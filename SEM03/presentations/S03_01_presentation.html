@@ -563,6 +563,33 @@
                 grid-template-columns: 1fr;
             }
         }
+    
+        /* === PRINT STYLES — ENos Kit v1.0 === */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            html, body { background: white !important; color: black !important; font-size: 11pt !important; line-height: 1.4 !important; overflow: visible !important; height: auto !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .presentation, .slides, .reveal, .reveal .slides { height: auto !important; width: 100% !important; position: static !important; overflow: visible !important; transform: none !important; }
+            .slide, section, .reveal section { display: block !important; position: static !important; visibility: visible !important; opacity: 1 !important; transform: none !important; page-break-after: always !important; page-break-inside: avoid !important; width: 100% !important; min-height: 200mm !important; padding: 15mm 12mm !important; margin: 0 0 5mm 0 !important; background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+            .slide:last-child, section:last-child { page-break-after: auto !important; }
+            .slide:not(.active), section.future, section.past { display: block !important; }
+            h1, h2, h3, h4, h5, h6 { color: black !important; background: none !important; -webkit-background-clip: initial !important; background-clip: initial !important; -webkit-text-fill-color: black !important; text-shadow: none !important; page-break-after: avoid !important; }
+            h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+            p, li, td, th { color: black !important; font-size: 10pt !important; }
+            pre, code, .code-block, .hljs, [class*="language-"] { background: #f5f5f5 !important; color: black !important; border: 1px solid #ddd !important; font-family: monospace !important; font-size: 9pt !important; white-space: pre-wrap !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
+            pre { padding: 8pt !important; margin: 6pt 0 !important; max-height: none !important; overflow: visible !important; }
+            .hljs-keyword, .hljs-string, .hljs-number, .hljs-comment, .hljs-built_in, .hljs-function, .hljs-variable, .token { color: black !important; }
+            table { border-collapse: collapse !important; width: 100% !important; font-size: 9pt !important; page-break-inside: avoid !important; }
+            th, td { border: 1px solid #333 !important; padding: 4pt 6pt !important; }
+            th { background: #e0e0e0 !important; font-weight: bold !important; }
+            a { color: black !important; text-decoration: underline !important; }
+            a[href^="http"]:after, a[href^="https"]:after { content: " (" attr(href) ")" !important; font-size: 8pt !important; color: #666 !important; }
+            a[href^="#"]:after, a[href^="./"]:after, a[href^="../"]:after { content: "" !important; }
+            img, svg { max-width: 100% !important; height: auto !important; page-break-inside: avoid !important; }
+            video, audio, iframe { display: none !important; }
+            .nav-controls, .controls, .progress, .progress-bar, .slide-number, .slide-menu-button, .playback, .navigate-left, .navigate-right, button, .copy-btn, .keyboard-hint, .notes, .speaker-notes, aside.notes { display: none !important; }
+            .fragment { opacity: 1 !important; visibility: visible !important; }
+            @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
+        }
     </style>
 </head>
 <body>
