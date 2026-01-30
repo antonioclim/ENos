@@ -1,0 +1,162 @@
+# C14_05_FORMATIVE_ASSESSMENT.yaml
+# Course 14: Virtualisation + Recap
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 14
+  subject: "Virtualisation + Recap"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a hypervisor (VMM - Virtual Machine Monitor)?"
+    options:
+      - "A type of processor"
+      - "Software that creates and manages virtual machines, providing hardware abstraction"
+      - "A network protocol"
+      - "A type of memory"
+    correct: 1
+    explanation: "Hypervisor = layer that allows running multiple OSes on the same physical hardware."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What is the difference between Type 1 and Type 2 hypervisors?"
+    options:
+      - "There is no difference"
+      - "Type 1 (bare-metal): runs directly on hardware. Type 2 (hosted): runs on top of a host OS"
+      - "Type 2 is faster"
+      - "Type 1 is software, Type 2 is hardware"
+    correct: 1
+    explanation: "Type 1: VMware ESXi, Xen (performance). Type 2: VirtualBox, VMware Workstation (convenience)."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What does paravirtualisation mean?"
+    options:
+      - "Very fast virtualisation"
+      - "The guest OS is modified to know it runs virtualised and communicates directly with the hypervisor"
+      - "Network-only virtualisation"
+      - "Hardware virtualisation"
+    correct: 1
+    explanation: "Paravirtualisation: modified guest OS uses hypercalls instead of privileged instructions."
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "How do Intel VT-x/AMD-V help with virtualisation?"
+    options:
+      - "They increase CPU speed"
+      - "They add a new ring (ring -1) for the hypervisor, enabling efficient traps"
+      - "They encrypt data"
+      - "They manage memory"
+    correct: 1
+    explanation: "Hardware virtualisation: hypervisor in VMX root mode, guest in VMX non-root. Efficient VM exits."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is a shadow page table and why is it necessary?"
+    options:
+      - "A backup copy"
+      - "The hypervisor maintains guest-virtual → host-physical translation for performance"
+      - "A type of encryption"
+      - "It is not necessary"
+    correct: 1
+    explanation: "Guest has its own PT (guest VA→guest PA). Shadow PT: guest VA→host PA, for hardware MMU."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What advantage does EPT/NPT (Extended Page Tables) offer?"
+    options:
+      - "More memory"
+      - "Hardware manages guest→host address translation, eliminating shadow PT"
+      - "Improved security"
+      - "It offers no advantages"
+    correct: 1
+    explanation: "EPT/NPT: hardware MMU performs two translations (guest VA→guest PA→host PA), without software overhead."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why are containers more lightweight than VMs?"
+    options:
+      - "They are not more lightweight"
+      - "Containers share the host kernel; VMs each have their own kernel and OS"
+      - "Containers have no isolation"
+      - "VMs are older"
+    correct: 1
+    explanation: "Container: isolated processes (namespaces, cgroups), without full OS overhead."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What Linux mechanisms do containers use for isolation?"
+    options:
+      - "Hardware virtualisation"
+      - "Namespaces (resource isolation) and cgroups (resource limits)"
+      - "Shadow page tables"
+      - "Type 2 hypervisor"
+    correct: 1
+    explanation: "Namespaces: isolate PID, network, mount, etc. Cgroups: limit CPU, memory, I/O."
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "When is full virtualisation preferred over containers?"
+    options:
+      - "Always"
+      - "When you need to run different OSes or require maximum isolation (security boundaries)"
+      - "When you want maximum performance"
+      - "Never"
+    correct: 1
+    explanation: "VM: kernel-level isolation, different OSes. Container: same kernel, weaker but efficient isolation."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "What is the main overhead of full virtualisation without hardware support?"
+    options:
+      - "There is no overhead"
+      - "Trap-and-emulate for privileged instructions: each trap is costly"
+      - "Network consumption"
+      - "Disk space"
+    correct: 1
+    explanation: "Without VT-x: trap on each privileged instruction, hypervisor emulates. With VT-x: fast exit."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "Why is live migration (moving a VM without downtime) possible?"
+    options:
+      - "It is not possible"
+      - "Memory is copied incrementally while the VM runs, then a short freeze for final state"
+      - "The VM has no state"
+      - "It uses encryption"
+    correct: 1
+    explanation: "Pre-copy: copies RAM iteratively. Short VM stop, copy remaining dirty pages, resume on new host."
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You have a server with 64GB RAM and want to run 100 isolated instances of the same application. What do you choose?"
+    options:
+      - "100 full VMs"
+      - "Containers: share kernel and libraries, overhead ~MB per instance vs ~GB per VM"
+      - "100 processes without isolation"
+      - "It is not possible"
+    correct: 1
+    explanation: "Container: ~10-50MB overhead vs VM ~1GB. 100 containers in 64GB possible; 100 VMs - impossible."
