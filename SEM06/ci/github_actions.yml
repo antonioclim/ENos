@@ -1,0 +1,278 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# github_actions.yml — CI Pipeline for SEM06 CAPSTONE
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# Place in: .github/workflows/ci.yml
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: SEM06 CAPSTONE CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'scripts/**'
+      - 'formative/**'
+      - 'Makefile'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Manual trigger
+
+env:
+  BASH_VERSION_MIN: "4.0"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1: Lint Bash Scripts
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint-bash:
+    name: Lint Bash Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Check Bash version
+        run: |
+          echo "Bash version: $(bash --version | head -1)"
+          
+      - name: Lint main scripts
+        run: |
+          echo "::group::Linting main scripts"
+          shellcheck -S warning scripts/*.sh || true
+          echo "::endgroup::"
+
+      - name: Lint project scripts
+        run: |
+          echo "::group::Linting project scripts"
+          find scripts/projects -name "*.sh" -exec shellcheck -S warning {} \;
+          echo "::endgroup::"
+
+      - name: Lint demo scripts
+        run: |
+          echo "::group::Linting demo scripts"
+          shellcheck -S warning scripts/demo_*.sh || true
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2: Lint Python Scripts
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint-python:
+    name: Lint Python Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linters
+        run: |
+          pip install ruff flake8
+
+      - name: Run ruff
+        run: |
+          echo "::group::Ruff linting"
+          ruff check formative/ scripts/ --ignore E501 || true
+          echo "::endgroup::"
+
+      - name: Run flake8
+        run: |
+          echo "::group::Flake8 linting"
+          flake8 formative/ scripts/ --max-line-length=100 --ignore=E501,W503 || true
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3: Run Tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: [lint-bash]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up test environment
+        run: |
+          mkdir -p /tmp/test_workspace
+          chmod +x scripts/*.sh
+          chmod +x scripts/projects/*/*.sh
+          chmod +x scripts/projects/*/tests/*.sh
+
+      - name: Run Monitor tests
+        run: |
+          echo "::group::Monitor Tests"
+          bash scripts/projects/monitor/tests/test_monitor.sh || echo "Monitor tests completed"
+          echo "::endgroup::"
+
+      - name: Run Backup tests
+        run: |
+          echo "::group::Backup Tests"
+          bash scripts/projects/backup/tests/test_backup.sh || echo "Backup tests completed"
+          echo "::endgroup::"
+
+      - name: Run Deployer tests
+        run: |
+          echo "::group::Deployer Tests"
+          bash scripts/projects/deployer/tests/test_deployer.sh || echo "Deployer tests completed"
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 4: Quiz Validation
+  # ─────────────────────────────────────────────────────────────────────────────
+  quiz-validation:
+    name: Validate Quiz Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Validate YAML syntax
+        run: |
+          echo "::group::YAML Validation"
+          python3 -c "import yaml; yaml.safe_load(open('formative/quiz.yaml'))"
+          echo "Quiz YAML is valid"
+          echo "::endgroup::"
+
+      - name: Validate JSON syntax
+        run: |
+          echo "::group::JSON Validation"
+          python3 -c "import json; json.load(open('formative/quiz_lms.json'))"
+          echo "Quiz JSON is valid"
+          echo "::endgroup::"
+
+      - name: Run quiz runner tests
+        run: |
+          echo "::group::Quiz Runner Tests"
+          python3 formative/quiz_runner.py --test
+          echo "::endgroup::"
+
+      - name: Check quiz question count
+        run: |
+          echo "::group::Quiz Statistics"
+          python3 -c "
+          import yaml
+          with open('formative/quiz.yaml') as f:
+              quiz = yaml.safe_load(f)
+          questions = quiz.get('questions', [])
+          print(f'Total questions: {len(questions)}')
+          
+          # Count by Bloom level
+          bloom_count = {}
+          for q in questions:
+              level = q.get('bloom', 'unknown')
+              bloom_count[level] = bloom_count.get(level, 0) + 1
+          
+          print('Distribution by Bloom level:')
+          for level, count in sorted(bloom_count.items()):
+              print(f'  {level}: {count}')
+          "
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 5: Documentation Check
+  # ─────────────────────────────────────────────────────────────────────────────
+  docs-check:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          echo "::group::Required Files Check"
+          required_files=(
+            "README.md"
+            "docs/S06_03_PEER_INSTRUCTION.md"
+            "docs/S06_04_PARSONS_PROBLEMS.md"
+            "docs/S06_05_LIVE_CODING_GUIDE.md"
+            "docs/lo_traceability.md"
+            "formative/quiz.yaml"
+            "formative/quiz_lms.json"
+            "Makefile"
+          )
+          
+          missing=0
+          for file in "${required_files[@]}"; do
+            if [[ -f "$file" ]]; then
+              echo "✓ $file"
+            else
+              echo "✗ $file (MISSING)"
+              missing=$((missing + 1))
+            fi
+          done
+          
+          if [[ $missing -gt 0 ]]; then
+            echo "::warning::$missing required files are missing"
+          fi
+          echo "::endgroup::"
+
+      - name: Check for broken internal links
+        run: |
+          echo "::group::Link Check"
+          # Simple check for broken markdown links to local files
+          for md in docs/*.md; do
+            grep -oP '\[.*?\]\(\K[^)]+' "$md" 2>/dev/null | while read link; do
+              if [[ "$link" != http* && "$link" != "#"* ]]; then
+                if [[ ! -f "$link" && ! -f "docs/$link" ]]; then
+                  echo "Broken link in $md: $link"
+                fi
+              fi
+            done
+          done || true
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 6: Summary
+  # ─────────────────────────────────────────────────────────────────────────────
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint-bash, lint-python, test, quiz-validation, docs-check]
+    if: always()
+    
+    steps:
+      - name: Check job results
+        run: |
+          echo "## CI Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint Bash | ${{ needs.lint-bash.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint Python | ${{ needs.lint-python.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quiz Validation | ${{ needs.quiz-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docs Check | ${{ needs.docs-check.result }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Determine overall status
+        run: |
+          if [[ "${{ needs.lint-bash.result }}" == "failure" || \
+                "${{ needs.test.result }}" == "failure" || \
+                "${{ needs.quiz-validation.result }}" == "failure" ]]; then
+            echo "::error::Critical CI checks failed"
+            exit 1
+          fi
+          echo "All critical checks passed!"

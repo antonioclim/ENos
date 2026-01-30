@@ -1,0 +1,663 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# quiz.yaml — Formative Quiz CAPSTONE SEM06
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# Seminar 6: Integrated Projects (Monitor, Backup, Deployer)
+# Version: 1.1.0 | January 2025
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  seminar: 6
+  title: "CAPSTONE: Integrated Bash Projects"
+  version: "1.1.0"
+  language: "en"
+  estimated_time_minutes: 30
+  total_points: 115
+  pass_threshold: 60
+  
+  bloom_distribution:
+    remember: 5      # 22%
+    understand: 6    # 26%
+    apply: 8         # 35%
+    analyse: 2       # 9%
+    evaluate: 2      # 9%
+  
+  subjects:
+    - "Modular Bash architecture"
+    - "Error handling and trap"
+    - "Professional logging"
+    - "Incremental backup"
+    - "Deployment strategies"
+    - "Health checks"
+    - "Testing in Bash"
+    - "Cron and systemd timers"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+questions:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REMEMBER (5 questions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: q01
+    type: mcq
+    bloom: remember
+    points: 5
+    subject: "Error handling"
+    text: |
+      Which command sets strict behaviour in Bash to stop
+      execution on first error, undefined variables, and pipe errors?
+    options:
+      a: "set -e"
+      b: "set -euo pipefail"
+      c: "set -x"
+      d: "set -v"
+    correct: b
+    explanation: |
+      `set -euo pipefail` combines:
+      - `-e`: stops on first error (exit code != 0)
+      - `-u`: error on undefined variables
+      - `-o pipefail`: pipe returns error of first command that fails
+    misconceptions:
+      a: "Only -e stops on errors, but doesn't detect undefined variables"
+      c: "-x activates debug mode (prints commands), not error handling"
+      d: "-v displays lines read, doesn't manage errors"
+
+  - id: q02
+    type: mcq
+    bloom: remember
+    points: 5
+    subject: "Trap and signals"
+    text: |
+      Which signal is sent to a process when the user presses Ctrl+C?
+    options:
+      a: "SIGTERM"
+      b: "SIGKILL"
+      c: "SIGINT"
+      d: "SIGHUP"
+    correct: c
+    explanation: |
+      SIGINT (Signal Interrupt) is sent by terminal when user
+      presses Ctrl+C. Can be caught with `trap` for cleanup.
+    misconceptions:
+      a: "SIGTERM is the default signal of kill command, not Ctrl+C"
+      b: "SIGKILL cannot be caught and terminates process immediately"
+      d: "SIGHUP is sent when terminal closes"
+
+  - id: q03
+    type: mcq
+    bloom: remember
+    points: 5
+    subject: "Exit codes"
+    text: |
+      Which exit code indicates successful execution in Unix convention?
+    options:
+      a: "1"
+      b: "-1"
+      c: "0"
+      d: "255"
+    correct: c
+    explanation: |
+      Unix convention: exit code 0 = success, anything else = error.
+      Check with `$?` or directly in conditions: `if command; then ...`
+    misconceptions:
+      a: "1 indicates generic error"
+      b: "Exit codes are 0-255, -1 is not valid"
+      d: "255 indicates error, not success"
+
+  - id: q19
+    type: mcq
+    bloom: remember
+    points: 5
+    subject: "Signal listing"
+    text: |
+      Which command displays the complete list of signals available in the system?
+    options:
+      a: "kill -l"
+      b: "signal --list"
+      c: "trap -p"
+      d: "ps -s"
+    correct: a
+    explanation: |
+      `kill -l` lists all available signals with their numbers.
+      Example output: 1) SIGHUP  2) SIGINT  3) SIGQUIT ...
+      
+      `trap -p` shows currently active traps, not the signal list.
+    misconceptions:
+      b: "There is no 'signal' command in standard Unix"
+      c: "trap -p shows active traps, not the signal list"
+      d: "ps -s shows session IDs, not signals"
+
+  - id: q20
+    type: mcq
+    bloom: remember
+    points: 5
+    subject: "Compression algorithms"
+    text: |
+      Which compression algorithm typically produces the smallest files
+      but takes the longest time to compress?
+    options:
+      a: "gzip"
+      b: "bzip2"
+      c: "xz"
+      d: "lz4"
+    correct: c
+    explanation: |
+      xz (using LZMA2 algorithm) achieves the best compression ratio
+      but is the slowest. Typical ranking by compression ratio:
+      
+      xz > bzip2 > gzip > lz4
+      
+      Typical ranking by speed (fastest first):
+      lz4 > gzip > bzip2 > xz
+    misconceptions:
+      a: "gzip is balanced but not the best compression"
+      b: "bzip2 is better than gzip but slower than xz"
+      d: "lz4 is fastest but with lowest compression ratio"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # UNDERSTAND (6 questions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: q04
+    type: mcq
+    bloom: understand
+    points: 6
+    subject: "Modular architecture"
+    text: |
+      Why do we separate code into lib/core.sh, lib/utils.sh, lib/config.sh
+      instead of writing everything in a single file?
+    options:
+      a: "Because Bash doesn't allow files larger than 1000 lines"
+      b: "For reuse, isolated testing, and easy maintenance"
+      c: "Because `source` only works with small files"
+      d: "To make the script harder for others to understand"
+    correct: b
+    explanation: |
+      Modular architecture offers:
+      - Reuse: functions from utils.sh can be used in multiple projects
+      - Testing: you can test each module independently
+      - Maintenance: changes in one module don't affect others
+      - Clarity: each file has a clear responsibility
+    misconceptions:
+      a: "Bash has no size limits for files"
+      c: "`source` works with files of any size"
+      d: "Modularisation increases clarity, doesn't reduce it"
+
+  - id: q05
+    type: mcq
+    bloom: understand
+    points: 6
+    subject: "Incremental backup"
+    text: |
+      How does an incremental backup work compared to a full one?
+    options:
+      a: "Copies all files on each run"
+      b: "Copies only files modified since the last backup"
+      c: "Compresses files more than full backup"
+      d: "Deletes old files automatically"
+    correct: b
+    explanation: |
+      Incremental backup:
+      - Uses `find -newer timestamp_file` to find modified files
+      - Saves time and space by copying only changes
+      - Requires periodic full backup as base
+      - Restore requires full + all incrementals
+    misconceptions:
+      a: "This is the definition of full backup"
+      c: "Compression doesn't define backup type"
+      d: "Rotation/deletion is separate from backup type"
+
+  - id: q06
+    type: mcq
+    bloom: understand
+    points: 6
+    subject: "Health checks"
+    text: |
+      What does an HTTP health check verify for a web application?
+    options:
+      a: "Whether port 22 SSH is open"
+      b: "Whether application responds with 2xx code to a specific endpoint"
+      c: "Whether server CPU is below 50%"
+      d: "Whether admin user can login"
+    correct: b
+    explanation: |
+      HTTP health check:
+      - Sends GET request to an endpoint (e.g.: /health, /status)
+      - Verifies HTTP 2xx response (200, 201, etc.)
+      - Optionally verifies response content (JSON with status)
+      - Is different from system resource monitoring
+    misconceptions:
+      a: "SSH is for administration, not for application health check"
+      c: "CPU monitoring is separate from application health check"
+      d: "Authentication is functionality, not health check"
+
+  - id: q07
+    type: mcq
+    bloom: understand
+    points: 6
+    subject: "Logging"
+    text: |
+      What is the correct order of logging levels from least
+      severe to most severe?
+    options:
+      a: "ERROR, WARN, INFO, DEBUG"
+      b: "DEBUG, INFO, WARN, ERROR"
+      c: "INFO, DEBUG, ERROR, WARN"
+      d: "WARN, ERROR, DEBUG, INFO"
+    correct: b
+    explanation: |
+      Standard order of logging levels:
+      DEBUG < INFO < WARN < ERROR < FATAL
+      - DEBUG: detailed information for debugging
+      - INFO: normal execution events
+      - WARN: unexpected but recoverable situations
+      - ERROR: errors affecting functionality
+    misconceptions:
+      a: "Order is reversed"
+      c: "DEBUG is less severe than INFO"
+      d: "Order is completely incorrect"
+
+  - id: q08
+    type: mcq
+    bloom: understand
+    points: 6
+    subject: "Deployment strategies"
+    text: |
+      What is the main advantage of Blue-Green deployment strategy?
+    options:
+      a: "Requires less memory than Rolling deployment"
+      b: "Allows instant rollback through traffic switch"
+      c: "Doesn't require load balancer"
+      d: "Works without downtime ever"
+    correct: b
+    explanation: |
+      Blue-Green deployment:
+      - Two identical environments: Blue (active) and Green (new)
+      - Deployment is done on Green while Blue serves traffic
+      - Traffic switch is instant (DNS or load balancer)
+      - Rollback = switch back to Blue, which is still functional
+    misconceptions:
+      a: "Blue-Green requires double the resources"
+      c: "Traffic switch requires load balancer or DNS"
+      d: "Switch itself can cause micro-downtime"
+
+  - id: q22
+    type: mcq
+    bloom: understand
+    points: 5
+    subject: "Cron scheduling"
+    text: |
+      What does the cron expression "0 3 * * 0" schedule?
+    options:
+      a: "Every day at 03:00"
+      b: "Every Sunday at 03:00"
+      c: "Every hour on the 3rd day"
+      d: "Every 3 minutes on Sunday"
+    correct: b
+    explanation: |
+      Cron format: minute hour day month weekday
+      0 3 * * 0 = minute 0, hour 3, any day, any month, Sunday (0)
+      Result: Every Sunday at 03:00
+      
+      Weekday field: 0=Sunday, 1=Monday, ..., 6=Saturday
+    misconceptions:
+      a: "Would be 0 3 * * * (all weekdays)"
+      c: "Would be 0 * 3 * *"
+      d: "*/3 would mean every 3 minutes"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # APPLY (8 questions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: q09
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Trap cleanup"
+    text: |
+      What is the correct syntax to execute the `cleanup` function
+      on script termination (normal or via Ctrl+C)?
+    options:
+      a: "trap cleanup EXIT SIGINT"
+      b: "trap 'cleanup' EXIT INT"
+      c: "on_exit cleanup"
+      d: "finally { cleanup }"
+    correct: b
+    explanation: |
+      Correct `trap` syntax:
+      - `trap 'command' SIGNALS...`
+      - EXIT = on normal termination or exit
+      - INT = SIGINT (Ctrl+C) - without SIG prefix
+      - Single quotes prevent premature expansion
+    misconceptions:
+      a: "SIGINT is not valid, use INT"
+      c: "on_exit doesn't exist in standard Bash"
+      d: "finally is from other languages, not Bash"
+
+  - id: q10
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Find with timestamp"
+    text: |
+      Which command finds files modified after timestamp.txt?
+    options:
+      a: "find /data -newer timestamp.txt -type f"
+      b: "find /data -mtime +timestamp.txt"
+      c: "find /data --after timestamp.txt"
+      d: "find /data -modified > timestamp.txt"
+    correct: a
+    explanation: |
+      `find -newer`:
+      - Compares mtime of files with mtime of reference file
+      - Returns files modified AFTER reference
+      - Essential for incremental backup
+      - `-type f` filters only regular files
+    misconceptions:
+      b: "-mtime uses days, not reference file"
+      c: "--after is not a valid option for find"
+      d: "Invalid syntax, wrong redirection"
+
+  - id: q11
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Functions with return"
+    text: |
+      How do you return a numeric value from a Bash function?
+    options:
+      a: "return $value where value is 0-255"
+      b: "echo $value and capture with $(function)"
+      c: "Both methods are correct, for different purposes"
+      d: "export RESULT=$value"
+    correct: c
+    explanation: |
+      Bash offers two methods:
+      - `return N`: sets exit code (0-255), check with $?
+      - `echo value`: output captured with $(function)
+      
+      Use `return` for status (success/error),
+      `echo` for values (string, large numbers, complex output).
+    misconceptions:
+      a: "Correct but incomplete - only works for 0-255"
+      b: "Correct but incomplete - only for values, not status"
+      d: "Export modifies environment, not a pattern for return"
+
+  - id: q12
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "HTTP verification"
+    text: |
+      Which command checks if a web server responds successfully?
+    options:
+      a: "ping localhost:8080"
+      b: "curl -sf http://localhost:8080/health"
+      c: "wget --check localhost:8080"
+      d: "nc -z localhost 8080"
+    correct: b
+    explanation: |
+      `curl -sf`:
+      - `-s`: silent (no progress bar)
+      - `-f`: fail silently on HTTP errors (returns exit code != 0)
+      - Verifies real HTTP response, not just TCP connection
+      
+      `nc -z` only checks if port is open, not HTTP response.
+    misconceptions:
+      a: "ping verifies ICMP, not HTTP, and doesn't accept port"
+      c: "--check is not a valid wget option"
+      d: "nc -z only checks open TCP port, not HTTP"
+
+  - id: q13
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Arrays in Bash"
+    text: |
+      Which syntax correctly iterates over array elements?
+    options:
+      a: 'for item in $ARRAY; do'
+      b: 'for item in ${ARRAY[@]}; do'
+      c: 'for item in "${ARRAY[@]}"; do'
+      d: 'foreach item in ARRAY; do'
+    correct: c
+    explanation: |
+      `"${ARRAY[@]}"` - correct form:
+      - `[@]` expands all elements
+      - Double quotes preserve elements with spaces as units
+      - Without quotes, "hello world" becomes two elements
+    misconceptions:
+      a: "$ARRAY without [@] returns only first element"
+      b: "Without quotes, spaces in elements cause problems"
+      d: "foreach doesn't exist in Bash"
+
+  - id: q14
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Checksum verification"
+    text: |
+      Which command verifies backup integrity using checksum?
+    options:
+      a: "md5sum -c backup.md5"
+      b: "sha256sum backup.tar.gz"
+      c: "diff backup.md5 backup.tar.gz"
+      d: "cmp --checksum backup.tar.gz"
+    correct: a
+    explanation: |
+      `md5sum -c file.md5`:
+      - `-c` (check) reads file with hashes and verifies each
+      - Format: "hash  filename" (two spaces)
+      - Returns exit code 0 if all verifications pass
+      
+      Without `-c`, only calculates hash, doesn't verify.
+    misconceptions:
+      b: "Calculates hash, doesn't verify existing one"
+      c: "diff compares content, doesn't verify checksum"
+      d: "--checksum is not a valid option for cmp"
+
+  - id: q21
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Bash testing"
+    text: |
+      Which assertion correctly tests that a function returns
+      exit code 0 on success?
+    options:
+      a: "test $(my_function) -eq 0"
+      b: "my_function; assertEquals 0 $?"
+      c: "my_function && assertTrue 'success'"
+      d: "assert my_function returns 0"
+    correct: b
+    explanation: |
+      After running the function, $? contains the exit code.
+      We capture it immediately and compare with assertEquals.
+      
+      Pattern:
+        my_function arg1 arg2
+        assertEquals 0 $? "Function should succeed"
+    misconceptions:
+      a: "This tests stdout content, not exit code"
+      c: "&& only checks success, doesn't capture specific code"
+      d: "This syntax doesn't exist in Bash testing"
+
+  - id: q23
+    type: mcq
+    bloom: apply
+    points: 6
+    subject: "Systemd timers"
+    text: |
+      Which systemd timer configuration runs a backup
+      every day at 02:30?
+    options:
+      a: "OnCalendar=02:30"
+      b: "OnCalendar=*-*-* 02:30:00"
+      c: "OnUnitActiveSec=24h"
+      d: "OnBootSec=02:30"
+    correct: b
+    explanation: |
+      OnCalendar uses the format: year-month-day hour:minute:second
+      *-*-* means every day, 02:30:00 specifies the time.
+      This is more readable than cron and supports timezones.
+      
+      Equivalent cron: 30 2 * * *
+    misconceptions:
+      a: "Missing date specification for daily schedule"
+      c: "This runs 24h after last activation, not at fixed time"
+      d: "OnBootSec runs relative to boot, not daily"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # ANALYSE (2 questions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: q15
+    type: mcq
+    bloom: analyse
+    points: 8
+    subject: "Debug script"
+    text: |
+      A backup script displays "Backup completed" but the
+      archive file is empty. What is the most likely cause?
+      
+      ```bash
+      tar czf "$BACKUP_FILE" "$SOURCE_DIR" 2>/dev/null
+      echo "Backup completed"
+      ```
+    options:
+      a: "The tar command failed but error was suppressed"
+      b: "echo doesn't work after tar"
+      c: "BACKUP_FILE is not defined"
+      d: "SOURCE_DIR contains only empty directories"
+    correct: a
+    explanation: |
+      `2>/dev/null` suppresses stderr, hiding tar errors:
+      - Could be permissions error on SOURCE_DIR
+      - SOURCE_DIR could be an invalid path
+      - Without `set -e`, script continues after errors
+      
+      Fix: remove `2>/dev/null` or check `$?` after tar.
+    misconceptions:
+      b: "echo works independently of previous commands"
+      c: "Undefined BACKUP_FILE would cause tar error, not empty archive"
+      d: "tar would include directories, even empty ones"
+
+  - id: q16
+    type: mcq
+    bloom: analyse
+    points: 8
+    subject: "Race condition"
+    text: |
+      Why can this pattern for PID file cause problems?
+      
+      ```bash
+      if [[ ! -f "$PID_FILE" ]]; then
+          echo $$ > "$PID_FILE"
+      fi
+      ```
+    options:
+      a: "$$ doesn't contain the correct PID"
+      b: "Two instances can check simultaneously and both write"
+      c: "PID_FILE must be in /var/run"
+      d: "Echo cannot write to files"
+    correct: b
+    explanation: |
+      Race condition (TOCTOU - Time Of Check To Time Of Use):
+      - Instance A checks: file doesn't exist
+      - Instance B checks: file doesn't exist
+      - Both write their PID
+      
+      Fix: use atomic `mkdir` or `flock`:
+      ```bash
+      exec 200>"$LOCK_FILE"
+      flock -n 200 || exit 1
+      ```
+    misconceptions:
+      a: "$$ correctly contains current process PID"
+      c: "Location doesn't affect race condition"
+      d: "echo can write to files with redirection"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # EVALUATE (2 questions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: q17
+    type: mcq
+    bloom: evaluate
+    points: 8
+    subject: "Deployment strategy"
+    text: |
+      For an application requiring zero downtime and instant rollback,
+      but you have limited resources (cannot double infrastructure), which
+      strategy is most suitable?
+    options:
+      a: "Blue-Green deployment"
+      b: "Rolling deployment"
+      c: "Recreate deployment"
+      d: "Big bang deployment"
+    correct: b
+    explanation: |
+      Rolling deployment:
+      - Replaces instances one by one
+      - Doesn't require double resources (vs Blue-Green)
+      - Zero downtime (always active instances exist)
+      - Rollback possible but not instant (requires re-deploy)
+      
+      Trade-off: slower rollback, but resource savings.
+    misconceptions:
+      a: "Blue-Green requires double infrastructure"
+      c: "Recreate stops everything before deploy - downtime"
+      d: "Big bang doesn't offer zero downtime"
+
+  - id: q18
+    type: mcq
+    bloom: evaluate
+    points: 8
+    subject: "Compression choice"
+    text: |
+      For daily backups on a server with limited CPU but
+      sufficient storage space, which compression algorithm do you choose?
+    options:
+      a: "xz (best compression ratio)"
+      b: "gzip (speed/compression balance)"
+      c: "zstd (fast with good compression)"
+      d: "No compression (fastest)"
+    correct: c
+    explanation: |
+      zstd offers the best trade-off:
+      - Speed comparable to gzip or faster
+      - Better compression than gzip
+      - Much lower CPU usage than xz
+      - Native support in modern tar (`tar --zstd`)
+      
+      xz would use too much CPU for frequent backups.
+    misconceptions:
+      a: "xz is slow and consumes much CPU"
+      b: "gzip is ok but zstd is superior in both aspects"
+      d: "No compression wastes space unnecessarily"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RUNNER CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+configuration:
+  show_explanations: true
+  show_misconceptions: true
+  random_order: false
+  allow_return: true
+  time_limit: false
+  
+  messages:
+    welcome: "CAPSTONE Quiz - Integrated Bash Projects"
+    final_pass: "You have demonstrated understanding of CAPSTONE concepts!"
+    final_fail: "Review the materials and try again."
+    
+  feedback_level:
+    90: "Excellent! You're ready for advanced projects."
+    75: "Good! Consolidate deployment concepts."
+    60: "Sufficient. Focus on error handling and testing."
+    0: "Requires additional study. Start with modular architecture."

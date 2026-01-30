@@ -1,0 +1,104 @@
+#!/bin/bash
+#===============================================================================
+# sysdeploy - System Deployment Wrapper
+#===============================================================================
+# Wrapper script for deployer.sh - allows running from any directory
+# Part of CAPSTONE Project - Seminar 11-12 Operating Systems
+#
+# Usage:
+#   sysdeploy [--config FILE] [OPTIONS] ACTION [ARGS]
+#   sysdeploy deploy --service myapp --source /path/to/app
+#   sysdeploy rollback myapp
+#   sysdeploy status myapp
+#   sysdeploy health
+#
+# Installation:
+#   sudo cp bin/sysdeploy /usr/local/bin/
+#   sudo chmod +x /usr/local/bin/sysdeploy
+#
+# Copyright (c) 2024 - Educational Use Only
+#===============================================================================
+
+set -euo pipefail
+
+# Detect script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Search for deployer.sh in standard locations
+find_deployer() {
+    local locations=(
+        "${SCRIPT_DIR}/../deployer.sh"
+        "/opt/deployer/deployer.sh"
+        "/usr/local/share/deployer/deployer.sh"
+        "${HOME}/.local/share/deployer/deployer.sh"
+        "/etc/deployer/deployer.sh"
+    )
+    
+    for loc in "${locations[@]}"; do
+        if [[ -f "$loc" && -x "$loc" ]]; then
+            echo "$loc"
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+# Search for configuration in standard locations
+find_config() {
+    local locations=(
+        "${SCRIPT_DIR}/../etc/deployer.conf"
+        "/etc/deployer/deployer.conf"
+        "/opt/deployer/etc/deployer.conf"
+        "${HOME}/.config/deployer/deployer.conf"
+        "${HOME}/.deployer.conf"
+    )
+    
+    for loc in "${locations[@]}"; do
+        if [[ -f "$loc" ]]; then
+            echo "$loc"
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+# Main
+main() {
+    local deployer_script
+    local config_file
+    local config_arg=""
+    
+    # Find deployer.sh
+    if ! deployer_script=$(find_deployer); then
+        echo "ERROR: deployer.sh not found" >&2
+        echo "Install deployer in /opt/deployer/ or set PATH correctly" >&2
+        exit 1
+    fi
+    
+    # Check if user specified --config
+    local has_config=false
+    for arg in "$@"; do
+        if [[ "$arg" == "--config" || "$arg" == "-c" ]]; then
+            has_config=true
+            break
+        fi
+    done
+    
+    # If --config not specified, search automatically
+    if ! $has_config; then
+        if config_file=$(find_config); then
+            config_arg="--config $config_file"
+        fi
+    fi
+    
+    # Execute deployer with arguments
+    if [[ -n "$config_arg" ]]; then
+        exec "$deployer_script" $config_arg "$@"
+    else
+        exec "$deployer_script" "$@"
+    fi
+}
+
+main "$@"

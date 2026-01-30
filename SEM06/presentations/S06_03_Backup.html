@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup - Automated Backup System | CAPSTONE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        :root { --r-main-font-size: 36px; --r-code-font: 'JetBrains Mono', monospace; }
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.5em; }
+        .reveal pre code { max-height: 520px; padding: 12px; }
+        .reveal ul { display: block; margin-left: 1em; }
+        .reveal li { margin: 0.4em 0; }
+        .hl-green { color: #4ec9b0; }
+        .hl-yellow { color: #dcdcaa; }
+        .hl-orange { color: #ce9178; }
+        .hl-blue { color: #569cd6; }
+        .hl-pink { color: #c586c0; }
+        .cols { display: flex; gap: 1.5em; }
+        .cols > * { flex: 1; }
+        .sm { font-size: 0.7em; }
+        .xs { font-size: 0.6em; }
+        .box { background: rgba(255,255,255,0.08); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .box-g { border-left: 4px solid #4ec9b0; }
+        .box-y { border-left: 4px solid #dcdcaa; }
+        .box-o { border-left: 4px solid #ce9178; }
+        .box-b { border-left: 4px solid #569cd6; }
+        .diagram { background: #1e1e1e; padding: 1em; border-radius: 8px; font-family: monospace; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.65em; }
+        th, td { border: 1px solid #444; padding: 0.4em; text-align: left; }
+        th { background: rgba(78, 201, 176, 0.25); }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title -->
+            <section>
+                <h1>Backup</h1>
+                <h2>Automated Backup System</h2>
+                <p class="hl-green">CAPSTONE Project 2/3</p>
+                <p class="sm">Incremental backup with compression and integrity verification</p>
+            </section>
+
+            <!-- Objectives -->
+            <section>
+                <h2>Learning Objectives</h2>
+                <div class="box box-g">
+                    <ul>
+                        <li><span class="hl-green">Strategii</span> - Full vs Incremental vs Differential</li>
+                        <li><span class="hl-yellow">Compression</span> - Algorithms and trade-offs</li>
+                        <li><span class="hl-orange">Integrity</span> - Checksums and archive verification</li>
+                        <li><span class="hl-blue">Rotation</span> - Grandfather-Father-Son (3-2-1 rule)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Architecture of -->
+            <section>
+                <h2>Backup Architecture</h2>
+                <div class="diagram">
+<pre style="margin:0; font-size:0.55em;">
+backup/
+├── <span class="hl-green">core/</span>
+│   ├── backup_core.sh      # Logica backup/restore
+│   ├── backup_utils.sh     # Compression, checksums
+│   └── backup_config.sh    # Gestionare configurări
+├── <span class="hl-yellow">config/</span>
+│   ├── default.conf        # Configurație implicită
+│   ├── exclude.list        # Files to exclude
+│   └── sources.conf        # Directoare sursă
+├── <span class="hl-orange">tests/</span>
+│   ├── test_backup.sh
+│   ├── test_restore.sh
+│   └── test_compression.sh
+└── <span class="hl-blue">backup.sh</span>              # Entry point (~600 linii)
+</pre>
+                </div>
+            </section>
+
+            <!-- 3-2-1 Rule -->
+            <section>
+                <h2>Regula 3-2-1</h2>
+                <div class="cols">
+                    <div class="box box-g">
+                        <h3 style="font-size:2em;">3</h3>
+                        <p>Copii ale datelor</p>
+                        <p class="sm hl-yellow">Original + 2 backup-uri</p>
+                    </div>
+                    <div class="box box-y">
+                        <h3 style="font-size:2em;">2</h3>
+                        <p>Tipuri diferite de stocare</p>
+                        <p class="sm hl-yellow">HDD + Cloud/Tape</p>
+                    </div>
+                    <div class="box box-o">
+                        <h3 style="font-size:2em;">1</h3>
+                        <p>Copie off-site</p>
+                        <p class="sm hl-yellow">Locație geografică diferită</p>
+                    </div>
+                </div>
+                <p class="sm" style="margin-top:1em;">🎯 Protecție împotriva: defecțiuni hardware, ransomware, dezastre naturale</p>
+            </section>
+
+            <!-- Backup Types -->
+            <section>
+                <h2>Tipuri de Backup</h2>
+                <table>
+                    <tr>
+                        <th>Tip</th>
+                        <th>Ce salvează</th>
+                        <th>Spațiu</th>
+                        <th>Restore</th>
+                    </tr>
+                    <tr>
+                        <td class="hl-green">Full</td>
+                        <td>Tot</td>
+                        <td>Mare</td>
+                        <td>Rapid (1 arhivă)</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-yellow">Incremental</td>
+                        <td>De la ultimul backup</td>
+                        <td>Mic</td>
+                        <td>Lent (chain)</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-orange">Differential</td>
+                        <td>De la ultimul FULL</td>
+                        <td>Mediu</td>
+                        <td>Mediu (full + diff)</td>
+                    </tr>
+                </table>
+                <div class="diagram sm" style="margin-top:1em;">
+<pre>Luni    Marți   Miercuri  Joi     Vineri
+[FULL]─→[INCR]─→[INCR]───→[INCR]─→[INCR]
+  │                                  │
+  └── Restore: Full + toate Incr ────┘</pre>
+                </div>
+            </section>
+
+            <!-- Full Backup -->
+            <section>
+                <h2>Full Backup Implementation</h2>
+                <pre><code class="language-bash">create_full_backup() {
+    local source_dir="$1"
+    local dest_dir="$2"
+    local compress="${3:-gzip}"
+    
+    # Validare input
+    [[ -d "$source_dir" ]] || { log_error "Source not found: $source_dir"; return 1; }
+    mkdir -p "$dest_dir"
+    
+    # Generare nume arhivă cu timestamp
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local archive_name="backup_full_${timestamp}"
+    local archive_path="$dest_dir/${archive_name}"
+    
+    log_info "Creating full backup: $source_dir → $archive_path"
+    
+    # Creare arhivă cu excluderi
+    local exclude_file="$CONFIG_DIR/exclude.list"
+    local tar_opts=(-cf - --exclude-from="$exclude_file")
+    
+    # Compression bazată pe algoritm
+    case "$compress" in
+        gzip)  tar "${tar_opts[@]}" "$source_dir" | gzip -9 > "${archive_path}.tar.gz" ;;
+        bzip2) tar "${tar_opts[@]}" "$source_dir" | bzip2 -9 > "${archive_path}.tar.bz2" ;;
+        xz)    tar "${tar_opts[@]}" "$source_dir" | xz -9 > "${archive_path}.tar.xz" ;;
+        zstd)  tar "${tar_opts[@]}" "$source_dir" | zstd -19 > "${archive_path}.tar.zst" ;;
+        none)  tar "${tar_opts[@]}" "$source_dir" > "${archive_path}.tar" ;;
+    esac
+    
+    # Generare checksum
+    generate_checksum "${archive_path}.*"
+    
+    log_info "Full backup complete: $(du -h "${archive_path}."* | cut -f1)"
+}</code></pre>
+            </section>
+
+            <!-- Incremental Backup -->
+            <section>
+                <h2>Incremental Backup</h2>
+                <pre><code class="language-bash">create_incremental_backup() {
+    local source_dir="$1"
+    local dest_dir="$2"
+    
+    # Găsire timestamp ultimul backup
+    local snapshot_file="$dest_dir/.snapshot"
+    local reference_time=""
+    
+    if [[ -f "$snapshot_file" ]]; then
+        reference_time=$(cat "$snapshot_file")
+        log_info "Incremental since: $reference_time"
+    else
+        log_warn "No previous backup found, creating full backup"
+        create_full_backup "$source_dir" "$dest_dir"
+        return
+    fi
+    
+    # Find modified files
+    local modified_files=$(mktemp)
+    find "$source_dir" -newer "$snapshot_file" -type f > "$modified_files"
+    
+    local file_count=$(wc -l < "$modified_files")
+    log_info "Modified files: $file_count"
+    
+    if ((file_count == 0)); then
+        log_info "No changes since last backup"
+        rm "$modified_files"
+        return 0
+    fi
+    
+    # Create archive only with modified files
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local archive="$dest_dir/backup_incr_${timestamp}.tar.gz"
+    
+    tar -czf "$archive" -T "$modified_files"
+    
+    # Actualizare snapshot
+    date -Iseconds > "$snapshot_file"
+    
+    rm "$modified_files"
+    log_info "Incremental backup complete: $(du -h "$archive" | cut -f1)"
+}</code></pre>
+            </section>
+
+            <!-- Compression Comparison -->
+            <section>
+                <h2>Comparație Algoritmi Compression</h2>
+                <table>
+                    <tr>
+                        <th>Algoritm</th>
+                        <th>Rație</th>
+                        <th>Viteză</th>
+                        <th>CPU</th>
+                        <th>Usage</th>
+                    </tr>
+                    <tr>
+                        <td class="hl-green">gzip</td>
+                        <td>~60%</td>
+                        <td>Rapidă</td>
+                        <td>Scăzut</td>
+                        <td>Default, compatibil</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-yellow">bzip2</td>
+                        <td>~70%</td>
+                        <td>Medie</td>
+                        <td>Mediu</td>
+                        <td>Text, logs</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-orange">xz</td>
+                        <td>~75%</td>
+                        <td>Lentă</td>
+                        <td>Ridicat</td>
+                        <td>Arhivare termen lung</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-blue">zstd</td>
+                        <td>~72%</td>
+                        <td>Foarte rapidă</td>
+                        <td>Scăzut</td>
+                        <td>Modern, recomandat</td>
+                    </tr>
+                </table>
+                <p class="sm" style="margin-top:1em;">💡 <span class="hl-blue">zstd</span> offers the best speed/compression balance for frequent backups</p>
+            </section>
+
+            <!-- Compression Implementation -->
+            <section>
+                <h2>Implementation Compression</h2>
+                <pre><code class="language-bash">compress_file() {
+    local input="$1"
+    local algorithm="${2:-gzip}"
+    local level="${3:-6}"  # 1-9 (or 1-19 for zstd)
+    
+    local output
+    case "$algorithm" in
+        gzip)
+            output="${input}.gz"
+            gzip -"$level" -c "$input" > "$output"
+            ;;
+        bzip2)
+            output="${input}.bz2"
+            bzip2 -"$level" -c "$input" > "$output"
+            ;;
+        xz)
+            output="${input}.xz"
+            xz -"$level" -c "$input" > "$output"
+            ;;
+        zstd)
+            output="${input}.zst"
+            zstd -"$level" -c "$input" > "$output"
+            ;;
+        *)
+            log_error "Unknown compression: $algorithm"
+            return 1
+            ;;
+    esac
+    
+    # Calculate and display ratio
+    local orig_size=$(stat -c%s "$input")
+    local comp_size=$(stat -c%s "$output")
+    local ratio=$((100 - (comp_size * 100 / orig_size)))
+    
+    log_info "Compressed: $orig_size → $comp_size bytes (${ratio}% reduction)"
+    echo "$output"
+}</code></pre>
+            </section>
+
+            <!-- Checksums -->
+            <section>
+                <h2>Verificare Integrity</h2>
+                <pre><code class="language-bash"># Generare checksum
+generate_checksum() {
+    local file="$1"
+    local algorithm="${2:-sha256}"
+    
+    local checksum_file="${file}.${algorithm}"
+    
+    case "$algorithm" in
+        md5)    md5sum "$file" > "$checksum_file" ;;
+        sha1)   sha1sum "$file" > "$checksum_file" ;;
+        sha256) sha256sum "$file" > "$checksum_file" ;;
+        sha512) sha512sum "$file" > "$checksum_file" ;;
+    esac
+    
+    log_info "Checksum generated: $checksum_file"
+}
+
+# Verificare checksum
+verify_checksum() {
+    local file="$1"
+    local algorithm="${2:-sha256}"
+    local checksum_file="${file}.${algorithm}"
+    
+    [[ -f "$checksum_file" ]] || { log_error "Checksum file not found"; return 1; }
+    
+    case "$algorithm" in
+        md5)    md5sum -c "$checksum_file" --quiet ;;
+        sha256) sha256sum -c "$checksum_file" --quiet ;;
+    esac
+    
+    if [[ $? -eq 0 ]]; then
+        log_info "✓ Checksum verified: $file"
+        return 0
+    else
+        log_error "✗ Checksum FAILED: $file"
+        return 1
+    fi
+}</code></pre>
+            </section>
+
+            <!-- Archive Verification -->
+            <section>
+                <h2>Verificare Arhivă</h2>
+                <pre><code class="language-bash">verify_archive() {
+    local archive="$1"
+    local check_contents="${2:-false}"
+    
+    log_info "Verifying archive: $archive"
+    
+    # 1. Check existence and permissions
+    [[ -f "$archive" ]] || { log_error "Archive not found"; return 1; }
+    [[ -r "$archive" ]] || { log_error "Archive not readable"; return 1; }
+    
+    # 2. Integrity verification structurală
+    local test_cmd
+    case "$archive" in
+        *.tar.gz|*.tgz)   test_cmd="tar -tzf" ;;
+        *.tar.bz2|*.tbz2) test_cmd="tar -tjf" ;;
+        *.tar.xz)         test_cmd="tar -tJf" ;;
+        *.tar.zst)        test_cmd="zstd -d -c '$archive' | tar -t" ;;
+        *.tar)            test_cmd="tar -tf" ;;
+        *)                log_error "Unknown format"; return 1 ;;
+    esac
+    
+    if eval "$test_cmd '$archive'" > /dev/null 2>&1; then
+        log_info "✓ Archive structure OK"
+    else
+        log_error "✗ Archive corrupted!"
+        return 1
+    fi
+    
+    # 3. Verificare checksum dacă există
+    verify_checksum "$archive" 2>/dev/null || log_warn "No checksum file found"
+    
+    # 4. List files if requested
+    if [[ "$check_contents" == "true" ]]; then
+        log_info "Archive contents:"
+        eval "$test_cmd '$archive'" | head -20
+    fi
+}</code></pre>
+            </section>
+
+            <!-- Restore -->
+            <section>
+                <h2>Restore Backup</h2>
+                <pre><code class="language-bash">restore_backup() {
+    local archive="$1"
+    local dest_dir="$2"
+    local verify="${3:-true}"
+    
+    # Verify archive before restore
+    if [[ "$verify" == "true" ]]; then
+        verify_archive "$archive" || return 1
+    fi
+    
+    mkdir -p "$dest_dir"
+    log_info "Restoring: $archive → $dest_dir"
+    
+    # Extragere bazată pe tip compresie
+    case "$archive" in
+        *.tar.gz|*.tgz)
+            tar -xzf "$archive" -C "$dest_dir"
+            ;;
+        *.tar.bz2|*.tbz2)
+            tar -xjf "$archive" -C "$dest_dir"
+            ;;
+        *.tar.xz)
+            tar -xJf "$archive" -C "$dest_dir"
+            ;;
+        *.tar.zst)
+            zstd -d -c "$archive" | tar -xf - -C "$dest_dir"
+            ;;
+        *.tar)
+            tar -xf "$archive" -C "$dest_dir"
+            ;;
+    esac
+    
+    local status=$?
+    if [[ $status -eq 0 ]]; then
+        log_info "✓ Restore complete"
+    else
+        log_error "✗ Restore failed with status: $status"
+    fi
+    return $status
+}</code></pre>
+            </section>
+
+            <!-- Incremental Restore -->
+            <section>
+                <h2>Restore Incrementală</h2>
+                <pre><code class="language-bash">restore_incremental_chain() {
+    local dest_dir="$1"
+    local target_date="${2:-$(date +%Y%m%d)}"  # YYYYMMDD sau "latest"
+    
+    local backup_dir="$BACKUP_DEST"
+    
+    # 1. Find last full backup before target_date
+    local full_backup=$(find "$backup_dir" -name "backup_full_*.tar.*" | \
+        sort | \
+        awk -v target="$target_date" -F'_' '$3 <= target' | tail -1)
+    
+    [[ -n "$full_backup" ]] || { log_error "No full backup found"; return 1; }
+    
+    log_info "Base full backup: $full_backup"
+    
+    # 2. Restore full backup
+    restore_backup "$full_backup" "$dest_dir"
+    
+    # 3. Find and apply incrementals in order
+    local full_date=$(basename "$full_backup" | grep -oP '\d{8}')
+    
+    find "$backup_dir" -name "backup_incr_*.tar.*" | sort | while read incr; do
+        local incr_date=$(basename "$incr" | grep -oP '\d{8}')
+        
+        # Apply only if incremental is after full and <= target
+        if [[ "$incr_date" > "$full_date" && "$incr_date" <= "$target_date" ]]; then
+            log_info "Applying incremental: $incr"
+            restore_backup "$incr" "$dest_dir" false
+        fi
+    done
+    
+    log_info "✓ Point-in-time restore complete: $target_date"
+}</code></pre>
+            </section>
+
+            <!-- Rotation GFS -->
+            <section>
+                <h2>Rotation Grandfather-Father-Son</h2>
+                <pre><code class="language-bash"># Configurație retenție
+declare -A RETENTION=(
+    [daily]=7      # 7 zile (Son)
+    [weekly]=4     # 4 weeks (Father)  
+    [monthly]=12   # 12 months (Grandfather)
+)
+
+rotate_backups() {
+    local backup_dir="$1"
+    
+    log_info "Starting backup rotation..."
+    
+    # 1. Ștergere daily > 7 zile
+    find "$backup_dir" -name "backup_incr_*.tar.*" -mtime +${RETENTION[daily]} -delete
+    log_info "Cleaned daily backups older than ${RETENTION[daily]} days"
+    
+    # 2. Keep only 1 full/week for the last 4 weeks
+    # ... logica de selecție weekly
+    
+    # 3. Keep only 1 full/month for the last 12 months
+    # ... logica de selecție monthly
+    
+    # 4. Raport spațiu eliberat
+    log_info "Rotation complete"
+}
+
+# Check available space before backup
+check_disk_space() {
+    local dest="$1"
+    local required_mb="$2"
+    
+    local available=$(df -m "$dest" | tail -1 | awk '{print $4}')
+    
+    if ((available < required_mb)); then
+        log_error "Insufficient space: ${available}MB < ${required_mb}MB"
+        return 1
+    fi
+}</code></pre>
+            </section>
+
+            <!-- CLI Interface -->
+            <section>
+                <h2>CLI Interface</h2>
+                <pre><code class="language-bash">show_help() {
+    cat <<'EOF'
+Usage: backup.sh [COMMAND] [OPTIONS]
+
+Commands:
+  create      Create new backup
+  restore     Restore from backup
+  verify      Verify backup integrity
+  list        List available backups
+  rotate      Apply retention policy
+
+Options:
+  --source DIR       Source directory to backup
+  --dest DIR         Destination for backups
+  --type TYPE        Backup type: full|incremental
+  --compress ALG     Compression: gzip|bzip2|xz|zstd|none
+  --level N          Compression level (1-9)
+  --exclude FILE     File with exclusion patterns
+  --verify           Verify after backup
+  --date YYYYMMDD    Target date for restore
+
+Examples:
+  backup.sh create --source=/data --dest=/backup --type=full
+  backup.sh create --source=/data --type=incremental --compress=zstd
+  backup.sh restore --archive=/backup/backup_full_*.tar.gz --dest=/restore
+  backup.sh verify --archive=/backup/backup_full_*.tar.gz
+  backup.sh list --dest=/backup
+  backup.sh rotate --dest=/backup --keep-daily=7 --keep-weekly=4
+EOF
+}</code></pre>
+            </section>
+
+            <!-- Exercise 1 -->
+            <section>
+                <h2>Exercise 1: Backup Encriptat</h2>
+                <div class="box box-g">
+                    <p><strong>Objective:</strong> Add encriptare GPG la backup</p>
+                </div>
+                <pre><code class="language-bash">create_encrypted_backup() {
+    local source="$1"
+    local dest="$2"
+    local recipient="$3"  # GPG key ID sau email
+    
+    # TODO: Create backup and encrypt with GPG
+    # Steps:
+    # 1. Creare arhivă tar.gz
+    # 2. Encriptare cu gpg --encrypt --recipient "$recipient"
+    # 3. Opțional: semnare cu gpg --sign
+    
+    # Hint: tar -czf - "$source" | gpg --encrypt -r "$recipient" > backup.tar.gz.gpg
+}
+
+decrypt_backup() {
+    local archive="$1"
+    local dest="$2"
+    
+    # TODO: Decryption and extraction
+    # gpg --decrypt "$archive" | tar -xzf - -C "$dest"
+}</code></pre>
+            </section>
+
+            <!-- Exercise 2 -->
+            <section>
+                <h2>Exercise 2: Backup Remote SSH</h2>
+                <div class="box box-y">
+                    <p><strong>Objective:</strong> Implementați backup pe server remote</p>
+                </div>
+                <pre><code class="language-bash">backup_to_remote() {
+    local source="$1"
+    local remote_host="$2"
+    local remote_path="$3"
+    
+    # Opțiunea 1: rsync (recomandat)
+    rsync -avz --progress \
+        --exclude-from="$EXCLUDE_FILE" \
+        "$source" "${remote_host}:${remote_path}"
+    
+    # Opțiunea 2: tar + ssh
+    tar -czf - "$source" | ssh "$remote_host" "cat > ${remote_path}/backup.tar.gz"
+    
+    # TODO: Add:
+    # - Check connectivity first
+    # - Retry la erori de rețea
+    # - Bandwidth limiting
+    # - Progress reporting
+}</code></pre>
+            </section>
+
+            <!-- Exercise 3 -->
+            <section>
+                <h2>Exercise 3: Notificări Slack</h2>
+                <div class="box box-o">
+                    <p><strong>Objective:</strong> Trimiteți notificări la finalizare backup</p>
+                </div>
+                <pre><code class="language-bash">send_slack_notification() {
+    local status="$1"      # success | failure
+    local backup_name="$2"
+    local size="$3"
+    local duration="$4"
+    
+    local webhook_url="$SLACK_WEBHOOK_URL"
+    local color emoji message
+    
+    if [[ "$status" == "success" ]]; then
+        color="good"; emoji="✅"
+        message="Full backuped successfully"
+    else
+        color="danger"; emoji="❌"
+        message="Backup FAILED"
+    fi
+    
+    # TODO: Trimiteți mesaj la Slack
+    curl -X POST -H 'Content-type: application/json' \
+        --data "{
+            \"attachments\": [{
+                \"color\": \"$color\",
+                \"title\": \"$emoji $message\",
+                \"fields\": [
+                    {\"title\": \"Backup\", \"value\": \"$backup_name\"},
+                    {\"title\": \"Size\", \"value\": \"$size\"},
+                    {\"title\": \"Duration\", \"value\": \"$duration\"}
+                ]
+            }]
+        }" "$webhook_url"
+}</code></pre>
+            </section>
+
+            <!-- Exercise 4 -->
+            <section>
+                <h2>Exercise 4: Scheduling cu Cron</h2>
+                <div class="box box-b">
+                    <p><strong>Objective:</strong> Configurați backup automat cu cron</p>
+                </div>
+                <pre><code class="language-bash"># File: /etc/cron.d/backup-system
+
+# Incremental backup zilnic la 2:00 AM
+0 2 * * * root /opt/backup/backup.sh create \
+    --source=/data --type=incremental --compress=zstd \
+    >> /var/log/backup.log 2>&1
+
+# Backup full duminică la 3:00 AM
+0 3 * * 0 root /opt/backup/backup.sh create \
+    --source=/data --type=full --compress=xz \
+    >> /var/log/backup.log 2>&1
+
+# Rotation backup-uri la 4:00 AM
+0 4 * * * root /opt/backup/backup.sh rotate \
+    --keep-daily=7 --keep-weekly=4 --keep-monthly=12 \
+    >> /var/log/backup.log 2>&1
+
+# Integrity verification săptămânală
+0 5 * * 1 root /opt/backup/backup.sh verify --all \
+    >> /var/log/backup-verify.log 2>&1</code></pre>
+            </section>
+
+            <!-- Best Practices -->
+            <section>
+                <h2>Best Practices</h2>
+                <div class="cols sm">
+                    <div class="box box-g">
+                        <h4>Securitate</h4>
+                        <ul>
+                            <li>Encriptare date sensibile</li>
+                            <li>Checksums for integrity</li>
+                            <li>Permisiuni restrictive</li>
+                            <li>Audit trail</li>
+                        </ul>
+                    </div>
+                    <div class="box box-y">
+                        <h4>Fiabilitate</h4>
+                        <ul>
+                            <li>Test restore periodic</li>
+                            <li>Monitorizare execuție</li>
+                            <li>Alerting la erori</li>
+                            <li>Redundanță locații</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-o sm" style="margin-top:0.5em;">
+                    <h4>Golden Rule</h4>
+                    <p>Un backup nu există până nu a fost testat cu succes un restore!</p>
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section>
+                <h2>Summary of Backup</h2>
+                <table>
+                    <tr>
+                        <th>Funcționalitate</th>
+                        <th>Comandă</th>
+                        <th>Rezultat</th>
+                    </tr>
+                    <tr>
+                        <td>Full backup</td>
+                        <td>--type=full</td>
+                        <td>Arhivă completă</td>
+                    </tr>
+                    <tr>
+                        <td>Incremental</td>
+                        <td>--type=incremental</td>
+                        <td>Doar modificări</td>
+                    </tr>
+                    <tr>
+                        <td>Compression</td>
+                        <td>--compress=zstd</td>
+                        <td>~70% reducere</td>
+                    </tr>
+                    <tr>
+                        <td>Verificare</td>
+                        <td>verify --archive=X</td>
+                        <td>Checksum + structură</td>
+                    </tr>
+                    <tr>
+                        <td>Restore</td>
+                        <td>restore --archive=X</td>
+                        <td>Date recuperate</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Next -->
+            <section>
+                <h1>Next: Deployer</h1>
+                <p class="hl-green">Deployment automatizat cu strategii multiple</p>
+                <div class="box" style="margin-top: 2em;">
+                    <p class="sm">Rolling | Blue-Green | Canary | Rollback automat</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

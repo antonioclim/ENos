@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor - System Monitoring Tool | CAPSTONE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        :root { --r-main-font-size: 36px; --r-code-font: 'JetBrains Mono', monospace; }
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.5em; }
+        .reveal pre code { max-height: 520px; padding: 12px; }
+        .reveal ul { display: block; margin-left: 1em; }
+        .reveal li { margin: 0.4em 0; }
+        .hl-green { color: #4ec9b0; }
+        .hl-yellow { color: #dcdcaa; }
+        .hl-orange { color: #ce9178; }
+        .hl-blue { color: #569cd6; }
+        .hl-pink { color: #c586c0; }
+        .cols { display: flex; gap: 1.5em; }
+        .cols > * { flex: 1; }
+        .sm { font-size: 0.7em; }
+        .xs { font-size: 0.6em; }
+        .box { background: rgba(255,255,255,0.08); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .box-g { border-left: 4px solid #4ec9b0; }
+        .box-y { border-left: 4px solid #dcdcaa; }
+        .box-o { border-left: 4px solid #ce9178; }
+        .box-b { border-left: 4px solid #569cd6; }
+        .diagram { background: #1e1e1e; padding: 1em; border-radius: 8px; font-family: monospace; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.65em; }
+        th, td { border: 1px solid #444; padding: 0.4em; text-align: left; }
+        th { background: rgba(78, 201, 176, 0.25); }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title -->
+            <section>
+                <h1>Monitor</h1>
+                <h2>System Monitoring Tool</h2>
+                <p class="hl-green">CAPSTONE Project 1/3</p>
+                <p class="sm">Real-time system monitoring with alerting</p>
+            </section>
+
+            <!-- Objectives -->
+            <section>
+                <h2>Learning Objectives</h2>
+                <div class="box box-g">
+                    <ul>
+                        <li><span class="hl-green">Understanding</span> - Structure of /proc and system metrics</li>
+                        <li><span class="hl-yellow">Implementation</span> - Funcții de monitoring CPU/Memory/Disk</li>
+                        <li><span class="hl-orange">Alerting</span> - Threshold system and notifications</li>
+                        <li><span class="hl-blue">Output</span> - Multiple formats (Text/JSON/CSV)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Architecture of -->
+            <section>
+                <h2>Monitor Architecture</h2>
+                <div class="diagram">
+<pre style="margin:0; font-size:0.55em;">
+monitor/
+├── <span class="hl-green">core/</span>
+│   ├── monitor_core.sh     # Logica principală monitoring
+│   ├── monitor_utils.sh    # Utilități (parsing, formatare)
+│   └── monitor_config.sh   # Gestionare configurări
+├── <span class="hl-yellow">config/</span>
+│   ├── default.conf        # Threshold-uri implicite
+│   └── alerts.conf         # Configurație alerting
+├── <span class="hl-orange">tests/</span>
+│   ├── test_cpu.sh
+│   ├── test_memory.sh
+│   └── test_disk.sh
+└── <span class="hl-blue">monitor.sh</span>              # Entry point (~500 linii)
+</pre>
+                </div>
+            </section>
+
+            <!-- /proc filesystem -->
+            <section>
+                <h2>The Filesystem /proc</h2>
+                <div class="cols sm">
+                    <div class="box box-g">
+                        <h4>/proc/stat</h4>
+                        <p>CPU Statistics</p>
+                        <pre><code>cpu  3357 0 4313 1362393 ...</code></pre>
+                        <p class="xs">user, nice, system, idle, iowait, irq, softirq</p>
+                    </div>
+                    <div class="box box-y">
+                        <h4>/proc/meminfo</h4>
+                        <p>Memory Information</p>
+                        <pre><code>MemTotal:  16384000 kB
+MemFree:    4521000 kB
+Buffers:     512000 kB</code></pre>
+                    </div>
+                </div>
+                <div class="box box-o sm" style="margin-top:0.5em;">
+                    <h4>/sys/block/*/stat</h4>
+                    <p>I/O statistics for block devices</p>
+                </div>
+            </section>
+
+            <!-- CPU Monitoring -->
+            <section>
+                <h2>CPU Monitoring</h2>
+                <pre><code class="language-bash">get_cpu_usage() {
+    local cpu_line prev_cpu_line
+    local user nice system idle iowait irq softirq
+    local prev_user prev_nice prev_system prev_idle
+    local total_diff idle_diff usage
+    
+    # First reading
+    read -r _ prev_user prev_nice prev_system prev_idle _ < /proc/stat
+    sleep 1
+    # Second reading (for delta)
+    read -r _ user nice system idle iowait irq softirq _ < /proc/stat
+    
+    # Calculate delta
+    local prev_total=$((prev_user + prev_nice + prev_system + prev_idle))
+    local curr_total=$((user + nice + system + idle + iowait + irq + softirq))
+    
+    total_diff=$((curr_total - prev_total))
+    idle_diff=$((idle - prev_idle))
+    
+    # Usage percentage (avoid division by zero)
+    if ((total_diff > 0)); then
+        usage=$(( (total_diff - idle_diff) * 100 / total_diff ))
+    else
+        usage=0
+    fi
+    
+    echo "$usage"
+}</code></pre>
+            </section>
+
+            <!-- CPU Details -->
+            <section>
+                <h2>CPU - Per Core Details</h2>
+                <pre><code class="language-bash">get_cpu_per_core() {
+    local -a cores=()
+    local line
+    
+    # Read all lines cpu* din /proc/stat
+    while IFS= read -r line; do
+        [[ $line =~ ^cpu[0-9]+ ]] || continue
+        
+        local core_id user nice system idle
+        read -r core_id user nice system idle _ <<< "$line"
+        
+        local total=$((user + nice + system + idle))
+        local usage=0
+        ((total > 0)) && usage=$((100 - (idle * 100 / total)))
+        
+        # Extract core number
+        local num="${core_id#cpu}"
+        cores+=("Core $num: ${usage}%")
+    done < /proc/stat
+    
+    printf '%s\n' "${cores[@]}"
+}
+
+# Example output:
+# Core 0: 25%
+# Core 1: 18%
+# Core 2: 45%
+# Core 3: 12%</code></pre>
+            </section>
+
+            <!-- Memory Monitoring -->
+            <section>
+                <h2>Memory Monitoring</h2>
+                <pre><code class="language-bash">get_memory_info() {
+    local -A mem
+    local key value unit
+    
+    # Parse /proc/meminfo into an associative array
+    while IFS=': ' read -r key value unit; do
+        # Remove whitespace and convert to KB
+        value="${value//[[:space:]]/}"
+        mem["$key"]=$value
+    done < /proc/meminfo
+    
+    # Calculate effectively used memory
+    # MemUsed = MemTotal - MemFree - Buffers - Cached
+    local total=${mem[MemTotal]}
+    local free=${mem[MemFree]}
+    local buffers=${mem[Buffers]}
+    local cached=${mem[Cached]}
+    
+    local used=$((total - free - buffers - cached))
+    local usage_percent=$((used * 100 / total))
+    
+    # Output in structured format
+    echo "total_kb:$total"
+    echo "used_kb:$used"
+    echo "free_kb:$free"
+    echo "buffers_kb:$buffers"
+    echo "cached_kb:$cached"
+    echo "usage_percent:$usage_percent"
+}</code></pre>
+            </section>
+
+            <!-- Disk Monitoring -->
+            <section>
+                <h2>Disk Monitoring</h2>
+                <pre><code class="language-bash">get_disk_usage() {
+    local mount_point="${1:-/}"
+    local output
+    
+    # Use df for disk space
+    output=$(df -P "$mount_point" 2>/dev/null | tail -1)
+    
+    local device total used available percent mount
+    read -r device total used available percent mount <<< "$output"
+    
+    # Remove % from percentage
+    percent="${percent%\%}"
+    
+    # Structured output
+    cat <<EOF
+device:$device
+total_kb:$total
+used_kb:$used
+available_kb:$available
+usage_percent:$percent
+mount_point:$mount
+EOF
+}
+
+# Monitoring I/O cu iostat-like metrics
+get_disk_io() {
+    local device="${1:-sda}"
+    local stat_file="/sys/block/$device/stat"
+    
+    [[ -f "$stat_file" ]] || { echo "error:device_not_found"; return 1; }
+    
+    read -r reads _ read_sectors _ writes _ write_sectors _ < "$stat_file"
+    echo "reads:$reads write:$writes read_sectors:$read_sectors"
+}</code></pre>
+            </section>
+
+            <!-- Process Monitoring -->
+            <section>
+                <h2>Process Monitoring</h2>
+                <pre><code class="language-bash">get_top_processes() {
+    local count="${1:-5}"
+    local sort_by="${2:-cpu}"  # cpu sau mem
+    
+    case "$sort_by" in
+        cpu)
+            ps aux --sort=-%cpu | head -n $((count + 1)) | tail -n "$count" | \
+            awk '{printf "%-8s %5s%% %5s%% %s\n", $1, $3, $4, $11}'
+            ;;
+        mem)
+            ps aux --sort=-%mem | head -n $((count + 1)) | tail -n "$count" | \
+            awk '{printf "%-8s %5s%% %5s%% %s\n", $1, $4, $3, $11}'
+            ;;
+    esac
+}
+
+# Monitoring proces specific
+monitor_process() {
+    local pid="$1"
+    local proc_stat="/proc/$pid/stat"
+    
+    [[ -f "$proc_stat" ]] || { echo "error:process_not_found"; return 1; }
+    
+    # Citire din /proc/PID/stat
+    local comm state ppid utime stime vsize rss
+    read -r _ comm state ppid _ _ _ _ _ _ _ _ _ utime stime _ _ _ _ _ _ vsize rss _ \
+        < "$proc_stat"
+    
+    echo "pid:$pid state:$state vsize:$vsize rss:$rss"
+}</code></pre>
+            </section>
+
+            <!-- Alerting System -->
+            <section>
+                <h2>Alerting System</h2>
+                <pre><code class="language-bash"># Configurație threshold-uri (alerts.conf)
+declare -A THRESHOLDS=(
+    [cpu_warning]=70
+    [cpu_critical]=90
+    [mem_warning]=75
+    [mem_critical]=95
+    [disk_warning]=80
+    [disk_critical]=95
+)
+
+check_thresholds() {
+    local metric="$1"
+    local value="$2"
+    local warning_key="${metric}_warning"
+    local critical_key="${metric}_critical"
+    
+    local warning=${THRESHOLDS[$warning_key]:-70}
+    local critical=${THRESHOLDS[$critical_key]:-90}
+    
+    if ((value >= critical)); then
+        echo "CRITICAL"
+        return 2
+    elif ((value >= warning)); then
+        echo "WARNING"
+        return 1
+    else
+        echo "OK"
+        return 0
+    fi
+}
+
+# Usage
+status=$(check_thresholds "cpu" "$cpu_usage")
+case $? in
+    2) send_alert "CRITICAL" "CPU at ${cpu_usage}%" ;;
+    1) log_warn "CPU warning: ${cpu_usage}%" ;;
+esac</code></pre>
+            </section>
+
+            <!-- Output Formats -->
+            <section>
+                <h2>Output Formats</h2>
+                <div class="cols">
+                    <div class="box box-g sm">
+                        <h4>Text (Human)</h4>
+                        <pre><code class="sm">System Status: OK
+CPU:    23.5%
+Memory: 4.2GB/16GB (26%)
+Disk:   120GB/500GB (24%)</code></pre>
+                    </div>
+                    <div class="box box-y sm">
+                        <h4>JSON (API)</h4>
+                        <pre><code class="sm">{
+  "timestamp": "...",
+  "cpu": {"usage": 23.5},
+  "memory": {"used_gb": 4.2}
+}</code></pre>
+                    </div>
+                </div>
+                <div class="box box-o sm" style="margin-top:0.5em;">
+                    <h4>CSV (Export)</h4>
+                    <pre><code>timestamp,cpu_usage,mem_used_gb,disk_usage_pct
+2025-01-20T10:30:00,23.5,4.2,24</code></pre>
+                </div>
+            </section>
+
+            <!-- Format Implementation -->
+            <section>
+                <h2>Format Implementation</h2>
+                <pre><code class="language-bash">format_output() {
+    local format="${1:-text}"
+    local cpu="$2" mem="$3" disk="$4"
+    
+    case "$format" in
+        text)
+            cat <<EOF
+═══════════════════════════════════
+  System Monitor - $(date '+%Y-%m-%d %H:%M:%S')
+═══════════════════════════════════
+  CPU Usage:    ${cpu}%
+  Memory:       ${mem}%
+  Disk (/):     ${disk}%
+═══════════════════════════════════
+EOF
+            ;;
+        json)
+            cat <<EOF
+{"timestamp":"$(date -Iseconds)","cpu":{"usage":$cpu},"memory":{"usage":$mem},"disk":{"usage":$disk}}
+EOF
+            ;;
+        csv)
+            echo "$(date -Iseconds),$cpu,$mem,$disk"
+            ;;
+        prometheus)
+            cat <<EOF
+# HELP system_cpu_usage CPU usage percentage
+system_cpu_usage $cpu
+# HELP system_memory_usage Memory usage percentage  
+system_memory_usage $mem
+EOF
+            ;;
+    esac
+}</code></pre>
+            </section>
+
+            <!-- Main Loop -->
+            <section>
+                <h2>Main Monitoring Loop</h2>
+                <pre><code class="language-bash">monitor_continuous() {
+    local interval="${1:-5}"
+    local format="${2:-text}"
+    local alert_enabled="${3:-false}"
+    
+    log_info "Starting continuous monitoring (interval: ${interval}s)"
+    
+    # Trap for cleanup on Ctrl+C
+    trap 'log_info "Monitoring stopped"; exit 0' INT TERM
+    
+    while true; do
+        # Collect metrics
+        local cpu mem disk
+        cpu=$(get_cpu_usage)
+        mem=$(get_memory_usage)
+        disk=$(get_disk_usage "/" | grep usage_percent | cut -d: -f2)
+        
+        # Output in desired format
+        format_output "$format" "$cpu" "$mem" "$disk"
+        
+        # Check thresholds if alerting enabled
+        if [[ "$alert_enabled" == "true" ]]; then
+            check_and_alert "cpu" "$cpu"
+            check_and_alert "memory" "$mem"
+            check_and_alert "disk" "$disk"
+        fi
+        
+        sleep "$interval"
+    done
+}</code></pre>
+            </section>
+
+            <!-- CLI Interface -->
+            <section>
+                <h2>CLI Interface</h2>
+                <pre><code class="language-bash">show_help() {
+    cat <<'EOF'
+Usage: monitor.sh [OPTIONS]
+
+Options:
+  --cpu              Monitor CPU usage
+  --memory, --mem    Monitor memory usage
+  --disk [PATH]      Monitor disk usage
+  --process PID      Monitor specific process
+  --all              Monitor all metrics
+  
+  --format FORMAT    Output format: text|json|csv|prometheus
+  --interval SEC     Monitoring interval (default: 5)
+  --continuous       Run continuously
+  
+  --alert            Enable alerting
+  --threshold-cpu N  CPU alert threshold (default: 80)
+  --threshold-mem N  Memory alert threshold (default: 80)
+  
+  --log FILE         Log to file
+  --quiet            Suppress informational output
+  --help             Show this help
+
+Examples:
+  monitor.sh --cpu --memory
+  monitor.sh --all --format=json --continuous
+  monitor.sh --all --alert --threshold-cpu=90
+EOF
+}
+</code></pre>
+            </section>
+
+            <!-- Exercise 1 -->
+            <section>
+                <h2>Exercise 1: File Descriptors</h2>
+                <div class="box box-g">
+                    <p><strong>Objective:</strong> Monitor open file descriptors</p>
+                </div>
+                <pre><code class="language-bash"># Implementați funcția:
+get_open_fds() {
+    local pid="${1:-$$}"  # Default: current process
+    
+    # TODO: Count FD-urile din /proc/$pid/fd/
+    # TODO: Identify types (file, socket, pipe)
+    # TODO: Return statistics
+}
+
+# Hints:
+# - ls -la /proc/$pid/fd/ | wc -l
+# - readlink /proc/$pid/fd/N  for type
+# - lsof -p $pid for details</code></pre>
+                <p class="sm hl-yellow">Verificare: get_open_fds $$ should return ~10-20 FD-uri</p>
+            </section>
+
+            <!-- Exercise 2 -->
+            <section>
+                <h2>Exercise 2: Prometheus Export</h2>
+                <div class="box box-y">
+                    <p><strong>Objective:</strong> Add HTTP endpoint for Prometheus metrics</p>
+                </div>
+                <pre><code class="language-bash"># Start a simple server with netcat:
+start_metrics_server() {
+    local port="${1:-9100}"
+    
+    while true; do
+        {
+            echo "HTTP/1.1 200 OK"
+            echo "Content-Type: text/plain"
+            echo ""
+            # TODO: Generate metrics in Prometheus format
+            format_output "prometheus" $(get_cpu_usage) $(get_memory_usage) ...
+        } | nc -l -p "$port" -q 1
+    done
+}
+
+# Test: curl http://localhost:9100/metrics</code></pre>
+            </section>
+
+            <!-- Exercise 3 -->
+            <section>
+                <h2>Exercise 3: Email Alerting</h2>
+                <div class="box box-o">
+                    <p><strong>Objective:</strong> Send alerts via email</p>
+                </div>
+                <pre><code class="language-bash">send_email_alert() {
+    local level="$1"      # WARNING, CRITICAL
+    local metric="$2"     # cpu, memory, disk
+    local value="$3"      # current value
+    local threshold="$4"  # exceeded threshold
+    
+    local subject="[$level] $metric Alert on $(hostname)"
+    local body="
+Metric: $metric
+Current Value: $value%
+Threshold: $threshold%
+Time: $(date)
+Host: $(hostname)
+"
+    
+    # TODO: Implement email sending
+    # Options: mail, sendmail, msmtp, or curl with API
+    
+    # With mail:
+    echo "$body" | mail -s "$subject" "$ALERT_EMAIL"
+}</code></pre>
+            </section>
+
+            <!-- Exercise 4 -->
+            <section>
+                <h2>Exercise 4: Istoric și Trending</h2>
+                <div class="box box-b">
+                    <p><strong>Objective:</strong> Store metrics for temporal analysis</p>
+                </div>
+                <pre><code class="language-bash"># Data structure:
+# ~/.monitor/history/YYYY-MM-DD.csv
+
+store_metrics() {
+    local history_dir="$HOME/.monitor/history"
+    local today=$(date +%Y-%m-%d)
+    local file="$history_dir/$today.csv"
+    
+    mkdir -p "$history_dir"
+    
+    # Header if file is new
+    [[ -f "$file" ]] || echo "timestamp,cpu,memory,disk" > "$file"
+    
+    # TODO: Add current metrics
+}
+
+# Trending analysis
+get_average() {
+    local metric="$1"  # cpu, memory, disk
+    local period="$2"  # 1h, 24h, 7d
+    
+    # TODO: Calculate average for specified period
+    # Hint: awk for CSV processing
+}</code></pre>
+            </section>
+
+            <!-- Best Practices -->
+            <section>
+                <h2>Best Practices</h2>
+                <div class="cols sm">
+                    <div class="box box-g">
+                        <h4>Performance</h4>
+                        <ul>
+                            <li>Cache reads /proc</li>
+                            <li>Avoid subshells</li>
+                            <li>Batch multiple metrics</li>
+                            <li>Adaptive sampling</li>
+                        </ul>
+                    </div>
+                    <div class="box box-y">
+                        <h4>Reliability</h4>
+                        <ul>
+                            <li>Validate files /proc</li>
+                            <li>Fallback to alternatives</li>
+                            <li>Operation timeout</li>
+                            <li>Graceful degradation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-o sm" style="margin-top:0.5em;">
+                    <h4>Alerting</h4>
+                    <p>Hysteresis to avoid alert flapping | Cooldown between alerts | Aggregate similar alerts</p>
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section>
+                <h2>Monitor Summary</h2>
+                <table>
+                    <tr>
+                        <th>Component</th>
+                        <th>Data Source</th>
+                        <th>Output</th>
+                    </tr>
+                    <tr>
+                        <td>CPU</td>
+                        <td>/proc/stat</td>
+                        <td>usage %, per-core</td>
+                    </tr>
+                    <tr>
+                        <td>Memory</td>
+                        <td>/proc/meminfo</td>
+                        <td>used/total, buffers/cache</td>
+                    </tr>
+                    <tr>
+                        <td>Disk</td>
+                        <td>df, /sys/block</td>
+                        <td>space %, I/O stats</td>
+                    </tr>
+                    <tr>
+                        <td>Process</td>
+                        <td>/proc/PID/*</td>
+                        <td>state, resources</td>
+                    </tr>
+                    <tr>
+                        <td>Network</td>
+                        <td>/proc/net/*</td>
+                        <td>bytes in/out, connections</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Next -->
+            <section>
+                <h1>Next: Backup</h1>
+                <p class="hl-green">Backup and restore strategies</p>
+                <div class="box" style="margin-top: 2em;">
+                    <p class="sm">Full vs Incremental | Compression | Integrity verification</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Architecture | CAPSTONE SO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css">
+    <style>
+        :root { --r-main-font-size: 32px; --r-code-font: 'JetBrains Mono', 'Fira Code', monospace; }
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.55em; }
+        .reveal code { font-family: var(--r-code-font); }
+        .reveal ul { display: block; margin-left: 1em; }
+        .reveal li { margin-bottom: 0.5em; }
+        .two-columns { display: flex; gap: 2em; }
+        .two-columns > * { flex: 1; }
+        .three-columns { display: flex; gap: 1.5em; }
+        .three-columns > * { flex: 1; }
+        .highlight-box { background: rgba(100, 100, 255, 0.2); padding: 1em; border-radius: 10px; border-left: 4px solid #6366f1; }
+        .warning-box { background: rgba(255, 150, 50, 0.2); padding: 1em; border-radius: 10px; border-left: 4px solid #f59e0b; }
+        .success-box { background: rgba(50, 200, 100, 0.2); padding: 1em; border-radius: 10px; border-left: 4px solid #10b981; }
+        .error-box { background: rgba(239, 68, 68, 0.2); padding: 1em; border-radius: 10px; border-left: 4px solid #ef4444; }
+        .architecture-diagram { background: #0d1117; padding: 1.5em; border-radius: 10px; font-family: monospace; font-size: 0.65em; line-height: 1.4; text-align: left; }
+        .file-tree { text-align: left; font-family: monospace; font-size: 0.6em; background: #0d1117; padding: 1em; border-radius: 8px; }
+        .pattern-card { background: rgba(255,255,255,0.05); padding: 1em; border-radius: 8px; text-align: center; }
+        .pattern-icon { font-size: 2.5em; margin-bottom: 0.3em; }
+        .vs-table { width: 100%; border-collapse: collapse; font-size: 0.65em; }
+        .vs-table th, .vs-table td { padding: 0.5em; border: 1px solid #333; }
+        .vs-table th { background: rgba(99, 102, 241, 0.3); }
+        .good { color: #10b981; }
+        .bad { color: #ef4444; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============== TITLE ============== -->
+<section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #0f172a 100%)">
+    <h1>Project Architecture</h1>
+    <h3>Design Patterns for Professional Bash</h3>
+    <p style="margin-top: 2em; opacity: 0.7;">
+        CAPSTONE SO • Seminar 6<br>
+        <small>Modularity • Separation of Responsibilities • Best Practices</small>
+    </p>
+</section>
+
+<!-- ============== DE CE ARHITECTURĂ ============== -->
+<section>
+    <section data-background-color="#1e1e3f">
+        <h2>Why Does Architecture Matter?</h2>
+        <p>The difference between a script and a professional project</p>
+    </section>
+    
+    <section>
+        <h3>Naive Script vs. Structured Project</h3>
+        <div class="two-columns">
+            <div>
+                <h4 class="bad">Monolithic Script</h4>
+                <pre><code class="language-bash" style="font-size: 0.9em;">#!/bin/bash
+# Everything in a single file
+# 500+ lines without structure
+
+cpu=$(cat /proc/stat | ...)
+if [ $cpu -gt 80 ]; then
+    echo "Alert!"
+    # ...mai mult cod
+fi
+
+# Backup logic mixed in
+tar -czf backup.tar.gz /data
+# ...and more code
+
+# Deploy logic
+scp backup.tar.gz server:
+# ...etc</code></pre>
+                <div class="error-box" style="font-size: 0.7em; margin-top: 0.5em;">
+                    Difficult to read, test, maintain
+                </div>
+            </div>
+            <div>
+                <h4 class="good">Modular Project</h4>
+                <pre><code class="language-bash" style="font-size: 0.9em;">#!/bin/bash
+# main.sh - Clear entry point
+
+source ./lib/common.sh
+source ./core/monitor.sh
+source ./core/backup.sh
+
+main() {
+    parse_args "$@"
+    load_config
+    
+    case $COMMAND in
+        monitor) run_monitor ;;
+        backup)  run_backup ;;
+        *)       show_help ;;
+    esac
+}
+
+main "$@"</code></pre>
+                <div class="success-box" style="font-size: 0.7em; margin-top: 0.5em;">
+                    Clear, testable, extensible
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Benefits of Good Architecture</h3>
+        <div class="three-columns">
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">🔧</div>
+                <h4>Maintainability</h4>
+                <p style="font-size: 0.7em;">Local changes without side effects</p>
+            </div>
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">🧪</div>
+                <h4>Testability</h4>
+                <p style="font-size: 0.7em;">Unit testing on isolated components</p>
+            </div>
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">♻️</div>
+                <h4>Reusability</h4>
+                <p style="font-size: 0.7em;">Modules reusable in other projects</p>
+            </div>
+        </div>
+        <div class="three-columns" style="margin-top: 1em;">
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">👥</div>
+                <h4>Collaboration</h4>
+                <p style="font-size: 0.7em;">Teams can work in parallel</p>
+            </div>
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">📈</div>
+                <h4>Scalability</h4>
+                <p style="font-size: 0.7em;">Easy to add new features</p>
+            </div>
+            <div class="pattern-card fragment">
+                <div class="pattern-icon">📖</div>
+                <h4>Documentation</h4>
+                <p style="font-size: 0.7em;">Structure = implicit documentation</p>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- ============== PRINCIPII SOLID ============== -->
+<section>
+    <section data-background-color="#1a365d">
+        <h2>SOLID Principles in Bash</h2>
+        <p>Adapting OOP principles for scripting</p>
+    </section>
+    
+    <section>
+        <h3>S - Single Responsibility</h3>
+        <div class="highlight-box">
+            <strong>Principle:</strong> Each module/function has a single responsibility
+        </div>
+        <div class="two-columns" style="margin-top: 1em;">
+            <div>
+                <h4 class="bad">Violation</h4>
+                <pre><code class="language-bash">process_backup() {
+    # Does too many things
+    validate_input "$@"
+    create_archive
+    compress_archive
+    upload_to_remote
+    send_notification
+    cleanup_old
+}</code></pre>
+            </div>
+            <div>
+                <h4 class="good">Correct</h4>
+                <pre><code class="language-bash"># Separate files
+# validation.sh
+validate_backup_input() { ... }
+
+# archive.sh  
+create_archive() { ... }
+compress_archive() { ... }
+
+# remote.sh
+upload_to_remote() { ... }
+
+# notify.sh
+send_notification() { ... }</code></pre>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>O - Open/Closed Principle</h3>
+        <div class="highlight-box">
+            <strong>Principle:</strong> Open for extension, closed for modification
+        </div>
+        <pre><code class="language-bash"># Using plugin pattern - add new compressors without modifying existing code
+
+# compressors/gzip.sh
+compress_gzip() { gzip -c "$1"; }
+decompress_gzip() { gunzip -c "$1"; }
+
+# compressors/zstd.sh  
+compress_zstd() { zstd -c "$1"; }
+decompress_zstd() { zstd -d -c "$1"; }
+
+# core/compress.sh - We don't modify, only extend
+compress_file() {
+    local file=$1 algorithm=$2
+    
+    # Load plugin dynamically
+    if [[ -f "compressors/${algorithm}.sh" ]]; then
+        source "compressors/${algorithm}.sh"
+        "compress_${algorithm}" "$file"
+    else
+        log_error "Unknown compressor: $algorithm"
+    fi
+}</code></pre>
+    </section>
+    
+    <section>
+        <h3>D - Dependency Inversion</h3>
+        <div class="highlight-box">
+            <strong>Principle:</strong> Depend on abstractions, not concrete implementations
+        </div>
+        <pre><code class="language-bash"># Define the interface (contract)
+# interfaces/notifier.sh
+notify() {
+    local level=$1 message=$2
+    # Concrete implementation is injected
+    "${NOTIFIER_IMPL:-notify_stdout}" "$level" "$message"
+}
+
+# Concrete implementations
+notify_stdout() { echo "[$1] $2"; }
+notify_email()  { mail -s "[$1] Alert" "$ADMIN_EMAIL" <<< "$2"; }
+notify_slack()  { curl -X POST "$SLACK_WEBHOOK" -d "{\"text\":\"[$1] $2\"}"; }
+
+# Configuration - choose implementation
+export NOTIFIER_IMPL="notify_slack"
+
+# Usage - code doesn't know which notifier it uses
+notify "ERROR" "Disk space critical!"</code></pre>
+    </section>
+</section>
+
+<!-- ============== STRUCTURA DIRECTOARELOR ============== -->
+<section>
+    <section data-background-color="#1e3a1e">
+        <h2>Directory Structure</h2>
+        <p>Physical organisation of the project</p>
+    </section>
+    
+    <section>
+        <h3>Standard CAPSTONE Layout</h3>
+        <div class="file-tree">
+<pre>
+project_name/
+│
+├── 📄 main.sh                    # 🎯 Single entry point
+│
+├── 📁 core/                      # 💼 Business logic
+│   ├── project_core.sh           #    Main logic
+│   ├── project_utils.sh          #    Specific helpers
+│   └── project_config.sh         #    Config management
+│
+├── 📁 lib/                       # 📚 Common libraries
+│   ├── common.sh                 #    General functions
+│   ├── logging.sh                #    Logging framework
+│   ├── validation.sh             #    Input validation
+│   └── colors.sh                 #    Coloured output
+│
+├── 📁 config/                    # ⚙️ Configurations
+│   ├── default.conf              #    Default values
+│   └── project.conf.example      #    Config template
+│
+├── 📁 tests/                     # 🧪 Tests
+│   ├── unit/                     #    Tests unitare
+│   │   ├── test_core.sh
+│   │   └── test_utils.sh
+│   ├── integration/              #    Tests integrare
+│   └── fixtures/                 #    Test data
+│
+├── 📁 docs/                      # 📖 Documentation
+│   └── README.md
+│
+└── 📄 Makefile                   # 🔨 Build automation
+</pre>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Directory Explanation</h3>
+        <table class="vs-table">
+            <thead>
+                <tr>
+                    <th>Director</th>
+                    <th>Responsibility</th>
+                    <th>Example Content</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="fragment">
+                    <td><code>core/</code></td>
+                    <td>Logica specifică proiectului</td>
+                    <td>Backup, monitoring algorithms</td>
+                </tr>
+                <tr class="fragment">
+                    <td><code>lib/</code></td>
+                    <td>Generic reusable code</td>
+                    <td>Logging, validation, helpers</td>
+                </tr>
+                <tr class="fragment">
+                    <td><code>config/</code></td>
+                    <td>Configuration files</td>
+                    <td>.conf, .env, templates</td>
+                </tr>
+                <tr class="fragment">
+                    <td><code>tests/</code></td>
+                    <td>Test suites</td>
+                    <td>Unit, integration, fixtures</td>
+                </tr>
+                <tr class="fragment">
+                    <td><code>docs/</code></td>
+                    <td>Documentation</td>
+                    <td>README, API docs, examples</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</section>
+
+<!-- ============== SOURCE CHAIN ============== -->
+<section>
+    <section data-background-color="#3d1a1a">
+        <h2>Pattern: Source Chain</h2>
+        <p>Loading dependencies in correct order</p>
+    </section>
+    
+    <section>
+        <h3>Dependencies and Loading Order</h3>
+        <div class="architecture-diagram">
+<pre>
+                    LOADING ORDER (Source Chain)
+                    
+    ┌─────────────────────────────────────────────────────────┐
+    │  1. BASH OPTIONS & CONSTANTS                            │
+    │     set -euo pipefail                                   │
+    │     readonly SCRIPT_DIR="$(dirname ...)"                │
+    └─────────────────────┬───────────────────────────────────┘
+                          ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  2. FOUNDATION LIBRARIES                                │
+    │     source lib/common.sh      # Zero dependencies       │
+    │     source lib/colors.sh      # Zero dependencies       │
+    └─────────────────────┬───────────────────────────────────┘
+                          ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  3. CORE LIBRARIES                                      │
+    │     source lib/logging.sh     # Needs: common, colors   │
+    │     source lib/validation.sh  # Needs: common, logging  │
+    └─────────────────────┬───────────────────────────────────┘
+                          ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  4. PROJECT MODULES                                     │
+    │     source core/config.sh     # Needs: validation       │
+    │     source core/utils.sh      # Needs: common, logging  │
+    │     source core/core.sh       # Needs: all above        │
+    └─────────────────────────────────────────────────────────┘
+</pre>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Source Chain Implementation</h3>
+        <pre><code class="language-bash">#!/bin/bash
+# main.sh - Entry point with robust source chain
+
+# 1. Strict mode
+set -euo pipefail
+
+# 2. Determine absolute location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+
+# 3. Helper for source with verification
+source_module() {
+    local module="$1"
+    local path="${SCRIPT_DIR}/${module}"
+    
+    if [[ ! -f "$path" ]]; then
+        echo "FATAL: Module not found: $path" >&2
+        exit 1
+    fi
+    
+    # shellcheck source=/dev/null
+    source "$path"
+}
+
+# 4. Load in correct order
+source_module "lib/common.sh"
+source_module "lib/colors.sh"
+source_module "lib/logging.sh"
+source_module "lib/validation.sh"
+source_module "core/config.sh"
+source_module "core/utils.sh"
+source_module "core/core.sh"
+
+# 5. Entry point
+main "$@"</code></pre>
+    </section>
+    
+    <section>
+        <h3>Guard Pattern - Avoiding Multiple Loading</h3>
+        <pre><code class="language-bash">#!/bin/bash
+# lib/logging.sh
+
+# Guard - prevents loading multiple times
+[[ -n "${_LOGGING_SH_LOADED:-}" ]] && return 0
+readonly _LOGGING_SH_LOADED=1
+
+# Check dependencies
+if [[ -z "${_COMMON_SH_LOADED:-}" ]]; then
+    echo "ERROR: logging.sh requires common.sh" >&2
+    exit 1
+fi
+
+# Implementation
+declare -gA LOG_LEVELS=(
+    [TRACE]=0 [DEBUG]=1 [INFO]=2 
+    [WARN]=3 [ERROR]=4 [FATAL]=5
+)
+
+log() {
+    local level="${1:-INFO}"
+    shift
+    local message="$*"
+    # ...implementare
+}</code></pre>
+        <div class="highlight-box" style="font-size: 0.8em; margin-top: 1em;">
+            <strong>Guard Pattern:</strong> Variabila <code>_MODULE_SH_LOADED</code> previne 
+            re-execution of code if the file is sourced multiple times.
+        </div>
+    </section>
+</section>
+
+<!-- ============== DESIGN PATTERNS ============== -->
+<section>
+    <section data-background-color="#1a2d3d">
+        <h2>Design Patterns in Bash</h2>
+        <p>Elegant solutions for common problems</p>
+    </section>
+    
+    <section>
+        <h3>1. Factory Pattern</h3>
+        <pre><code class="language-bash"># Create objects (associative arrays) dynamically
+create_backup_job() {
+    local name=$1 source=$2 dest=$3
+    
+    # "Constructor" - returnează referință
+    local -n job="BACKUP_JOB_${name}"
+    
+    job=(
+        [name]="$name"
+        [source]="$source"
+        [destination]="$dest"
+        [created_at]="$(date -Iseconds)"
+        [status]="pending"
+        [type]="full"
+    )
+    
+    echo "BACKUP_JOB_${name}"
+}
+
+# Usage
+job_ref=$(create_backup_job "daily" "/var/www" "/backup")
+declare -n job="$job_ref"
+echo "Created job: ${job[name]} at ${job[created_at]}"</code></pre>
+    </section>
+    
+    <section>
+        <h3>2. Strategy Pattern</h3>
+        <pre><code class="language-bash"># Interchangeable algorithms for the same operation
+
+# Compression strategies
+strategy_gzip()  { gzip -c "$1" > "$2"; }
+strategy_bzip2() { bzip2 -c "$1" > "$2"; }
+strategy_zstd()  { zstd -q -c "$1" -o "$2"; }
+strategy_none()  { cp "$1" "$2"; }
+
+# Context - uses selected strategy
+compress_with_strategy() {
+    local input=$1 output=$2 strategy=${3:-gzip}
+    
+    # Select and execute strategy
+    local strategy_func="strategy_${strategy}"
+    
+    if declare -f "$strategy_func" > /dev/null; then
+        "$strategy_func" "$input" "$output"
+    else
+        log_error "Unknown compression strategy: $strategy"
+        return 1
+    fi
+}
+
+# Usage
+compress_with_strategy "data.tar" "data.tar.zst" "zstd"</code></pre>
+    </section>
+    
+    <section>
+        <h3>3. Observer Pattern</h3>
+        <pre><code class="language-bash"># Event system for notifications
+
+declare -a EVENT_HANDLERS=()
+
+# Register handler
+on_event() {
+    local event=$1 handler=$2
+    EVENT_HANDLERS+=("${event}:${handler}")
+}
+
+# Emit event
+emit_event() {
+    local event=$1; shift
+    local data="$*"
+    
+    for registration in "${EVENT_HANDLERS[@]}"; do
+        local registered_event="${registration%%:*}"
+        local handler="${registration#*:}"
+        
+        if [[ "$registered_event" == "$event" ]]; then
+            "$handler" "$data"
+        fi
+    done
+}
+
+# Handlers
+on_backup_complete() { log_info "Backup finished: $1"; }
+on_backup_complete() { send_notification "Backup done: $1"; }
+
+# Setup
+on_event "backup:complete" "on_backup_complete"
+
+# Trigger
+emit_event "backup:complete" "/backup/daily_20240115.tar.gz"</code></pre>
+    </section>
+    
+    <section>
+        <h3>4. Command Pattern</h3>
+        <pre><code class="language-bash"># Encapsulate commands for undo/redo/queue
+
+declare -a COMMAND_HISTORY=()
+
+# Wrapper for commands with history
+execute_command() {
+    local cmd="$*"
+    
+    # Log for audit
+    log_debug "Executing: $cmd"
+    
+    # Save to history
+    COMMAND_HISTORY+=("$cmd")
+    
+    # Execute
+    eval "$cmd"
+    local status=$?
+    
+    if [[ $status -ne 0 ]]; then
+        log_error "Command failed (exit: $status): $cmd"
+    fi
+    
+    return $status
+}
+
+# Replay last N commands
+replay_commands() {
+    local count=${1:-${#COMMAND_HISTORY[@]}}
+    
+    for ((i=${#COMMAND_HISTORY[@]}-count; i<${#COMMAND_HISTORY[@]}; i++)); do
+        execute_command "${COMMAND_HISTORY[$i]}"
+    done
+}</code></pre>
+    </section>
+</section>
+
+<!-- ============== MODULARITATE ============== -->
+<section>
+    <section data-background-color="#2d1a3d">
+        <h2>Modularity Practică</h2>
+        <p>How we divide code into cohesive modules</p>
+    </section>
+    
+    <section>
+        <h3>Criteria for a Good Module</h3>
+        <div class="three-columns">
+            <div class="highlight-box">
+                <h4>Cohesion</h4>
+                <p style="font-size: 0.75em;">
+                    All functions in the module serve the same purpose
+                </p>
+                <pre><code class="language-bash" style="font-size: 0.8em;"># logging.sh - ONLY logging
+log_info() { ... }
+log_error() { ... }
+log_debug() { ... }
+set_log_level() { ... }</code></pre>
+            </div>
+            <div class="highlight-box">
+                <h4>Loose Coupling</h4>
+                <p style="font-size: 0.75em;">
+                    Minimal dependencies between modules
+                </p>
+                <pre><code class="language-bash" style="font-size: 0.8em;"># validation.sh
+# Uses only common.sh
+validate_path() {
+    is_empty "$1" && return 1
+    [[ -e "$1" ]]
+}</code></pre>
+            </div>
+            <div class="highlight-box">
+                <h4>Encapsulation</h4>
+                <p style="font-size: 0.75em;">
+                    Hide internal details
+                </p>
+                <pre><code class="language-bash" style="font-size: 0.8em;"># Public API
+get_cpu_usage() { ... }
+
+# Private (prefix _)
+_parse_proc_stat() { ... }
+_calculate_diff() { ... }</code></pre>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Example: Module logging.sh</h3>
+        <pre><code class="language-bash">#!/bin/bash
+# lib/logging.sh - Complete logging framework
+
+[[ -n "${_LOGGING_SH_LOADED:-}" ]] && return 0
+readonly _LOGGING_SH_LOADED=1
+
+# ═══════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════
+declare -g LOG_LEVEL="${LOG_LEVEL:-INFO}"
+declare -g LOG_FILE="${LOG_FILE:-}"
+declare -g LOG_FORMAT="${LOG_FORMAT:-'[%timestamp] [%level] %message'}"
+
+# ═══════════════════════════════════════════════════════════
+# PUBLIC API
+# ═══════════════════════════════════════════════════════════
+log_trace() { _log "TRACE" "$@"; }
+log_debug() { _log "DEBUG" "$@"; }
+log_info()  { _log "INFO"  "$@"; }
+log_warn()  { _log "WARN"  "$@"; }
+log_error() { _log "ERROR" "$@"; }
+log_fatal() { _log "FATAL" "$@"; exit 1; }
+
+set_log_level() { LOG_LEVEL="$1"; }
+set_log_file()  { LOG_FILE="$1"; }
+
+# ═══════════════════════════════════════════════════════════
+# PRIVATE IMPLEMENTATION
+# ═══════════════════════════════════════════════════════════
+_log() {
+    local level=$1; shift
+    _should_log "$level" || return 0
+    
+    local msg="$(_format_message "$level" "$*")"
+    echo -e "$msg" >&2
+    [[ -n "$LOG_FILE" ]] && echo "$msg" >> "$LOG_FILE"
+}</code></pre>
+    </section>
+</section>
+
+<!-- ============== API DESIGN ============== -->
+<section>
+    <section data-background-color="#3d2d1a">
+        <h2>API Design for Functions</h2>
+        <p>Clear and consistent interfaces</p>
+    </section>
+    
+    <section>
+        <h3>Conventions for Functions</h3>
+        <div class="two-columns">
+            <div>
+                <h4>Naming</h4>
+                <pre><code class="language-bash"># Descriptive verbs
+get_cpu_usage()
+set_log_level()
+is_file_readable()
+has_dependencies()
+validate_config()
+create_backup()
+parse_arguments()
+
+# Prefix for category
+file_exists()
+file_read()
+file_write()
+
+# Prefix _ for private
+_internal_helper()</code></pre>
+            </div>
+            <div>
+                <h4>Parameters Parametri & Return Return</h4>
+                <pre><code class="language-bash"># Documentation parametri
+# @param $1 - source path
+# @param $2 - destination path  
+# @param $3 - (optional) compression
+# @return 0 on success, 1 on failure
+# @output backup filename to stdout
+create_backup() {
+    local src="${1:?Source required}"
+    local dest="${2:?Dest required}"
+    local compress="${3:-gzip}"
+    
+    # Validation
+    [[ -d "$src" ]] || return 1
+    
+    # Logic
+    local filename="backup_$(date +%s)"
+    # ...
+    
+    # Output
+    echo "$filename"
+    return 0
+}</code></pre>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Pattern: Options Object</h3>
+        <pre><code class="language-bash"># For functions with many parameters - use associative array
+
+create_backup() {
+    # Parse options from associative array
+    local -n opts=$1
+    
+    local source="${opts[source]:?Source required}"
+    local dest="${opts[destination]:?Destination required}"
+    local type="${opts[type]:-full}"
+    local compress="${opts[compress]:-gzip}"
+    local keep="${opts[keep]:-7}"
+    local notify="${opts[notify]:-false}"
+    
+    log_info "Creating $type backup: $source → $dest"
+    log_debug "Options: compress=$compress, keep=$keep, notify=$notify"
+    
+    # Implementation...
+}
+
+# Usage - much clearer than 6 positional parameters
+declare -A backup_opts=(
+    [source]="/var/www"
+    [destination]="/backup"
+    [type]="incremental"
+    [compress]="zstd"
+    [keep]=14
+    [notify]=true
+)
+
+create_backup backup_opts</code></pre>
+    </section>
+</section>
+
+<!-- ============== BEST PRACTICES ============== -->
+<section>
+    <section data-background-color="#1a1a2e">
+        <h2>Best Practices Checklist</h2>
+        <p>Rules to follow in CAPSTONE projects</p>
+    </section>
+    
+    <section>
+        <h3>Architecture Checklist</h3>
+        <div class="two-columns">
+            <div class="success-box">
+                <h4>DO</h4>
+                <ul style="font-size: 0.8em;">
+                    <li>One clear entry point (main.sh)</li>
+                    <li>Separate core/lib/config/tests</li>
+                    <li>Small, focused functions</li>
+                    <li>Explicit dependencies (source)</li>
+                    <li>Guard pattern for modules</li>
+                    <li>Prefix _ for private functions</li>
+                    <li>Documentation parametri</li>
+                    <li>Consistent return codes</li>
+                </ul>
+            </div>
+            <div class="error-box">
+                <h4>DON'T</h4>
+                <ul style="font-size: 0.8em;">
+                    <li>Monolithic scripts >500 lines</li>
+                    <li>Global variables without prefixes</li>
+                    <li>Hardcoding paths/values</li>
+                    <li>Functions with >50 lines</li>
+                    <li>Side effects in functions</li>
+                    <li>Circular dependencies</li>
+                    <li>God functions (do everything)</li>
+                    <li>Copy-paste code</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Complete Example - Mini Project</h3>
+        <div class="architecture-diagram">
+<pre>
+mini_project/
+├── main.sh           ──────►  Entry point, orchestration
+│
+├── lib/
+│   ├── common.sh     ──────►  is_empty(), die(), trim()
+│   └── logging.sh    ──────►  log_info(), log_error()
+│
+├── core/
+│   ├── config.sh     ──────►  load_config(), get_config()
+│   └── processor.sh  ──────►  process_file(), validate_input()
+│
+├── config/
+│   └── default.conf  ──────►  KEY=value pairs
+│
+└── tests/
+    └── test_processor.sh ──►  test_process_file(), test_validate()
+
+Dependențe:
+  main.sh ─────► common.sh ◄─── logging.sh
+                    ▲
+                    │
+              config.sh ◄─── processor.sh
+</pre>
+        </div>
+    </section>
+</section>
+
+<!-- ============== EXERCIȚIU ============== -->
+<section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)">
+    <h2>Practical Exercise</h2>
+    <div class="highlight-box">
+        <h4>Refactorizare Monolithic Script</h4>
+        <p>Primiți un script de 300 lines. Sarcina voastră:</p>
+        <ol style="font-size: 0.9em;">
+            <li>Identify distinct responsibilities</li>
+            <li>Create directory structure</li>
+            <li>Extract modules (lib/, core/)</li>
+            <li>Implement source chain</li>
+            <li>Add guard pattern</li>
+        </ol>
+    </div>
+    <p style="margin-top: 2em;">
+        <strong>Time:</strong> 45 minutes | <strong>Score:</strong> 10p architecture
+    </p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [RevealHighlight]
+});
+</script>
+</body>
+</html>

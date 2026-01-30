@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Consolas, monospace">
+  <!-- Background -->
+  <rect width="900" height="520" fill="#1a1a2e"/>
+  
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" fill="#e0e0e0" font-size="18" font-weight="bold">Deployment Strategies Comparison</text>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ROLLING DEPLOYMENT -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="30" y="50" width="260" height="200" rx="8" fill="#16213e" stroke="#00d9ff" stroke-width="2"/>
+  <text x="160" y="75" text-anchor="middle" fill="#00d9ff" font-size="14" font-weight="bold">ROLLING</text>
+  
+  <!-- Servers visualization -->
+  <g transform="translate(50, 95)">
+    <!-- Time T0 -->
+    <text x="0" y="0" fill="#666" font-size="9">T0:</text>
+    <rect x="30" y="-12" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="70" y="-12" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="110" y="-12" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="150" y="-12" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <text x="48" y="2" fill="#00ff88" font-size="8">v1</text>
+    <text x="88" y="2" fill="#00ff88" font-size="8">v1</text>
+    <text x="128" y="2" fill="#00ff88" font-size="8">v1</text>
+    <text x="168" y="2" fill="#00ff88" font-size="8">v1</text>
+    
+    <!-- Time T1 -->
+    <text x="0" y="35" fill="#666" font-size="9">T1:</text>
+    <rect x="30" y="23" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="70" y="23" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="110" y="23" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="150" y="23" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <text x="48" y="37" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="88" y="37" fill="#00ff88" font-size="8">v1</text>
+    <text x="128" y="37" fill="#00ff88" font-size="8">v1</text>
+    <text x="168" y="37" fill="#00ff88" font-size="8">v1</text>
+    
+    <!-- Time T2 -->
+    <text x="0" y="70" fill="#666" font-size="9">T2:</text>
+    <rect x="30" y="58" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="70" y="58" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="110" y="58" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <rect x="150" y="58" width="35" height="18" rx="3" fill="#1f3d1f" stroke="#00ff88"/>
+    <text x="48" y="72" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="88" y="72" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="128" y="72" fill="#00ff88" font-size="8">v1</text>
+    <text x="168" y="72" fill="#00ff88" font-size="8">v1</text>
+    
+    <!-- Time Tn -->
+    <text x="0" y="105" fill="#666" font-size="9">Tn:</text>
+    <rect x="30" y="93" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="70" y="93" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="110" y="93" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <rect x="150" y="93" width="35" height="18" rx="3" fill="#3d1f1f" stroke="#ff6b6b"/>
+    <text x="48" y="107" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="88" y="107" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="128" y="107" fill="#ff6b6b" font-size="8">v2</text>
+    <text x="168" y="107" fill="#ff6b6b" font-size="8">v2</text>
+  </g>
+  
+  <text x="160" y="230" text-anchor="middle" fill="#888" font-size="9">Gradual, one-by-one</text>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- BLUE-GREEN DEPLOYMENT -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="320" y="50" width="260" height="200" rx="8" fill="#16213e" stroke="#00ff88" stroke-width="2"/>
+  <text x="450" y="75" text-anchor="middle" fill="#00ff88" font-size="14" font-weight="bold">BLUE-GREEN</text>
+  
+  <g transform="translate(340, 100)">
+    <!-- Blue environment -->
+    <rect x="0" y="0" width="90" height="80" rx="5" fill="#1a1a3a" stroke="#4a90d9" stroke-width="1.5"/>
+    <text x="45" y="20" text-anchor="middle" fill="#4a90d9" font-size="10" font-weight="bold">BLUE</text>
+    <rect x="10" y="30" width="30" height="15" rx="2" fill="#0f3460"/>
+    <rect x="50" y="30" width="30" height="15" rx="2" fill="#0f3460"/>
+    <rect x="10" y="55" width="30" height="15" rx="2" fill="#0f3460"/>
+    <rect x="50" y="55" width="30" height="15" rx="2" fill="#0f3460"/>
+    <text x="25" y="41" text-anchor="middle" fill="#4a90d9" font-size="7">v1</text>
+    <text x="65" y="41" text-anchor="middle" fill="#4a90d9" font-size="7">v1</text>
+    <text x="25" y="66" text-anchor="middle" fill="#4a90d9" font-size="7">v1</text>
+    <text x="65" y="66" text-anchor="middle" fill="#4a90d9" font-size="7">v1</text>
+    
+    <!-- Green environment -->
+    <rect x="120" y="0" width="90" height="80" rx="5" fill="#1a1a3a" stroke="#00ff88" stroke-width="1.5"/>
+    <text x="165" y="20" text-anchor="middle" fill="#00ff88" font-size="10" font-weight="bold">GREEN</text>
+    <rect x="130" y="30" width="30" height="15" rx="2" fill="#1f3d1f"/>
+    <rect x="170" y="30" width="30" height="15" rx="2" fill="#1f3d1f"/>
+    <rect x="130" y="55" width="30" height="15" rx="2" fill="#1f3d1f"/>
+    <rect x="170" y="55" width="30" height="15" rx="2" fill="#1f3d1f"/>
+    <text x="145" y="41" text-anchor="middle" fill="#00ff88" font-size="7">v2</text>
+    <text x="185" y="41" text-anchor="middle" fill="#00ff88" font-size="7">v2</text>
+    <text x="145" y="66" text-anchor="middle" fill="#00ff88" font-size="7">v2</text>
+    <text x="185" y="66" text-anchor="middle" fill="#00ff88" font-size="7">v2</text>
+    
+    <!-- Load balancer -->
+    <rect x="70" y="95" width="70" height="25" rx="4" fill="#2d2d44" stroke="#ffd93d"/>
+    <text x="105" y="112" text-anchor="middle" fill="#ffd93d" font-size="9">LB Switch</text>
+    
+    <!-- Arrow showing switch -->
+    <path d="M45 80 Q45 90 70 100" fill="none" stroke="#4a90d9" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <path d="M165 80 Q165 90 140 100" fill="none" stroke="#00ff88" stroke-width="2"/>
+  </g>
+  
+  <text x="450" y="230" text-anchor="middle" fill="#888" font-size="9">Instant switch, full rollback</text>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- CANARY DEPLOYMENT -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="610" y="50" width="260" height="200" rx="8" fill="#16213e" stroke="#ffd93d" stroke-width="2"/>
+  <text x="740" y="75" text-anchor="middle" fill="#ffd93d" font-size="14" font-weight="bold">CANARY</text>
+  
+  <g transform="translate(630, 95)">
+    <!-- Main fleet -->
+    <rect x="0" y="0" width="140" height="60" rx="5" fill="#1a1a3a" stroke="#00ff88"/>
+    <text x="70" y="18" text-anchor="middle" fill="#888" font-size="9">Production (95%)</text>
+    <rect x="10" y="28" width="25" height="20" rx="2" fill="#1f3d1f"/>
+    <rect x="40" y="28" width="25" height="20" rx="2" fill="#1f3d1f"/>
+    <rect x="70" y="28" width="25" height="20" rx="2" fill="#1f3d1f"/>
+    <rect x="100" y="28" width="25" height="20" rx="2" fill="#1f3d1f"/>
+    <text x="23" y="42" text-anchor="middle" fill="#00ff88" font-size="7">v1</text>
+    <text x="53" y="42" text-anchor="middle" fill="#00ff88" font-size="7">v1</text>
+    <text x="83" y="42" text-anchor="middle" fill="#00ff88" font-size="7">v1</text>
+    <text x="113" y="42" text-anchor="middle" fill="#00ff88" font-size="7">v1</text>
+    
+    <!-- Canary -->
+    <rect x="160" y="0" width="55" height="60" rx="5" fill="#1a1a3a" stroke="#ffd93d"/>
+    <text x="188" y="18" text-anchor="middle" fill="#888" font-size="9">Canary</text>
+    <text x="188" y="30" text-anchor="middle" fill="#666" font-size="8">(5%)</text>
+    <rect x="170" y="38" width="35" height="15" rx="2" fill="#3d3d1f"/>
+    <text x="188" y="49" text-anchor="middle" fill="#ffd93d" font-size="7">v2</text>
+    
+    <!-- Traffic distribution -->
+    <rect x="60" y="75" width="100" height="25" rx="4" fill="#2d2d44" stroke="#6c757d"/>
+    <text x="110" y="92" text-anchor="middle" fill="#aaa" font-size="9">Traffic Split</text>
+    
+    <!-- Monitoring -->
+    <text x="110" y="115" text-anchor="middle" fill="#ff6b6b" font-size="9">📊 Monitor errors</text>
+    <text x="110" y="128" text-anchor="middle" fill="#00ff88" font-size="9">✓ Gradual rollout</text>
+  </g>
+  
+  <text x="740" y="230" text-anchor="middle" fill="#888" font-size="9">Small % first, monitor, expand</text>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COMPARISON TABLE -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="30" y="270" width="840" height="200" rx="8" fill="#0f0f1a" stroke="#3a3a5a"/>
+  <text x="450" y="295" text-anchor="middle" fill="#e0e0e0" font-size="14" font-weight="bold">Strategy Comparison</text>
+  
+  <!-- Table header -->
+  <line x1="50" y1="310" x2="850" y2="310" stroke="#3a3a5a"/>
+  <text x="150" y="330" text-anchor="middle" fill="#888" font-size="11">Aspect</text>
+  <text x="330" y="330" text-anchor="middle" fill="#00d9ff" font-size="11">Rolling</text>
+  <text x="530" y="330" text-anchor="middle" fill="#00ff88" font-size="11">Blue-Green</text>
+  <text x="730" y="330" text-anchor="middle" fill="#ffd93d" font-size="11">Canary</text>
+  <line x1="50" y1="340" x2="850" y2="340" stroke="#3a3a5a"/>
+  
+  <!-- Row 1: Downtime -->
+  <text x="150" y="360" text-anchor="middle" fill="#aaa" font-size="10">Downtime</text>
+  <text x="330" y="360" text-anchor="middle" fill="#888" font-size="10">Minimal</text>
+  <text x="530" y="360" text-anchor="middle" fill="#888" font-size="10">Zero</text>
+  <text x="730" y="360" text-anchor="middle" fill="#888" font-size="10">Zero</text>
+  
+  <!-- Row 2: Rollback -->
+  <text x="150" y="385" text-anchor="middle" fill="#aaa" font-size="10">Rollback Speed</text>
+  <text x="330" y="385" text-anchor="middle" fill="#888" font-size="10">Slow</text>
+  <text x="530" y="385" text-anchor="middle" fill="#888" font-size="10">Instant</text>
+  <text x="730" y="385" text-anchor="middle" fill="#888" font-size="10">Fast</text>
+  
+  <!-- Row 3: Resources -->
+  <text x="150" y="410" text-anchor="middle" fill="#aaa" font-size="10">Resources</text>
+  <text x="330" y="410" text-anchor="middle" fill="#888" font-size="10">1x</text>
+  <text x="530" y="410" text-anchor="middle" fill="#888" font-size="10">2x</text>
+  <text x="730" y="410" text-anchor="middle" fill="#888" font-size="10">1.05x</text>
+  
+  <!-- Row 4: Complexity -->
+  <text x="150" y="435" text-anchor="middle" fill="#aaa" font-size="10">Complexity</text>
+  <text x="330" y="435" text-anchor="middle" fill="#888" font-size="10">Low</text>
+  <text x="530" y="435" text-anchor="middle" fill="#888" font-size="10">Medium</text>
+  <text x="730" y="435" text-anchor="middle" fill="#888" font-size="10">High</text>
+  
+  <!-- Row 5: Use case -->
+  <text x="150" y="460" text-anchor="middle" fill="#aaa" font-size="10">Best For</text>
+  <text x="330" y="460" text-anchor="middle" fill="#666" font-size="9">Stateless apps</text>
+  <text x="530" y="460" text-anchor="middle" fill="#666" font-size="9">Critical systems</text>
+  <text x="730" y="460" text-anchor="middle" fill="#666" font-size="9">High-risk changes</text>
+  
+  <!-- Footer -->
+  <text x="450" y="500" text-anchor="middle" fill="#3a3a5a" font-size="9">SEM06 CAPSTONE — Deployment Strategies — ASE Bucharest</text>
+</svg>

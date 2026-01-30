@@ -1,0 +1,47 @@
+#!/bin/bash
+#==============================================================================
+# sysmonitor - Wrapper for System Monitor
+#==============================================================================
+# This script is intended to be installed in /usr/local/bin/ or ~/bin/
+# for easy access to the System Monitor application.
+#
+# INSTALLATION:
+#   sudo ln -sf /path/to/monitor/monitor.sh /usr/local/bin/sysmonitor
+#   or
+#   cp /path/to/monitor/bin/sysmonitor ~/bin/
+#
+# USAGE:
+#   sysmonitor              # Single-shot check
+#   sysmonitor -d           # Daemon mode
+#   sysmonitor --help       # Help
+#==============================================================================
+
+# Find the real directory of the script (resolves symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+    DIR=$(cd -P "$(dirname "$SOURCE")" && pwd)
+    SOURCE=$(readlink "$SOURCE")
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+WRAPPER_DIR=$(cd -P "$(dirname "$SOURCE")" && pwd)
+
+# Path to main script
+MONITOR_SCRIPT="${WRAPPER_DIR}/../monitor.sh"
+
+# Check main script exists
+if [[ ! -f "$MONITOR_SCRIPT" ]]; then
+    echo "ERROR: Cannot find main script: $MONITOR_SCRIPT" >&2
+    echo "Ensure the directory structure is intact." >&2
+    exit 1
+fi
+
+# Check execution permissions
+if [[ ! -x "$MONITOR_SCRIPT" ]]; then
+    chmod +x "$MONITOR_SCRIPT" 2>/dev/null || {
+        echo "ERROR: Cannot set execution permissions for: $MONITOR_SCRIPT" >&2
+        exit 1
+    }
+fi
+
+# Execute main script with all arguments
+exec "$MONITOR_SCRIPT" "$@"

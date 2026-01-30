@@ -1,0 +1,47 @@
+# Systemd Service for Backup (used with backup.timer)
+# Save as: /etc/systemd/system/backup.service
+
+[Unit]
+Description=Automated Backup Service
+Documentation=man:backup(1)
+After=network.target local-fs.target
+
+[Service]
+Type=oneshot
+
+# User and group (adjust for your setup)
+User=root
+Group=root
+
+# Working directory
+WorkingDirectory=/opt/capstone/backup
+
+# Main script with arguments
+ExecStart=/opt/capstone/backup/backup.sh create \
+    --source=/var/www \
+    --dest=/backup \
+    --type=incremental \
+    --compress=gz \
+    --retention=7
+
+# Pre and post scripts
+ExecStartPre=/bin/mkdir -p /backup
+ExecStartPost=/usr/bin/logger "Backup completed successfully"
+
+# Timeout (backups can take a while)
+TimeoutStartSec=3600
+
+# Logging
+StandardOutput=append:/var/log/backup/backup.log
+StandardError=append:/var/log/backup/backup_error.log
+
+# Environment
+Environment="BACKUP_NOTIFY_EMAIL=admin@example.com"
+Environment="LOG_LEVEL=INFO"
+
+# Security (more relaxed for backup that reads entire system)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

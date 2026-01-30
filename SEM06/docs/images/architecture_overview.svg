@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Consolas, monospace">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#1a1a2e"/>
+  
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#e0e0e0" font-size="20" font-weight="bold">CAPSTONE Architecture Overview</text>
+  
+  <!-- Infrastructure Layer -->
+  <rect x="50" y="60" width="700" height="380" rx="10" fill="#16213e" stroke="#4a4a6a" stroke-width="2"/>
+  <text x="400" y="90" text-anchor="middle" fill="#8892b0" font-size="14">INFRASTRUCTURE LAYER</text>
+  
+  <!-- Monitor Box -->
+  <rect x="80" y="120" width="180" height="140" rx="8" fill="#0f3460" stroke="#00d9ff" stroke-width="2"/>
+  <text x="170" y="150" text-anchor="middle" fill="#00d9ff" font-size="16" font-weight="bold">MONITOR</text>
+  <text x="170" y="175" text-anchor="middle" fill="#a0a0a0" font-size="11">• CPU/Memory metrics</text>
+  <text x="170" y="195" text-anchor="middle" fill="#a0a0a0" font-size="11">• Disk I/O stats</text>
+  <text x="170" y="215" text-anchor="middle" fill="#a0a0a0" font-size="11">• Process monitoring</text>
+  <text x="170" y="235" text-anchor="middle" fill="#a0a0a0" font-size="11">• Alerting system</text>
+  
+  <!-- Backup Box -->
+  <rect x="310" y="120" width="180" height="140" rx="8" fill="#0f3460" stroke="#00ff88" stroke-width="2"/>
+  <text x="400" y="150" text-anchor="middle" fill="#00ff88" font-size="16" font-weight="bold">BACKUP</text>
+  <text x="400" y="175" text-anchor="middle" fill="#a0a0a0" font-size="11">• Full/incremental</text>
+  <text x="400" y="195" text-anchor="middle" fill="#a0a0a0" font-size="11">• Compression</text>
+  <text x="400" y="215" text-anchor="middle" fill="#a0a0a0" font-size="11">• Checksum verify</text>
+  <text x="400" y="235" text-anchor="middle" fill="#a0a0a0" font-size="11">• Rotation policy</text>
+  
+  <!-- Deployer Box -->
+  <rect x="540" y="120" width="180" height="140" rx="8" fill="#0f3460" stroke="#ff6b6b" stroke-width="2"/>
+  <text x="630" y="150" text-anchor="middle" fill="#ff6b6b" font-size="16" font-weight="bold">DEPLOYER</text>
+  <text x="630" y="175" text-anchor="middle" fill="#a0a0a0" font-size="11">• Rolling deploy</text>
+  <text x="630" y="195" text-anchor="middle" fill="#a0a0a0" font-size="11">• Blue-Green</text>
+  <text x="630" y="215" text-anchor="middle" fill="#a0a0a0" font-size="11">• Health checks</text>
+  <text x="630" y="235" text-anchor="middle" fill="#a0a0a0" font-size="11">• Rollback</text>
+  
+  <!-- Shared Libraries -->
+  <rect x="180" y="300" width="440" height="80" rx="8" fill="#1a1a3a" stroke="#ffd93d" stroke-width="2"/>
+  <text x="400" y="330" text-anchor="middle" fill="#ffd93d" font-size="14" font-weight="bold">SHARED LIBRARIES</text>
+  <text x="250" y="355" text-anchor="middle" fill="#c0c0c0" font-size="12">lib/core.sh</text>
+  <text x="400" y="355" text-anchor="middle" fill="#c0c0c0" font-size="12">lib/config.sh</text>
+  <text x="550" y="355" text-anchor="middle" fill="#c0c0c0" font-size="12">lib/utils.sh</text>
+  
+  <!-- Connections -->
+  <line x1="170" y1="260" x2="170" y2="285" stroke="#00d9ff" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="170" y1="285" x2="200" y2="300" stroke="#00d9ff" stroke-width="2" stroke-dasharray="5,3"/>
+  
+  <line x1="400" y1="260" x2="400" y2="300" stroke="#00ff88" stroke-width="2" stroke-dasharray="5,3"/>
+  
+  <line x1="630" y1="260" x2="630" y2="285" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="630" y1="285" x2="600" y2="300" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5,3"/>
+  
+  <!-- Data flow arrows between projects -->
+  <path d="M260 190 Q285 190 310 190" fill="none" stroke="#6c757d" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M490 190 Q515 190 540 190" fill="none" stroke="#6c757d" stroke-width="1.5" marker-end="url(#arrow)"/>
+  
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6c757d"/>
+    </marker>
+  </defs>
+  
+  <!-- Integration labels -->
+  <text x="285" y="180" text-anchor="middle" fill="#6c757d" font-size="9">alerts</text>
+  <text x="515" y="180" text-anchor="middle" fill="#6c757d" font-size="9">pre-deploy</text>
+  
+  <!-- Linux kernel reference -->
+  <rect x="80" y="400" width="640" height="30" rx="5" fill="#2d2d44" stroke="#4a4a6a"/>
+  <text x="400" y="420" text-anchor="middle" fill="#6c757d" font-size="12">Linux Kernel: /proc • /sys • signals • processes</text>
+  
+  <!-- Footer -->
+  <text x="400" y="475" text-anchor="middle" fill="#4a4a6a" font-size="10">SEM06 CAPSTONE — Operating Systems — ASE Bucharest</text>
+</svg>

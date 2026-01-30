@@ -1,0 +1,440 @@
+{
+  "quiz": {
+    "title": "CAPSTONE: Integrated Bash Projects",
+    "description": "Formative quiz for Seminar 6 - Operating Systems",
+    "metadata": {
+      "course": "Operating Systems",
+      "institution": "ASE Bucharest - CSIE",
+      "semester": "2024-2025",
+      "seminar": 6,
+      "version": "1.0.0",
+      "language": "en",
+      "time_limit_minutes": 25,
+      "passing_score": 60,
+      "total_points": 100,
+      "bloom_distribution": {
+        "remember": 3,
+        "understand": 5,
+        "apply": 6,
+        "analyse": 2,
+        "evaluate": 2
+      }
+    },
+    "settings": {
+      "shuffle_questions": false,
+      "shuffle_answers": true,
+      "show_correct_answers": true,
+      "show_explanations": true,
+      "allow_backtrack": true,
+      "one_question_per_page": false
+    },
+    "questions": [
+      {
+        "id": "q01",
+        "type": "multiple_choice",
+        "bloom_level": "remember",
+        "points": 5,
+        "topic": "Error handling",
+        "question_text": "Which command sets strict behaviour in Bash to stop execution on first error, undefined variables, and pipe errors?",
+        "answers": [
+          {"id": "a", "text": "set -e", "correct": false},
+          {"id": "b", "text": "set -euo pipefail", "correct": true},
+          {"id": "c", "text": "set -x", "correct": false},
+          {"id": "d", "text": "set -v", "correct": false}
+        ],
+        "explanation": "`set -euo pipefail` combines: -e (stops on first error), -u (error on undefined variables), -o pipefail (pipe returns error of first command that fails).",
+        "feedback": {
+          "a": "Only -e stops on errors, but doesn't detect undefined variables",
+          "c": "-x activates debug mode (prints commands), not error handling",
+          "d": "-v displays lines read, doesn't manage errors"
+        }
+      },
+      {
+        "id": "q02",
+        "type": "multiple_choice",
+        "bloom_level": "remember",
+        "points": 5,
+        "topic": "Trap and signals",
+        "question_text": "Which signal is sent to a process when the user presses Ctrl+C?",
+        "answers": [
+          {"id": "a", "text": "SIGTERM", "correct": false},
+          {"id": "b", "text": "SIGKILL", "correct": false},
+          {"id": "c", "text": "SIGINT", "correct": true},
+          {"id": "d", "text": "SIGHUP", "correct": false}
+        ],
+        "explanation": "SIGINT (Signal Interrupt) is sent by terminal when user presses Ctrl+C. Can be caught with `trap` for cleanup.",
+        "feedback": {
+          "a": "SIGTERM is the default signal of kill command, not Ctrl+C",
+          "b": "SIGKILL cannot be caught and terminates process immediately",
+          "d": "SIGHUP is sent when terminal closes"
+        }
+      },
+      {
+        "id": "q03",
+        "type": "multiple_choice",
+        "bloom_level": "remember",
+        "points": 5,
+        "topic": "Exit codes",
+        "question_text": "Which exit code indicates successful execution in Unix convention?",
+        "answers": [
+          {"id": "a", "text": "1", "correct": false},
+          {"id": "b", "text": "-1", "correct": false},
+          {"id": "c", "text": "0", "correct": true},
+          {"id": "d", "text": "255", "correct": false}
+        ],
+        "explanation": "Unix convention: exit code 0 = success, anything else = error. Check with `$?` or directly in conditions.",
+        "feedback": {
+          "a": "1 indicates generic error",
+          "b": "Exit codes are 0-255, -1 is not valid",
+          "d": "255 indicates error, not success"
+        }
+      },
+      {
+        "id": "q04",
+        "type": "multiple_choice",
+        "bloom_level": "understand",
+        "points": 6,
+        "topic": "Modular architecture",
+        "question_text": "Why do we separate code into lib/core.sh, lib/utils.sh, lib/config.sh instead of writing everything in a single file?",
+        "answers": [
+          {"id": "a", "text": "Because Bash doesn't allow files larger than 1000 lines", "correct": false},
+          {"id": "b", "text": "For reuse, isolated testing, and easy maintenance", "correct": true},
+          {"id": "c", "text": "Because `source` only works with small files", "correct": false},
+          {"id": "d", "text": "To make the script harder for others to understand", "correct": false}
+        ],
+        "explanation": "Modular architecture offers: reuse, independent testing, easy maintenance, and clarity of responsibilities.",
+        "feedback": {
+          "a": "Bash has no size limits for files",
+          "c": "`source` works with files of any size",
+          "d": "Modularisation increases clarity, doesn't reduce it"
+        }
+      },
+      {
+        "id": "q05",
+        "type": "multiple_choice",
+        "bloom_level": "understand",
+        "points": 6,
+        "topic": "Incremental backup",
+        "question_text": "How does an incremental backup work compared to a full one?",
+        "answers": [
+          {"id": "a", "text": "Copies all files on each run", "correct": false},
+          {"id": "b", "text": "Copies only files modified since the last backup", "correct": true},
+          {"id": "c", "text": "Compresses files more than full backup", "correct": false},
+          {"id": "d", "text": "Deletes old files automatically", "correct": false}
+        ],
+        "explanation": "Incremental backup uses `find -newer` to find modified files. Saves time and space by copying only changes.",
+        "feedback": {
+          "a": "This is the definition of full backup",
+          "c": "Compression doesn't define backup type",
+          "d": "Rotation/deletion is separate from backup type"
+        }
+      },
+      {
+        "id": "q06",
+        "type": "multiple_choice",
+        "bloom_level": "understand",
+        "points": 6,
+        "topic": "Health checks",
+        "question_text": "What does an HTTP health check verify for a web application?",
+        "answers": [
+          {"id": "a", "text": "Whether port 22 SSH is open", "correct": false},
+          {"id": "b", "text": "Whether application responds with 2xx code to a specific endpoint", "correct": true},
+          {"id": "c", "text": "Whether server CPU is below 50%", "correct": false},
+          {"id": "d", "text": "Whether admin user can login", "correct": false}
+        ],
+        "explanation": "HTTP health check sends GET request to an endpoint (/health) and verifies HTTP 2xx response. Different from resource monitoring.",
+        "feedback": {
+          "a": "SSH is for administration, not for application health check",
+          "c": "CPU monitoring is separate from application health check",
+          "d": "Authentication is functionality, not health check"
+        }
+      },
+      {
+        "id": "q07",
+        "type": "multiple_choice",
+        "bloom_level": "understand",
+        "points": 6,
+        "topic": "Logging",
+        "question_text": "What is the correct order of logging levels from least severe to most severe?",
+        "answers": [
+          {"id": "a", "text": "ERROR, WARN, INFO, DEBUG", "correct": false},
+          {"id": "b", "text": "DEBUG, INFO, WARN, ERROR", "correct": true},
+          {"id": "c", "text": "INFO, DEBUG, ERROR, WARN", "correct": false},
+          {"id": "d", "text": "WARN, ERROR, DEBUG, INFO", "correct": false}
+        ],
+        "explanation": "Standard order: DEBUG < INFO < WARN < ERROR < FATAL. DEBUG for details, INFO for normal events, WARN for unexpected situations, ERROR for errors.",
+        "feedback": {
+          "a": "Order is reversed",
+          "c": "DEBUG is less severe than INFO",
+          "d": "Order is completely incorrect"
+        }
+      },
+      {
+        "id": "q08",
+        "type": "multiple_choice",
+        "bloom_level": "understand",
+        "points": 6,
+        "topic": "Deployment strategies",
+        "question_text": "What is the main advantage of Blue-Green deployment strategy?",
+        "answers": [
+          {"id": "a", "text": "Requires less memory than Rolling deployment", "correct": false},
+          {"id": "b", "text": "Allows instant rollback through traffic switch", "correct": true},
+          {"id": "c", "text": "Doesn't require load balancer", "correct": false},
+          {"id": "d", "text": "Works without downtime ever", "correct": false}
+        ],
+        "explanation": "Blue-Green: two identical environments, deploy on Green, instant traffic switch, rollback = switch back to Blue.",
+        "feedback": {
+          "a": "Blue-Green requires double the resources",
+          "c": "Traffic switch requires load balancer or DNS",
+          "d": "Switch itself can cause micro-downtime"
+        }
+      },
+      {
+        "id": "q09",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "Trap cleanup",
+        "question_text": "What is the correct syntax to execute the `cleanup` function on script termination (normal or via Ctrl+C)?",
+        "answers": [
+          {"id": "a", "text": "trap cleanup EXIT SIGINT", "correct": false},
+          {"id": "b", "text": "trap 'cleanup' EXIT INT", "correct": true},
+          {"id": "c", "text": "on_exit cleanup", "correct": false},
+          {"id": "d", "text": "finally { cleanup }", "correct": false}
+        ],
+        "explanation": "Correct syntax: `trap 'command' SIGNALS...`. EXIT for normal termination, INT for SIGINT (without SIG prefix).",
+        "feedback": {
+          "a": "SIGINT is not valid in trap, use INT",
+          "c": "on_exit doesn't exist in standard Bash",
+          "d": "finally is from other languages, not Bash"
+        }
+      },
+      {
+        "id": "q10",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "Find with timestamp",
+        "question_text": "Which command finds files modified after timestamp.txt?",
+        "answers": [
+          {"id": "a", "text": "find /data -newer timestamp.txt -type f", "correct": true},
+          {"id": "b", "text": "find /data -mtime +timestamp.txt", "correct": false},
+          {"id": "c", "text": "find /data --after timestamp.txt", "correct": false},
+          {"id": "d", "text": "find /data -modified > timestamp.txt", "correct": false}
+        ],
+        "explanation": "`find -newer` compares mtime of files with reference file. Returns files modified AFTER reference.",
+        "feedback": {
+          "b": "-mtime uses days, not reference file",
+          "c": "--after is not a valid option for find",
+          "d": "Invalid syntax, wrong redirection"
+        }
+      },
+      {
+        "id": "q11",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "Functions with return",
+        "question_text": "How do you return a numeric value from a Bash function?",
+        "answers": [
+          {"id": "a", "text": "return $value where value is 0-255", "correct": false},
+          {"id": "b", "text": "echo $value and capture with $(function)", "correct": false},
+          {"id": "c", "text": "Both methods are correct, for different purposes", "correct": true},
+          {"id": "d", "text": "export RESULT=$value", "correct": false}
+        ],
+        "explanation": "Bash offers two methods: `return N` for exit code (0-255), `echo value` for output captured with $(). Use return for status, echo for values.",
+        "feedback": {
+          "a": "Correct but incomplete - only works for 0-255",
+          "b": "Correct but incomplete - only for values, not status",
+          "d": "Export modifies environment, not a pattern for return"
+        }
+      },
+      {
+        "id": "q12",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "HTTP verification",
+        "question_text": "Which command checks if a web server responds successfully?",
+        "answers": [
+          {"id": "a", "text": "ping localhost:8080", "correct": false},
+          {"id": "b", "text": "curl -sf http://localhost:8080/health", "correct": true},
+          {"id": "c", "text": "wget --check localhost:8080", "correct": false},
+          {"id": "d", "text": "nc -z localhost 8080", "correct": false}
+        ],
+        "explanation": "`curl -sf`: -s for silent, -f for fail on HTTP errors. Verifies real HTTP response, not just TCP connection.",
+        "feedback": {
+          "a": "ping verifies ICMP, not HTTP, and doesn't accept port",
+          "c": "--check is not a valid wget option",
+          "d": "nc -z only checks open TCP port, not HTTP"
+        }
+      },
+      {
+        "id": "q13",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "Arrays in Bash",
+        "question_text": "Which syntax correctly iterates over array elements?",
+        "answers": [
+          {"id": "a", "text": "for item in $ARRAY; do", "correct": false},
+          {"id": "b", "text": "for item in ${ARRAY[@]}; do", "correct": false},
+          {"id": "c", "text": "for item in \"${ARRAY[@]}\"; do", "correct": true},
+          {"id": "d", "text": "foreach item in ARRAY; do", "correct": false}
+        ],
+        "explanation": "`\"${ARRAY[@]}\"` - [@] expands all elements, double quotes preserve elements with spaces as units.",
+        "feedback": {
+          "a": "$ARRAY without [@] returns only first element",
+          "b": "Without quotes, spaces in elements cause problems",
+          "d": "foreach doesn't exist in Bash"
+        }
+      },
+      {
+        "id": "q14",
+        "type": "multiple_choice",
+        "bloom_level": "apply",
+        "points": 6,
+        "topic": "Checksum verification",
+        "question_text": "Which command verifies backup integrity using checksum?",
+        "answers": [
+          {"id": "a", "text": "md5sum -c backup.md5", "correct": true},
+          {"id": "b", "text": "sha256sum backup.tar.gz", "correct": false},
+          {"id": "c", "text": "diff backup.md5 backup.tar.gz", "correct": false},
+          {"id": "d", "text": "cmp --checksum backup.tar.gz", "correct": false}
+        ],
+        "explanation": "`md5sum -c file.md5`: -c (check) reads file with hashes and verifies each. Returns exit code 0 if all pass.",
+        "feedback": {
+          "b": "Calculates hash, doesn't verify existing one",
+          "c": "diff compares content, doesn't verify checksum",
+          "d": "--checksum is not a valid option for cmp"
+        }
+      },
+      {
+        "id": "q15",
+        "type": "multiple_choice",
+        "bloom_level": "analyse",
+        "points": 8,
+        "topic": "Debug script",
+        "question_text": "A backup script displays \"Backup completed\" but the archive file is empty. What is the most likely cause?\n\n```bash\ntar czf \"$BACKUP_FILE\" \"$SOURCE_DIR\" 2>/dev/null\necho \"Backup completed\"\n```",
+        "answers": [
+          {"id": "a", "text": "The tar command failed but error was suppressed", "correct": true},
+          {"id": "b", "text": "echo doesn't work after tar", "correct": false},
+          {"id": "c", "text": "BACKUP_FILE is not defined", "correct": false},
+          {"id": "d", "text": "SOURCE_DIR contains only empty directories", "correct": false}
+        ],
+        "explanation": "`2>/dev/null` suppresses stderr, hiding tar errors. Fix: remove redirection or check $? after tar.",
+        "feedback": {
+          "b": "echo works independently of previous commands",
+          "c": "Undefined BACKUP_FILE would cause tar error, not empty archive",
+          "d": "tar would include directories, even empty ones"
+        }
+      },
+      {
+        "id": "q16",
+        "type": "multiple_choice",
+        "bloom_level": "analyse",
+        "points": 8,
+        "topic": "Race condition",
+        "question_text": "Why can this pattern for PID file cause problems?\n\n```bash\nif [[ ! -f \"$PID_FILE\" ]]; then\n    echo $$ > \"$PID_FILE\"\nfi\n```",
+        "answers": [
+          {"id": "a", "text": "$$ doesn't contain the correct PID", "correct": false},
+          {"id": "b", "text": "Two instances can check simultaneously and both write", "correct": true},
+          {"id": "c", "text": "PID_FILE must be in /var/run", "correct": false},
+          {"id": "d", "text": "Echo cannot write to files", "correct": false}
+        ],
+        "explanation": "Race condition (TOCTOU): between check and write, another instance can pass. Fix: use `flock` for atomic locking.",
+        "feedback": {
+          "a": "$$ correctly contains current process PID",
+          "c": "Location doesn't affect race condition",
+          "d": "echo can write to files with redirection"
+        }
+      },
+      {
+        "id": "q17",
+        "type": "multiple_choice",
+        "bloom_level": "evaluate",
+        "points": 8,
+        "topic": "Deployment strategy",
+        "question_text": "For an application requiring zero downtime and instant rollback, but you have limited resources (cannot double infrastructure), which strategy is most suitable?",
+        "answers": [
+          {"id": "a", "text": "Blue-Green deployment", "correct": false},
+          {"id": "b", "text": "Rolling deployment", "correct": true},
+          {"id": "c", "text": "Recreate deployment", "correct": false},
+          {"id": "d", "text": "Big bang deployment", "correct": false}
+        ],
+        "explanation": "Rolling deployment: replaces instances one by one, doesn't require double resources, zero downtime. Trade-off: slower rollback.",
+        "feedback": {
+          "a": "Blue-Green requires double infrastructure",
+          "c": "Recreate stops everything before deploy - downtime",
+          "d": "Big bang doesn't offer zero downtime"
+        }
+      },
+      {
+        "id": "q18",
+        "type": "multiple_choice",
+        "bloom_level": "evaluate",
+        "points": 8,
+        "topic": "Compression choice",
+        "question_text": "For daily backups on a server with limited CPU but sufficient storage space, which compression algorithm do you choose?",
+        "answers": [
+          {"id": "a", "text": "xz (best compression ratio)", "correct": false},
+          {"id": "b", "text": "gzip (speed/compression balance)", "correct": false},
+          {"id": "c", "text": "zstd (fast with good compression)", "correct": true},
+          {"id": "d", "text": "No compression (fastest)", "correct": false}
+        ],
+        "explanation": "zstd offers best trade-off: speed comparable or better than gzip, superior compression, much lower CPU usage than xz.",
+        "feedback": {
+          "a": "xz is slow and consumes much CPU",
+          "b": "gzip is ok but zstd is superior in both aspects",
+          "d": "No compression wastes space unnecessarily"
+        }
+      },
+      {
+        "id": "q19",
+        "type": "multiple_choice",
+        "bloom_level": "remember",
+        "points": 5,
+        "topic": "Signal listing",
+        "question_text": "Which command displays the complete list of signals available in the system?",
+        "answers": [
+          {"id": "a", "text": "kill -l", "correct": true},
+          {"id": "b", "text": "signal --list", "correct": false},
+          {"id": "c", "text": "trap -p", "correct": false},
+          {"id": "d", "text": "ps -s", "correct": false}
+        ],
+        "explanation": "kill -l lists all available signals with their numbers. Example: 1) SIGHUP 2) SIGINT 3) SIGQUIT...",
+        "feedback": {
+          "b": "There is no 'signal' command in standard Unix",
+          "c": "trap -p shows active traps, not the signal list",
+          "d": "ps -s shows session IDs, not signals"
+        }
+      },
+      {
+        "id": "q20",
+        "type": "multiple_choice",
+        "bloom_level": "remember",
+        "points": 5,
+        "topic": "Compression algorithms",
+        "question_text": "Which compression algorithm typically produces the smallest files but takes the longest time to compress?",
+        "answers": [
+          {"id": "a", "text": "gzip", "correct": false},
+          {"id": "b", "text": "bzip2", "correct": false},
+          {"id": "c", "text": "xz", "correct": true},
+          {"id": "d", "text": "lz4", "correct": false}
+        ],
+        "explanation": "xz (LZMA2) achieves best compression ratio but is slowest. Ranking by compression: xz > bzip2 > gzip > lz4. Ranking by speed: lz4 > gzip > bzip2 > xz.",
+        "feedback": {
+          "a": "gzip is balanced but not the best compression",
+          "b": "bzip2 is better than gzip but slower than xz",
+          "d": "lz4 is fastest but with lowest compression ratio"
+        }
+      }
+    ]
+  },
+  "export_info": {
+    "format_version": "1.0",
+    "compatible_with": ["Moodle 3.9+", "Canvas", "Blackboard"],
+    "export_date": "2025-01-27",
+    "generator": "SEM06 Quiz Generator"
+  }
+}

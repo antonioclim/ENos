@@ -1,0 +1,56 @@
+# Systemd Service Template for Monitor
+# Save as: /etc/systemd/system/monitor.service
+#
+# Installation:
+#   sudo cp monitor.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable monitor.service
+#   sudo systemctl start monitor.service
+#
+
+[Unit]
+Description=System Monitor Service
+Documentation=man:monitor(1)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+# Working directory
+WorkingDirectory=/opt/capstone/monitor
+
+# Main script
+ExecStart=/opt/capstone/monitor/monitor.sh --continuous --interval=60
+
+# Restart policy
+Restart=on-failure
+RestartSec=30
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Logging
+StandardOutput=append:/var/log/monitor/monitor.log
+StandardError=append:/var/log/monitor/monitor_error.log
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/log/monitor
+
+# Environment
+Environment="LOG_LEVEL=INFO"
+Environment="THRESHOLD_CPU=80"
+Environment="THRESHOLD_MEM=85"
+Environment="THRESHOLD_DISK=90"
+
+# Resource limits
+MemoryMax=100M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target

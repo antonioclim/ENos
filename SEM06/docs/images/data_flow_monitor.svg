@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="Consolas, monospace">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#1a1a2e"/>
+  
+  <!-- Title -->
+  <text x="400" y="28" text-anchor="middle" fill="#e0e0e0" font-size="18" font-weight="bold">Monitor Data Flow: /proc → Parsing → Alerting</text>
+  
+  <!-- Linux Kernel Source -->
+  <rect x="30" y="60" width="140" height="280" rx="8" fill="#0f3460" stroke="#00d9ff" stroke-width="2"/>
+  <text x="100" y="85" text-anchor="middle" fill="#00d9ff" font-size="13" font-weight="bold">KERNEL</text>
+  <text x="100" y="85" text-anchor="middle" fill="#00d9ff" font-size="13" font-weight="bold">KERNEL</text>
+  
+  <rect x="45" y="100" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="120" text-anchor="middle" fill="#4a90d9" font-size="10">/proc/stat</text>
+  
+  <rect x="45" y="140" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="160" text-anchor="middle" fill="#4a90d9" font-size="10">/proc/meminfo</text>
+  
+  <rect x="45" y="180" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="200" text-anchor="middle" fill="#4a90d9" font-size="10">/proc/diskstats</text>
+  
+  <rect x="45" y="220" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="240" text-anchor="middle" fill="#4a90d9" font-size="10">/proc/loadavg</text>
+  
+  <rect x="45" y="260" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="280" text-anchor="middle" fill="#4a90d9" font-size="10">/sys/class/*</text>
+  
+  <rect x="45" y="300" width="110" height="30" rx="4" fill="#1a1a3a" stroke="#4a90d9"/>
+  <text x="100" y="320" text-anchor="middle" fill="#4a90d9" font-size="10">/proc/[pid]/*</text>
+  
+  <!-- Arrows to parsing -->
+  <line x1="170" y1="200" x2="210" y2="200" stroke="#4a90d9" stroke-width="2"/>
+  <polygon points="220,200 210,195 210,205" fill="#4a90d9"/>
+  
+  <!-- Parsing Layer -->
+  <rect x="230" y="80" width="160" height="240" rx="8" fill="#16213e" stroke="#00ff88" stroke-width="2"/>
+  <text x="310" y="105" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="bold">PARSING</text>
+  
+  <text x="310" y="135" text-anchor="middle" fill="#888" font-size="10">awk '{print $2}'</text>
+  <text x="310" y="160" text-anchor="middle" fill="#888" font-size="10">grep "^MemFree"</text>
+  <text x="310" y="185" text-anchor="middle" fill="#888" font-size="10">sed 's/kB//'</text>
+  <text x="310" y="210" text-anchor="middle" fill="#888" font-size="10">cut -d: -f2</text>
+  <text x="310" y="235" text-anchor="middle" fill="#888" font-size="10">bc &lt;&lt;&lt; "scale=2"</text>
+  
+  <rect x="250" y="260" width="120" height="45" rx="4" fill="#1a1a3a" stroke="#ffd93d"/>
+  <text x="310" y="280" text-anchor="middle" fill="#ffd93d" font-size="10">Calculations:</text>
+  <text x="310" y="295" text-anchor="middle" fill="#777" font-size="9">% = (used/total)*100</text>
+  
+  <!-- Arrow to metrics -->
+  <line x1="390" y1="200" x2="430" y2="200" stroke="#00ff88" stroke-width="2"/>
+  <polygon points="440,200 430,195 430,205" fill="#00ff88"/>
+  
+  <!-- Metrics Storage -->
+  <rect x="450" y="100" width="140" height="200" rx="8" fill="#16213e" stroke="#ffd93d" stroke-width="2"/>
+  <text x="520" y="125" text-anchor="middle" fill="#ffd93d" font-size="13" font-weight="bold">METRICS</text>
+  
+  <text x="520" y="155" text-anchor="middle" fill="#aaa" font-size="10">cpu_usage=78.5</text>
+  <text x="520" y="175" text-anchor="middle" fill="#aaa" font-size="10">mem_used=4096</text>
+  <text x="520" y="195" text-anchor="middle" fill="#aaa" font-size="10">disk_free=50G</text>
+  <text x="520" y="215" text-anchor="middle" fill="#aaa" font-size="10">load_avg=2.5</text>
+  <text x="520" y="235" text-anchor="middle" fill="#aaa" font-size="10">swap_pct=15</text>
+  
+  <rect x="465" y="255" width="110" height="35" rx="4" fill="#1a1a3a" stroke="#6c757d"/>
+  <text x="520" y="278" text-anchor="middle" fill="#6c757d" font-size="9">associative array</text>
+  
+  <!-- Arrow to decision -->
+  <line x1="590" y1="200" x2="630" y2="200" stroke="#ffd93d" stroke-width="2"/>
+  <polygon points="640,200 630,195 630,205" fill="#ffd93d"/>
+  
+  <!-- Decision/Alert Layer -->
+  <rect x="650" y="80" width="120" height="240" rx="8" fill="#16213e" stroke="#ff6b6b" stroke-width="2"/>
+  <text x="710" y="105" text-anchor="middle" fill="#ff6b6b" font-size="13" font-weight="bold">ALERTING</text>
+  
+  <!-- Threshold check -->
+  <polygon points="710,140 680,170 710,200 740,170" fill="#2d2d44" stroke="#ff6b6b"/>
+  <text x="710" y="173" text-anchor="middle" fill="#ff6b6b" font-size="9">&gt;thresh?</text>
+  
+  <!-- Alert actions -->
+  <rect x="665" y="220" width="90" height="25" rx="4" fill="#3d1f1f" stroke="#ff6b6b"/>
+  <text x="710" y="237" text-anchor="middle" fill="#ff6b6b" font-size="9">log_warn()</text>
+  
+  <rect x="665" y="255" width="90" height="25" rx="4" fill="#3d1f1f" stroke="#ff6b6b"/>
+  <text x="710" y="272" text-anchor="middle" fill="#ff6b6b" font-size="9">send_alert()</text>
+  
+  <rect x="665" y="290" width="90" height="25" rx="4" fill="#1f3d1f" stroke="#00ff88"/>
+  <text x="710" y="307" text-anchor="middle" fill="#00ff88" font-size="9">log_info()</text>
+  
+  <!-- Legend -->
+  <rect x="230" y="345" width="340" height="40" rx="5" fill="#0f0f1a" stroke="#3a3a5a"/>
+  <text x="250" y="365" fill="#4a90d9" font-size="10">■</text>
+  <text x="265" y="365" fill="#888" font-size="9">Kernel source</text>
+  <text x="350" y="365" fill="#00ff88" font-size="10">■</text>
+  <text x="365" y="365" fill="#888" font-size="9">Text processing</text>
+  <text x="460" y="365" fill="#ff6b6b" font-size="10">■</text>
+  <text x="475" y="365" fill="#888" font-size="9">Threshold check</text>
+  
+  <!-- Footer -->
+  <text x="400" y="390" text-anchor="middle" fill="#3a3a5a" font-size="9">SEM06 — System Monitor Data Pipeline</text>
+</svg>

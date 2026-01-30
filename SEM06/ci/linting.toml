@@ -1,0 +1,168 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# linting.toml — Linting Configuration for SEM06 CAPSTONE
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# 
+# This file contains configurations for:
+# - shellcheck (Bash linting)
+# - ruff (Python linting - rapid)
+# - flake8 (Python linting - classic)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHELLCHECK CONFIGURATION
+# ─────────────────────────────────────────────────────────────────────────────
+# Shellcheck does not use TOML, but we document the configuration here.
+# Use: shellcheck -S warning script.sh
+#
+# Recommended options for SEM06:
+#   -S warning    : Minimum severity warning (not style/info)
+#   -e SC1090     : Ignore dynamic sources (source "$VAR")
+#   -e SC2034     : Ignore apparently unused variables
+#   -e SC2155     : Allow declare and assign on the same line
+#
+# Complete command example:
+#   shellcheck -S warning -e SC1090,SC2034 scripts/*.sh
+#
+# For CI, use the format:
+#   shellcheck -f gcc scripts/*.sh
+#
+# Important codes to know:
+#   SC2086: Double quote to prevent word splitting
+#   SC2046: Quote this to prevent word splitting
+#   SC2006: Use $(...) instead of legacy `...`
+#   SC1091: Not following sourced file
+#   SC2164: Use cd ... || exit in case cd fails
+
+[shellcheck]
+# These settings are for documentation - shellcheck uses .shellcheckrc
+severity = "warning"
+shell = "bash"
+exclude = [
+    "SC1090",  # Can't follow non-constant source
+    "SC1091",  # Not following sourced file
+    "SC2034",  # Variable appears unused
+]
+
+# Create .shellcheckrc in root:
+# severity=warning
+# shell=bash
+# disable=SC1090,SC1091
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUFF CONFIGURATION (Python - Rapid)
+# ─────────────────────────────────────────────────────────────────────────────
+# Ruff is a very fast Python linter, written in Rust
+# Replaces flake8, isort, pyupgrade, etc.
+
+[tool.ruff]
+# Target Python version
+target-version = "py39"
+
+# Maximum line length
+line-length = 100
+
+# Directories to exclude
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "*.pyc",
+]
+
+# Activated rules
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+
+# Ignored rules
+ignore = [
+    "E501",  # Line too long (handled by line-length)
+    "E402",  # Module level import not at top
+    "B008",  # Do not perform function calls in argument defaults
+    "B905",  # zip() without an explicit strict parameter
+    "W503",  # Line break before binary operator
+]
+
+# Allow unused variables if they start with _
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.per-file-ignores]
+# Allow import * in __init__.py
+"__init__.py" = ["F401", "F403"]
+# Allow long lines in tests
+"**/test_*.py" = ["E501"]
+
+[tool.ruff.isort]
+known-first-party = ["formative", "scripts"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLAKE8 CONFIGURATION (Python - Classic)
+# ─────────────────────────────────────────────────────────────────────────────
+# Flake8 uses setup.cfg or .flake8, but we document here
+
+[flake8]
+max-line-length = 100
+max-complexity = 10
+
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+]
+
+ignore = [
+    "E501",  # Line too long
+    "W503",  # Line break before binary operator
+    "E203",  # Whitespace before ':'
+    "E266",  # Too many leading '#' for block comment
+]
+
+# Per-file ignores
+per-file-ignores = [
+    "__init__.py:F401,F403",
+    "test_*.py:E501",
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SETUP INSTRUCTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+# 
+# 1. For shellcheck, create .shellcheckrc in root:
+#    ```
+#    severity=warning
+#    shell=bash
+#    disable=SC1090,SC1091
+#    ```
+#
+# 2. For ruff, copy the [tool.ruff] section into pyproject.toml
+#
+# 3. For flake8, create .flake8 in root:
+#    ```
+#    [flake8]
+#    max-line-length = 100
+#    ignore = E501,W503,E203
+#    exclude = .git,__pycache__,.venv
+#    ```
+#
+# 4. Install linters:
+#    pip install ruff flake8
+#    sudo apt install shellcheck
+#
+# 5. Run:
+#    make lint
+#    # or manually:
+#    shellcheck scripts/*.sh
+#    ruff check formative/
+#    flake8 formative/
+# ═══════════════════════════════════════════════════════════════════════════════

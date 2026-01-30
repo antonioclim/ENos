@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminar 6: CAPSTONE Projects | Operating Systems</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        :root {
+            --r-main-font-size: 38px;
+            --r-heading1-size: 2.2em;
+            --r-heading2-size: 1.6em;
+            --r-code-font: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.55em; }
+        .reveal pre code { max-height: 500px; padding: 15px; }
+        .reveal ul { display: block; margin-left: 1em; }
+        .reveal li { margin: 0.5em 0; }
+        .highlight-green { color: #4ec9b0; }
+        .highlight-yellow { color: #dcdcaa; }
+        .highlight-orange { color: #ce9178; }
+        .highlight-blue { color: #569cd6; }
+        .highlight-pink { color: #c586c0; }
+        .two-columns { display: flex; gap: 2em; }
+        .two-columns > * { flex: 1; }
+        .small { font-size: 0.7em; }
+        .box { background: rgba(255,255,255,0.1); padding: 1em; border-radius: 10px; margin: 0.5em 0; }
+        .box-green { border-left: 4px solid #4ec9b0; }
+        .box-yellow { border-left: 4px solid #dcdcaa; }
+        .box-orange { border-left: 4px solid #ce9178; }
+        .architecture-diagram { background: #1e1e1e; padding: 1.5em; border-radius: 10px; font-family: monospace; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        th, td { border: 1px solid #444; padding: 0.5em; text-align: left; }
+        th { background: rgba(78, 201, 176, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Slide 1: Title -->
+            <section>
+                <h1>CAPSTONE Projects</h1>
+                <h2>Seminar 6</h2>
+                <p class="highlight-green">Operating Systems - ASE Bucharest CSIE</p>
+                <p class="small">Integrating projects: Monitor, Backup, Deployer</p>
+            </section>
+
+            <!-- Slide 2: Objectives -->
+            <section>
+                <h2>Seminar Objectives</h2>
+                <div class="box box-green">
+                    <ul>
+                        <li><span class="highlight-green">Synthesis</span> - Integration of knowledge from weeks 1-10</li>
+                        <li><span class="highlight-yellow">Practical application</span> - Real projects, production-ready</li>
+                        <li><span class="highlight-orange">Best Practices</span> - Modular architecture, testing, error handling</li>
+                        <li><span class="highlight-blue">Automation</span> - Cron, systemd timers, CI/CD</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 3: The 3 Projects -->
+            <section>
+                <h2>The 3 CAPSTONE Projects</h2>
+                <div class="two-columns">
+                    <div class="box box-green">
+                        <h3>Monitor</h3>
+                        <p class="small">Real-time system monitoring</p>
+                        <ul class="small">
+                            <li>CPU, Memory, Disk</li>
+                            <li>Alerting with thresholds</li>
+                            <li>Output: Text/JSON/CSV</li>
+                        </ul>
+                    </div>
+                    <div class="box box-yellow">
+                        <h3>Backup</h3>
+                        <p class="small">Incremental backup with rotation</p>
+                        <ul class="small">
+                            <li>Full & Incremental</li>
+                            <li>Multi-algorithm compression</li>
+                            <li>Integrity verification</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-orange" style="margin-top: 1em;">
+                    <h3>Deployer</h3>
+                    <p class="small">Automated deployment with rollback</p>
+                    <ul class="small" style="display: flex; gap: 2em;">
+                        <li>Rolling / Blue-Green / Canary</li>
+                        <li>Health checks</li>
+                        <li>Pre/post deploy hooks</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 4: General Architecture -->
+            <section>
+                <h2>Modular Architecture</h2>
+                <div class="architecture-diagram">
+<pre style="margin: 0; font-size: 0.6em;">
+project/
+├── <span class="highlight-green">core/</span>           # Main logic
+│   ├── *_core.sh      # Core functions
+│   ├── *_utils.sh     # Common utilities
+│   └── *_config.sh    # Configuration management
+├── <span class="highlight-yellow">config/</span>         # Configuration files
+│   ├── default.conf   # Default configuration
+│   └── custom.conf    # User configuration
+├── <span class="highlight-orange">tests/</span>          # Test suites
+│   ├── unit/          # Unit tests
+│   └── integration/   # Integration tests
+└── <span class="highlight-blue">main.sh</span>         # Entry point
+</pre>
+                </div>
+            </section>
+
+            <!-- Slide 5: Design Principles -->
+            <section>
+                <h2>Design Principles</h2>
+                <table>
+                    <tr>
+                        <th>Principle</th>
+                        <th>Description</th>
+                        <th>Benefit</th>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">SRP</td>
+                        <td>Single Responsibility</td>
+                        <td>Each function - one single task</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-yellow">DRY</td>
+                        <td>Don't Repeat Yourself</td>
+                        <td>Reuse through common functions</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-orange">KISS</td>
+                        <td>Keep It Simple</td>
+                        <td>Simple code, easy to understand</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-blue">Defensive</td>
+                        <td>Defensive programming</td>
+                        <td>Input validation, error handling</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Slide 6: Educational Kit Structure -->
+            <section>
+                <h2>Educational Kit Structure</h2>
+                <div class="architecture-diagram">
+<pre style="margin: 0; font-size: 0.55em;">
+SEM11-12_COMPLETE/
+├── <span class="highlight-green">scripts/</span>
+│   ├── projects/           # The 3 complete projects
+│   │   ├── monitor/        # ~2500 lines
+│   │   ├── backup/         # ~2500 lines
+│   │   └── deployer/       # ~2600 lines
+│   ├── demo_*.sh           # Interactive demonstrations
+│   ├── install.sh          # Automatic installation
+│   ├── test_runner.sh      # Testing framework
+│   └── check_dependencies.sh
+├── <span class="highlight-yellow">docs/</span>                   # Pedagogical documentation
+├── <span class="highlight-orange">presentations/</span>          # Reveal.js presentations
+├── <span class="highlight-blue">assignments/</span>            # Practical assignments
+└── <span class="highlight-pink">resources/</span>              # Auxiliary materials
+</pre>
+                </div>
+            </section>
+
+            <!-- Slide 7: Recommended Workflow -->
+            <section>
+                <h2>Recommended Workflow</h2>
+                <div class="box box-green">
+                    <p><strong>1. Installation</strong></p>
+                    <pre><code class="language-bash">./install.sh --all</code></pre>
+                </div>
+                <div class="box box-yellow">
+                    <p><strong>2. Verify dependencies</strong></p>
+                    <pre><code class="language-bash">./check_dependencies.sh</code></pre>
+                </div>
+                <div class="box box-orange">
+                    <p><strong>3. Run demos</strong></p>
+                    <pre><code class="language-bash">./demo_monitor.sh    # Monitoring demo
+./demo_backup.sh     # Backup demo
+./demo_deployer.sh   # Deployment demo</code></pre>
+                </div>
+            </section>
+
+            <!-- Slide 8: Prerequisite Knowledge -->
+            <section>
+                <h2>Prerequisite Knowledge</h2>
+                <div class="two-columns">
+                    <div>
+                        <h4 class="highlight-green">From Previous Weeks:</h4>
+                        <ul class="small">
+                            <li>S01: Basic Bash commands</li>
+                            <li>S02: Variables and substitution</li>
+                            <li>S03: Control flow (if/for/while)</li>
+                            <li>S04: Functions and modularisation</li>
+                            <li>S05: Regular expressions, AWK</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="highlight-yellow">Advanced Concepts:</h4>
+                        <ul class="small">
+                            <li>S06-07: Processes and signals</li>
+                            <li>S08: File system</li>
+                            <li>S09: Basic networking</li>
+                            <li>S10: Security and permissions</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: Demo Monitor Quick -->
+            <section>
+                <h2>Quick Demo: Monitor</h2>
+                <pre><code class="language-bash"># Verify CPU usage
+$ ./monitor.sh --cpu
+CPU Usage: 23.5%
+  user: 15.2%  system: 5.8%  idle: 76.5%
+
+# Complete monitoring with alerting
+$ ./monitor.sh --all --alert --threshold-cpu=80
+[INFO] Starting system monitoring...
+[OK] CPU: 23.5% (threshold: 80%)
+[OK] Memory: 4.2GB/16GB (26.3%)
+[WARN] Disk /dev/sda1: 85% used (threshold: 80%)
+
+# Output in JSON format
+$ ./monitor.sh --format=json | jq .
+{
+  "timestamp": "2025-01-20T10:30:00Z",
+  "cpu": { "usage": 23.5, "cores": 8 },
+  "memory": { "used_gb": 4.2, "total_gb": 16 }
+}</code></pre>
+            </section>
+
+            <!-- Slide 10: Demo Backup Quick -->
+            <section>
+                <h2>Quick Demo: Backup</h2>
+                <pre><code class="language-bash"># Full backup with compression
+$ ./backup.sh --source=/data --dest=/backup --type=full --compress=gzip
+[INFO] Starting full backup...
+[INFO] Compressing with gzip...
+[OK] Backup complete: backup_full_20250120_103000.tar.gz
+     Size: 2.3GB → 890MB (compression ratio: 61%)
+     Checksum: sha256:a1b2c3d4...
+
+# Incremental backup (modified files only)
+$ ./backup.sh --source=/data --dest=/backup --type=incremental
+[INFO] Finding modified files since last backup...
+[INFO] Modified files: 47
+[OK] Incremental backup: backup_incr_20250120_140000.tar.gz
+
+# Verify integrity
+$ ./backup.sh --verify --archive=/backup/backup_full_*.tar.gz
+[OK] Archive integrity verified
+[OK] Checksum matches</code></pre>
+            </section>
+
+            <!-- Slide 11: Demo Deployer Quick -->
+            <section>
+                <h2>Quick Demo: Deployer</h2>
+                <pre><code class="language-bash"># Rolling deployment
+$ ./deployer.sh --app=myapp --strategy=rolling --instances=3
+[INFO] Starting rolling deployment...
+[INFO] Deploying to instance 1/3...
+[OK] Instance 1 healthy
+[INFO] Deploying to instance 2/3...
+[OK] Instance 2 healthy
+[INFO] Deploying to instance 3/3...
+[OK] All instances deployed successfully!
+
+# Blue-Green deployment
+$ ./deployer.sh --app=myapp --strategy=blue-green
+[INFO] Active: BLUE, Deploying to: GREEN
+[INFO] Running health checks on GREEN...
+[OK] GREEN environment healthy
+[INFO] Switching traffic BLUE → GREEN
+[OK] Deployment complete!
+
+# Rollback in case of problems
+$ ./deployer.sh --rollback --app=myapp
+[WARN] Rolling back to previous version...
+[OK] Rollback complete!</code></pre>
+            </section>
+
+            <!-- Slide 12: Error Handling Overview -->
+            <section>
+                <h2>Robust Error Handling</h2>
+                <pre><code class="language-bash">#!/bin/bash
+# Activate strict mode
+set -euo pipefail
+
+# Standardised exit codes
+readonly EXIT_SUCCESS=0
+readonly EXIT_FAILURE=1
+readonly EXIT_INVALID_ARG=2
+readonly EXIT_FILE_NOT_FOUND=3
+
+# Trap for cleanup
+cleanup() {
+    local exit_code=$?
+    rm -f "$TEMP_FILE" 2>/dev/null
+    [[ $exit_code -ne 0 ]] && log_error "Script failed with code: $exit_code"
+    exit "$exit_code"
+}
+trap cleanup EXIT
+
+# Error handler with stack trace
+error_handler() {
+    local line=$1 cmd=$2
+    log_error "Error at line $line: $cmd"
+    # Stack trace for debugging
+    local i=0
+    while caller $i; do ((i++)); done
+}</code></pre>
+            </section>
+
+            <!-- Slide 13: Testing Framework -->
+            <section>
+                <h2>Testing Framework</h2>
+                <pre><code class="language-bash"># test_monitor.sh
+source test_helpers.sh
+
+test_cpu_monitoring() {
+    local result
+    result=$(./monitor.sh --cpu --format=json)
+    
+    assert_success "CPU monitoring should succeed"
+    assert_contains "$result" "usage" "Output should contain usage"
+    assert_in_range "$(echo "$result" | jq .cpu.usage)" 0 100 \
+        "CPU usage should be 0-100%"
+}
+
+test_alert_threshold() {
+    # Mock CPU at 95%
+    mock_command "cat /proc/stat" "cpu 950 0 50 0 0 0 0 0 0 0"
+    
+    local output
+    output=$(./monitor.sh --cpu --alert --threshold-cpu=80)
+    
+    assert_contains "$output" "[ALERT]" "Should trigger alert"
+}
+
+run_tests</code></pre>
+            </section>
+
+            <!-- Slide 14: Cron Automation -->
+            <section>
+                <h2>Automation with Cron</h2>
+                <pre><code class="language-bash"># Monitoring every 5 minutes
+*/5 * * * * /opt/capstone/monitor.sh --all --log >> /var/log/monitor.log
+
+# Daily incremental backup at 2 AM
+0 2 * * * /opt/capstone/backup.sh --type=incremental
+
+# Weekly full backup (Sunday 3 AM)
+0 3 * * 0 /opt/capstone/backup.sh --type=full
+
+# Deployment health check every 10 minutes
+*/10 * * * * /opt/capstone/deployer.sh --health-check --quiet
+
+# Daily report at 8 AM
+0 8 * * * /opt/capstone/monitor.sh --report --email=admin@example.com</code></pre>
+            </section>
+
+            <!-- Slide 15: Seminars Agenda -->
+            <section>
+                <h2>Seminars 11-12 Agenda</h2>
+                <div class="two-columns small">
+                    <div class="box box-green">
+                        <h4>Seminar 11 (2h)</h4>
+                        <ul>
+                            <li>Architecture and design patterns</li>
+                            <li>Monitor: core implementation</li>
+                            <li>Backup: strategies and compression</li>
+                            <li>Practical exercises (1)</li>
+                        </ul>
+                    </div>
+                    <div class="box box-yellow">
+                        <h4>Seminar 12 (2h)</h4>
+                        <ul>
+                            <li>Deployer: deployment strategies</li>
+                            <li>Testing framework</li>
+                            <li>Advanced error handling</li>
+                            <li>Cron/systemd automation</li>
+                            <li>Practical exercises (2)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 16: Assessment -->
+            <section>
+                <h2>Assessment Criteria</h2>
+                <table>
+                    <tr>
+                        <th>Criterion</th>
+                        <th>Score</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>Functionality</td>
+                        <td>40%</td>
+                        <td>Functional code, complete features</td>
+                    </tr>
+                    <tr>
+                        <td>Code quality</td>
+                        <td>25%</td>
+                        <td>Modularisation, clean code, comments</td>
+                    </tr>
+                    <tr>
+                        <td>Error handling</td>
+                        <td>15%</td>
+                        <td>Error management, edge cases</td>
+                    </tr>
+                    <tr>
+                        <td>Testing</td>
+                        <td>10%</td>
+                        <td>Unit and integration tests</td>
+                    </tr>
+                    <tr>
+                        <td>Documentation</td>
+                        <td>10%</td>
+                        <td>README, comments, help</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Slide 17: Resources -->
+            <section>
+                <h2>Resources and References</h2>
+                <div class="two-columns small">
+                    <div>
+                        <h4 class="highlight-green">Documentation:</h4>
+                        <ul>
+                            <li>GNU Bash Manual</li>
+                            <li>Advanced Bash Scripting Guide</li>
+                            <li>Linux man pages (proc, cron)</li>
+                            <li>ShellCheck - linter for Bash</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="highlight-yellow">Practice:</h4>
+                        <ul>
+                            <li>Exercises from /assignments/</li>
+                            <li>Modify existing projects</li>
+                            <li>Create your own project</li>
+                            <li>Code review with colleagues</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-orange" style="margin-top: 1em;">
+                    <p>💡 <strong>Tip:</strong> Run the demos interactively and modify the code to make sense (not just as a recipe)!</p>
+                </div>
+            </section>
+
+            <!-- Slide 18: Q&A -->
+            <section>
+                <h1>Questions?</h1>
+                <p class="highlight-green">Let's start with the first project!</p>
+                <div class="box" style="margin-top: 2em;">
+                    <p class="small">Navigation: ← → for slides | ESC for overview | F for fullscreen</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

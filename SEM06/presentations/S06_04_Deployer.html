@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployer - Automated Deployment | CAPSTONE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        :root { --r-main-font-size: 36px; --r-code-font: 'JetBrains Mono', monospace; }
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.48em; }
+        .reveal pre code { max-height: 520px; padding: 12px; }
+        .reveal ul { display: block; margin-left: 1em; }
+        .reveal li { margin: 0.4em 0; }
+        .hl-green { color: #4ec9b0; }
+        .hl-yellow { color: #dcdcaa; }
+        .hl-orange { color: #ce9178; }
+        .hl-blue { color: #569cd6; }
+        .hl-pink { color: #c586c0; }
+        .cols { display: flex; gap: 1.5em; }
+        .cols > * { flex: 1; }
+        .sm { font-size: 0.7em; }
+        .xs { font-size: 0.6em; }
+        .box { background: rgba(255,255,255,0.08); padding: 0.8em; border-radius: 8px; margin: 0.4em 0; }
+        .box-g { border-left: 4px solid #4ec9b0; }
+        .box-y { border-left: 4px solid #dcdcaa; }
+        .box-o { border-left: 4px solid #ce9178; }
+        .box-b { border-left: 4px solid #569cd6; }
+        .diagram { background: #1e1e1e; padding: 1em; border-radius: 8px; font-family: monospace; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.6em; }
+        th, td { border: 1px solid #444; padding: 0.4em; text-align: left; }
+        th { background: rgba(78, 201, 176, 0.25); }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title -->
+            <section>
+                <h1>Deployer</h1>
+                <h2>Automated Deployment System</h2>
+                <p class="hl-green">CAPSTONE Project 3/3</p>
+                <p class="sm">Rolling, Blue-Green, Canary cu rollback automat</p>
+            </section>
+
+            <!-- Objectives -->
+            <section>
+                <h2>Learning Objectives</h2>
+                <div class="box box-g">
+                    <ul>
+                        <li><span class="hl-green">Strategii</span> - Rolling, Blue-Green, Canary</li>
+                        <li><span class="hl-yellow">Health Checks</span> - HTTP, TCP, Process verification</li>
+                        <li><span class="hl-orange">Hooks</span> - Pre/Post deploy, failure handling</li>
+                        <li><span class="hl-blue">Rollback</span> - Automatic and manual recovery</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Architecture of -->
+            <section>
+                <h2>Deployer Architecture</h2>
+                <div class="diagram">
+<pre style="margin:0; font-size:0.55em;">
+deployer/
+├── <span class="hl-green">core/</span>
+│   ├── deployer_core.sh    # Logica deployment
+│   ├── deployer_utils.sh   # Health checks, hooks
+│   └── deployer_config.sh  # Gestionare configurări
+├── <span class="hl-yellow">config/</span>
+│   ├── default.conf        # Configurație implicită
+│   └── apps/               # Configurații per aplicație
+│       ├── myapp.conf
+│       └── api.conf
+├── <span class="hl-orange">hooks/</span>
+│   ├── pre_deploy.sh
+│   ├── post_deploy.sh
+│   └── on_failure.sh
+├── <span class="hl-blue">releases/</span>              # Istoric versiuni
+└── <span class="hl-pink">deployer.sh</span>            # Entry point (~700 linii)
+</pre>
+                </div>
+            </section>
+
+            <!-- Deployment Strategies Comparison -->
+            <section>
+                <h2>Comparație Strategii</h2>
+                <table>
+                    <tr>
+                        <th>Strategie</th>
+                        <th>Downtime</th>
+                        <th>Resurse</th>
+                        <th>Rollback</th>
+                        <th>Risc</th>
+                    </tr>
+                    <tr>
+                        <td class="hl-green">Rolling</td>
+                        <td>Zero</td>
+                        <td>N instanțe</td>
+                        <td>Mediu</td>
+                        <td>Mediu</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-yellow">Blue-Green</td>
+                        <td>Zero</td>
+                        <td>2x instanțe</td>
+                        <td>Instant</td>
+                        <td>Scăzut</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-orange">Canary</td>
+                        <td>Zero</td>
+                        <td>N+few</td>
+                        <td>Instant</td>
+                        <td>Foarte scăzut</td>
+                    </tr>
+                    <tr>
+                        <td class="hl-blue">Recreate</td>
+                        <td>Da</td>
+                        <td>N instanțe</td>
+                        <td>Lent</td>
+                        <td>Ridicat</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Rolling Deployment Diagram -->
+            <section>
+                <h2>Rolling Deployment</h2>
+                <div class="diagram sm">
+<pre style="margin:0;">
+     ┌─────────────────────────────────────────────┐
+     │           Load Balancer                     │
+     └─────────────────────────────────────────────┘
+              │         │         │         │
+     T1:    [v1]      [v1]      [v1]      [v1]    ← Start: toate v1
+              ↓
+     T2:    [<span class="hl-yellow">v2</span>]      [v1]      [v1]      [v1]    ← Update instanță 1
+              ↓
+     T3:    [v2]      [<span class="hl-yellow">v2</span>]      [v1]      [v1]    ← Update instanță 2
+              ↓
+     T4:    [v2]      [v2]      [<span class="hl-yellow">v2</span>]      [v1]    ← Update instanță 3
+              ↓
+     T5:    [v2]      [v2]      [v2]      [<span class="hl-green">v2</span>]    ← Complete: toate v2
+</pre>
+                </div>
+                <p class="sm">✅ Zero downtime | ⚡ Gradual | 🔄 Rollback per instanță</p>
+            </section>
+
+            <!-- Rolling Implementation -->
+            <section>
+                <h2>Rolling - Implementation</h2>
+                <pre><code class="language-bash">deploy_rolling() {
+    local app="$1"
+    local version="$2"
+    local instances=("${@:3}")
+    local batch_size="${ROLLING_BATCH_SIZE:-1}"
+    
+    local total=${#instances[@]}
+    local deployed=0
+    
+    log_info "Starting rolling deployment: $app v$version"
+    log_info "Instances: $total, Batch size: $batch_size"
+    
+    for ((i=0; i<total; i+=batch_size)); do
+        # Procesare batch de instanțe
+        local batch=("${instances[@]:i:batch_size}")
+        
+        for instance in "${batch[@]}"; do
+            log_info "[$((deployed+1))/$total] Deploying to: $instance"
+            
+            # 1. Drain traffic (scoatere din load balancer)
+            drain_instance "$instance"
+            
+            # 2. Deploy noua versiune
+            deploy_to_instance "$instance" "$app" "$version"
+            
+            # 3. Health check
+            if ! wait_for_health "$instance" "$HEALTH_TIMEOUT"; then
+                log_error "Health check failed for $instance"
+                rollback_instance "$instance" "$app"
+                return 1
+            fi
+            
+            # 4. Re-enable in load balancer
+            enable_instance "$instance"
+            ((deployed++))
+        done
+        
+        # Pause between batches for stabilisation
+        [[ $((i + batch_size)) -lt $total ]] && sleep "$ROLLING_DELAY"
+    done
+    
+    log_info "✓ Rolling deployment complete: $deployed/$total instances"
+}</code></pre>
+            </section>
+
+            <!-- Blue-Green Diagram -->
+            <section>
+                <h2>Blue-Green Deployment</h2>
+                <div class="diagram sm">
+<pre style="margin:0;">
+                    ┌────────────────┐
+                    │  Load Balancer │
+                    └───────┬────────┘
+                            │
+            ┌───────────────┴───────────────┐
+            │                               │
+     ┌──────▼──────┐                ┌───────▼──────┐
+     │ <span class="hl-blue">BLUE (v1)</span>  │                │ <span class="hl-green">GREEN (v2)</span> │
+     │  [Active]   │  ═══════▶      │  [Standby]   │
+     │   ○ ○ ○     │   Switch       │   ● ● ●     │
+     └─────────────┘                └──────────────┘
+     
+     T1: BLUE active, GREEN deploy v2
+     T2: Test GREEN, smoke tests
+     T3: Switch traffic BLUE → GREEN
+     T4: GREEN active, BLUE standby (rollback ready)
+</pre>
+                </div>
+                <p class="sm">✅ Instant rollback | 🎯 Atomic switch | ⚠️ 2x resurse</p>
+            </section>
+
+            <!-- Blue-Green Implementation -->
+            <section>
+                <h2>Blue-Green - Implementation</h2>
+                <pre><code class="language-bash">deploy_blue_green() {
+    local app="$1"
+    local version="$2"
+    
+    # Determine active and target environment
+    local active_env=$(get_active_environment "$app")
+    local target_env=$([[ "$active_env" == "blue" ]] && echo "green" || echo "blue")
+    
+    log_info "Active: $active_env → Deploying to: $target_env"
+    
+    # 1. Deploy pe mediul inactiv
+    log_info "Deploying v$version to $target_env environment"
+    deploy_to_environment "$target_env" "$app" "$version"
+    
+    # 2. Health checks complete
+    log_info "Running health checks on $target_env..."
+    if ! check_environment_health "$target_env" "$app"; then
+        log_error "Health check failed on $target_env"
+        return 1
+    fi
+    
+    # 3. Smoke tests
+    log_info "Running smoke tests..."
+    if ! run_smoke_tests "$target_env" "$app"; then
+        log_error "Smoke tests failed"
+        return 1
+    fi
+    
+    # 4. Switch traffic
+    log_info "Switching traffic: $active_env → $target_env"
+    switch_traffic "$app" "$target_env"
+    
+    # 5. Verificare post-switch
+    sleep 5
+    if check_environment_health "$target_env" "$app"; then
+        log_info "✓ Blue-Green deployment complete"
+        update_active_environment "$app" "$target_env"
+    else
+        log_error "Post-switch health check failed, rolling back"
+        switch_traffic "$app" "$active_env"
+        return 1
+    fi
+}</code></pre>
+            </section>
+
+            <!-- Canary Diagram -->
+            <section>
+                <h2>Canary Deployment</h2>
+                <div class="diagram sm">
+<pre style="margin:0;">
+Traffic Distribution Over Time:
+
+ 100% ┤
+      │  v1 ████████████████████████████
+      │                    
+  75% ┤        v1 ██████████████████
+      │             v2 ████████████████
+  50% ┤                  v1 █████████
+      │                       v2 ████████████
+  25% ┤                            v2 ████████████
+      │  v2 █                              v1 ████
+   0% ┼──────────────────────────────────────────▶
+      T1    T2        T3         T4         T5
+     
+     T1: 5% canary   (testare inițială)
+     T2: 25% canary  (dacă metrici OK)
+     T3: 50% canary  (expansiune)
+     T4: 75% canary  (aproape complet)
+     T5: 100%        (full rollout)
+</pre>
+                </div>
+                <p class="sm">✅ Risc minim | 📊 Metrics-driven | 🎛️ Fine-grained control</p>
+            </section>
+
+            <!-- Canary Implementation -->
+            <section>
+                <h2>Canary - Implementation</h2>
+                <pre><code class="language-bash">deploy_canary() {
+    local app="$1"
+    local version="$2"
+    local stages=(5 25 50 75 100)  # Procentaje trafic
+    
+    log_info "Starting canary deployment: $app v$version"
+    
+    # Deploy pe subset de instanțe (canary pool)
+    deploy_to_canary_pool "$app" "$version"
+    
+    for percentage in "${stages[@]}"; do
+        log_info "Setting canary weight: ${percentage}%"
+        set_canary_weight "$app" "$percentage"
+        
+        # Perioada de observare
+        local observe_duration=$((CANARY_OBSERVE_MINUTES * 60))
+        log_info "Observing for ${CANARY_OBSERVE_MINUTES} minutes..."
+        
+        # Monitor metrics during observation
+        if ! monitor_canary_metrics "$app" "$observe_duration"; then
+            log_error "Canary metrics degraded at ${percentage}%"
+            rollback_canary "$app"
+            return 1
+        fi
+        
+        # Verificare threshold-uri
+        local error_rate=$(get_canary_error_rate "$app")
+        local latency_p99=$(get_canary_latency "$app" "p99")
+        
+        if (( $(echo "$error_rate > $CANARY_ERROR_THRESHOLD" | bc -l) )); then
+            log_error "Error rate too high: ${error_rate}%"
+            rollback_canary "$app"
+            return 1
+        fi
+        
+        log_info "Stage ${percentage}% passed - Error: ${error_rate}%, P99: ${latency_p99}ms"
+    done
+    
+    # Finalizare: promote canary la stable
+    promote_canary "$app" "$version"
+    log_info "✓ Canary deployment complete"
+}</code></pre>
+            </section>
+
+            <!-- Health Checks -->
+            <section>
+                <h2>Health Checks</h2>
+                <pre><code class="language-bash">check_health() {
+    local instance="$1"
+    local check_type="$2"
+    local endpoint="$3"
+    local timeout="${4:-10}"
+    
+    case "$check_type" in
+        http)
+            # HTTP health check
+            local status
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+                --connect-timeout "$timeout" \
+                "http://${instance}${endpoint}")
+            [[ "$status" == "200" ]]
+            ;;
+        tcp)
+            # TCP port check
+            local host port
+            IFS=':' read -r host port <<< "$instance"
+            nc -z -w "$timeout" "$host" "$port"
+            ;;
+        process)
+            # Process running check
+            ssh "$instance" "pgrep -f '$endpoint'" > /dev/null
+            ;;
+        command)
+            # Custom command
+            ssh "$instance" "$endpoint"
+            ;;
+    esac
+}
+
+wait_for_health() {
+    local instance="$1"
+    local timeout="${2:-60}"
+    local interval="${3:-5}"
+    
+    local elapsed=0
+    while ((elapsed < timeout)); do
+        if check_health "$instance" "http" "/health"; then
+            return 0
+        fi
+        sleep "$interval"
+        ((elapsed += interval))
+    done
+    return 1
+}</code></pre>
+            </section>
+
+            <!-- Hooks System -->
+            <section>
+                <h2>The Hooks System</h2>
+                <pre><code class="language-bash"># Configurație hooks (app.conf)
+declare -A HOOKS=(
+    [pre_deploy]="hooks/pre_deploy.sh"
+    [build]="hooks/build.sh"
+    [post_deploy]="hooks/post_deploy.sh"
+    [pre_rollback]="hooks/pre_rollback.sh"
+    [post_rollback]="hooks/post_rollback.sh"
+    [on_failure]="hooks/on_failure.sh"
+)
+
+run_hook() {
+    local hook_name="$1"
+    shift
+    local hook_script="${HOOKS[$hook_name]}"
+    
+    [[ -z "$hook_script" ]] && return 0  # Hook nu e definit
+    [[ ! -x "$hook_script" ]] && { log_warn "Hook not executable: $hook_name"; return 0; }
+    
+    log_info "Running hook: $hook_name"
+    
+    # Execution with environment and arguments
+    if APP="$APP_NAME" VERSION="$VERSION" ENVIRONMENT="$ENVIRONMENT" \
+       "$hook_script" "$@"; then
+        log_info "✓ Hook $hook_name completed"
+        return 0
+    else
+        local status=$?
+        log_error "✗ Hook $hook_name failed with status: $status"
+        return $status
+    fi
+}
+
+# Example hook pre_deploy.sh
+#!/bin/bash
+# hooks/pre_deploy.sh
+echo "Running pre-deploy checks for $APP v$VERSION"
+# Validare configurație, backup bază de date, etc.
+./scripts/validate_config.sh || exit 1
+./scripts/backup_db.sh || exit 1</code></pre>
+            </section>
+
+            <!-- Rollback -->
+            <section>
+                <h2>Rollback Automat</h2>
+                <pre><code class="language-bash">rollback() {
+    local app="$1"
+    local target_version="${2:-previous}"
+    
+    log_warn "Starting rollback for $app"
+    
+    # 1. Determine versiunea țintă
+    local version
+    if [[ "$target_version" == "previous" ]]; then
+        version=$(get_previous_version "$app")
+    else
+        version="$target_version"
+    fi
+    
+    [[ -z "$version" ]] && { log_error "No previous version found"; return 1; }
+    
+    log_info "Rolling back to version: $version"
+    
+    # 2. Run pre_rollback hook
+    run_hook "pre_rollback" "$version"
+    
+    # 3. Efectuare rollback bazat pe strategie
+    case "$DEPLOY_STRATEGY" in
+        blue-green)
+            # Simple switch back
+            local previous_env=$(get_previous_environment "$app")
+            switch_traffic "$app" "$previous_env"
+            ;;
+        rolling|canary)
+            # Re-deploy versiunea anterioară
+            deploy_rolling "$app" "$version" "${INSTANCES[@]}"
+            ;;
+    esac
+    
+    # 4. Verificare rollback
+    if verify_deployment "$app" "$version"; then
+        log_info "✓ Rollback complete"
+        run_hook "post_rollback" "$version"
+        
+        # Record in history
+        record_rollback "$app" "$version"
+    else
+        log_error "Rollback verification failed!"
+        run_hook "on_failure" "rollback_failed"
+        return 1
+    fi
+}</code></pre>
+            </section>
+
+            <!-- Release Management -->
+            <section>
+                <h2>Release Management</h2>
+                <pre><code class="language-bash"># Structură releases
+# releases/
+# ├── myapp/
+# │   ├── current -> v2.1.0
+# │   ├── v2.1.0/
+# │   │   ├── app/
+# │   │   ├── manifest.json
+# │   │   └── checksum
+# │   ├── v2.0.0/
+# │   └── v1.9.0/
+# └── api/
+
+create_release() {
+    local app="$1"
+    local version="$2"
+    local artifact="$3"
+    
+    local release_dir="$RELEASES_DIR/$app/$version"
+    mkdir -p "$release_dir"
+    
+    # Extragere artifact
+    tar -xzf "$artifact" -C "$release_dir"
+    
+    # Creare manifest
+    cat > "$release_dir/manifest.json" <<EOF
+{
+  "app": "$app",
+  "version": "$version",
+  "created_at": "$(date -Iseconds)",
+  "artifact": "$(basename "$artifact")",
+  "checksum": "$(sha256sum "$artifact" | cut -d' ' -f1)"
+}
+EOF
+    
+    log_info "Release created: $app v$version"
+}
+
+activate_release() {
+    local app="$1"
+    local version="$2"
+    
+    local releases_app="$RELEASES_DIR/$app"
+    local current_link="$releases_app/current"
+    
+    # Atomic symlink update
+    ln -sfn "$version" "${current_link}.new"
+    mv -Tf "${current_link}.new" "$current_link"
+    
+    log_info "Activated: $app v$version"
+}</code></pre>
+            </section>
+
+            <!-- CLI Interface -->
+            <section>
+                <h2>CLI Interface</h2>
+                <pre><code class="language-bash">show_help() {
+    cat <<'EOF'
+Usage: deployer.sh [COMMAND] [OPTIONS]
+
+Commands:
+  deploy       Deploy application
+  rollback     Rollback to previous version
+  status       Show deployment status
+  health       Check application health
+  releases     List available releases
+
+Options:
+  --app NAME         Application name
+  --version VER      Version to deploy
+  --strategy STR     Strategy: rolling|blue-green|canary
+  --instances LIST   Comma-separated instance list
+  --config FILE      Custom config file
+  --dry-run          Simulate without changes
+  --force            Skip confirmations
+
+Strategy Options:
+  --batch-size N     Rolling: instances per batch
+  --canary-weight N  Canary: initial weight %
+  --observe-time M   Canary: observation period (minutes)
+
+Examples:
+  deployer.sh deploy --app=myapp --version=2.1.0 --strategy=rolling
+  deployer.sh deploy --app=api --strategy=blue-green
+  deployer.sh deploy --app=web --strategy=canary --canary-weight=5
+  deployer.sh rollback --app=myapp
+  deployer.sh rollback --app=myapp --version=1.9.0
+  deployer.sh status --app=myapp
+EOF
+}</code></pre>
+            </section>
+
+            <!-- Exercise 1 -->
+            <section>
+                <h2>Exercise 1: Docker Deployment</h2>
+                <div class="box box-g">
+                    <p><strong>Objective:</strong> Implement deployment for Docker containers</p>
+                </div>
+                <pre><code class="language-bash">deploy_docker() {
+    local image="$1"      # myapp:v2.1.0
+    local container="$2"  # myapp-prod
+    
+    # TODO: Implementați:
+    # 1. Pull new image
+    docker pull "$image"
+    
+    # 2. Stop existing container (graceful)
+    docker stop "$container" --time=30
+    
+    # 3. Remove old container
+    docker rm "$container"
+    
+    # 4. Start new container
+    docker run -d --name "$container" \
+        --restart=unless-stopped \
+        -p 8080:8080 \
+        "$image"
+    
+    # 5. Health check
+    # TODO: wait_for_health "localhost:8080"
+}</code></pre>
+            </section>
+
+            <!-- Exercise 2 -->
+            <section>
+                <h2>Exercise 2: Multi-Environment</h2>
+                <div class="box box-y">
+                    <p><strong>Objective:</strong> Deployment to staging then production</p>
+                </div>
+                <pre><code class="language-bash">deploy_pipeline() {
+    local app="$1"
+    local version="$2"
+    
+    # 1. Deploy to STAGING
+    log_info "Deploying to STAGING..."
+    ENVIRONMENT="staging" deploy_rolling "$app" "$version" "${STAGING_INSTANCES[@]}"
+    
+    # 2. Automated tests in staging
+    run_integration_tests "$app" "staging" || {
+        log_error "Staging tests failed"
+        return 1
+    }
+    
+    # 3. Manual approval (opțional)
+    if [[ "$REQUIRE_APPROVAL" == "true" ]]; then
+        read -p "Approve production deployment? (yes/no): " approval
+        [[ "$approval" == "yes" ]] || return 0
+    fi
+    
+    # 4. Deploy to PRODUCTION
+    log_info "Deploying to PRODUCTION..."
+    ENVIRONMENT="production" deploy_canary "$app" "$version"
+}</code></pre>
+            </section>
+
+            <!-- Exercise 3 -->
+            <section>
+                <h2>Exercise 3: Feature Flags</h2>
+                <div class="box box-o">
+                    <p><strong>Objective:</strong> Deployment cu feature flags</p>
+                </div>
+                <pre><code class="language-bash"># Feature flags permit activare graduală fără re-deploy
+
+set_feature_flag() {
+    local flag_name="$1"
+    local percentage="$2"  # 0-100
+    local app="$3"
+    
+    # Storage in Redis/etcd/file
+    redis-cli SET "feature:${app}:${flag_name}" "$percentage"
+}
+
+# În aplicație (pseudo-cod):
+# if feature_enabled("new_checkout", user_id):
+#     return new_checkout_flow()
+# else:
+#     return old_checkout_flow()
+
+deploy_with_feature_flag() {
+    local app="$1"
+    local version="$2"
+    local feature="$3"
+    
+    # 1. Deploy cod nou (feature disabled)
+    set_feature_flag "$feature" 0 "$app"
+    deploy_rolling "$app" "$version" "${INSTANCES[@]}"
+    
+    # 2. Gradual enable
+    for pct in 5 25 50 100; do
+        set_feature_flag "$feature" "$pct" "$app"
+        sleep 300  # 5 min observare
+        check_metrics || rollback_feature_flag "$feature"
+    done
+}</code></pre>
+            </section>
+
+            <!-- Best Practices -->
+            <section>
+                <h2>Best Practices</h2>
+                <div class="cols sm">
+                    <div class="box box-g">
+                        <h4>Pre-Deploy</h4>
+                        <ul>
+                            <li>Database migrations first</li>
+                            <li>Config validation</li>
+                            <li>Backup critical data</li>
+                            <li>Notify stakeholders</li>
+                        </ul>
+                    </div>
+                    <div class="box box-y">
+                        <h4>During Deploy</h4>
+                        <ul>
+                            <li>Monitor metrics closely</li>
+                            <li>Keep rollback ready</li>
+                            <li>Gradual traffic shift</li>
+                            <li>Log everything</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-o sm" style="margin-top:0.5em;">
+                    <h4>Post-Deploy</h4>
+                    <p>Smoke tests | Performance baseline | Cleanup old releases | Update documentation</p>
+                </div>
+            </section>
+
+            <!-- Decision Tree -->
+            <section>
+                <h2>Alegere Strategie</h2>
+                <div class="diagram sm">
+<pre style="margin:0;">
+                    ┌─────────────────────┐
+                    │ Need zero downtime? │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │ Yes            │                │ No
+              ▼                │                ▼
+     ┌────────────────┐        │       ┌────────────────┐
+     │ Can afford 2x  │        │       │    Recreate    │
+     │   resources?   │        │       │   (simplest)   │
+     └───────┬────────┘        │       └────────────────┘
+             │                 │
+    ┌────────┴────────┐        │
+    │ Yes             │ No     │
+    ▼                 ▼        │
+┌──────────┐   ┌──────────┐    │
+│Blue-Green│   │ Rolling  │    │
+│(instant  │   │ (gradual │    │
+│ rollback)│   │  update) │    │
+└──────────┘   └─────┬────┘    │
+                     │         │
+                     ▼         │
+              ┌──────────────┐ │
+              │ High risk or │ │
+              │ need metrics?│ │
+              └──────┬───────┘ │
+                     │ Yes     │
+                     ▼         │
+              ┌──────────────┐ │
+              │    Canary    │ │
+              └──────────────┘ │
+</pre>
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section>
+                <h2>Summary of Deployer</h2>
+                <table>
+                    <tr>
+                        <th>Funcție</th>
+                        <th>Description</th>
+                        <th>Când folosești</th>
+                    </tr>
+                    <tr>
+                        <td>Rolling</td>
+                        <td>Update gradual</td>
+                        <td>Default, resurse limitate</td>
+                    </tr>
+                    <tr>
+                        <td>Blue-Green</td>
+                        <td>Switch atomic</td>
+                        <td>Rollback instant necesar</td>
+                    </tr>
+                    <tr>
+                        <td>Canary</td>
+                        <td>% gradual</td>
+                        <td>Risc mare, metrici importante</td>
+                    </tr>
+                    <tr>
+                        <td>Health Checks</td>
+                        <td>HTTP/TCP/Process</td>
+                        <td>Mereu, verificare sănătate</td>
+                    </tr>
+                    <tr>
+                        <td>Rollback</td>
+                        <td>Rollback versiune</td>
+                        <td>La erori, automat sau manual</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Next -->
+            <section>
+                <h1>Next: Testing</h1>
+                <p class="hl-green">Testing framework for Bash scripts</p>
+                <div class="box" style="margin-top: 2em;">
+                    <p class="sm">Unit tests | Integration tests | Mocking | TDD</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'slide',
+            plugins: [ RevealHighlight ]
+        });
+    </script>
+</body>
+</html>

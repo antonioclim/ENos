@@ -1,0 +1,30 @@
+# Systemd Timer Template for Backup
+# Save as: /etc/systemd/system/backup.timer
+#
+# Installation:
+#   sudo cp backup.service /etc/systemd/system/
+#   sudo cp backup.timer /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable backup.timer
+#   sudo systemctl start backup.timer
+#
+
+[Unit]
+Description=Daily Backup Timer
+Documentation=man:backup(1)
+
+[Timer]
+# Run daily at 3:00 AM
+OnCalendar=*-*-* 03:00:00
+
+# Run immediately if missed (system was off)
+Persistent=true
+
+# Randomise ±30 minutes to avoid load spikes
+RandomizedDelaySec=1800
+
+# Timer accuracy
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

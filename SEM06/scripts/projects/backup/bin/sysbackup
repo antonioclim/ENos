@@ -1,0 +1,55 @@
+#!/bin/bash
+# =============================================================================
+# SYSBACKUP - Enterprise Backup System Wrapper
+# =============================================================================
+# Wrapper for installation in /usr/local/bin
+# Automatically resolves path to main script
+#
+# Installation:
+#   sudo ln -s /path/to/backup/bin/sysbackup /usr/local/bin/sysbackup
+#
+# =============================================================================
+
+set -euo pipefail
+
+# Resolve symlinks to find real directory
+get_script_dir() {
+    local source="${BASH_SOURCE[0]}"
+    local dir
+    
+    # Resolve symlinks
+    while [[ -L "$source" ]]; do
+        dir="$(cd -P "$(dirname "$source")" && pwd)"
+        source="$(readlink "$source")"
+        [[ "$source" != /* ]] && source="$dir/$source"
+    done
+    
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    echo "$dir"
+}
+
+# Find script directory
+SCRIPT_DIR="$(get_script_dir)"
+
+# Calculate project directory (one level up from bin/)
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Main script
+MAIN_SCRIPT="${PROJECT_DIR}/backup.sh"
+
+# Verify main script exists
+if [[ ! -f "$MAIN_SCRIPT" ]]; then
+    echo "ERROR: Cannot find main script: $MAIN_SCRIPT" >&2
+    echo "Check backup system installation." >&2
+    exit 1
+fi
+
+# Verify it's executable
+if [[ ! -x "$MAIN_SCRIPT" ]]; then
+    echo "ERROR: Main script is not executable: $MAIN_SCRIPT" >&2
+    echo "Run: chmod +x $MAIN_SCRIPT" >&2
+    exit 1
+fi
+
+# Execute main script with all arguments
+exec "$MAIN_SCRIPT" "$@"

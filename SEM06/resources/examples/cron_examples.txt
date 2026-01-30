@@ -1,0 +1,145 @@
+# Cron Jobs Examples for CAPSTONE Projects
+# ============================================
+#
+# Crontab format:
+# ┌───────────── minute (0-59)
+# │ ┌───────────── hour (0-23)
+# │ │ ┌───────────── day of month (1-31)
+# │ │ │ ┌───────────── month (1-12)
+# │ │ │ │ ┌───────────── day of week (0-7, 0 and 7 = Sunday)
+# │ │ │ │ │
+# * * * * * command
+#
+# Useful commands:
+#   crontab -e      # Edit current user's crontab
+#   crontab -l      # List crontab
+#   crontab -r      # Delete crontab
+#   sudo crontab -e # Edit root's crontab
+#
+# Cron file locations:
+#   /etc/crontab            # System crontab
+#   /etc/cron.d/            # Additional cron files
+#   /etc/cron.daily/        # Daily scripts
+#   /etc/cron.hourly/       # Hourly scripts
+#   /etc/cron.weekly/       # Weekly scripts
+#   /etc/cron.monthly/      # Monthly scripts
+#
+# ============================================
+
+# === ENVIRONMENT VARIABLES (at the beginning of crontab) ===
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+MAILTO=admin@example.com
+HOME=/root
+
+# === MONITOR ===
+# Every 5 minutes
+*/5 * * * * /opt/capstone/monitor/monitor.sh --all >> /var/log/monitor/cron.log 2>&1
+
+# Every minute during working hours (9-18, Mon-Fri)
+* 9-18 * * 1-5 /opt/capstone/monitor/monitor.sh --cpu --memory >> /var/log/monitor/work_hours.log 2>&1
+
+# Once per hour, at minute 0
+0 * * * * /opt/capstone/monitor/monitor.sh --all --format=json >> /var/log/monitor/hourly.json 2>&1
+
+# === BACKUP ===
+# Daily at 3:00 AM - incremental backup
+0 3 * * * /opt/capstone/backup/backup.sh create --type=incremental --source=/var/www >> /var/log/backup/daily.log 2>&1
+
+# Sunday at 2:00 AM - full backup
+0 2 * * 0 /opt/capstone/backup/backup.sh create --type=full --source=/var/www >> /var/log/backup/weekly.log 2>&1
+
+# First day of month at 1:00 AM - full backup with extended retention
+0 1 1 * * /opt/capstone/backup/backup.sh create --type=full --retention=365 --source=/ >> /var/log/backup/monthly.log 2>&1
+
+# Old backup cleanup - daily at 4:00 AM
+0 4 * * * /opt/capstone/backup/backup.sh rotate --keep-daily=7 --keep-weekly=4 >> /var/log/backup/rotate.log 2>&1
+
+# === DEPLOY ===
+# Application status check - every 10 minutes
+*/10 * * * * /opt/capstone/deployer/deployer.sh status --all --format=json >> /var/log/deploy/status.json 2>&1
+
+# Health check - every minute
+* * * * * /opt/capstone/deployer/deployer.sh health --app=webapp || /opt/capstone/deployer/deployer.sh rollback --app=webapp >> /var/log/deploy/health.log 2>&1
+
+# === LOG ROTATION ===
+# Daily at midnight - log rotation
+0 0 * * * /opt/capstone/scripts/rotate_logs.sh >> /var/log/rotate.log 2>&1
+
+# === MAINTENANCE ===
+# Temporary file cleanup - daily at 5:00 AM
+0 5 * * * find /tmp -type f -mtime +7 -delete 2>/dev/null
+
+# Disk space check - every hour
+0 * * * * /opt/capstone/monitor/monitor.sh --disk --threshold=90 || mail -s "Disk Alert" admin@example.com
+
+# === SPECIAL EXAMPLES ===
+# Every 15 minutes (0, 15, 30, 45)
+*/15 * * * * command
+
+# Every 2 hours
+0 */2 * * * command
+
+# Daily at 8:30 AM
+30 8 * * * command
+
+# On weekdays (Monday-Friday) at 9:00 AM
+0 9 * * 1-5 command
+
+# On weekends at 10:00 AM
+0 10 * * 0,6 command
+
+# First and 15th day of each month
+0 0 1,15 * * command
+
+# Every minute in the first quarter hour
+0-14 * * * * command
+
+# At reboot (@reboot is non-standard extension but widely supported)
+@reboot /opt/startup/init.sh >> /var/log/startup.log 2>&1
+
+# Other shortcuts (if supported)
+@yearly   # 0 0 1 1 *
+@monthly  # 0 0 1 * *
+@weekly   # 0 0 * * 0
+@daily    # 0 0 * * *
+@hourly   # 0 * * * *
+
+# === Solid pattern: With lock and logging ===
+# Prevents simultaneous runs using flock
+*/5 * * * * flock -n /var/run/monitor.lock -c '/opt/capstone/monitor/monitor.sh --all' >> /var/log/monitor/cron.log 2>&1
+
+# With timeout to prevent stuck jobs
+0 3 * * * timeout 3600 /opt/capstone/backup/backup.sh create >> /var/log/backup/cron.log 2>&1
+
+# With error notification
+*/5 * * * * /opt/capstone/monitor/monitor.sh --all 2>&1 | logger -t monitor || echo "Monitor failed" | mail -s "Cron Alert" admin@example.com
+
+# ============================================
+# DEBUGGING CRON
+# ============================================
+#
+# 1. Check if cron is running:
+#    systemctl status cron
+#    # or
+#    service cron status
+#
+# 2. Check cron logs:
+#    grep CRON /var/log/syslog
+#    # or
+#    journalctl -u cron
+#
+# 3. Test command manually:
+#    /bin/bash -c 'COMMAND_FROM_CRONTAB'
+#
+# 4. Check script permissions:
+#    ls -la /path/to/script.sh
+#    # Must be executable
+#
+# 5. Check PATH in crontab:
+#    Cron has minimal PATH, specify full path or set PATH
+#
+# 6. Check if script works without terminal:
+#    Avoid interactive commands, use redirections
+#
+# ============================================
