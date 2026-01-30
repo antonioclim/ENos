@@ -18,6 +18,7 @@ USAGE:
 """
 
 import argparse
+import logging
 import os
 import re
 import subprocess
@@ -26,6 +27,12 @@ import json
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
+
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
 
 @dataclass
 class CheckResult:
@@ -518,8 +525,10 @@ def main():
     scripts = []
     
     if args.batch:
+        logger.info(f"Batch grading directory: {args.batch}")
         scripts = list(Path(args.batch).glob('*.sh'))
     elif args.script:
+        logger.info(f"Grading script: {args.script}")
         scripts = [Path(args.script)]
     else:
         parser.print_help()
@@ -527,6 +536,7 @@ def main():
     
     reports = []
     for script in scripts:
+        logger.info(f"Processing: {script.name}")
         report = grader.grade(str(script), test_cases)
         reports.append(report)
         
@@ -555,6 +565,7 @@ def main():
             (r.total_score / r.max_score * 100) if r.max_score > 0 else 0 
             for r in reports
         ) / len(reports)
+        logger.info(f"Average score: {avg_percentage:.1f}%")
         sys.exit(0 if avg_percentage >= 60 else 1)
 
 if __name__ == '__main__':

@@ -46,7 +46,7 @@ sleep 10 & jobs
 ```
 
 ### Common Deductions
-- `-1.0`: Confusing && and || behavior
+- `-1.0`: Confusing && and || behaviour
 - `-0.5`: Not handling exit codes correctly
 - `-0.5`: Forgetting spaces in test brackets
 

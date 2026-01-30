@@ -240,7 +240,7 @@ for f in "${files[@]}"; do
 ### General
 
 **Q: Can I use AI tools like ChatGPT?**
-> Yes, but you must (1) document exactly what you used, (2) explain what you modified, and (3) be able to explain every line in the oral defence. Submitting AI output verbatim without understanding it will be obvious during the viva.
+> Yes, but you must (1) document exactly what you used, (2) explain what you modified and (3) be able to explain every line in the oral defence. Submitting AI output verbatim without understanding it will be obvious during the viva.
 
 **Q: What if shellcheck gives warnings I don't understand?**
 > Google the SC code (e.g., "SC2086 shellcheck"). The wiki explains every warning. If still stuck, ask in the course forum — but show you tried first.
