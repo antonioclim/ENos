@@ -1,0 +1,134 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Linting Configuration — Seminar 05: Advanced Bash Scripting
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# Version: 1.1.0
+#
+# This file configures:
+#   - Ruff (Python linter) settings
+#   - ShellCheck (Bash linter) severity levels
+#
+# USAGE:
+#   ruff check --config ci/linting.toml scripts/python/
+#   shellcheck --severity=warning scripts/bash/*.sh
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUFF CONFIGURATION (Python)
+# ─────────────────────────────────────────────────────────────────────────────
+# Documentation: https://docs.astral.sh/ruff/
+
+[tool.ruff]
+# Target Python version
+target-version = "py39"
+
+# Maximum line length
+line-length = 100
+
+# Exclude directories
+exclude = [
+    "__pycache__",
+    ".git",
+    ".venv",
+    "venv",
+    "*.pyc",
+]
+
+[tool.ruff.lint]
+# Enable rules
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort (import sorting)
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "B008",   # Function call in default argument
+    "B905",   # zip without strict
+    "E402",   # Module level import not at top of file
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore import order in __init__.py
+"__init__.py" = ["F401", "I001"]
+# Allow print statements in scripts
+"scripts/python/*.py" = ["T201"]
+"formative/*.py" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["scripts"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHELLCHECK CONFIGURATION (Bash)
+# ─────────────────────────────────────────────────────────────────────────────
+# Note: ShellCheck uses command-line options, not TOML config
+# These are the recommended settings for this project:
+#
+# Severity levels:
+#   error   - Serious issues that will cause failures
+#   warning - Issues that may cause problems
+#   info    - Suggestions for improvement
+#   style   - Pure style issues
+#
+# Recommended command:
+#   shellcheck --severity=warning --shell=bash script.sh
+#
+# Common codes to be aware of:
+#   SC2086 - Double quote to prevent globbing and word splitting
+#   SC2046 - Quote to prevent word splitting
+#   SC2034 - Variable appears unused
+#   SC2154 - Variable referenced but not assigned
+#   SC2155 - Declare and assign separately
+#   SC2164 - Use cd ... || exit in case cd fails
+#
+# To disable a specific warning in a script:
+#   # shellcheck disable=SC2086
+#   echo $variable
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FLAKE8 CONFIGURATION (Alternative to Ruff)
+# ─────────────────────────────────────────────────────────────────────────────
+# If using flake8 instead of ruff, use these settings in setup.cfg or .flake8:
+#
+# [flake8]
+# max-line-length = 100
+# exclude = __pycache__,.git,.venv,venv
+# ignore = E501,W503,E402
+# per-file-ignores =
+#     __init__.py:F401
+#     scripts/python/*.py:T201
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT-SPECIFIC NOTES
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# For this seminar's scripts:
+#
+# 1. All Bash scripts MUST have:
+#    - #!/bin/bash shebang
+#    - set -euo pipefail
+#    - Proper quoting of variables
+#
+# 2. All Python scripts SHOULD have:
+#    - Type hints where practical
+#    - Docstrings for public functions
+#    - No unused imports
+#
+# 3. Acceptable shellcheck warnings (project-specific):
+#    - SC2034 in template files (variables for user to fill)
+#    - SC2155 when combined declaration is clearer
+#
+# ─────────────────────────────────────────────────────────────────────────────

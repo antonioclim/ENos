@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminar 5: Advanced Bash Scripting | ASE Bucharest - CSIE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        :root {
+            --r-heading-color: #58a6ff;
+            --r-link-color: #58a6ff;
+            --r-selection-background-color: #58a6ff;
+        }
+        .reveal h1, .reveal h2 { text-transform: none; }
+        .reveal pre { font-size: 0.55em; width: 100%; }
+        .reveal code { background: #1e1e1e; padding: 2px 8px; border-radius: 4px; }
+        .reveal pre code { padding: 15px; }
+        .good { color: #4caf50; }
+        .bad { color: #f44336; }
+        .warn { color: #ff9800; }
+        .highlight-box {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 4px solid #58a6ff;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .two-column { display: flex; gap: 20px; }
+        .two-column > div { flex: 1; }
+        .small { font-size: 0.7em; }
+        .fragment.current-visible.visible:not(.current-fragment) { display: none; }
+        table { font-size: 0.7em; }
+        th { background: #333; }
+        td, th { padding: 8px 15px !important; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- TITLE SLIDE -->
+<!-- ============================================================ -->
+<section>
+    <h1>Advanced Bash Scripting</h1>
+<p><strong>Lab note:</strong> jot down key commands and relevant output (2–3 lines) as you work. It helps with debugging and, honestly, at the end you'll have a good README without extra effort.</p>
+
+    <h3>Functions • Arrays • Robustness</h3>
+    <p>Operating Systems | ASE Bucharest - CSIE</p>
+    <p class="small">Seminar 5</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- AGENDA -->
+<!-- ============================================================ -->
+<section>
+    <h2>Agenda</h2>
+    <div class="highlight-box">
+        <ol>
+            <li><strong>Advanced Functions</strong> - local, return, scope</li>
+            <li><strong>Arrays</strong> - indexed and associative</li>
+            <li><strong>Robustness</strong> - set -euo pipefail</li>
+            <li><strong>Error Handling</strong> - trap, cleanup</li>
+            <li><strong>Professional Template</strong> - best practices</li>
+        </ol>
+    </div>
+    <p class="small">⏱️ ~100 minutes + break</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- HOOK: FRAGILE VS ROBUST -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>HOOK: One Script, Two Destinies</h2>
+        <p>Which script would you prefer to run in production?</p>
+    </section>
+    
+    <section>
+        <h3 class="bad">Fragile Script</h3>
+        <pre><code class="bash">#!/bin/bash
+cd $BACKUP_DIR
+rm -rf *
+tar -czf backup.tar.gz /data
+echo "Done!"</code></pre>
+        <p class="fragment">What happens if <code>$BACKUP_DIR</code> is empty?</p>
+        <p class="fragment bad">💀 <code>rm -rf /*</code> - RIP system!</p>
+    </section>
+    
+    <section>
+        <h3 class="good">Robust Script</h3>
+        <pre><code class="bash">#!/bin/bash
+set -euo pipefail
+
+BACKUP_DIR="${BACKUP_DIR:?Error: BACKUP_DIR not set}"
+[[ -d "$BACKUP_DIR" ]] || { echo "Dir not found"; exit 1; }
+
+cd "$BACKUP_DIR"
+rm -rf ./*
+tar -czf backup.tar.gz /data
+echo "Done!"</code></pre>
+        <p class="fragment good">✓ Stops at the first problem</p>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 1: FUNCTIONS -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>1. Advanced Functions</h2>
+    </section>
+    
+    <section>
+        <h3>Misconception #1: Scope</h3>
+        <div class="highlight-box">
+            <p><strong>80% of students believe that variables in functions are local by default.</strong></p>
+            <p>In reality, they are <span class="bad">GLOBAL</span>!</p>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Demo: Global Variables</h3>
+        <pre><code class="bash">#!/bin/bash
+count=10
+
+increment() {
+    count=$((count + 1))  # Modifies GLOBAL!
+}
+
+increment
+echo $count  # Output: 11 (not 10!)</code></pre>
+    </section>
+    
+    <section>
+        <h3 class="good">Solution: <code>local</code></h3>
+        <pre><code class="bash">#!/bin/bash
+count=10
+
+increment() {
+    local count=0  # LOCAL variable
+    count=$((count + 1))
+    echo "In function: $count"  # 1
+}
+
+increment
+echo "After function: $count"    # 10 (unchanged!)</code></pre>
+        <p class="fragment">🔑 <strong>Rule:</strong> ALWAYS use <code>local</code> in functions!</p>
+    </section>
+    
+    <section>
+        <h3>Misconception #2: Return Values</h3>
+        <pre><code class="bash"># WRONG - return is only for exit codes (0-255)
+get_sum() {
+    return $((100 + 200))  # 300 mod 256 = 44 😱
+}
+
+# CORRECT - use echo
+get_sum() {
+    local a=$1 b=$2
+    echo $((a + b))  # "Returns" via stdout
+}
+result=$(get_sum 100 200)  # Capture with $()</code></pre>
+    </section>
+    
+    <section>
+        <h3>Peer Instruction: Q1</h3>
+        <pre><code class="bash">x=5
+modify() { x=10; }
+modify
+echo $x</code></pre>
+        <p>What does it display?</p>
+        <p>A) 5 &nbsp;&nbsp; B) 10 &nbsp;&nbsp; C) Error &nbsp;&nbsp; D) Nothing</p>
+        <p class="fragment">➡️ Discuss for 2 minutes with your colleague!</p>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 2: ARRAYS -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>2. Arrays</h2>
+    </section>
+    
+    <section>
+        <h3>Indexed Arrays</h3>
+        <pre><code class="bash"># Creation
+arr=("apple" "banana" "cherry")
+
+# Access (starts at 0!)
+echo ${arr[0]}    # apple
+echo ${arr[-1]}   # cherry (last element)
+
+# All elements
+echo ${arr[@]}    # apple banana cherry
+
+# Length
+echo ${#arr[@]}   # 3</code></pre>
+    </section>
+    
+    <section>
+        <h3>Misconception #3: Indexing</h3>
+        <div class="highlight-box">
+            <p><strong>55% of students</strong> believe arrays start at 1.</p>
+            <p>In Bash, they start at <span class="good">0</span>!</p>
+        </div>
+        <pre><code class="bash">arr=("first" "second" "third")
+echo ${arr[1]}  # second (NOT first!)</code></pre>
+    </section>
+    
+    <section>
+        <h3>Misconception #4: Quotes</h3>
+        <pre><code class="bash">files=("my file.txt" "doc.pdf")
+
+# WRONG - word splitting!
+for f in ${files[@]}; do echo "$f"; done
+# Output: my / file.txt / doc.pdf (4 iterations!)
+
+# CORRECT - with quotes
+for f in "${files[@]}"; do echo "$f"; done
+# Output: my file.txt / doc.pdf (2 iterations)</code></pre>
+        <p class="fragment bad">Without quotes = GUARANTEED bug with spaces!</p>
+    </section>
+    
+    <section>
+        <h3>Associative Arrays (Hash)</h3>
+        <pre><code class="bash"># MANDATORY: declare -A
+declare -A config
+
+config[host]="localhost"
+config[port]="8080"
+
+# Accessing
+echo ${config[host]}     # localhost
+echo ${!config[@]}       # host port (the keys)
+echo ${config[@]}        # localhost 8080 (the values)</code></pre>
+    </section>
+    
+    <section>
+        <h3>Misconception #5: declare -A</h3>
+        <pre><code class="bash"># WRONG - without declare -A
+config[host]="localhost"
+config[port]="8080"
+echo ${!config[@]}  # Output: 0 (treated as indexed array!)
+
+# CORRECT - with declare -A
+declare -A config
+config[host]="localhost"
+echo ${!config[@]}  # Output: host port</code></pre>
+        <p class="fragment bad">70% forget <code>declare -A</code>!</p>
+    </section>
+    
+    <section>
+        <h3>Peer Instruction: Q2</h3>
+        <pre><code class="bash">arr=("a b" "c")
+for i in ${arr[@]}; do echo "[$i]"; done</code></pre>
+        <p>How many lines are displayed?</p>
+        <p>A) 2 &nbsp;&nbsp; B) 3 &nbsp;&nbsp; C) 1 &nbsp;&nbsp; D) Error</p>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 3: ROBUSTNESS -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>3. Robustness: set -euo pipefail</h2>
+    </section>
+    
+    <section>
+        <h3>The Holy Triad</h3>
+        <pre><code class="bash">#!/bin/bash
+set -e          # Exit on first error
+set -u          # Error for undefined variables
+set -o pipefail # Propagate errors in pipes
+
+# Or compact:
+set -euo pipefail</code></pre>
+    </section>
+    
+    <section>
+        <h3>set -e: Stop on Error</h3>
+        <div class="two-column">
+            <div>
+                <p class="bad">WITHOUT set -e</p>
+                <pre><code class="bash">false
+echo "Continues"
+# Output: Continues</code></pre>
+            </div>
+            <div>
+                <p class="good">WITH set -e</p>
+                <pre><code class="bash">set -e
+false
+echo "Never reaches"
+# Script stops!</code></pre>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h3>Misconception #6: Limitations of set -e</h3>
+        <div class="highlight-box">
+            <p><strong>75%</strong> believe set -e catches ANY error.</p>
+            <p>FALSE! It doesn't work in:</p>
+        </div>
+        <ul>
+            <li>Conditions <code>if/while/until</code></li>
+            <li>After <code>||</code> or <code>&&</code></li>
+            <li>Functions in test context</li>
+            <li>Subshells (without shopt)</li>
+        </ul>
+    </section>
+    
+    <section>
+        <h3>Demo: When set -e DOESN'T Work</h3>
+        <pre><code class="bash">set -e
+
+# Does NOT stop - it's in if!
+if false; then echo "no"; fi
+echo "Continues!"
+
+# Does NOT stop - has ||
+false || true
+echo "Continues!"
+
+# Does NOT stop - function in if
+check() { false; }
+if check; then echo "no"; fi
+echo "Continues!"</code></pre>
+    </section>
+    
+    <section>
+        <h3>set -o pipefail</h3>
+        <pre><code class="bash"># WITHOUT pipefail
+false | true
+echo $?  # 0 (from true) - error is IGNORED!
+
+# WITH pipefail
+set -o pipefail
+false | true
+echo $?  # 1 (from false) - error is PROPAGATED</code></pre>
+    </section>
+    
+    <section>
+        <h3>Peer Instruction: Q3</h3>
+        <pre><code class="bash">set -e
+if false; then echo "yes"; fi
+echo "continued"</code></pre>
+        <p>What happens?</p>
+        <p>A) Stops at false &nbsp;&nbsp; B) Displays "continued"</p>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 4: ERROR HANDLING -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>4. Error Handling & Cleanup</h2>
+    </section>
+    
+    <section>
+        <h3>trap EXIT - Guaranteed Cleanup</h3>
+        <pre><code class="bash">#!/bin/bash
+set -euo pipefail
+
+TEMP_FILE=""
+
+cleanup() {
+    local exit_code=$?
+    echo "Cleanup..."
+    [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+    exit $exit_code
+}
+
+trap cleanup EXIT  # ALWAYS executes on exit!
+
+TEMP_FILE=$(mktemp)
+# ... processing ...
+# Cleanup executes automatically!</code></pre>
+    </section>
+    
+    <section>
+        <h3>trap for Signals</h3>
+        <pre><code class="bash">#!/bin/bash
+
+# Catch Ctrl+C
+trap 'echo "Interrupted!"; exit 130' INT TERM
+
+# Catch errors with context
+trap 'echo "Error at line $LINENO"' ERR
+
+echo "Working..."
+sleep 100
+# Ctrl+C → "Interrupted!" + exit 130</code></pre>
+    </section>
+    
+    <section>
+        <h3>Pattern: die()</h3>
+        <pre><code class="bash">die() {
+    echo "FATAL: $*" >&2
+    exit 1
+}
+
+# Usage
+[[ $# -ge 1 ]] || die "Usage: $0 <file>"
+[[ -f "$1" ]] || die "File not found: $1"
+command -v jq &>/dev/null || die "jq not installed"</code></pre>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 5: TEMPLATE -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>5. Professional Template</h2>
+    </section>
+    
+    <section>
+        <h3>Template Structure</h3>
+        <pre><code class="bash" style="font-size: 0.45em;">#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+readonly SCRIPT_NAME=$(basename "$0")
+readonly VERSION="1.0.0"
+
+usage() { ... }
+die() { echo "FATAL: $*" >&2; exit 1; }
+log() { echo "[$(date '+%H:%M:%S')] $*"; }
+
+cleanup() {
+    local exit_code=$?
+    # cleanup code
+    exit $exit_code
+}
+trap cleanup EXIT
+
+parse_args() { ... }
+validate() { ... }
+main() {
+    parse_args "$@"
+    validate
+    # logic
+}
+
+main "$@"</code></pre>
+    </section>
+    
+    <section>
+        <h3>Pre-Commit Checklist</h3>
+        <table>
+            <tr><td>☐</td><td><code>set -euo pipefail</code></td></tr>
+            <tr><td>☐</td><td>All variables in functions have <code>local</code></td></tr>
+            <tr><td>☐</td><td><code>declare -A</code> for associative arrays</td></tr>
+            <tr><td>☐</td><td>Quotes in <code>"${arr[@]}"</code></td></tr>
+            <tr><td>☐</td><td><code>trap cleanup EXIT</code></td></tr>
+            <tr><td>☐</td><td>Argument validation</td></tr>
+            <tr><td>☐</td><td>shellcheck with no warnings</td></tr>
+        </table>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- EXERCISES -->
+<!-- ============================================================ -->
+<section>
+    <section>
+        <h2>Sprint: Practical Exercises</h2>
+    </section>
+    
+    <section>
+        <h3>Sprint 1: Functions (5 min)</h3>
+        <p>Create the function <code>validate_email</code>:</p>
+        <pre><code class="bash">validate_email() {
+    # Returns 0 if valid email, 1 otherwise
+    # Valid = contains @ and .
+    ???
+}
+
+# Test
+validate_email "test@example.com" && echo "Valid"
+validate_email "invalid" || echo "Invalid"</code></pre>
+    </section>
+    
+    <section>
+        <h3>Sprint 2: Arrays (5 min)</h3>
+        <p>Count words using an associative array:</p>
+        <pre><code class="bash">declare -A word_count
+text="the cat sat on the mat"
+
+# TODO: Populate word_count
+for word in $text; do
+    ???
+done
+
+# Display result
+for word in "${!word_count[@]}"; do
+    echo "$word: ${word_count[$word]}"
+done</code></pre>
+    </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- RECAP -->
+<!-- ============================================================ -->
+<section>
+    <h2>Recap: Key Takeaways</h2>
+    <div class="highlight-box">
+        <ol>
+            <li><strong>local</strong> - ALWAYS in functions</li>
+            <li><strong>declare -A</strong> - MANDATORY for hash</li>
+            <li><strong>"${arr[@]}"</strong> - ALWAYS with quotes</li>
+            <li><strong>set -euo pipefail</strong> - At the start of the script</li>
+            <li><strong>trap EXIT</strong> - For guaranteed cleanup</li>
+        </ol>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- HOMEWORK -->
+<!-- ============================================================ -->
+<section>
+    <h2>Homework</h2>
+    <div class="highlight-box">
+        <p><strong>Log Analyser + Config Manager</strong></p>
+        <p>Details in: <code>teme/S05_01_TEMA.md</code></p>
+    </div>
+    <p>Resources:</p>
+    <ul>
+        <li><code>docs/S05_02_MATERIAL_PRINCIPAL.md</code></li>
+        <li><code>scripts/templates/professional_script.sh</code></li>
+        <li><code>scripts/bash/S05_03_validator.sh</code></li>
+    </ul>
+</section>
+
+<!-- ============================================================ -->
+<!-- Q&A -->
+<!-- ============================================================ -->
+<section>
+    <h2>Questions?</h2>
+    <p class="small">Thank you for your attention! 🎉</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: true,
+        progress: true,
+        center: true,
+        transition: 'slide',
+        plugins: [ RevealHighlight ]
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# requirements.txt — Python Dependencies for Seminar 05
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# Seminar 05: Advanced Bash Scripting
+#
+# INSTALLATION:
+#   pip install -r requirements.txt
+#   pip install --user -r requirements.txt     (without sudo)
+#   pip install --break-system-packages -r requirements.txt  (Ubuntu 24.04)
+#
+# VERIFICATION:
+#   python3 -c "import yaml; import rich; print('OK')"
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORE DEPENDENCIES (required for basic functionality)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# YAML Parser - required for quiz.yaml parsing
+pyyaml>=6.0,<7.0
+
+# Terminal formatting - coloured output in quiz_runner.py and report_generator
+rich>=13.0,<14.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OPTIONAL DEPENDENCIES (uncomment if needed)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# JSON Schema Validation (for quiz_lms.json validation)
+# jsonschema>=4.17,<5.0
+
+# Progress bars (for long processing in autograder)
+# tqdm>=4.65,<5.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEVELOPMENT DEPENDENCIES (for contributors only)
+# ─────────────────────────────────────────────────────────────────────────────
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+
+# Python Linting (fast, modern)
+# ruff>=0.1.0,<1.0
+
+# Type checking
+# mypy>=1.5,<2.0
+
+# Testing
+# pytest>=7.4,<8.0
+# pytest-cov>=4.1,<5.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SYSTEM DEPENDENCIES (install with apt, not pip)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Bash linting (RECOMMENDED):
+#   sudo apt install shellcheck
+#
+# Python 3 (if not installed):
+#   sudo apt install python3 python3-pip
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMPATIBILITY NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Tested with:
+#   - Python 3.9, 3.10, 3.11, 3.12
+#   - Ubuntu 22.04 LTS, Ubuntu 24.04 LTS
+#   - WSL2 (Windows 10/11)
+#
+# Known issues:
+#   - On Ubuntu 24.04, use --break-system-packages flag
+#   - On older systems, rich may need: pip install rich --upgrade
+#
+# ═══════════════════════════════════════════════════════════════════════════════

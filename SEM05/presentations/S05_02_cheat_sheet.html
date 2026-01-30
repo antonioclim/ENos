@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheat Sheet: Advanced Bash Scripting | Seminar 5</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --orange: #f97316;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title.strict { color: #ef4444; }
+        .card-title.functions { color: #10b981; }
+        .card-title.arrays { color: #8b5cf6; }
+        .card-title.assoc { color: #f59e0b; }
+        .card-title.trap { color: #ec4899; }
+        .card-title.debug { color: #06b6d4; }
+        .card-title.checks { color: #22c55e; }
+        .card-title.defaults { color: #f97316; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--danger);
+            padding: 10px 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+        }
+        
+        .tip {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--success);
+            padding: 10px 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+        }
+        
+        .examples {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        
+        .examples .comment {
+            color: #64748b;
+        }
+        
+        .examples .cmd {
+            color: #10b981;
+        }
+        
+        .examples .bad {
+            color: #ef4444;
+        }
+        
+        .examples .good {
+            color: #10b981;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        .vs-table td:first-child {
+            color: #ef4444;
+        }
+        
+        .vs-table td:last-child {
+            color: #10b981;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .card {
+                border: 1px solid #ccc;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Bash Cheat Sheet</h1>
+        <p class="subtitle">Seminar 5 | Functions • Arrays • Robustness • Debugging</p>
+        
+        <div class="grid">
+            
+            <!-- STRICT MODE -->
+            <div class="card">
+                <div class="card-title strict">🛡️ Strict Mode (MANDATORY)</div>
+                <div class="examples">
+                    <span class="comment">#!/bin/bash</span><br>
+                    <span class="cmd">set -e</span>          <span class="comment"># Exit on error</span><br>
+                    <span class="cmd">set -u</span>          <span class="comment"># Error on undefined var</span><br>
+                    <span class="cmd">set -o pipefail</span> <span class="comment"># Catch pipe errors</span><br><br>
+                    <span class="comment"># Or compact:</span><br>
+                    <span class="cmd">set -euo pipefail</span>
+                </div>
+                <div class="warning">
+                    ⚠️ <code>set -e</code> does NOT catch errors in: <code>if/while</code>, after <code>||/&&</code>, subshells
+                </div>
+            </div>
+            
+            <!-- FUNCTIONS MISTAKES -->
+            <div class="card">
+                <div class="card-title functions">📦 Functions - Common Mistakes</div>
+                <div class="examples">
+                    <span class="comment"># ❌ WRONG: global variable</span><br>
+                    <span class="bad">process() { count=0; }</span><br><br>
+                    <span class="comment"># ✅ CORRECT: local variable</span><br>
+                    <span class="good">process() { local count=0; }</span><br><br>
+                    <span class="comment"># ❌ WRONG: return for values</span><br>
+                    <span class="bad">get_sum() { return $((a+b)); }</span> <span class="comment"># Max 255!</span><br><br>
+                    <span class="comment"># ✅ CORRECT: echo for values</span><br>
+                    <span class="good">get_sum() { echo $((a+b)); }</span><br>
+                    <span class="good">result=$(get_sum)</span>
+                </div>
+            </div>
+            
+            <!-- INDEXED ARRAYS -->
+            <div class="card">
+                <div class="card-title arrays">📚 Indexed Arrays</div>
+                <table>
+                    <tr><th>Operation</th><th>Syntax</th></tr>
+                    <tr><td>Create</td><td><code>arr=("a" "b" "c")</code></td></tr>
+                    <tr><td>Append</td><td><code>arr+=("d")</code></td></tr>
+                    <tr><td>Modify</td><td><code>arr[0]="A"</code></td></tr>
+                    <tr><td>Element</td><td><code>${arr[0]}</code> (index 0!)</td></tr>
+                    <tr><td>All</td><td><code>${arr[@]}</code></td></tr>
+                    <tr><td>Length</td><td><code>${#arr[@]}</code></td></tr>
+                    <tr><td>Indices</td><td><code>${!arr[@]}</code></td></tr>
+                    <tr><td>Slice</td><td><code>${arr[@]:1:3}</code></td></tr>
+                </table>
+                <div class="warning">
+                    ⚠️ Iteration: <code>for item in "${arr[@]}"</code> - WITH quotes!
+                </div>
+            </div>
+            
+            <!-- ASSOCIATIVE ARRAYS -->
+            <div class="card">
+                <div class="card-title assoc">🔑 Associative Arrays</div>
+                <div class="examples">
+                    <span class="comment"># MANDATORY declare -A !</span><br>
+                    <span class="cmd">declare -A config</span><br>
+                    <span class="cmd">config[host]="localhost"</span><br>
+                    <span class="cmd">config[port]="8080"</span><br><br>
+                    <span class="comment"># Or inline:</span><br>
+                    <span class="cmd">declare -A config=(</span><br>
+                    <span class="cmd">    [host]="localhost"</span><br>
+                    <span class="cmd">    [port]="8080"</span><br>
+                    <span class="cmd">)</span>
+                </div>
+                <table>
+                    <tr><th>Operation</th><th>Syntax</th></tr>
+                    <tr><td>Value</td><td><code>${config[host]}</code></td></tr>
+                    <tr><td>All keys</td><td><code>${!config[@]}</code></td></tr>
+                    <tr><td>All values</td><td><code>${config[@]}</code></td></tr>
+                    <tr><td>Key count</td><td><code>${#config[@]}</code></td></tr>
+                </table>
+                <div class="warning">
+                    ⚠️ WITHOUT <code>declare -A</code>: <code>hash[host]="x"</code> → <code>hash[0]="x"</code> (host=0!)
+                </div>
+            </div>
+            
+            <!-- TRAP -->
+            <div class="card">
+                <div class="card-title trap">🧹 Trap and Cleanup</div>
+                <div class="examples">
+                    <span class="cmd">cleanup() {</span><br>
+                    <span class="cmd">    local exit_code=$?</span><br>
+                    <span class="cmd">    [[ -f "$TEMP" ]] && rm -f "$TEMP"</span><br>
+                    <span class="cmd">    exit $exit_code</span><br>
+                    <span class="cmd">}</span><br><br>
+                    <span class="cmd">trap cleanup EXIT</span>  <span class="comment"># On any exit</span><br>
+                    <span class="cmd">trap 'echo "Ctrl+C"' INT</span>  <span class="comment"># On Ctrl+C</span>
+                </div>
+                <table>
+                    <tr><th>Signal</th><th>When</th></tr>
+                    <tr><td><code>EXIT</code></td><td>On script exit (any mode)</td></tr>
+                    <tr><td><code>ERR</code></td><td>On error (with set -e)</td></tr>
+                    <tr><td><code>INT</code></td><td>Ctrl+C</td></tr>
+                    <tr><td><code>TERM</code></td><td>kill (default)</td></tr>
+                    <tr><td><code>DEBUG</code></td><td>Before each command</td></tr>
+                </table>
+            </div>
+            
+            <!-- DEFAULT VALUES -->
+            <div class="card">
+                <div class="card-title defaults">🔧 Default Values</div>
+                <table>
+                    <tr><th>Syntax</th><th>Effect</th></tr>
+                    <tr><td><code>${VAR:-default}</code></td><td>Return default if unset/empty</td></tr>
+                    <tr><td><code>${VAR:=default}</code></td><td>Set VAR to default if unset/empty</td></tr>
+                    <tr><td><code>${VAR:?error}</code></td><td>Error if unset/empty</td></tr>
+                    <tr><td><code>${VAR:+alt}</code></td><td>Return alt if VAR IS set</td></tr>
+                </table>
+                <div class="examples">
+                    <span class="comment"># Pattern for arguments:</span><br>
+                    <span class="cmd">INPUT="${1:-default.txt}"</span><br>
+                    <span class="cmd">: "${REQUIRED:?Must be set}"</span>
+                </div>
+            </div>
+            
+            <!-- DEBUGGING -->
+            <div class="card">
+                <div class="card-title debug">🪲 Debugging</div>
+                <table>
+                    <tr><th>Command</th><th>Effect</th></tr>
+                    <tr><td><code>set -x</code></td><td>Display commands (xtrace)</td></tr>
+                    <tr><td><code>set -v</code></td><td>Display lines read</td></tr>
+                    <tr><td><code>set +x</code></td><td>Disable trace</td></tr>
+                    <tr><td><code>bash -x script.sh</code></td><td>Run with debug</td></tr>
+                </table>
+                <div class="examples">
+                    <span class="comment"># Custom PS4:</span><br>
+                    <span class="cmd">PS4='+ ${BASH_SOURCE}:${LINENO}: '</span><br><br>
+                    <span class="comment"># Debug variables:</span><br>
+                    <span class="cmd">$LINENO</span>          <span class="comment"># Current line</span><br>
+                    <span class="cmd">$BASH_COMMAND</span>    <span class="comment"># Current command</span><br>
+                    <span class="cmd">$FUNCNAME</span>        <span class="comment"># Current function</span><br>
+                    <span class="cmd">${PIPESTATUS[@]}</span> <span class="comment"># Exit codes from pipe</span>
+                </div>
+            </div>
+            
+            <!-- CHECKS -->
+            <div class="card">
+                <div class="card-title checks">✅ Checks ([[ ... ]])</div>
+                <table>
+                    <tr><th colspan="2">Files</th></tr>
+                    <tr><td><code>-f "$f"</code></td><td>File exists</td></tr>
+                    <tr><td><code>-d "$d"</code></td><td>Directory exists</td></tr>
+                    <tr><td><code>-r/-w/-x</code></td><td>Readable/Writable/Executable</td></tr>
+                    <tr><td><code>-s "$f"</code></td><td>Non-empty</td></tr>
+                    <tr><th colspan="2">Strings</th></tr>
+                    <tr><td><code>-z "$s"</code></td><td>Empty</td></tr>
+                    <tr><td><code>-n "$s"</code></td><td>Non-empty</td></tr>
+                    <tr><td><code>"$a" == "$b"</code></td><td>Equal</td></tr>
+                    <tr><td><code>"$s" =~ regex</code></td><td>Regex match</td></tr>
+                    <tr><th colspan="2">Numbers</th></tr>
+                    <tr><td><code>$a -eq/-ne $b</code></td><td>Equal / Not equal</td></tr>
+                    <tr><td><code>$a -lt/-gt $b</code></td><td>Less than / Greater than</td></tr>
+                </table>
+            </div>
+            
+            <!-- COMMON MISTAKES -->
+            <div class="card">
+                <div class="card-title" style="color: var(--danger);">🚫 Common Mistakes</div>
+                <table class="vs-table">
+                    <tr><th>❌ Wrong</th><th>✅ Correct</th></tr>
+                    <tr><td><code>$arr[@]</code></td><td><code>${arr[@]}</code></td></tr>
+                    <tr><td><code>${arr[@]}</code> in for</td><td><code>"${arr[@]}"</code></td></tr>
+                    <tr><td><code>hash[key]=v</code></td><td><code>declare -A hash; hash[key]=v</code></td></tr>
+                    <tr><td><code>var</code> in func</td><td><code>local var</code> in func</td></tr>
+                    <tr><td><code>return "string"</code></td><td><code>echo "string"</code></td></tr>
+                    <tr><td><code>cd $dir</code></td><td><code>cd "$dir"</code></td></tr>
+                    <tr><td><code>$(ls *.txt)</code></td><td><code>*.txt</code> or <code>find</code></td></tr>
+                </table>
+            </div>
+            
+            <!-- QUICK TEMPLATE -->
+            <div class="card">
+                <div class="card-title" style="color: var(--primary);">📋 Professional Script Template</div>
+                <div class="examples">
+                    <span class="comment">#!/bin/bash</span><br>
+                    <span class="cmd">set -euo pipefail</span><br><br>
+                    <span class="cmd">readonly SCRIPT_NAME=$(basename "$0")</span><br>
+                    <span class="cmd">die() { echo "FATAL: $*" >&2; exit 1; }</span><br><br>
+                    <span class="cmd">cleanup() {</span><br>
+                    <span class="cmd">    local ec=$?</span><br>
+                    <span class="cmd">    # cleanup code</span><br>
+                    <span class="cmd">    exit $ec</span><br>
+                    <span class="cmd">}</span><br>
+                    <span class="cmd">trap cleanup EXIT</span><br><br>
+                    <span class="cmd">[[ $# -ge 1 ]] || die "Usage: $SCRIPT_NAME &lt;arg&gt;"</span><br><br>
+                    <span class="cmd">main() {</span><br>
+                    <span class="cmd">    echo "Hello from $SCRIPT_NAME"</span><br>
+                    <span class="cmd">}</span><br><br>
+                    <span class="cmd">main "$@"</span>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            Operating Systems | ASE Bucharest - CSIE | Seminar 5<br>
+            <small>set -euo pipefail • local in functions • declare -A for hash • quotes for arrays</small>
+        </div>
+    </div>
+</body>
+</html>

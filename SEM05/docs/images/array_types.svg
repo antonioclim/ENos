@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="indexedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f5e9;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#c8e6c9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="assocGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ffe0b2;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
+    Tipuri de Arrays în Bash
+  </text>
+  
+  <!-- Indexed Array Section -->
+  <rect x="30" y="50" width="360" height="380" rx="10" ry="10" fill="url(#indexedGrad)" stroke="#2e7d32" stroke-width="2"/>
+  <text x="210" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2e7d32">
+    ARRAY INDEXAT
+  </text>
+  <text x="210" y="100" text-anchor="middle" font-family="monospace" font-size="12" fill="#666">declare -a arr</text>
+  
+  <!-- Indexed array boxes -->
+  <g transform="translate(50, 120)">
+    <!-- Index labels -->
+    <text x="30" y="-5" text-anchor="middle" font-family="monospace" font-size="11" fill="#666">[0]</text>
+    <text x="100" y="-5" text-anchor="middle" font-family="monospace" font-size="11" fill="#666">[1]</text>
+    <text x="170" y="-5" text-anchor="middle" font-family="monospace" font-size="11" fill="#666">[2]</text>
+    <text x="240" y="-5" text-anchor="middle" font-family="monospace" font-size="11" fill="#666">[3]</text>
+    
+    <!-- Value boxes -->
+    <rect x="0" y="0" width="60" height="40" rx="3" ry="3" fill="#fff" stroke="#4caf50" stroke-width="2"/>
+    <text x="30" y="25" text-anchor="middle" font-family="monospace" font-size="12" fill="#333">"a"</text>
+    
+    <rect x="70" y="0" width="60" height="40" rx="3" ry="3" fill="#fff" stroke="#4caf50" stroke-width="2"/>
+    <text x="100" y="25" text-anchor="middle" font-family="monospace" font-size="12" fill="#333">"b"</text>
+    
+    <rect x="140" y="0" width="60" height="40" rx="3" ry="3" fill="#fff" stroke="#4caf50" stroke-width="2"/>
+    <text x="170" y="25" text-anchor="middle" font-family="monospace" font-size="12" fill="#333">"c"</text>
+    
+    <rect x="210" y="0" width="60" height="40" rx="3" ry="3" fill="#fff" stroke="#4caf50" stroke-width="2"/>
+    <text x="240" y="25" text-anchor="middle" font-family="monospace" font-size="12" fill="#333">"d"</text>
+  </g>
+  
+  <!-- Indexed array code examples -->
+  <rect x="50" y="190" width="320" height="110" rx="5" ry="5" fill="#fff" stroke="#81c784" stroke-width="1"/>
+  <text x="60" y="210" font-family="monospace" font-size="11" fill="#333"># Declarare</text>
+  <text x="60" y="228" font-family="monospace" font-size="11" fill="#2e7d32">arr=("a" "b" "c" "d")</text>
+  <text x="60" y="250" font-family="monospace" font-size="11" fill="#333"># Acces</text>
+  <text x="60" y="268" font-family="monospace" font-size="11" fill="#2e7d32">echo "${arr[0]}"  # a</text>
+  <text x="60" y="286" font-family="monospace" font-size="11" fill="#2e7d32">echo "${arr[@]}"  # a b c d</text>
+  
+  <!-- Indexed notes -->
+  <text x="50" y="320" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Indexare de la 0</text>
+  <text x="50" y="340" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Acces rapid prin index numeric</text>
+  <text x="50" y="360" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Ordine păstrată</text>
+  <text x="50" y="380" font-family="Arial, sans-serif" font-size="11" fill="#c62828">⚠ unset creează array sparse!</text>
+  <text x="50" y="400" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ declare -a opțional</text>
+  
+  <!-- Associative Array Section -->
+  <rect x="410" y="50" width="360" height="380" rx="10" ry="10" fill="url(#assocGrad)" stroke="#ef6c00" stroke-width="2"/>
+  <text x="590" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ef6c00">
+    ARRAY ASOCIATIV
+  </text>
+  <text x="590" y="100" text-anchor="middle" font-family="monospace" font-size="12" fill="#666">declare -A hash</text>
+  
+  <!-- Associative array boxes -->
+  <g transform="translate(430, 120)">
+    <!-- Key-value pairs -->
+    <rect x="0" y="0" width="140" height="35" rx="3" ry="3" fill="#fff" stroke="#ff9800" stroke-width="2"/>
+    <text x="10" y="22" font-family="monospace" font-size="11" fill="#666">[host]</text>
+    <text x="70" y="22" font-family="monospace" font-size="11" fill="#333">→ "localhost"</text>
+    
+    <rect x="160" y="0" width="140" height="35" rx="3" ry="3" fill="#fff" stroke="#ff9800" stroke-width="2"/>
+    <text x="170" y="22" font-family="monospace" font-size="11" fill="#666">[port]</text>
+    <text x="230" y="22" font-family="monospace" font-size="11" fill="#333">→ "8080"</text>
+    
+    <rect x="80" y="45" width="140" height="35" rx="3" ry="3" fill="#fff" stroke="#ff9800" stroke-width="2"/>
+    <text x="90" y="67" font-family="monospace" font-size="11" fill="#666">[debug]</text>
+    <text x="150" y="67" font-family="monospace" font-size="11" fill="#333">→ "true"</text>
+  </g>
+  
+  <!-- Associative array code examples -->
+  <rect x="430" y="215" width="320" height="110" rx="5" ry="5" fill="#fff" stroke="#ffcc80" stroke-width="1"/>
+  <text x="440" y="235" font-family="monospace" font-size="11" fill="#c62828"># OBLIGATORIU!</text>
+  <text x="440" y="253" font-family="monospace" font-size="11" fill="#ef6c00">declare -A config</text>
+  <text x="440" y="275" font-family="monospace" font-size="11" fill="#333"># Atribuire</text>
+  <text x="440" y="293" font-family="monospace" font-size="11" fill="#ef6c00">config[host]="localhost"</text>
+  <text x="440" y="311" font-family="monospace" font-size="11" fill="#ef6c00">echo "${config[host]}"</text>
+  
+  <!-- Associative notes -->
+  <text x="430" y="345" font-family="Arial, sans-serif" font-size="11" fill="#c62828">⚠ declare -A OBLIGATORIU!</text>
+  <text x="430" y="365" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Chei string (hash/dictionary)</text>
+  <text x="430" y="385" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Ordine NU e garantată</text>
+  <text x="430" y="405" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ Bash 4.0+ necesar</text>
+  <text x="430" y="425" font-family="Arial, sans-serif" font-size="11" fill="#333">✓ ${!hash[@]} pentru chei</text>
+</svg>

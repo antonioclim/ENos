@@ -1,0 +1,277 @@
+{
+  "metadata": {
+    "title": "Seminar 05: Advanced Bash Scripting",
+    "description": "Formative quiz covering functions, arrays, reliability and error handling in Bash",
+    "version": "1.1.0",
+    "author": "ing. dr. Antonio Clim",
+    "institution": "ASE Bucharest - CSIE",
+    "course": "Operating Systems",
+    "date": "2025-01",
+    "duration_minutes": 25,
+    "passing_score": 60,
+    "total_points": 100,
+    "question_count": 18,
+    "format": "Moodle/Canvas compatible"
+  },
+  "settings": {
+    "shuffle_questions": true,
+    "shuffle_answers": true,
+    "show_feedback": true,
+    "allow_review": true,
+    "attempts_allowed": 2
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multiple_choice",
+      "topic": "Functions",
+      "bloom_level": "understand",
+      "points": 5,
+      "question": "Given the code:\n```bash\n#!/bin/bash\ncount=10\n\nincrement() {\n    count=$((count + 1))\n    echo \"In function: $count\"\n}\n\nincrement\necho \"After function: $count\"\n```\nWhat does the last line display?",
+      "answers": [
+        {"text": "After function: 10", "correct": false, "feedback": "Incorrect. Variables in Bash functions are GLOBAL by default, not local."},
+        {"text": "After function: 11", "correct": true, "feedback": "Correct! Variables in functions are GLOBAL by default. Use 'local' to make them local."},
+        {"text": "After function: (empty)", "correct": false, "feedback": "Incorrect. The variable exists and has a value."},
+        {"text": "Error - count is not defined in main", "correct": false, "feedback": "Incorrect. Variables in functions are global by default."}
+      ]
+    },
+    {
+      "id": "q02",
+      "type": "multiple_choice",
+      "topic": "Functions",
+      "bloom_level": "understand",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\n\nget_value() {\n    return 42\n}\n\nresult=$(get_value)\necho \"Result: '$result'\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Result: '42'", "correct": false, "feedback": "Incorrect. 'return' sets exit code, not stdout. Use 'echo' to return values."},
+        {"text": "Result: '' (empty string)", "correct": true, "feedback": "Correct! 'return' only sets exit code (0-255). $() captures stdout, which is empty here."},
+        {"text": "Result: '0'", "correct": false, "feedback": "Incorrect. The result is empty, not 0."},
+        {"text": "Syntax error", "correct": false, "feedback": "Incorrect. The syntax is valid."}
+      ]
+    },
+    {
+      "id": "q03",
+      "type": "multiple_choice",
+      "topic": "Functions",
+      "bloom_level": "understand",
+      "points": 5,
+      "question": "Script test.sh:\n```bash\n#!/bin/bash\nshow_arg() {\n    echo \"Function sees: $1\"\n}\necho \"Script sees: $1\"\nshow_arg \"FUNC_ARG\"\n```\nRun with ./test.sh SCRIPT_ARG. What does the second line display?",
+      "answers": [
+        {"text": "Function sees: SCRIPT_ARG", "correct": false, "feedback": "Incorrect. Functions have their own positional arguments."},
+        {"text": "Function sees: FUNC_ARG", "correct": true, "feedback": "Correct! $1 in function refers to the function's argument, not the script's."},
+        {"text": "Function sees: (empty)", "correct": false, "feedback": "Incorrect. The function receives 'FUNC_ARG' as $1."},
+        {"text": "Function sees: $1", "correct": false, "feedback": "Incorrect. Variables are expanded."}
+      ]
+    },
+    {
+      "id": "q04",
+      "type": "multiple_choice",
+      "topic": "Arrays",
+      "bloom_level": "remember",
+      "points": 4,
+      "question": "Given the code:\n```bash\n#!/bin/bash\narr=(\"first\" \"second\" \"third\")\necho \"${arr[1]}\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "first", "correct": false, "feedback": "Incorrect. Arrays in Bash start at index 0, not 1."},
+        {"text": "second", "correct": true, "feedback": "Correct! arr[0]='first', arr[1]='second', arr[2]='third'."},
+        {"text": "third", "correct": false, "feedback": "Incorrect. Index 1 is 'second'."},
+        {"text": "Error - index 1 does not exist", "correct": false, "feedback": "Incorrect. Index 1 exists."}
+      ]
+    },
+    {
+      "id": "q05",
+      "type": "multiple_choice",
+      "topic": "Arrays",
+      "bloom_level": "understand",
+      "points": 6,
+      "question": "Given the code (WITHOUT declare -A):\n```bash\n#!/bin/bash\nconfig[host]=\"localhost\"\nconfig[port]=\"8080\"\necho \"Keys: ${!config[@]}\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Keys: host port", "correct": false, "feedback": "Incorrect. That would require 'declare -A config'."},
+        {"text": "Keys: 0", "correct": true, "feedback": "Correct! Without declare -A, 'host' and 'port' are evaluated as 0, so both write to config[0]."},
+        {"text": "Keys: 0 0", "correct": false, "feedback": "Incorrect. Only one key exists (second overwrites first)."},
+        {"text": "Error - config is not declared", "correct": false, "feedback": "Incorrect. Indexed arrays are created implicitly."}
+      ]
+    },
+    {
+      "id": "q06",
+      "type": "multiple_choice",
+      "topic": "Arrays",
+      "bloom_level": "apply",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nfiles=(\"file one.txt\" \"file two.txt\")\ncount=0\nfor f in ${files[@]}; do\n    ((count++))\ndone\necho \"Iterations: $count\"\n```\nHow many iterations does the loop have?",
+      "answers": [
+        {"text": "2", "correct": false, "feedback": "Incorrect. Without quotes, word splitting occurs."},
+        {"text": "4", "correct": true, "feedback": "Correct! Without quotes, 'file one.txt' becomes 2 words. Use \"${files[@]}\" always!"},
+        {"text": "1", "correct": false, "feedback": "Incorrect. There are multiple iterations."},
+        {"text": "Error", "correct": false, "feedback": "Incorrect. The code runs without error."}
+      ]
+    },
+    {
+      "id": "q07",
+      "type": "multiple_choice",
+      "topic": "Arrays",
+      "bloom_level": "understand",
+      "points": 5,
+      "question": "Given the code:\n```bash\n#!/bin/bash\narr=(\"a\" \"b\" \"c\" \"d\" \"e\")\nunset arr[2]\necho \"Indices: ${!arr[@]}\"\necho \"Length: ${#arr[@]}\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Indices: 0 1 2 3 and Length: 4", "correct": false, "feedback": "Incorrect. unset does not re-index the array."},
+        {"text": "Indices: 0 1 3 4 and Length: 4", "correct": true, "feedback": "Correct! unset creates a sparse array - index 2 is missing but others remain."},
+        {"text": "Indices: 0 1 2 3 4 and Length: 5", "correct": false, "feedback": "Incorrect. Element at index 2 was deleted."},
+        {"text": "Error", "correct": false, "feedback": "Incorrect. The syntax is valid."}
+      ]
+    },
+    {
+      "id": "q08",
+      "type": "multiple_choice",
+      "topic": "Reliability",
+      "bloom_level": "understand",
+      "points": 5,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -euo pipefail\nx=\"${UNDEFINED_VAR}\"\necho \"Continues...\"\n```\nWhat happens?",
+      "answers": [
+        {"text": "Displays Continues... with x=\"\"", "correct": false, "feedback": "Incorrect. set -u causes error on undefined variables."},
+        {"text": "Error: unbound variable", "correct": true, "feedback": "Correct! set -u makes undefined variables an error. Use ${VAR:-default} for optional vars."},
+        {"text": "Displays Continues... with x=\"UNDEFINED_VAR\"", "correct": false, "feedback": "Incorrect. Variable expansion doesn't work that way."},
+        {"text": "Depends on Bash version", "correct": false, "feedback": "Incorrect. Behaviour is consistent."}
+      ]
+    },
+    {
+      "id": "q09",
+      "type": "multiple_choice",
+      "topic": "Reliability",
+      "bloom_level": "understand",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -e\nif false; then\n    echo \"In if\"\nfi\necho \"After if\"\n```\nWhat happens?",
+      "answers": [
+        {"text": "Script stops at false", "correct": false, "feedback": "Incorrect. set -e does not apply in conditional context."},
+        {"text": "Displays After if", "correct": true, "feedback": "Correct! set -e has exceptions: commands in if/while/until conditions are not affected."},
+        {"text": "Displays In if then After if", "correct": false, "feedback": "Incorrect. The condition is false."},
+        {"text": "Syntax error", "correct": false, "feedback": "Incorrect. The syntax is valid."}
+      ]
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "topic": "Reliability",
+      "bloom_level": "apply",
+      "points": 5,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -e\nfalse || echo \"Recovered\"\necho \"Continues\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Script stops at false", "correct": false, "feedback": "Incorrect. || disables set -e for the left command."},
+        {"text": "Recovered then Continues", "correct": true, "feedback": "Correct! || catches the error from false, so 'Recovered' prints, then script continues."},
+        {"text": "Only Recovered", "correct": false, "feedback": "Incorrect. Script continues after ||."},
+        {"text": "Only Continues", "correct": false, "feedback": "Incorrect. 'Recovered' is printed because false fails."}
+      ]
+    },
+    {
+      "id": "q11",
+      "type": "multiple_choice",
+      "topic": "Reliability",
+      "bloom_level": "apply",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -o pipefail\nfalse | true | true\necho \"Exit: $?\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Exit: 0", "correct": false, "feedback": "Incorrect. That would be WITHOUT pipefail."},
+        {"text": "Exit: 1", "correct": true, "feedback": "Correct! pipefail returns the exit code of the first failing command in the pipeline."},
+        {"text": "Exit: 2", "correct": false, "feedback": "Incorrect. Only the first non-zero matters."},
+        {"text": "Nothing - script stops", "correct": false, "feedback": "Incorrect. Without set -e, script continues."}
+      ]
+    },
+    {
+      "id": "q12",
+      "type": "multiple_choice",
+      "topic": "Reliability",
+      "bloom_level": "apply",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -eo pipefail\ncat /nonexistent | grep \"pattern\"\necho \"After pipe\"\n```\nWhat happens?",
+      "answers": [
+        {"text": "Displays error from cat, then After pipe", "correct": false, "feedback": "Incorrect. set -e stops the script."},
+        {"text": "Script stops at cat error", "correct": true, "feedback": "Correct! set -e + pipefail = errors in pipe stop the script."},
+        {"text": "Displays After pipe (grep saves it)", "correct": false, "feedback": "Incorrect. pipefail propagates error from cat."},
+        {"text": "Depends on existence of pattern file", "correct": false, "feedback": "Incorrect. cat error appears first."}
+      ]
+    },
+    {
+      "id": "q13",
+      "type": "multiple_choice",
+      "topic": "Trap and Error Handling",
+      "bloom_level": "apply",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -e\ncleanup() { echo \"Cleanup executed\"; }\ntrap cleanup EXIT\necho \"Start\"\nfalse\necho \"End\"\n```\nWhat does it display?",
+      "answers": [
+        {"text": "Start then Cleanup executed", "correct": true, "feedback": "Correct! trap EXIT executes ALWAYS - on normal exit, errors, or signals."},
+        {"text": "Start, End, Cleanup executed", "correct": false, "feedback": "Incorrect. set -e stops at false, so 'End' is not displayed."},
+        {"text": "Only Start", "correct": false, "feedback": "Incorrect. trap EXIT still executes."},
+        {"text": "Cleanup executed then Start", "correct": false, "feedback": "Incorrect. trap executes at EXIT, not at start."}
+      ]
+    },
+    {
+      "id": "q14",
+      "type": "multiple_choice",
+      "topic": "Trap and Error Handling",
+      "bloom_level": "understand",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\ncleanup() { echo \"Cleanup\"; }\ntrap cleanup EXIT\n(\n    echo \"In subshell\"\n    exit 1\n)\necho \"After subshell: $?\"\n```\nHow many 'Cleanup' appear?",
+      "answers": [
+        {"text": "0", "correct": false, "feedback": "Incorrect. Trap from main script executes at exit."},
+        {"text": "1", "correct": true, "feedback": "Correct! Traps are NOT inherited in subshells. Cleanup appears only when main script terminates."},
+        {"text": "2", "correct": false, "feedback": "Incorrect. Trap is not inherited in subshell."},
+        {"text": "Depends on Bash version", "correct": false, "feedback": "Incorrect. Behaviour is consistent."}
+      ]
+    },
+    {
+      "id": "q15",
+      "type": "multiple_choice",
+      "topic": "Consolidation",
+      "bloom_level": "remember",
+      "points": 5,
+      "question": "What is the correct order of sections in a professional Bash script?",
+      "answers": [
+        {"text": "Shebang → Main → Functions → Trap → Constants", "correct": false, "feedback": "Incorrect. Main should be at the end."},
+        {"text": "Shebang → Constants → Functions → Trap → Main", "correct": false, "feedback": "Incorrect. Missing set -euo pipefail after shebang."},
+        {"text": "Shebang → set -euo pipefail → Constants → Functions → Trap → Parse Args → Main", "correct": true, "feedback": "Correct! This is the standard professional structure."},
+        {"text": "Main → Functions → Shebang → Trap", "correct": false, "feedback": "Incorrect. Shebang must be the first line."}
+      ]
+    },
+    {
+      "id": "q16",
+      "type": "multiple_choice",
+      "topic": "Consolidation",
+      "bloom_level": "analyse",
+      "points": 8,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nset -euo pipefail\ndeclare -a files\nfiles=$(find . -name \"*.txt\")\nfor f in ${files[@]}; do\n    process \"$f\"\ndone\n```\nHow many bugs does this code have?",
+      "answers": [
+        {"text": "1", "correct": false, "feedback": "Incorrect. There are more problems."},
+        {"text": "2", "correct": false, "feedback": "Incorrect. There is one more."},
+        {"text": "3", "correct": true, "feedback": "Correct! Bug 1: files=$() should be mapfile. Bug 2: ${files[@]} needs quotes. Bug 3: declare -a is redundant."},
+        {"text": "4 or more", "correct": false, "feedback": "Incorrect. There are exactly 3 main bugs."}
+      ]
+    },
+    {
+      "id": "q17",
+      "type": "multiple_choice",
+      "topic": "Consolidation",
+      "bloom_level": "evaluate",
+      "points": 6,
+      "question": "Which statement is FALSE about Bash best practices?",
+      "answers": [
+        {"text": "local should be used for all variables in functions", "correct": false, "feedback": "This statement is TRUE - local prevents side effects."},
+        {"text": "declare -A is mandatory for associative arrays", "correct": false, "feedback": "This statement is TRUE - otherwise treated as indexed."},
+        {"text": "set -e stops script on absolutely any error", "correct": true, "feedback": "This statement is FALSE! set -e has exceptions: if, ||, &&, !, subshells, etc."},
+        {"text": "\"${arr[@]}\" with quotes is necessary for correct iteration", "correct": false, "feedback": "This statement is TRUE - prevents word splitting."}
+      ]
+    },
+    {
+      "id": "q18",
+      "type": "multiple_choice",
+      "topic": "Consolidation",
+      "bloom_level": "analyse",
+      "points": 6,
+      "question": "Given the code:\n```bash\n#!/bin/bash\nDEBUG=\"${DEBUG:-false}\"\nprocess() {\n    local file=\"$1\"\n    $DEBUG && echo \"[DEBUG] Processing: $file\" >&2\n}\n```\nWhat does $DEBUG && echo ... do?",
+      "answers": [
+        {"text": "Always displays debug message", "correct": false, "feedback": "Incorrect. It depends on DEBUG value."},
+        {"text": "Displays message only if DEBUG=\"true\"", "correct": true, "feedback": "Correct! $DEBUG is executed as a command. 'true' succeeds, 'false' fails."},
+        {"text": "Displays message if DEBUG is any non-empty value", "correct": false, "feedback": "Incorrect. 'false' as a command fails."},
+        {"text": "Syntax error", "correct": false, "feedback": "Incorrect. The syntax is valid."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GitHub Actions Workflow — Seminar 05: Advanced Bash Scripting
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest - CSIE
+# Version: 1.1.0
+#
+# This workflow:
+#   - Validates Bash scripts with ShellCheck
+#   - Validates Python scripts with Ruff
+#   - Runs automated tests
+#   - Validates quiz YAML syntax
+#
+# USAGE:
+#   Copy this file to .github/workflows/ci.yml in your repository
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: CI Pipeline - SEM05
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'scripts/**'
+      - 'formative/**'
+      - 'teste/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1: Lint Bash Scripts
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint-bash:
+    name: ShellCheck Bash Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      
+      - name: Check Bash version
+        run: bash --version
+      
+      - name: Lint scripts/bash/
+        run: |
+          echo "::group::Checking scripts/bash/"
+          shellcheck --severity=warning scripts/bash/*.sh || true
+          echo "::endgroup::"
+      
+      - name: Lint scripts/demo/
+        run: |
+          echo "::group::Checking scripts/demo/"
+          shellcheck --severity=warning scripts/demo/*.sh || true
+          echo "::endgroup::"
+      
+      - name: Lint scripts/templates/
+        run: |
+          echo "::group::Checking scripts/templates/"
+          shellcheck --severity=warning scripts/templates/*.sh || true
+          echo "::endgroup::"
+      
+      - name: Lint homework solutions
+        run: |
+          echo "::group::Checking teme/solutii/"
+          if [ -d "teme/solutii" ]; then
+            shellcheck --severity=warning teme/solutii/*.sh 2>/dev/null || true
+          fi
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2: Lint Python Scripts
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint-python:
+    name: Ruff Python Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pyyaml rich
+      
+      - name: Lint with Ruff
+        run: |
+          echo "::group::Checking Python scripts"
+          ruff check scripts/python/*.py formative/*.py --config ci/linting.toml || true
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3: Validate Quiz
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate-quiz:
+    name: Validate Quiz YAML
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install PyYAML
+        run: pip install pyyaml
+      
+      - name: Validate quiz.yaml syntax
+        run: |
+          python3 -c "
+          import yaml
+          import sys
+          
+          try:
+              with open('formative/quiz.yaml', 'r') as f:
+                  data = yaml.safe_load(f)
+              
+              # Basic validation
+              assert 'metadata' in data, 'Missing metadata section'
+              assert 'questions' in data, 'Missing questions section'
+              assert len(data['questions']) > 0, 'No questions found'
+              
+              print(f'✓ Quiz validated: {len(data[\"questions\"])} questions')
+              print(f'✓ Total points: {data[\"metadata\"].get(\"total_points\", \"N/A\")}')
+              
+          except Exception as e:
+              print(f'✗ Validation failed: {e}')
+              sys.exit(1)
+          "
+      
+      - name: Validate quiz_lms.json syntax
+        run: |
+          python3 -c "
+          import json
+          import sys
+          
+          try:
+              with open('formative/quiz_lms.json', 'r') as f:
+                  data = json.load(f)
+              
+              assert 'questions' in data, 'Missing questions'
+              print(f'✓ LMS export validated: {len(data[\"questions\"])} questions')
+              
+          except Exception as e:
+              print(f'✗ Validation failed: {e}')
+              sys.exit(1)
+          "
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 4: Run Tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    needs: [lint-bash, lint-python]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: pip install pyyaml rich
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/bash/*.sh 2>/dev/null || true
+          chmod +x scripts/demo/*.sh 2>/dev/null || true
+          chmod +x teste/*.sh 2>/dev/null || true
+      
+      - name: Run test suite
+        run: |
+          if [ -f "teste/run_all_tests.sh" ]; then
+            bash teste/run_all_tests.sh
+          else
+            echo "No test runner found, skipping tests"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 5: Summary
+  # ─────────────────────────────────────────────────────────────────────────────
+  summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [lint-bash, lint-python, validate-quiz, test]
+    if: always()
+    
+    steps:
+      - name: Report Status
+        run: |
+          echo "═══════════════════════════════════════════════════════════════"
+          echo "  CI Pipeline Complete - Seminar 05"
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "Results:"
+          echo "  - Bash Linting:   ${{ needs.lint-bash.result }}"
+          echo "  - Python Linting: ${{ needs.lint-python.result }}"
+          echo "  - Quiz Validation: ${{ needs.validate-quiz.result }}"
+          echo "  - Tests:          ${{ needs.test.result }}"
+          echo ""
