@@ -1,0 +1,13 @@
+@startuml
+title cgroups Hierarchy
+rectangle "Root" {
+  rectangle "CPU"
+  rectangle "Memory"
+  rectangle "IO"
+  rectangle "PIDs"
+}
+rectangle "Container A"
+rectangle "Container B"
+Root --> "Container A"
+Root --> "Container B"
+@enduml

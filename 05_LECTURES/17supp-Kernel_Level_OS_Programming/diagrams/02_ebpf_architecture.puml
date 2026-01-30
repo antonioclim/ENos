@@ -1,0 +1,20 @@
+@startuml
+title eBPF Architecture
+rectangle "User Space" {
+  rectangle "Program"
+  rectangle "libbpf"
+}
+rectangle "Kernel" {
+  rectangle "Verifier"
+  rectangle "JIT"
+  rectangle "VM"
+  rectangle "Hooks"
+}
+rectangle "Maps"
+Program --> libbpf
+libbpf --> Verifier
+Verifier --> JIT
+JIT --> VM
+VM --> Hooks
+Hooks --> Maps
+@enduml

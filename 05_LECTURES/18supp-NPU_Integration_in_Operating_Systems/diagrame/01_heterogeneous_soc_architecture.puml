@@ -1,0 +1,49 @@
+@startuml 01_heterogeneous_soc_architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Consolas"
+
+title Modern SoC: Heterogeneous CPU+GPU+NPU Architecture
+
+rectangle "COMPUTE TILE" as compute #E3F2FD {
+    rectangle "P-Core 1\n(Performance)" as p1 #BBDEFB
+    rectangle "P-Core 2\n(Performance)" as p2 #BBDEFB
+    rectangle "E-Core 1\n(Efficiency)" as e1 #C8E6C9
+    rectangle "E-Core 2\n(Efficiency)" as e2 #C8E6C9
+    rectangle "Thread\nDirector" as td #FFF9C4
+}
+
+rectangle "GPU TILE" as gpu #FFCDD2 {
+    rectangle "Xe Core 1" as xe1
+    rectangle "Xe Core 2" as xe2
+    rectangle "Xe Core N" as xen
+}
+
+rectangle "NPU TILE" as npu #D1C4E9 {
+    rectangle "NCE 1" as nce1
+    rectangle "NCE 2" as nce2
+    rectangle "NCE N" as ncen
+    rectangle "DMA\nEngine" as dma
+}
+
+rectangle "Memory Controller" as mc #FFECB3
+
+database "LPDDR5X\n(Unified Memory)" as mem #FFF3E0
+
+compute --> mc
+gpu --> mc
+npu --> mc
+mc --> mem
+
+note right of td
+  Hardware Feedback
+  Interface (HFI)
+  to OS
+end note
+
+note right of npu
+  48 TOPS (INT8)
+  AI Workloads
+end note
+
+@enduml
