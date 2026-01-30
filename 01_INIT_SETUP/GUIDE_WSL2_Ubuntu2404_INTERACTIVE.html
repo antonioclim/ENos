@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSL2 Ubuntu 24.04 Installation Guide - Operating Systems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E95420;
+            --primary-dark: #C7411F;
+            --secondary: #772953;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --powershell-bg: #012456;
+            --powershell-text: #FFFF00;
+            --bash-bg: #1a1a1a;
+            --bash-text: #00ff00;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #00ff88);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            position: sticky;
+            top: 60px;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1 1 auto;
+            min-width: 120px;
+            padding: 0.8rem 1rem;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            box-shadow: 0 4px 15px rgba(233, 84, 32, 0.4);
+        }
+
+        .tab-btn.completed {
+            border: 2px solid var(--success);
+        }
+
+        .tab-btn .step-num {
+            background: rgba(0,0,0,0.3);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tab-btn.completed .step-num {
+            background: var(--success);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title .icon {
+            font-size: 1.5rem;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.15);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info {
+            background: rgba(23, 162, 184, 0.15);
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            position: relative;
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block.powershell .code-header {
+            background: #1e3a5f;
+            color: #7ec8e3;
+        }
+
+        .code-block.bash .code-header {
+            background: #2d2d2d;
+            color: #98c379;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block.powershell pre {
+            background: var(--powershell-bg);
+            color: #dcdcdc;
+        }
+
+        .code-block.bash pre {
+            background: var(--bash-bg);
+            color: #f8f8f2;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: inherit;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            background: rgba(233, 84, 32, 0.2);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Checkbox List */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checklist li:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--success);
+        }
+
+        .checklist li.checked {
+            background: rgba(40, 167, 69, 0.15);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn.prev {
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+        }
+
+        .nav-btn.next {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.complete {
+            background: var(--success);
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 1rem 0;
+        }
+
+        .accordion-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .accordion-header .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-header .arrow {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-content {
+            max-height: 2000px;
+        }
+
+        .accordion-inner {
+            padding: 0 1rem 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs-nav {
+                position: relative;
+                top: 0;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding: 0.5rem;
+                gap: 0.3rem;
+            }
+
+            .tab-btn {
+                min-width: 100px;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .code-block pre {
+                font-size: 0.8rem;
+                padding: 0.8rem;
+            }
+        }
+
+        /* Scroll to top */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .scroll-top.visible {
+            display: flex;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-3px);
+            background: var(--primary-dark);
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, rgba(233, 84, 32, 0.3) 0%, rgba(119, 41, 83, 0.3) 100%);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        code:not(pre code) {
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        /* Links */
+        a {
+            color: #7ec8e3;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mark done button */
+        .mark-done {
+            background: transparent;
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .mark-done:hover, .mark-done.done {
+            background: var(--success);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>WSL2 Ubuntu 24.04 Installation Guide</h1>
+<p><strong>Lab observation:</strong> in practice, most WSL2 problems come from two places: (1) virtualisation features disabled in BIOS/UEFI or in Windows, and (2) a "skipped" reboot after installation. Quickly check with `wsl --status` and `wsl --list --verbose` before reinventing the wheel.</p>
+
+        <p class="subtitle">Operating Systems 2023-2027 - by Revolvix/github.com</p>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">Progress: <span id="progressText">0%</span> completed</div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs Navigation -->
+        <nav class="tabs-nav" id="tabsNav">
+            <button class="tab-btn active" data-tab="intro">
+                <span class="step-num">0</span>
+                <span class="tab-text">Start</span>
+            </button>
+            <button class="tab-btn" data-tab="tab1">
+                <span class="step-num">1</span>
+                <span class="tab-text">Check</span>
+            </button>
+            <button class="tab-btn" data-tab="tab2">
+                <span class="step-num">2</span>
+                <span class="tab-text">Enable</span>
+            </button>
+            <button class="tab-btn" data-tab="tab3">
+                <span class="step-num">3</span>
+                <span class="tab-text">Ubuntu</span>
+            </button>
+            <button class="tab-btn" data-tab="tab4">
+                <span class="step-num">4</span>
+                <span class="tab-text">Account</span>
+            </button>
+            <button class="tab-btn" data-tab="tab5">
+                <span class="step-num">5</span>
+                <span class="tab-text">Update</span>
+            </button>
+            <button class="tab-btn" data-tab="tab6">
+                <span class="step-num">6</span>
+                <span class="tab-text">Hostname</span>
+            </button>
+            <button class="tab-btn" data-tab="tab7">
+                <span class="step-num">7</span>
+                <span class="tab-text">Packages</span>
+            </button>
+            <button class="tab-btn" data-tab="tab8">
+                <span class="step-num">8</span>
+                <span class="tab-text">SSH</span>
+            </button>
+            <button class="tab-btn" data-tab="tab9">
+                <span class="step-num">9</span>
+                <span class="tab-text">PuTTY</span>
+            </button>
+            <button class="tab-btn" data-tab="tab10">
+                <span class="step-num">10</span>
+                <span class="tab-text">WinSCP</span>
+            </button>
+            <button class="tab-btn" data-tab="tab11">
+                <span class="step-num">11</span>
+                <span class="tab-text">Folders</span>
+            </button>
+            <button class="tab-btn" data-tab="tab12">
+                <span class="step-num">12</span>
+                <span class="tab-text">Verify</span>
+            </button>
+            <button class="tab-btn" data-tab="tab13">
+                <span class="step-num">13</span>
+                <span class="tab-text">Problems</span>
+            </button>
+            <button class="tab-btn" data-tab="tab14">
+                <span class="step-num">14</span>
+                <span class="tab-text">AI</span>
+            </button>
+        </nav>
+
+        <!-- Tab: Introduction -->
+        <div class="tab-content active" id="intro">
+            <div class="card">
+                <h2 class="card-title">Welcome!</h2>
+                
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>
+                        <strong>What is this guide?</strong><br>
+                        This guide will teach you step by step how to install Linux (Ubuntu) on your Windows computer. You do not need any prior knowledge - everything is explained from scratch.
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">What will you have at the end?</h3>
+                <p>A Linux system (Ubuntu 24.04) that runs directly in Windows, which you will use at seminars to learn commands and scripting.</p>
+
+                <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">How long does it take?</h3>
+                <p>Approximately <strong>30-60 minutes</strong>, depending on internet speed.</p>
+
+                <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">What do you need?</h3>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Computer with <strong>Windows 10</strong> or <strong>Windows 11</strong></li>
+                    <li>Internet connection</li>
+                    <li>Minimum <strong>10 GB</strong> free disk space</li>
+                </ul>
+
+                <div class="alert alert-warning" style="margin-top: 1.5rem;">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>IMPORTANT!</strong><br>
+                        Installation is <strong>MANDATORY</strong> before the first seminar. This guide will be checked at the first evaluation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">How to read this guide</h2>
+                
+                <p>In this guide you will see two types of commands:</p>
+
+                <h4 style="margin-top: 1rem; color: #7ec8e3;">PowerShell Commands (Windows)</h4>
+                <p>These are run in Windows and have a <strong>dark blue</strong> background:</p>
+                
+                <div class="code-block powershell">
+                    <div class="code-header">
+                        <span>🔵 POWERSHELL (Windows)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>wsl --version</pre>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; color: #98c379;">Bash Commands (Linux/Ubuntu)</h4>
+                <p>These are run in Ubuntu and have a <strong>black</strong> background:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu/Linux)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>ls -la</pre>
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">How to copy and paste commands</h4>
+                <ol style="margin-left: 1.5rem;">
+                    <li><strong>Click on the "📋 Copy" button</strong> in the top right corner of the command</li>
+                    <li><strong>Paste</strong> in terminal:
+                        <ul>
+                            <li>In PowerShell: <code>Ctrl+V</code> or right-click</li>
+                            <li>In Ubuntu/Bash: <code>Ctrl+Shift+V</code> or right-click</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="alert alert-danger" style="margin-top: 1rem;">
+                    <span class="alert-icon">🚫</span>
+                    <div>
+                        <strong>DO NOT modify the commands!</strong><br>
+                        Copy EXACTLY the command displayed, without modifying anything (except where it explicitly says to replace something with your data).
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" disabled>← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Start installation →</button>
+            </div>
+        </div>
+
+        <!-- Tab 1: System check -->
+        <div class="tab-content" id="tab1">
+            <div class="card">
+                <h2 class="card-title">1. Check if you can install WSL2</h2>
+
+                <h3>What is WSL2?</h3>
+                <p>WSL2 (Windows Subsystem for Linux 2) is a Windows feature that allows you to run Linux directly in Windows, without installing a separate operating system.</p>
+            </div>
+
+            <div class="card">
+                <h3>Check Windows version</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open the "Run" window</h4>
+                        <p>Press the <code>Windows + R</code> keys at the same time (the Windows key is the one with the Windows logo, next to Alt)</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Type the command</h4>
+                        <p>In the small window that appears (called "Run"), type:</p>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>Type in the Run window</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>winver</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Press Enter or click OK</h4>
+                        <p>A window with information about Windows opens.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Check the version</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <tr>
+                                    <th>Your system</th>
+                                    <th>What you need to have</th>
+                                </tr>
+                                <tr>
+                                    <td>Windows 10</td>
+                                    <td>Version 2004 or newer (Build 19041+)</td>
+                                </tr>
+                                <tr>
+                                    <td>Windows 11</td>
+                                    <td>Any version works ✅</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="alert alert-warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div>If your version is older, update Windows first (Settings → Windows Update)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Check if virtualisation is enabled</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open Task Manager</h4>
+                        <p>Press the keys <code>Ctrl + Shift + Esc</code> at the same time</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Expand the window (if needed)</h4>
+                        <p>If you see a simple window with little information, click on <strong>"More details"</strong> in the bottom left.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Go to Performance</h4>
+                        <p>Click on the <strong>"Performance"</strong> tab</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Select CPU</h4>
+                        <p>Click on <strong>"CPU"</strong> on the left side</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h4>Look for "Virtualization"</h4>
+                        <p>In the bottom right area, look for the text <strong>"Virtualization:"</strong></p>
+                        <div class="alert alert-success">
+                            <span class="alert-icon">✅</span>
+                            <div>If it says <strong>"Enabled"</strong> - you are OK, continue!</div>
+                        </div>
+                        <div class="alert alert-danger">
+                            <span class="alert-icon">❌</span>
+                            <div>If it says <strong>"Disabled"</strong> - you need to enable virtualisation from BIOS (see the Common problems section, tab 13)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab1')">✓ I have checked, everything is OK</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 2: Enable WSL -->
+        <div class="tab-content" id="tab2">
+            <div class="card">
+                <h2 class="card-title">2. Enable WSL and Virtual Machine Platform</h2>
+            </div>
+
+            <div class="card">
+                <h3>Open PowerShell as Administrator</h3>
+
+                <div class="alert alert-danger">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>VERY IMPORTANT!</strong><br>
+                        You must open PowerShell <strong>AS ADMINISTRATOR</strong>, otherwise the commands will NOT work!
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Click on the Start button</h4>
+                        <p>It is the button in the bottom left corner of the screen (with the Windows logo)</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Search for PowerShell</h4>
+                        <p>Type: <code>powershell</code></p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>RIGHT-click on the result</h4>
+                        <p>In the results appears <strong>"Windows PowerShell"</strong>. <strong>RIGHT</strong>-click on it (not left-click!)</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Select "Run as administrator"</h4>
+                        <p>From the menu that appears, click on <strong>"Run as administrator"</strong></p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h4>Confirm permissions</h4>
+                        <p>If a window appears asking "Do you want to allow this app to make changes?", click <strong>"Yes"</strong></p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <span class="alert-icon">💡</span>
+                    <div>
+                        <strong>How do you know you are Administrator?</strong><br>
+                        The window title must contain the word <strong>"Administrator"</strong><br>
+                        Example: "Administrator: Windows PowerShell"
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Enable WSL and Virtual Machine Platform</h3>
+                <p>Now you will run a few commands. Copy each command and paste it in PowerShell, then press Enter.</p>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Command 1 - Enable WSL</h4>
+                        <p>Copy this command, paste it in PowerShell and press Enter:</p>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem; color: var(--gray);">Wait for it to finish (1-2 minutes). You will see the message "The operation completed successfully."</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Command 2 - Enable Virtual Machine Platform</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem; color: var(--gray);">Again you will see "The operation completed successfully."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(255, 193, 7, 0.2)); border: 2px solid var(--warning);">
+                <h3>RESTART THE COMPUTER</h3>
+                
+                <div class="alert alert-danger">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>MANDATORY!</strong> You must restart the computer NOW!
+                    </div>
+                </div>
+
+                <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+                    <li>Save any open work</li>
+                    <li>Click <strong>Start → Power → Restart</strong></li>
+                    <li>Wait for it to restart completely</li>
+                    <li>After restart, return to this guide and continue with the next step</li>
+                </ol>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab2')">✓ I have restarted the computer</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">I have restarted, continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: Install Ubuntu -->
+        <div class="tab-content" id="tab3">
+            <div class="card">
+                <h2 class="card-title">3. Install Ubuntu</h2>
+                
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>Make sure you have restarted the computer at the previous step!</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Open PowerShell as Administrator again</h3>
+                <p>Follow the same steps as before: Start → type "powershell" → right-click → "Run as administrator" → Yes</p>
+            </div>
+
+            <div class="card">
+                <h3>Install WSL2 kernel and Ubuntu</h3>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Download kernel update</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>Invoke-WebRequest -Uri https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi -OutFile wsl_update_x64.msi -UseBasicParsing</pre>
+                        </div>
+                        <p style="color: var(--gray);">Wait for it to download (1-2 minutes).</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Install the update</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>msiexec /i wsl_update_x64.msi /quiet</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Set WSL2 as default version</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>wsl --set-default-version 2</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Update WSL</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>wsl --update</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h4>Install Ubuntu 24.04</h4>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL (Administrator)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>wsl --install -d Ubuntu-24.04</pre>
+                        </div>
+                        <div class="alert alert-info" style="margin-top: 1rem;">
+                            <span class="alert-icon">⏳</span>
+                            <div>
+                                <strong>What is happening now:</strong>
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Windows downloads Ubuntu (around 2 GB)</li>
+                                    <li>May take 5-15 minutes depending on internet speed</li>
+                                    <li>At the end, a new window with Ubuntu will open automatically</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab3')">✓ Ubuntu has been installed</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 4: Account configuration -->
+        <div class="tab-content" id="tab4">
+            <div class="card">
+                <h2 class="card-title">4. Configure your Linux account</h2>
+            </div>
+
+            <div class="card">
+                <h3>The Ubuntu window</h3>
+                <p>After installation, a black window (Ubuntu terminal) has opened automatically. If it did not open, search for "Ubuntu" in Start and open it.</p>
+            </div>
+
+            <div class="card">
+                <h3>Create your user</h3>
+                
+                <p>Ubuntu will ask you to create an account. You will see the message:</p>
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>What you see on screen</span>
+                    </div>
+                    <pre>Enter new UNIX username:</pre>
+                </div>
+
+                <div class="alert alert-warning" style="margin-top: 1rem;">
+                    <span class="alert-icon">📌</span>
+                    <div>
+                        <strong>WHAT TO TYPE:</strong> Your surname, in lowercase, without diacritics!
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th>If your name is</th>
+                            <th>You type</th>
+                        </tr>
+                        <tr><td>Popescu Ion</td><td><code>popescu</code></td></tr>
+                        <tr><td>Ionescu Maria</td><td><code>ionescu</code></td></tr>
+                        <tr><td>Ștefănescu Dan</td><td><code>stefanescu</code></td></tr>
+                        <tr><td>Bălan Ana</td><td><code>balan</code></td></tr>
+                        <tr><td>O'Brien John</td><td><code>obrien</code></td></tr>
+                    </table>
+                </div>
+
+                <p style="margin-top: 1rem;">Type your surname and press <strong>Enter</strong>.</p>
+            </div>
+
+            <div class="card">
+                <h3>Create password</h3>
+                
+                <p>You will see:</p>
+                <div class="code-block bash">
+                    <div class="code-header"><span>What you see on screen</span></div>
+                    <pre>New password:</pre>
+                </div>
+
+                <div class="alert alert-danger" style="margin-top: 1rem;">
+                    <span class="alert-icon">🔒</span>
+                    <div>
+                        <strong>VERY IMPORTANT!</strong><br>
+                        When you type the password, <strong>YOU WILL NOT SEE ANYTHING ON SCREEN</strong> - no stars, no dots, NOTHING!<br>
+                        This is normal for Linux. Type the password anyway and press Enter.
+                    </div>
+                </div>
+
+                <p><strong>WHAT TO TYPE:</strong> <code>stud</code></p>
+                <p>Then you will see "Retype new password:" - type <code>stud</code> again and press Enter.</p>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(0, 255, 136, 0.1));">
+                <h3>Done!</h3>
+                <p>If everything went well, you will see a welcome message and a prompt that looks like this:</p>
+                <div class="code-block bash">
+                    <div class="code-header"><span>Ubuntu prompt</span></div>
+                    <pre>popescu@DESKTOP-XXXXX:~$</pre>
+                </div>
+                <p style="margin-top: 0.5rem;">(Instead of "popescu" will be your surname)</p>
+                <p style="margin-top: 1rem; font-size: 1.2rem;"><strong>🎊 Congratulations! You have installed Ubuntu!</strong></p>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab4')">✓ I have created the account</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 5: System update -->
+        <div class="tab-content" id="tab5">
+            <div class="card">
+                <h2 class="card-title">5. Update the system</h2>
+                
+                <p>Just like Windows has Windows Update, Linux has its own update system. You need to update the system to have the latest versions and security patches.</p>
+            </div>
+
+            <div class="card">
+                <h3>Run the update</h3>
+                
+                <p>In the Ubuntu window (the black one), copy and paste the following command, then press Enter:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo apt update && sudo apt -y upgrade</pre>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: 1rem;">
+                    <span class="alert-icon">⏳</span>
+                    <div>
+                        <strong>What is happening:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li>The system downloads and installs all updates</li>
+                            <li>May take <strong>5-15 minutes</strong></li>
+                            <li>You will see a lot of text on screen - this is normal</li>
+                            <li>Wait until the prompt <code>$</code> reappears</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p style="margin-top: 1rem;">If it asks for password, type <code>stud</code> and press Enter.</p>
+            </div>
+
+            <div class="card">
+                <h3>Configure timezone</h3>
+                
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo timedatectl set-timezone Europe/Bucharest</pre>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab5')">✓ I have updated the system</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 6: Hostname configuration -->
+        <div class="tab-content" id="tab6">
+            <div class="card">
+                <h2 class="card-title">6. Configure the hostname</h2>
+                
+                <p>The hostname is the name of your Ubuntu system. At seminars, we will identify you by this name.</p>
+            </div>
+
+            <div class="card">
+                <h3>Hostname format</h3>
+                <p>Format: <code>INITIAL_GROUP_SERIES</code></p>
+                <p>Where:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>INITIAL</strong> = First letter of first name + First letter of surname</li>
+                    <li><strong>GROUP</strong> = Your group number (e.g.: 1001, 2034)</li>
+                    <li><strong>SERIES</strong> = Your series (A, B, C, etc.)</li>
+                </ul>
+
+                <div class="table-responsive" style="margin-top: 1rem;">
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Group</th>
+                            <th>Series</th>
+                            <th>Hostname</th>
+                        </tr>
+                        <tr><td>Ana Popescu</td><td>1001</td><td>A</td><td><code>AP_1001_A</code></td></tr>
+                        <tr><td>Ion Marin Ionescu</td><td>2034</td><td>B</td><td><code>IMI_2034_B</code></td></tr>
+                        <tr><td>Maria Stan</td><td>1502</td><td>C</td><td><code>MS_1502_C</code></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Note down your data</h3>
+                <p>Before you proceed, fill in:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>Your initials:</strong> First letter of first name + first letter of surname</li>
+                    <li><strong>Your group:</strong> Group number (e.g.: 1001, 2034)</li>
+                    <li><strong>Your series:</strong> A, B, C, etc.</li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Your hostname will be:</strong> <code>_____________________</code> (note it down!)</p>
+            </div>
+
+            <div class="card">
+                <h3>Create the configuration file</h3>
+                
+                <div class="alert alert-danger">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>REPLACE</strong> the text <code>INITIAL_GROUP_SERIES</code> with YOUR hostname before copying the command!
+                    </div>
+                </div>
+
+                <p>For example, for Ana Popescu, group 1001, series A, the command becomes:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH - Example for AP_1001_A</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo tee /etc/wsl.conf &lt;&lt; 'EOF'
+[network]
+hostname = AP_1001_A
+generateHosts = false
+
+[boot]
+systemd = true
+EOF</pre>
+                </div>
+
+                <p style="margin-top: 1rem;">If it asks for password, type <code>stud</code> and press Enter.</p>
+            </div>
+
+            <div class="card">
+                <h3>Add hostname to hosts file</h3>
+                
+                <p>Again, <strong>REPLACE</strong> <code>INITIAL_GROUP_SERIES</code> with your hostname:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH - Example for AP_1001_A</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>echo "127.0.0.1    AP_1001_A" | sudo tee -a /etc/hosts</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Apply changes</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Close Ubuntu</h4>
+                        <p>Type <code>exit</code> and press Enter, or close the window.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Stop WSL</h4>
+                        <p>Open PowerShell (does not need to be Administrator) and run:</p>
+                        <div class="code-block powershell">
+                            <div class="code-header">
+                                <span>🔵 POWERSHELL</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>wsl --shutdown</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Reopen Ubuntu</h4>
+                        <p>Open Ubuntu again from Start.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Verify the hostname</h4>
+                        <div class="code-block bash">
+                            <div class="code-header">
+                                <span>⬛ BASH (Ubuntu)</span>
+                                <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                            </div>
+                            <pre>hostname</pre>
+                        </div>
+                        <p>You should see your hostname (e.g.: <code>AP_1001_A</code>).</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab6')">✓ I have configured the hostname</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 7: Install packages -->
+        <div class="tab-content" id="tab7">
+            <div class="card">
+                <h2 class="card-title">7. Install required software</h2>
+                
+                <p>For seminars and projects, you will need various Linux tools. This command installs them all at once.</p>
+            </div>
+
+            <div class="card">
+                <h3>Install everything you need</h3>
+                
+                <p>Copy and paste this command in Ubuntu:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu) - One long command</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo apt update && sudo apt install -y build-essential git curl wget nano vim tree htop net-tools openssh-server man-db manpages-posix gawk sed grep coreutils findutils diffutils procps sysstat lsof tar gzip bzip2 xz-utils zstd zip unzip p7zip-full iproute2 iputils-ping dnsutils netcat-openbsd traceroute nmap tcpdump gcc g++ make cmake gdb valgrind python3 python3-pip python3-venv shellcheck jq bc figlet cowsay ncdu pv dialog</pre>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: 1rem;">
+                    <span class="alert-icon">⏳</span>
+                    <div>
+                        <strong>What is happening:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li>The system downloads and installs all required software</li>
+                            <li>May take <strong>5-15 minutes</strong></li>
+                            <li>You will see a lot of text on screen - this is normal</li>
+                            <li>Wait until the prompt <code>$</code> reappears</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Install required Python libraries</h3>
+                
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>pip3 install --break-system-packages rich tabulate psutil</pre>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab7')">✓ I have installed the packages</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 8: SSH Configuration -->
+        <div class="tab-content" id="tab8">
+            <div class="card">
+                <h2 class="card-title">8. Configure SSH access</h2>
+                
+                <p>SSH (Secure Shell) is a protocol that allows you to connect to a Linux computer remotely. We will install the SSH server to be able to use PuTTY later.</p>
+            </div>
+
+            <div class="card">
+                <h3>Start the SSH service</h3>
+                
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo service ssh start</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Verify that it is working</h3>
+                
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>sudo service ssh status</pre>
+                </div>
+                
+                <p style="margin-top: 0.5rem;">You should see something like "Active: <strong>active (running)</strong>".</p>
+                <p>Press the <code>q</code> key to exit this screen.</p>
+            </div>
+
+            <div class="card">
+                <h3>Find out the IP address</h3>
+                
+                <p>To connect with PuTTY, you need the IP address of Ubuntu:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>hostname -I</pre>
+                </div>
+
+                <div class="alert alert-warning" style="margin-top: 1rem;">
+                    <span class="alert-icon">📝</span>
+                    <div>
+                        <strong>NOTE DOWN this IP address!</strong><br>
+                        You will see an address like <code>172.XX.XX.XX</code><br>
+                        You will use it at the next step for PuTTY.
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab8')">✓ SSH is working</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 9: PuTTY Configuration -->
+        <div class="tab-content" id="tab9">
+            <div class="card">
+                <h2 class="card-title">9. Install and configure PuTTY</h2>
+                
+                <p>PuTTY is a Windows program that allows you to connect to Linux via SSH. It is like another type of window for working in Ubuntu.</p>
+            </div>
+
+            <div class="card">
+                <h3>Download and install PuTTY</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open browser</h4>
+                        <p>Chrome, Firefox, Edge - any of them.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Go to address:</h4>
+                        <p><a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html" target="_blank">https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html</a></p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Download the appropriate version</h4>
+                        <p>At the "MSI (Windows Installer)" section, download version <strong>64-bit x86</strong></p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Install</h4>
+                        <p>Open the downloaded file and click Next → Next → Install → Finish</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Configure PuTTY</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open PuTTY</h4>
+                        <p>From Start, search for "PuTTY" and open it.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Configure connection</h4>
+                        <p>In the main screen (Session):</p>
+                        <ul style="margin-left: 1.5rem;">
+                            <li><strong>Host Name:</strong> the IP address noted at the previous step (e.g.: <code>172.24.123.45</code>)</li>
+                            <li><strong>Port:</strong> <code>22</code></li>
+                            <li><strong>Connection type:</strong> <code>SSH</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Configure colours (black background, white text)</h4>
+                        <ol style="margin-left: 1.5rem;">
+                            <li>In the left menu, click on <strong>Window → Colours</strong></li>
+                            <li>Select <strong>"Default Background"</strong> from the list</li>
+                            <li>Click <strong>Modify...</strong></li>
+                            <li>Set: Red: <code>0</code>, Green: <code>0</code>, Blue: <code>0</code></li>
+                            <li>Click <strong>OK</strong></li>
+                            <li>Select <strong>"Default Foreground"</strong></li>
+                            <li>Click <strong>Modify...</strong></li>
+                            <li>Set: Red: <code>255</code>, Green: <code>255</code>, Blue: <code>255</code></li>
+                            <li>Click <strong>OK</strong></li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Configure font</h4>
+                        <ol style="margin-left: 1.5rem;">
+                            <li>In the left menu, click on <strong>Window → Appearance</strong></li>
+                            <li>At "Font settings", click <strong>Change...</strong></li>
+                            <li>Select: Font: <code>Consolas</code>, Size: <code>12</code></li>
+                            <li>Click <strong>OK</strong></li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h4>Configure auto-login</h4>
+                        <ol style="margin-left: 1.5rem;">
+                            <li>In the left menu, click on <strong>Connection → Data</strong></li>
+                            <li>At <strong>"Auto-login username"</strong>, type your name (e.g.: <code>popescu</code>)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">6</span>
+                    <div class="step-content">
+                        <h4>Save the session</h4>
+                        <ol style="margin-left: 1.5rem;">
+                            <li>Go back to <strong>Session</strong> (in the left menu)</li>
+                            <li>At <strong>"Saved Sessions"</strong>, type: <code>Ubuntu-WSL2-SO</code></li>
+                            <li>Click <strong>Save</strong></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Connect for the first time</h3>
+                
+                <ol style="margin-left: 1.5rem;">
+                    <li>Make sure Ubuntu is running (the black window should be open)</li>
+                    <li>In PuTTY, double-click on the saved session "Ubuntu-WSL2-SO"</li>
+                    <li>At the first connection, you will see a security message - click <strong>Accept</strong> or <strong>Yes</strong></li>
+                    <li>Type the password: <code>stud</code> (you will not see it as you type)</li>
+                    <li>Press <strong>Enter</strong></li>
+                </ol>
+
+                <div class="alert alert-success" style="margin-top: 1rem;">
+                    <span class="alert-icon">✅</span>
+                    <div>If you see the prompt <code>$</code>, PuTTY works!</div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab9')">✓ PuTTY is working</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 10: WinSCP -->
+        <div class="tab-content" id="tab10">
+            <div class="card">
+                <h2 class="card-title">10. Install WinSCP (file transfer)</h2>
+                
+                <p>WinSCP is a program that allows you to copy files between Windows and Ubuntu, using a graphical interface (like Windows Explorer).</p>
+            </div>
+
+            <div class="card">
+                <h3>Download and install WinSCP</h3>
+                
+                <ol style="margin-left: 1.5rem;">
+                    <li>Go to: <a href="https://winscp.net/eng/download.php" target="_blank">winscp.net/eng/download.php</a></li>
+                    <li>Click on <strong>Download WinSCP</strong></li>
+                    <li>Open the downloaded file and install:
+                        <ul>
+                            <li>Select "Typical installation"</li>
+                            <li>Click Next, Next, Install, Finish</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>Configure connection</h3>
+                
+                <ol style="margin-left: 1.5rem;">
+                    <li>Open WinSCP from Start</li>
+                    <li>In the "Login" window that appears:
+                        <ul>
+                            <li><strong>File protocol:</strong> <code>SFTP</code></li>
+                            <li><strong>Host name:</strong> Ubuntu's IP address</li>
+                            <li><strong>Port number:</strong> <code>22</code></li>
+                            <li><strong>User name:</strong> your name (e.g.: <code>popescu</code>)</li>
+                            <li><strong>Password:</strong> <code>stud</code></li>
+                        </ul>
+                    </li>
+                    <li>Click <strong>Save</strong></li>
+                    <li>Give the session a name: <code>Ubuntu-WSL2-Files</code></li>
+                    <li>Tick <strong>"Save password"</strong> if you want</li>
+                    <li>Click <strong>OK</strong></li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>Connect and transfer files</h3>
+                
+                <ol style="margin-left: 1.5rem;">
+                    <li>Make sure Ubuntu is running</li>
+                    <li>Select the saved session and click <strong>Login</strong></li>
+                    <li>At first connection, click <strong>Yes</strong> at the security message</li>
+                    <li>Now you see two panels:
+                        <ul>
+                            <li><strong>Left:</strong> Your Windows files</li>
+                            <li><strong>Right:</strong> Ubuntu files</li>
+                        </ul>
+                    </li>
+                    <li>To transfer files, <strong>drag & drop</strong> from left to right or vice versa</li>
+                </ol>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab10')">✓ WinSCP is working</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 11: Create folders -->
+        <div class="tab-content" id="tab11">
+            <div class="card">
+                <h2 class="card-title">11. Create working folders</h2>
+                
+                <p>At seminars you will create many files. It is important to organise them in a clear structure.</p>
+            </div>
+
+            <div class="card">
+                <h3>Create the folders</h3>
+                
+                <p>In Ubuntu (either in the black window or via PuTTY), run:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>mkdir -p ~/Books ~/HomeworksOLD ~/Projects ~/ScriptsSTUD ~/test ~/TXT</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>What each folder is for</h3>
+                
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th>Folder</th>
+                            <th>What you use it for</th>
+                        </tr>
+                        <tr><td><code>Books</code></td><td>Books, PDFs, study materials</td></tr>
+                        <tr><td><code>HomeworksOLD</code></td><td>Old homework, for reference</td></tr>
+                        <tr><td><code>Projects</code></td><td>Semester project and other projects</td></tr>
+                        <tr><td><code>ScriptsSTUD</code></td><td>Scripts you make at seminars</td></tr>
+                        <tr><td><code>test</code></td><td>Folder for tests and experiments</td></tr>
+                        <tr><td><code>TXT</code></td><td>Various text files, notes</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Verify that they were created</h3>
+                
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu)</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>ls -la ~</pre>
+                </div>
+                
+                <p style="margin-top: 0.5rem;">You should see all folders listed.</p>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab11')">✓ I have created the folders</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 12: Verify installation -->
+        <div class="tab-content" id="tab12">
+            <div class="card">
+                <h2 class="card-title">12. Verify the installation</h2>
+                
+                <p>Run this command that checks if everything is installed correctly.</p>
+            </div>
+
+            <div class="card">
+                <h3>Verification script</h3>
+                
+                <p>Copy and run this command in Ubuntu:</p>
+
+                <div class="code-block bash">
+                    <div class="code-header">
+                        <span>⬛ BASH (Ubuntu) - Verification command</span>
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    </div>
+                    <pre>echo "" && echo "========================================" && echo "   INSTALLATION VERIFICATION - OS Revolvix" && echo "========================================" && echo "" && echo ">>> System information:" && echo "Hostname: $(hostname)" && echo "User: $(whoami)" && echo "Ubuntu: $(lsb_release -d 2>/dev/null | cut -f2)" && echo "Kernel: $(uname -r)" && echo "" && echo ">>> Network:" && echo "IP: $(hostname -I | awk '{print $1}')" && ping -c 1 google.com > /dev/null 2>&1 && echo "Internet: OK" || echo "Internet: NO CONNECTION" && echo "" && echo ">>> Essential commands:" && for cmd in bash git nano vim gcc python3 ssh tree htop awk sed grep find tar gzip; do command -v $cmd > /dev/null 2>&1 && echo "  [OK] $cmd" || echo "  [MISSING] $cmd"; done && echo "" && echo ">>> SSH:" && sudo service ssh status 2>/dev/null | grep -q "running" && echo "  SSH server: ACTIVE" || echo "  SSH server: INACTIVE" && echo "" && echo ">>> Folders:" && for dir in Books HomeworksOLD Projects ScriptsSTUD test TXT; do [ -d ~/$dir ] && echo "  [OK] ~/$dir" || echo "  [MISSING] ~/$dir"; done && echo "" && echo "========================================" && echo "   VERIFICATION COMPLETE!" && echo "========================================"</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>What you should see</h3>
+                
+                <p>If everything is OK, you should see:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>✅ Your hostname (e.g.: <code>AP_1001_A</code>)</li>
+                    <li>✅ Your username (e.g.: <code>popescu</code>)</li>
+                    <li>✅ Ubuntu 24.04</li>
+                    <li>✅ IP</li>
+                    <li>✅ Internet: OK</li>
+                    <li>✅ All commands with [OK]</li>
+                    <li>✅ SSH server: ACTIVE</li>
+                    <li>✅ All folders with [OK]</li>
+                </ul>
+
+                <div class="alert alert-warning" style="margin-top: 1rem;">
+                    <span class="alert-icon">⚠️</span>
+                    <div>If you see anything with [MISSING] or NO CONNECTION, check the previous steps.</div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Verification showed everything OK</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 13: Common problems -->
+        <div class="tab-content" id="tab13">
+            <div class="card">
+                <h2 class="card-title">13. Common problems and solutions</h2>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ "WSL 2 requires an update to its kernel component"</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Solution:</strong> Open PowerShell as Administrator and run:</p>
+                            <div class="code-block powershell">
+                                <div class="code-header">
+                                    <span>🔵 POWERSHELL (Administrator)</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                </div>
+                                <pre>wsl --update</pre>
+                            </div>
+                            <p>Then restart the computer.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ Virtualisation is not enabled (Error: 0x80370102)</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Solution:</strong></p>
+                            <ol style="margin-left: 1.5rem;">
+                                <li>Restart the computer</li>
+                                <li>When it starts, quickly press the BIOS key (usually <code>Del</code>, <code>F2</code>, <code>F10</code>, or <code>F12</code> - depends on manufacturer)</li>
+                                <li>Look in menus for the option "Virtualization Technology", "VT-x", "AMD-V" or "SVM"</li>
+                                <li>Change from "Disabled" to "Enabled"</li>
+                                <li>Save and exit (usually the <code>F10</code> key)</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ Cannot paste commands in Ubuntu</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Solution:</strong> In the Ubuntu window, use:</p>
+                            <ul style="margin-left: 1.5rem;">
+                                <li><strong>Right-click</strong> to paste, or</li>
+                                <li><code>Ctrl+Shift+V</code> (not just <code>Ctrl+V</code>)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ I forgot the password</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Solution:</strong> Open PowerShell and run:</p>
+                            <div class="code-block powershell">
+                                <div class="code-header">
+                                    <span>🔵 POWERSHELL</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                </div>
+                                <pre>wsl -u root</pre>
+                            </div>
+                            <p>Now you are root (administrator). Change the password (replace <code>yourname</code> with your username):</p>
+                            <div class="code-block bash">
+                                <div class="code-header">
+                                    <span>⬛ BASH (as root)</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                </div>
+                                <pre>passwd yourname</pre>
+                            </div>
+                            <p>Type the new password twice, then type <code>exit</code> to exit.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ SSH does not start</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Solution:</strong> Run in Ubuntu:</p>
+                            <div class="code-block bash">
+                                <div class="code-header">
+                                    <span>⬛ BASH (Ubuntu)</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                </div>
+                                <pre>sudo apt install --reinstall openssh-server</pre>
+                            </div>
+                            <p>Then start SSH:</p>
+                            <div class="code-block bash">
+                                <div class="code-header">
+                                    <span>⬛ BASH (Ubuntu)</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                                </div>
+                                <pre>sudo service ssh start</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ Cannot connect with PuTTY</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p><strong>Check:</strong></p>
+                            <ol style="margin-left: 1.5rem;">
+                                <li>Is Ubuntu running? (the black window must be open)</li>
+                                <li>Is SSH started? Run in Ubuntu: <code>sudo service ssh status</code></li>
+                                <li>Is the IP address correct? Run in Ubuntu: <code>hostname -I</code></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 14: AI -->
+        <div class="tab-content" id="tab14">
+            <div class="card">
+                <h2 class="card-title">14. How to use AI assistants</h2>
+            </div>
+
+            <div class="card">
+                <h3>Why AI assistants?</h3>
+                <p>AI assistants (such as ChatGPT, Claude, Gemini) can help you understand concepts and solve problems. They are like a tutor available 24/7.</p>
+                
+                <h4 style="margin-top: 1rem;">Recommended assistants:</h4>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>Claude</strong> - <a href="https://claude.ai" target="_blank">claude.ai</a></li>
+                    <li><strong>ChatGPT</strong> - <a href="https://chat.openai.com" target="_blank">chat.openai.com</a></li>
+                    <li><strong>Gemini</strong> - <a href="https://gemini.google.com" target="_blank">gemini.google.com</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>What you are allowed to do with AI</h3>
+                <ul style="margin-left: 1.5rem;">
+                    <li>✅ Ask for explanations for concepts you do not understand</li>
+                    <li>✅ Ask why you get an error and how to fix it</li>
+                    <li>✅ Ask for alternative approaches to a problem</li>
+                    <li>✅ Ask to have code explained step by step</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>What you are NOT allowed to do with AI</h3>
+                <ul style="margin-left: 1.5rem;">
+                    <li>❌ Copy solutions directly for homework</li>
+                    <li>❌ Submit AI-generated code as your own without understanding it</li>
+                    <li>❌ Use AI during exams (unless explicitly allowed)</li>
+                </ul>
+                
+                <div class="alert alert-danger" style="margin-top: 1rem;">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>Attention!</strong><br>
+                        Using AI to cheat is plagiarism and will be penalised according to faculty regulations.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(0, 255, 136, 0.1)); border: 2px solid var(--success);">
+                <h2>Congratulations!</h2>
+                <p>You have finished installing and configuring WSL2 with Ubuntu!</p>
+                
+                <h3 style="margin-top: 1rem;">Final checklist</h3>
+                <ul class="checklist" id="finalChecklist">
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> WSL2 installed and updated</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Ubuntu 24.04 LTS installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Account created with surname</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Password set (stud)</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Hostname configured (INITIAL_GROUP_SERIES)</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> System updated</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Software packages installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> SSH working</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> PuTTY installed and configured</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> WinSCP installed and configured</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Folders created</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Verification showed everything OK</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next complete" onclick="alert('🎉 Congratulations! You have completed the guide!')">✓ Done!</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
+
+    <footer class="footer">
+        <p>Operating Systems 2023-2027 - by Revolvix/github.com</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 4.2 - Interactive guide for students</p>
+    </footer>
+
+    <script>
+        // Tab functionality
+        let currentTab = 'intro';
+        const tabs = ['intro', 'tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10', 'tab11', 'tab12', 'tab13', 'tab14'];
+        const completedTabs = new Set();
+
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate button
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            currentTab = tabId;
+            updateProgress();
+            
+            // Scroll to top of content
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        function nextTab() {
+            const currentIndex = tabs.indexOf(currentTab);
+            if (currentIndex < tabs.length - 1) {
+                showTab(tabs[currentIndex + 1]);
+            }
+        }
+
+        function prevTab() {
+            const currentIndex = tabs.indexOf(currentTab);
+            if (currentIndex > 0) {
+                showTab(tabs[currentIndex - 1]);
+            }
+        }
+
+        // Tab button clicks
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                showTab(btn.dataset.tab);
+            });
+        });
+
+        // Copy code functionality
+        function copyCode(btn) {
+            const pre = btn.closest('.code-block').querySelector('pre');
+            const text = pre.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Mark as done
+        function markDone(btn, tabId) {
+            btn.classList.add('done');
+            btn.textContent = '✓ Completed!';
+            completedTabs.add(tabId);
+            
+            // Mark tab button as completed
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('completed');
+            
+            updateProgress();
+        }
+
+        // Update progress
+        function updateProgress() {
+            const progress = (completedTabs.size / (tabs.length - 1)) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }
+
+        // Accordion
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle('open');
+        }
+
+        // Checklist
+        function toggleCheck(li) {
+            li.classList.toggle('checked');
+            const checkbox = li.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show/hide scroll button
+        window.addEventListener('scroll', () => {
+            const scrollBtn = document.getElementById('scrollTop');
+            if (window.scrollY > 500) {
+                scrollBtn.classList.add('visible');
+            } else {
+                scrollBtn.classList.remove('visible');
+            }
+        });
+
+        // Load saved progress from localStorage
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('wsl2-progress');
+            if (saved) {
+                const savedTabs = JSON.parse(saved);
+                savedTabs.forEach(tabId => {
+                    completedTabs.add(tabId);
+                    const btn = document.querySelector(`[data-tab="${tabId}"]`);
+                    if (btn) btn.classList.add('completed');
+                });
+                updateProgress();
+            }
+        });
+
+        // Save progress
+        function saveProgress() {
+            localStorage.setItem('wsl2-progress', JSON.stringify([...completedTabs]));
+        }
+
+        // Save on tab complete
+        const originalMarkDone = markDone;
+        markDone = function(btn, tabId) {
+            originalMarkDone(btn, tabId);
+            saveProgress();
+        };
+    </script>
+</body>
+</html>

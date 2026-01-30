@@ -1,0 +1,96 @@
+' ============================================================================
+' OS Kit - Common Configuration for PlantUML Diagrams
+' ============================================================================
+' Include this file in your diagrams with: !include ../common/skin.puml
+' ============================================================================
+
+' Global settings for A4 and high resolution
+skinparam dpi 300
+skinparam defaultFontName "Segoe UI, Helvetica, Arial, sans-serif"
+skinparam defaultFontSize 12
+skinparam shadowing false
+
+' Consistent colour palette
+!define COLOR_PRIMARY #2C3E50
+!define COLOR_SECONDARY #3498DB
+!define COLOR_SUCCESS #27AE60
+!define COLOR_WARNING #F39C12
+!define COLOR_DANGER #E74C3C
+!define COLOR_INFO #17A2B8
+!define COLOR_LIGHT #ECF0F1
+!define COLOR_DARK #1A252F
+
+' Colours for OS-specific components
+!define COLOR_KERNEL #8E44AD
+!define COLOR_USER #3498DB
+!define COLOR_PROCESS #27AE60
+!define COLOR_MEMORY #E67E22
+!define COLOR_DISK #95A5A6
+!define COLOR_CPU #E74C3C
+
+' Styles for state diagrams
+skinparam state {
+    BackgroundColor COLOR_LIGHT
+    BorderColor COLOR_PRIMARY
+    FontColor COLOR_DARK
+    StartColor COLOR_SUCCESS
+    EndColor COLOR_DANGER
+    ArrowColor COLOR_PRIMARY
+}
+
+' Styles for sequence diagrams
+skinparam sequence {
+    ArrowColor COLOR_PRIMARY
+    LifeLineBorderColor COLOR_SECONDARY
+    LifeLineBackgroundColor COLOR_LIGHT
+    ParticipantBackgroundColor COLOR_LIGHT
+    ParticipantBorderColor COLOR_PRIMARY
+    ActorBorderColor COLOR_PRIMARY
+}
+
+' Styles for activity diagrams
+skinparam activity {
+    BackgroundColor COLOR_LIGHT
+    BorderColor COLOR_PRIMARY
+    StartColor COLOR_SUCCESS
+    EndColor COLOR_DANGER
+    BarColor COLOR_PRIMARY
+    ArrowColor COLOR_PRIMARY
+    DiamondBackgroundColor COLOR_WARNING
+    DiamondBorderColor COLOR_PRIMARY
+}
+
+' Styles for component diagrams
+skinparam component {
+    BackgroundColor COLOR_LIGHT
+    BorderColor COLOR_PRIMARY
+    FontColor COLOR_DARK
+}
+
+' Styles for package/folder
+skinparam package {
+    BackgroundColor #FAFAFA
+    BorderColor COLOR_PRIMARY
+    FontColor COLOR_PRIMARY
+}
+
+' Styles for notes
+skinparam note {
+    BackgroundColor #FFFDE7
+    BorderColor COLOR_WARNING
+}
+
+' Styles for class diagrams
+skinparam class {
+    BackgroundColor COLOR_LIGHT
+    BorderColor COLOR_PRIMARY
+    HeaderBackgroundColor COLOR_PRIMARY
+    FontColor COLOR_DARK
+}
+
+' Legend macro
+!definelong LEGEND(text)
+legend right
+  text
+endlegend
+!enddefinelong
