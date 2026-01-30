@@ -1,0 +1,178 @@
+# C08_05_FORMATIVE_ASSESSMENT.yaml
+# Course 8: Deadlock (Coffman Conditions)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 8
+  subiect: "Deadlock (Coffman Conditions)"
+  versiune: "2.0"
+  data_creare: "2026-01-28"
+  autor: "by Revolvix"
+  numar_intrebari: 12
+  timp_estimat_minute: 15
+  distributie_bloom:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    dificultate: usor
+    text: "What is a deadlock?"
+    optiuni:
+      - "A computer virus"
+      - "A situation in which processes mutually block each other, waiting for resources held by the others"
+      - "A compilation error"
+      - "A type of memory"
+    corect: 1
+    explicatie: "Deadlock = impasse: each process waits for a resource held by another process in the group."
+
+  - id: q02
+    bloom: remember
+    dificultate: usor
+    text: "What are the 4 Coffman conditions for deadlock?"
+    optiuni:
+      - "Read, write, execute, delete"
+      - "Mutual exclusion, hold and wait, no preemption, circular wait"
+      - "Lock, unlock, signal, wait"
+      - "Create, destroy, modify, access"
+    corect: 1
+    explicatie: "All 4 must be true simultaneously for deadlock to be possible."
+
+  - id: q03
+    bloom: remember
+    dificultate: usor
+    text: "What is a Resource Allocation Graph (RAG)?"
+    optiuni:
+      - "A sorting algorithm"
+      - "A graph showing allocation and request relationships between processes and resources"
+      - "A type of memory"
+      - "A network protocol"
+    corect: 1
+    explicatie: "RAG: nodes = processes and resources, edges = allocations and requests. A cycle indicates potential deadlock."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    dificultate: mediu
+    text: "How can the 'circular wait' condition be prevented?"
+    optiuni:
+      - "By encrypting resources"
+      - "By imposing a total order on resource acquisition"
+      - "By increasing memory"
+      - "By disabling interrupts"
+    corect: 1
+    explicatie: "If all processes acquire resources in the same order, a cycle cannot form."
+
+  - id: q05
+    bloom: understand
+    dificultate: mediu
+    text: "What does 'hold and wait' mean and how can it be eliminated?"
+    optiuni:
+      - "Hold and wait = busy waiting"
+      - "A process that holds resources and waits for others; eliminated through atomic acquisition (all or nothing)"
+      - "It is an optimisation method"
+      - "It cannot be eliminated"
+    corect: 1
+    explicatie: "Solution: the process requests all resources simultaneously, or releases held ones before requesting others."
+
+  - id: q06
+    bloom: understand
+    dificultate: mediu
+    text: "What is a 'safe' state in the context of the Banker's Algorithm?"
+    optiuni:
+      - "The system has no viruses"
+      - "There exists an execution sequence in which all processes can complete"
+      - "Memory is sufficient"
+      - "The CPU is not overloaded"
+    corect: 1
+    explicatie: "Safe state = at least one safe sequence exists: processes complete without deadlock."
+
+  - id: q07
+    bloom: understand
+    dificultate: mediu
+    text: "Why is the Banker's Algorithm not frequently used in practice?"
+    optiuni:
+      - "It is too simple"
+      - "It requires a priori knowledge of maximum resource requirements, which are rarely known"
+      - "It does not work on multi-core systems"
+      - "It consumes too much memory"
+    corect: 1
+    explicatie: "Modern programmes do not declare maximum resources; plus the computational overhead on each request."
+
+  - id: q08
+    bloom: understand
+    dificultate: mediu
+    text: "What is the difference between deadlock prevention and deadlock avoidance?"
+    optiuni:
+      - "They are identical"
+      - "Prevention permanently eliminates one condition; avoidance dynamically checks each request"
+      - "Prevention is slower"
+      - "Avoidance does not work"
+    corect: 1
+    explicatie: "Prevention: structurally impossible. Avoidance: permits requests only if the system remains safe."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    dificultate: greu
+    text: "In a RAG with a single instance per resource, what does the presence of a cycle indicate?"
+    optiuni:
+      - "Good performance"
+      - "Guaranteed deadlock"
+      - "Possible deadlock"
+      - "No problem"
+    corect: 1
+    explicatie: "With single instances, a cycle in RAG = certain deadlock. With multiple instances, the cycle is only necessary, not sufficient."
+
+  - id: q10
+    bloom: analyse
+    dificultate: greu
+    text: "Why can resource 'preemption' be impossible for certain resources?"
+    optiuni:
+      - "It is always possible"
+      - "Some resources (printer mid-print, mutexes) cannot be preempted without corrupting state"
+      - "Preemption is too fast"
+      - "It requires special hardware"
+    corect: 1
+    explicatie: "Non-preemptable resources: cannot be forcibly taken without losing work or corrupting state."
+
+  - id: q11
+    bloom: analyse
+    dificultate: greu
+    text: "A system uses detection + recovery for deadlock. What is the trade-off?"
+    optiuni:
+      - "There is no trade-off"
+      - "Less overhead in normal operation, but recovery (kill/rollback) can be costly"
+      - "It is always better than prevention"
+      - "It does not work"
+    corect: 1
+    explicatie: "Detection runs periodically; recovery involves process termination or rollback, both with costs."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    dificultate: greu
+    text: "You have 2 processes and 2 locks (A, B). P1 acquires A then B; P2 acquires B then A. How do you prevent deadlock?"
+    optiuni:
+      - "Use more locks"
+      - "Both processes acquire in the same order: A then B"
+      - "Remove the locks"
+      - "Increase P1's priority"
+    corect: 1
+    explicatie: "Consistent global order (A < B) eliminates circular wait: both request A first, then B."

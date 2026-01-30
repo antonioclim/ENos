@@ -1,0 +1,162 @@
+# C10_05_FORMATIVE_ASSESSMENT.yaml
+# Course 10: Virtual Memory (TLB, Belady)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 10
+  subject: "Virtual Memory (TLB, Belady)"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is virtual memory?"
+    options:
+      - "Additional RAM memory"
+      - "A technique to use disk to extend the apparent memory available to processes"
+      - "Cache memory"
+      - "ROM memory"
+    correct: 1
+    explanation: "Virtual memory allows processes to use more memory than the physically available RAM."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What is TLB (Translation Lookaside Buffer)?"
+    options:
+      - "A type of RAM"
+      - "Hardware cache for recent page→frame translations"
+      - "A replacement algorithm"
+      - "A software data structure"
+    correct: 1
+    explanation: "TLB = fast associative cache for frequently accessed PTEs, avoiding page table access."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What is a page fault?"
+    options:
+      - "A programming error"
+      - "Access to a page that is not in physical memory"
+      - "A virus"
+      - "A disk error"
+    correct: 1
+    explanation: "Page fault = requested page is not in RAM; OS must bring it from disk."
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "Why is a TLB miss costly?"
+    options:
+      - "It is not costly"
+      - "It requires additional memory accesses to traverse the page table"
+      - "It consumes energy"
+      - "It erases memory"
+    correct: 1
+    explanation: "TLB miss: 1+ memory accesses for PT (in addition to data access), significantly slowing down."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is Belady's anomaly?"
+    options:
+      - "A hardware error"
+      - "More frames can cause more page faults for FIFO"
+      - "An optimal algorithm"
+      - "An optimisation technique"
+    correct: 1
+    explanation: "Belady: FIFO can have more faults with more frames. LRU does not have this anomaly."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "Why is the OPT (Optimal) algorithm not used in practice?"
+    options:
+      - "It is too slow"
+      - "It requires knowledge of the future (which pages will be accessed)"
+      - "It consumes too much memory"
+      - "It does not work"
+    correct: 1
+    explanation: "OPT replaces the page that will be used furthest in the future - impossible to know."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "How does LRU approximate the OPT algorithm?"
+    options:
+      - "It chooses randomly"
+      - "It assumes recently used pages will be used soon (temporal locality)"
+      - "It chooses the first page"
+      - "It does not approximate"
+    correct: 1
+    explanation: "LRU is based on temporal locality: page unused for longest probably won't be used soon."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What is thrashing?"
+    options:
+      - "An optimisation technique"
+      - "A system that spends more time swapping than executing useful code"
+      - "A sorting algorithm"
+      - "A network error"
+    correct: 1
+    explanation: "Thrashing: too few frames → continuous page faults → disastrous performance."
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "Reference sequence: 1,2,3,4,1,2,5,1,2,3,4,5. With 3 frames and FIFO, how many page faults?"
+    options:
+      - "6"
+      - "9"
+      - "10"
+      - "12"
+    correct: 1
+    explanation: "FIFO with 3 frames: faults at 1,2,3,4,5,3,4,5,1 = 9 page faults."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "Why does the working set model help prevent thrashing?"
+    options:
+      - "It deletes pages"
+      - "It allocates enough frames for the process's recent active pages"
+      - "It increases CPU speed"
+      - "It does not help"
+    correct: 1
+    explanation: "Working set = pages used in last Δ references. Allocating WS avoids excessive page faults."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "What is the trade-off for exact LRU implementation vs approximate (clock)?"
+    options:
+      - "There is no trade-off"
+      - "Exact LRU: precision but overhead (timestamps/stack). Clock: less overhead, good enough approximation"
+      - "Clock is more precise"
+      - "Exact LRU is faster"
+    correct: 1
+    explanation: "Exact LRU requires update on every access; clock uses only a reference bit, simpler."
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "A system has 100MB RAM and 50 processes. Each process has a working set of 3MB. What happens?"
+    options:
+      - "Everything works normally"
+      - "Thrashing: 50×3MB=150MB > 100MB, system swaps continuously"
+      - "Processes get more memory"
+      - "Disk becomes faster"
+    correct: 1
+    explanation: "WS requirements (150MB) > available RAM (100MB) → continuous page faults, degraded performance."

@@ -1,0 +1,66 @@
+@startuml paging_mechanism
+!include ../../diagrams_common/skin.puml
+title Address Translation with Paging
+
+skinparam rectangle {
+    roundCorner 5
+}
+
+rectangle "**VIRTUAL ADDRESS** (32 bits, 4KB pages)" as va #E3F2FD {
+    rectangle "Page Number\n(20 bits)" as pn #BBDEFB
+    rectangle "Offset\n(12 bits)" as off #C8E6C9
+    
+    note bottom
+    Example: **0x00003ABC**
+    Page# = 3, Offset = 0xABC
+    end note
+}
+
+rectangle "**PAGE TABLE**" as pt #FFF9C4 {
+    note as pt_entries
+    | Index | Frame | V | R/W |
+    | 0 | 0x0A5 | 1 | RW |
+    | 1 | 0x123 | 1 | RW |
+    | 2 | 0x000 | **0** | - |
+    | **3** | **0x0F7** | 1 | RW |
+    | ... | ... | ... | ... |
+    
+    **V** = Valid (in memory)
+    **R/W** = Read/Write
+    end note
+}
+
+rectangle "**PHYSICAL ADDRESS**" as pa #C8E6C9 {
+    rectangle "Frame Number\n0x0F7" as fn #BBDEFB
+    rectangle "Offset\n0xABC" as off2 #C8E6C9
+    
+    note bottom
+    **= 0x0F7ABC**
+    Frame × 4KB + Offset
+    end note
+}
+
+rectangle "**PHYSICAL MEMORY**" as pm #FFE0B2 {
+    rectangle "Frame 100" as f100 #FFFFFF
+    rectangle "Frame 247\n(0x0F7)" as f247 #C8E6C9
+    rectangle "Frame 500" as f500 #FFFFFF
+    
+    note right of f247
+    Data is here!
+    Byte at offset 0xABC
+    end note
+}
+
+va -[#3498DB,bold]-> pt : 1. Page# = index
+pt -[#27AE60,bold]-> pa : 2. Frame# from table
+pa -[#E74C3C,bold]-> pm : 3. Physical access
+
+note bottom
+**Translation steps:**
+1. Extract Page Number from virtual address
+2. Index Page Table → obtain Frame Number
+3. Concatenate Frame + Offset → Physical Address
+4. Access physical memory
+end note
+
+@enduml

@@ -1,0 +1,178 @@
+# C07_05_FORMATIVE_ASSESSMENT.yaml
+# Course 7: Synchronisation (Part 2 - Semaphores, Buffer)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 7
+  subject: "Synchronisation (Part 2 - Semaphores, Buffer)"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a semaphore?"
+    options:
+      - "A type of memory"
+      - "An integer variable accessed through atomic operations wait() and signal()"
+      - "A sorting algorithm"
+      - "A type of file"
+    correct: 1
+    explanation: "Semaphore = variable with atomic P(wait)/V(signal) operations for synchronisation and mutual exclusion."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What does the wait() (P) operation do on a semaphore?"
+    options:
+      - "Increments the value"
+      - "Decrements the value; if it becomes negative, the process blocks"
+      - "Deletes the semaphore"
+      - "Displays the value"
+    correct: 1
+    explanation: "wait(): S--; if (S < 0) block(). The process waits if the resource is not available."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What is the difference between a binary semaphore and a counting semaphore?"
+    options:
+      - "There is no difference"
+      - "Binary: values 0/1 (mutex). Counting: any integer value (multiple resources)"
+      - "Counting is slower"
+      - "Binary does not exist in practice"
+    correct: 1
+    explanation: "Binary = 0/1, equivalent to mutex. Counting = N, for N instances of a resource."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "In the Producer-Consumer problem with a bounded buffer, why do we need 3 semaphores?"
+    options:
+      - "One semaphore is sufficient"
+      - "mutex (buffer access), empty (free slots), full (occupied slots)"
+      - "For speed"
+      - "We do not need semaphores"
+    correct: 1
+    explanation: "mutex = buffer exclusivity, empty = producer waits for free slot, full = consumer waits for data."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is a monitor in the context of synchronisation?"
+    options:
+      - "A display device"
+      - "A high-level construct that encapsulates data and procedures with implicit mutual exclusion"
+      - "A type of semaphore"
+      - "A system process"
+    correct: 1
+    explanation: "Monitor = ADT with built-in synchronisation; only one thread can execute a method at any given time."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What role do condition variables play in a monitor?"
+    options:
+      - "They store data"
+      - "They allow threads to wait until a condition becomes true"
+      - "They count processes"
+      - "They synchronise the clock"
+    correct: 1
+    explanation: "Condition variables: wait() releases the lock and blocks; signal() wakes a waiting thread."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why must we check the condition in a while loop and not with if when using condition variables?"
+    options:
+      - "If is slower"
+      - "Spurious wakeups: the thread may be woken without the condition being true"
+      - "While is syntactically safer"
+      - "If does not work"
+    correct: 1
+    explanation: "Spurious wakeups and the fact that another thread may modify the condition require re-checking in while."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What problem do counting semaphores solve for the Dining Philosophers problem?"
+    options:
+      - "Execution speed"
+      - "Limiting the number of philosophers who can try to eat simultaneously, preventing deadlock"
+      - "Memory consumption"
+      - "Serving order"
+    correct: 1
+    explanation: "By allowing only N-1 philosophers to pick up forks simultaneously, circular wait and deadlock are prevented."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "Why is the wait() order on semaphores critical for avoiding deadlock?"
+    options:
+      - "The order does not matter"
+      - "Wrong order can lead to circular wait: each process holds a resource and waits for another"
+      - "For speed"
+      - "For memory savings"
+    correct: 1
+    explanation: "Ex: P1: wait(A), wait(B); P2: wait(B), wait(A) → deadlock possible. Consistent order prevents this."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "In the Readers-Writers problem, why can the solution cause starvation for writers?"
+    options:
+      - "Writers are slower"
+      - "If readers arrive continuously, no writer can obtain exclusive access"
+      - "Writers do not use semaphores"
+      - "It is an implementation error"
+    correct: 1
+    explanation: "With preference for readers, a continuous stream of readers can indefinitely block writers."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "Compare efficiency: semaphore with busy-wait vs semaphore with blocking."
+    options:
+      - "Busy-wait is always better"
+      - "Blocking is better on single-core; on multi-core, busy-wait may be better for very short waits"
+      - "Blocking does not work"
+      - "There is no difference"
+    correct: 1
+    explanation: "Single-core: busy-wait wastes the only CPU. Multi-core: for waits < context switch, busy-wait may win."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You implement a bounded buffer with capacity 10. With what values do you initialise the semaphores?"
+    options:
+      - "mutex=0, empty=0, full=10"
+      - "mutex=1, empty=10, full=0"
+      - "mutex=10, empty=1, full=1"
+      - "mutex=1, empty=0, full=10"
+    correct: 1
+    explanation: "mutex=1 (exclusivity), empty=10 (10 free slots initially), full=0 (0 elements initially)."

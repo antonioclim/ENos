@@ -1,0 +1,58 @@
+@startuml tlb_memory_access
+!include ../../diagrame_common/skin.puml
+title TLB (Translation Lookaside Buffer)
+
+skinparam activity {
+    DiamondBackgroundColor #FFF9C4
+}
+
+start
+
+:CPU generates
+**Virtual Address**;
+
+:Extract **Page Number**;
+
+if (Search in\n**TLB**?) then (HIT ~98%)
+    #C8E6C9:Frame# found directly!;
+    :Memory access: **1×**;
+else (MISS ~2%)
+    #FFCDD2:Consult **Page Table**
+    (can be 2-4 levels);
+    :Memory accesses: **2-4×**;
+    
+    if (Page valid?) then (Yes)
+        :Update TLB;
+    else (No - Page Fault)
+        #FFE0B2:Kernel interrupt
+        Load page from disk;
+        :Update Page Table;
+        :Update TLB;
+    endif
+endif
+
+:Form **Physical Address**
+Frame# + Offset;
+
+:Access **Physical Memory**;
+
+stop
+
+legend right
+**EAT Calculation (Effective Access Time)**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+α = TLB hit rate (e.g. 98%)
+ε = TLB access (e.g. 1 ns)
+m = Memory access (e.g. 100 ns)
+
+**EAT = α(ε+m) + (1-α)(ε+2m)**
+
+Example:
+0.98×(1+100) + 0.02×(1+200)
+= 98.98 + 4.02 = **103 ns**
+
+Without TLB: 200 ns
+With TLB: 103 ns → **49% faster!**
+endlegend
+
+@enduml

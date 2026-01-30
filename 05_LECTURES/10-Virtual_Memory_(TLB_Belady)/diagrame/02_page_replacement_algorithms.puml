@@ -1,0 +1,76 @@
+@startuml page_replacement_algorithms
+!include ../../diagrame_common/skin.puml
+title Page Replacement Algorithms
+
+skinparam rectangle {
+    roundCorner 8
+}
+
+rectangle "**FIFO** (First-In, First-Out)" as fifo #FFCDD2 {
+    note as fifo_note
+    **Mechanism:** Evicts the oldest page
+    **Structure:** Simple queue
+    
+    ✓ Simple to implement
+    ✗ Can evict useful pages
+    ✗ **Belady's Anomaly** (more frames → more faults!)
+    
+    **Page Faults:** 15 (for standard ref. string)
+    end note
+}
+
+rectangle "**OPT** (Optimal - Clairvoyant)" as opt #C8E6C9 {
+    note as opt_note
+    **Mechanism:** Evicts the page used furthest in the future
+    **Structure:** Requires knowledge of the future!
+    
+    ✓ **Theoretical minimum** of page faults
+    ✗ **Practically impossible** (we don't know the future)
+    ✓ Useful as benchmark
+    
+    **Page Faults:** 9 (optimal)
+    end note
+}
+
+rectangle "**LRU** (Least Recently Used)" as lru #E3F2FD {
+    note as lru_note
+    **Mechanism:** Evicts the page unused for the longest time
+    **Structure:** Counter or Stack
+    
+    ✓ Approximates OPT well
+    ✓ No Belady's Anomaly
+    ✗ Tracking overhead (counter/stack)
+    
+    **Page Faults:** 12 (close to OPT)
+    end note
+}
+
+rectangle "**CLOCK** (Second Chance)" as clock #FFF9C4 {
+    note as clock_note
+    **Mechanism:** FIFO + Reference Bit
+    • R=0 → Evict
+    • R=1 → R=0, "second chance", continue
+    
+    **Structure:** Circular buffer with pointer
+    
+    ✓ Approximates LRU efficiently
+    ✓ Low overhead (only 1 bit per page)
+    ✓ Used in practice!
+    
+    **Page Faults:** ~12-13
+    end note
+}
+
+fifo -[hidden]right-> opt
+lru -[hidden]right-> clock
+
+note bottom
+**Comparison for standard reference string with 3 frames:**
+| Algorithm | Page Faults | Practical? |
+| FIFO | 15 | Yes, simple |
+| **OPT** | **9** | No (theoretical) |
+| LRU | 12 | Yes, but costly |
+| **Clock** | ~12 | **Yes, recommended!** |
+end note
+
+@enduml

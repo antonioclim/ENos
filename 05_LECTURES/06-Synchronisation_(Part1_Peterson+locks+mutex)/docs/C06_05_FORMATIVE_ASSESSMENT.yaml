@@ -1,0 +1,178 @@
+# C06_05_FORMATIVE_ASSESSMENT.yaml
+# Lecture 6: Synchronisation (Part 1 - Peterson, locks, mutex)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  lecture: 6
+  subject: "Synchronisation (Part 1 - Peterson, locks, mutex)"
+  version: "2.0"
+  date_created: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a critical section?"
+    options:
+      - "A fatal system error"
+      - "A portion of code that accesses shared resources and must be executed atomically"
+      - "A type of memory"
+      - "A system function"
+    correct: 1
+    explanation: "Critical section = code that accesses shared data; only one process/thread can be in it at any given time."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What is a race condition?"
+    options:
+      - "A competition between processes for memory"
+      - "The outcome depends on the relative order of execution, which is non-deterministic"
+      - "A sorting algorithm"
+      - "A type of thread"
+    correct: 1
+    explanation: "Race condition = behaviour dependent on the relative timing of concurrent operations."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What are the 3 necessary conditions for a correct solution to the critical section problem?"
+    options:
+      - "Speed, memory, CPU"
+      - "Mutual exclusion, progress, bounded waiting"
+      - "Read, write, execute"
+      - "Lock, unlock, wait"
+    correct: 1
+    explanation: "Mutual exclusion (exclusivity), progress (no unnecessary blocking), bounded waiting (no starvation)."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "What is busy-waiting and why is it problematic?"
+    options:
+      - "An optimisation technique"
+      - "The process repeatedly checks a condition in a loop, wasting CPU cycles"
+      - "A memory allocation method"
+      - "A type of interrupt"
+    correct: 1
+    explanation: "Busy-wait = spinning in a loop while waiting; wastes CPU unnecessarily, better to sleep + wake."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "How does Peterson's algorithm work for 2 processes?"
+    options:
+      - "It uses hardware interrupts"
+      - "It uses flags and the turn variable to decide who enters the critical section"
+      - "It uses semaphores"
+      - "It blocks the processor"
+    correct: 1
+    explanation: "Peterson: each process sets its flag + yields turn to the other; enters only if the other does not want to or it is not their turn."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What does the atomic test-and-set instruction do?"
+    options:
+      - "It tests memory"
+      - "It reads the value, sets it to true, returns the old value - all atomically"
+      - "It increments a counter"
+      - "It disables interrupts"
+    correct: 1
+    explanation: "TAS: atomic { old = *ptr; *ptr = true; return old; }. The basis for spinlocks."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "What is the difference between a mutex and a spinlock?"
+    options:
+      - "They are identical"
+      - "A mutex puts the process to sleep when blocked, a spinlock does busy-wait"
+      - "A spinlock is safer"
+      - "A mutex does not work on multi-core"
+    correct: 1
+    explanation: "Mutex: sleep/wake (efficient for long waits). Spinlock: busy-wait (efficient for short waits)."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "Why can we not use interrupt disabling alone for synchronisation on multi-core?"
+    options:
+      - "Interrupts do not exist on multi-core"
+      - "Disabling on one core does not affect other cores which can simultaneously access the data"
+      - "It is too fast"
+      - "It consumes too much memory"
+    correct: 1
+    explanation: "Each core has its own interrupts; local disabling does not prevent access from another core."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "Why can the compiler 'break' Peterson's algorithm without memory barriers?"
+    options:
+      - "The compiler has bugs"
+      - "The compiler may reorder instructions for optimisation, breaking the required order"
+      - "Peterson does not work"
+      - "The memory is faulty"
+    correct: 1
+    explanation: "Without memory barriers, the compiler/CPU may reorder writes/reads, violating the algorithm's assumptions."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "A lock protects a linked list. Why might one lock per node be better than a global lock?"
+    options:
+      - "It is simpler to implement"
+      - "It allows concurrent operations on different nodes (fine-grained locking)"
+      - "It consumes less memory"
+      - "It automatically eliminates all race conditions"
+    correct: 1
+    explanation: "Fine-grained locking increases parallelism: operations on different parts of the structure can run simultaneously."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "What is the trade-off between spinlock and mutex for short critical sections?"
+    options:
+      - "There is no trade-off"
+      - "Spinlock avoids context switch overhead but wastes CPU; for very short sections, spinlock may be more efficient"
+      - "Mutex is always better"
+      - "Spinlock does not work"
+    correct: 1
+    explanation: "If the critical section < context switch time, spinlock avoids the sleep/wake overhead."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You have a shared counter incremented by 1000 threads. What synchronisation method is optimal?"
+    options:
+      - "No synchronisation"
+      - "Global mutex"
+      - "Atomic operations (atomic_fetch_add)"
+      - "Interrupt disabling"
+    correct: 2
+    explanation: "For a single counter, atomic operations (lock-free) are more efficient than mutexes."

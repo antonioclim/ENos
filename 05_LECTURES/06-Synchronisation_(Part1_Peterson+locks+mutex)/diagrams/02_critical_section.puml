@@ -1,0 +1,60 @@
+@startuml critical_section
+!include ../../diagrams_common/skin.puml
+title Critical Section - Structure and Properties
+
+skinparam activity {
+    BackgroundColor #FAFAFA
+    DiamondBackgroundColor #FFF9C4
+}
+
+start
+
+:while (true) {;
+
+partition "**ENTRY SECTION**" #E3F2FD {
+    :acquire(lock)
+    or wait(mutex);
+    note right
+    Request access
+    May **block**
+    end note
+}
+
+partition "**CRITICAL SECTION**" #FFCDD2 {
+    :Access the shared
+    resource
+    (e.g. counter++);
+    note right #FFCDD2
+    ⚠️ **MAXIMUM ONE PROCESS**
+    at any given time!
+    end note
+}
+
+partition "**EXIT SECTION**" #C8E6C9 {
+    :release(lock)
+    or signal(mutex);
+    note right
+    Release
+    access
+    end note
+}
+
+partition "**REMAINDER SECTION**" #FFFFFF {
+    :Code that does not access
+    the shared resource;
+}
+
+:} // end while;
+
+stop
+
+legend right
+**The 3 Necessary Properties:**
+
+|= Property |= Description |
+| **Mutual Exclusion** | Only one process in CS |
+| **Progress** | If CS is free, someone enters |
+| **Bounded Waiting** | Limit on how long one waits |
+endlegend
+
+@enduml

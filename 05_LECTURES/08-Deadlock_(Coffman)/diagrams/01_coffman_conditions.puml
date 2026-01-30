@@ -1,0 +1,62 @@
+@startuml conditiile_coffman
+!include ../../diagrams_common/skin.puml
+title The 4 Coffman Conditions for Deadlock
+
+skinparam rectangle {
+    roundCorner 10
+}
+
+rectangle "**DEADLOCK** occurs only when\n**ALL 4** conditions are present!" as title #FFCDD2
+
+rectangle "**1. MUTUAL EXCLUSION**" as me #E3F2FD {
+    note as me_note
+    Resource can be held by
+    **at most one process** at a time
+    
+    🖨️ Example: Printer, mutex
+    end note
+}
+
+rectangle "**2. HOLD AND WAIT**" as hw #C8E6C9 {
+    note as hw_note
+    Process **holds** resources and
+    **waits** for other resources
+    
+    📦 Example: P1 has R1, wants R2
+    end note
+}
+
+rectangle "**3. NO PREEMPTION**" as np #FFF9C4 {
+    note as np_note
+    Resources **cannot be forcibly taken**
+    Only the process can release them voluntarily
+    
+    🔒 Example: Cannot snatch the lock
+    end note
+}
+
+rectangle "**4. CIRCULAR WAIT**" as cw #FCE4EC {
+    note as cw_note
+    A **waiting cycle** exists:
+    P1→R1→P2→R2→...→Pn→Rn→P1
+    
+    🔄 Example: Dining Philosophers
+    end note
+}
+
+title -down-> me
+title -down-> hw
+title -down-> np
+title -down-> cw
+
+note bottom
+**Deadlock Prevention**: Eliminate at least **one** condition!
+
+| Condition | Elimination Method |
+| Mutual Exclusion | Impossible for some resources |
+| Hold and Wait | Request all resources at once |
+| No Preemption | Allow preemption (roll back) |
+| **Circular Wait** | **Resource ordering** (most practical) |
+end note
+
+@enduml

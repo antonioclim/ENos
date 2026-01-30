@@ -1,0 +1,58 @@
+@startuml race_condition
+!include ../../diagrams_common/skin.puml
+title Race Condition - counter++
+
+skinparam sequence {
+    ParticipantPadding 30
+}
+
+participant "Thread A" as A #E3F2FD
+participant "Memory\n(counter)" as M #FFF9C4
+participant "Thread B" as B #FCE4EC
+
+note over M
+**counter = 0**
+(initial)
+end note
+
+== Scenario with RACE CONDITION ==
+
+A -> M : (1) LOAD counter\nregA = **0**
+activate A #C8E6C9
+
+B -> M : (2) LOAD counter\nregB = **0**
+activate B #FFCDD2
+
+note over A
+regA = 0 + 1 = **1**
+end note
+
+note over B
+regB = 0 + 1 = **1**
+end note
+
+A -> M : (3) STORE regA\ncounter = **1**
+deactivate A
+
+B -> M : (4) STORE regB\ncounter = **1**
+deactivate B
+
+note over M #FFCDD2
+**counter = 1**
+⚠️ **WRONG!**
+It should be 2!
+We lost an increment!
+end note
+
+== Explanation ==
+
+note across #FFFDE7
+**Problem**: counter++ decomposes into 3 NON-atomic operations:
+1. LOAD counter → register
+2. ADD 1 → register  
+3. STORE register → counter
+
+If two threads do this in parallel, the results **overlap**!
+end note
+
+@enduml
