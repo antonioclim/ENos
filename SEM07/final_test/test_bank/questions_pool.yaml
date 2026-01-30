@@ -1,0 +1,4548 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONSOLIDATED QUESTIONS POOL — Final Test Bank
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest — CSIE
+# Version: 2.0 | Date: January 2025
+# Author: ing. dr. Antonio Clim
+# 
+# Sources integrated:
+#   - SEM01-06 formative quizzes
+#   - Lecture 02-18 formative assessments
+#   - Original SEM07 test bank questions
+#
+# Total Questions: 250+
+# Bloom Taxonomy Distribution: Remember 15%, Understand 30%, Apply 30%, 
+#                               Analyse 15%, Evaluate 7%, Create 3%
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  version: "2.0"
+  course: "Operating Systems"
+  semester: "2024-2025"
+  institution: "ASE Bucharest - CSIE"
+  total_questions: 256
+  language: "en-GB"
+  
+  statistics:
+    by_difficulty:
+      easy: 64
+      medium: 128
+      hard: 64
+    by_type:
+      multiple_choice: 180
+      short_answer: 50
+      practical: 26
+    by_bloom:
+      remember: 38
+      understand: 77
+      apply: 77
+      analyse: 38
+      evaluate: 18
+      create: 8
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 1: SHELL FUNDAMENTALS
+# Sources: SEM01, Lectures 1-2
+# ═══════════════════════════════════════════════════════════════════════════════
+
+categories:
+
+  - name: "Shell Fundamentals"
+    lectures: [1, 2]
+    seminars: [1]
+    question_count: 24
+    
+    questions:
+      # --- Original SEM07 Questions ---
+      - id: SF01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        question: "Which command displays the current working directory?"
+        options:
+          a: "cd"
+          b: "pwd"
+          c: "ls"
+          d: "dir"
+        answer: "b"
+        points: 0.5
+        
+      - id: SF02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        question: "What does the command 'ls -la' display?"
+        options:
+          a: "Only hidden files"
+          b: "Only directories"
+          c: "All files including hidden, in long format"
+          d: "Only regular files"
+        answer: "c"
+        points: 0.5
+        
+      - id: SF03
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a command to create the directory structure 'project/src/main' in one command."
+        answer: "mkdir -p project/src/main"
+        accept_alternatives:
+          - "mkdir --parents project/src/main"
+        points: 1.0
+        
+      - id: SF04
+        type: short_answer
+        difficulty: medium
+        bloom: understand
+        question: "What is the difference between 'export VAR=value' and 'VAR=value'?"
+        answer: "export makes the variable available to child processes, without export it's only available in the current shell"
+        keywords: ["child", "process", "subshell", "environment"]
+        points: 1.0
+
+      # --- From SEM01 Quiz ---
+      - id: SF05
+        type: multiple_choice
+        difficulty: easy
+        bloom: understand
+        source: "SEM01-q03"
+        question: "What is the difference between a shell and a terminal?"
+        options:
+          a: "They are the same thing"
+          b: "The shell interprets commands; the terminal is the interface to access the shell"
+          c: "The terminal interprets commands; the shell displays them"
+          d: "The shell is hardware; the terminal is software"
+        answer: "b"
+        explanation: "Terminal = interface (window, keyboard, display). Shell = interpreter (Bash, Zsh)."
+        points: 0.5
+
+      - id: SF06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM01-q05"
+        question: "You define VAR=secret without export. What happens in a subshell?"
+        options:
+          a: "The variable is accessible with value 'secret'"
+          b: "The variable is undefined"
+          c: "The variable has value 'VAR'"
+          d: "Error: variable not exported"
+        answer: "b"
+        explanation: "Without export, the variable is not part of the environment inherited by child processes."
+        points: 0.5
+
+      - id: SF07
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM01-q01"
+        question: "What does the pwd command do?"
+        options:
+          a: "Changes the current directory"
+          b: "Displays the current working directory"
+          c: "Creates a new directory"
+          d: "Lists directory contents"
+        answer: "b"
+        explanation: "pwd = Print Working Directory, displays the absolute path of the current location."
+        points: 0.5
+
+      - id: SF08
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM01-q06"
+        question: "Which command creates nested directories /home/user/projects/new/src in one step?"
+        options:
+          a: "mkdir /home/user/projects/new/src"
+          b: "mkdir -p /home/user/projects/new/src"
+          c: "mkdir -r /home/user/projects/new/src"
+          d: "mkdirs /home/user/projects/new/src"
+        answer: "b"
+        explanation: "-p (parents) creates intermediate directories if they don't exist."
+        points: 0.5
+
+      - id: SF09
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM01-q07"
+        question: "What does 'source script.sh' do compared to './script.sh'?"
+        options:
+          a: "They are identical"
+          b: "source runs in the current shell; ./script.sh runs in a subshell"
+          c: "source is faster"
+          d: "source requires execute permission"
+        answer: "b"
+        explanation: "source (or .) executes in the current shell, so variables and changes persist."
+        points: 0.5
+
+      - id: SF10
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM01-q08"
+        question: "Which brace expansion creates files file1.txt, file2.txt, file3.txt?"
+        options:
+          a: "touch file[1-3].txt"
+          b: "touch file{1..3}.txt"
+          c: "touch file(1,2,3).txt"
+          d: "touch file<1-3>.txt"
+        answer: "b"
+        explanation: "{1..3} is brace expansion generating sequence 1, 2, 3."
+        points: 0.5
+
+      - id: SF11
+        type: multiple_choice
+        difficulty: medium
+        bloom: analyse
+        source: "SEM01-q09"
+        question: "What is the output of: VAR='$HOME'; echo $VAR?"
+        options:
+          a: "/home/user (the home directory)"
+          b: "$HOME (literal string)"
+          c: "Error: invalid syntax"
+          d: "Empty string"
+        answer: "b"
+        explanation: "Single quotes prevent variable expansion; $HOME remains literal."
+        points: 0.5
+
+      - id: SF12
+        type: multiple_choice
+        difficulty: easy
+        bloom: understand
+        source: "SEM01-q10"
+        question: "What does exit code 0 indicate?"
+        options:
+          a: "Error"
+          b: "Success"
+          c: "Warning"
+          d: "Interrupted"
+        answer: "b"
+        explanation: "Unix convention: 0 = success, non-zero = error."
+        points: 0.5
+
+      - id: SF13
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM01-q11"
+        question: "Which pattern matches all .txt files in the current directory?"
+        options:
+          a: "[*.txt]"
+          b: "*.txt"
+          c: "?.txt"
+          d: "{.txt}"
+        answer: "b"
+        explanation: "* is a glob that matches any characters; *.txt matches all .txt files."
+        points: 0.5
+
+      - id: SF14
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM01-q12"
+        question: "Why is 'rm -rf $DIR' dangerous if DIR is unset or empty?"
+        options:
+          a: "It does nothing"
+          b: "It can delete files from the current directory or even /"
+          c: "It shows an error"
+          d: "It only deletes empty directories"
+        answer: "b"
+        explanation: "If DIR is empty, 'rm -rf' could act on current directory or, with certain shells, /."
+        points: 0.75
+
+      - id: SF15
+        type: multiple_choice
+        difficulty: hard
+        bloom: evaluate
+        source: "SEM01-q13"
+        question: |
+          Analyse this backup script:
+          #!/bin/bash
+          backup_dir=$1
+          tar czf backup.tar.gz $backup_dir
+          What security problem exists?
+        options:
+          a: "The script is too slow"
+          b: "Unquoted variable $backup_dir can break with spaces or malicious names"
+          c: "tar doesn't support gzip"
+          d: "There is no security problem"
+        answer: "b"
+        explanation: "Without quotes, a filename with spaces or special characters causes unexpected behaviour."
+        points: 0.75
+
+      - id: SF16
+        type: short_answer
+        difficulty: hard
+        bloom: create
+        source: "SEM01-q14"
+        question: "Create an alias 'backup' that creates a timestamped tar.gz archive of the current directory."
+        answer: "alias backup='tar czf backup_$(date +%Y%m%d_%H%M%S).tar.gz .'"
+        accept_alternatives:
+          - "alias backup='tar -czf $(date +%F).tar.gz .'"
+        keywords: ["alias", "tar", "date", "czf"]
+        points: 1.5
+
+      - id: SF17
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        question: "According to the Filesystem Hierarchy Standard, where are user-installed programs typically placed?"
+        options:
+          a: "/bin"
+          b: "/usr/local/bin"
+          c: "/etc"
+          d: "/var"
+        answer: "b"
+        explanation: "/usr/local is for locally installed software, separate from system packages."
+        points: 0.5
+
+      - id: SF18
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is the difference between /bin and /usr/bin?"
+        options:
+          a: "They are identical"
+          b: "/bin contains essential system binaries; /usr/bin contains user applications"
+          c: "/usr/bin is for root only"
+          d: "/bin is deprecated"
+        answer: "b"
+        explanation: "Historically, /bin for boot essentials, /usr/bin for general programs (now often merged)."
+        points: 0.5
+
+      - id: SF19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a command to find the type and location of the 'python3' command."
+        answer: "type python3"
+        accept_alternatives:
+          - "which python3"
+          - "whereis python3"
+          - "command -v python3"
+        points: 1.0
+
+      - id: SF20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does the shebang line '#!/usr/bin/env bash' do?"
+        options:
+          a: "Sets an environment variable"
+          b: "Specifies the interpreter using the PATH to find bash"
+          c: "Comments out the first line"
+          d: "Enables debugging"
+        answer: "b"
+        explanation: "Using env makes the script more portable across systems with bash in different locations."
+        points: 0.5
+
+      - id: SF21
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        question: "How do you make a script executable?"
+        options:
+          a: "touch script.sh"
+          b: "chmod +x script.sh"
+          c: "chown script.sh"
+          d: "exec script.sh"
+        answer: "b"
+        explanation: "chmod +x adds execute permission to the file."
+        points: 0.5
+
+      - id: SF22
+        type: short_answer
+        difficulty: hard
+        bloom: analyse
+        question: "Explain why 'echo $var' might produce different output than 'echo \"$var\"' when var contains spaces."
+        answer: "Without quotes, word splitting occurs and multiple spaces collapse to one; with quotes, the exact value is preserved"
+        keywords: ["word splitting", "quotes", "spaces", "preserve"]
+        points: 1.0
+
+      - id: SF23
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        question: "Which file is typically executed when starting an interactive Bash login shell?"
+        options:
+          a: ".bashrc"
+          b: ".bash_profile"
+          c: ".bash_history"
+          d: ".bash_logout"
+        answer: "b"
+        explanation: "Login shells read .bash_profile (or .profile); interactive non-login shells read .bashrc."
+        points: 0.5
+
+      - id: SF24
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is the purpose of the PATH environment variable?"
+        options:
+          a: "Stores the current directory"
+          b: "Lists directories where the shell searches for executables"
+          c: "Contains the home directory path"
+          d: "Defines file permissions"
+        answer: "b"
+        explanation: "PATH is a colon-separated list of directories searched when running commands."
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 2: CONTROL OPERATORS AND REDIRECTION
+# Sources: SEM02, Lectures 2-3
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Control Operators and Redirection"
+    lectures: [2, 3]
+    seminars: [2]
+    question_count: 26
+    
+    questions:
+      # --- Original SEM07 Questions ---
+      - id: CR01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        question: "What does '&&' do in Bash?"
+        options:
+          a: "Runs both commands simultaneously"
+          b: "Runs second command only if first succeeds"
+          c: "Runs second command only if first fails"
+          d: "Combines output of both commands"
+        answer: "b"
+        points: 0.5
+        
+      - id: CR02
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does 'command 2>&1' do?"
+        options:
+          a: "Redirects stdout to stderr"
+          b: "Redirects stderr to stdout"
+          c: "Discards stderr"
+          d: "Duplicates the command"
+        answer: "b"
+        points: 0.5
+        
+      - id: CR03
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a command that saves both stdout and stderr to 'output.log'."
+        answer: "command > output.log 2>&1"
+        accept_alternatives:
+          - "command &> output.log"
+          - "command >& output.log"
+        points: 1.0
+        
+      - id: CR04
+        type: practical
+        difficulty: hard
+        bloom: apply
+        question: "Write a one-liner that: 1) Pings google.com once, 2) If successful prints 'Online', 3) If failed prints 'Offline'."
+        answer: "ping -c1 google.com &>/dev/null && echo 'Online' || echo 'Offline'"
+        points: 1.5
+
+      # --- From SEM02 Quiz ---
+      - id: CR05
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM02-q01"
+        question: "What does the && operator do in 'cmd1 && cmd2'?"
+        options:
+          a: "Runs cmd2 regardless of cmd1's result"
+          b: "Runs cmd2 in background"
+          c: "Runs cmd2 only if cmd1 succeeds (exit code 0)"
+          d: "Runs cmd2 only if cmd1 fails"
+        answer: "c"
+        explanation: "&& is logical AND - second command runs only on success."
+        points: 0.5
+
+      - id: CR06
+        type: multiple_choice
+        difficulty: easy
+        bloom: understand
+        source: "SEM02-q02"
+        question: "What does the single & do in 'command &'?"
+        options:
+          a: "Logical AND"
+          b: "Runs the command in the background"
+          c: "Redirects stderr"
+          d: "Waits for the command"
+        answer: "b"
+        explanation: "& at the end backgrounds the process, returning control immediately."
+        points: 0.5
+
+      - id: CR07
+        type: multiple_choice
+        difficulty: medium
+        bloom: analyse
+        source: "SEM02-q03"
+        question: "What is the output of: mkdir test && echo 'created' || echo 'failed' (if test already exists)?"
+        options:
+          a: "'created'"
+          b: "'failed'"
+          c: "'created' then 'failed'"
+          d: "No output"
+        answer: "b"
+        explanation: "mkdir fails (test exists), so && is skipped and || executes."
+        points: 0.5
+
+      - id: CR08
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM02-q04"
+        question: "In 'false | true', what is the value of $?"
+        options:
+          a: "1 (from false)"
+          b: "0 (from true)"
+          c: "Undefined"
+          d: "Error"
+        answer: "b"
+        explanation: "Without pipefail, $? reflects only the last command's exit code."
+        points: 0.75
+
+      - id: CR09
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q05"
+        question: "What is the difference between { } and ( ) for command grouping?"
+        options:
+          a: "They are identical"
+          b: "{ } runs in the current shell; ( ) runs in a subshell"
+          c: "( ) is faster"
+          d: "{ } requires spaces; ( ) doesn't"
+        answer: "b"
+        explanation: "{ } executes in current context (variables persist); ( ) creates subshell."
+        points: 0.5
+
+      - id: CR10
+        type: multiple_choice
+        difficulty: easy
+        bloom: understand
+        source: "SEM02-q06"
+        question: "What is the difference between > and >> in redirection?"
+        options:
+          a: "> is faster"
+          b: "> overwrites; >> appends"
+          c: ">> overwrites; > appends"
+          d: "They are identical"
+        answer: "b"
+        explanation: "> truncates and writes; >> adds to the end of the file."
+        points: 0.5
+
+      - id: CR11
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM02-q07"
+        question: "What is the difference between 'cmd > file 2>&1' and 'cmd 2>&1 > file'?"
+        options:
+          a: "They are identical"
+          b: "First: both stdout and stderr to file. Second: stderr to original stdout, stdout to file"
+          c: "First is invalid syntax"
+          d: "Second is invalid syntax"
+        answer: "b"
+        explanation: "Redirection order matters. In the second, 2>&1 copies stdout before it's redirected."
+        points: 0.75
+
+      - id: CR12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q08"
+        question: "What does 'command 2>/dev/null' do?"
+        options:
+          a: "Discards all output"
+          b: "Discards only stderr, preserving exit code"
+          c: "Saves stderr to a file"
+          d: "Converts stderr to stdout"
+        answer: "b"
+        explanation: "2>/dev/null suppresses error messages but exit code is unchanged."
+        points: 0.5
+
+      - id: CR13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q09"
+        question: "What does '&>' do in Bash?"
+        options:
+          a: "Runs command in background"
+          b: "Redirects both stdout and stderr to a file"
+          c: "Logical AND then redirect"
+          d: "Invalid syntax"
+        answer: "b"
+        explanation: "&> is shorthand for > file 2>&1, redirecting both streams."
+        points: 0.5
+
+      - id: CR14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q10"
+        question: "What does the tee command do?"
+        options:
+          a: "Combines two files"
+          b: "Reads stdin and writes to both stdout and a file"
+          c: "Compresses data"
+          d: "Splits a file"
+        answer: "b"
+        explanation: "tee duplicates input to stdout and file(s), useful for logging while displaying."
+        points: 0.5
+
+      - id: CR15
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM02-q11"
+        question: "Which option in sort selects the sorting key by field?"
+        options:
+          a: "-n"
+          b: "-k"
+          c: "-r"
+          d: "-u"
+        answer: "b"
+        explanation: "-k specifies field for sorting, e.g., sort -k2 sorts by second field."
+        points: 0.5
+
+      - id: CR16
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q12"
+        question: "Why must input be sorted before using uniq?"
+        options:
+          a: "uniq is faster on sorted input"
+          b: "uniq only removes adjacent duplicates"
+          c: "uniq requires sorted input"
+          d: "uniq sorts automatically"
+        answer: "b"
+        explanation: "uniq compares consecutive lines; non-adjacent duplicates aren't removed."
+        points: 0.5
+
+      - id: CR17
+        type: multiple_choice
+        difficulty: easy
+        bloom: apply
+        source: "SEM02-q14"
+        question: "Which command translates all lowercase letters to uppercase?"
+        options:
+          a: "sed 's/a-z/A-Z/'"
+          b: "tr 'a-z' 'A-Z'"
+          c: "cut -u"
+          d: "awk '{upper}'"
+        answer: "b"
+        explanation: "tr translates character sets; a-z to A-Z converts case."
+        points: 0.5
+
+      - id: CR18
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM02-q15"
+        question: "Which command counts lines in a file?"
+        options:
+          a: "count file"
+          b: "wc -l file"
+          c: "lines file"
+          d: "cat -n file"
+        answer: "b"
+        explanation: "wc -l counts lines; -w counts words; -c counts bytes."
+        points: 0.5
+
+      - id: CR19
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q16"
+        question: "What is the syntax for a for loop in Bash?"
+        options:
+          a: "for (i=0; i<10; i++)"
+          b: "for i in {1..10}; do ... done"
+          c: "foreach i in 1..10"
+          d: "for i = 1 to 10"
+        answer: "b"
+        explanation: "Bash uses 'for var in list; do commands; done' syntax."
+        points: 0.5
+
+      - id: CR20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q17"
+        question: "What is the difference between 'break' and 'exit' in a loop?"
+        options:
+          a: "They are identical"
+          b: "break exits the loop; exit terminates the script"
+          c: "exit exits the loop; break terminates the script"
+          d: "Both terminate the script"
+        answer: "b"
+        explanation: "break continues after the loop; exit ends the entire script/shell."
+        points: 0.5
+
+      - id: CR21
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM02-q18"
+        question: "Which syntax correctly iterates over .txt files in the current directory?"
+        options:
+          a: "for f in ls *.txt; do"
+          b: "for f in *.txt; do"
+          c: "for f in (*.txt); do"
+          d: "for f = *.txt; do"
+        answer: "b"
+        explanation: "The glob *.txt expands to the list of files; no need for ls."
+        points: 0.5
+
+      - id: CR22
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM02-q19"
+        question: "Which syntax correctly reads a file line by line?"
+        options:
+          a: "for line in file.txt; do"
+          b: "while read line; do ... done < file.txt"
+          c: "cat file.txt | for line; do"
+          d: "read file.txt into line"
+        answer: "b"
+        explanation: "while read with redirection properly handles lines with spaces."
+        points: 0.5
+
+      - id: CR23
+        type: practical
+        difficulty: hard
+        bloom: analyse
+        source: "SEM02-q21"
+        question: |
+          Explain what this pipeline does:
+          grep 'ERROR' app.log | cut -d':' -f2 | sort | uniq -c | sort -rn | head -5
+        answer: "Finds ERROR lines, extracts field 2 (colon-delimited), sorts, counts unique occurrences, sorts by count descending, shows top 5"
+        keywords: ["grep", "cut", "sort", "uniq", "count", "top"]
+        points: 1.5
+
+      - id: CR24
+        type: multiple_choice
+        difficulty: medium
+        bloom: evaluate
+        source: "SEM02-q22"
+        question: "Why is 'cat file | grep pattern' considered bad practice?"
+        options:
+          a: "It doesn't work"
+          b: "It's a Useless Use of Cat (UUOC); grep can read the file directly"
+          c: "cat is slower"
+          d: "grep doesn't support pipes"
+        answer: "b"
+        explanation: "UUOC: unnecessary process. Use 'grep pattern file' directly."
+        points: 0.5
+
+      - id: CR25
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM02-q23"
+        question: "What does nohup do for a command?"
+        options:
+          a: "Increases priority"
+          b: "Makes the command immune to SIGHUP (continue after logout)"
+          c: "Runs the command faster"
+          d: "Reduces memory usage"
+        answer: "b"
+        explanation: "nohup prevents SIGHUP from terminating the process when terminal closes."
+        points: 0.5
+
+      - id: CR26
+        type: multiple_choice
+        difficulty: hard
+        bloom: evaluate
+        source: "SEM02-q26"
+        question: |
+          Evaluate this LLM-generated code for processing user input:
+          files=$(ls $input_dir)
+          for f in $files; do rm $f; done
+          What's the main problem?
+        options:
+          a: "ls is unnecessary"
+          b: "Unquoted variables can cause word splitting and glob expansion issues"
+          c: "rm doesn't work in loops"
+          d: "Missing shebang"
+        answer: "b"
+        explanation: "Filenames with spaces or special characters will break. Use quotes and glob directly."
+        points: 0.75
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 3: TEXT PROCESSING
+# Sources: SEM04, Lectures 4-5
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Text Processing"
+    lectures: [4, 5]
+    seminars: [4]
+    question_count: 22
+    
+    questions:
+      - id: TP01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM04-R1"
+        question: "Which regex metacharacter matches ANY single character (except newline)?"
+        options:
+          a: "."
+          b: "*"
+          c: "?"
+          d: "+"
+        answer: "a"
+        explanation: "The dot (.) matches exactly one character. * = zero or more; ? = zero or one; + = one or more."
+        points: 0.5
+
+      - id: TP02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM04-R2"
+        question: "Which grep option displays ONLY the text that matched, not the entire line?"
+        options:
+          a: "-o"
+          b: "-v"
+          c: "-c"
+          d: "-l"
+        answer: "a"
+        explanation: "-o (only-matching) displays only the matched portion."
+        points: 0.5
+
+      - id: TP03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM04-R3"
+        question: "In sed, which command deletes lines that match a pattern?"
+        options:
+          a: "d"
+          b: "p"
+          c: "s"
+          d: "q"
+        answer: "a"
+        explanation: "d = delete, p = print, s = substitute, q = quit."
+        points: 0.5
+
+      - id: TP04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM04-U1"
+        question: "What is the MAIN difference between BRE and ERE in grep?"
+        options:
+          a: "In BRE, metacharacters +, ?, {}, (), | require escaping with backslash"
+          b: "BRE is faster than ERE"
+          c: "ERE does not support grouping with parentheses"
+          d: "BRE works only on Linux, ERE on all systems"
+        answer: "a"
+        explanation: "In BRE, + ? {} () | are literal; must escape them. In ERE (-E), they're metacharacters."
+        points: 0.5
+
+      - id: TP05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM04-U2"
+        question: "What does the regex pattern `^[^#]` match?"
+        options:
+          a: "Lines that do NOT start with #"
+          b: "Lines that start with #"
+          c: "The character ^ followed by #"
+          d: "Any line that contains #"
+        answer: "a"
+        explanation: "First ^ = start anchor; [^#] = any character except #."
+        points: 0.5
+
+      - id: TP06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM04-U3"
+        question: "What will 'echo -e \"abc\\nABC\\nabC\" | grep -i 'abc'' display?"
+        options:
+          a: "abc, ABC, abC (all three lines)"
+          b: "only abc"
+          c: "abc and ABC"
+          d: "Error: invalid pattern"
+        answer: "a"
+        explanation: "-i makes the search case-insensitive."
+        points: 0.5
+
+      - id: TP07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM04-U4"
+        question: "What will 'echo \"hello world\" | sed 's/o/O/'' display?"
+        options:
+          a: "hellO world"
+          b: "hellO wOrld"
+          c: "HELLO WORLD"
+          d: "hello world"
+        answer: "a"
+        explanation: "Without the 'g' flag, sed replaces only the FIRST occurrence."
+        points: 0.5
+
+      - id: TP08
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM04-U5"
+        question: "What will 'echo \"ana:are:mere\" | awk -F: '{print $2}'' display?"
+        options:
+          a: "are"
+          b: "ana"
+          c: "mere"
+          d: "ana:are:mere"
+        answer: "a"
+        explanation: "-F: sets delimiter to ':'; $2 is the second field."
+        points: 0.5
+
+      - id: TP09
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM04-A1"
+        question: "Which command extracts ALL IP addresses from log.txt?"
+        options:
+          a: "grep -oE '([0-9]{1,3}\\.){3}[0-9]{1,3}' log.txt"
+          b: "grep -o '[0-9]*' log.txt"
+          c: "grep 'IP' log.txt"
+          d: "grep -E '[0-9].[0-9].[0-9].[0-9]' log.txt"
+        answer: "a"
+        explanation: "Pattern matches 1-3 digits, escaped dot, repeated 3 times, plus final octet."
+        points: 0.5
+
+      - id: TP10
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM04-A2"
+        question: "Which sed command deletes all blank lines from a file?"
+        options:
+          a: "sed '/^$/d' file.txt"
+          b: "sed 's/^$//' file.txt"
+          c: "sed '/./d' file.txt"
+          d: "sed 'd' file.txt"
+        answer: "a"
+        explanation: "^$ matches empty line (start followed by end); d deletes it."
+        points: 0.5
+
+      - id: TP11
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM04-A3"
+        question: "Which awk command calculates the sum of values in column 3 of a CSV?"
+        options:
+          a: "awk -F, '{sum+=$3} END {print sum}' data.csv"
+          b: "awk '{print $3}' data.csv | sum"
+          c: "awk -F, 'BEGIN {print $3}' data.csv"
+          d: "awk '{sum=$3} END {print sum}' data.csv"
+        answer: "a"
+        explanation: "sum+=$3 accumulates; END block prints total after all lines."
+        points: 0.5
+
+      - id: TP12
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM04-A4"
+        question: "Which pipeline counts unique lines containing 'ERROR' in all .log files?"
+        options:
+          a: "grep -h 'ERROR' *.log | sort | uniq | wc -l"
+          b: "grep 'ERROR' *.log | wc -l"
+          c: "grep -c 'ERROR' *.log"
+          d: "grep 'ERROR' *.log | uniq | wc -l"
+        answer: "a"
+        explanation: "-h suppresses filenames; sort before uniq; wc -l counts lines."
+        points: 0.5
+
+      - id: TP13
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        source: "SEM04-A5"
+        question: "Complete the sed command that replaces ALL occurrences of 'foo' with 'bar': sed 's/foo/bar/___' file.txt"
+        answer: "g"
+        keywords: ["g", "global"]
+        points: 0.5
+
+      - id: TP14
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM04-AN1"
+        question: |
+          A colleague wrote: grep 'error|warning' server.log
+          It finds nothing despite the file containing 'error' and 'warning'. Why?
+        options:
+          a: "Missing -E; in BRE, | is literal, not alternation"
+          b: "The pattern should be 'error\\|warning'"
+          c: "Both options A and B are correct"
+          d: "Must use -i for case-insensitive"
+        answer: "c"
+        explanation: "In BRE, | is literal. Fix with -E or escape: \\|"
+        points: 0.75
+
+      - id: TP15
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM04-AN2"
+        question: "Which approach is MORE EFFICIENT for extracting column 2 from a 1GB CSV?"
+        options:
+          a: "awk -F, '{print $2}' large.csv"
+          b: "cat large.csv | cut -d, -f2"
+          c: "sed 's/[^,]*,\\([^,]*\\).*/\\1/' large.csv"
+          d: "All are equally efficient"
+        answer: "a"
+        explanation: "awk parses once, no extra processes. cat|cut = UUOC; sed regex is slower."
+        points: 0.75
+
+      - id: TP16
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write an awk command to print lines where the third field is greater than 100."
+        answer: "awk '$3 > 100' file.txt"
+        accept_alternatives:
+          - "awk '{if ($3 > 100) print}' file.txt"
+        points: 1.0
+
+      - id: TP17
+        type: short_answer
+        difficulty: hard
+        bloom: apply
+        question: "Write a sed command to swap the first and second words on each line."
+        answer: "sed 's/^\\([^ ]*\\) \\([^ ]*\\)/\\2 \\1/'"
+        accept_alternatives:
+          - "sed -E 's/^([^ ]+) ([^ ]+)/\\2 \\1/'"
+        points: 1.5
+
+      - id: TP18
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does the regex anchors \\b match?"
+        options:
+          a: "Beginning of line"
+          b: "Word boundary"
+          c: "Backspace character"
+          d: "End of line"
+        answer: "b"
+        explanation: "\\b matches position between word and non-word character."
+        points: 0.5
+
+      - id: TP19
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        question: "Which grep command finds whole words only?"
+        options:
+          a: "grep -w 'word' file"
+          b: "grep -o 'word' file"
+          c: "grep -x 'word' file"
+          d: "grep -e 'word' file"
+        answer: "a"
+        explanation: "-w matches whole words only (word boundaries on both sides)."
+        points: 0.5
+
+      - id: TP20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "In awk, what does NF represent?"
+        options:
+          a: "Number of files"
+          b: "Number of fields in current record"
+          c: "Number of formatted outputs"
+          d: "Next field"
+        answer: "b"
+        explanation: "NF = Number of Fields. NR = Number of Records (line number)."
+        points: 0.5
+
+      - id: TP21
+        type: practical
+        difficulty: hard
+        bloom: create
+        question: "Write an awk script to calculate average of column 2 for a CSV file."
+        answer: "awk -F, '{sum+=$2; count++} END {print sum/count}' file.csv"
+        points: 1.5
+
+      - id: TP22
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        question: "Which option makes grep search recursively in directories?"
+        options:
+          a: "-r"
+          b: "-R"
+          c: "Both -r and -R work"
+          d: "-d"
+        answer: "c"
+        explanation: "Both -r and -R enable recursive search; -R follows symlinks."
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 4: BASH SCRIPTING
+# Sources: SEM05, SEM06, Lectures 7-9
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Bash Scripting"
+    lectures: [7, 8, 9]
+    seminars: [5, 6]
+    question_count: 30
+    
+    questions:
+      - id: BS01
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM05-q01"
+        question: |
+          What does this script output?
+          count=10
+          increment() { count=$((count + 1)); echo "In function: $count"; }
+          increment
+          echo "After function: $count"
+        options:
+          a: "After function: 10"
+          b: "After function: 11"
+          c: "After function: (empty)"
+          d: "Error - count is not defined in main"
+        answer: "b"
+        explanation: "In Bash, variables in functions are GLOBAL by default (unlike Python/Java/C)."
+        points: 0.5
+
+      - id: BS02
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM05-q02"
+        question: |
+          What does this display?
+          get_value() { return 42; }
+          result=$(get_value)
+          echo "Result: '$result'"
+        options:
+          a: "Result: '42'"
+          b: "Result: '' (empty string)"
+          c: "Result: '0'"
+          d: "Syntax error"
+        answer: "b"
+        explanation: "return sets exit code (0-255), not output. $() captures stdout, not exit code."
+        points: 0.5
+
+      - id: BS03
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM05-q03"
+        question: |
+          Script test.sh: show_arg() { echo "$1"; }; echo "$1"; show_arg "FUNC"
+          Running: ./test.sh SCRIPT
+          What does the function print?
+        options:
+          a: "SCRIPT"
+          b: "FUNC"
+          c: "(empty)"
+          d: "$1"
+        answer: "b"
+        explanation: "$1 in function refers to function argument, not script argument."
+        points: 0.5
+
+      - id: BS04
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM05-q04"
+        question: "What does arr=(\"first\" \"second\" \"third\"); echo \"${arr[1]}\" display?"
+        options:
+          a: "first"
+          b: "second"
+          c: "third"
+          d: "Error"
+        answer: "b"
+        explanation: "Bash arrays start at index 0."
+        points: 0.5
+
+      - id: BS05
+        type: multiple_choice
+        difficulty: hard
+        bloom: understand
+        source: "SEM05-q05"
+        question: |
+          Without 'declare -A':
+          config[host]="localhost"
+          config[port]="8080"
+          echo "Keys: ${!config[@]}"
+        options:
+          a: "Keys: host port"
+          b: "Keys: 0"
+          c: "Keys: 0 0"
+          d: "Error"
+        answer: "b"
+        explanation: "Without declare -A, Bash treats 'host' and 'port' as arithmetic (=0), both write to config[0]."
+        points: 0.75
+
+      - id: BS06
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM05-q06"
+        question: |
+          files=("file one.txt" "file two.txt")
+          count=0; for f in ${files[@]}; do ((count++)); done
+          echo "Iterations: $count"
+        options:
+          a: "2"
+          b: "4"
+          c: "1"
+          d: "Error"
+        answer: "b"
+        explanation: "Without quotes, word splitting separates each element. Use \"${files[@]}\"."
+        points: 0.5
+
+      - id: BS07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM05-q07"
+        question: |
+          arr=(a b c d e); unset arr[2]
+          echo "Indices: ${!arr[@]} Length: ${#arr[@]}"
+        options:
+          a: "Indices: 0 1 2 3 Length: 4"
+          b: "Indices: 0 1 3 4 Length: 4"
+          c: "Indices: 0 1 2 3 4 Length: 5"
+          d: "Error"
+        answer: "b"
+        explanation: "unset creates a sparse array; indices don't re-index."
+        points: 0.5
+
+      - id: BS08
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM05-q08"
+        question: |
+          set -euo pipefail
+          x="${UNDEFINED_VAR}"
+          echo "Continues..."
+        options:
+          a: "Displays 'Continues...' with x=\"\""
+          b: "Error: unbound variable"
+          c: "Displays 'Continues...' with x=\"UNDEFINED_VAR\""
+          d: "Depends on Bash version"
+        answer: "b"
+        explanation: "set -u makes undefined variables an error."
+        points: 0.5
+
+      - id: BS09
+        type: multiple_choice
+        difficulty: hard
+        bloom: understand
+        source: "SEM05-q09"
+        question: |
+          set -e
+          if false; then echo "In if"; fi
+          echo "After if"
+        options:
+          a: "Script stops at false"
+          b: "Displays 'After if'"
+          c: "Displays 'In if' then 'After if'"
+          d: "Syntax error"
+        answer: "b"
+        explanation: "set -e has exceptions: if/while conditions, || and && left side, negation with !."
+        points: 0.75
+
+      - id: BS10
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM06-q01"
+        question: "Which command sets strict Bash mode: stop on error, undefined variables, and pipe failures?"
+        options:
+          a: "set -e"
+          b: "set -euo pipefail"
+          c: "set -x"
+          d: "set -v"
+        answer: "b"
+        explanation: "-e: exit on error, -u: undefined var error, -o pipefail: pipe error detection."
+        points: 0.5
+
+      - id: BS11
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM06-q02"
+        question: "Which signal is sent when the user presses Ctrl+C?"
+        options:
+          a: "SIGTERM"
+          b: "SIGKILL"
+          c: "SIGINT"
+          d: "SIGHUP"
+        answer: "c"
+        explanation: "SIGINT (Signal Interrupt) from Ctrl+C; can be caught with trap."
+        points: 0.5
+
+      - id: BS12
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM06-q03"
+        question: "Which exit code indicates successful execution in Unix convention?"
+        options:
+          a: "1"
+          b: "-1"
+          c: "0"
+          d: "255"
+        answer: "c"
+        explanation: "0 = success, non-zero = error. Check with $?."
+        points: 0.5
+
+      - id: BS13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM06-q04"
+        question: "Why separate code into lib/core.sh, lib/utils.sh, lib/config.sh?"
+        options:
+          a: "Bash limits file size to 1000 lines"
+          b: "For reuse, isolated testing, and easy maintenance"
+          c: "source only works with small files"
+          d: "To make code harder to understand"
+        answer: "b"
+        explanation: "Modular architecture enables reuse, independent testing, and clear responsibilities."
+        points: 0.5
+
+      - id: BS14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM06-q05"
+        question: "How does incremental backup differ from full backup?"
+        options:
+          a: "Copies all files every time"
+          b: "Copies only files modified since last backup"
+          c: "Uses better compression"
+          d: "Automatically deletes old files"
+        answer: "b"
+        explanation: "Incremental uses 'find -newer' to detect changes, saving time and space."
+        points: 0.5
+
+      - id: BS15
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM06-q07"
+        question: "What is the correct order of logging levels from least to most severe?"
+        options:
+          a: "ERROR, WARN, INFO, DEBUG"
+          b: "DEBUG, INFO, WARN, ERROR"
+          c: "INFO, DEBUG, ERROR, WARN"
+          d: "WARN, ERROR, DEBUG, INFO"
+        answer: "b"
+        explanation: "DEBUG < INFO < WARN < ERROR < FATAL is the standard ordering."
+        points: 0.5
+
+      - id: BS16
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q09"
+        question: "What is the correct syntax to run 'cleanup' on EXIT and SIGINT?"
+        options:
+          a: "trap cleanup EXIT SIGINT"
+          b: "trap 'cleanup' EXIT INT"
+          c: "on_exit cleanup"
+          d: "finally { cleanup }"
+        answer: "b"
+        explanation: "trap 'command' SIGNALS... with quotes; INT not SIGINT in trap."
+        points: 0.5
+
+      - id: BS17
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q10"
+        question: "Which command finds files modified after timestamp.txt?"
+        options:
+          a: "find /data -newer timestamp.txt -type f"
+          b: "find /data -mtime +timestamp.txt"
+          c: "find /data --after timestamp.txt"
+          d: "find /data -modified > timestamp.txt"
+        answer: "a"
+        explanation: "-newer compares mtime with reference file."
+        points: 0.5
+
+      - id: BS18
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q11"
+        question: "How do you return a numeric value from a Bash function?"
+        options:
+          a: "return $value (for 0-255)"
+          b: "echo $value and capture with $()"
+          c: "Both methods, for different purposes"
+          d: "export RESULT=$value"
+        answer: "c"
+        explanation: "return for exit code (0-255), echo for output values."
+        points: 0.5
+
+      - id: BS19
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q12"
+        question: "Which command checks if a web server responds successfully?"
+        options:
+          a: "ping localhost:8080"
+          b: "curl -sf http://localhost:8080/health"
+          c: "wget --check localhost:8080"
+          d: "nc -z localhost 8080"
+        answer: "b"
+        explanation: "curl -s (silent) -f (fail on HTTP error) verifies HTTP response, not just TCP."
+        points: 0.5
+
+      - id: BS20
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q13"
+        question: "Which syntax correctly iterates over array elements preserving spaces?"
+        options:
+          a: "for item in $ARRAY; do"
+          b: "for item in ${ARRAY[@]}; do"
+          c: "for item in \"${ARRAY[@]}\"; do"
+          d: "foreach item in ARRAY; do"
+        answer: "c"
+        explanation: "Double quotes preserve elements with spaces as single units."
+        points: 0.5
+
+      - id: BS21
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM06-q14"
+        question: "Which command verifies backup integrity using checksum?"
+        options:
+          a: "md5sum -c backup.md5"
+          b: "sha256sum backup.tar.gz"
+          c: "diff backup.md5 backup.tar.gz"
+          d: "cmp --checksum backup.tar.gz"
+        answer: "a"
+        explanation: "-c (check) reads hash file and verifies each entry."
+        points: 0.5
+
+      - id: BS22
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM06-q15"
+        question: |
+          A backup script shows "Backup completed" but archive is empty:
+          tar czf "$BACKUP_FILE" "$SOURCE_DIR" 2>/dev/null
+          echo "Backup completed"
+          What's the problem?
+        options:
+          a: "tar failed but error was suppressed by 2>/dev/null"
+          b: "echo doesn't work after tar"
+          c: "BACKUP_FILE is undefined"
+          d: "SOURCE_DIR only has empty directories"
+        answer: "a"
+        explanation: "2>/dev/null hides errors; without set -e, script continues after failure."
+        points: 0.75
+
+      - id: BS23
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM06-q16"
+        question: |
+          Why can this PID file pattern cause problems?
+          if [[ ! -f "$PID_FILE" ]]; then
+              echo $$ > "$PID_FILE"
+          fi
+        options:
+          a: "$$ doesn't contain correct PID"
+          b: "Race condition: two instances can check simultaneously and both write"
+          c: "PID_FILE must be in /var/run"
+          d: "Echo cannot write to files"
+        answer: "b"
+        explanation: "TOCTOU (Time Of Check To Time Of Use) race. Use atomic mkdir or flock."
+        points: 0.75
+
+      - id: BS24
+        type: multiple_choice
+        difficulty: hard
+        bloom: evaluate
+        source: "SEM06-q17"
+        question: "For zero-downtime deployment with instant rollback but limited resources, which strategy?"
+        options:
+          a: "Blue-Green deployment"
+          b: "Rolling deployment"
+          c: "Recreate deployment"
+          d: "Big bang deployment"
+        answer: "b"
+        explanation: "Rolling replaces instances gradually; doesn't need double resources like Blue-Green."
+        points: 0.75
+
+      - id: BS25
+        type: multiple_choice
+        difficulty: hard
+        bloom: evaluate
+        source: "SEM06-q18"
+        question: "For daily backups on server with limited CPU but sufficient storage, which compression?"
+        options:
+          a: "xz (best ratio)"
+          b: "gzip (balanced)"
+          c: "zstd (fast with good compression)"
+          d: "No compression"
+        answer: "c"
+        explanation: "zstd: speed comparable to gzip, better compression, lower CPU than xz."
+        points: 0.75
+
+      - id: BS26
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a trap command to remove /tmp/lockfile on script exit."
+        answer: "trap 'rm -f /tmp/lockfile' EXIT"
+        accept_alternatives:
+          - "trap \"rm -f /tmp/lockfile\" EXIT"
+        points: 1.0
+
+      - id: BS27
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "How do you make a variable local to a function in Bash?"
+        answer: "local varname=value"
+        keywords: ["local"]
+        points: 0.5
+
+      - id: BS28
+        type: practical
+        difficulty: hard
+        bloom: create
+        question: "Write a function that logs messages with timestamp and level: log INFO \"message\""
+        answer: |
+          log() {
+              local level="$1"
+              local msg="$2"
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $msg"
+          }
+        points: 1.5
+
+      - id: BS29
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does ${var:-default} do?"
+        options:
+          a: "Sets var to default"
+          b: "Returns default if var is unset or empty"
+          c: "Returns default only if var is unset"
+          d: "Deletes var"
+        answer: "b"
+        explanation: "${var:-default} provides default for unset/empty; ${var-default} only for unset."
+        points: 0.5
+
+      - id: BS30
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        question: "Which getopts specification handles '-v' flag and '-f filename' option?"
+        options:
+          a: "getopts 'v:f:'"
+          b: "getopts 'vf:'"
+          c: "getopts 'v f'"
+          d: "getopts '-v -f:'"
+        answer: "b"
+        explanation: "v = flag (no argument), f: = option requiring argument."
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 5: SYSTEM ADMINISTRATION
+# Sources: SEM03, Lectures 3
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "System Administration"
+    lectures: [3]
+    seminars: [3]
+    question_count: 20
+    
+    questions:
+      - id: SA01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM03-q01"
+        question: "Which find option specifies file type?"
+        options:
+          a: "-name"
+          b: "-type"
+          c: "-size"
+          d: "-exec"
+        answer: "b"
+        explanation: "-type f for files, -type d for directories, -type l for symlinks."
+        points: 0.5
+
+      - id: SA02
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM03-q02"
+        question: "What is the difference between locate and find?"
+        options:
+          a: "They are identical"
+          b: "locate uses a database (fast); find searches real-time (slow but current)"
+          c: "find is deprecated"
+          d: "locate only works on Windows"
+        answer: "b"
+        explanation: "locate queries updatedb database; find traverses filesystem."
+        points: 0.5
+
+      - id: SA03
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM03-q03"
+        question: "Which command finds .log files larger than 10MB modified in last 7 days?"
+        options:
+          a: "find / -name '*.log' -size +10M -mtime -7"
+          b: "locate *.log | size 10M | date 7"
+          c: "find / -type log -big -recent"
+          d: "search *.log 10M 7d"
+        answer: "a"
+        explanation: "-size +10M (larger than 10M), -mtime -7 (modified within 7 days)."
+        points: 0.5
+
+      - id: SA04
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM03-q04"
+        question: "In find, what is the operator precedence for -name '*.txt' -o -name '*.log' -size +1M?"
+        options:
+          a: "All evaluated left to right"
+          b: "AND (-size) binds tighter than OR (-o)"
+          c: "OR binds tighter than AND"
+          d: "Size is evaluated first"
+        answer: "b"
+        explanation: "AND has higher precedence: '*.txt' OR ('*.log' AND +1M). Use \\( \\) for grouping."
+        points: 0.75
+
+      - id: SA05
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM03-q05"
+        question: "Which approach handles filenames with spaces in find | xargs?"
+        options:
+          a: "find | xargs rm"
+          b: "find -print0 | xargs -0 rm"
+          c: "find | xargs -s rm"
+          d: "find -spaces | xargs rm"
+        answer: "b"
+        explanation: "-print0 uses null terminator; xargs -0 reads null-separated input."
+        points: 0.5
+
+      - id: SA06
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM03-q06"
+        question: "What does $# represent in a Bash script?"
+        options:
+          a: "Last argument"
+          b: "Number of arguments"
+          c: "Script name"
+          d: "All arguments"
+        answer: "b"
+        explanation: "$# = argument count, $@ = all arguments, $0 = script name, $? = exit status."
+        points: 0.5
+
+      - id: SA07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM03-q07"
+        question: "What does \"$@\" preserve that $* doesn't?"
+        options:
+          a: "Nothing, they are identical"
+          b: "The original argument boundaries (arguments with spaces)"
+          c: "The script name"
+          d: "The exit code"
+        answer: "b"
+        explanation: "\"$@\" expands each argument as separate word; $* joins them."
+        points: 0.5
+
+      - id: SA08
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM03-q08"
+        question: "In getopts 'vf:', what does f: mean?"
+        options:
+          a: "-f is a flag"
+          b: "-f requires an argument"
+          c: "-f is optional"
+          d: "-f is invalid"
+        answer: "b"
+        explanation: "Colon after letter means option requires argument (OPTARG)."
+        points: 0.5
+
+      - id: SA09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM03-q09"
+        question: "What does permission mode 755 mean?"
+        options:
+          a: "rwx------"
+          b: "rwxr-xr-x"
+          c: "rw-rw-rw-"
+          d: "rwxrwxrwx"
+        answer: "b"
+        explanation: "7=rwx (owner), 5=r-x (group), 5=r-x (others)."
+        points: 0.5
+
+      - id: SA10
+        type: multiple_choice
+        difficulty: easy
+        bloom: apply
+        source: "SEM03-q10"
+        question: "What does chmod g+w do?"
+        options:
+          a: "Removes write from group"
+          b: "Adds write permission to group"
+          c: "Sets group to world"
+          d: "Changes group ownership"
+        answer: "b"
+        explanation: "g+w adds (+) write (w) permission to group (g)."
+        points: 0.5
+
+      - id: SA11
+        type: multiple_choice
+        difficulty: medium
+        bloom: analyse
+        source: "SEM03-q11"
+        question: "A script has permissions rwxr-xr-x but won't execute. What's the likely cause?"
+        options:
+          a: "Missing read permission"
+          b: "Missing execute permission on directory"
+          c: "Wrong ownership"
+          d: "File is too large"
+        answer: "b"
+        explanation: "Need execute on directories to access contents; check parent dirs."
+        points: 0.5
+
+      - id: SA12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "SEM03-q12"
+        question: "What does SUID (chmod u+s) allow?"
+        options:
+          a: "Anyone can delete the file"
+          b: "File executes with owner's permissions, not executor's"
+          c: "File is shared"
+          d: "File is system-protected"
+        answer: "b"
+        explanation: "SUID runs executable as owner (e.g., passwd runs as root)."
+        points: 0.5
+
+      - id: SA13
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "SEM03-q13"
+        question: "What is the crontab field order?"
+        options:
+          a: "hour minute day month weekday"
+          b: "minute hour day month weekday"
+          c: "day month weekday hour minute"
+          d: "minute hour month day weekday"
+        answer: "b"
+        explanation: "m h dom mon dow command (minute, hour, day-of-month, month, day-of-week)."
+        points: 0.5
+
+      - id: SA14
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM03-q14"
+        question: "What does cron expression '30 2 * * 1' schedule?"
+        options:
+          a: "Every day at 2:30"
+          b: "Every Monday at 2:30"
+          c: "Every hour at minute 30"
+          d: "January 30 at 2:00"
+        answer: "b"
+        explanation: "minute=30, hour=2, any day, any month, weekday=1 (Monday)."
+        points: 0.5
+
+      - id: SA15
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        source: "SEM03-q15"
+        question: "How do you schedule a job every 15 minutes in cron?"
+        options:
+          a: "15 * * * *"
+          b: "*/15 * * * *"
+          c: "0/15 * * * *"
+          d: "* 15 * * *"
+        answer: "b"
+        explanation: "*/15 means every 15 units; 15 would be only at minute 15."
+        points: 0.5
+
+      - id: SA16
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "SEM03-q16"
+        question: "A cron job runs manually but fails in cron. Most likely cause?"
+        options:
+          a: "Wrong syntax"
+          b: "Missing absolute paths or environment variables"
+          c: "Cron is disabled"
+          d: "File permissions"
+        answer: "b"
+        explanation: "Cron has minimal PATH; use absolute paths and set environment."
+        points: 0.75
+
+      - id: SA17
+        type: multiple_choice
+        difficulty: hard
+        bloom: evaluate
+        source: "SEM03-q17"
+        question: "Which is more efficient for deleting many files: find -exec rm {} + or find | while read; rm?"
+        options:
+          a: "They are equal"
+          b: "-exec {} + batches files into fewer rm invocations"
+          c: "while read is faster"
+          d: "Neither works"
+        answer: "b"
+        explanation: "{} + batches arguments (like xargs); {} \\; runs rm once per file."
+        points: 0.75
+
+      - id: SA18
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a find command to delete all .tmp files older than 30 days."
+        answer: "find /path -name '*.tmp' -mtime +30 -delete"
+        accept_alternatives:
+          - "find /path -name '*.tmp' -mtime +30 -exec rm {} +"
+        points: 1.0
+
+      - id: SA19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Write a cron entry to run backup.sh every Sunday at 3:00 AM."
+        answer: "0 3 * * 0 /path/to/backup.sh"
+        accept_alternatives:
+          - "0 3 * * 7 /path/to/backup.sh"
+          - "0 3 * * SUN /path/to/backup.sh"
+        points: 1.0
+
+      - id: SA20
+        type: practical
+        difficulty: hard
+        bloom: apply
+        question: "Write a script that accepts -v (verbose) and -o outputfile options using getopts."
+        answer: |
+          while getopts 'vo:' opt; do
+              case $opt in
+                  v) VERBOSE=1 ;;
+                  o) OUTPUT="$OPTARG" ;;
+                  *) echo "Usage: $0 [-v] [-o file]" >&2; exit 1 ;;
+              esac
+          done
+        points: 1.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 6: PROCESS MANAGEMENT
+# Sources: Lectures 2-5
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Process Management"
+    lectures: [2, 3, 4, 5]
+    seminars: []
+    question_count: 36
+    
+    questions:
+      # --- Basic OS Concepts (Lecture 02) ---
+      - id: PM01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L02-q01"
+        question: "What is an interrupt?"
+        options:
+          a: "A fatal system error"
+          b: "A hardware/software signal that requests CPU attention"
+          c: "A jump instruction"
+          d: "A type of memory"
+        answer: "b"
+        explanation: "Interrupts cause CPU to suspend current execution and run a handler."
+        points: 0.5
+
+      - id: PM02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L02-q02"
+        question: "What is the difference between an interrupt and a trap?"
+        options:
+          a: "They are identical"
+          b: "Interrupt is hardware (async), trap is software (sync)"
+          c: "Trap is faster"
+          d: "Interrupt is generated by applications"
+        answer: "b"
+        explanation: "Interrupt = asynchronous, hardware. Trap = synchronous, software (syscall, exception)."
+        points: 0.5
+
+      - id: PM03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L02-q03"
+        question: "What does the Interrupt Vector Table (IVT) contain?"
+        options:
+          a: "List of all processes"
+          b: "Addresses of handling routines for each interrupt type"
+          c: "System passwords"
+          d: "Hardware configuration"
+        answer: "b"
+        explanation: "IVT maps interrupt numbers to handler addresses."
+        points: 0.5
+
+      - id: PM04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L02-q04"
+        question: "Why must processor context be saved during interrupt handling?"
+        options:
+          a: "To clear memory"
+          b: "To return to the exact state before the interrupt"
+          c: "To speed up processing"
+          d: "It is not necessary"
+        answer: "b"
+        explanation: "Context (registers, PC, flags) must be saved for correct process resumption."
+        points: 0.5
+
+      - id: PM05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L02-q05"
+        question: "What does DMA (Direct Memory Access) mean?"
+        options:
+          a: "A type of RAM"
+          b: "Data transfer between I/O and memory without CPU involvement"
+          c: "A network protocol"
+          d: "An encryption method"
+        answer: "b"
+        explanation: "DMA allows I/O devices to transfer data directly to/from memory."
+        points: 0.5
+
+      - id: PM06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L02-q06"
+        question: "What is polling and why is it inefficient?"
+        options:
+          a: "Polling = active waiting, CPU checks repeatedly, wasting cycles"
+          b: "Polling = hardware interrupts"
+          c: "Polling is very efficient"
+          d: "Polling = DMA transfer"
+        answer: "a"
+        explanation: "In polling, CPU constantly checks device status (busy-wait), wasting cycles."
+        points: 0.5
+
+      # --- Processes (Lecture 03) ---
+      - id: PM07
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L03-q01"
+        question: "What is a process?"
+        options:
+          a: "An executable file stored on disk"
+          b: "A program in execution with allocated resources"
+          c: "A function from source code"
+          d: "A type of memory"
+        answer: "b"
+        explanation: "Process = program in execution + address space + resources."
+        points: 0.5
+
+      - id: PM08
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L03-q02"
+        question: "What does the PCB (Process Control Block) contain?"
+        options:
+          a: "Only program code"
+          b: "PID, state, CPU registers, scheduling info, resources"
+          c: "Only heap memory"
+          d: "User password"
+        answer: "b"
+        explanation: "PCB contains all information OS needs to manage the process."
+        points: 0.5
+
+      - id: PM09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L03-q03"
+        question: "What does fork() return in the child process?"
+        options:
+          a: "Parent's PID"
+          b: "0"
+          c: "-1"
+          d: "Child's PID"
+        answer: "b"
+        explanation: "fork() returns 0 in child, child's PID in parent, -1 on error."
+        points: 0.5
+
+      - id: PM10
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L03-q04"
+        question: "What are the 5 main states of a process?"
+        options:
+          a: "Start, Run, Stop, Pause, End"
+          b: "New, Ready, Running, Waiting, Terminated"
+          c: "Init, Active, Sleep, Wake, Exit"
+          d: "Create, Execute, Block, Resume, Kill"
+        answer: "b"
+        explanation: "Standard 5-state model with transitions between states."
+        points: 0.5
+
+      - id: PM11
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L03-q05"
+        question: "What does the exec() family do?"
+        options:
+          a: "Creates a new process"
+          b: "Replaces current process image with a new program"
+          c: "Terminates current process"
+          d: "Duplicates the process"
+        answer: "b"
+        explanation: "exec() replaces code, data, stack with new program; PID stays same."
+        points: 0.5
+
+      - id: PM12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L03-q06"
+        question: "What is a zombie process?"
+        options:
+          a: "Process consuming too much memory"
+          b: "Terminated process whose parent hasn't called wait()"
+          c: "Process blocked on I/O"
+          d: "A virus"
+        answer: "b"
+        explanation: "Zombie = terminated but parent hasn't read exit status; occupies process table slot."
+        points: 0.5
+
+      - id: PM13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L03-q07"
+        question: "What happens to an orphan process?"
+        options:
+          a: "It crashes"
+          b: "It is adopted by init (PID 1)"
+          c: "It becomes a zombie"
+          d: "It is terminated"
+        answer: "b"
+        explanation: "When parent dies, children become orphans, adopted by init for cleanup."
+        points: 0.5
+
+      - id: PM14
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L03-q09"
+        question: "What technique makes fork() efficient on modern systems?"
+        options:
+          a: "Immediate copying of entire memory"
+          b: "Copy-on-Write (COW): pages shared, copied only on write"
+          c: "Memory compression"
+          d: "Automatic swap"
+        answer: "b"
+        explanation: "COW delays copying until modification, saving memory and time."
+        points: 0.75
+
+      - id: PM15
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L03-q11"
+        question: "A program calls fork() 3 times in sequence. How many processes exist at the end?"
+        options:
+          a: "3"
+          b: "4"
+          c: "8"
+          d: "6"
+        answer: "c"
+        explanation: "Each fork doubles processes: 1→2→4→8. Formula: 2^n."
+        points: 0.75
+
+      # --- Scheduling (Lecture 04) ---
+      - id: PM16
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L04-q01"
+        question: "What is a scheduler?"
+        options:
+          a: "A code compiler"
+          b: "OS component that decides which process runs on CPU"
+          c: "A type of memory"
+          d: "A network protocol"
+        answer: "b"
+        explanation: "Scheduler selects next process from Ready queue for CPU execution."
+        points: 0.5
+
+      - id: PM17
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L04-q02"
+        question: "What does preemption mean?"
+        options:
+          a: "Forced termination"
+          b: "OS can interrupt running process to run another"
+          c: "Process creation"
+          d: "Memory allocation"
+        answer: "b"
+        explanation: "Preemption = OS's ability to forcibly suspend a process."
+        points: 0.5
+
+      - id: PM18
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L04-q03"
+        question: "What is turnaround time?"
+        options:
+          a: "System boot time"
+          b: "Total time from submission to process completion"
+          c: "CPU execution time"
+          d: "Queue waiting time"
+        answer: "b"
+        explanation: "Turnaround = total time (submission → completion), includes waiting + execution."
+        points: 0.5
+
+      - id: PM19
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L04-q04"
+        question: "What is the difference between FCFS and SJF?"
+        options:
+          a: "FCFS is preemptive"
+          b: "FCFS serves in arrival order; SJF serves shortest job first"
+          c: "SJF is slower"
+          d: "No difference"
+        answer: "b"
+        explanation: "FCFS = First Come First Served. SJF = Shortest Job First."
+        points: 0.5
+
+      - id: PM20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L04-q05"
+        question: "What problem does Round Robin solve?"
+        options:
+          a: "Minimises turnaround time"
+          b: "Ensures fairness through equal time quanta"
+          c: "Eliminates deadlocks"
+          d: "Reduces memory"
+        answer: "b"
+        explanation: "RR gives each process a time quantum, preventing starvation."
+        points: 0.5
+
+      - id: PM21
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L04-q06"
+        question: "What is starvation in scheduling?"
+        options:
+          a: "Process consuming too much CPU"
+          b: "Process never receives CPU because others have higher priority"
+          c: "Lack of RAM"
+          d: "Disk error"
+        answer: "b"
+        explanation: "Starvation = process waits indefinitely because other processes preempt it."
+        points: 0.5
+
+      - id: PM22
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L04-q08"
+        question: "How does aging work in priority scheduling?"
+        options:
+          a: "Terminates old processes"
+          b: "Gradually increases priority of waiting processes"
+          c: "Reduces priority of CPU-bound processes"
+          d: "Deletes inactive processes"
+        answer: "b"
+        explanation: "Aging = periodic priority increment for waiting processes to prevent starvation."
+        points: 0.5
+
+      - id: PM23
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L04-q10"
+        question: "Time quantum in RR is 10ms. Process requires 25ms CPU. How many preemptions?"
+        options:
+          a: "1"
+          b: "2"
+          c: "3"
+          d: "Never"
+        answer: "b"
+        explanation: "Runs 10ms (preempt), 10ms (preempt), 5ms (finish). 2 preemptions."
+        points: 0.75
+
+      - id: PM24
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L04-q11"
+        question: "Why is MLFQ considered the most versatile scheduling algorithm?"
+        options:
+          a: "Simplest to implement"
+          b: "Combines advantages of multiple algorithms and adapts to behaviour"
+          c: "Uses least CPU"
+          d: "Doesn't require priorities"
+        answer: "b"
+        explanation: "MLFQ dynamically adjusts priorities based on process behaviour."
+        points: 0.75
+
+      - id: PM25
+        type: practical
+        difficulty: hard
+        bloom: apply
+        source: "L04-q12"
+        question: "P1(burst=6), P2(burst=2), P3(burst=4) arrive at t=0. With SJF, what's the average waiting time?"
+        options:
+          a: "4.0"
+          b: "3.33"
+          c: "2.67"
+          d: "5.0"
+        answer: "c"
+        explanation: "SJF order: P2(2), P3(4), P1(6). Waiting: P2=0, P3=2, P1=6. Avg = 8/3 = 2.67."
+        points: 0.75
+
+      # --- Threads (Lecture 05) ---
+      - id: PM26
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L05-q01"
+        question: "What is a thread?"
+        options:
+          a: "An independent process"
+          b: "Smallest unit of execution, shares address space with other threads in same process"
+          c: "A type of memory"
+          d: "An executable file"
+        answer: "b"
+        explanation: "Thread = lightweight process, shares code/data/resources, has own stack."
+        points: 0.5
+
+      - id: PM27
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L05-q02"
+        question: "What do threads of the same process share?"
+        options:
+          a: "Nothing, completely isolated"
+          b: "Code, global data, heap, open files"
+          c: "Only the stack"
+          d: "Only CPU registers"
+        answer: "b"
+        explanation: "Threads share entire address space (code, data, heap) and resources."
+        points: 0.5
+
+      - id: PM28
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L05-q03"
+        question: "What do threads NOT share?"
+        options:
+          a: "Program code"
+          b: "Global variables"
+          c: "Stack, CPU registers, thread ID"
+          d: "Open files"
+        answer: "c"
+        explanation: "Each thread has own stack, registers, and TID."
+        points: 0.5
+
+      - id: PM29
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L05-q04"
+        question: "Why is creating a thread faster than fork()?"
+        options:
+          a: "Threads don't need memory"
+          b: "Address space doesn't need duplication, only new stack allocated"
+          c: "Threads don't run code"
+          d: "Fork() is deprecated"
+        answer: "b"
+        explanation: "Thread reuses existing address space; fork() must create/copy entire space."
+        points: 0.5
+
+      - id: PM30
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L05-q06"
+        question: "What threading model do most modern systems use?"
+        options:
+          a: "Many-to-One"
+          b: "One-to-One (1:1)"
+          c: "Many-to-Many"
+          d: "None-to-None"
+        answer: "b"
+        explanation: "1:1 maps each user thread to kernel thread, allowing full parallelism."
+        points: 0.5
+
+      - id: PM31
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L05-q08"
+        question: "What problem can occur when a thread modifies a global variable?"
+        options:
+          a: "Variable becomes read-only"
+          b: "Race condition: other threads may read inconsistent values"
+          c: "Program terminates"
+          d: "Memory doubles"
+        answer: "b"
+        explanation: "Unsynchronised concurrent access causes race conditions."
+        points: 0.5
+
+      - id: PM32
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L05-q10"
+        question: "On a system with 4 cores, how many CPU-bound threads for optimal performance?"
+        options:
+          a: "1 thread"
+          b: "4 threads (one per core)"
+          c: "100 threads"
+          d: "8 threads"
+        answer: "b"
+        explanation: "For CPU-bound: #threads ≈ #cores. More adds context switch overhead."
+        points: 0.75
+
+      - id: PM33
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L05-q12"
+        question: "For a program reading large files and processing them, what threading strategy?"
+        options:
+          a: "Single thread for everything"
+          b: "Separate thread for I/O and worker threads for processing (producer-consumer)"
+          c: "One thread per byte"
+          d: "Don't use threads"
+        answer: "b"
+        explanation: "Separating I/O from processing allows parallelism via producer-consumer pattern."
+        points: 0.75
+
+      - id: PM34
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What is the command to view the process tree in Linux?"
+        answer: "pstree"
+        accept_alternatives:
+          - "ps --forest"
+          - "ps auxf"
+        points: 0.5
+
+      - id: PM35
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "How do you send SIGTERM to process with PID 1234?"
+        answer: "kill 1234"
+        accept_alternatives:
+          - "kill -15 1234"
+          - "kill -TERM 1234"
+          - "kill -SIGTERM 1234"
+        points: 0.5
+
+      - id: PM36
+        type: practical
+        difficulty: hard
+        bloom: apply
+        question: "Write C code fragment showing fork() + exec() pattern to run 'ls -l'."
+        answer: |
+          pid_t pid = fork();
+          if (pid == 0) {
+              execlp("ls", "ls", "-l", NULL);
+          } else {
+              wait(NULL);
+          }
+        points: 1.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 7: SYNCHRONISATION
+# Sources: Lectures 6-7
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Synchronisation"
+    lectures: [6, 7]
+    seminars: []
+    question_count: 24
+    
+    questions:
+      # --- Part 1: Peterson, Locks, Mutex (Lecture 06) ---
+      - id: SY01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L06-q01"
+        question: "What is a critical section?"
+        options:
+          a: "A fatal system error"
+          b: "Code that accesses shared resources, must be executed atomically"
+          c: "A type of memory"
+          d: "A system function"
+        answer: "b"
+        explanation: "Critical section = code accessing shared data; only one thread at a time."
+        points: 0.5
+
+      - id: SY02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L06-q02"
+        question: "What is a race condition?"
+        options:
+          a: "Competition between processes for memory"
+          b: "Outcome depends on non-deterministic execution order"
+          c: "A sorting algorithm"
+          d: "A type of thread"
+        answer: "b"
+        explanation: "Race condition = behaviour dependent on timing of concurrent operations."
+        points: 0.5
+
+      - id: SY03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L06-q03"
+        question: "What are the 3 conditions for correct critical section solution?"
+        options:
+          a: "Speed, memory, CPU"
+          b: "Mutual exclusion, progress, bounded waiting"
+          c: "Read, write, execute"
+          d: "Lock, unlock, wait"
+        answer: "b"
+        explanation: "Mutual exclusion (exclusivity), progress (no unnecessary blocking), bounded waiting (no starvation)."
+        points: 0.5
+
+      - id: SY04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L06-q04"
+        question: "What is busy-waiting and why is it problematic?"
+        options:
+          a: "An optimisation technique"
+          b: "Process repeatedly checks condition in loop, wasting CPU cycles"
+          c: "Memory allocation method"
+          d: "A type of interrupt"
+        answer: "b"
+        explanation: "Busy-wait = spinning in loop; wastes CPU. Better: sleep + wake."
+        points: 0.5
+
+      - id: SY05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L06-q06"
+        question: "What does atomic test-and-set instruction do?"
+        options:
+          a: "Tests memory"
+          b: "Reads value, sets to true, returns old value - all atomically"
+          c: "Increments counter"
+          d: "Disables interrupts"
+        answer: "b"
+        explanation: "TAS: atomic { old = *ptr; *ptr = true; return old; }. Basis for spinlocks."
+        points: 0.5
+
+      - id: SY06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L06-q07"
+        question: "What is the difference between mutex and spinlock?"
+        options:
+          a: "Identical"
+          b: "Mutex sleeps when blocked; spinlock does busy-wait"
+          c: "Spinlock is safer"
+          d: "Mutex doesn't work on multi-core"
+        answer: "b"
+        explanation: "Mutex: sleep/wake (long waits). Spinlock: busy-wait (short waits)."
+        points: 0.5
+
+      - id: SY07
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L06-q11"
+        question: "What is the trade-off between spinlock and mutex for short critical sections?"
+        options:
+          a: "No trade-off"
+          b: "Spinlock avoids context switch but wastes CPU; for very short sections, spinlock may be better"
+          c: "Mutex is always better"
+          d: "Spinlock doesn't work"
+        answer: "b"
+        explanation: "If critical section < context switch time, spinlock avoids sleep/wake overhead."
+        points: 0.75
+
+      - id: SY08
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L06-q12"
+        question: "1000 threads increment a shared counter. Optimal synchronisation?"
+        options:
+          a: "No synchronisation"
+          b: "Global mutex"
+          c: "Atomic operations (atomic_fetch_add)"
+          d: "Interrupt disabling"
+        answer: "c"
+        explanation: "For single counter, atomic operations (lock-free) are more efficient than mutexes."
+        points: 0.75
+
+      # --- Part 2: Semaphores, Buffer (Lecture 07) ---
+      - id: SY09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L07-q01"
+        question: "What is a semaphore?"
+        options:
+          a: "A type of memory"
+          b: "Integer variable accessed through atomic wait() and signal()"
+          c: "A sorting algorithm"
+          d: "A type of file"
+        answer: "b"
+        explanation: "Semaphore = variable with atomic P(wait)/V(signal) for synchronisation."
+        points: 0.5
+
+      - id: SY10
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L07-q02"
+        question: "What does wait() (P) do on a semaphore?"
+        options:
+          a: "Increments value"
+          b: "Decrements value; if negative, process blocks"
+          c: "Deletes semaphore"
+          d: "Displays value"
+        answer: "b"
+        explanation: "wait(): S--; if (S < 0) block(). Process waits if resource unavailable."
+        points: 0.5
+
+      - id: SY11
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L07-q03"
+        question: "What's the difference between binary and counting semaphore?"
+        options:
+          a: "No difference"
+          b: "Binary: 0/1 (mutex). Counting: any integer (multiple resources)"
+          c: "Counting is slower"
+          d: "Binary doesn't exist"
+        answer: "b"
+        explanation: "Binary = 0/1, equivalent to mutex. Counting = N resources."
+        points: 0.5
+
+      - id: SY12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L07-q04"
+        question: "In Producer-Consumer with bounded buffer, why 3 semaphores?"
+        options:
+          a: "One is sufficient"
+          b: "mutex (buffer access), empty (free slots), full (occupied slots)"
+          c: "For speed"
+          d: "No semaphores needed"
+        answer: "b"
+        explanation: "mutex = exclusivity, empty = producer waits for free slot, full = consumer waits for data."
+        points: 0.5
+
+      - id: SY13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L07-q05"
+        question: "What is a monitor in synchronisation?"
+        options:
+          a: "A display device"
+          b: "High-level construct encapsulating data and procedures with implicit mutual exclusion"
+          c: "A type of semaphore"
+          d: "A system process"
+        answer: "b"
+        explanation: "Monitor = ADT with built-in synchronisation; only one thread executes at a time."
+        points: 0.5
+
+      - id: SY14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L07-q07"
+        question: "Why check condition in while loop, not if, with condition variables?"
+        options:
+          a: "if is slower"
+          b: "Spurious wakeups: thread may wake without condition being true"
+          c: "while is syntactically safer"
+          d: "if doesn't work"
+        answer: "b"
+        explanation: "Spurious wakeups and other threads may modify condition; must re-check."
+        points: 0.5
+
+      - id: SY15
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L07-q09"
+        question: "Why is wait() order on semaphores critical for avoiding deadlock?"
+        options:
+          a: "Order doesn't matter"
+          b: "Wrong order leads to circular wait: each holds one, waits for other"
+          c: "For speed"
+          d: "For memory savings"
+        answer: "b"
+        explanation: "P1: wait(A), wait(B); P2: wait(B), wait(A) → deadlock. Consistent order prevents this."
+        points: 0.75
+
+      - id: SY16
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L07-q10"
+        question: "In Readers-Writers, why can solution cause writer starvation?"
+        options:
+          a: "Writers are slower"
+          b: "Continuous readers prevent writers from getting exclusive access"
+          c: "Writers don't use semaphores"
+          d: "Implementation error"
+        answer: "b"
+        explanation: "With reader preference, continuous stream of readers indefinitely blocks writers."
+        points: 0.75
+
+      - id: SY17
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L07-q12"
+        question: "Bounded buffer capacity 10. Initial semaphore values?"
+        options:
+          a: "mutex=0, empty=0, full=10"
+          b: "mutex=1, empty=10, full=0"
+          c: "mutex=10, empty=1, full=1"
+          d: "mutex=1, empty=0, full=10"
+        answer: "b"
+        explanation: "mutex=1 (exclusivity), empty=10 (10 free slots), full=0 (0 elements initially)."
+        points: 0.75
+
+      - id: SY18
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What POSIX function initialises a mutex?"
+        answer: "pthread_mutex_init"
+        accept_alternatives:
+          - "pthread_mutex_init()"
+        points: 0.5
+
+      - id: SY19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What function releases a semaphore (signals)?"
+        answer: "sem_post"
+        accept_alternatives:
+          - "sem_post()"
+          - "signal"
+          - "V"
+        points: 0.5
+
+      - id: SY20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is priority inversion?"
+        options:
+          a: "High priority runs first"
+          b: "Low-priority task blocks high-priority indirectly via shared resource"
+          c: "Priorities are reversed"
+          d: "No such thing"
+        answer: "b"
+        explanation: "Priority inversion: high blocks on lock held by low, while medium runs."
+        points: 0.5
+
+      - id: SY21
+        type: multiple_choice
+        difficulty: hard
+        bloom: understand
+        question: "How does priority inheritance protocol solve priority inversion?"
+        options:
+          a: "Disables priorities"
+          b: "Temporarily raises holder's priority to highest waiter"
+          c: "Kills low-priority tasks"
+          d: "Uses spinlocks only"
+        answer: "b"
+        explanation: "Priority inheritance: lock holder inherits priority of highest waiting thread."
+        points: 0.75
+
+      - id: SY22
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is a barrier in parallel programming?"
+        options:
+          a: "A type of lock"
+          b: "Synchronisation point where threads wait until all reach it"
+          c: "Memory protection"
+          d: "Thread termination"
+        answer: "b"
+        explanation: "Barrier: all threads must arrive before any proceed past the barrier."
+        points: 0.5
+
+      - id: SY23
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is a reader-writer lock advantage over mutex?"
+        options:
+          a: "Faster"
+          b: "Allows multiple concurrent readers when no writer"
+          c: "Uses less memory"
+          d: "No advantage"
+        answer: "b"
+        explanation: "RW lock: multiple readers OR one writer. Better parallelism for read-heavy workloads."
+        points: 0.5
+
+      - id: SY24
+        type: practical
+        difficulty: hard
+        bloom: create
+        question: "Write pseudocode for producer in bounded buffer with semaphores."
+        answer: |
+          while (true) {
+              item = produce();
+              wait(empty);
+              wait(mutex);
+              buffer[in] = item;
+              in = (in + 1) % N;
+              signal(mutex);
+              signal(full);
+          }
+        points: 1.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 8: DEADLOCK
+# Sources: Lecture 8
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Deadlock"
+    lectures: [8]
+    seminars: []
+    question_count: 12
+    
+    questions:
+      - id: DL01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L08-q01"
+        question: "What is a deadlock?"
+        options:
+          a: "A computer virus"
+          b: "Processes mutually block each other, waiting for resources held by others"
+          c: "A compilation error"
+          d: "A type of memory"
+        answer: "b"
+        explanation: "Deadlock = impasse: each waits for resource held by another in the group."
+        points: 0.5
+
+      - id: DL02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L08-q02"
+        question: "What are the 4 Coffman conditions for deadlock?"
+        options:
+          a: "Read, write, execute, delete"
+          b: "Mutual exclusion, hold and wait, no preemption, circular wait"
+          c: "Lock, unlock, signal, wait"
+          d: "Create, destroy, modify, access"
+        answer: "b"
+        explanation: "All 4 must be true simultaneously for deadlock to occur."
+        points: 0.5
+
+      - id: DL03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L08-q03"
+        question: "What is a Resource Allocation Graph (RAG)?"
+        options:
+          a: "A sorting algorithm"
+          b: "Graph showing allocation and request relationships between processes and resources"
+          c: "A type of memory"
+          d: "A network protocol"
+        answer: "b"
+        explanation: "RAG: nodes = processes/resources, edges = allocations/requests. Cycle indicates potential deadlock."
+        points: 0.5
+
+      - id: DL04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L08-q04"
+        question: "How can 'circular wait' be prevented?"
+        options:
+          a: "Encrypting resources"
+          b: "Imposing total order on resource acquisition"
+          c: "Increasing memory"
+          d: "Disabling interrupts"
+        answer: "b"
+        explanation: "If all acquire resources in same order, cycle cannot form."
+        points: 0.5
+
+      - id: DL05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L08-q06"
+        question: "What is a 'safe' state in Banker's Algorithm?"
+        options:
+          a: "System has no viruses"
+          b: "Exists an execution sequence where all processes can complete"
+          c: "Memory is sufficient"
+          d: "CPU is not overloaded"
+        answer: "b"
+        explanation: "Safe state = at least one safe sequence exists: processes complete without deadlock."
+        points: 0.5
+
+      - id: DL06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L08-q07"
+        question: "Why is Banker's Algorithm rarely used in practice?"
+        options:
+          a: "Too simple"
+          b: "Requires a priori knowledge of maximum resource requirements"
+          c: "Doesn't work on multi-core"
+          d: "Consumes too much memory"
+        answer: "b"
+        explanation: "Modern programs don't declare max resources; plus computational overhead."
+        points: 0.5
+
+      - id: DL07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L08-q08"
+        question: "Difference between deadlock prevention and avoidance?"
+        options:
+          a: "Identical"
+          b: "Prevention permanently eliminates one condition; avoidance dynamically checks each request"
+          c: "Prevention is slower"
+          d: "Avoidance doesn't work"
+        answer: "b"
+        explanation: "Prevention: structurally impossible. Avoidance: permits only if system stays safe."
+        points: 0.5
+
+      - id: DL08
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L08-q09"
+        question: "In RAG with single instance per resource, what does a cycle indicate?"
+        options:
+          a: "Good performance"
+          b: "Guaranteed deadlock"
+          c: "Possible deadlock"
+          d: "No problem"
+        answer: "b"
+        explanation: "Single instances: cycle = certain deadlock. Multiple instances: necessary but not sufficient."
+        points: 0.75
+
+      - id: DL09
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L08-q10"
+        question: "Why can resource preemption be impossible for certain resources?"
+        options:
+          a: "Always possible"
+          b: "Some resources cannot be taken without corrupting state"
+          c: "Preemption is too fast"
+          d: "Requires special hardware"
+        answer: "b"
+        explanation: "Non-preemptable: printer mid-print, mutexes; cannot take without losing work."
+        points: 0.75
+
+      - id: DL10
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L08-q11"
+        question: "System uses detection + recovery for deadlock. What's the trade-off?"
+        options:
+          a: "No trade-off"
+          b: "Less overhead normally, but recovery (kill/rollback) can be costly"
+          c: "Always better than prevention"
+          d: "Doesn't work"
+        answer: "b"
+        explanation: "Detection runs periodically; recovery involves termination or rollback."
+        points: 0.75
+
+      - id: DL11
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L08-q12"
+        question: "2 processes, 2 locks (A, B). P1 acquires A then B; P2 acquires B then A. How to prevent deadlock?"
+        options:
+          a: "Use more locks"
+          b: "Both acquire in same order: A then B"
+          c: "Remove locks"
+          d: "Increase P1's priority"
+        answer: "b"
+        explanation: "Consistent global order (A < B) eliminates circular wait."
+        points: 0.75
+
+      - id: DL12
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "Name one method to recover from deadlock."
+        answer: "Process termination"
+        accept_alternatives:
+          - "Kill process"
+          - "Resource preemption"
+          - "Rollback"
+          - "Checkpoint and restart"
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 9: MEMORY MANAGEMENT
+# Sources: Lectures 9-10
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Memory Management"
+    lectures: [9, 10]
+    seminars: []
+    question_count: 24
+    
+    questions:
+      # --- Part 1: Paging, Segmentation (Lecture 09) ---
+      - id: MM01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L09-q01"
+        question: "What is a logical (virtual) address?"
+        options:
+          a: "Physical address in RAM"
+          b: "Address generated by CPU, seen by process"
+          c: "Address on disk"
+          d: "IP address"
+        answer: "b"
+        explanation: "Logical address = address seen by program; translated by MMU to physical."
+        points: 0.5
+
+      - id: MM02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L09-q02"
+        question: "What is paging?"
+        options:
+          a: "Dividing program into functions"
+          b: "Dividing memory into fixed-size blocks (pages and frames)"
+          c: "Memory compression"
+          d: "Data encryption"
+        answer: "b"
+        explanation: "Paging: logical space into pages, physical memory into frames of same size."
+        points: 0.5
+
+      - id: MM03
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L09-q04"
+        question: "What's the difference between internal and external fragmentation?"
+        options:
+          a: "Identical"
+          b: "Internal: wasted within blocks. External: free space fragmented between blocks"
+          c: "External doesn't exist"
+          d: "Internal only on disk"
+        answer: "b"
+        explanation: "Internal: last frame partially used. External: free blocks too small."
+        points: 0.5
+
+      - id: MM04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L09-q05"
+        question: "Why does paging eliminate external fragmentation?"
+        options:
+          a: "Doesn't eliminate it"
+          b: "Any free frame can be used for any page; contiguity doesn't matter"
+          c: "Pages are compressed"
+          d: "Frames are larger"
+        answer: "b"
+        explanation: "Frames have fixed size and are interchangeable."
+        points: 0.5
+
+      - id: MM05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L09-q07"
+        question: "What does the MMU (Memory Management Unit) do?"
+        options:
+          a: "Manages network"
+          b: "Translates logical addresses to physical in hardware"
+          c: "Compiles programs"
+          d: "Stores passwords"
+        answer: "b"
+        explanation: "MMU = hardware for address translation and protection checking."
+        points: 0.5
+
+      - id: MM06
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L09-q09"
+        question: "System has 32-bit addresses, 4KB pages. How many page table entries?"
+        options:
+          a: "1024"
+          b: "1 million (2^20)"
+          c: "4 billion"
+          d: "4096"
+        answer: "b"
+        explanation: "4KB = 2^12 offset. 32-12 = 20 bits for page number → 2^20 entries."
+        points: 0.75
+
+      - id: MM07
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L09-q10"
+        question: "Why are multi-level page tables used?"
+        options:
+          a: "For speed"
+          b: "To save memory: don't allocate entries for unused pages"
+          c: "For security"
+          d: "Not used in practice"
+        answer: "b"
+        explanation: "Multi-level: allocate tables only for used regions, not entire space."
+        points: 0.75
+
+      - id: MM08
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L09-q12"
+        question: "Logical address 0x00003A7F on system with 4KB pages. What's the page number?"
+        options:
+          a: "0x3A7F"
+          b: "0x3"
+          c: "0xA7F"
+          d: "0x00003"
+        answer: "b"
+        explanation: "0x00003A7F: last 12 bits (0xA7F) = offset. Remainder (0x3) = page number."
+        points: 0.75
+
+      # --- Part 2: Virtual Memory, TLB (Lecture 10) ---
+      - id: MM09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L10-q01"
+        question: "What is virtual memory?"
+        options:
+          a: "Additional RAM"
+          b: "Technique using disk to extend apparent memory"
+          c: "Cache memory"
+          d: "ROM memory"
+        answer: "b"
+        explanation: "Virtual memory allows processes to use more memory than physical RAM."
+        points: 0.5
+
+      - id: MM10
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L10-q02"
+        question: "What is TLB (Translation Lookaside Buffer)?"
+        options:
+          a: "A type of RAM"
+          b: "Hardware cache for recent page→frame translations"
+          c: "A replacement algorithm"
+          d: "A software structure"
+        answer: "b"
+        explanation: "TLB = fast associative cache for frequently accessed PTEs."
+        points: 0.5
+
+      - id: MM11
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L10-q03"
+        question: "What is a page fault?"
+        options:
+          a: "A programming error"
+          b: "Access to page not in physical memory"
+          c: "A virus"
+          d: "A disk error"
+        answer: "b"
+        explanation: "Page fault = requested page not in RAM; OS brings it from disk."
+        points: 0.5
+
+      - id: MM12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L10-q05"
+        question: "What is Belady's anomaly?"
+        options:
+          a: "A hardware error"
+          b: "More frames can cause more page faults for FIFO"
+          c: "An optimal algorithm"
+          d: "An optimisation"
+        answer: "b"
+        explanation: "Belady: FIFO can have more faults with more frames. LRU doesn't have this."
+        points: 0.5
+
+      - id: MM13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L10-q06"
+        question: "Why is OPT algorithm not used in practice?"
+        options:
+          a: "Too slow"
+          b: "Requires knowledge of future page accesses"
+          c: "Consumes too much memory"
+          d: "Doesn't work"
+        answer: "b"
+        explanation: "OPT replaces page used furthest in future - impossible to know."
+        points: 0.5
+
+      - id: MM14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L10-q08"
+        question: "What is thrashing?"
+        options:
+          a: "An optimisation"
+          b: "System spending more time swapping than executing useful code"
+          c: "A sorting algorithm"
+          d: "A network error"
+        answer: "b"
+        explanation: "Thrashing: too few frames → continuous page faults → disastrous performance."
+        points: 0.5
+
+      - id: MM15
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L10-q10"
+        question: "Why does working set model help prevent thrashing?"
+        options:
+          a: "Deletes pages"
+          b: "Allocates enough frames for process's recent active pages"
+          c: "Increases CPU speed"
+          d: "Doesn't help"
+        answer: "b"
+        explanation: "Working set = pages used recently. Allocating WS avoids excessive faults."
+        points: 0.75
+
+      - id: MM16
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L10-q12"
+        question: "100MB RAM, 50 processes, each with 3MB working set. What happens?"
+        options:
+          a: "Works normally"
+          b: "Thrashing: 150MB > 100MB, continuous swapping"
+          c: "Processes get more memory"
+          d: "Disk becomes faster"
+        answer: "b"
+        explanation: "WS requirements (150MB) > RAM (100MB) → continuous faults."
+        points: 0.75
+
+      - id: MM17
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What Linux command displays memory usage?"
+        answer: "free"
+        accept_alternatives:
+          - "free -h"
+          - "cat /proc/meminfo"
+          - "vmstat"
+          - "top"
+        points: 0.5
+
+      - id: MM18
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What algorithm does Linux use for page replacement?"
+        answer: "LRU approximation (clock)"
+        accept_alternatives:
+          - "LRU"
+          - "Clock"
+          - "Second chance"
+          - "PFRA"
+        points: 0.5
+
+      - id: MM19
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does the 'dirty bit' in a page table entry indicate?"
+        options:
+          a: "Page contains errors"
+          b: "Page has been modified and must be written to disk before replacement"
+          c: "Page is invalid"
+          d: "Page is being accessed"
+        answer: "b"
+        explanation: "Dirty bit = modified. Clean pages can be discarded; dirty must be written back."
+        points: 0.5
+
+      - id: MM20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is demand paging?"
+        options:
+          a: "Loading all pages at startup"
+          b: "Loading pages only when they're accessed (on demand)"
+          c: "Deleting unused pages"
+          d: "Compressing pages"
+        answer: "b"
+        explanation: "Demand paging: pages loaded only when needed, not preloaded."
+        points: 0.5
+
+      - id: MM21
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is a valid bit in a page table entry?"
+        options:
+          a: "Page is error-free"
+          b: "Page is currently in physical memory"
+          c: "Page has correct permissions"
+          d: "Page contains valid data"
+        answer: "b"
+        explanation: "Valid bit: 1 = page in RAM (legal to access), 0 = not in RAM (causes page fault)."
+        points: 0.5
+
+      - id: MM22
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        question: "Why does TLB flushing occur on context switch?"
+        options:
+          a: "TLB is full"
+          b: "Each process has its own address space and page table"
+          c: "For security only"
+          d: "It doesn't occur"
+        answer: "b"
+        explanation: "TLB entries are process-specific; must flush or use ASID to avoid wrong translations."
+        points: 0.75
+
+      - id: MM23
+        type: multiple_choice
+        difficulty: hard
+        bloom: understand
+        question: "What are huge pages (large pages) and their advantage?"
+        options:
+          a: "Encrypted pages"
+          b: "Larger page size (2MB/1GB) reducing TLB misses for large datasets"
+          c: "Faster pages"
+          d: "Compressed pages"
+        answer: "b"
+        explanation: "Huge pages: fewer TLB entries needed, better TLB hit rate for large memory."
+        points: 0.75
+
+      - id: MM24
+        type: practical
+        difficulty: hard
+        bloom: apply
+        question: "Given reference string 1,2,3,4,1,2,5,1,2,3,4,5 and 3 frames with LRU, how many page faults?"
+        options:
+          a: "8"
+          b: "9"
+          c: "10"
+          d: "12"
+        answer: "c"
+        explanation: "LRU trace: 1(F),2(F),3(F),4(F),1(F),2(F),5(F),1(H),2(H),3(F),4(F),5(F) = 10 faults."
+        points: 1.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 10: FILE SYSTEMS
+# Sources: Lectures 11-12
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "File Systems"
+    lectures: [11, 12]
+    seminars: []
+    question_count: 24
+    
+    questions:
+      # --- Part 1: Inode, Pointers (Lecture 11) ---
+      - id: FS01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L11-q01"
+        question: "What is an inode?"
+        options:
+          a: "A type of processor"
+          b: "Data structure storing file metadata (permissions, size, pointers to blocks)"
+          c: "A directory"
+          d: "A type of network"
+        answer: "b"
+        explanation: "Inode = index node, contains all file info EXCEPT the name."
+        points: 0.5
+
+      - id: FS02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L11-q02"
+        question: "What does an inode NOT contain?"
+        options:
+          a: "File permissions"
+          b: "File name"
+          c: "File size"
+          d: "Pointers to data blocks"
+        answer: "b"
+        explanation: "Name is stored in directory, not inode. Inode identified by number."
+        points: 0.5
+
+      - id: FS03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L11-q03"
+        question: "What is a hard link?"
+        options:
+          a: "A copy of the file"
+          b: "Directory entry pointing to same inode as another file"
+          c: "A symbolic link"
+          d: "A network connection"
+        answer: "b"
+        explanation: "Hard link = another name for same inode. File exists until link count=0."
+        points: 0.5
+
+      - id: FS04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L11-q04"
+        question: "Why do inodes use indirect pointers for large files?"
+        options:
+          a: "For security"
+          b: "To allow any file size without increasing inode structure"
+          c: "For speed"
+          d: "They don't"
+        answer: "b"
+        explanation: "Direct: small files (fast). Indirect: large files without expanding inode."
+        points: 0.5
+
+      - id: FS05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L11-q05"
+        question: "What's the difference between hard link and symbolic link?"
+        options:
+          a: "Identical"
+          b: "Hard: same inode. Symlink: separate file containing path"
+          c: "Symlink is faster"
+          d: "Hard link works across filesystems"
+        answer: "b"
+        explanation: "Hard: shares inode, can't cross filesystem. Symlink: independent path file."
+        points: 0.5
+
+      - id: FS06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L11-q06"
+        question: "What happens when deleting a file with hard links?"
+        options:
+          a: "All hard links deleted"
+          b: "Link count decreases; data deleted only when count=0"
+          c: "File moved to Trash"
+          d: "Inode duplicated"
+        answer: "b"
+        explanation: "Deletion decreases link count. Data remains until no links exist."
+        points: 0.5
+
+      - id: FS07
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L11-q09"
+        question: "Inode: 12 direct, 1 single indirect, 1 double indirect. Block=4KB, pointer=4B. Max file size?"
+        options:
+          a: "48 KB"
+          b: "~4 GB"
+          c: "~4 TB"
+          d: "12 KB"
+        answer: "b"
+        explanation: "Direct: 12×4KB. Single: 1024×4KB. Double: 1024×1024×4KB. Total ≈ 4GB."
+        points: 0.75
+
+      - id: FS08
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L11-q10"
+        question: "Why are journaling filesystems safer during crash?"
+        options:
+          a: "Faster"
+          b: "Record operations in journal BEFORE applying, allowing recovery"
+          c: "Use encryption"
+          d: "Not safer"
+        answer: "b"
+        explanation: "Journaling: write-ahead logging. On crash, check journal and complete/rollback."
+        points: 0.75
+
+      # --- Part 2: Allocation, Structures (Lecture 12) ---
+      - id: FS09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L12-q01"
+        question: "What are the 3 main disk space allocation methods?"
+        options:
+          a: "Fast, slow, medium"
+          b: "Contiguous, linked, indexed"
+          c: "FIFO, LIFO, random"
+          d: "Read, write, execute"
+        answer: "b"
+        explanation: "Contiguous: consecutive blocks. Linked: linked lists. Indexed: pointer table."
+        points: 0.5
+
+      - id: FS10
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L12-q02"
+        question: "What is a bitmap in free space management?"
+        options:
+          a: "A graphical image"
+          b: "Bit vector where each bit indicates free(0) or occupied(1) block"
+          c: "Compression algorithm"
+          d: "A file type"
+        answer: "b"
+        explanation: "Bitmap: 1 bit/block, efficient for finding consecutive free blocks."
+        points: 0.5
+
+      - id: FS11
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L12-q04"
+        question: "What is the main advantage of contiguous allocation?"
+        options:
+          a: "Space efficiency"
+          b: "Very fast sequential and random access (single seek)"
+          c: "Easy extension"
+          d: "No advantages"
+        answer: "b"
+        explanation: "Contiguous: single seek for any access. Disadvantage: external fragmentation."
+        points: 0.5
+
+      - id: FS12
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L12-q05"
+        question: "Why does linked allocation have slow random access?"
+        options:
+          a: "More secure"
+          b: "Must traverse list from beginning to desired block"
+          c: "Uses encryption"
+          d: "Not slow"
+        answer: "b"
+        explanation: "For block N, must read N-1 blocks to follow pointers. O(n) vs O(1)."
+        points: 0.5
+
+      - id: FS13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L12-q06"
+        question: "What do extents solve in modern filesystems?"
+        options:
+          a: "Security"
+          b: "Reduces overhead for large contiguous files (stores start:length vs individual pointers)"
+          c: "Increases network speed"
+          d: "Automatic compression"
+        answer: "b"
+        explanation: "Extent = (start_block, length). 1GB contiguous: 1 extent vs thousands of pointers."
+        points: 0.5
+
+      - id: FS14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L12-q07"
+        question: "Why is VFS useful in Linux?"
+        options:
+          a: "Increases speed"
+          b: "Provides uniform interface for all filesystems"
+          c: "Encrypts data"
+          d: "Manages memory"
+        answer: "b"
+        explanation: "VFS: abstraction. Applications use same syscalls regardless of physical filesystem."
+        points: 0.5
+
+      - id: FS15
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L12-q08"
+        question: "What is a mount point?"
+        options:
+          a: "Hardware type"
+          b: "Directory where filesystem becomes accessible in hierarchy"
+          c: "Boot partition"
+          d: "Network server"
+        answer: "b"
+        explanation: "Mount: attaches filesystem to directory. /mnt/usb makes USB accessible."
+        points: 0.5
+
+      - id: FS16
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L12-q09"
+        question: "1MB file on FAT32 with 32KB clusters. How many FAT entries?"
+        options:
+          a: "1"
+          b: "32"
+          c: "1024"
+          d: "1048576"
+        answer: "b"
+        explanation: "1MB / 32KB = 32 clusters. Each cluster has one FAT entry."
+        points: 0.75
+
+      - id: FS17
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L12-q11"
+        question: "Trade-off for large vs small block size?"
+        options:
+          a: "No trade-off"
+          b: "Large: less overhead but more internal fragmentation. Small: opposite"
+          c: "Large always better"
+          d: "Small always better"
+        answer: "b"
+        explanation: "Large: efficient for large files, wasteful for small. Small: opposite."
+        points: 0.75
+
+      - id: FS18
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L12-q12"
+        question: "SSD vs HDD filesystem features?"
+        options:
+          a: "Same for both"
+          b: "SSD: TRIM support, no defrag. HDD: periodic defrag, write cache"
+          c: "HDD: TRIM. SSD: defrag"
+          d: "Storage type doesn't matter"
+        answer: "b"
+        explanation: "SSD: TRIM for garbage collection. HDD: defrag (seek time matters)."
+        points: 0.75
+
+      - id: FS19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command shows filesystem disk usage in Linux?"
+        answer: "df"
+        accept_alternatives:
+          - "df -h"
+          - "df -H"
+        points: 0.5
+
+      - id: FS20
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command shows directory space usage?"
+        answer: "du"
+        accept_alternatives:
+          - "du -h"
+          - "du -sh"
+        points: 0.5
+
+      - id: FS21
+        type: multiple_choice
+        difficulty: medium
+        bloom: apply
+        question: "What does 'ln -s target link' create?"
+        options:
+          a: "Hard link"
+          b: "Symbolic link"
+          c: "Copy of file"
+          d: "Directory"
+        answer: "b"
+        explanation: "-s creates symbolic (soft) link. Without -s creates hard link."
+        points: 0.5
+
+      - id: FS22
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is the purpose of /proc in Linux?"
+        options:
+          a: "Store procedures"
+          b: "Virtual filesystem providing process and system information"
+          c: "Temporary files"
+          d: "User home directories"
+        answer: "b"
+        explanation: "/proc = pseudo-filesystem exposing kernel/process data as files."
+        points: 0.5
+
+      - id: FS23
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What does sync command do?"
+        options:
+          a: "Synchronises time"
+          b: "Flushes filesystem buffers to disk"
+          c: "Syncs files between servers"
+          d: "Compares files"
+        answer: "b"
+        explanation: "sync forces write of buffered data to disk, ensuring persistence."
+        points: 0.5
+
+      - id: FS24
+        type: practical
+        difficulty: hard
+        bloom: apply
+        question: "Write command to create ext4 filesystem on /dev/sdb1."
+        answer: "mkfs.ext4 /dev/sdb1"
+        accept_alternatives:
+          - "mkfs -t ext4 /dev/sdb1"
+          - "mke2fs -t ext4 /dev/sdb1"
+        points: 1.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 11: SECURITY
+# Sources: Lecture 13
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Security"
+    lectures: [13]
+    seminars: []
+    question_count: 12
+    
+    questions:
+      - id: SE01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L13-q01"
+        question: "What does the CIA triad mean in security?"
+        options:
+          a: "Central Intelligence Agency"
+          b: "Confidentiality, Integrity, Availability"
+          c: "Create, Install, Activate"
+          d: "Control, Inspect, Authenticate"
+        answer: "b"
+        explanation: "CIA: Confidentiality (authorised access), Integrity (unaltered), Availability (accessible)."
+        points: 0.5
+
+      - id: SE02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L13-q02"
+        question: "What do permissions rwxr-xr-- represent?"
+        options:
+          a: "Everyone has full access"
+          b: "Owner: rwx, Group: r-x, Others: r--"
+          c: "File is encrypted"
+          d: "File is executable"
+        answer: "b"
+        explanation: "rwx (owner=7), r-x (group=5), r-- (others=4). Octal: 754."
+        points: 0.5
+
+      - id: SE03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L13-q03"
+        question: "What is the SUID bit?"
+        options:
+          a: "A virus"
+          b: "Executable runs with owner's permissions, not executor's"
+          c: "A type of encryption"
+          d: "A network command"
+        answer: "b"
+        explanation: "SUID: allows users to run programs with elevated privileges (e.g., passwd)."
+        points: 0.5
+
+      - id: SE04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L13-q04"
+        question: "Difference between authentication and authorisation?"
+        options:
+          a: "Identical"
+          b: "Authentication: WHO you are. Authorisation: WHAT you can do"
+          c: "Authorisation comes first"
+          d: "Authentication not necessary"
+        answer: "b"
+        explanation: "Authentication = identity verification. Authorisation = access control."
+        points: 0.5
+
+      - id: SE05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L13-q05"
+        question: "What is the 'least privilege' principle?"
+        options:
+          a: "All users have root"
+          b: "Processes receive only minimum permissions for their task"
+          c: "Privileges increase automatically"
+          d: "Doesn't apply"
+        answer: "b"
+        explanation: "Least privilege: minimises attack surface. Compromise has limited impact."
+        points: 0.5
+
+      - id: SE06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L13-q06"
+        question: "What is a buffer overflow?"
+        options:
+          a: "RAM is full"
+          b: "Data exceeds buffer boundary, overwriting adjacent memory"
+          c: "A type of compression"
+          d: "A network error"
+        answer: "b"
+        explanation: "Buffer overflow: can overwrite return address, enabling code execution."
+        points: 0.5
+
+      - id: SE07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L13-q07"
+        question: "What is ASLR?"
+        options:
+          a: "An encryption algorithm"
+          b: "Randomises memory positions to make exploitation harder"
+          c: "A firewall"
+          d: "A permission type"
+        answer: "b"
+        explanation: "ASLR: attacker doesn't know where data is → overflow doesn't know where to jump."
+        points: 0.5
+
+      - id: SE08
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L13-q08"
+        question: "Why does sticky bit on /tmp prevent deleting others' files?"
+        options:
+          a: "Encrypts files"
+          b: "Only file owner or root can delete files in directory"
+          c: "Compresses files"
+          d: "Hides files"
+        answer: "b"
+        explanation: "Sticky bit (t): in world-writable dirs, prevents deletion by non-owners."
+        points: 0.5
+
+      - id: SE09
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L13-q09"
+        question: "Why does DEP/NX help prevent buffer overflow exploits?"
+        options:
+          a: "Encrypts memory"
+          b: "Marks regions non-executable: injected data cannot run as code"
+          c: "Increases speed"
+          d: "Doesn't help"
+        answer: "b"
+        explanation: "NX: stack/heap non-executable. Shellcode can't run directly."
+        points: 0.75
+
+      - id: SE10
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L13-q10"
+        question: "What advantage does sandboxing offer?"
+        options:
+          a: "Increases speed"
+          b: "Limits syscalls and resources, reducing compromise impact"
+          c: "Saves memory"
+          d: "No advantages"
+        answer: "b"
+        explanation: "Sandbox: compromised app can't access entire system, only permitted resources."
+        points: 0.75
+
+      - id: SE11
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L13-q11"
+        question: "Main risk of SUID root programs?"
+        options:
+          a: "Too slow"
+          b: "Any vulnerability gives attacker full root access"
+          c: "Consume too much memory"
+          d: "No risk"
+        answer: "b"
+        explanation: "Bug in SUID root = privilege escalation. Attacker gains root."
+        points: 0.75
+
+      - id: SE12
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L13-q12"
+        question: "File has -rwsr-xr-x owned by root. Security risk?"
+        options:
+          a: "None"
+          b: "SUID root: any vulnerability allows root escalation"
+          c: "File corrupted"
+          d: "Normal permissions"
+        answer: "b"
+        explanation: "SUID (s in owner execute) + root owner = execution as root. Audit carefully."
+        points: 0.75
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 12: VIRTUALISATION AND CONTAINERS
+# Sources: Lectures 14, 16
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Virtualisation and Containers"
+    lectures: [14, 16]
+    seminars: []
+    question_count: 22
+    
+    questions:
+      # --- Virtualisation (Lecture 14) ---
+      - id: VC01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L14-q01"
+        question: "What is a hypervisor (VMM)?"
+        options:
+          a: "A type of processor"
+          b: "Software that creates and manages VMs, providing hardware abstraction"
+          c: "A network protocol"
+          d: "A type of memory"
+        answer: "b"
+        explanation: "Hypervisor = layer allowing multiple OSes on same physical hardware."
+        points: 0.5
+
+      - id: VC02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L14-q02"
+        question: "Difference between Type 1 and Type 2 hypervisors?"
+        options:
+          a: "No difference"
+          b: "Type 1 (bare-metal): on hardware. Type 2 (hosted): on host OS"
+          c: "Type 2 is faster"
+          d: "Type 1 is software, Type 2 hardware"
+        answer: "b"
+        explanation: "Type 1: ESXi, Xen (performance). Type 2: VirtualBox, Workstation (convenience)."
+        points: 0.5
+
+      - id: VC03
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L14-q03"
+        question: "What is paravirtualisation?"
+        options:
+          a: "Very fast virtualisation"
+          b: "Guest OS modified to know it's virtualised, uses hypercalls"
+          c: "Network-only virtualisation"
+          d: "Hardware virtualisation"
+        answer: "b"
+        explanation: "Paravirtualisation: modified guest uses hypercalls instead of privileged instructions."
+        points: 0.5
+
+      - id: VC04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L14-q04"
+        question: "How do Intel VT-x/AMD-V help?"
+        options:
+          a: "Increase CPU speed"
+          b: "Add ring -1 for hypervisor, enabling efficient traps"
+          c: "Encrypt data"
+          d: "Manage memory"
+        answer: "b"
+        explanation: "Hardware virtualisation: hypervisor in VMX root, guest in non-root. Fast VM exits."
+        points: 0.5
+
+      - id: VC05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L14-q05"
+        question: "What is a shadow page table?"
+        options:
+          a: "A backup copy"
+          b: "Hypervisor maintains guest-virtual → host-physical translation"
+          c: "A type of encryption"
+          d: "Not necessary"
+        answer: "b"
+        explanation: "Guest has its own PT. Shadow PT: guest VA→host PA for hardware MMU."
+        points: 0.5
+
+      - id: VC06
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L14-q07"
+        question: "Why are containers more lightweight than VMs?"
+        options:
+          a: "Not more lightweight"
+          b: "Containers share host kernel; VMs each have own kernel"
+          c: "Containers have no isolation"
+          d: "VMs are older"
+        answer: "b"
+        explanation: "Container: isolated processes without full OS overhead."
+        points: 0.5
+
+      - id: VC07
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L14-q08"
+        question: "What Linux mechanisms do containers use?"
+        options:
+          a: "Hardware virtualisation"
+          b: "Namespaces (isolation) and cgroups (limits)"
+          c: "Shadow page tables"
+          d: "Type 2 hypervisor"
+        answer: "b"
+        explanation: "Namespaces: isolate PID, network, mount. Cgroups: limit CPU, memory, I/O."
+        points: 0.5
+
+      - id: VC08
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L14-q09"
+        question: "When prefer full virtualisation over containers?"
+        options:
+          a: "Always"
+          b: "Need different OSes or maximum isolation (security boundaries)"
+          c: "Maximum performance"
+          d: "Never"
+        answer: "b"
+        explanation: "VM: kernel isolation, different OSes. Container: same kernel, weaker isolation."
+        points: 0.75
+
+      - id: VC09
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L14-q11"
+        question: "Why is live migration possible?"
+        options:
+          a: "Not possible"
+          b: "Memory copied incrementally while VM runs, short freeze for final state"
+          c: "VM has no state"
+          d: "Uses encryption"
+        answer: "b"
+        explanation: "Pre-copy: iterative RAM copy. Short stop, copy dirty pages, resume on new host."
+        points: 0.75
+
+      - id: VC10
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L14-q12"
+        question: "64GB RAM, want 100 isolated instances of same app. Choose?"
+        options:
+          a: "100 full VMs"
+          b: "Containers: share kernel, ~MB overhead vs ~GB per VM"
+          c: "100 processes without isolation"
+          d: "Not possible"
+        answer: "b"
+        explanation: "Container: ~10-50MB vs VM ~1GB. 100 containers in 64GB possible."
+        points: 0.75
+
+      # --- Advanced Containerisation (Lecture 16) ---
+      - id: VC11
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L16-q01"
+        question: "What is a Linux namespace?"
+        options:
+          a: "A type of file"
+          b: "Kernel mechanism isolating system resources for process groups"
+          c: "A network protocol"
+          d: "A type of memory"
+        answer: "b"
+        explanation: "Namespace: isolates PID, network, mount, user, IPC, cgroup, UTS."
+        points: 0.5
+
+      - id: VC12
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L16-q02"
+        question: "What is cgroups?"
+        options:
+          a: "A type of container"
+          b: "Kernel mechanism limiting and monitoring resources per process group"
+          c: "A communication protocol"
+          d: "A filesystem"
+        answer: "b"
+        explanation: "Cgroups: limits and accounts for CPU, memory, I/O."
+        points: 0.5
+
+      - id: VC13
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L16-q03"
+        question: "What does PID namespace isolate?"
+        options:
+          a: "The network"
+          b: "PID space: container sees only its processes, with own PID 1"
+          c: "Memory"
+          d: "Files"
+        answer: "b"
+        explanation: "PID namespace: init (PID 1) in container. Can't see host processes."
+        points: 0.5
+
+      - id: VC14
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L16-q05"
+        question: "What does 'unshare' command do?"
+        options:
+          a: "Deletes files"
+          b: "Creates new namespaces and executes program within them"
+          c: "Shares memory"
+          d: "Configures network"
+        answer: "b"
+        explanation: "unshare: creates namespace(s) and runs command. Basis for simple containers."
+        points: 0.5
+
+      - id: VC15
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L16-q06"
+        question: "What is overlay filesystem and why does Docker use it?"
+        options:
+          a: "A type of RAID"
+          b: "Layers multiple directories: read-only with writable on top"
+          c: "Encrypted filesystem"
+          d: "Network filesystem"
+        answer: "b"
+        explanation: "Overlay: image layers (ro) + container layer (rw). Efficient sharing."
+        points: 0.5
+
+      - id: VC16
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L16-q07"
+        question: "Why do rootless containers need user namespace?"
+        options:
+          a: "Don't need it"
+          b: "Maps UID 0 in container to non-root on host, allowing safe 'root' operations"
+          c: "For speed"
+          d: "For networking"
+        answer: "b"
+        explanation: "User NS: root in container = normal user on host. Escape doesn't give root."
+        points: 0.75
+
+      - id: VC17
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L16-q08"
+        question: "Security difference: container escape vs VM escape?"
+        options:
+          a: "No difference"
+          b: "Container: shared kernel, escape = host access. VM: must break hypervisor"
+          c: "VM escape is easier"
+          d: "Container is more secure"
+        answer: "b"
+        explanation: "Container: kernel vulnerability = host access. VM: hardware isolation."
+        points: 0.75
+
+      - id: VC18
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L16-q10"
+        question: "Limit container to 512MB RAM and 0.5 CPU. What cgroup controllers?"
+        options:
+          a: "Only memory"
+          b: "memory controller for RAM, cpu controller for quota"
+          c: "Only cpu"
+          d: "Cannot limit"
+        answer: "b"
+        explanation: "memory.max=512M, cpu.max=50000 100000 (50% of one core)."
+        points: 0.75
+
+      - id: VC19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command lists running Docker containers?"
+        answer: "docker ps"
+        accept_alternatives:
+          - "docker container ls"
+        points: 0.5
+
+      - id: VC20
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command enters a running container's shell?"
+        answer: "docker exec -it container_name /bin/bash"
+        accept_alternatives:
+          - "docker exec -it container_name bash"
+          - "docker exec -it container_name sh"
+        points: 0.5
+
+      - id: VC21
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is a container image?"
+        options:
+          a: "A running container"
+          b: "Read-only template containing application and dependencies"
+          c: "A virtual machine"
+          d: "A network configuration"
+        answer: "b"
+        explanation: "Image = template. Container = running instance of image with writable layer."
+        points: 0.5
+
+      - id: VC22
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is Kubernetes?"
+        options:
+          a: "A container runtime"
+          b: "Container orchestration platform for managing containerised workloads"
+          c: "A hypervisor"
+          d: "A Linux distribution"
+        answer: "b"
+        explanation: "K8s: orchestrates deployment, scaling, and management of containers."
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 13: NETWORKING AND ADVANCED TOPICS
+# Sources: Lectures 15, 17, 18
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - name: "Networking and Advanced Topics"
+    lectures: [15, 17, 18]
+    seminars: []
+    question_count: 20
+    
+    questions:
+      # --- Network (Lecture 15) ---
+      - id: NA01
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L15-q01"
+        question: "What is a socket in network programming?"
+        options:
+          a: "A network cable"
+          b: "Communication endpoint: IP + port combination"
+          c: "A type of server"
+          d: "An encryption protocol"
+        answer: "b"
+        explanation: "Socket = OS abstraction for network communication, identified by IP:port."
+        points: 0.5
+
+      - id: NA02
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L15-q02"
+        question: "Main difference between TCP and UDP?"
+        options:
+          a: "TCP is older"
+          b: "TCP: connection-oriented, reliable. UDP: connectionless, best-effort"
+          c: "UDP is more secure"
+          d: "No difference"
+        answer: "b"
+        explanation: "TCP: ordered delivery. UDP: fast, no guarantees (streaming, gaming)."
+        points: 0.5
+
+      - id: NA03
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L15-q03"
+        question: "What does bind() do in socket API?"
+        options:
+          a: "Connects to server"
+          b: "Associates socket with local IP and port"
+          c: "Sends data"
+          d: "Closes connection"
+        answer: "b"
+        explanation: "bind(): server specifies which IP:port to listen on."
+        points: 0.5
+
+      - id: NA04
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L15-q04"
+        question: "Why does TCP server call listen() and accept()?"
+        options:
+          a: "To send data"
+          b: "listen(): marks passive. accept(): accepts connections, creates new socket per client"
+          c: "For encryption"
+          d: "To close connection"
+        answer: "b"
+        explanation: "listen(): sets up queue. accept(): blocks until client, returns new socket."
+        points: 0.5
+
+      - id: NA05
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L15-q05"
+        question: "What is I/O multiplexing with select()/poll()/epoll()?"
+        options:
+          a: "Creating threads"
+          b: "Single thread monitors multiple sockets for I/O events"
+          c: "Data compression"
+          d: "Connection encryption"
+        answer: "b"
+        explanation: "Multiplexing: one thread handles thousands of connections efficiently."
+        points: 0.5
+
+      - id: NA06
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L15-q07"
+        question: "Server handles 10,000 connections. Most suitable model?"
+        options:
+          a: "One thread per connection"
+          b: "Event-driven with epoll and small worker pool"
+          c: "One process per connection"
+          d: "Sequential processing"
+        answer: "b"
+        explanation: "10K threads = large overhead. Event loop with epoll: efficient, scalable."
+        points: 0.75
+
+      - id: NA07
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L15-q10"
+        question: "Writing a chat server. Problem with partial messages on TCP?"
+        options:
+          a: "TCP guarantees complete messages"
+          b: "TCP is stream-based: need framing protocol (length prefix or delimiter)"
+          c: "Use UDP instead"
+          d: "No problems"
+        answer: "b"
+        explanation: "TCP: stream of bytes. recv() may return partial. Implement framing."
+        points: 0.75
+
+      # --- Kernel Programming (Lecture 17) ---
+      - id: NA08
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L17-q01"
+        question: "What is a kernel module?"
+        options:
+          a: "A type of application"
+          b: "Code loadable into kernel at runtime without recompiling"
+          c: "A configuration file"
+          d: "A network protocol"
+        answer: "b"
+        explanation: "Kernel module: extends functionality (drivers, filesystems) dynamically."
+        points: 0.5
+
+      - id: NA09
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L17-q02"
+        question: "Commands to manage kernel modules?"
+        options:
+          a: "apt install/remove"
+          b: "insmod, rmmod, modprobe, lsmod"
+          c: "mount, umount"
+          d: "start, stop"
+        answer: "b"
+        explanation: "insmod: load. rmmod: unload. modprobe: with dependencies. lsmod: list."
+        points: 0.5
+
+      - id: NA10
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L17-q05"
+        question: "Why can't you use printf() in kernel?"
+        options:
+          a: "Too slow"
+          b: "printf() is from libc (userspace). Kernel uses printk()"
+          c: "Kernel has no output"
+          d: "printf() deprecated"
+        answer: "b"
+        explanation: "Kernel lacks libc. printk(KERN_INFO ...) writes to kernel log (dmesg)."
+        points: 0.5
+
+      - id: NA11
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L17-q07"
+        question: "Why prefer spinlocks over mutexes in interrupt handlers?"
+        options:
+          a: "Safer"
+          b: "Mutexes can sleep; in interrupt context you cannot sleep"
+          c: "Spinlocks slower"
+          d: "No difference"
+        answer: "b"
+        explanation: "Interrupt: no process context, cannot sleep. Spinlock: busy-wait, OK for short."
+        points: 0.75
+
+      - id: NA12
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L17-q08"
+        question: "What is eBPF and why revolutionary?"
+        options:
+          a: "A firewall"
+          b: "Allows custom code in kernel safely (sandbox) without traditional modules"
+          c: "A network protocol"
+          d: "A filesystem"
+        answer: "b"
+        explanation: "eBPF: verified program, sandbox in kernel. Tracing, networking without crash risk."
+        points: 0.75
+
+      - id: NA13
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L17-q10"
+        question: "Register handler for hardware interrupt. Which kernel function?"
+        options:
+          a: "malloc()"
+          b: "request_irq()"
+          c: "printf()"
+          d: "fork()"
+        answer: "b"
+        explanation: "request_irq(irq, handler, flags, name, dev_id) registers IRQ handler."
+        points: 0.75
+
+      # --- NPU Integration (Lecture 18) ---
+      - id: NA14
+        type: multiple_choice
+        difficulty: easy
+        bloom: remember
+        source: "L18-q01"
+        question: "What is an NPU?"
+        options:
+          a: "A type of RAM"
+          b: "Specialised processor for ML/AI operations"
+          c: "A network protocol"
+          d: "A storage type"
+        answer: "b"
+        explanation: "NPU: hardware optimised for AI inference, energy-efficient for ML."
+        points: 0.5
+
+      - id: NA15
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        source: "L18-q03"
+        question: "Why are NPUs more energy-efficient than CPUs for AI?"
+        options:
+          a: "Not more efficient"
+          b: "Specialised architecture: many parallel MAC units without general-purpose overhead"
+          c: "Use less memory"
+          d: "Newer"
+        answer: "b"
+        explanation: "NPU: thousands of MAC units optimised for tensor ops. CPU: general overhead."
+        points: 0.5
+
+      - id: NA16
+        type: multiple_choice
+        difficulty: hard
+        bloom: analyse
+        source: "L18-q07"
+        question: "When prefer CPU vs NPU for AI inference?"
+        options:
+          a: "Always NPU"
+          b: "NPU: large models, batch, efficiency. CPU: small models, minimal latency"
+          c: "Always CPU"
+          d: "Doesn't matter"
+        answer: "b"
+        explanation: "NPU: throughput, efficiency. CPU: transfer overhead can exceed benefit for small."
+        points: 0.75
+
+      - id: NA17
+        type: multiple_choice
+        difficulty: hard
+        bloom: apply
+        source: "L18-q10"
+        question: "Laptop doing continuous AI inference. Why prefer NPU over GPU?"
+        options:
+          a: "GPU always better"
+          b: "NPU: lower power (1-5W vs 15-50W), longer battery, no thermal throttling"
+          c: "NPU is faster"
+          d: "GPU can't do AI"
+        answer: "b"
+        explanation: "Laptop: thermal/battery limits GPU. NPU: energy efficiency for sustained inference."
+        points: 0.75
+
+      - id: NA18
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command shows network interfaces in Linux?"
+        answer: "ip addr"
+        accept_alternatives:
+          - "ip a"
+          - "ifconfig"
+          - "ip link"
+        points: 0.5
+
+      - id: NA19
+        type: short_answer
+        difficulty: medium
+        bloom: apply
+        question: "What command shows listening ports?"
+        answer: "ss -tuln"
+        accept_alternatives:
+          - "netstat -tuln"
+          - "ss -l"
+          - "lsof -i"
+        points: 0.5
+
+      - id: NA20
+        type: multiple_choice
+        difficulty: medium
+        bloom: understand
+        question: "What is a network namespace used for?"
+        options:
+          a: "File isolation"
+          b: "Creating isolated network stacks (interfaces, routing, firewall)"
+          c: "Memory isolation"
+          d: "Process isolation"
+        answer: "b"
+        explanation: "Network NS: container/process has own network stack, IP, routing."
+        points: 0.5
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF CONSOLIDATED QUESTION POOL
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# Total: 256 questions across 13 categories
+# Ready for test generation with test_generator.py
+# ═══════════════════════════════════════════════════════════════════════════════

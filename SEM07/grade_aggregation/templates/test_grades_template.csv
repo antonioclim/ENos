@@ -1,0 +1,19 @@
+student_id,student_name,student_group,test_id,score,date,notes
+123001,Ion Popescu,1234A,T1,8.5,2025-02-15,
+123001,Ion Popescu,1234A,T2,7.5,2025-02-22,
+123001,Ion Popescu,1234A,T3,8.0,2025-03-01,
+123001,Ion Popescu,1234A,T4,9.0,2025-03-08,
+123001,Ion Popescu,1234A,T5,7.0,2025-03-15,
+123001,Ion Popescu,1234A,T6,8.5,2025-03-22,
+123002,Maria Ionescu,1234A,T1,9.5,2025-02-15,
+123002,Maria Ionescu,1234A,T2,9.0,2025-02-22,
+123002,Maria Ionescu,1234A,T3,10.0,2025-03-01,
+123002,Maria Ionescu,1234A,T4,9.5,2025-03-08,
+123002,Maria Ionescu,1234A,T5,8.5,2025-03-15,
+123002,Maria Ionescu,1234A,T6,9.0,2025-03-22,
+123003,Andrei Georgescu,1234B,T1,6.0,2025-02-15,
+123003,Andrei Georgescu,1234B,T2,-1,2025-02-22,Absent
+123003,Andrei Georgescu,1234B,T3,7.0,2025-03-01,
+123003,Andrei Georgescu,1234B,T4,6.5,2025-03-08,
+123003,Andrei Georgescu,1234B,T5,-1,2025-03-15,Absent - medical
+123003,Andrei Georgescu,1234B,T6,7.5,2025-03-22,

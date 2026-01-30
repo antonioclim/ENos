@@ -1,0 +1,6 @@
+student_id,student_name,student_group,project_id,project_level,auto_score,manual_score,eligible,github_url,notes
+123001,Ion Popescu,1234A,M03,MEDIUM,7.5,1.2,yes,https://github.com/ipopescu/os-project,Good implementation
+123002,Maria Ionescu,1234A,E02,EASY,8.0,1.4,yes,https://github.com/mionescu/log-analyzer,Excellent documentation
+123003,Andrei Georgescu,1234B,M01,MEDIUM,6.5,0.8,yes,https://github.com/ageorgescu/backup-system,Missing some tests
+123004,Elena Dumitru,1234B,A01,ADVANCED,9.0,1.5,yes,https://github.com/edumitru/container-mgmt,Outstanding work
+123005,Alexandru Popa,1234B,M05,MEDIUM,0,0,no,,Project requirements not met - no GitHub repository
