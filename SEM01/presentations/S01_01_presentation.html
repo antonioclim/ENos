@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminar 1: Bash Shell | Operating Systems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-slide: #161b22;
+            --bg-code: #1e252e;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --accent-cyan: #39c5cf;
+            --border: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Presentation Container */
+        .presentation {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            display: none;
+            flex-direction: column;
+            background: var(--bg-slide);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Header */
+        .slide-header {
+            margin-bottom: 40px;
+        }
+
+        .slide-number {
+            font-size: 14px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 36px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 24px;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Content */
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .code-header {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--border);
+            padding: 4px 12px;
+            border-radius: 0 8px 0 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Syntax Highlighting */
+        .cmd { color: var(--accent-green); }
+        .flag { color: var(--accent-yellow); }
+        .string { color: var(--accent-cyan); }
+        .comment { color: var(--text-secondary); font-style: italic; }
+        .var { color: var(--accent-purple); }
+        .output { color: var(--text-secondary); }
+        .error { color: var(--accent-red); }
+
+        /* Cards */
+        .card {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 10px 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 25px;
+            line-height: 1.8;
+        }
+
+        li {
+            margin: 10px 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-code);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        /* Diagrams */
+        .diagram {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-code);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            white-space: pre;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+
+        /* Highlights */
+        .highlight {
+            background: rgba(88, 166, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .highlight-green {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--accent-green);
+        }
+
+        .highlight-yellow {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        .highlight-red {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--accent-red);
+        }
+
+        /* Callouts */
+        .callout {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .callout-info {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .callout-warning {
+            background: rgba(210, 153, 34, 0.1);
+            border-left: 4px solid var(--accent-yellow);
+        }
+
+        .callout-error {
+            background: rgba(248, 81, 73, 0.1);
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .callout-success {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .callout-icon {
+            font-size: 24px;
+        }
+
+        /* Interactive Elements */
+        .quiz-container {
+            background: var(--bg-code);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quiz-option {
+            background: var(--bg-slide);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.1);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--accent-red);
+            background: rgba(248, 81, 73, 0.1);
+        }
+
+        .quiz-option-letter {
+            background: var(--border);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .quiz-feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Terminal Simulation */
+        .terminal {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-header {
+            background: #333;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca40; }
+
+        .terminal-body {
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .terminal-line {
+            margin: 5px 0;
+            opacity: 0;
+            animation: typeIn 0.3s ease forwards;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-green);
+        }
+
+        @keyframes typeIn {
+            to { opacity: 1; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: rgba(22, 27, 34, 0.9);
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .nav-progress {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-blue);
+            transform: scale(1.2);
+        }
+
+        .nav-dot:hover {
+            background: var(--accent-purple);
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        kbd {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Title Slide Special */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        .title-slide .subtitle {
+            font-size: 28px;
+            margin-bottom: 40px;
+        }
+
+        .title-meta {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 60px;
+        }
+
+        .title-meta-item {
+            text-align: center;
+        }
+
+        .title-meta-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .title-meta-value {
+            font-size: 18px;
+            color: var(--accent-cyan);
+            margin-top: 5px;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .slide { padding: 40px; }
+            h1 { font-size: 36px; }
+            h2 { font-size: 28px; }
+            .two-columns { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide title-slide active" data-slide="1">
+            <div class="slide-number">Seminar 1</div>
+            <h1>Shell Bash</h1>
+            <p class="subtitle">Navigation, Variables and Configuration</p>
+            
+            <div class="title-meta">
+                <div class="title-meta-item">
+                    <div class="title-meta-label">Course</div>
+                    <div class="title-meta-value">Operating Systems</div>
+                </div>
+                <div class="title-meta-item">
+                    <div class="title-meta-label">Institution</div>
+                    <div class="title-meta-value">Bucharest UES - CSIE</div>
+                </div>
+                <div class="title-meta-item">
+                    <div class="title-meta-label">Duration</div>
+                    <div class="title-meta-value">100 minutes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Obiective -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <div class="slide-number">Objectives</div>
+                <h2>What you will learn today</h2>
+            </div>
+            <div class="slide-content">
+                <div class="three-columns">
+                    <div class="card slide-up" style="animation-delay: 0.1s">
+                        <div class="card-title">🧭 Navigare</div>
+                        <ul>
+                            <li>File system structure</li>
+                            <li>Comenzi: <code>pwd</code>, <code>cd</code>, <code>ls</code></li>
+                            <li>Absolute vs relative paths</li>
+                        </ul>
+                    </div>
+                    <div class="card slide-up" style="animation-delay: 0.2s">
+                        <div class="card-title">📦 Variabile</div>
+                        <ul>
+                            <li>Local vs environment variables</li>
+                            <li><code>export</code> and subprocesses</li>
+                            <li>Quoting: single vs double</li>
+                        </ul>
+                    </div>
+                    <div class="card slide-up" style="animation-delay: 0.3s">
+                        <div class="card-title">⚙️ Configuration</div>
+                        <ul>
+                            <li>The <code>~/.bashrc</code> file</li>
+                            <li>Aliases and functions</li>
+                            <li>Prompt customisation (PS1)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Modelul Mental -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <div class="slide-number">Concept</div>
+                <h2>System Layers</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="diagram">
+┌─────────────────────────────────────┐
+│           USER                │
+│               │                     │
+│          ╔════▼════╗                │
+│          ║  SHELL  ║ ◄─ Interprets
+│          ║ (Bash)  ║    commands     │
+│          ╚════╬════╝                │
+│               │                     │
+│          ╔════▼════╗                │
+│          ║ KERNEL  ║ ◄─ Manages │
+│          ║ (Linux) ║    resources     │
+│          ╚════╬════╝                │
+│               │                     │
+│          ┌────▼────┐                │
+│          │HARDWARE │                │
+│          └─────────┘                │
+└─────────────────────────────────────┘
+                    </div>
+                    <div>
+                        <div class="callout callout-info">
+                            <span class="callout-icon">💡</span>
+                            <div>
+                                <strong>Analogy:</strong> The shell is like a <em>translator</em> between you and the computer. You say "show me the files", it translates into instructions for the kernel.
+                            </div>
+                        </div>
+                        
+                        <h3>Component roles:</h3>
+                        <table>
+                            <tr>
+                                <th>Component</th>
+                                <th>Role</th>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">Shell</span></td>
+                                <td>Interprets commands text</td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">Kernel</span></td>
+                                <td>Manages hardware and processes</td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">Hardware</span></td>
+                                <td>CPU, RAM, Disk, Network</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: FHS -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <div class="slide-number">Structure</div>
+                <h2>Filesystem Hierarchy Standard (FHS)</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="diagram" style="font-size: 14px;">
+<span class="var">/</span>                    ← ROOT
+├── <span class="cmd">bin/</span>             ← Essential binaries
+├── <span class="string">etc/</span>             ← Configurations
+│   ├── passwd
+│   ├── hosts
+│   └── bash.bashrc
+├── <span class="var">home/</span>            ← USERI
+│   └── <span class="cmd">student/</span>      ← Your HOME (~)
+│       ├── Desktop/
+│       ├── Documents/
+│       └── <span class="flag">.bashrc</span>   ← Personal config
+├── <span class="comment">tmp/</span>             ← Temporary (deleted!)
+├── <span class="string">var/</span>             ← Variable data
+│   └── log/         ← Logs
+└── <span class="cmd">usr/</span>             ← User programs
+                    </div>
+                    <div>
+                        <h3>Key directoryies:</h3>
+                        <table>
+                            <tr>
+                                <th>Directory</th>
+                                <th>Mnemonic</th>
+                                <th>Contains</th>
+                            </tr>
+                            <tr>
+                                <td><code>/etc</code></td>
+                                <td><span class="highlight-yellow">E</span>ditable <span class="highlight-yellow">T</span>ext <span class="highlight-yellow">C</span>onfig</td>
+                                <td>Configurations</td>
+                            </tr>
+                            <tr>
+                                <td><code>/var</code></td>
+                                <td><span class="highlight-yellow">VAR</span>iable</td>
+                                <td>Data that changes</td>
+                            </tr>
+                            <tr>
+                                <td><code>/tmp</code></td>
+                                <td><span class="highlight-yellow">T</span>e<span class="highlight-yellow">MP</span>orar</td>
+                                <td>Temporary files</td>
+                            </tr>
+                            <tr>
+                                <td><code>/home</code></td>
+                                <td><span class="highlight-yellow">HOME</span></td>
+                                <td>User directoryies</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="callout callout-warning">
+                            <span class="callout-icon">⚠️</span>
+                            <div>
+                                <strong>Trap:</strong> <code>/tmp</code> is deleted on reboot! Do not store important data there.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Comenzi Navigare -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <div class="slide-number">Commands</div>
+                <h2>Navigare: pwd, cd, ls</h2>
+            </div>
+            <div class="slide-content">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-btn red"></span>
+                        <span class="terminal-btn yellow"></span>
+                        <span class="terminal-btn green"></span>
+                    </div>
+                    <div class="terminal-body" id="terminal1">
+                        <div class="terminal-line"><span class="terminal-prompt">student@linux:~$</span> <span class="cmd">pwd</span></div>
+                        <div class="terminal-line"><span class="output">/home/student</span></div>
+                        <div class="terminal-line"></div>
+                        <div class="terminal-line"><span class="terminal-prompt">student@linux:~$</span> <span class="cmd">cd</span> <span class="string">/etc</span></div>
+                        <div class="terminal-line"><span class="terminal-prompt">student@linux:/etc$</span> <span class="cmd">pwd</span></div>
+                        <div class="terminal-line"><span class="output">/etc</span></div>
+                        <div class="terminal-line"></div>
+                        <div class="terminal-line"><span class="terminal-prompt">student@linux:/etc$</span> <span class="cmd">cd</span> <span class="flag">~</span></div>
+                        <div class="terminal-line"><span class="terminal-prompt">student@linux:~$</span> <span class="cmd">ls</span> <span class="flag">-la</span></div>
+                        <div class="terminal-line"><span class="output">drwxr-xr-x  5 student student 4096 Jan 15 10:00 .</span></div>
+                        <div class="terminal-line"><span class="output">drwxr-xr-x  3 root    root    4096 Jan 10 08:00 ..</span></div>
+                        <div class="terminal-line"><span class="output">-rw-r--r--  1 student student  220 Jan 10 08:00 .bashrc</span></div>
+                    </div>
+                </div>
+                
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div class="card">
+                        <div class="card-title">📍 cd Shortcuts</div>
+                        <table>
+                            <tr><td><code>cd ~</code></td><td>Home directory</td></tr>
+                            <tr><td><code>cd ..</code></td><td>Parent directory</td></tr>
+                            <tr><td><code>cd -</code></td><td>Previous directory</td></tr>
+                            <tr><td><code>cd</code></td><td>Also home (shortcut)</td></tr>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📋 ls Options</div>
+                        <table>
+                            <tr><td><code>-l</code></td><td>Long format (details)</td></tr>
+                            <tr><td><code>-a</code></td><td>Include hidden files</td></tr>
+                            <tr><td><code>-h</code></td><td>Human-readable (KB, MB)</td></tr>
+                            <tr><td><code>-t</code></td><td>Sort by time</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Quiz Interactiv -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <div class="slide-number">Peer Instruction</div>
+                <h2>Question: What does this display?</h2>
+            </div>
+            <div class="slide-content">
+                <div class="quiz-container">
+                    <pre><code><span class="cmd">cd</span> <span class="string">/var/log</span>
+<span class="cmd">cd</span> <span class="string">~</span>
+<span class="cmd">cd</span> <span class="flag">-</span>
+<span class="cmd">pwd</span></code></pre>
+                    
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                            <span class="quiz-option-letter">A</span>
+                            <span>/home/student</span>
+                        </div>
+                        <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)">
+                            <span class="quiz-option-letter">B</span>
+                            <span>/var/log</span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                            <span class="quiz-option-letter">C</span>
+                            <span>/</span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                            <span class="quiz-option-letter">D</span>
+                            <span>Error - cd - command does not exist</span>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-feedback callout callout-success" id="quiz-feedback">
+                        <span class="callout-icon">✓</span>
+                        <div>
+                            <strong>Correct!</strong> <code>cd -</code> returns to the previous directory. After <code>cd ~</code>, the previous directory was <code>/var/log</code>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Variabile -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <div class="slide-number">Variables</div>
+                <h2>Types of Variables in Bash</h2>
+            </div>
+            <div class="slide-content">
+                <div class="diagram" style="text-align: center;">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          BASH VARIABLES                                  │
+├─────────────────────┬─────────────────────┬─────────────────────────────┤
+│      <span class="cmd">LOCAL</span>          │   <span class="var">ENVIRONMENT (export)</span>     │        <span class="flag">SPECIAL</span>            │
+├─────────────────────┼─────────────────────┼─────────────────────────────┤
+│  VAR="valoare"      │  export VAR="val"   │  $? $$ $! $0 $1-$9          │
+│                     │                     │                             │
+│  Exists ONLY in     │  Inherited by       │  Set automatically             │
+│  current shell    │  subprocesses         │  by shell                   │
+└─────────────────────┴─────────────────────┴─────────────────────────────┘
+                </div>
+                
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div>
+                        <h3>Local Variable</h3>
+                        <pre><code><span class="var">NUME</span>=<span class="string">"Ion"</span>
+<span class="cmd">echo</span> <span class="var">$NUME</span>           <span class="comment"># Ion</span>
+<span class="cmd">bash</span> -c <span class="string">'echo $NUME'</span>  <span class="comment"># (empty!)</span></code></pre>
+                    </div>
+                    <div>
+                        <h3>Environment Variable</h3>
+                        <pre><code><span class="cmd">export</span> <span class="var">GLOBAL</span>=<span class="string">"valoare"</span>
+<span class="cmd">echo</span> <span class="var">$GLOBAL</span>          <span class="comment"># valoare</span>
+<span class="cmd">bash</span> -c <span class="string">'echo $GLOBAL'</span> <span class="comment"># valoare</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="callout callout-error" style="margin-top: 20px;">
+                    <span class="callout-icon">❌</span>
+                    <div>
+                        <strong>Common mistake:</strong> <code>VARSTA = 25</code> ← WRONG! Spaces are not allowed around <code>=</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Quoting -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <div class="slide-number">Quoting</div>
+                <h2>Single vs Double Quotes</h2>
+            </div>
+            <div class="slide-content">
+                <div class="diagram" style="text-align: center; font-size: 18px; margin-bottom: 30px;">
+┌─────────────────────────────────────────────────────────────────────────┐
+│  <span class="string">'single quotes'</span>  →  NOTHING is interpreted (literal)              │
+│  <span class="var">"double quotes"</span>  →  $variables and `commands` ARE interpreted         │
+│   no quotes     →  Everything is interpreted + word splitting              │
+└─────────────────────────────────────────────────────────────────────────┘
+                </div>
+                
+                <pre><code><span class="var">NUME</span>=<span class="string">"Student"</span>
+
+<span class="comment"># Single quotes - everything literal</span>
+<span class="cmd">echo</span> <span class="string">'Hello $NUME'</span>
+<span class="output"># Output: Hello $NUME</span>
+
+<span class="comment"># Double quotes - variables are expanded</span>
+<span class="cmd">echo</span> <span class="var">"Hello $NUME"</span>
+<span class="output"># Output: Hello Student</span>
+
+<span class="comment"># No quotes - word splitting</span>
+<span class="cmd">echo</span> Hello    <span class="var">$NUME</span>
+<span class="output"># Output: Hello Student (spaces were compressed!)</span></code></pre>
+                
+                <div class="callout callout-warning" style="margin-top: 20px;">
+                    <span class="callout-icon">⚠️</span>
+                    <div>
+                        <strong>Golden rule:</strong> Always use <code>"$VARIABILA"</code> with double quotes for files with spaces!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: .bashrc -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <div class="slide-number">Configuration</div>
+                <h2>The ~/.bashrc File</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <h3>When is it executed?</h3>
+                        <div class="diagram" style="font-size: 14px;">
+NON-LOGIN SHELL (new terminal):
+┌─────────────────┐
+│   ~/.bashrc     │ ← Executed!
+└─────────────────┘
+
+LOGIN SHELL (ssh, login):
+┌─────────────────┐
+│  /etc/profile   │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│ ~/.bash_profile │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│   ~/.bashrc     │ ← source ~/.bashrc
+└─────────────────┘
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Typical content:</h3>
+                        <pre><code><span class="comment"># Aliases</span>
+<span class="cmd">alias</span> ll=<span class="string">'ls -la'</span>
+<span class="cmd">alias</span> cls=<span class="string">'clear'</span>
+<span class="cmd">alias</span> ..=<span class="string">'cd ..'</span>
+
+<span class="comment"># Environment variables</span>
+<span class="cmd">export</span> <span class="var">EDITOR</span>=<span class="string">"nano"</span>
+<span class="cmd">export</span> <span class="var">PATH</span>=<span class="string">"$HOME/bin:$PATH"</span>
+
+<span class="comment"># Custom prompt</span>
+<span class="var">PS1</span>=<span class="string">'\u@\h:\w\$ '</span>
+
+<span class="comment"># Useful functions</span>
+<span class="cmd">mkcd</span>() { 
+    <span class="cmd">mkdir</span> -p <span class="string">"$1"</span> && <span class="cmd">cd</span> <span class="string">"$1"</span>
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="callout callout-info" style="margin-top: 20px;">
+                    <span class="callout-icon">💡</span>
+                    <div>
+                        After modification, run <code>source ~/.bashrc</code> to apply changes without opening a new terminal.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Globbing -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <div class="slide-number">Wildcards</div>
+                <h2>File Globbing (Pattern Matching)</h2>
+            </div>
+            <div class="slide-content">
+                <table style="font-size: 18px;">
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                        <th>Matches</th>
+                    </tr>
+                    <tr>
+                        <td><code class="highlight">*</code></td>
+                        <td>Zero or more characters</td>
+                        <td><code>*.txt</code></td>
+                        <td>file.txt, note.txt, a.txt</td>
+                    </tr>
+                    <tr>
+                        <td><code class="highlight">?</code></td>
+                        <td>Exactly one character</td>
+                        <td><code>file?.txt</code></td>
+                        <td>file1.txt, fileA.txt (NU file10.txt!)</td>
+                    </tr>
+                    <tr>
+                        <td><code class="highlight">[abc]</code></td>
+                        <td>One character from set</td>
+                        <td><code>file[123].txt</code></td>
+                        <td>file1.txt, file2.txt, file3.txt</td>
+                    </tr>
+                    <tr>
+                        <td><code class="highlight">[a-z]</code></td>
+                        <td>One character from range</td>
+                        <td><code>file[a-c].txt</code></td>
+                        <td>filea.txt, fileb.txt, filec.txt</td>
+                    </tr>
+                    <tr>
+                        <td><code class="highlight">{a,b,c}</code></td>
+                        <td>Brace expansion (lists)</td>
+                        <td><code>file{1,2,3}.txt</code></td>
+                        <td>file1.txt file2.txt file3.txt</td>
+                    </tr>
+                </table>
+                
+                <div class="callout callout-warning" style="margin-top: 30px;">
+                    <span class="callout-icon">⚠️</span>
+                    <div>
+                        <strong>Trap:</strong> <code>*</code> does NOT include hidden files (those starting with <code>.</code> )! Use <code>.*</code> or <code>ls -a</code>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Cheat Sheet -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <div class="slide-number">Reference</div>
+                <h2>Cheat Sheet</h2>
+            </div>
+            <div class="slide-content">
+                <div class="three-columns">
+                    <div class="card">
+                        <div class="card-title">🧭 Navigare</div>
+                        <pre style="background: transparent; border: none; padding: 0;"><code><span class="cmd">pwd</span>          <span class="comment"># where am I</span>
+<span class="cmd">cd</span> DIR       <span class="comment"># change dir</span>
+<span class="cmd">cd</span> ~         <span class="comment"># home</span>
+<span class="cmd">cd</span> ..        <span class="comment"># parent</span>
+<span class="cmd">cd</span> -         <span class="comment"># previous</span>
+<span class="cmd">ls</span> -la       <span class="comment"># listing</span></code></pre>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📦 Variabile</div>
+                        <pre style="background: transparent; border: none; padding: 0;"><code><span class="var">VAR</span>=<span class="string">"val"</span>    <span class="comment"># local</span>
+<span class="cmd">export</span> VAR   <span class="comment"># environment</span>
+<span class="cmd">echo</span> <span class="var">$VAR</span>    <span class="comment"># display</span>
+<span class="cmd">unset</span> VAR    <span class="comment"># delete</span>
+
+<span class="comment"># Special</span>
+<span class="var">$?</span> <span class="var">$HOME</span> <span class="var">$PATH</span></code></pre>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">⚙️ Configuration</div>
+                        <pre style="background: transparent; border: none; padding: 0;"><code><span class="comment"># ~/.bashrc</span>
+<span class="cmd">alias</span> ll=<span class="string">'ls -la'</span>
+<span class="cmd">source</span> ~/.bashrc
+
+<span class="comment"># Prompt</span>
+<span class="var">PS1</span>=<span class="string">'\u@\h:\w\$ '</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="callout callout-success" style="margin-top: 20px;">
+                    <span class="callout-icon">✓</span>
+                    <div>
+                        <strong>10 Golden Rules:</strong> Check with pwd • ~ ≠ / • No spaces around = • Use "$VAR" • 'single'=literal • source after changes • rm -i for safety • * excludes hidden • Test PS1 • export for subprocesses
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Exercises -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <div class="slide-number">Practice</div>
+                <h2>Sprint Exercises</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="card">
+                        <div class="card-title">Sprint 1: System Explorer (12 min)</div>
+                        <ol>
+                            <li>Verify identity: <code>whoami</code>, <code>$HOME</code>, <code>$SHELL</code></li>
+                            <li>Explore root: <code>cd /</code>, identify /etc, /home, /var</li>
+                            <li>Investigate /etc: examine passwd, hosts</li>
+                            <li>Document with <code>ls -la</code></li>
+                        </ol>
+                        <div class="callout callout-info" style="margin-top: 10px;">
+                            <span class="callout-icon">👥</span>
+                            <div>Pair programming: switch driver/navigator at 6 min</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Sprint 2: Shell Configurator (15 min)</div>
+                        <ol>
+                            <li>Backup <code>~/.bashrc</code></li>
+                            <li>Add aliases: <code>ll</code>, <code>cls</code>, <code>cdp</code></li>
+                            <li>Add function: <code>mkcd</code></li>
+                            <li>Customise PS1 with colours</li>
+                            <li>Test with <code>source ~/.bashrc</code></li>
+                        </ol>
+                        <div class="callout callout-warning" style="margin-top: 10px;">
+                            <span class="callout-icon">⚠️</span>
+                            <div>ALWAYS backup before editing!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Final -->
+        <div class="slide title-slide" data-slide="13">
+            <div class="slide-number">Conclusion</div>
+            <h1>Thank You!</h1>
+            <p class="subtitle">Questions?</p>
+            
+            <div class="title-meta">
+                <div class="title-meta-item">
+                    <div class="title-meta-label">Homework</div>
+                    <div class="title-meta-value">Configure your personal shell</div>
+                </div>
+                <div class="title-meta-item">
+                    <div class="title-meta-label">Next seminar</div>
+                    <div class="title-meta-value">Pipes, Redirections, Processes</div>
+                </div>
+            </div>
+            
+            <div class="callout callout-success" style="margin-top: 40px; display: inline-block;">
+                <span class="callout-icon">📚</span>
+                <div>
+                    <strong>Resources:</strong> man bash • explainshell.com • tldr.sh
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <button class="nav-btn" onclick="prevSlide()">◀ Back</button>
+        <div class="nav-progress" id="nav-progress"></div>
+        <button class="nav-btn" onclick="nextSlide()">Next ▶</button>
+    </div>
+
+    <!-- Keyboard shortcuts hint -->
+    <div class="shortcuts">
+        <kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> for navigation
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+
+        // Initialize progress dots
+        function initProgress() {
+            const progress = document.getElementById('nav-progress');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                progress.appendChild(dot);
+            }
+        }
+
+        function updateProgress() {
+            const dots = document.querySelectorAll('.nav-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === currentSlide);
+            });
+        }
+
+        function goToSlide(n) {
+            document.querySelector('.slide.active').classList.remove('active');
+            currentSlide = n;
+            if (currentSlide < 1) currentSlide = totalSlides;
+            if (currentSlide > totalSlides) currentSlide = 1;
+            document.querySelector(`[data-slide="${currentSlide}"]`).classList.add('active');
+            updateProgress();
+        }
+
+        function nextSlide() {
+            goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            goToSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Quiz functionality
+        function checkAnswer(element, isCorrect) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                if (opt.dataset.correct === 'true') {
+                    opt.classList.add('correct');
+                } else if (opt === element && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.style.display = 'flex';
+        }
+
+        // Initialize
+        initProgress();
+    </script>
+</body>
+</html>

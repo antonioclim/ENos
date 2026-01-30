@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 280" width="450" height="280">
+  <title>Single Quotes vs Double Quotes în Bash</title>
+  <desc>Comparație vizuală între comportamentul ghilimelelor în Bash</desc>
+  
+  <!-- Background -->
+  <rect width="450" height="280" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="225" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">
+    Quoting în Bash: Single vs Double
+  </text>
+  
+  <!-- Variable setup -->
+  <rect x="20" y="40" width="410" height="25" rx="3" fill="#fff" stroke="#ddd"/>
+  <text x="30" y="57" font-family="monospace" font-size="11" fill="#333">NAME="Student"    DATA=$(date +%Y)</text>
+  
+  <!-- Single Quotes Section -->
+  <rect x="20" y="80" width="200" height="180" rx="5" fill="#ffebee" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#c62828">
+    SINGLE QUOTES ' '
+  </text>
+  <text x="120" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+    Totul este LITERAL
+  </text>
+  
+  <!-- Single quotes example -->
+  <rect x="30" y="130" width="180" height="25" rx="3" fill="#fff" stroke="#c62828"/>
+  <text x="40" y="147" font-family="monospace" font-size="10" fill="#333">echo 'Hello $NAME'</text>
+  
+  <text x="40" y="170" font-family="Arial, sans-serif" font-size="10" fill="#666">Output:</text>
+  <rect x="30" y="175" width="180" height="22" rx="3" fill="#c62828"/>
+  <text x="40" y="190" font-family="monospace" font-size="11" fill="#fff">Hello $NAME</text>
+  
+  <text x="30" y="220" font-family="Arial, sans-serif" font-size="9" fill="#666">✗ Variabile NU se expandează</text>
+  <text x="30" y="235" font-family="Arial, sans-serif" font-size="9" fill="#666">✗ Comenzi NU se execută</text>
+  <text x="30" y="250" font-family="Arial, sans-serif" font-size="9" fill="#666">✓ Folosește pentru text literal</text>
+  
+  <!-- Double Quotes Section -->
+  <rect x="230" y="80" width="200" height="180" rx="5" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+  <text x="330" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#388e3c">
+    DOUBLE QUOTES " "
+  </text>
+  <text x="330" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+    Variabile SE EXPANDEAZĂ
+  </text>
+  
+  <!-- Double quotes example -->
+  <rect x="240" y="130" width="180" height="25" rx="3" fill="#fff" stroke="#388e3c"/>
+  <text x="250" y="147" font-family="monospace" font-size="10" fill="#333">echo "Hello $NAME"</text>
+  
+  <text x="250" y="170" font-family="Arial, sans-serif" font-size="10" fill="#666">Output:</text>
+  <rect x="240" y="175" width="180" height="22" rx="3" fill="#388e3c"/>
+  <text x="250" y="190" font-family="monospace" font-size="11" fill="#fff">Hello Student</text>
+  
+  <text x="240" y="220" font-family="Arial, sans-serif" font-size="9" fill="#666">✓ Variabile SE expandează</text>
+  <text x="240" y="235" font-family="Arial, sans-serif" font-size="9" fill="#666">✓ $() și `` SE execută</text>
+  <text x="240" y="250" font-family="Arial, sans-serif" font-size="9" fill="#666">✓ Protejează spațiile</text>
+  
+  <!-- Footer -->
+  <text x="20" y="275" font-family="Arial, sans-serif" font-size="9" fill="#888">
+    Seminarul 01 — Shell Fundamentals | Misconceptie frecventă: M1.4
+  </text>
+</svg>

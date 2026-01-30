@@ -1,0 +1,177 @@
+{
+  "quiz": {
+    "title": "Quiz S01: Shell Fundamentals",
+    "description": "Formative quiz for Seminar 01 - Shell Fundamentals",
+    "time_limit_minutes": 18,
+    "shuffle_questions": true,
+    "allowed_attempts": 2
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "learning_outcome": "LO1.1",
+      "text": "What does the pwd command display?",
+      "answers": [
+        {"text": "List of processes", "correct": false, "feedback": "Processes are displayed with ps or top."},
+        {"text": "Current user", "correct": false, "feedback": "Current user is displayed with whoami."},
+        {"text": "Current working directory", "correct": true, "feedback": "Correct! pwd = Print Working Directory."},
+        {"text": "User password", "correct": false, "feedback": "Passwords are never displayed in plain text in Linux."}
+      ]
+    },
+    {
+      "id": "q02",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "learning_outcome": "LO1.2",
+      "text": "Which directory contains system configuration files?",
+      "answers": [
+        {"text": "/home", "correct": false, "feedback": "/home contains user directories."},
+        {"text": "/etc", "correct": true, "feedback": "Correct! /etc contains system configurations."},
+        {"text": "/bin", "correct": false, "feedback": "/bin contains basic executables."},
+        {"text": "/tmp", "correct": false, "feedback": "/tmp is for temporary files."}
+      ]
+    },
+    {
+      "id": "q03",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_outcome": "LO2.1",
+      "text": "What is the difference between shell and terminal?",
+      "answers": [
+        {"text": "They are synonyms", "correct": false, "feedback": "They are not synonyms - they have different roles."},
+        {"text": "The shell is the program that interprets commands, the terminal is the interface", "correct": true, "feedback": "Correct! The shell (bash) interprets, the terminal is the graphical interface."},
+        {"text": "The terminal interprets commands, the shell is the window", "correct": false, "feedback": "It's the other way round - the shell interprets commands."},
+        {"text": "There is no functional difference", "correct": false, "feedback": "There are clear functional differences."}
+      ]
+    },
+    {
+      "id": "q04",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_outcome": "LO2.2",
+      "text": "What type of path is '/home/stud/project'?",
+      "answers": [
+        {"text": "Relative path", "correct": false, "feedback": "Relative paths do not start with /."},
+        {"text": "Absolute path", "correct": true, "feedback": "Correct! It starts with / (root), so it's absolute."},
+        {"text": "Symbolic path", "correct": false, "feedback": "Symbolic paths are links, not a type of path."},
+        {"text": "Virtual path", "correct": false, "feedback": "The concept of virtual path doesn't exist in Linux."}
+      ]
+    },
+    {
+      "id": "q05",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_outcome": "LO3.1",
+      "text": "If I set VAR='test' without export and start a subshell, what will echo $VAR display in the subshell?",
+      "answers": [
+        {"text": "test", "correct": false, "feedback": "Local variables are not visible in subprocesses."},
+        {"text": "Nothing (empty string)", "correct": true, "feedback": "Correct! Without export, the variable is not in the environment."},
+        {"text": "Error", "correct": false, "feedback": "It's not an error, just an empty result."},
+        {"text": "$VAR literally", "correct": false, "feedback": "Without single quotes, $VAR expands."}
+      ]
+    },
+    {
+      "id": "q06",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "learning_outcome": "LO4.1",
+      "text": "What command creates the directory structure /project/src/main/java if it doesn't exist?",
+      "answers": [
+        {"text": "mkdir /project/src/main/java", "correct": false, "feedback": "Without -p, mkdir fails if parents don't exist."},
+        {"text": "mkdir -p /project/src/main/java", "correct": true, "feedback": "Correct! -p (parents) creates all necessary directories."},
+        {"text": "mkdir -r /project/src/main/java", "correct": false, "feedback": "-r is not a valid option for mkdir."},
+        {"text": "mkdir --create /project/src/main/java", "correct": false, "feedback": "--create is not a valid option for mkdir."}
+      ]
+    },
+    {
+      "id": "q07",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "learning_outcome": "LO4.2",
+      "text": "You just modified ~/.bashrc. What command applies the changes in the current session?",
+      "answers": [
+        {"text": "restart bash", "correct": false, "feedback": "restart is not a valid command in this context."},
+        {"text": "source ~/.bashrc", "correct": true, "feedback": "Correct! source (or .) executes the script in the current shell."},
+        {"text": "refresh ~/.bashrc", "correct": false, "feedback": "refresh is not a Bash command."},
+        {"text": "reload ~/.bashrc", "correct": false, "feedback": "reload is not a standard Bash command."}
+      ]
+    },
+    {
+      "id": "q08",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "learning_outcome": "LO5.1",
+      "text": "What files does the command: touch file{1,2,3}.txt create?",
+      "answers": [
+        {"text": "file{1,2,3}.txt (a single file)", "correct": false, "feedback": "Brace expansion expands before execution."},
+        {"text": "file1.txt, file2.txt, file3.txt", "correct": true, "feedback": "Correct! Brace expansion creates 3 separate files."},
+        {"text": "file123.txt", "correct": false, "feedback": "It doesn't concatenate - it creates separate files."},
+        {"text": "Syntax error", "correct": false, "feedback": "The syntax is valid - it's brace expansion."}
+      ]
+    },
+    {
+      "id": "q09",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "learning_outcome": "LO6.1",
+      "text": "NAME='John'; echo 'Hello $NAME' displays:",
+      "answers": [
+        {"text": "Hello John", "correct": false, "feedback": "Single quotes don't expand variables."},
+        {"text": "Hello $NAME", "correct": true, "feedback": "Correct! Single quotes keep everything literal."},
+        {"text": "Syntax error", "correct": false, "feedback": "The syntax is correct."},
+        {"text": "Hello (empty)", "correct": false, "feedback": "$NAME remains literal in single quotes."}
+      ]
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "learning_outcome": "LO6.2",
+      "text": "What does exit code 0 signify in Linux?",
+      "answers": [
+        {"text": "Error", "correct": false, "feedback": "Non-zero means error."},
+        {"text": "Non-existent command", "correct": false, "feedback": "127 means command not found."},
+        {"text": "Success", "correct": true, "feedback": "Correct! 0 = success in Unix convention."},
+        {"text": "Insufficient permissions", "correct": false, "feedback": "1 or another non-zero code for permission errors."}
+      ]
+    },
+    {
+      "id": "q11",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "learning_outcome": "LO4.3",
+      "text": "You want to copy all .log files from /var/log to ~/backup. Which command is correct?",
+      "answers": [
+        {"text": "cp /var/log/.log ~/backup/", "correct": false, "feedback": "Missing * before .log - this matches nothing."},
+        {"text": "cp /var/log/*.log ~/backup/", "correct": true, "feedback": "Correct! *.log matches all files ending in .log."},
+        {"text": "cp '/var/log/*.log' ~/backup/", "correct": false, "feedback": "Single quotes prevent glob expansion - no pattern matching."},
+        {"text": "cp /var/log/*log ~/backup/", "correct": false, "feedback": "Missing dot - *log matches syslog, not just .log files."}
+      ]
+    },
+    {
+      "id": "q12",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "learning_outcome": "LO6.3",
+      "text": "Compare: DIR='/home/user'; rm -rf $DIR/temp versus DIR=''; rm -rf $DIR/temp — what is the critical difference?",
+      "answers": [
+        {"text": "No difference, both delete temp", "correct": false, "feedback": "The empty variable creates a dangerous path."},
+        {"text": "Second deletes /temp (root level) — DANGEROUS", "correct": true, "feedback": "Correct! Empty $DIR makes $DIR/temp become /temp. Always quote and verify before rm -rf."},
+        {"text": "Second causes syntax error", "correct": false, "feedback": "No syntax error - the command runs, which is the problem."},
+        {"text": "Second does nothing", "correct": false, "feedback": "It does something dangerous - deletes /temp if it exists."}
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.1",
+    "seminar": 1,
+    "bloom_distribution": {
+      "remember": "17%",
+      "understand": "25%",
+      "apply": "33%",
+      "analyse": "25%"
+    }
+  }
+}

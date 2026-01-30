@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheat Sheet - Bash Shell | OS ASE</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #3b82f6;
+            --accent2: #8b5cf6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text: #f1f5f9;
+            --muted: #64748b;
+            --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: var(--muted); margin-top: 10px; }
+        
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 25px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .tab:hover { border-color: var(--accent); }
+        .tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-icon { font-size: 1.5em; }
+        .card-title { font-weight: 700; font-size: 1.1em; }
+        .card-body { padding: 20px; }
+        
+        .cmd-list { list-style: none; }
+        .cmd-item {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: start;
+        }
+        .cmd-item:last-child { border-bottom: none; }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(59, 130, 246, 0.15);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: var(--accent);
+        }
+        
+        .cmd-desc {
+            color: var(--muted);
+            font-size: 0.95em;
+        }
+        
+        .example {
+            background: #0d1424;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+        }
+        .example-label {
+            color: var(--success);
+            margin-bottom: 8px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tip {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .tip-icon { margin-right: 8px; }
+        
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .table-container { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { 
+            background: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+        
+        .highlight-green { color: var(--success); }
+        .highlight-red { color: var(--error); }
+        .highlight-yellow { color: var(--warning); }
+        
+        .kbd {
+            display: inline-block;
+            background: var(--border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            border: 1px solid #475569;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        
+        @media print {
+            body { background: white; color: black; }
+            .card { break-inside: avoid; }
+            .search-container, .tabs { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .cmd-item { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bash Cheat Sheet</h1>
+            <p class="subtitle">Seminar 1: Bash Shell | Operating Systems | ASE Bucharest</p>
+        </header>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="🔍 Search command..." id="search" onkeyup="filterCards()">
+        </div>
+        
+        <div class="tabs">
+            <span class="tab active" onclick="filterCategory('all')">All</span>
+            <span class="tab" onclick="filterCategory('nav')">🧭 Navigation</span>
+            <span class="tab" onclick="filterCategory('files')">📁 Files</span>
+            <span class="tab" onclick="filterCategory('vars')">📦 Variables</span>
+            <span class="tab" onclick="filterCategory('config')">⚙️ Configuration</span>
+            <span class="tab" onclick="filterCategory('glob')">✨ Globbing</span>
+        </div>
+        
+        <div class="grid" id="cards-container">
+            
+            <!-- Navigare -->
+            <div class="card" data-category="nav" data-keywords="navigation pwd cd ls directory">
+                <div class="card-header">
+                    <span class="card-icon">🧭</span>
+                    <span class="card-title">Navigation</span>
+                </div>
+                <div class="card-body">
+                    <ul class="cmd-list">
+                        <li class="cmd-item">
+                            <code>pwd</code>
+                            <span class="cmd-desc">Print Working Directory - displays current directoryy</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cd DIR</code>
+                            <span class="cmd-desc">Change Directory - changes directoryy</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cd ~</code>
+                            <span class="cmd-desc">Go to HOME directoryy</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cd ..</code>
+                            <span class="cmd-desc">Go to parent directoryy</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cd -</code>
+                            <span class="cmd-desc">Return to previous directoryy</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>ls -la</code>
+                            <span class="cmd-desc">Detailed listing with hidden files</span>
+                        </li>
+                    </ul>
+                    <div class="example">
+                        <div class="example-label">Example</div>
+                        <span style="color: #22c55e;">$</span> cd /var/log<br>
+                        <span style="color: #22c55e;">$</span> ls -lh *.log
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Files and Directories -->
+            <div class="card" data-category="files" data-keywords="file directoryy mkdir touch cp mv rm cat">
+                <div class="card-header">
+                    <span class="card-icon">📁</span>
+                    <span class="card-title">Files & Directories</span>
+                </div>
+                <div class="card-body">
+                    <ul class="cmd-list">
+                        <li class="cmd-item">
+                            <code>mkdir -p DIR</code>
+                            <span class="cmd-desc">Create directoryy(ies) recursively</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>touch FILE</code>
+                            <span class="cmd-desc">Create empty file or update timestamp</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cp SRC DEST</code>
+                            <span class="cmd-desc">Copy files (-r for directoryies)</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>mv SRC DEST</code>
+                            <span class="cmd-desc">Move/Rename</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>rm FILE</code>
+                            <span class="cmd-desc">Delete file (-rf for directoryies)</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>cat FILE</code>
+                            <span class="cmd-desc">Display file contents</span>
+                        </li>
+                    </ul>
+                    <div class="warning">
+                        <span class="tip-icon">⚠️</span>
+                        <strong>Trap:</strong> <code>rm -rf</code> deletes permanently! There is no Recycle Bin.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variabile -->
+            <div class="card" data-category="vars" data-keywords="variables export echo env local">
+                <div class="card-header">
+                    <span class="card-icon">📦</span>
+                    <span class="card-title">Variables</span>
+                </div>
+                <div class="card-body">
+                    <ul class="cmd-list">
+                        <li class="cmd-item">
+                            <code>VAR="val"</code>
+                            <span class="cmd-desc">Set local variable (no spaces!)</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>export VAR</code>
+                            <span class="cmd-desc">Makes variable accessible in subprocesses</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>echo $VAR</code>
+                            <span class="cmd-desc">Display variable value</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>unset VAR</code>
+                            <span class="cmd-desc">Delete the variable</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>env</code>
+                            <span class="cmd-desc">Display all environment variables</span>
+                        </li>
+                    </ul>
+                    <div class="table-container">
+                        <table>
+                            <tr><th>Variable</th><th>Meaning</th></tr>
+                            <tr><td><code>$HOME</code></td><td>Home directoryy</td></tr>
+                            <tr><td><code>$USER</code></td><td>Current user</td></tr>
+                            <tr><td><code>$PATH</code></td><td>Executable search paths</td></tr>
+                            <tr><td><code>$?</code></td><td>Last command exit code</td></tr>
+                            <tr><td><code>$$</code></td><td>Current shell PID</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quoting -->
+            <div class="card" data-category="vars" data-keywords="quoting quotes single double">
+                <div class="card-header">
+                    <span class="card-icon">💬</span>
+                    <span class="card-title">Quoting</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Type</th>
+                                <th>Behaviour</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td><code>'single'</code></td>
+                                <td>Everything literal</td>
+                                <td><span class="highlight-yellow">'$VAR'</span> → $VAR</td>
+                            </tr>
+                            <tr>
+                                <td><code>"double"</code></td>
+                                <td>Expands variables</td>
+                                <td><span class="highlight-green">"$VAR"</span> → value</td>
+                            </tr>
+                            <tr>
+                                <td>no quotes</td>
+                                <td>Expands + word split</td>
+                                <td><span class="highlight-red">$VAR</span> → problems with spaces</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">💡</span>
+                        <strong>Rule:</strong> Always use <code>"$VAR"</code> for files with spaces!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurare -->
+            <div class="card" data-category="config" data-keywords="bashrc alias source config">
+                <div class="card-header">
+                    <span class="card-icon">⚙️</span>
+                    <span class="card-title">Configurare ~/.bashrc</span>
+                </div>
+                <div class="card-body">
+                    <ul class="cmd-list">
+                        <li class="cmd-item">
+                            <code>alias ll='ls -la'</code>
+                            <span class="cmd-desc">Define a shortcut</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>source ~/.bashrc</code>
+                            <span class="cmd-desc">Apply changes immediately</span>
+                        </li>
+                        <li class="cmd-item">
+                            <code>export PATH="..."</code>
+                            <span class="cmd-desc">Modify search paths</span>
+                        </li>
+                    </ul>
+                    <div class="example">
+                        <div class="example-label">Useful function</div>
+                        mkcd() {<br>
+                        &nbsp;&nbsp;mkdir -p "$1" && cd "$1"<br>
+                        }
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">💡</span>
+                        <strong>Backup:</strong> <code>cp ~/.bashrc ~/.bashrc.backup</code> before making changes!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Globbing -->
+            <div class="card" data-category="glob" data-keywords="wildcard glob pattern asterisk">
+                <div class="card-header">
+                    <span class="card-icon">✨</span>
+                    <span class="card-title">Globbing (Wildcards)</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Pattern</th>
+                                <th>Matches</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td><code>*</code></td>
+                                <td>Zero or more characters</td>
+                                <td><code>*.txt</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>?</code></td>
+                                <td>Exact UN caracter</td>
+                                <td><code>file?.txt</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>[abc]</code></td>
+                                <td>One character from set</td>
+                                <td><code>file[123].txt</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>[a-z]</code></td>
+                                <td>Un caracter din range</td>
+                                <td><code>file[a-c].txt</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>{a,b}</code></td>
+                                <td>Brace expansion</td>
+                                <td><code>{src,docs}</code></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="warning">
+                        <span class="tip-icon">⚠️</span>
+                        <code>*</code> Does NOT include hidden files (those starting with <code>.</code> )
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FHS -->
+            <div class="card" data-category="nav" data-keywords="fhs directory etc var tmp home">
+                <div class="card-header">
+                    <span class="card-icon">🗂️</span>
+                    <span class="card-title">Structura FHS</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <tr><th>Directory</th><th>Content</th></tr>
+                            <tr><td><code>/</code></td><td>System root</td></tr>
+                            <tr><td><code>/etc</code></td><td>System configurations</td></tr>
+                            <tr><td><code>/home</code></td><td>User directoryies</td></tr>
+                            <tr><td><code>/tmp</code></td><td>Temporary files (deleted at reboot!)</td></tr>
+                            <tr><td><code>/var</code></td><td>Variable data, logs</td></tr>
+                            <tr><td><code>/usr</code></td><td>User programs</td></tr>
+                            <tr><td><code>/bin</code></td><td>Essential executables</td></tr>
+                        </table>
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">💡</span>
+                        <strong>/etc</strong> = <strong>E</strong>ditable <strong>T</strong>ext <strong>C</strong>onfiguration
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shortcuts Terminal -->
+            <div class="card" data-category="config" data-keywords="shortcut terminal ctrl tab">
+                <div class="card-header">
+                    <span class="card-icon">⌨️</span>
+                    <span class="card-title">Shortcut-uri Terminal</span>
+                </div>
+                <div class="card-body">
+                    <ul class="cmd-list">
+                        <li class="cmd-item">
+                            <span class="kbd">Tab</span>
+                            <span class="cmd-desc">Autocomplete command/path</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">Ctrl+C</span>
+                            <span class="cmd-desc">Interrupt current command</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">Ctrl+L</span>
+                            <span class="cmd-desc">Clear screen</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">Ctrl+R</span>
+                            <span class="cmd-desc">Search history</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">↑ ↓</span>
+                            <span class="cmd-desc">Navigate through history</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">Ctrl+A</span>
+                            <span class="cmd-desc">Jump to line beginning</span>
+                        </li>
+                        <li class="cmd-item">
+                            <span class="kbd">Ctrl+E</span>
+                            <span class="cmd-desc">Jump to line end</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+        
+        <footer>
+            <p>Operating Systems | ASE Bucharest - CSIE</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <span class="kbd">Ctrl+P</span> to print this cheat sheet
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        function filterCards() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                const keywords = card.dataset.keywords.toLowerCase();
+                const content = card.textContent.toLowerCase();
+                const visible = keywords.includes(query) || content.includes(query);
+                card.style.display = visible ? '' : 'none';
+            });
+        }
+        
+        function filterCategory(category) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

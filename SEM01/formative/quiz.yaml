@@ -1,0 +1,223 @@
+# Formative Quiz - Seminar 01: Shell Fundamentals
+# Operating Systems | ASE Bucharest - CSIE
+# Format: YAML runnable with quiz_runner.py
+
+metadata:
+  title: "Quiz S01: Shell Fundamentals"
+  seminar: 1
+  estimated_time: "20 minutes"
+  total_questions: 14
+  bloom_distribution:
+    remember: 14%
+    understand: 21%
+    apply: 29%
+    analyse: 22%
+    evaluate: 7%
+    create: 7%
+
+questions:
+  - id: q01
+    type: mcq
+    bloom: remember
+    lo: LO1.1
+    text: "What does the pwd command display?"
+    options:
+      - "A) List of processes"
+      - "B) Current user"
+      - "C) Current working directory"
+      - "D) User password"
+    correct: C
+    explanation: "pwd stands for Print Working Directory. It displays the absolute path of your current location."
+    targeted_misconception: M1.1
+
+  - id: q02
+    type: mcq
+    bloom: remember
+    lo: LO1.2
+    text: "Which directory contains system configuration files?"
+    options:
+      - "A) /home"
+      - "B) /etc"
+      - "C) /bin"
+      - "D) /tmp"
+    correct: B
+    explanation: "/etc (et cetera or editable text configuration) contains global system configuration files."
+    targeted_misconception: M1.2
+
+  - id: q03
+    type: mcq
+    bloom: understand
+    lo: LO2.1
+    text: "What is the difference between shell and terminal?"
+    options:
+      - "A) They are synonyms"
+      - "B) The shell interprets commands, the terminal is the interface"
+      - "C) The terminal interprets commands, the shell is the window"
+      - "D) There is no functional difference"
+    correct: B
+    explanation: "The shell (bash, zsh) is the command interpreter. The terminal (GNOME Terminal, Windows Terminal) is the terminal emulator — the graphical interface."
+    targeted_misconception: M2.1
+
+  - id: q04
+    type: mcq
+    bloom: understand
+    lo: LO2.2
+    text: "What type of path is '/home/stud/project'?"
+    options:
+      - "A) Relative path"
+      - "B) Absolute path"
+      - "C) Symbolic path"
+      - "D) Virtual path"
+    correct: B
+    explanation: "An absolute path starts with / (root) and specifies the complete location. Relative paths do not start with /."
+    targeted_misconception: M2.2
+
+  - id: q05
+    type: mcq
+    bloom: understand
+    lo: LO3.1
+    text: "If I set VAR='test' without export and start a subshell, what will echo $VAR display in the subshell?"
+    options:
+      - "A) test"
+      - "B) Nothing (empty string)"
+      - "C) Error"
+      - "D) $VAR literally"
+    correct: B
+    explanation: "Local variables (without export) are not visible in child processes. Using export VAR makes the variable part of the environment."
+    targeted_misconception: M3.1
+
+  - id: q06
+    type: mcq
+    bloom: apply
+    lo: LO4.1
+    text: "What command creates the directory structure /project/src/main/java if it does not exist?"
+    options:
+      - "A) mkdir /project/src/main/java"
+      - "B) mkdir -p /project/src/main/java"
+      - "C) mkdir -r /project/src/main/java"
+      - "D) mkdir --create /project/src/main/java"
+    correct: B
+    explanation: "The -p (parents) option creates all necessary parent directories. Without -p, mkdir fails if parents do not exist."
+    targeted_misconception: M3.2
+
+  - id: q07
+    type: mcq
+    bloom: apply
+    lo: LO4.2
+    text: "You just modified ~/.bashrc. What command applies the changes in the current session?"
+    options:
+      - "A) restart bash"
+      - "B) source ~/.bashrc"
+      - "C) refresh ~/.bashrc"
+      - "D) reload ~/.bashrc"
+    correct: B
+    explanation: "source (or .) executes the script in the current shell, applying changes immediately. The alternative is opening a new terminal."
+    targeted_misconception: M3.3
+
+  - id: q08
+    type: mcq
+    bloom: apply
+    lo: LO5.1
+    text: "What files does the command: touch file{1,2,3}.txt create?"
+    options:
+      - "A) file{1,2,3}.txt (a single file)"
+      - "B) file1.txt, file2.txt, file3.txt"
+      - "C) file123.txt"
+      - "D) Syntax error"
+    correct: B
+    explanation: "Brace expansion {} expands the pattern before execution. This is not globbing (which uses *)."
+    targeted_misconception: M1.3
+
+  - id: q09
+    type: mcq
+    bloom: analyse
+    lo: LO6.1
+    text: "NAME='John'; echo 'Hello $NAME' displays:"
+    options:
+      - "A) Hello John"
+      - "B) Hello $NAME"
+      - "C) Syntax error"
+      - "D) Hello (empty)"
+    correct: B
+    explanation: "Single quotes ('') preserve everything literally — variables do NOT expand. Double quotes (\"\") allow expansion."
+    targeted_misconception: M1.4
+
+  - id: q10
+    type: mcq
+    bloom: analyse
+    lo: LO6.2
+    text: "What does exit code 0 signify in Linux?"
+    options:
+      - "A) Error"
+      - "B) Non-existent command"
+      - "C) Success"
+      - "D) Insufficient permissions"
+    correct: C
+    explanation: "Unix convention: 0 = success, non-zero = error. Check with echo $? after execution."
+    targeted_misconception: M3.4
+
+  - id: q11
+    type: mcq
+    bloom: apply
+    lo: LO4.3
+    text: "You want to copy all .log files from /var/log to ~/backup. Which command is correct?"
+    options:
+      - "A) cp /var/log/.log ~/backup/"
+      - "B) cp /var/log/*.log ~/backup/"
+      - "C) cp '/var/log/*.log' ~/backup/"
+      - "D) cp /var/log/*log ~/backup/"
+    correct: B
+    explanation: "*.log matches all files ending in .log. Single quotes in C prevent glob expansion. D misses the dot before log."
+    targeted_misconception: M4.1
+
+  - id: q12
+    type: mcq
+    bloom: analyse
+    lo: LO6.3
+    text: "Compare: DIR='/home/user'; rm -rf $DIR/temp versus DIR=''; rm -rf $DIR/temp — what is the critical difference?"
+    options:
+      - "A) No difference, both delete temp"
+      - "B) Second deletes /temp (root level) — DANGEROUS"
+      - "C) Second causes syntax error"
+      - "D) Second does nothing"
+    correct: B
+    explanation: "Empty variable + unquoted = $DIR/temp becomes /temp. Always quote variables and verify before rm -rf."
+    targeted_misconception: M4.2
+
+  - id: q13
+    type: mcq
+    bloom: evaluate
+    lo: LO7.1
+    text: |
+      Evaluate this backup script. What is the most serious security problem?
+      
+      #!/bin/bash
+      DEST=$1
+      rm -rf $DEST/old_backup
+      cp -r ~/Documents $DEST/
+    options:
+      - "A) Missing comments"
+      - "B) Unquoted variable in rm -rf command"
+      - "C) Does not check exit code"
+      - "D) Missing shebang"
+    correct: B
+    explanation: "If DEST is empty or contains spaces, rm -rf $DEST/old_backup becomes dangerous. Always quote variables, especially with rm."
+    targeted_misconception: M4.2
+
+  - id: q14
+    type: open
+    bloom: create
+    lo: LO8.1
+    text: |
+      Create an alias named 'backup' that copies ~/Documents to ~/Backup/$(date +%Y%m%d)/.
+      Write the complete alias definition line.
+    rubric:
+      - "alias keyword present: 1p"
+      - "mkdir -p for date directory: 2p"
+      - "Correct date expansion with $(): 2p"
+      - "Proper quoting throughout: 2p"
+      - "cp command with correct paths: 2p"
+      - "Single line, syntactically correct: 1p"
+    example_solution: |
+      alias backup='mkdir -p ~/Backup/$(date +%Y%m%d) && cp -r ~/Documents ~/Backup/$(date +%Y%m%d)/'
+    targeted_misconception: M3.1

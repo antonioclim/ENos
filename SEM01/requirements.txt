@@ -1,0 +1,15 @@
+# Requirements for SEM01 - Shell Fundamentals
+# Operating Systems | ASE Bucharest - CSIE
+
+# Core dependencies
+PyYAML>=6.0.1
+
+# Development/Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Linting
+ruff>=0.1.9
+
+# Report generation
+Jinja2>=3.1.2

@@ -1,0 +1,258 @@
+# .github/workflows/ci.yml
+# CI Pipeline for SEM01 - Shell Fundamentals
+# Operating Systems | ASE Bucharest - CSIE
+# Version: 2.1
+
+name: SEM01 CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+
+env:
+  COVERAGE_THRESHOLD: 75
+
+jobs:
+  lint-bash:
+    name: Lint Bash Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      
+      - name: Run shellcheck on bash scripts
+        run: |
+          echo ">>> Checking scripts/bash/"
+          find scripts/bash -name "*.sh" -exec shellcheck --severity=warning {} \;
+          
+      - name: Run shellcheck on demo scripts
+        run: |
+          echo ">>> Checking scripts/demo/"
+          find scripts/demo -name "*.sh" -exec shellcheck --severity=warning {} \;
+          
+      - name: Check for set -euo pipefail
+        run: |
+          echo ">>> Verifying error handling in scripts"
+          for script in scripts/bash/*.sh scripts/demo/*.sh; do
+            if [ -f "$script" ]; then
+              if grep -q "set -euo pipefail\|set -e" "$script"; then
+                echo "[OK] $script has error handling"
+              else
+                echo "[FAIL] $script is missing error handling"
+                exit 1
+              fi
+            fi
+          done
+
+  lint-python:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install ruff
+        run: pip install ruff
+      
+      - name: Run ruff on formative/
+        run: ruff check formative/ --ignore E501
+        
+      - name: Run ruff on scripts/python/
+        run: ruff check scripts/python/ --ignore E501
+        
+      - name: Run ruff on tests/
+        run: ruff check tests/ --ignore E501
+
+  validate-yaml:
+    name: Validate YAML Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install PyYAML
+        run: pip install pyyaml
+      
+      - name: Validate quiz.yaml structure
+        run: |
+          python -c "
+          import yaml
+          with open('formative/quiz.yaml') as f:
+              data = yaml.safe_load(f)
+              assert 'metadata' in data, 'Missing metadata'
+              assert 'questions' in data, 'Missing questions'
+              q_count = len(data['questions'])
+              assert q_count >= 12, f'Expected at least 12 questions, got {q_count}'
+              print(f'[OK] Quiz valid: {q_count} questions')
+          "
+      
+      - name: Validate quiz_lms.json
+        run: |
+          python -c "
+          import json
+          with open('formative/quiz_lms.json') as f:
+              data = json.load(f)
+              assert 'quiz' in data, 'Missing quiz settings'
+              assert 'questions' in data, 'Missing questions'
+              print(f'[OK] LMS JSON valid: {len(data[\"questions\"])} questions')
+          "
+
+  ai-check:
+    name: AI Fingerprint Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Run AI pattern scanner on documentation
+        run: |
+          python scripts/python/S01_06_ai_fingerprint_scanner.py docs/
+          AI_EXIT=$?
+          if [ $AI_EXIT -ne 0 ]; then
+            echo "[WARN] AI patterns detected in documentation - review recommended"
+          fi
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: [validate-yaml]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml pytest pytest-cov
+      
+      - name: Run pytest with coverage threshold
+        run: |
+          pytest tests/ -v --tb=short \
+            --cov=formative \
+            --cov=scripts/python \
+            --cov-report=term-missing \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }}
+      
+      - name: Validate Bash scripts syntax
+        run: |
+          echo ">>> Checking Bash syntax"
+          ERRORS=0
+          for script in scripts/bash/*.sh scripts/demo/*.sh; do
+            if [ -f "$script" ]; then
+              if bash -n "$script" 2>/dev/null; then
+                echo "[OK] $script"
+              else
+                echo "[FAIL] $script"
+                ERRORS=$((ERRORS+1))
+              fi
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo ">>> $ERRORS script(s) have syntax errors"
+            exit 1
+          fi
+
+  structure-check:
+    name: Structure Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check mandatory directories
+        run: |
+          echo ">>> Checking directory structure"
+          for dir in ci docs formative homework presentations resources scripts tests; do
+            if [ -d "$dir" ]; then
+              echo "[OK] $dir/"
+            else
+              echo "[FAIL] Missing: $dir/"
+              exit 1
+            fi
+          done
+      
+      - name: Check for non-standard directories
+        run: |
+          echo ">>> Checking for non-standard directories"
+          ISSUES=0
+          for dir in prezentari resurse teme teste assignments tests_runner unit_tests; do
+            if [ -d "$dir" ]; then
+              echo "[WARN] Non-standard folder: $dir/"
+              ISSUES=$((ISSUES+1))
+            fi
+          done
+          if [ $ISSUES -gt 0 ]; then
+            echo ">>> $ISSUES non-standard directories found"
+          fi
+      
+      - name: Check mandatory docs (00-11)
+        run: |
+          echo ">>> Checking documentation files"
+          for i in 00 01 02 03 04 05 06 07 08 09 10 11; do
+            count=$(ls docs/S01_${i}_*.md 2>/dev/null | wc -l)
+            if [ "$count" -eq 0 ]; then
+              echo "[FAIL] Missing: docs/S01_${i}_*.md"
+              exit 1
+            else
+              echo "[OK] docs/S01_${i}_*.md"
+            fi
+          done
+      
+      - name: Check homework files
+        run: |
+          echo ">>> Checking homework files"
+          REQUIRED="S01_01_HOMEWORK.md S01_03_EVALUATION_RUBRIC.md S01_04_ORAL_VERIFICATION_LOG.md"
+          for file in $REQUIRED; do
+            if [ -f "homework/$file" ]; then
+              echo "[OK] homework/$file"
+            else
+              echo "[FAIL] Missing: homework/$file"
+              exit 1
+            fi
+          done
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint-bash, lint-python, validate-yaml, ai-check, test, structure-check]
+    if: always()
+    steps:
+      - name: Check job results
+        run: |
+          echo "====================================================================="
+          echo "        CI SUMMARY - SEM01 v2.1"
+          echo "====================================================================="
+          echo "Lint Bash:       ${{ needs.lint-bash.result }}"
+          echo "Lint Python:     ${{ needs.lint-python.result }}"
+          echo "Validate YAML:   ${{ needs.validate-yaml.result }}"
+          echo "AI Check:        ${{ needs.ai-check.result }}"
+          echo "Tests:           ${{ needs.test.result }}"
+          echo "Structure:       ${{ needs.structure-check.result }}"
+          echo "====================================================================="
+          echo "Coverage threshold: ${{ env.COVERAGE_THRESHOLD }}%"
+          echo "====================================================================="
+          
+          # Fail if any required job failed
+          if [ "${{ needs.validate-yaml.result }}" == "failure" ] || \
+             [ "${{ needs.test.result }}" == "failure" ] || \
+             [ "${{ needs.structure-check.result }}" == "failure" ]; then
+            echo ">>> Critical jobs failed!"
+            exit 1
+          fi

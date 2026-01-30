@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="400" height="320">
+  <title>Straturile Sistemului: User → Shell → Kernel → Hardware</title>
+  <desc>Diagrama arată cum comenzile utilizatorului traversează straturile sistemului</desc>
+  
+  <!-- Background -->
+  <rect width="400" height="320" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">
+    Straturile Sistemului Linux
+  </text>
+  
+  <!-- User Layer -->
+  <rect x="50" y="45" width="300" height="50" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="200" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1976d2">UTILIZATOR</text>
+  <text x="200" y="90" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">tastează comenzi în terminal</text>
+  
+  <!-- Arrow User to Shell -->
+  <path d="M200 95 L200 115" stroke="#666" stroke-width="2" marker-end="url(#arrowDown)"/>
+  <text x="260" y="108" font-family="Arial, sans-serif" font-size="9" fill="#666">comenzi text</text>
+  
+  <!-- Shell Layer -->
+  <rect x="50" y="120" width="300" height="50" rx="8" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+  <text x="200" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#388e3c">SHELL (Bash)</text>
+  <text x="200" y="162" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">interpretează și execută comenzi</text>
+  
+  <!-- Arrow Shell to Kernel -->
+  <path d="M200 170 L200 190" stroke="#666" stroke-width="2" marker-end="url(#arrowDown)"/>
+  <text x="260" y="183" font-family="Arial, sans-serif" font-size="9" fill="#666">system calls</text>
+  
+  <!-- Kernel Layer -->
+  <rect x="50" y="195" width="300" height="50" rx="8" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f57c00">KERNEL (Linux)</text>
+  <text x="200" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">gestionează resurse și procese</text>
+  
+  <!-- Arrow Kernel to Hardware -->
+  <path d="M200 245 L200 265" stroke="#666" stroke-width="2" marker-end="url(#arrowDown)"/>
+  <text x="260" y="258" font-family="Arial, sans-serif" font-size="9" fill="#666">driver calls</text>
+  
+  <!-- Hardware Layer -->
+  <rect x="50" y="270" width="300" height="40" rx="8" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="200" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c2185b">HARDWARE</text>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowDown" markerWidth="10" markerHeight="7" refX="5" refY="7" orient="auto">
+      <polygon points="0 0, 10 0, 5 7" fill="#666"/>
+    </marker>
+  </defs>
+</svg>

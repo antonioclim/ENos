@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350" width="700" height="350">
+  <defs>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d333b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22272e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="350" fill="#161b22"/>
+  
+  <!-- Title -->
+  <text x="350" y="35" font-family="Inter, sans-serif" font-size="20" font-weight="bold" fill="#e6edf3" text-anchor="middle">Variables: Labelled Boxes Analogy</text>
+  
+  <!-- Local Variable Box -->
+  <g transform="translate(50, 70)">
+    <!-- Box -->
+    <rect width="180" height="120" rx="8" fill="url(#boxGrad)" stroke="#58a6ff" stroke-width="2"/>
+    <!-- Label tab -->
+    <rect x="20" y="-15" width="80" height="30" rx="4" fill="#58a6ff"/>
+    <text x="60" y="5" font-family="JetBrains Mono, monospace" font-size="12" fill="#161b22" text-anchor="middle" font-weight="bold">NAME</text>
+    <!-- Content -->
+    <text x="90" y="70" font-family="JetBrains Mono, monospace" font-size="18" fill="#e6edf3" text-anchor="middle">"Alice"</text>
+    <!-- Type indicator -->
+    <text x="90" y="105" font-family="Inter, sans-serif" font-size="11" fill="#8b949e" text-anchor="middle">Local Variable</text>
+  </g>
+  
+  <!-- Export arrow -->
+  <g transform="translate(250, 130)">
+    <rect x="0" y="-10" width="80" height="30" rx="4" fill="#3fb950"/>
+    <text x="40" y="10" font-family="JetBrains Mono, monospace" font-size="11" fill="#161b22" text-anchor="middle" font-weight="bold">export</text>
+    <!-- Arrow line -->
+    <line x1="85" y1="5" x2="130" y2="5" stroke="#3fb950" stroke-width="2" stroke-dasharray="5,3"/>
+    <polygon points="130,0 140,5 130,10" fill="#3fb950"/>
+  </g>
+  
+  <!-- Environment Variable Box -->
+  <g transform="translate(400, 70)">
+    <!-- Box with conveyor -->
+    <rect width="200" height="120" rx="8" fill="url(#boxGrad)" stroke="#3fb950" stroke-width="3"/>
+    <!-- Conveyor belt decoration -->
+    <line x1="0" y1="130" x2="200" y2="130" stroke="#3fb950" stroke-width="4"/>
+    <circle cx="20" cy="130" r="8" fill="#22272e" stroke="#3fb950" stroke-width="2"/>
+    <circle cx="180" cy="130" r="8" fill="#22272e" stroke="#3fb950" stroke-width="2"/>
+    <!-- Label tab -->
+    <rect x="20" y="-15" width="80" height="30" rx="4" fill="#3fb950"/>
+    <text x="60" y="5" font-family="JetBrains Mono, monospace" font-size="12" fill="#161b22" text-anchor="middle" font-weight="bold">PATH</text>
+    <!-- Content -->
+    <text x="100" y="60" font-family="JetBrains Mono, monospace" font-size="12" fill="#e6edf3" text-anchor="middle">/usr/bin:</text>
+    <text x="100" y="80" font-family="JetBrains Mono, monospace" font-size="12" fill="#e6edf3" text-anchor="middle">/bin</text>
+    <!-- Type indicator -->
+    <text x="100" y="105" font-family="Inter, sans-serif" font-size="11" fill="#3fb950" text-anchor="middle">Environment Variable</text>
+  </g>
+  
+  <!-- Child process illustration -->
+  <g transform="translate(400, 220)">
+    <rect width="200" height="80" rx="8" fill="#1e252e" stroke="#a371f7" stroke-width="2" stroke-dasharray="4,2"/>
+    <text x="100" y="25" font-family="Inter, sans-serif" font-size="12" fill="#a371f7" text-anchor="middle">Child Process (bash -c)</text>
+    <text x="100" y="50" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e" text-anchor="middle">Can see: PATH ✓</text>
+    <text x="100" y="68" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e" text-anchor="middle">Cannot see: NAME ✗</text>
+  </g>
+  
+  <!-- Arrow to child -->
+  <line x1="500" y1="200" x2="500" y2="215" stroke="#a371f7" stroke-width="2"/>
+  <polygon points="495,215 500,225 505,215" fill="#a371f7"/>
+  
+  <!-- Legend box -->
+  <g transform="translate(50, 230)">
+    <rect width="180" height="100" rx="6" fill="#1e252e" stroke="#30363d"/>
+    <text x="90" y="25" font-family="Inter, sans-serif" font-size="12" fill="#e6edf3" text-anchor="middle" font-weight="bold">Key Concepts</text>
+    <text x="15" y="50" font-family="Inter, sans-serif" font-size="11" fill="#58a6ff">●</text>
+    <text x="30" y="50" font-family="Inter, sans-serif" font-size="11" fill="#8b949e">Local: only in current shell</text>
+    <text x="15" y="70" font-family="Inter, sans-serif" font-size="11" fill="#3fb950">●</text>
+    <text x="30" y="70" font-family="Inter, sans-serif" font-size="11" fill="#8b949e">export: passes to children</text>
+    <text x="15" y="90" font-family="Inter, sans-serif" font-size="11" fill="#a371f7">●</text>
+    <text x="30" y="90" font-family="Inter, sans-serif" font-size="11" fill="#8b949e">Child: inherits environment</text>
+  </g>
+</svg>
