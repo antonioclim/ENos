@@ -1,0 +1,57 @@
+@startuml inode_structure
+!include ../../diagrams_common/skin.puml
+title Inode Structure (ext4)
+
+skinparam rectangle {
+    roundCorner 5
+}
+
+rectangle "**INODE #12345**" as inode #E3F2FD {
+    
+    rectangle "**METADATA**" as meta #FFF9C4 {
+        note as meta_note
+        **Type & Mode:** -rw-r--r-- (0644)
+        **Owner UID/GID:** 1000/1000
+        **Size:** 15,847 bytes
+        **Link Count:** 2
+        
+        **Timestamps:**
+        • atime: 2024-01-15 (last access)
+        • mtime: 2024-01-14 (modification)
+        • ctime: 2024-01-14 (inode change)
+        end note
+    }
+    
+    rectangle "**BLOCK POINTERS**" as blocks #C8E6C9 {
+        
+        rectangle "**12 Direct Blocks**\n→ 48 KB direct" as direct #BBDEFB
+        
+        rectangle "**Single Indirect**\n1024 ptr → 4 MB" as single #E1BEE7
+        
+        rectangle "**Double Indirect**\n1024² ptr → 4 GB" as double #FCE4EC
+        
+        rectangle "**Triple Indirect**\n1024³ ptr → 4 TB" as triple #FFCDD2
+    }
+}
+
+rectangle "**DATA BLOCKS**" as data #FFE0B2 {
+    rectangle "Block 100" as b100 #FFFFFF
+    rectangle "Block 101" as b101 #FFFFFF
+    rectangle "Block 102" as b102 #FFFFFF
+    rectangle "..." as bdots #FFFFFF
+}
+
+direct -[#27AE60]-> data : direct data
+single -[#3498DB]-> data : via 1 level
+double -[#9C27B0]-> data : via 2 levels
+triple -[#E74C3C]-> data : via 3 levels
+
+note bottom of inode
+**Important:** The inode does **NOT** contain the file name!
+The name is stored in the **directory** (name → inode# mapping)
+
+**Max file size (4KB blocks):**
+12×4KB + 1024×4KB + 1024²×4KB + 1024³×4KB ≈ **4 TB**
+end note
+
+@enduml

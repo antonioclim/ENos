@@ -1,0 +1,79 @@
+@startuml security_aaa_permissions
+!include ../../diagrams_common/skin.puml
+title Security: AAA Triad and Unix Permissions
+
+skinparam rectangle {
+    roundCorner 10
+}
+
+rectangle "**AAA TRIAD**" as aaa #FAFAFA {
+    
+    rectangle "**Authentication**\n(Who are you?)" as authn #E3F2FD {
+        note as authn_note
+        • Password
+        • SSH Key
+        • Biometric
+        • 2FA/MFA
+        end note
+    }
+    
+    rectangle "**Authorisation**\n(What can you do?)" as authz #C8E6C9 {
+        note as authz_note
+        • Unix Permissions
+        • ACL
+        • RBAC
+        • Capabilities
+        end note
+    }
+    
+    rectangle "**Audit**\n(What did you do?)" as audit #FFF9C4 {
+        note as audit_note
+        • /var/log/auth.log
+        • syslog
+        • auditd
+        • journalctl
+        end note
+    }
+}
+
+authn -[#3498DB]-> authz : Verified?
+authz -[#27AE60]-> audit : Log actions
+
+rectangle "**UNIX PERMISSIONS**" as perms #FCE4EC {
+    
+    note as perms_note
+    **Format:** -rwxr-xr-- (0754)
+    
+    | Position | Category | Bits |
+    | 1 | Type (-/d/l) | - |
+    | 2-4 | **Owner** | rwx (7) |
+    | 5-7 | **Group** | r-x (5) |
+    | 8-10 | **Others** | r-- (4) |
+    
+    **r** = read (4)
+    **w** = write (2)
+    **x** = execute (1)
+    end note
+    
+    rectangle "**Special Bits**" as special #FFFFFF {
+        note as special_note
+        **setuid (4xxx):** Runs as owner
+        **setgid (2xxx):** Runs as group
+        **sticky (1xxx):** Only owner deletes
+        end note
+    }
+}
+
+rectangle "**ACCESS CONTROL MODELS**" as models #E1BEE7 {
+    rectangle "**DAC**\nOwner decides" as dac #FFFFFF
+    rectangle "**MAC**\nSystem decides\n(SELinux)" as mac #FFFFFF
+    rectangle "**RBAC**\nRoles\n(K8s, AWS)" as rbac #FFFFFF
+}
+
+note bottom
+**Useful commands:**
+chmod 755 file | chown user:group file | getfacl file
+find / -perm -4000 (find setuid)
+end note
+
+@enduml

@@ -1,0 +1,162 @@
+# C11_05_FORMATIVE_ASSESSMENT.yaml
+# Course 11: File System (Part 1 - Inode, Pointers)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 11
+  subject: "File System (Part 1 - Inode, Pointers)"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is an inode?"
+    options:
+      - "A type of processor"
+      - "The data structure that stores a file's metadata (permissions, size, pointers to blocks)"
+      - "A directory"
+      - "A type of network"
+    correct: 1
+    explanation: "Inode = index node, contains all information about the file EXCEPT the name."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What does an inode NOT contain?"
+    options:
+      - "File permissions"
+      - "File name"
+      - "File size"
+      - "Pointers to data blocks"
+    correct: 1
+    explanation: "The name is stored in the directory, not in the inode. The inode is identified by number."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What is a hard link?"
+    options:
+      - "A copy of the file"
+      - "A directory entry that points to the same inode as another file"
+      - "A symbolic link"
+      - "A network connection"
+    correct: 1
+    explanation: "Hard link = another name for the same inode. Link count increases; the file exists until count=0."
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "Why do inodes use indirect pointers for large files?"
+    options:
+      - "For security"
+      - "To allow files of any size without increasing the inode structure size"
+      - "For speed"
+      - "They do not use them"
+    correct: 1
+    explanation: "Direct pointers: small files (fast). Indirect: large files without increasing inode size."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is the difference between a hard link and a symbolic link?"
+    options:
+      - "They are identical"
+      - "Hard link: same inode. Symlink: separate file that contains the path to the target"
+      - "Symlink is faster"
+      - "Hard link works across filesystems"
+    correct: 1
+    explanation: "Hard link: shares inode, cannot cross filesystem. Symlink: independent file with path, works anywhere."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What happens when you delete a file with hard links?"
+    options:
+      - "All hard links are deleted"
+      - "Link count decreases; data is deleted only when count reaches 0"
+      - "The file is moved to Trash"
+      - "The inode is duplicated"
+    correct: 1
+    explanation: "Deletion decreases link count. The inode and data remain until no link exists."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why are directories special files?"
+    options:
+      - "They are not special"
+      - "They contain lists of (name, inode_number) pairs, not regular data"
+      - "They are faster"
+      - "They consume less memory"
+    correct: 1
+    explanation: "Directory = file with special structure: name → inode number mapping."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What role does the superblock play in a filesystem?"
+    options:
+      - "It stores system files"
+      - "It contains global metadata: FS size, number of free blocks, location of inode tables"
+      - "It encrypts data"
+      - "It manages the network"
+    correct: 1
+    explanation: "Superblock = the filesystem 'header' with critical information about its structure and state."
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "An inode has 12 direct pointers, 1 single indirect, 1 double indirect. Block size = 4KB, pointer = 4B. What is the theoretical maximum file size?"
+    options:
+      - "48 KB"
+      - "~4 GB"
+      - "~4 TB"
+      - "12 KB"
+    correct: 1
+    explanation: "Direct: 12×4KB. Single: 1024×4KB. Double: 1024×1024×4KB. Total ≈ 4GB."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "Why are journaling filesystems (ext4, NTFS) safer during a crash?"
+    options:
+      - "They are faster"
+      - "They record operations in a journal BEFORE applying them, allowing recovery"
+      - "They use encryption"
+      - "They are not safer"
+    correct: 1
+    explanation: "Journaling: write-ahead logging. On crash, the journal is checked and operations are completed/rolled back."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "A 5KB file on a filesystem with 4KB blocks. How much space does it occupy on disk?"
+    options:
+      - "5 KB"
+      - "8 KB (2 blocks)"
+      - "4 KB"
+      - "12 KB"
+    correct: 1
+    explanation: "5KB requires 2 blocks of 4KB (internal fragmentation: 3KB wasted in the second block)."
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You want to create an incremental backup. What inode information do you use to detect modified files?"
+    options:
+      - "File name"
+      - "mtime (modification time) and size"
+      - "Permissions"
+      - "Number of hard links"
+    correct: 1
+    explanation: "mtime indicates the last content modification. Compare with previous backup for changes."

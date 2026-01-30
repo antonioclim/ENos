@@ -1,0 +1,86 @@
+@startuml vm_vs_container
+!include ../../diagrams_common/skin.puml
+title Virtual Machines vs Containers
+
+skinparam rectangle {
+    roundCorner 8
+}
+
+rectangle "**VIRTUAL MACHINES**" as vm #E3F2FD {
+    
+    rectangle "**Infrastructure**" as vm_hw #ECEFF1 {
+        rectangle "Hardware (CPU, RAM, Disk)" as hw1 #FFFFFF
+    }
+    
+    rectangle "**Hypervisor**\n(VMware, Hyper-V, KVM)" as hyper #FFE0B2
+    
+    rectangle "VM1" as vm1 #C8E6C9 {
+        rectangle "App A" as app1 #FFFFFF
+        rectangle "Bins/Libs" as lib1 #FFFFFF
+        rectangle "**Guest OS**\n(Ubuntu)" as os1 #FFF9C4
+    }
+    
+    rectangle "VM2" as vm2 #C8E6C9 {
+        rectangle "App B" as app2 #FFFFFF
+        rectangle "Bins/Libs" as lib2 #FFFFFF
+        rectangle "**Guest OS**\n(Windows)" as os2 #FFF9C4
+    }
+    
+    note bottom of vm
+    **VM Characteristics:**
+    • Boot: 30-60 sec
+    • Size: 5-50 GB
+    • RAM: 500MB-2GB overhead
+    • Isolation: **COMPLETE**
+    • Density: 10-20 VM/host
+    end note
+}
+
+rectangle "**CONTAINERS**" as cont #C8E6C9 {
+    
+    rectangle "**Infrastructure**" as cont_hw #ECEFF1 {
+        rectangle "Hardware (CPU, RAM, Disk)" as hw2 #FFFFFF
+    }
+    
+    rectangle "**Host OS** (Linux Kernel)" as host #FFE0B2
+    
+    rectangle "**Container Runtime**\n(Docker, containerd)" as runtime #FFF9C4
+    
+    rectangle "C1" as c1 #E3F2FD {
+        rectangle "App A" as capp1 #FFFFFF
+        rectangle "Bins/Libs" as clib1 #FFFFFF
+    }
+    
+    rectangle "C2" as c2 #E3F2FD {
+        rectangle "App B" as capp2 #FFFFFF
+        rectangle "Bins/Libs" as clib2 #FFFFFF
+    }
+    
+    rectangle "C3" as c3 #E3F2FD {
+        rectangle "App C" as capp3 #FFFFFF
+        rectangle "Bins/Libs" as clib3 #FFFFFF
+    }
+    
+    note bottom of cont
+    **Container Characteristics:**
+    • Boot: **1-5 sec**
+    • Size: **100MB-1GB**
+    • RAM: 10-100MB overhead
+    • Isolation: Process (shared kernel)
+    • Density: **100-1000/host**
+    end note
+}
+
+vm -[hidden]right-> cont
+
+legend bottom
+|= Aspect |= VM |= Container |
+| Isolation | Complete (hardware) | Process (namespaces) |
+| Overhead | High | **Minimal** |
+| Startup | Minutes | **Seconds** |
+| Different OSes | ✅ Yes | ❌ Linux only |
+| Security | Very good | Good (shared kernel) |
+| Use Case | Strict isolation | **Microservices, CI/CD** |
+endlegend
+
+@enduml

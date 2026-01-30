@@ -1,0 +1,138 @@
+# C15_05_FORMATIVE_ASSESSMENT.yaml
+# Lesson 15 Supplementary: Network Connection
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  lesson: 15
+  subject: "Network Connection"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 10
+  estimated_time_minutes: 12
+  bloom_distribution:
+    remember: 2
+    understand: 4
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a socket in network programming?"
+    options:
+      - "A network cable"
+      - "Communication endpoint: combination of IP + port that enables data transfer"
+      - "A type of server"
+      - "An encryption protocol"
+    correct: 1
+    explanation: "Socket = OS abstraction for network communication, identified by IP:port."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What is the main difference between TCP and UDP?"
+    options:
+      - "TCP is older"
+      - "TCP: connection-oriented, reliable. UDP: connectionless, best-effort"
+      - "UDP is more secure"
+      - "There is no difference"
+    correct: 1
+    explanation: "TCP: guarantees ordered delivery. UDP: fast but no guarantees (video streaming, gaming)."
+
+  - id: q03
+    bloom: understand
+    difficulty: medium
+    text: "What does the bind() call do in the socket API?"
+    options:
+      - "Connects to server"
+      - "Associates the socket with a local IP address and port"
+      - "Sends data"
+      - "Closes the connection"
+    correct: 1
+    explanation: "bind(): the server specifies which IP:port to listen on. The client usually does not call bind explicitly."
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "Why does a TCP server call listen() and accept()?"
+    options:
+      - "To send data"
+      - "listen(): marks the socket as passive. accept(): accepts connections and creates a new socket per client"
+      - "For encryption"
+      - "To close the connection"
+    correct: 1
+    explanation: "listen(): sets up queue for connections. accept(): blocks until a client arrives, returns new socket."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is I/O multiplexing with select()/poll()/epoll()?"
+    options:
+      - "Creating threads"
+      - "Allows a single thread to monitor multiple sockets for I/O events"
+      - "Data compression"
+      - "Connection encryption"
+    correct: 1
+    explanation: "Multiplexing: one thread efficiently handles thousands of connections without a thread per connection."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "Why is epoll more efficient than select for many descriptors?"
+    options:
+      - "It is not more efficient"
+      - "epoll: O(1) for events, does not scan all descriptors. select: O(n) scan on each call"
+      - "epoll uses more memory"
+      - "select does not exist on Linux"
+    correct: 1
+    explanation: "epoll: kernel notifies only about active descriptors. select: userspace iterates through all."
+
+  - id: q07
+    bloom: analyse
+    difficulty: hard
+    text: "A server handles 10,000 simultaneous connections. Which model is most suitable?"
+    options:
+      - "One thread per connection"
+      - "Event-driven with epoll and a small number of worker threads"
+      - "One process per connection"
+      - "Sequential processing"
+    correct: 1
+    explanation: "10K threads = large overhead (memory, scheduling). Event loop with epoll: efficient, scalable."
+
+  - id: q08
+    bloom: analyse
+    difficulty: hard
+    text: "Why does TCP use a three-way handshake (SYN, SYN-ACK, ACK)?"
+    options:
+      - "For speed"
+      - "To synchronise sequence numbers and confirm that both parties are ready"
+      - "For encryption"
+      - "It is optional"
+    correct: 1
+    explanation: "3-way handshake: establishes connection parameters, prevents false connections from old packets."
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "What problem does Nagle's algorithm solve and why do we sometimes disable it?"
+    options:
+      - "Security"
+      - "Combines small packets for efficiency but adds latency; we disable it for real-time applications"
+      - "Data compression"
+      - "It does not solve anything"
+    correct: 1
+    explanation: "Nagle: reduces header overhead for streams. Disabled (TCP_NODELAY) for low latency."
+
+  - id: q10
+    bloom: apply
+    difficulty: hard
+    text: "You are writing a chat server. What problems must you handle for partial messages on TCP?"
+    options:
+      - "TCP guarantees complete messages"
+      - "TCP is stream-based: you need a framing protocol (length prefix or delimiter) to delimit messages"
+      - "You use UDP instead"
+      - "There are no problems"
+    correct: 1
+    explanation: "TCP: stream of bytes, not messages. recv() may return half a message. You implement a protocol."

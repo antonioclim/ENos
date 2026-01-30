@@ -1,0 +1,17 @@
+@startuml
+title Socket API Flow
+state "Server" {
+  [*] --> socket
+  socket --> bind
+  bind --> listen
+  listen --> accept
+  accept --> read_write
+  read_write --> close
+}
+state "Client" {
+  [*] --> socket2
+  socket2 --> connect
+  connect --> read_write2
+  read_write2 --> close2
+}
+@enduml
