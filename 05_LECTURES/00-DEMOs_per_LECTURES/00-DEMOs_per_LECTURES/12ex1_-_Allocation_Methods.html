@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocation Methods Comparator - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Rubik:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #12121f 50%, #0a0a12 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .method-tab {
+            transition: all 0.3s ease;
+        }
+        
+        .method-tab.activee {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .disk-block {
+            width: 40px;
+            height: 40px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .disk-block:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .disk-block.empty {
+            background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+            border: 1px solid #374151;
+        }
+        
+        .disk-block.file-a {
+            background: linear-gradient(145deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 1px solid #60a5fa;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        
+        .disk-block.file-b {
+            background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+            border: 1px solid #4ade80;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+        
+        .disk-block.file-c {
+            background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+            border: 1px solid #fbbf24;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
+        
+        .disk-block.index {
+            background: linear-gradient(145deg, #a855f7 0%, #7c3aed 100%);
+            border: 1px solid #c084fc;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        }
+        
+        .disk-block.pointer {
+            position: relative;
+        }
+        
+        .disk-block.pointer::after {
+            content: '→';
+            position: absolute;
+            right: 2px;
+            bottom: 0;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .allocation-animation {
+            animation: allocate 0.3s ease-out;
+        }
+        
+        @keyframes allocate {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .fragment-warning {
+            animation: fragmentPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes fragmentPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .arrow-connection {
+            stroke-dasharray: 4, 2;
+            animation: flowArrow 1s linear infinite;
+        }
+
+        @keyframes flowArrow {
+            to { stroke-dashoffset: -6; }
+        }
+
+        .directory-entry {
+            transition: all 0.2s ease;
+        }
+
+        .directory-entry:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
+                <i class="fas fa-th mr-3"></i>Disk Allocation Methods
+            </h1>
+            <p class="text-gray-400 text-lg">Contiguous vs Linked vs Indexed Allocation</p>
+        </header>
+
+        <!-- Method Tabs -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <button onclick="showMethod('contiguous')" id="tab-contiguous" class="method-tab activee px-5 py-3 rounded-xl border border-gray-700 transition flex items-center gap-2">
+                <div class="w-4 h-4 rounded bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                <span class="font-semibold">Contiguous</span>
+            </button>
+            <button onclick="showMethod('linked')" id="tab-linked" class="method-tab px-5 py-3 rounded-xl border border-gray-700 transition flex items-center gap-2">
+                <div class="w-4 h-4 rounded bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                <span class="font-semibold">Linked</span>
+            </button>
+            <button onclick="showMethod('indexed')" id="tab-indexed" class="method-tab px-5 py-3 rounded-xl border border-gray-700 transition flex items-center gap-2">
+                <div class="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                <span class="font-semibold">Indexed</span>
+            </button>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left: Disk Visualization -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold flex items-center">
+                            <i class="fas fa-hdd mr-2 text-blue-400"></i>Disk Blockks
+                        </h3>
+                        <div class="text-sm text-gray-400">
+                            <span id="used-blocks">0</span>/<span id="total-blocks">32</span> blocks used
+                        </div>
+                    </div>
+                    
+                    <!-- Disk Grid -->
+                    <div id="disk-grid" class="grid grid-cols-8 gap-1 mb-4">
+                        <!-- Generated by JS -->
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="flex flex-wrap gap-4 text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded disk-block empty"></div>
+                            <span class="text-gray-400">Empty</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded disk-block file-a"></div>
+                            <span class="text-gray-400">File A</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded disk-block file-b"></div>
+                            <span class="text-gray-400">File B</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded disk-block file-c"></div>
+                            <span class="text-gray-400">File C</span>
+                        </div>
+                        <div id="legend-index" class="flex items-center gap-2 hidden">
+                            <div class="w-4 h-4 rounded disk-block index"></div>
+                            <span class="text-gray-400">Index Blockk</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Directoryy Table -->
+                <div class="glass-card rounded-2xl p-5 mt-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-folder mr-2 text-amber-400"></i>Directoryy Entry Table
+                    </h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-700">
+                                    <th class="text-left py-2 px-3">File Name</th>
+                                    <th class="text-center py-2 px-3" id="dir-col-2">Start Blockk</th>
+                                    <th class="text-center py-2 px-3" id="dir-col-3">Length</th>
+                                    <th class="text-center py-2 px-3">Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="directory-table">
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Method Explanation -->
+                <div id="method-explanation" class="glass-card rounded-2xl p-5 mt-6">
+                    <!-- Content set by JS -->
+                </div>
+            </div>
+
+            <!-- Right: Controls & Info -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Operations -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-cogs mr-2 text-green-400"></i>Operations
+                    </h3>
+                    
+                    <!-- Create File -->
+                    <div class="mb-4">
+                        <label class="text-sm text-gray-400 mb-2 block">Create File</label>
+                        <div class="flex gap-2">
+                            <select id="new-file-name" class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
+                                <option value="A">File A</option>
+                                <option value="B">File B</option>
+                                <option value="C">File C</option>
+                            </select>
+                            <input type="number" id="new-file-size" min="1" max="10" value="3" class="w-20 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="Size">
+                            <button onclick="createdeFile()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Delete File -->
+                    <div class="mb-4">
+                        <label class="text-sm text-gray-400 mb-2 block">Delete File</label>
+                        <div class="flex gap-2">
+                            <select id="delete-file-name" class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
+                                <option value="A">File A</option>
+                                <option value="B">File B</option>
+                                <option value="C">File C</option>
+                            </select>
+                            <button onclick="deleteFile()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Extend File -->
+                    <div class="mb-4">
+                        <label class="text-sm text-gray-400 mb-2 block">Extend File</label>
+                        <div class="flex gap-2">
+                            <select id="extend-file-name" class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
+                                <option value="A">File A</option>
+                                <option value="B">File B</option>
+                                <option value="C">File C</option>
+                            </select>
+                            <input type="number" id="extend-size" min="1" max="5" value="2" class="w-20 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm" placeholder="+">
+                            <button onclick="extendFile()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="resetDisk()" class="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
+                        <i class="fas fa-redo mr-2"></i>Reset Disk
+                    </button>
+                </div>
+                
+                <!-- Status/Warnings -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-cyan-400"></i>Status
+                    </h3>
+                    <div id="status-log" class="space-y-2 text-sm max-h-40 overflow-y-auto">
+                        <div class="text-gray-500">Select a method and create files...</div>
+                    </div>
+                </div>
+                
+                <!-- Comparison Quick View -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-balance-scale mr-2 text-purple-400"></i>Comparison Fast
+                    </h3>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">External Fragmentation</span>
+                            <div id="cmp-fragmentation" class="text-right">
+                                <span class="text-red-400">Contiguous</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Sequential Access</span>
+                            <div id="cmp-sequential">
+                                <span class="text-green-400">Contiguous</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Acces Random</span>
+                            <div id="cmp-random">
+                                <span class="text-green-400">Indexed</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Extensibility</span>
+                            <div id="cmp-extend">
+                                <span class="text-green-400">Linked/Indexed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Comparison Table -->
+        <div class="glass-card rounded-2xl p-5 mt-6">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-table mr-2 text-amber-400"></i>Detailed Comparison
+            </h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="text-left py-3 px-4">Aspect</th>
+                            <th class="text-center py-3 px-4 text-blue-400">Contiguous</th>
+                            <th class="text-center py-3 px-4 text-green-400">Linked</th>
+                            <th class="text-center py-3 px-4 text-purple-400">Indexed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Directoryy Entry</td>
+                            <td class="text-center py-3 px-4 mono text-xs">(start, length)</td>
+                            <td class="text-center py-3 px-4 mono text-xs">(first, last)</td>
+                            <td class="text-center py-3 px-4 mono text-xs">(index_block)</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">External Fragmentation</td>
+                            <td class="text-center py-3 px-4"><span class="px-2 py-1 bg-red-900/30 text-red-400 rounded">Severe</span></td>
+                            <td class="text-center py-3 px-4"><span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Nu</span></td>
+                            <td class="text-center py-3 px-4"><span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Nu</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Sequential Access</td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">★★★</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-yellow-400">★★☆</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-yellow-400">★★☆</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Acces Random</td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">★★★</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-red-400">★☆☆</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">★★★</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Extendre Fiander</td>
+                            <td class="text-center py-3 px-4"><span class="text-red-400">Difficult</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Easy</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Easy</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Overhead</td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Minim</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-yellow-400">Pointeri in blocks</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-yellow-400">Index block(s)</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-medium">Utilizare Typeithat</td>
+                            <td class="text-center py-3 px-4 text-xs">CD-ROM, DVD</td>
+                            <td class="text-center py-3 px-4 text-xs">FAT (mai old)</td>
+                            <td class="text-center py-3 px-4 text-xs">UNIX (inode)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // Constants
+        const TOTAL_BLOCKS = 32;
+        const BLOCK_SIZE = 4096; // 4KB
+        
+        // State
+        let currentMethod = 'contiguous';
+        let diskBlockks = new Array(TOTAL_BLOCKS).fill(null);
+        let files = {};
+        
+        // Method explanations
+        const methodExplanations = {
+            contiguous: `
+                <h4 class="text-lg font-bold text-blue-400 mb-3"><i class="fas fa-arrow-right mr-2"></i>Contiguous Allocation</h4>
+                <p class="text-gray-300 mb-3">Each file occupies a set of <strong>consecutive blocks</strong> on disk.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-3">
+                        <div class="text-green-400 font-semibold mb-2"><i class="fas fa-check mr-1"></i> Advantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Sequential access foarte fast</li>
+                            <li>• Acces random eficient (start + offset)</li>
+                            <li>• Directoryy entry simplu</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3">
+                        <div class="text-red-400 font-semibold mb-2"><i class="fas fa-times mr-1"></i> Disadvantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Severe external fragmentation</li>
+                            <li>• Extendrea fileelor e problematithat</li>
+                            <li>• Requires periodic compacting</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            linked: `
+                <h4 class="text-lg font-bold text-green-400 mb-3"><i class="fas fa-link mr-2"></i>Linked Allocation</h4>
+                <p class="text-gray-300 mb-3">Each block contains a <strong>pointer</strong> to the next block of the file.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-3">
+                        <div class="text-green-400 font-semibold mb-2"><i class="fas fa-check mr-1"></i> Advantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Without external fragmentation</li>
+                            <li>• Extendre easy</li>
+                            <li>• Orice bloc free may fi folosit</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3">
+                        <div class="text-red-400 font-semibold mb-2"><i class="fas fa-times mr-1"></i> Disadvantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Acces random slow (traversare)</li>
+                            <li>• Overhead pointeri in fiecare bloc</li>
+                            <li>• Vulnerable to corruption (a broken pointer = data loss)</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            indexed: `
+                <h4 class="text-lg font-bold text-purple-400 mb-3"><i class="fas fa-list-ol mr-2"></i>Indexed Allocation</h4>
+                <p class="text-gray-300 mb-3">A <strong>index block</strong> separate contains all pointers to the data blocks.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-3">
+                        <div class="text-green-400 font-semibold mb-2"><i class="fas fa-check mr-1"></i> Advantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Acces random fast</li>
+                            <li>• Without external fragmentation</li>
+                            <li>• Similar cu inodesle UNIX</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3">
+                        <div class="text-red-400 font-semibold mb-2"><i class="fas fa-times mr-1"></i> Disadvantages</div>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• Overhead for index block</li>
+                            <li>• for filee mari: indirect blocks</li>
+                            <li>• Wasted space for filee small</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initDiskGrid();
+            showMethod('contiguous');
+        });
+        
+        // Initialize disk grid
+        function initDiskGrid() {
+            const grid = document.getElementById('disk-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                const block = document.createdeElement('div');
+                block.id = `block-${i}`;
+                block.className = 'disk-block empty rounded flex items-center justify-center text-xs font-bold';
+                block.textContent = i;
+                block.onclick = () => showBlockkInfo(i);
+                grid.appendChild(block);
+            }
+        }
+        
+        // Show method
+        function showMethod(method) {
+            currentMethod = method;
+            
+            // Update tabs
+            document.querySelectorAll('.method-tab').forEach(tab => tab.classList.remove('activee'));
+            document.getElementById(`tab-${method}`).classList.add('activee');
+            
+            // Update directory table headers
+            if (method === 'contiguous') {
+                document.getElementById('dir-col-2').textContent = 'Start Blockk';
+                document.getElementById('dir-col-3').textContent = 'Length';
+            } else if (method === 'linked') {
+                document.getElementById('dir-col-2').textContent = 'First Blockk';
+                document.getElementById('dir-col-3').textContent = 'Last Blockk';
+            } else {
+                document.getElementById('dir-col-2').textContent = 'Index Blockk';
+                document.getElementById('dir-col-3').textContent = 'Blockks';
+            }
+            
+            // Show/hide index legend
+            document.getElementById('legend-index').classList.toggle('hidden', method !== 'indexed');
+            
+            // Update explanation
+            document.getElementById('method-explanation').innerHTML = methodExplanations[method];
+            
+            // Reset and redraw
+            resetDisk();
+        }
+        
+        // Create file
+        function createdeFile() {
+            const name = document.getElementById('new-file-name').value;
+            const size = parseInt(document.getElementById('new-file-size').value);
+            
+            if (files[name]) {
+                logStatus(`The file ${name} already exists!`, 'error');
+                return;
+            }
+            
+            const result = allocateBlockks(name, size);
+            if (result.success) {
+                files[name] = result.fileInfo;
+                updateDiskDisplay();
+                updateDirectoryyTable();
+                logStatus(`Fiander ${name} created (${size} blocks)`, 'success');
+            } else {
+                logStatus(result.message, 'error');
+            }
+        }
+        
+        // Allocate blocks based on method
+        function allocateBlockks(name, size) {
+            const fileClass = `file-${name.toLowerCase()}`;
+            
+            if (currentMethod === 'contiguous') {
+                // Find contiguous free space
+                let start = -1;
+                let count = 0;
+                
+                for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                    if (diskBlockks[i] === null) {
+                        if (start === -1) start = i;
+                        count++;
+                        if (count === size) {
+                            // Allocate
+                            for (let j = start; j < start + size; j++) {
+                                diskBlockks[j] = { file: name, class: fileClass };
+                            }
+                            return {
+                                success: true,
+                                fileInfo: { start, length: size, blocks: Array.from({length: size}, (_, i) => start + i) }
+                            };
+                        }
+                    } else {
+                        start = -1;
+                        count = 0;
+                    }
+                }
+                
+                return { success: false, message: `No available ${size} contiguous free blocks! (External fragmentation)` };
+                
+            } else if (currentMethod === 'linked') {
+                // Find any free blocks
+                const freeBlockks = [];
+                for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                    if (diskBlockks[i] === null) freeBlockks.push(i);
+                    if (freeBlockks.length === size) break;
+                }
+                
+                if (freeBlockks.length < size) {
+                    return { success: false, message: `No available ${size} free blocks!` };
+                }
+                
+                // Allocate with pointers
+                for (let i = 0; i < freeBlockks.length; i++) {
+                    const blockIdx = freeBlockks[i];
+                    const nextBlockk = i < freeBlockks.length - 1 ? freeBlockks[i + 1] : null;
+                    diskBlockks[blockIdx] = { 
+                        file: name, 
+                        class: fileClass, 
+                        next: nextBlockk,
+                        isPointer: true
+                    };
+                }
+                
+                return {
+                    success: true,
+                    fileInfo: { 
+                        first: freeBlockks[0], 
+                        last: freeBlockks[freeBlockks.length - 1],
+                        blocks: freeBlockks
+                    }
+                };
+                
+            } else { // indexed
+                // Need 1 index block + size data blocks
+                const freeBlockks = [];
+                for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                    if (diskBlockks[i] === null) freeBlockks.push(i);
+                    if (freeBlockks.length === size + 1) break;
+                }
+                
+                if (freeBlockks.length < size + 1) {
+                    return { success: false, message: `No available ${size + 1} blocks freee (1 index + ${size} date)!` };
+                }
+                
+                // First block is index
+                const indexBlockk = freeBlockks[0];
+                const dataBlockks = freeBlockks.slice(1);
+                
+                diskBlockks[indexBlockk] = { 
+                    file: name, 
+                    class: 'index',
+                    isIndex: true,
+                    pointers: dataBlockks
+                };
+                
+                for (const blockIdx of dataBlockks) {
+                    diskBlockks[blockIdx] = { file: name, class: fileClass };
+                }
+                
+                return {
+                    success: true,
+                    fileInfo: {
+                        indexBlockk,
+                        blocks: dataBlockks,
+                        allBlockks: freeBlockks
+                    }
+                };
+            }
+        }
+        
+        // Delete file
+        function deleteFile() {
+            const name = document.getElementById('delete-file-name').value;
+            
+            if (!files[name]) {
+                logStatus(`The file ${name} does not exist!`, 'error');
+                return;
+            }
+            
+            // Free blocks
+            for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                if (diskBlockks[i] && diskBlockks[i].file === name) {
+                    diskBlockks[i] = null;
+                }
+            }
+            
+            delete files[name];
+            updateDiskDisplay();
+            updateDirectoryyTable();
+            logStatus(`Fiander ${name} deleted`, 'success');
+        }
+        
+        // Extend file
+        function extendFile() {
+            const name = document.getElementById('extend-file-name').value;
+            const extendBy = parseInt(document.getElementById('extend-size').value);
+            
+            if (!files[name]) {
+                logStatus(`The file ${name} does not exist!`, 'error');
+                return;
+            }
+            
+            const fileClass = `file-${name.toLowerCase()}`;
+            
+            if (currentMethod === 'contiguous') {
+                // Check if next blocks are free
+                const file = files[name];
+                const endBlockk = file.start + file.length;
+                
+                let canExtend = true;
+                for (let i = endBlockk; i < endBlockk + extendBy; i++) {
+                    if (i >= TOTAL_BLOCKS || diskBlockks[i] !== null) {
+                        canExtend = false;
+                        break;
+                    }
+                }
+                
+                if (canExtend) {
+                    for (let i = endBlockk; i < endBlockk + extendBy; i++) {
+                        diskBlockks[i] = { file: name, class: fileClass };
+                        file.blocks.push(i);
+                    }
+                    file.length += extendBy;
+                    updateDiskDisplay();
+                    updateDirectoryyTable();
+                    logStatus(`Fiander ${name} extins cu ${extendBy} blocks`, 'success');
+                } else {
+                    logStatus(`Nu se may extinde ${name} - blocks occupiede or end of disk!`, 'error');
+                }
+                
+            } else if (currentMethod === 'linked') {
+                // Find free blocks and link them
+                const freeBlockks = [];
+                for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                    if (diskBlockks[i] === null) freeBlockks.push(i);
+                    if (freeBlockks.length === extendBy) break;
+                }
+                
+                if (freeBlockks.length < extendBy) {
+                    logStatus(`No available ${extendBy} free blocks!`, 'error');
+                    return;
+                }
+                
+                const file = files[name];
+                
+                // Update last block's pointer
+                diskBlockks[file.last].next = freeBlockks[0];
+                
+                // Allocate new blocks
+                for (let i = 0; i < freeBlockks.length; i++) {
+                    const blockIdx = freeBlockks[i];
+                    const nextBlockk = i < freeBlockks.length - 1 ? freeBlockks[i + 1] : null;
+                    diskBlockks[blockIdx] = { 
+                        file: name, 
+                        class: fileClass, 
+                        next: nextBlockk,
+                        isPointer: true
+                    };
+                    file.blocks.push(blockIdx);
+                }
+                
+                file.last = freeBlockks[freeBlockks.length - 1];
+                
+                updateDiskDisplay();
+                updateDirectoryyTable();
+                logStatus(`Fiander ${name} extins cu ${extendBy} blocks`, 'success');
+                
+            } else { // indexed
+                const freeBlockks = [];
+                for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                    if (diskBlockks[i] === null) freeBlockks.push(i);
+                    if (freeBlockks.length === extendBy) break;
+                }
+                
+                if (freeBlockks.length < extendBy) {
+                    logStatus(`No available ${extendBy} free blocks!`, 'error');
+                    return;
+                }
+                
+                const file = files[name];
+                
+                // Update index block
+                diskBlockks[file.indexBlockk].pointers.push(...freeBlockks);
+                
+                // Allocate data blocks
+                for (const blockIdx of freeBlockks) {
+                    diskBlockks[blockIdx] = { file: name, class: fileClass };
+                    file.blocks.push(blockIdx);
+                    file.allBlockks.push(blockIdx);
+                }
+                
+                updateDiskDisplay();
+                updateDirectoryyTable();
+                logStatus(`Fiander ${name} extins cu ${extendBy} blocks`, 'success');
+            }
+        }
+        
+        // Update disk display
+        function updateDiskDisplay() {
+            let usedCount = 0;
+            
+            for (let i = 0; i < TOTAL_BLOCKS; i++) {
+                const block = document.getElementById(`block-${i}`);
+                const data = diskBlockks[i];
+                
+                block.className = 'disk-block rounded flex items-center justify-center text-xs font-bold';
+                
+                if (data) {
+                    block.classList.add(data.class);
+                    if (data.isPointer && data.next !== null) {
+                        block.classList.add('pointer');
+                    }
+                    if (data.isIndex) {
+                        block.textContent = 'IDX';
+                    } else {
+                        block.textContent = i;
+                    }
+                    block.classList.add('allocation-animation');
+                    usedCount++;
+                } else {
+                    block.classList.add('empty');
+                    block.textContent = i;
+                }
+            }
+            
+            document.getElementById('used-blocks').textContent = usedCount;
+        }
+        
+        // Update directory table
+        function updateDirectoryyTable() {
+            const tbody = document.getElementById('directory-table');
+            tbody.innerHTML = '';
+            
+            for (const [name, info] of Object.entries(files)) {
+                const row = document.createdeElement('tr');
+                row.className = 'directory-entry border-b border-gray-800';
+                
+                let col2, col3;
+                
+                if (currentMethod === 'contiguous') {
+                    col2 = info.start;
+                    col3 = info.length;
+                } else if (currentMethod === 'linked') {
+                    col2 = info.first;
+                    col3 = info.last;
+                } else {
+                    col2 = info.indexBlockk;
+                    col3 = info.blocks.length;
+                }
+                
+                const sizeKB = (currentMethod === 'indexed' ? info.blocks.length : info.blocks?.length || info.length) * 4;
+                
+                row.innerHTML = `
+                    <td class="py-2 px-3">
+                        <span class="inline-block w-3 h-3 rounded mr-2 disk-block file-${name.toLowerCase()}"></span>
+                        File ${name}
+                    </td>
+                    <td class="text-center py-2 px-3 mono">${col2}</td>
+                    <td class="text-center py-2 px-3 mono">${col3}</td>
+                    <td class="text-center py-2 px-3 text-gray-400">${sizeKB} KB</td>
+                `;
+                
+                tbody.appendChild(row);
+            }
+            
+            if (Object.keys(files).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Niciun file</td></tr>';
+            }
+        }
+        
+        // Show block info
+        function showBlockkInfo(blockIdx) {
+            const data = diskBlockks[blockIdx];
+            if (!data) {
+                logStatus(`Blockk ${blockIdx}: free`, 'info');
+            } else {
+                let info = `Blockk ${blockIdx}: File ${data.file}`;
+                if (data.isIndex) {
+                    info += ` (INDEX → [${data.pointers.join(', ')}])`;
+                } else if (data.next !== null && data.next !== undefined) {
+                    info += ` → next: ${data.next}`;
+                }
+                logStatus(info, 'info');
+            }
+        }
+        
+        // Log status
+        function logStatus(message, type = 'info') {
+            const log = document.getElementById('status-log');
+            const colors = {
+                'info': 'text-gray-300',
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warning': 'text-amber-400'
+            };
+            
+            const entry = document.createdeElement('div');
+            entry.className = colors[type];
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            entry.innerHTML = `<span class="text-gray-600 text-xs">[${time}]</span> ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep only last 10 entries
+            while (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+        }
+        
+        // Reset disk
+        function resetDisk() {
+            diskBlockks = new Array(TOTAL_BLOCKS).fill(null);
+            files = {};
+            updateDiskDisplay();
+            updateDirectoryyTable();
+            logStatus('Disk resetat', 'info');
+        }
+    </script>
+</body>
+</html>

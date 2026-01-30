@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>07ex3 - Readers-Writers Problem | OS Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: linear-gradient(135deg, #0a1628 0%, #132743 50%, #0a1628 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(19, 39, 67, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .database-icon {
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        
+        .database-icon.idle {
+            background: linear-gradient(135deg, #1e3a5f, #2d4a6f);
+        }
+        
+        .database-icon.reading {
+            background: linear-gradient(135deg, #065f46, #047857);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+            animation: read-pulse 1.5s ease-in-out infinite;
+        }
+        
+        .database-icon.writing {
+            background: linear-gradient(135deg, #9f1239, #be123c);
+            box-shadow: 0 0 40px rgba(244, 63, 94, 0.5);
+            animation: write-pulse 0.8s ease-in-out infinite;
+        }
+        
+        @keyframes read-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes write-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(244, 63, 94, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(244, 63, 94, 0.7); }
+        }
+        
+        .reader-avatar {
+            transition: all 0.3s ease;
+        }
+        
+        .reader-avatar.active {
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+        
+        .reader-avatar.waiting {
+            border-color: #f59e0b;
+            animation: waiting-bounce 1s ease-in-out infinite;
+        }
+        
+        .writer-avatar {
+            transition: all 0.3s ease;
+        }
+        
+        .writer-avatar.active {
+            border-color: #f43f5e;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+        }
+        
+        .writer-avatar.waiting {
+            border-color: #f59e0b;
+            animation: waiting-bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes waiting-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .access-line {
+            stroke-dasharray: 10, 5;
+            animation: dash-flow 0.5s linear infinite;
+        }
+        
+        @keyframes dash-flow {
+            to { stroke-dashoffset: -15; }
+        }
+        
+        .semaphore-box {
+            transition: all 0.3s ease;
+        }
+        
+        .semaphore-box.locked {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+        
+        .semaphore-box.unlocked {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        
+        .code-line {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .code-line.executing {
+            background: rgba(251, 191, 36, 0.15);
+            border-left-color: #fbbf24;
+        }
+        
+        .code-line.blocked {
+            background: rgba(239, 68, 68, 0.15);
+            border-left-color: #ef4444;
+        }
+        
+        .strategy-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .strategy-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .strategy-card.selected {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .starvation-warning {
+            animation: starvation-glow 1s ease-in-out infinite;
+        }
+        
+        @keyframes starvation-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="text-slate-200 p-4 lg:p-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                            <i class="fas fa-book-reader text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                                Readers-Writers Problem
+                            </h1>
+                            <p class="text-slate-400 text-sm">Course 07 • Synchronisation Part 2 • Concurrent Data Access</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <i class="fas fa-eye mr-1"></i> Readers
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <i class="fas fa-pen mr-1"></i> Writers
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Strategy Selection -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-cog text-blue-400"></i> Priority Strategy
+            </h3>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="strategy-card selected p-4 rounded-xl bg-slate-800/50 border-2 border-slate-700" data-strategy="readers">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-book text-emerald-400 text-xl"></i>
+                        <span class="font-semibold">Readers Priority</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Readers do not wait as long as another reader is reading.</p>
+                    <p class="text-xs text-amber-400 mt-1"><i class="fas fa-exclamation-triangle mr-1"></i> Risk: Writer starvation</p>
+                </div>
+                <div class="strategy-card p-4 rounded-xl bg-slate-800/50 border-2 border-slate-700" data-strategy="writers">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-pen text-rose-400 text-xl"></i>
+                        <span class="font-semibold">Writers Priority</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Writers have priority, new readers wait.</p>
+                    <p class="text-xs text-amber-400 mt-1"><i class="fas fa-exclamation-triangle mr-1"></i> Risk: Reader starvation</p>
+                </div>
+                <div class="strategy-card p-4 rounded-xl bg-slate-800/50 border-2 border-slate-700" data-strategy="fair">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-balance-scale text-blue-400 text-xl"></i>
+                        <span class="font-semibold">Fair (FIFO)</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Arrival order. No starvation.</p>
+                    <p class="text-xs text-emerald-400 mt-1"><i class="fas fa-check mr-1"></i> Corect</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Visualization -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
+                <i class="fas fa-database"></i> Access Visualisation
+            </h2>
+            
+            <div class="flex items-center justify-center gap-8 mb-6">
+                <!-- Readers Queue -->
+                <div class="text-center">
+                    <h4 class="text-sm text-emerald-400 mb-3">Readers</h4>
+                    <div id="readersContainer" class="flex flex-wrap justify-center gap-2 w-32">
+                        <!-- Readers generated by JS -->
+                    </div>
+                    <button id="btnAddReader" class="btn-action mt-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded text-xs font-medium">
+                        <i class="fas fa-plus mr-1"></i> Add Reader
+                    </button>
+                </div>
+
+                <!-- Access Lines (SVG) -->
+                <svg width="100" height="150" class="overflow-visible">
+                    <defs>
+                        <marker id="arrowhead-read" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#22c55e"/>
+                        </marker>
+                        <marker id="arrowhead-write" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#f43f5e"/>
+                        </marker>
+                    </defs>
+                    <g id="accessLines">
+                        <!-- Lines drawn dynamically -->
+                    </g>
+                </svg>
+
+                <!-- Database -->
+                <div class="text-center">
+                    <div id="databaseIcon" class="database-icon idle w-24 h-24 rounded-2xl flex flex-col items-center justify-center">
+                        <i class="fas fa-database text-3xl mb-1"></i>
+                        <span id="dbStatus" class="text-xs">Idle</span>
+                    </div>
+                    <div class="mt-3 p-2 bg-slate-800/50 rounded-lg">
+                        <div class="text-xs text-slate-500">Active Readers:</div>
+                        <div id="readCountDisplay" class="mono text-2xl font-bold text-emerald-400">0</div>
+                    </div>
+                </div>
+
+                <!-- Access Lines Right -->
+                <svg width="100" height="150" class="overflow-visible">
+                    <g id="accessLinesRight">
+                        <!-- Lines drawn dynamically -->
+                    </g>
+                </svg>
+
+                <!-- Writers Queue -->
+                <div class="text-center">
+                    <h4 class="text-sm text-rose-400 mb-3">Writers</h4>
+                    <div id="writersContainer" class="flex flex-wrap justify-center gap-2 w-32">
+                        <!-- Writers generated by JS -->
+                    </div>
+                    <button id="btnAddWriter" class="btn-action mt-3 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 rounded text-xs font-medium">
+                        <i class="fas fa-plus mr-1"></i> Add Writer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Starvation Warning -->
+            <div id="starvationWarning" class="hidden starvation-warning p-3 rounded-lg bg-amber-900/30 border border-amber-500 text-center mb-4">
+                <i class="fas fa-exclamation-triangle text-amber-400 mr-2"></i>
+                <span id="starvationText" class="text-amber-300 text-sm">Writer starvation detected!</span>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-4 gap-4">
+                <div class="p-3 bg-slate-800/50 rounded-lg text-center">
+                    <div class="text-xs text-slate-500">Waiting Readers</div>
+                    <div id="waitingReaders" class="mono text-xl font-bold text-emerald-400">0</div>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg text-center">
+                    <div class="text-xs text-slate-500">Waiting Writers</div>
+                    <div id="waitingWriters" class="mono text-xl font-bold text-rose-400">0</div>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg text-center">
+                    <div class="text-xs text-slate-500">Total Reads</div>
+                    <div id="totalReads" class="mono text-xl font-bold text-cyan-400">0</div>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg text-center">
+                    <div class="text-xs text-slate-500">Total Writes</div>
+                    <div id="totalWrites" class="mono text-xl font-bold text-pink-400">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Semaphores & Variables -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-traffic-light"></i> Synchronisation Variables
+            </h3>
+            
+            <div class="grid md:grid-cols-4 gap-4">
+                <div id="semRw" class="semaphore-box unlocked p-4 rounded-xl border-2 text-center">
+                    <div class="text-xs text-slate-400 mb-1">rw_mutex</div>
+                    <div id="rwValue" class="mono text-2xl font-bold">1</div>
+                    <div class="text-xs text-slate-500 mt-1">Exclusive write access</div>
+                </div>
+                <div id="semMutex" class="semaphore-box unlocked p-4 rounded-xl border-2 text-center">
+                    <div class="text-xs text-slate-400 mb-1">mutex</div>
+                    <div id="mutexValue" class="mono text-2xl font-bold">1</div>
+                    <div class="text-xs text-slate-500 mt-1">Protects read_count</div>
+                </div>
+                <div class="p-4 rounded-xl border-2 border-slate-700 bg-slate-800/30 text-center">
+                    <div class="text-xs text-slate-400 mb-1">read_count</div>
+                    <div id="readCount" class="mono text-2xl font-bold text-emerald-400">0</div>
+                    <div class="text-xs text-slate-500 mt-1">Active readers</div>
+                </div>
+                <div class="p-4 rounded-xl border-2 border-slate-700 bg-slate-800/30 text-center">
+                    <div class="text-xs text-slate-400 mb-1">write_count</div>
+                    <div id="writeCount" class="mono text-2xl font-bold text-rose-400">0</div>
+                    <div class="text-xs text-slate-500 mt-1">Writers waiting</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Coof Display -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Reader Coof -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-emerald-500">
+                <h3 class="text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-eye"></i> Reader Code
+                </h3>
+                
+                <div class="bg-slate-900 rounded-lg p-3 mono text-xs space-y-1">
+                    <div id="r-line-1" class="code-line px-2 py-1 rounded">wait(mutex);</div>
+                    <div id="r-line-2" class="code-line px-2 py-1 rounded pl-4">read_count++;</div>
+                    <div id="r-line-3" class="code-line px-2 py-1 rounded pl-4"><span class="text-purple-400">if</span> (read_count == 1)</div>
+                    <div id="r-line-4" class="code-line px-2 py-1 rounded pl-8">wait(rw_mutex);</div>
+                    <div id="r-line-5" class="code-line px-2 py-1 rounded">signal(mutex);</div>
+                    <div id="r-line-6" class="code-line px-2 py-1 rounded text-emerald-400">// READ DATA</div>
+                    <div id="r-line-7" class="code-line px-2 py-1 rounded">wait(mutex);</div>
+                    <div id="r-line-8" class="code-line px-2 py-1 rounded pl-4">read_count--;</div>
+                    <div id="r-line-9" class="code-line px-2 py-1 rounded pl-4"><span class="text-purple-400">if</span> (read_count == 0)</div>
+                    <div id="r-line-10" class="code-line px-2 py-1 rounded pl-8">signal(rw_mutex);</div>
+                    <div id="r-line-11" class="code-line px-2 py-1 rounded">signal(mutex);</div>
+                </div>
+            </section>
+
+            <!-- Writer Coof -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-rose-500">
+                <h3 class="text-lg font-bold text-rose-400 mb-4 flex items-center gap-2">
+                    <i class="fas fa-pen"></i> Writer Code
+                </h3>
+                
+                <div class="bg-slate-900 rounded-lg p-3 mono text-xs space-y-1">
+                    <div id="w-line-1" class="code-line px-2 py-1 rounded">wait(rw_mutex);</div>
+                    <div id="w-line-2" class="code-line px-2 py-1 rounded text-rose-400">// WRITE DATA</div>
+                    <div id="w-line-3" class="code-line px-2 py-1 rounded">signal(rw_mutex);</div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-slate-800/50 rounded-lg text-xs text-slate-400">
+                    <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+                    Writer has exclusive access</strong>: no readers, no other writers.
+                </div>
+            </section>
+        </div>
+
+        <!-- Controls -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-gamepad text-purple-400"></i> Simulation Control
+            </h3>
+            
+            <div class="flex flex-wrap gap-3">
+                <button id="btnAutoSim" class="btn-action px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium">
+                    <i class="fas fa-play mr-1"></i> Auto Simulation
+                </button>
+                <button id="btnStop" class="btn-action px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-sm font-medium" disabled>
+                    <i class="fas fa-stop mr-1"></i> Stop
+                </button>
+                <button id="btnReset" class="btn-action px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium">
+                    <i class="fas fa-redo mr-1"></i> Reset
+                </button>
+                <div class="flex items-center gap-2 ml-4">
+                    <label class="text-sm text-slate-400">Speed:</label>
+                    <input type="range" id="speedSlider" min="200" max="2000" value="800" class="w-32 accent-purple-500">
+                    <span id="speedValue" class="mono text-xs text-purple-400">800ms</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Operation Log -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-amber-400"></i> Operations Log
+            </h3>
+            
+            <div id="operationLog" class="bg-slate-900 rounded-lg p-4 h-48 overflow-y-auto mono text-xs space-y-1">
+                <div class="text-slate-500">// Operations will appear here...</div>
+            </div>
+        </section>
+
+        <!-- Theory -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-amber-400"></i> Readers-Writers Problem
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-emerald-400 mb-3">Rules:</h4>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span>Multiple Readers can read simultaneously</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span>A Writer has exclusive access (nici readers, nici writers)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span>Readers and Writers cannot be active simultaneously</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-rose-400 mb-3">Challenges:</h4>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-exclamation-triangle text-amber-400 mt-1"></i>
+                            <span><strong>Readers Priority</strong>: Writers may wait indefinitely (starvation)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-exclamation-triangle text-amber-400 mt-1"></i>
+                            <span><strong>Writers Priority</strong>: Readers may wait indefinitely</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-balance-scale text-blue-400 mt-1"></i>
+                            <span><strong>Fair</strong>: FIFO order, no starvation</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto mt-8 text-center text-slate-500 text-sm pb-4">
+        <div class="glass-card rounded-xl py-3 px-6 inline-block">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            strategy: 'readers',
+            readers: [],
+            writers: [],
+            activeReaders: [],
+            activeWriter: null,
+            readCount: 0,
+            writeCount: 0,
+            rwMutex: 1,
+            mutex: 1,
+            nextReaderId: 1,
+            nextWriterId: 1,
+            totalReads: 0,
+            totalWrites: 0,
+            speed: 800,
+            isAutoRunning: false,
+            autoInterval: null,
+            writerWaitTime: 0
+        };
+
+        // DOM Elements
+        const elements = {
+            readersContainer: document.getElementById('readersContainer'),
+            writersContainer: document.getElementById('writersContainer'),
+            databaseIcon: document.getElementById('databaseIcon'),
+            dbStatus: document.getElementById('dbStatus'),
+            readCountDisplay: document.getElementById('readCountDisplay'),
+            waitingReaders: document.getElementById('waitingReaders'),
+            waitingWriters: document.getElementById('waitingWriters'),
+            totalReads: document.getElementById('totalReads'),
+            totalWrites: document.getElementById('totalWrites'),
+            readCount: document.getElementById('readCount'),
+            writeCount: document.getElementById('writeCount'),
+            rwValue: document.getElementById('rwValue'),
+            mutexValue: document.getElementById('mutexValue'),
+            semRw: document.getElementById('semRw'),
+            semMutex: document.getElementById('semMutex'),
+            operationLog: document.getElementById('operationLog'),
+            starvationWarning: document.getElementById('starvationWarning'),
+            starvationText: document.getElementById('starvationText')
+        };
+
+        // Functions
+        function updateDisplay() {
+            // Update counts
+            elements.readCountDisplay.textContent = state.activeReaders.length;
+            elements.readCount.textContent = state.readCount;
+            elements.writeCount.textContent = state.writeCount;
+            elements.waitingReaders.textContent = state.readers.filter(r => r.state === 'waiting').length;
+            elements.waitingWriters.textContent = state.writers.filter(w => w.state === 'waiting').length;
+            elements.totalReads.textContent = state.totalReads;
+            elements.totalWrites.textContent = state.totalWrites;
+            
+            // Update semaphores
+            elements.rwValue.textContent = state.rwMutex;
+            elements.mutexValue.textContent = state.mutex;
+            elements.semRw.className = `semaphore-box ${state.rwMutex > 0 ? 'unlocked' : 'locked'} p-4 rounded-xl border-2 text-center`;
+            elements.semMutex.className = `semaphore-box ${state.mutex > 0 ? 'unlocked' : 'locked'} p-4 rounded-xl border-2 text-center`;
+            
+            // Update database icon
+            if (state.activeWriter) {
+                elements.databaseIcon.className = 'database-icon writing w-24 h-24 rounded-2xl flex flex-col items-center justify-center';
+                elements.dbStatus.textContent = 'Writing';
+            } else if (state.activeReaders.length > 0) {
+                elements.databaseIcon.className = 'database-icon reading w-24 h-24 rounded-2xl flex flex-col items-center justify-center';
+                elements.dbStatus.textContent = `${state.activeReaders.length} Reading`;
+            } else {
+                elements.databaseIcon.className = 'database-icon idle w-24 h-24 rounded-2xl flex flex-col items-center justify-center';
+                elements.dbStatus.textContent = 'Idle';
+            }
+            
+            // Render readers
+            elements.readersContainer.innerHTML = state.readers.map(r => {
+                const stateClass = r.state === 'reading' ? 'active' : r.state === 'waiting' ? 'waiting' : '';
+                return `
+                    <div class="reader-avatar ${stateClass} w-10 h-10 rounded-full bg-emerald-900/50 border-2 border-emerald-700 flex items-center justify-center text-xs font-bold" title="Reader ${r.id} - ${r.state}">
+                        R${r.id}
+                    </div>
+                `;
+            }).join('');
+            
+            // Render writers
+            elements.writersContainer.innerHTML = state.writers.map(w => {
+                const stateClass = w.state === 'writing' ? 'active' : w.state === 'waiting' ? 'waiting' : '';
+                return `
+                    <div class="writer-avatar ${stateClass} w-10 h-10 rounded-full bg-rose-900/50 border-2 border-rose-700 flex items-center justify-center text-xs font-bold" title="Writer ${w.id} - ${w.state}">
+                        W${w.id}
+                    </div>
+                `;
+            }).join('');
+            
+            // Check for starvation
+            checkStarvation();
+        }
+
+        function checkStarvation() {
+            const waitingWriters = state.writers.filter(w => w.state === 'waiting').length;
+            const waitingReaders = state.readers.filter(r => r.state === 'waiting').length;
+            
+            if (state.strategy === 'readers' && waitingWriters > 0 && state.activeReaders.length > 0 && state.writerWaitTime > 3) {
+                elements.starvationWarning.classList.remove('hidden');
+                elements.starvationText.textContent = `Writer starvation! ${waitingWriters} writer(s) waiting while readers continue...`;
+            } else if (state.strategy === 'writers' && waitingReaders > 0 && waitingWriters > 0 && state.activeWriter) {
+                elements.starvationWarning.classList.remove('hidden');
+                elements.starvationText.textContent = `Reader starvation risk! ${waitingReaders} reader(s) waiting...`;
+            } else {
+                elements.starvationWarning.classList.add('hidden');
+            }
+        }
+
+        function highlightCode(type, lineNum, isBlocked = false) {
+            const prefix = type === 'reader' ? 'r' : 'w';
+            const maxLines = type === 'reader' ? 11 : 3;
+            
+            for (let i = 1; i <= maxLines; i++) {
+                const line = document.getElementById(`${prefix}-line-${i}`);
+                if (line) line.classList.remove('executing', 'blocked');
+            }
+            
+            if (lineNum > 0) {
+                const line = document.getElementById(`${prefix}-line-${lineNum}`);
+                if (line) line.classList.add(isBlocked ? 'blocked' : 'executing');
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const colors = {
+                info: 'text-slate-400',
+                reader: 'text-emerald-400',
+                writer: 'text-rose-400',
+                blocked: 'text-amber-400',
+                semaphore: 'text-cyan-400'
+            };
+            
+            const entry = document.createdeElement('div');
+            entry.className = colors[type];
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            elements.operationLog.appendChild(entry);
+            elements.operationLog.scrollTop = elements.operationLog.scrollHeight;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function addReader() {
+            const reader = { id: state.nextReaderId++, state: 'idle' };
+            state.readers.push(reader);
+            updateDisplay();
+            addLog(`Reader R${reader.id} createded`, 'reader');
+            return reader;
+        }
+
+        function addWriter() {
+            const writer = { id: state.nextWriterId++, state: 'idle' };
+            state.writers.push(writer);
+            updateDisplay();
+            addLog(`Writer W${writer.id} createded`, 'writer');
+            return writer;
+        }
+
+        async function readerEnter(reader) {
+            reader.state = 'waiting';
+            updateDisplay();
+            
+            // wait(mutex)
+            highlightCode('reader', 1);
+            addLog(`R${reader.id}: wait(mutex)`, 'semaphore');
+            await sleep(state.speed / 2);
+            state.mutex--;
+            updateDisplay();
+            
+            // read_count++
+            highlightCode('reader', 2);
+            state.readCount++;
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // if first reader, lock rw_mutex
+            highlightCode('reader', 3);
+            if (state.readCount === 1) {
+                highlightCode('reader', 4);
+                addLog(`R${reader.id}: First reader, wait(rw_mutex)`, 'semaphore');
+                
+                if (state.rwMutex <= 0 || state.activeWriter) {
+                    highlightCode('reader', 4, true);
+                    addLog(`R${reader.id}: BLOCKED - Writer active`, 'blocked');
+                    // Wait for writer to finish
+                    while (state.activeWriter) {
+                        await sleep(100);
+                    }
+                }
+                
+                state.rwMutex--;
+                updateDisplay();
+            }
+            await sleep(state.speed / 2);
+            
+            // signal(mutex)
+            highlightCode('reader', 5);
+            state.mutex++;
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // READ
+            highlightCode('reader', 6);
+            reader.state = 'reading';
+            state.activeReaders.push(reader);
+            state.totalReads++;
+            updateDisplay();
+            addLog(`R${reader.id}: READING data...`, 'reader');
+            await sleep(state.speed * 2);
+            
+            // Exit
+            await readerExit(reader);
+        }
+
+        async function readerExit(reader) {
+            // wait(mutex)
+            highlightCode('reader', 7);
+            state.mutex--;
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // read_count--
+            highlightCode('reader', 8);
+            state.readCount--;
+            state.activeReaders = state.activeReaders.filter(r => r.id !== reader.id);
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // if last reader, unlock rw_mutex
+            highlightCode('reader', 9);
+            if (state.readCount === 0) {
+                highlightCode('reader', 10);
+                state.rwMutex++;
+                state.writerWaitTime = 0;
+                addLog(`R${reader.id}: Last reader, signal(rw_mutex)`, 'semaphore');
+            }
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // signal(mutex)
+            highlightCode('reader', 11);
+            state.mutex++;
+            reader.state = 'done';
+            updateDisplay();
+            addLog(`R${reader.id}: Done reading`, 'reader');
+            
+            // Remove reader
+            state.readers = state.readers.filter(r => r.id !== reader.id);
+            updateDisplay();
+            highlightCode('reader', 0);
+        }
+
+        async function writerEnter(writer) {
+            writer.state = 'waiting';
+            state.writeCount++;
+            updateDisplay();
+            
+            // wait(rw_mutex)
+            highlightCode('writer', 1);
+            addLog(`W${writer.id}: wait(rw_mutex)`, 'semaphore');
+            
+            if (state.rwMutex <= 0 || state.activeReaders.length > 0 || state.activeWriter) {
+                highlightCode('writer', 1, true);
+                addLog(`W${writer.id}: BLOCKED - ${state.activeReaders.length} readers active`, 'blocked');
+                
+                while (state.activeReaders.length > 0 || state.activeWriter) {
+                    await sleep(100);
+                    state.writerWaitTime++;
+                    updateDisplay();
+                }
+            }
+            
+            state.rwMutex--;
+            updateDisplay();
+            await sleep(state.speed / 2);
+            
+            // WRITE
+            highlightCode('writer', 2);
+            writer.state = 'writing';
+            state.activeWriter = writer;
+            state.totalWrites++;
+            updateDisplay();
+            addLog(`W${writer.id}: WRITING data...`, 'writer');
+            await sleep(state.speed * 2);
+            
+            // signal(rw_mutex)
+            highlightCode('writer', 3);
+            state.rwMutex++;
+            state.activeWriter = null;
+            state.writeCount--;
+            writer.state = 'done';
+            updateDisplay();
+            addLog(`W${writer.id}: Done writing, signal(rw_mutex)`, 'semaphore');
+            
+            // Remove writer
+            state.writers = state.writers.filter(w => w.id !== writer.id);
+            updateDisplay();
+            highlightCode('writer', 0);
+        }
+
+        function reset() {
+            stopAuto();
+            state.readers = [];
+            state.writers = [];
+            state.activeReaders = [];
+            state.activeWriter = null;
+            state.readCount = 0;
+            state.writeCount = 0;
+            state.rwMutex = 1;
+            state.mutex = 1;
+            state.nextReaderId = 1;
+            state.nextWriterId = 1;
+            state.totalReads = 0;
+            state.totalWrites = 0;
+            state.writerWaitTime = 0;
+            
+            updateDisplay();
+            highlightCode('reader', 0);
+            highlightCode('writer', 0);
+            elements.operationLog.innerHTML = '<div class="text-slate-500">// Operations will appear here...</div>';
+            elements.starvationWarning.classList.add('hidden');
+        }
+
+        function startAuto() {
+            state.isAutoRunning = true;
+            document.getElementById('btnAutoSim').disabled = true;
+            document.getElementById('btnStop').disabled = false;
+            
+            // Add some initial actors
+            if (state.readers.length === 0 && state.writers.length === 0) {
+                for (let i = 0; i < 3; i++) addReader();
+                for (let i = 0; i < 2; i++) addWriter();
+            }
+            
+            state.autoInterval = setInterval(() => {
+                const idleReaders = state.readers.filter(r => r.state === 'idle');
+                const idleWriters = state.writers.filter(w => w.state === 'idle');
+                
+                // Randomly start an operation
+                if (Math.random() < 0.7 && idleReaders.length > 0) {
+                    readerEnter(idleReaders[0]);
+                } else if (idleWriters.length > 0) {
+                    writerEnter(idleWriters[0]);
+                }
+                
+                // Randomly add new actors
+                if (Math.random() < 0.2 && state.readers.length < 6) addReader();
+                if (Math.random() < 0.1 && state.writers.length < 4) addWriter();
+            }, state.speed * 2);
+        }
+
+        function stopAuto() {
+            state.isAutoRunning = false;
+            if (state.autoInterval) {
+                clearInterval(state.autoInterval);
+                state.autoInterval = null;
+            }
+            document.getElementById('btnAutoSim').disabled = false;
+            document.getElementById('btnStop').disabled = true;
+        }
+
+        // Event Listeners
+        document.getElementById('btnAddReader').addEventListener('click', () => {
+            const r = addReader();
+            readerEnter(r);
+        });
+
+        document.getElementById('btnAddWriter').addEventListener('click', () => {
+            const w = addWriter();
+            writerEnter(w);
+        });
+
+        document.getElementById('btnAutoSim').addEventListener('click', startAuto);
+        document.getElementById('btnStop').addEventListener('click', stopAuto);
+        document.getElementById('btnReset').addEventListener('click', reset);
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            state.speed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = state.speed + 'ms';
+        });
+
+        document.querySelectorAll('.strategy-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                state.strategy = card.dataset.strategy;
+                addLog(`Strategy changed to: ${state.strategy}`, 'info');
+            });
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie & Orphan Simulator - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .process-box {
+            transition: all 0.5s ease;
+        }
+        
+        .process-box.active {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+        
+        .process-box.zombie {
+            animation: zombiePulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes zombiePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(107, 114, 128, 0); }
+        }
+        
+        .process-box.dying {
+            animation: dying 0.6s ease-out forwards;
+        }
+        
+        @keyframes dying {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        .process-box.spawning {
+            animation: spawning 0.5s ease-out;
+        }
+        
+        @keyframes spawning {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .connector-line {
+            transition: all 0.5s ease;
+        }
+        
+        .connector-line.breaking {
+            animation: lineBrake 0.5s ease-in-out;
+        }
+        
+        @keyframes lineBrake {
+            0% { stroke-dasharray: none; }
+            100% { stroke-dasharray: 10, 10; stroke: #f97316; }
+        }
+        
+        .reparent-line {
+            animation: reparentDraw 0.8s ease-out;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation-fill-mode: forwards;
+        }
+        
+        @keyframes reparentDraw {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .code-line {
+            transition: all 0.3s ease;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .code-line.highlight {
+            background: linear-gradient(90deg, #fef08a 0%, #fde047 100%);
+            font-weight: 600;
+        }
+        
+        .code-line.executed {
+            background: #dcfce7;
+        }
+        
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        .step-indicator.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+        
+        .step-indicator.completed {
+            background: #22c55e;
+        }
+        
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+        
+        .quiz-option:hover {
+            transform: translateX(4px);
+        }
+        
+        .quiz-option.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+        
+        .quiz-option.incorrect {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-stone-500 to-orange-500 flex items-center justify-center">
+                    <i class="fas fa-skull text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Zombie & Orphan Simulator</h1>
+                    <p class="text-xs text-stone-500">Demonstratie Pas-cu-Pas</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-stone-100 text-stone-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Scenario Selector -->
+        <div class="mb-6 bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span class="text-sm font-semibold text-stone-700">Select Scenariul:</span>
+                <div class="flex gap-2">
+                    <label class="flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-lg cursor-pointer hover:bg-stone-200 transition-colors">
+                        <input type="radio" name="scenario" value="zombie" checked class="w-4 h-4 text-stone-600">
+                        <i class="fas fa-skull text-stone-500"></i>
+                        <span class="text-sm font-medium">Crearea unui Zombie</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-lg cursor-pointer hover:bg-stone-200 transition-colors">
+                        <input type="radio" name="scenario" value="orphan" class="w-4 h-4 text-orange-600">
+                        <i class="fas fa-user-slash text-orange-500"></i>
+                        <span class="text-sm font-medium">Crearea unui Orphan</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="mb-6 grid grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 text-center">
+                <div class="text-xs text-stone-500 mb-1">Activee Processes</div>
+                <div id="statActivee" class="text-2xl font-bold text-blue-600">1</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 text-center">
+                <div class="text-xs text-stone-500 mb-1">Zombie Processes</div>
+                <div id="statZombie" class="text-2xl font-bold text-stone-500">0</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 text-center">
+                <div class="text-xs text-stone-500 mb-1">Orphan Processes</div>
+                <div id="statOrphan" class="text-2xl font-bold text-orange-500">0</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Panel: Visualization -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <i class="fas fa-project-diagram text-blue-500"></i>
+                        Vizualizare Procese
+                    </h2>
+                    
+                    <div id="visualization" class="relative min-h-[300px]">
+                        <!-- Init Process (always visible) -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2">
+                            <div id="initProcess" class="process-box w-24 h-20 bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg border-2 border-stone-400 flex flex-col items-center justify-center shadow-md">
+                                <i class="fas fa-server text-stone-500 text-lg mb-1"></i>
+                                <span class="font-bold text-sm">init</span>
+                                <span class="text-xs text-stone-500 mono">PID 1</span>
+                            </div>
+                        </div>
+
+                        <!-- SVG for connection lines -->
+                        <svg id="connectionSvg" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+                            <line id="parentInitLine" class="connector-line hidden" x1="50%" y1="80" x2="35%" y2="140" stroke="#a8a29e" stroke-width="2"/>
+                            <line id="parentChildLine" class="connector-line hidden" x1="35%" y1="200" x2="35%" y2="250" stroke="#a8a29e" stroke-width="2"/>
+                            <line id="orphanInitLine" class="connector-line hidden" x1="50%" y1="80" x2="65%" y2="250" stroke="#f97316" stroke-width="2" stroke-dasharray="5,5"/>
+                        </svg>
+
+                        <!-- Parent Process -->
+                        <div id="parentProcess" class="absolute top-28 left-1/4 transform -translate-x-1/2 hidden">
+                            <div class="process-box w-28 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg border-2 border-blue-400 flex flex-col items-center justify-center shadow-md">
+                                <i class="fas fa-user text-blue-500 text-lg mb-1"></i>
+                                <span class="font-bold text-sm">PARENT</span>
+                                <span class="text-xs text-blue-600 mono">PID 1000</span>
+                                <span id="parentState" class="text-xs text-blue-500 mt-1">Running</span>
+                            </div>
+                        </div>
+
+                        <!-- Child Process -->
+                        <div id="childProcess" class="absolute top-56 transform -translate-x-1/2 hidden" style="left: 35%;">
+                            <div class="process-box w-28 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-lg border-2 border-green-400 flex flex-col items-center justify-center shadow-md">
+                                <i id="childIcon" class="fas fa-child text-green-500 text-lg mb-1"></i>
+                                <span class="font-bold text-sm">CHILD</span>
+                                <span class="text-xs text-green-600 mono">PID 1001</span>
+                                <div id="childStateContainer" class="flex items-center gap-1 mt-1">
+                                    <span id="childState" class="text-xs text-green-500">Running</span>
+                                </div>
+                            </div>
+                            <!-- Exit Status Badge -->
+                            <div id="exitStatusBadge" class="hidden absolute -right-2 -top-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow">
+                                exit(42)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explanation Box -->
+                    <div id="explanationBox" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="explanationTitle">Stare Initiala</span>
+                        </h4>
+                        <p id="explanationText" class="text-sm text-blue-700">
+                            Sistemul este initializat cu procesul init (PID 1). Apasa "Pas Next" for a start scenariul.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal"></i>
+                        <span id="terminalTitle">ps aux | grep -E "STAT|1000|1001"</span>
+                    </h3>
+                    <pre id="terminalOutput" class="text-xs mono text-green-300 overflow-x-auto">
+USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Right Panel: Code & Controls -->
+            <div class="space-y-6">
+                <!-- Step Progress -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-4">
+                        <i class="fas fa-list-ol text-purple-500 mr-2"></i>Progres Scenariu
+                    </h3>
+                    <div id="stepProgress" class="flex justify-between items-center">
+                        <!-- Steps will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- C Code -->
+                <div class="bg-stone-800 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-code"></i> Cod C Corespunzator
+                    </h3>
+                    <pre id="codeBlock" class="text-xs mono text-stone-300 leading-relaxed"></pre>
+                </div>
+
+                <!-- Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-4">
+                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controale
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button id="btnPrev" class="btn-action p-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center gap-1" disabled>
+                            <i class="fas fa-chevron-left"></i> Back
+                        </button>
+                        <button id="btnNext" class="btn-action col-span-2 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                            Pas Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button id="btnReset" class="btn-action p-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center gap-1">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div class="mt-4 flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="autoPlay" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="text-sm text-stone-600">Auto-play</span>
+                        </label>
+                        <div class="flex-1">
+                            <input type="range" id="speedSlider" min="500" max="3000" value="1500" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <span class="text-xs text-stone-500">Speed</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Section -->
+                <div id="quizSection" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 hidden">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-4">
+                        <i class="fas fa-question-circle text-amber-500 mr-2"></i>verification Cunostinte
+                    </h3>
+                    <div id="quizContent">
+                        <!-- Quiz will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Summary -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="zombieSummary" class="bg-gradient-to-br from-stone-50 to-stone-100 rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span class="text-2xl">💀</span>
+                    Rezumat: Proces Zombie
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-stone-400">
+                        <strong>Definitie:</strong> Un proces care s-a finished dar the parent nu a citit inca exit status-ul prin wait().
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-amber-400">
+                        <strong>In sistem:</strong> Ocupa un slot in tabela de procese, dar NU consuma CPU or memorie.
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-red-400">
+                        <strong>Pericol:</strong> Prea multe zombie-uri pot epuiza PID-urile disponibile (~32000).
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-green-400">
+                        <strong>solution:</strong> The parent must to apeleze wait() or waitpid() for a "reaps" zombie-ul.
+                    </div>
+                </div>
+            </div>
+
+            <div id="orphanSummary" class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-sm border border-orange-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span class="text-2xl">👤</span>
+                    Rezumat: Proces Orphan
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-orange-400">
+                        <strong>Definitie:</strong> Un proces al carui parent s-a finished before ca el to se termine.
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-blue-400">
+                        <strong>Reparenting:</strong> Sistemul il adopta automat — init (PID 1) devine noul parent.
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-green-400">
+                        <strong>Avantaj:</strong> Init face automat wait() when orfanul finish, prevenind zombie-uri.
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border-l-4 border-purple-400">
+                        <strong>Daemon pattern:</strong> Multe daemoane folosesc intentionat orfanizarea for a rula independent.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== Scenarios Data ====================
+        const scenarios = {
+            zombie: {
+                name: "Crearea unui Zombie",
+                steps: [
+                    {
+                        title: "Stare Initiala",
+                        explanation: "Sistemul run cu procesul init (PID 1). Vom crea un parent care va fork()-a un copil.",
+                        codeLine: null,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init`,
+                        action: 'init'
+                    },
+                    {
+                        title: "fork() - Creation Procese",
+                        explanation: "The parent (PID 1000) apeleaza fork(). Se create copilul (PID 1001). Ambele procese sunt active.",
+                        codeLine: 1,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1000     1  S     ./program
+user      1001  1000  S     ./program`,
+                        action: 'fork'
+                    },
+                    {
+                        title: "child: exit(42)",
+                        explanation: "Copilul isi finish executia cu exit(42). The PCB remains in the system cu exit status-ul 42, asteptand ca the parent to-l citeasca.",
+                        codeLine: 3,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1000     1  S     ./program
+user      1001  1000  Z     [program] <defunct>`,
+                        action: 'childExit'
+                    },
+                    {
+                        title: "ps aux | grep Z",
+                        explanation: "Folosind comanda ps, we can vedea procesul zombie. Starea 'Z' and '<defunct>' indica un zombie. The parent inca nu a facut wait()!",
+                        codeLine: null,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+user      1001  1000  Z     [program] <defunct>
+
+# Zombie detectat! Procesul 1001 waits reaping.`,
+                        action: 'showZombie'
+                    },
+                    {
+                        title: "parent: wait(&status)",
+                        explanation: "The parent apeleaza wait(). Exit status-ul (42) este citit, iar zombie-ul este eliminat din sistem. Resursele sunt complet eliberate.",
+                        codeLine: 7,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1000     1  S     ./program
+
+# Zombie reaped! Exit status: 42`,
+                        action: 'parentWait'
+                    }
+                ],
+                code: `<span class="code-line" data-line="1">pid_t pid = fork();</span>
+<span class="code-line" data-line="2">if (pid == 0) {</span>
+<span class="code-line" data-line="3">    // Cod copil</span>
+<span class="code-line" data-line="4">    exit(42);  // ← Copilul finish</span>
+<span class="code-line" data-line="5">} else {</span>
+<span class="code-line" data-line="6">    sleep(10);  // The parent "uita" to faca wait</span>
+<span class="code-line" data-line="7">    wait(&status);  // ← Reaping zombie</span>
+<span class="code-line" data-line="8">}</span>`,
+                quiz: [
+                    {
+                        question: "Ce return fork() in procesul copil?",
+                        options: ["PID-ul parentlui", "0", "PID-ul copilului", "-1"],
+                        correct: 1
+                    },
+                    {
+                        question: "Ce se intampla cu un zombie if the parent nu face niciodata wait()?",
+                        options: ["Este omorat automat", "Ramane in sistem pana la reboot", "It is adopted by init", "Consuma 100% CPU"],
+                        correct: 1
+                    }
+                ]
+            },
+            orphan: {
+                name: "Crearea unui Orphan",
+                steps: [
+                    {
+                        title: "Stare Initiala",
+                        explanation: "Sistemul run cu procesul init (PID 1). Vom crea un parent care va fork()-a un copil, apoi the parent va finish first.",
+                        codeLine: null,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init`,
+                        action: 'init'
+                    },
+                    {
+                        title: "fork() - Creation Procese",
+                        explanation: "The parent (PID 1000) apeleaza fork(). Se create copilul (PID 1001). Ambele procese sunt active, copilul are PPID=1000.",
+                        codeLine: 1,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1000     1  S     ./program
+user      1001  1000  S     ./program`,
+                        action: 'fork'
+                    },
+                    {
+                        title: "parent: exit(0)",
+                        explanation: "The parent isi finish executia before de copil! Copilul devine ORFAN. Sistemul il reparent-eaza automat to init (PID 1).",
+                        codeLine: 6,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1001     1  S     ./program  # PPID changed! Was 1000, now 1`,
+                        action: 'parentExit'
+                    },
+                    {
+                        title: "Copilul continue...",
+                        explanation: "Copilul (acum orfan) continue to ruleze normal. Observati ca PPID s-a schimbat de la 1000 la 1. Init este acum responsabil for el.",
+                        codeLine: 3,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+user      1001     1  S     ./program  # Orphan adoptat de init
+
+# Copilul run independent de fostul parent.`,
+                        action: 'childContinue'
+                    },
+                    {
+                        title: "child: exit(0)",
+                        explanation: "When copilul finish, init face automat wait(). Nu exists zombie! Acesta este unul among avantajele reparenting-ului to init.",
+                        codeLine: 4,
+                        terminal: `USER       PID  PPID  STAT  COMMAND
+root         1     0  Ss    /sbin/init
+
+# Copilul a finished. Init a facut wait() automat.
+# Nu exists zombie!`,
+                        action: 'childExit'
+                    }
+                ],
+                code: `<span class="code-line" data-line="1">pid_t pid = fork();</span>
+<span class="code-line" data-line="2">if (pid == 0) {</span>
+<span class="code-line" data-line="3">    // Cod copil - continue to ruleze</span>
+<span class="code-line" data-line="4">    sleep(5);</span>
+<span class="code-line" data-line="5">    exit(0);</span>
+<span class="code-line" data-line="6">} else {</span>
+<span class="code-line" data-line="7">    // The parent finish IMEDIAT</span>
+<span class="code-line" data-line="8">    exit(0);  // ← Copilul devine orfan</span>
+<span class="code-line" data-line="9">}</span>`,
+                quiz: [
+                    {
+                        question: "Cine devine the parent unui proces orfan?",
+                        options: ["Kernel-ul", "init (PID 1)", "Procesul cu cel mai mic PID", "Nimeni"],
+                        correct: 1
+                    },
+                    {
+                        question: "De ce orfanii NU devin zombie-uri when finish?",
+                        options: ["Orphanii nu pot finish", "Init face automat wait()", "Kernel-ul ii delete direct", "PPID devine 0"],
+                        correct: 1
+                    }
+                ]
+            }
+        };
+
+        // ==================== State ====================
+        let currentScenario = 'zombie';
+        let currentStep = 0;
+        let autoPlayInterval = null;
+
+        // ==================== Rendering ====================
+        function renderStepProgress() {
+            const scenario = scenarios[currentScenario];
+            const container = document.getElementById('stepProgress');
+            
+            container.innerHTML = scenario.steps.map((step, index) => `
+                <div class="flex flex-col items-center">
+                    <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold 
+                        ${index < currentStep ? 'completed text-white' : index === currentStep ? 'active bg-blue-500 text-white' : 'bg-stone-200 text-stone-500'}">
+                        ${index < currentStep ? '<i class="fas fa-check"></i>' : index + 1}
+                    </div>
+                    <span class="text-[10px] text-stone-500 mt-1 text-center max-w-16 truncate">${step.title.split(' ')[0]}</span>
+                </div>
+                ${index < scenario.steps.length - 1 ? '<div class="flex-1 h-0.5 bg-stone-200 mx-1 self-center mb-4"></div>' : ''}
+            `).join('');
+        }
+
+        function renderCode() {
+            const scenario = scenarios[currentScenario];
+            document.getElementById('codeBlock').innerHTML = scenario.code;
+            
+            // Highlight current line
+            const step = scenario.steps[currentStep];
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('highlight', 'executed');
+                const lineNum = parseInt(line.dataset.line);
+                if (step.codeLine && lineNum === step.codeLine) {
+                    line.classList.add('highlight');
+                } else if (step.codeLine && lineNum < step.codeLine) {
+                    line.classList.add('executed');
+                }
+            });
+        }
+
+        function updateVisualization() {
+            const scenario = scenarios[currentScenario];
+            const step = scenario.steps[currentStep];
+            
+            // Update explanation
+            document.getElementById('explanationTitle').textContent = step.title;
+            document.getElementById('explanationText').textContent = step.explanation;
+            
+            // Update terminal
+            document.getElementById('terminalOutput').textContent = step.terminal;
+            
+            // Update stats
+            updateStats();
+            
+            // Apply visual action
+            applyAction(step.action);
+        }
+
+        function applyAction(action) {
+            const parentProcess = document.getElementById('parentProcess');
+            const childProcess = document.getElementById('childProcess');
+            const parentInitLine = document.getElementById('parentInitLine');
+            const parentChildLine = document.getElementById('parentChildLine');
+            const orphanInitLine = document.getElementById('orphanInitLine');
+            const childBox = childProcess.querySelector('.process-box');
+            const parentBox = parentProcess.querySelector('.process-box');
+            
+            // Reset classes
+            childBox?.classList.remove('zombie', 'spawning', 'dying', 'active');
+            parentBox?.classList.remove('spawning', 'dying', 'active');
+            
+            switch(action) {
+                case 'init':
+                    parentProcess.classList.add('hidden');
+                    childProcess.classList.add('hidden');
+                    parentInitLine.classList.add('hidden');
+                    parentChildLine.classList.add('hidden');
+                    orphanInitLine.classList.add('hidden');
+                    document.getElementById('exitStatusBadge').classList.add('hidden');
+                    break;
+                    
+                case 'fork':
+                    parentProcess.classList.remove('hidden');
+                    childProcess.classList.remove('hidden');
+                    parentInitLine.classList.remove('hidden');
+                    parentChildLine.classList.remove('hidden');
+                    orphanInitLine.classList.add('hidden');
+                    
+                    parentBox.classList.add('spawning');
+                    setTimeout(() => childBox.classList.add('spawning'), 300);
+                    
+                    document.getElementById('parentState').textContent = 'Running';
+                    document.getElementById('childState').textContent = 'Running';
+                    childBox.classList.remove('bg-gradient-to-br', 'from-stone-100', 'to-stone-200', 'border-stone-400');
+                    childBox.classList.add('bg-gradient-to-br', 'from-green-100', 'to-green-200', 'border-green-400');
+                    document.getElementById('childIcon').className = 'fas fa-child text-green-500 text-lg mb-1';
+                    document.getElementById('exitStatusBadge').classList.add('hidden');
+                    break;
+                    
+                case 'childExit':
+                    if (currentScenario === 'zombie') {
+                        // Zombie case
+                        document.getElementById('childState').textContent = 'Zombie';
+                        childBox.classList.remove('from-green-100', 'to-green-200', 'border-green-400');
+                        childBox.classList.add('from-stone-100', 'to-stone-200', 'border-stone-400', 'zombie');
+                        document.getElementById('childIcon').className = 'fas fa-skull text-stone-500 text-lg mb-1';
+                        document.getElementById('exitStatusBadge').classList.remove('hidden');
+                    } else {
+                        // Orphan case - child exits cleanly
+                        childProcess.classList.add('hidden');
+                        parentChildLine.classList.add('hidden');
+                        orphanInitLine.classList.add('hidden');
+                    }
+                    break;
+                    
+                case 'showZombie':
+                    childBox.classList.add('zombie', 'active');
+                    break;
+                    
+                case 'parentWait':
+                    childBox.classList.remove('zombie');
+                    childBox.classList.add('dying');
+                    setTimeout(() => {
+                        childProcess.classList.add('hidden');
+                        parentChildLine.classList.add('hidden');
+                    }, 500);
+                    break;
+                    
+                case 'parentExit':
+                    parentBox.classList.add('dying');
+                    parentInitLine.classList.add('breaking');
+                    
+                    setTimeout(() => {
+                        parentProcess.classList.add('hidden');
+                        parentInitLine.classList.add('hidden');
+                        parentChildLine.classList.add('hidden');
+                        
+                        // Move child and show orphan line
+                        childProcess.style.left = '65%';
+                        orphanInitLine.classList.remove('hidden');
+                        
+                        // Update child PPID display
+                        const ppidSpan = childProcess.querySelector('.mono');
+                        ppidSpan.textContent = 'PID 1001';
+                        
+                        // Mark as orphan
+                        childBox.classList.add('active');
+                        childBox.style.borderStyle = 'dashed';
+                        childBox.style.borderColor = '#f97316';
+                    }, 500);
+                    break;
+                    
+                case 'childContinue':
+                    childBox.classList.add('active');
+                    document.getElementById('childState').textContent = 'Running (Orphan)';
+                    break;
+            }
+        }
+
+        function updateStats() {
+            const scenario = scenarios[currentScenario];
+            const step = scenario.steps[currentStep];
+            
+            let active = 1; // init always active
+            let zombies = 0;
+            let orphans = 0;
+            
+            if (currentScenario === 'zombie') {
+                if (currentStep >= 1 && currentStep < 5) active = 2 + (currentStep >= 2 ? 0 : 1);
+                if (currentStep >= 1 && currentStep < 5) active = currentStep < 4 ? 2 : (currentStep === 4 ? 2 : 1);
+                if (currentStep === 1) active = 3;
+                if (currentStep === 2 || currentStep === 3) { active = 2; zombies = 1; }
+                if (currentStep === 4) active = 2;
+            } else {
+                if (currentStep === 1) active = 3;
+                if (currentStep === 2) { active = 2; orphans = 1; }
+                if (currentStep === 3) { active = 2; orphans = 1; }
+                if (currentStep === 4) active = 1;
+            }
+            
+            document.getElementById('statActivee').textContent = active;
+            document.getElementById('statZombie').textContent = zombies;
+            document.getElementById('statOrphan').textContent = orphans;
+        }
+
+        function updateButtons() {
+            const scenario = scenarios[currentScenario];
+            document.getElementById('btnPrev').disabled = currentStep === 0;
+            document.getElementById('btnNext').disabled = currentStep >= scenario.steps.length - 1;
+            
+            // Show quiz at end
+            if (currentStep === scenario.steps.length - 1) {
+                showQuiz();
+            } else {
+                document.getElementById('quizSection').classList.add('hidden');
+            }
+        }
+
+        // ==================== Quiz ====================
+        function showQuiz() {
+            const scenario = scenarios[currentScenario];
+            const quizSection = document.getElementById('quizSection');
+            const quizContent = document.getElementById('quizContent');
+            
+            quizSection.classList.remove('hidden');
+            
+            quizContent.innerHTML = scenario.quiz.map((q, qIndex) => `
+                <div class="mb-4 p-4 bg-stone-50 rounded-lg">
+                    <p class="font-medium text-sm mb-3">${qIndex + 1}. ${q.question}</p>
+                    <div class="space-y-2">
+                        ${q.options.map((opt, oIndex) => `
+                            <div class="quiz-option p-2 border border-stone-200 rounded cursor-pointer hover:bg-stone-100 text-sm"
+                                 data-question="${qIndex}" data-option="${oIndex}"
+                                 onclick="checkAnswer(${qIndex}, ${oIndex}, ${q.correct})">
+                                ${String.fromCharCode(65 + oIndex)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function checkAnswer(qIndex, selected, correct) {
+            const options = document.querySelectorAll(`[data-question="${qIndex}"]`);
+            options.forEach((opt, idx) => {
+                opt.classList.remove('correct', 'incorrect');
+                if (idx === correct) opt.classList.add('correct');
+                else if (idx === selected && idx !== correct) opt.classList.add('incorrect');
+                opt.style.pointerEvents = 'none';
+            });
+        }
+
+        // ==================== Navigation ====================
+        function nextStep() {
+            const scenario = scenarios[currentScenario];
+            if (currentStep < scenario.steps.length - 1) {
+                currentStep++;
+                renderAll();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderAll();
+            }
+        }
+
+        function resetScenario() {
+            currentStep = 0;
+            stopAutoPlay();
+            
+            // Reset visual elements
+            const childProcess = document.getElementById('childProcess');
+            const childBox = childProcess.querySelector('.process-box');
+            childProcess.style.left = '35%';
+            childBox.style.borderStyle = 'solid';
+            childBox.style.borderColor = '';
+            
+            renderAll();
+        }
+
+        function renderAll() {
+            renderStepProgress();
+            renderCode();
+            updateVisualization();
+            updateButtons();
+        }
+
+        // ==================== Auto Play ====================
+        function toggleAutoPlay() {
+            if (document.getElementById('autoPlay').checked) {
+                startAutoPlay();
+            } else {
+                stopAutoPlay();
+            }
+        }
+
+        function startAutoPlay() {
+            const speed = parseInt(document.getElementById('speedSlider').value);
+            autoPlayInterval = setInterval(() => {
+                const scenario = scenarios[currentScenario];
+                if (currentStep < scenario.steps.length - 1) {
+                    nextStep();
+                } else {
+                    stopAutoPlay();
+                    document.getElementById('autoPlay').checked = false;
+                }
+            }, speed);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        // ==================== Event Listeners ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scenario selection
+            document.querySelectorAll('input[name="scenario"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    currentScenario = e.target.value;
+                    resetScenario();
+                });
+            });
+            
+            // Navigation buttons
+            document.getElementById('btnNext').addEventListener('click', nextStep);
+            document.getElementById('btnPrev').addEventListener('click', prevStep);
+            document.getElementById('btnReset').addEventListener('click', resetScenario);
+            
+            // Auto play
+            document.getElementById('autoPlay').addEventListener('change', toggleAutoPlay);
+            document.getElementById('speedSlider').addEventListener('input', () => {
+                if (autoPlayInterval) {
+                    stopAutoPlay();
+                    startAutoPlay();
+                }
+            });
+            
+            // Initial render
+            renderAll();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadlock Detection and Recovery | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .process-card {
+            transition: all 0.3s ease;
+        }
+        .process-card.deadlocked {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            animation: deadlockPulse 2s ease-in-out infinite;
+        }
+        .process-card.terminated {
+            opacity: 0.5;
+            border-color: #9ca3af;
+            background: #f5f5f4;
+        }
+        .process-card.selected {
+            box-shadow: 0 0 0 3px #3b82f6;
+        }
+        
+        @keyframes deadlockPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 15px 5px rgba(239, 68, 68, 0.2); }
+        }
+        
+        .resource-box {
+            transition: all 0.3s ease;
+        }
+        .resource-box.depleted {
+            background-color: #fef2f2;
+            border-color: #fca5a5;
+        }
+        
+        .recovery-step {
+            animation: stepIn 0.3s ease-out;
+        }
+        @keyframes stepIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .deadlock-indicator {
+            animation: indicatorPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes indicatorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .timeline-item {
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 30px;
+            bottom: -10px;
+            width: 2px;
+            background: #d4d4d4;
+        }
+        .timeline-item:last-child::before {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
+                    <i class="fas fa-ambulance text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Deadlock Detection and Recovery</h1>
+                    <p class="text-xs text-stone-500">Strategii de Rezolvare</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Status Banner -->
+        <div id="statusBanner" class="hidden mb-6 rounded-xl p-4 flex items-center gap-4">
+            <div id="statusIcon" class="text-4xl"></div>
+            <div class="flex-1">
+                <h3 id="statusTitle" class="font-bold text-lg"></h3>
+                <p id="statusMessage" class="text-sm"></p>
+            </div>
+            <button onclick="hideBanner()" class="text-stone-400 hover:text-stone-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel: System State -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Resources Overview -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-cubes text-amber-500"></i>
+                            Resurse in Sistem
+                        </h2>
+                        <div id="deadlockIndicator" class="hidden deadlock-indicator px-3 py-1 bg-red-500 text-white rounded-full text-sm font-bold">
+                            🔒 DEADLOCK!
+                        </div>
+                    </div>
+                    <div id="resourcesContainer" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <!-- Resources will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Processes -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-cogs text-blue-500"></i>
+                            Procese
+                        </h2>
+                        <span id="processStats" class="text-sm text-stone-500"></span>
+                    </div>
+                    <div id="processesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Processes will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Detection Algorithm -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-search text-purple-500"></i>
+                        Algoritm de Detectare
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <h4 class="text-xs text-stone-500 mb-2">Work Vector</h4>
+                            <div id="workVector" class="flex gap-2 flex-wrap">
+                                <!-- Work values -->
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs text-stone-500 mb-2">Finish Array</h4>
+                            <div id="finishArray" class="flex gap-2 flex-wrap">
+                                <!-- Finish values -->
+                            </div>
+                        </div>
+                    </div>
+                    <div id="detectionLog" class="bg-stone-900 rounded-lg p-3 text-xs mono text-green-300 h-32 overflow-y-auto">
+                        <div class="text-stone-500">// Apasa "Detectare" for a rula algoritmul</div>
+                    </div>
+                </div>
+
+                <!-- Recovery Timeline -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-history text-green-500"></i>
+                        Istoric Recuperare
+                    </h3>
+                    <div id="recoveryTimeline" class="space-y-4">
+                        <div class="text-sm text-stone-400 italic">Nu s-au efectuat actions de recuperare inca.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Detection Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-search text-red-500 mr-2"></i>Detect Deadlock
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="detectDeadlock()" class="btn-action w-full p-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Detect Deadlock
+                        </button>
+                        <button onclick="detectDeadlockAnimated()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
+                            <i class="fas fa-film mr-1"></i> Detectare Animata
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recovery Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-first-aid text-green-500 mr-2"></i>Strategii de Recuperare
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">1. Terminare Procese</label>
+                            <select id="terminationStrategy" class="w-full p-2 border border-stone-300 rounded text-sm mb-2">
+                                <option value="all">Finish toate procesele deadlocked</option>
+                                <option value="one">Finish cate unul (cost minim)</option>
+                                <option value="priority">after prioritate (low first)</option>
+                            </select>
+                            <button onclick="recoverByTermination()" id="btnTerminate" disabled class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition-colors">
+                                <i class="fas fa-skull mr-1"></i> Aplica Terminare
+                            </button>
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">2. Preemptare Resurse</label>
+                            <select id="preemptionStrategy" class="w-full p-2 border border-stone-300 rounded text-sm mb-2">
+                                <option value="min">Preempteaza minim necesar</option>
+                                <option value="fifo">FIFO (cel mai old request)</option>
+                            </select>
+                            <button onclick="recoverByPreemption()" id="btnPreempt" disabled class="btn-action w-full p-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded text-sm transition-colors">
+                                <i class="fas fa-hand-paper mr-1"></i> Aplica Preemptare
+                            </button>
+                        </div>
+                        <button onclick="recoverAutomatic()" id="btnAutoRecover" disabled class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
+                            <i class="fas fa-magic mr-1"></i> Recuperare Automata
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadScenario('simple')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-lock text-red-500 mr-2"></i>Deadlock Simplu (2P, 2R)
+                        </button>
+                        <button onclick="loadScenario('complex')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-lock text-red-500 mr-2"></i>Complex Deadlock (4P, 3R)
+                        </button>
+                        <button onclick="loadScenario('partial')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-exclamation-circle text-amber-500 mr-2"></i>Partial Deadlock
+                        </button>
+                        <button onclick="loadScenario('safe')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>No Deadlock
+                        </button>
+                        <button onclick="resetSystem()" class="w-full p-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded text-sm transition-colors">
+                            <i class="fas fa-redo mr-1"></i> Reset Complet
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Costs Info -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-200 p-4">
+                    <h3 class="text-sm font-semibold text-amber-800 mb-3">
+                        <i class="fas fa-coins text-amber-500 mr-2"></i>Costuri Recuperare
+                    </h3>
+                    <div class="space-y-2 text-xs text-amber-700">
+                        <div class="flex justify-between p-2 bg-white/50 rounded">
+                            <span>Process termination:</span>
+                            <span class="font-bold">Cost = Priority × Resources</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-white/50 rounded">
+                            <span>Preemptare resursa:</span>
+                            <span class="font-bold">Cost = Rollback time</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-white/50 rounded">
+                            <span>Total recuperari:</span>
+                            <span id="totalCost" class="font-bold">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Explanation -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-book text-blue-500 mr-2"></i>Algoritm Detectare
+                    </h3>
+                    <ol class="text-xs text-stone-600 space-y-1 list-decimal list-inside">
+                        <li>Work = Available</li>
+                        <li>Finish[i] = (Allocation[i] == 0)</li>
+                        <li>find i: Finish[i]=false and Request[i] ≤ Work</li>
+                        <li>Work = Work + Allocation[i], Finish[i] = true</li>
+                        <li>Repeta pana nu mai gasesti</li>
+                        <li>Finish[i] = false → P[i] este in deadlock</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Section -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-skull text-red-500"></i>
+                    Terminare Procese
+                </h3>
+                <div class="space-y-3 text-sm text-stone-600">
+                    <div class="p-3 bg-red-50 rounded-lg">
+                        <strong>Optiunea 1: Finish TOATE procesele deadlocked</strong>
+                        <ul class="list-disc list-inside mt-1 text-xs">
+                            <li>Simplu and garantat to functioneze</li>
+                            <li>Cost maxim - pierdere totala a progresului</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg">
+                        <strong>Optiunea 2: Finish cate unul</strong>
+                        <ul class="list-disc list-inside mt-1 text-xs">
+                            <li>Finish un proces, re-check deadlock</li>
+                            <li>Mai complex, dar cost potential mai mic</li>
+                            <li>Criteriu: prioritate, resurse detinute, timp executie</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-hand-paper text-amber-500"></i>
+                    Preemptare Resurse
+                </h3>
+                <div class="space-y-3 text-sm text-stone-600">
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <strong>Selectare Victima</strong>
+                        <p class="text-xs mt-1">Alege procesul de la care to preemptezi resursa bazat pe: cost minim, prioritate, timp de waiting.</p>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <strong>Rollback</strong>
+                        <p class="text-xs mt-1">Procesul victima must readus la o stare safe (checkpoint). If nu exists checkpoint → terminare.</p>
+                    </div>
+                    <div class="p-3 bg-green-50 rounded-lg">
+                        <strong>Starvation Prevention</strong>
+                        <p class="text-xs mt-1">Include numarul de rollback-uri in cost for a preveni ca acelasi proces to fie victima mereu.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let resources = [];
+        let processes = [];
+        let deadlockedProcesses = [];
+        let recoveryHistory = [];
+        let totalRecoveryCost = 0;
+
+        // ==================== Data Structures ====================
+        class Resource {
+            constructor(id, name, total) {
+                this.id = id;
+                this.name = name;
+                this.total = total;
+                this.available = total;
+            }
+        }
+
+        class Process {
+            constructor(id, name, priority) {
+                this.id = id;
+                this.name = name;
+                this.priority = priority;
+                this.allocation = {};
+                this.request = {};
+                this.isDeadlocked = false;
+                this.isTerminated = false;
+            }
+            
+            getCost() {
+                const allocTotal = Object.values(this.allocation).reduce((a, b) => a + b, 0);
+                return this.priority * (allocTotal + 1);
+            }
+        }
+
+        // ==================== Initialization ====================
+        function loadScenario(type) {
+            resetSystem();
+            
+            switch(type) {
+                case 'simple':
+                    resources = [
+                        new Resource('R1', 'R1', 1),
+                        new Resource('R2', 'R2', 1)
+                    ];
+                    processes = [
+                        new Process('P1', 'P1', 3),
+                        new Process('P2', 'P2', 2)
+                    ];
+                    // P1 holds R1, wants R2
+                    processes[0].allocation = { R1: 1 };
+                    processes[0].request = { R2: 1 };
+                    // P2 holds R2, wants R1
+                    processes[1].allocation = { R2: 1 };
+                    processes[1].request = { R1: 1 };
+                    // Update available
+                    resources[0].available = 0;
+                    resources[1].available = 0;
+                    break;
+                    
+                case 'complex':
+                    resources = [
+                        new Resource('R1', 'R1', 2),
+                        new Resource('R2', 'R2', 2),
+                        new Resource('R3', 'R3', 1)
+                    ];
+                    processes = [
+                        new Process('P1', 'P1', 4),
+                        new Process('P2', 'P2', 2),
+                        new Process('P3', 'P3', 3),
+                        new Process('P4', 'P4', 1)
+                    ];
+                    // Circular wait involving all
+                    processes[0].allocation = { R1: 1 };
+                    processes[0].request = { R2: 1 };
+                    processes[1].allocation = { R2: 1 };
+                    processes[1].request = { R3: 1 };
+                    processes[2].allocation = { R3: 1 };
+                    processes[2].request = { R1: 1 };
+                    processes[3].allocation = { R2: 1 };
+                    processes[3].request = { R1: 1 };
+                    
+                    resources[0].available = 0;
+                    resources[1].available = 0;
+                    resources[2].available = 0;
+                    break;
+                    
+                case 'partial':
+                    resources = [
+                        new Resource('R1', 'R1', 2),
+                        new Resource('R2', 'R2', 2)
+                    ];
+                    processes = [
+                        new Process('P1', 'P1', 3),
+                        new Process('P2', 'P2', 2),
+                        new Process('P3', 'P3', 1)
+                    ];
+                    // P1 and P2 in deadlock, P3 can finish
+                    processes[0].allocation = { R1: 1 };
+                    processes[0].request = { R2: 1 };
+                    processes[1].allocation = { R2: 1 };
+                    processes[1].request = { R1: 1 };
+                    processes[2].allocation = { R1: 1 };
+                    processes[2].request = {};
+                    
+                    resources[0].available = 0;
+                    resources[1].available = 1;
+                    break;
+                    
+                case 'safe':
+                    resources = [
+                        new Resource('R1', 'R1', 3),
+                        new Resource('R2', 'R2', 2)
+                    ];
+                    processes = [
+                        new Process('P1', 'P1', 2),
+                        new Process('P2', 'P2', 1)
+                    ];
+                    processes[0].allocation = { R1: 1, R2: 1 };
+                    processes[0].request = { R1: 1 };
+                    processes[1].allocation = { R1: 1 };
+                    processes[1].request = { R2: 1 };
+                    
+                    resources[0].available = 1;
+                    resources[1].available = 1;
+                    break;
+            }
+            
+            renderAll();
+            log(`Scenariu "${type}" loaded.`);
+        }
+
+        function resetSystem() {
+            resources = [];
+            processes = [];
+            deadlockedProcesses = [];
+            recoveryHistory = [];
+            totalRecoveryCost = 0;
+            
+            document.getElementById('deadlockIndicator').classList.add('hidden');
+            document.getElementById('btnTerminate').disabled = true;
+            document.getElementById('btnPreempt').disabled = true;
+            document.getElementById('btnAutoRecover').disabled = true;
+            document.getElementById('totalCost').textContent = '0';
+            
+            hideBanner();
+            clearLog();
+            renderAll();
+        }
+
+        // ==================== Rendering ====================
+        function renderAll() {
+            renderResources();
+            renderProcesses();
+            renderWorkVector();
+            renderFinishArray();
+            renderRecoveryTimeline();
+        }
+
+        function renderResources() {
+            const container = document.getElementById('resourcesContainer');
+            container.innerHTML = resources.map(r => {
+                const used = r.total - r.available;
+                const depleted = r.available === 0;
+                return `
+                    <div class="resource-box ${depleted ? 'depleted' : ''} p-3 rounded-lg border-2 ${depleted ? 'border-red-300' : 'border-amber-300'} bg-amber-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-bold text-amber-800">${r.name}</span>
+                            <i class="fas fa-cube text-amber-500"></i>
+                        </div>
+                        <div class="text-xs text-stone-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Total:</span>
+                                <span class="mono font-semibold">${r.total}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Used:</span>
+                                <span class="mono font-semibold text-red-600">${used}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Available:</span>
+                                <span class="mono font-semibold ${depleted ? 'text-red-600' : 'text-green-600'}">${r.available}</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-2 bg-stone-200 rounded-full overflow-hidden">
+                            <div class="h-full ${depleted ? 'bg-red-400' : 'bg-amber-400'}" style="width: ${(used/r.total)*100}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderProcesses() {
+            const container = document.getElementById('processesContainer');
+            const activeProcesses = processes.filter(p => !p.isTerminated);
+            
+            document.getElementById('processStats').textContent = 
+                `${activeProcesses.length} activ${activeProcesses.length !== 1 ? 'e' : ''}, ${deadlockedProcesses.length} deadlocked`;
+            
+            container.innerHTML = processes.map(p => {
+                const allocList = Object.entries(p.allocation).filter(([k,v]) => v > 0);
+                const reqList = Object.entries(p.request).filter(([k,v]) => v > 0);
+                
+                return `
+                    <div class="process-card p-4 rounded-lg border-2 ${p.isTerminated ? 'terminated border-stone-300' : p.isDeadlocked ? 'deadlocked border-red-400' : 'border-blue-300 bg-blue-50'}">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-lg">${p.name}</span>
+                                ${p.isTerminated ? '<span class="text-xs bg-stone-300 text-stone-700 px-2 py-0.5 rounded">finished</span>' : ''}
+                                ${p.isDeadlocked && !p.isTerminated ? '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded">DEADLOCK</span>' : ''}
+                            </div>
+                            <div class="text-xs text-stone-500">
+                                Priority: ${p.priority} | Cost: ${p.getCost()}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <div class="text-stone-500 mb-1">Allocation:</div>
+                                <div class="flex flex-wrap gap-1">
+                                    ${allocList.length > 0 ? 
+                                        allocList.map(([r, v]) => `<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded">${r}:${v}</span>`).join('') :
+                                        '<span class="text-stone-400">none</span>'}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-stone-500 mb-1">Request:</div>
+                                <div class="flex flex-wrap gap-1">
+                                    ${reqList.length > 0 ? 
+                                        reqList.map(([r, v]) => `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">${r}:${v}</span>`).join('') :
+                                        '<span class="text-stone-400">none</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderWorkVector() {
+            const container = document.getElementById('workVector');
+            const available = resources.map(r => r.available);
+            container.innerHTML = resources.map((r, i) => `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-stone-500">${r.name}</span>
+                    <span class="w-10 p-1 text-center bg-blue-100 border border-blue-300 rounded text-sm mono font-semibold">${available[i]}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFinishArray() {
+            const container = document.getElementById('finishArray');
+            container.innerHTML = processes.map(p => {
+                const finished = p.isTerminated || !p.isDeadlocked;
+                return `
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-stone-500">${p.name}</span>
+                        <span class="w-10 p-1 text-center ${finished ? 'bg-green-100 border-green-300 text-green-700' : 'bg-red-100 border-red-300 text-red-700'} border rounded text-sm mono font-semibold">${finished ? 'T' : 'F'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecoveryTimeline() {
+            const container = document.getElementById('recoveryTimeline');
+            if (recoveryHistory.length === 0) {
+                container.innerHTML = '<div class="text-sm text-stone-400 italic">Nu s-au efectuat actions de recuperare inca.</div>';
+                return;
+            }
+            
+            container.innerHTML = recoveryHistory.map((item, idx) => `
+                <div class="timeline-item recovery-step flex gap-3">
+                    <div class="w-8 h-8 rounded-full ${item.type === 'terminate' ? 'bg-red-500' : 'bg-amber-500'} flex items-center justify-center text-white text-sm flex-shrink-0">
+                        ${idx + 1}
+                    </div>
+                    <div class="flex-1 pb-4">
+                        <div class="font-semibold text-sm">${item.action}</div>
+                        <div class="text-xs text-stone-500 mt-1">${item.details}</div>
+                        <div class="text-xs text-stone-400">Cost: ${item.cost}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== Detection Algorithm ====================
+        function detectDeadlock() {
+            clearLog();
+            const result = runDetection();
+            
+            deadlockedProcesses = result.deadlocked;
+            processes.forEach(p => {
+                p.isDeadlocked = deadlockedProcesses.includes(p.id);
+            });
+            
+            renderAll();
+            
+            if (deadlockedProcesses.length > 0) {
+                document.getElementById('deadlockIndicator').classList.remove('hidden');
+                document.getElementById('btnTerminate').disabled = false;
+                document.getElementById('btnPreempt').disabled = false;
+                document.getElementById('btnAutoRecover').disabled = false;
+                showBanner('deadlock', 'DEADLOCK DETECTAT!', 
+                    `Processes in deadlock: ${deadlockedProcesses.join(', ')}`);
+            } else {
+                document.getElementById('deadlockIndicator').classList.add('hidden');
+                document.getElementById('btnTerminate').disabled = true;
+                document.getElementById('btnPreempt').disabled = true;
+                document.getElementById('btnAutoRecover').disabled = true;
+                showBanner('safe', 'No Deadlock', 'Sistemul este intr-o stare safe.');
+            }
+        }
+
+        async function detectDeadlockAnimated() {
+            clearLog();
+            const result = await runDetectionAnimated();
+            
+            deadlockedProcesses = result.deadlocked;
+            processes.forEach(p => {
+                p.isDeadlocked = deadlockedProcesses.includes(p.id);
+            });
+            
+            renderAll();
+            
+            if (deadlockedProcesses.length > 0) {
+                document.getElementById('deadlockIndicator').classList.remove('hidden');
+                document.getElementById('btnTerminate').disabled = false;
+                document.getElementById('btnPreempt').disabled = false;
+                document.getElementById('btnAutoRecover').disabled = false;
+                showBanner('deadlock', 'DEADLOCK DETECTAT!', 
+                    `Processes in deadlock: ${deadlockedProcesses.join(', ')}`);
+            } else {
+                document.getElementById('deadlockIndicator').classList.add('hidden');
+                showBanner('safe', 'No Deadlock', 'Sistemul este intr-o stare safe.');
+            }
+        }
+
+        function runDetection() {
+            const work = resources.map(r => r.available);
+            const finish = processes.map(p => {
+                if (p.isTerminated) return true;
+                const totalAlloc = Object.values(p.allocation).reduce((a, b) => a + b, 0);
+                return totalAlloc === 0;
+            });
+            
+            log('=== ALGORITM DE DETECTARE ===');
+            log(`Work = [${work.join(', ')}]`);
+            log(`Finish = [${finish.map(f => f ? 'T' : 'F').join(', ')}]`);
+            
+            let changed = true;
+            while (changed) {
+                changed = false;
+                
+                for (let i = 0; i < processes.length; i++) {
+                    const p = processes[i];
+                    if (finish[i] || p.isTerminated) continue;
+                    
+                    // Check if request <= work
+                    let canFinish = true;
+                    for (const r of resources) {
+                        const req = p.request[r.id] || 0;
+                        const workIdx = resources.indexOf(r);
+                        if (req > work[workIdx]) {
+                            canFinish = false;
+                            break;
+                        }
+                    }
+                    
+                    if (canFinish) {
+                        log(`${p.name}: Request ≤ Work → may finish`);
+                        // Simulate release
+                        for (const r of resources) {
+                            const alloc = p.allocation[r.id] || 0;
+                            const workIdx = resources.indexOf(r);
+                            work[workIdx] += alloc;
+                        }
+                        finish[i] = true;
+                        changed = true;
+                        log(`  Work devine [${work.join(', ')}]`);
+                    }
+                }
+            }
+            
+            // Find deadlocked processes
+            const deadlocked = [];
+            for (let i = 0; i < processes.length; i++) {
+                if (!finish[i] && !processes[i].isTerminated) {
+                    deadlocked.push(processes[i].id);
+                    log(`${processes[i].name}: Finish=false → DEADLOCK`);
+                }
+            }
+            
+            if (deadlocked.length === 0) {
+                log('✓ Nu exists deadlock');
+            } else {
+                log(`✗ Deadlock detected: ${deadlocked.join(', ')}`);
+            }
+            
+            return { deadlocked, finish, work };
+        }
+
+        async function runDetectionAnimated() {
+            const work = resources.map(r => r.available);
+            const finish = processes.map(p => {
+                if (p.isTerminated) return true;
+                const totalAlloc = Object.values(p.allocation).reduce((a, b) => a + b, 0);
+                return totalAlloc === 0;
+            });
+            
+            log('=== ALGORITM DE DETECTARE (ANIMAT) ===');
+            log(`Work initial = [${work.join(', ')}]`);
+            await sleep(500);
+            
+            let changed = true;
+            while (changed) {
+                changed = false;
+                
+                for (let i = 0; i < processes.length; i++) {
+                    const p = processes[i];
+                    if (finish[i] || p.isTerminated) continue;
+                    
+                    log(`\nVerific ${p.name}...`);
+                    await sleep(400);
+                    
+                    let canFinish = true;
+                    for (const r of resources) {
+                        const req = p.request[r.id] || 0;
+                        const workIdx = resources.indexOf(r);
+                        if (req > work[workIdx]) {
+                            canFinish = false;
+                            log(`  ${r.id}: Request(${req}) > Work(${work[workIdx]}) ✗`);
+                            break;
+                        }
+                    }
+                    
+                    if (canFinish) {
+                        log(`  ✓ ${p.name} may finish!`);
+                        for (const r of resources) {
+                            const alloc = p.allocation[r.id] || 0;
+                            const workIdx = resources.indexOf(r);
+                            work[workIdx] += alloc;
+                        }
+                        finish[i] = true;
+                        changed = true;
+                        log(`  Work = [${work.join(', ')}]`);
+                        await sleep(400);
+                        break;
+                    } else {
+                        log(`  ✗ ${p.name} nu may finish acum`);
+                    }
+                }
+            }
+            
+            const deadlocked = [];
+            for (let i = 0; i < processes.length; i++) {
+                if (!finish[i] && !processes[i].isTerminated) {
+                    deadlocked.push(processes[i].id);
+                }
+            }
+            
+            log('\n=== result ===');
+            if (deadlocked.length === 0) {
+                log('✓ Nu exists deadlock');
+            } else {
+                log(`✗ Processes in deadlock: ${deadlocked.join(', ')}`);
+            }
+            
+            return { deadlocked, finish, work };
+        }
+
+        // ==================== Recovery ====================
+        function recoverByTermination() {
+            const strategy = document.getElementById('terminationStrategy').value;
+            
+            if (deadlockedProcesses.length === 0) {
+                showBanner('info', 'Nimic de facut', 'Nu exists procese in deadlock.');
+                return;
+            }
+            
+            let terminated = [];
+            
+            if (strategy === 'all') {
+                terminated = [...deadlockedProcesses];
+                deadlockedProcesses.forEach(pid => {
+                    const p = processes.find(proc => proc.id === pid);
+                    if (p) terminateProcess(p);
+                });
+            } else {
+                // Terminate one by one
+                const deadlockedProcs = processes.filter(p => deadlockedProcesses.includes(p.id));
+                
+                if (strategy === 'priority') {
+                    deadlockedProcs.sort((a, b) => a.priority - b.priority);
+                } else {
+                    deadlockedProcs.sort((a, b) => a.getCost() - b.getCost());
+                }
+                
+                const victim = deadlockedProcs[0];
+                terminateProcess(victim);
+                terminated.push(victim.id);
+            }
+            
+            addRecoveryAction('terminate', 
+                `finished: ${terminated.join(', ')}`,
+                `Strategie: ${strategy}`,
+                terminated.reduce((sum, pid) => {
+                    const p = processes.find(proc => proc.id === pid);
+                    return sum + (p ? p.getCost() : 0);
+                }, 0)
+            );
+            
+            detectDeadlock();
+        }
+
+        function terminateProcess(p) {
+            // Release all resources
+            for (const r of resources) {
+                const alloc = p.allocation[r.id] || 0;
+                r.available += alloc;
+            }
+            p.allocation = {};
+            p.request = {};
+            p.isTerminated = true;
+            p.isDeadlocked = false;
+        }
+
+        function recoverByPreemption() {
+            if (deadlockedProcesses.length === 0) {
+                showBanner('info', 'Nimic de facut', 'Nu exists procese in deadlock.');
+                return;
+            }
+            
+            // Find a resource to preempt that would help
+            const deadlockedProcs = processes.filter(p => deadlockedProcesses.includes(p.id));
+            
+            // Sort by cost (lowest first)
+            deadlockedProcs.sort((a, b) => a.getCost() - b.getCost());
+            
+            const victim = deadlockedProcs[0];
+            const preemptedResources = [];
+            
+            // Preempt one resource from victim
+            for (const r of resources) {
+                if (victim.allocation[r.id] > 0) {
+                    const amount = victim.allocation[r.id];
+                    r.available += amount;
+                    victim.allocation[r.id] = 0;
+                    preemptedResources.push(`${r.id}:${amount}`);
+                    break; // Preempt only one
+                }
+            }
+            
+            addRecoveryAction('preempt',
+                `Preemptat de la ${victim.id}: ${preemptedResources.join(', ')}`,
+                'Procesul va trebui to re-ceara resursa',
+                victim.priority
+            );
+            
+            detectDeadlock();
+        }
+
+        function recoverAutomatic() {
+            log('\n=== RECUPERARE AUTOMATA ===');
+            
+            let iterations = 0;
+            const maxIterations = 10;
+            
+            while (deadlockedProcesses.length > 0 && iterations < maxIterations) {
+                iterations++;
+                log(`\nIteratia ${iterations}:`);
+                
+                // Find lowest cost victim
+                const deadlockedProcs = processes.filter(p => 
+                    deadlockedProcesses.includes(p.id) && !p.isTerminated
+                );
+                
+                if (deadlockedProcs.length === 0) break;
+                
+                deadlockedProcs.sort((a, b) => a.getCost() - b.getCost());
+                const victim = deadlockedProcs[0];
+                
+                log(`  Victima selectata: ${victim.id} (cost=${victim.getCost()})`);
+                terminateProcess(victim);
+                
+                addRecoveryAction('terminate',
+                    `finished automat: ${victim.id}`,
+                    `Iteratia ${iterations} - cost minim`,
+                    victim.getCost()
+                );
+                
+                // Re-check
+                const result = runDetection();
+                deadlockedProcesses = result.deadlocked;
+                processes.forEach(p => {
+                    p.isDeadlocked = deadlockedProcesses.includes(p.id);
+                });
+            }
+            
+            renderAll();
+            
+            if (deadlockedProcesses.length === 0) {
+                document.getElementById('deadlockIndicator').classList.add('hidden');
+                document.getElementById('btnTerminate').disabled = true;
+                document.getElementById('btnPreempt').disabled = true;
+                document.getElementById('btnAutoRecover').disabled = true;
+                showBanner('safe', 'Recuperare Completa!', 
+                    `Deadlock rezolvat in ${iterations} iteratii. Cost total: ${totalRecoveryCost}`);
+            } else {
+                showBanner('error', 'Recuperare Esuata', 'Nu s-a putut rezolva deadlock-ul.');
+            }
+        }
+
+        function addRecoveryAction(type, action, details, cost) {
+            totalRecoveryCost += cost;
+            document.getElementById('totalCost').textContent = totalRecoveryCost;
+            
+            recoveryHistory.push({ type, action, details, cost });
+            renderRecoveryTimeline();
+        }
+
+        // ==================== UI Helpers ====================
+        function showBanner(type, title, message) {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const titleEl = document.getElementById('statusTitle');
+            const msgEl = document.getElementById('statusMessage');
+            
+            const configs = {
+                safe: { bg: 'bg-green-100 border-2 border-green-400', icon: '✅', title: 'text-green-800', msg: 'text-green-700' },
+                deadlock: { bg: 'bg-red-100 border-2 border-red-400', icon: '🔒', title: 'text-red-800', msg: 'text-red-700' },
+                error: { bg: 'bg-red-100 border-2 border-red-400', icon: '❌', title: 'text-red-800', msg: 'text-red-700' },
+                info: { bg: 'bg-blue-100 border-2 border-blue-400', icon: 'ℹ️', title: 'text-blue-800', msg: 'text-blue-700' }
+            };
+            
+            const c = configs[type];
+            banner.className = `mb-6 rounded-xl p-4 flex items-center gap-4 ${c.bg}`;
+            icon.textContent = c.icon;
+            titleEl.className = `font-bold text-lg ${c.title}`;
+            titleEl.textContent = title;
+            msgEl.className = `text-sm ${c.msg}`;
+            msgEl.textContent = message;
+            
+            banner.classList.remove('hidden');
+        }
+
+        function hideBanner() {
+            document.getElementById('statusBanner').classList.add('hidden');
+        }
+
+        function log(message) {
+            const container = document.getElementById('detectionLog');
+            const div = document.createElement('div');
+            div.textContent = message;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('detectionLog').innerHTML = '';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadScenario('simple');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06ex1 - Race Condition Demo | OS Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1f1f 50%, #1a0a0a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(45, 31, 31, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .instruction-step {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .instruction-step.active {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .instruction-step.completed {
+            opacity: 0.5;
+        }
+        
+        .instruction-step.pending {
+            opacity: 0.7;
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 20px 10px rgba(239, 68, 68, 0); }
+        }
+        
+        .pulse-danger { animation: pulse-danger 1.5s infinite; }
+        
+        @keyframes value-change {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); color: #fbbf24; }
+            100% { transform: scale(1); }
+        }
+        
+        .value-changed { animation: value-change 0.4s ease; }
+        
+        @keyframes conflict-flash {
+            0%, 100% { background-color: rgba(239, 68, 68, 0.1); }
+            50% { background-color: rgba(239, 68, 68, 0.5); }
+        }
+        
+        .conflict-flash { animation: conflict-flash 0.5s ease 3; }
+        
+        .register-box {
+            transition: all 0.3s ease;
+        }
+        
+        .register-box.highlight {
+            background: rgba(34, 197, 94, 0.3) !important;
+            border-color: #22c55e !important;
+        }
+        
+        .btn-control {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-control:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .btn-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .timeline-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .timeline-marker::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 2px;
+            height: 20px;
+            background: currentColor;
+            transform: translateX(-50%);
+            opacity: 0.3;
+        }
+        
+        .interleave-arrow {
+            animation: bounce-arrow 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce-arrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body class="text-slate-200 p-4 lg:p-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-600 to-orange-600 flex items-center justify-center pulse-danger">
+                            <i class="fas fa-bolt text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                                Race Condition Demo
+                            </h1>
+                            <p class="text-slate-400 text-sm">course 06 • Sincronizare Part 1 • Interleaving Visualisation</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Race Condition
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Shared Variable Display -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-red-400 flex items-center gap-2">
+                        <i class="fas fa-database"></i> variable Partajata
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1">Ambele thread-uri execute: <coof class="bg-slate-800 px-2 py-0.5 rounded">counter++</code></p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-center">
+                        <div class="text-xs text-slate-500 mb-1">value Initiala</div>
+                        <div class="mono text-lg text-slate-400">0</div>
+                    </div>
+                    <div class="text-4xl text-slate-600">→</div>
+                    <div class="text-center">
+                        <div class="text-xs text-slate-500 mb-1">value Curenta</div>
+                        <div id="counterValue" class="mono text-4xl font-bold text-amber-400">0</div>
+                    </div>
+                    <div class="text-4xl text-slate-600">→</div>
+                    <div class="text-center">
+                        <div class="text-xs text-slate-500 mb-1">Expected</div>
+                        <div class="mono text-lg text-emerald-400">2</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Result Indicator -->
+            <div id="resultIndicator" class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 text-center">
+                <span class="text-slate-400">Execute simulationa for a vedea rezultatul...</span>
+            </div>
+        </section>
+
+        <!-- Thread Visualization -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Thread A -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-blue-400 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm font-bold">A</span>
+                        Thread A
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Registru:</span>
+                        <div id="regA" class="register-box mono text-sm px-3 py-1 rounded bg-slate-800 border border-slate-700">
+                            R<sub>A</sub> = <span class="text-blue-400">?</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2" id="threadASteps">
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A1">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">1</span>
+                            <coof class="text-sm flex-1">LOAD R<sub>A</sub>, counter</code>
+                            <span class="text-xs text-slate-500">citeste from memorie</span>
+                        </div>
+                    </div>
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">2</span>
+                            <coof class="text-sm flex-1">ADD R<sub>A</sub>, 1</code>
+                            <span class="text-xs text-slate-500">incrementeaza</span>
+                        </div>
+                    </div>
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">3</span>
+                            <coof class="text-sm flex-1">STORE counter, R<sub>A</sub></code>
+                            <span class="text-xs text-slate-500">scrie in memorie</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thread B -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-purple-400 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center text-sm font-bold">B</span>
+                        Thread B
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Registru:</span>
+                        <div id="regB" class="register-box mono text-sm px-3 py-1 rounded bg-slate-800 border border-slate-700">
+                            R<sub>B</sub> = <span class="text-purple-400">?</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2" id="threadBSteps">
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B1">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">1</span>
+                            <coof class="text-sm flex-1">LOAD R<sub>B</sub>, counter</code>
+                            <span class="text-xs text-slate-500">citeste from memorie</span>
+                        </div>
+                    </div>
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">2</span>
+                            <coof class="text-sm flex-1">ADD R<sub>B</sub>, 1</code>
+                            <span class="text-xs text-slate-500">incrementeaza</span>
+                        </div>
+                    </div>
+                    <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">3</span>
+                            <coof class="text-sm flex-1">STORE counter, R<sub>B</sub></code>
+                            <span class="text-xs text-slate-500">scrie in memorie</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Controls -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-sliders-h text-amber-400"></i> Controale Simulation
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Interleaving Moof Selection -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Select Interleaving:</label>
+                    <select id="interleavingSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-amber-500 focus:outline-none">
+                        <option value="correct">Corect: A1→A2→A3→B1→B2→B3 (result: 2)</option>
+                        <option value="race1" selected>Race #1: A1→B1→A2→B2→A3→B3 (result: 1)</option>
+                        <option value="race2">Race #2: A1→A2→B1→B2→B3→A3 (result: 1)</option>
+                        <option value="race3">Race #3: B1→A1→B2→A2→A3→B3 (result: 1)</option>
+                        <option value="random">Random (alege aleator)</option>
+                    </select>
+                </div>
+                
+                <!-- Speed Control -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Speed Animatie:</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="speedSlider" min="200" max="2000" value="800" class="flex-1 accent-amber-500">
+                        <span id="speedValue" class="mono text-sm text-amber-400 w-16 text-right">800ms</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 mt-6">
+                <button id="btnStep" class="btn-control px-5 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-step-forward"></i> Pas with Pas
+                </button>
+                <button id="btnAuto" class="btn-control px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-play"></i> Auto Run
+                </button>
+                <button id="btnPause" class="btn-control px-5 py-2.5 bg-amber-600 hover:bg-amber-500 rounded-lg font-medium text-sm flex items-center gap-2" disabled>
+                    <i class="fas fa-pause"></i> Pauza
+                </button>
+                <button id="btnReset" class="btn-control px-5 py-2.5 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <button id="btnRunMany" class="btn-control px-5 py-2.5 bg-red-600 hover:bg-red-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-bolt"></i> Run 100x Random
+                </button>
+            </div>
+        </section>
+
+        <!-- Execution Timeline -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-stream text-cyan-400"></i> Timeline Executie
+            </h3>
+            
+            <div id="timeline" class="flex items-center gap-2 p-4 bg-slate-800/50 rounded-xl overflow-x-auto">
+                <span class="text-slate-500 text-sm">Execute simulationa...</span>
+            </div>
+            
+            <div id="executionLog" class="mt-4 p-4 bg-slate-900 rounded-xl max-h-48 overflow-y-auto mono text-xs space-y-1">
+                <div class="text-slate-500">// Log executie...</div>
+            </div>
+        </section>
+
+        <!-- Statistics / Histogram -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-purple-400"></i> Statistics (Run 100x)
+            </h3>
+            
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div class="h-64">
+                    <canvas id="histogramChart"></canvas>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-slate-400">Total Runs:</span>
+                            <span id="statTotal" class="mono text-lg font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-emerald-400">Result Corect (2):</span>
+                            <span id="statCorrect" class="mono text-lg font-bold text-emerald-400">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-red-400">Race Condition (1):</span>
+                            <span id="statRace" class="mono text-lg font-bold text-red-400">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-red-900/30 rounded-xl p-4 border border-red-500/30">
+                        <p class="text-sm text-red-300">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <strong>Race Condition:</strong> When thread-urile citesc/scriu without sincronizare, rezultatul depinof of ordinea executiei (non-deterministic)!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Theory Box -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-book text-blue-400"></i> Concepte Cheie
+            </h3>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h4 class="font-semibold text-amber-400 mb-2">Race Condition</h4>
+                    <p class="text-xs text-slate-400">Situatie in care rezultatul depinof of ordinea relativa a executiei thread-urilor - comportament non-deterministic.</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h4 class="font-semibold text-red-400 mb-2">Critical Section</h4>
+                    <p class="text-xs text-slate-400">Sectiona of cod care acceseaza resurse partajate. must executata atomic or protejata prin sincronizare.</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h4 class="font-semibold text-emerald-400 mb-2">Mutual Exclusion</h4>
+                    <p class="text-xs text-slate-400">solution: only un thread can fi in sectiunea critical at un moment dat. Implementare: mutex, semafoare, etc.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto mt-8 text-center text-slate-500 text-sm pb-4">
+        <div class="glass-card rounded-xl py-3 px-6 inline-block">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            counter: 0,
+            regA: null,
+            regB: null,
+            currentStepIndex: 0,
+            sequence: [],
+            isRunning: false,
+            autoInterval: null,
+            stats: { total: 0, correct: 0, race: 0 },
+            speed: 800
+        };
+
+        // Interleaving sequences
+        const sequences = {
+            correct: ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'],
+            race1: ['A1', 'B1', 'A2', 'B2', 'A3', 'B3'],
+            race2: ['A1', 'A2', 'B1', 'B2', 'B3', 'A3'],
+            race3: ['B1', 'A1', 'B2', 'A2', 'A3', 'B3']
+        };
+
+        // DOM Elements
+        const counterValueEl = document.getElementById('counterValue');
+        const regAEl = document.getElementById('regA');
+        const regBEl = document.getElementById('regB');
+        const resultIndicatorEl = document.getElementById('resultIndicator');
+        const timelineEl = document.getElementById('timeline');
+        const executionLogEl = document.getElementById('executionLog');
+        const interleavingSelect = document.getElementById('interleavingSelect');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValueEl = document.getElementById('speedValue');
+
+        // Chart
+        const ctx = document.getElementById('histogramChart').getContext('2d');
+        const histogramChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Result = 1 (Race)', 'Result = 2 (Corect)'],
+                datasets: [{
+                    label: 'Number Rulari',
+                    data: [0, 0],
+                    backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(34, 197, 94, 0.7)'],
+                    borderColor: ['#ef4444', '#22c55e'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Functions
+        function getRandomSequence() {
+            const steps = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
+            const aSteps = ['A1', 'A2', 'A3'];
+            const bSteps = ['B1', 'B2', 'B3'];
+            
+            let result = [];
+            let aIdx = 0, bIdx = 0;
+            
+            while (aIdx < 3 || bIdx < 3) {
+                if (aIdx >= 3) {
+                    result.push(bSteps[bIdx++]);
+                } else if (bIdx >= 3) {
+                    result.push(aSteps[aIdx++]);
+                } else {
+                    if (Math.random() < 0.5) {
+                        result.push(aSteps[aIdx++]);
+                    } else {
+                        result.push(bSteps[bIdx++]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        function executeStep(step) {
+            const thread = step[0];
+            const stepNum = step[1];
+            
+            if (thread === 'A') {
+                if (stepNum === '1') {
+                    state.regA = state.counter;
+                    updateRegDisplay('A', state.regA);
+                    addLog(`[A] LOAD R_A, counter → R_A = ${state.regA}`, 'blue');
+                } else if (stepNum === '2') {
+                    state.regA = state.regA + 1;
+                    updateRegDisplay('A', state.regA);
+                    addLog(`[A] ADD R_A, 1 → R_A = ${state.regA}`, 'blue');
+                } else if (stepNum === '3') {
+                    state.counter = state.regA;
+                    updateCounterDisplay();
+                    addLog(`[A] STORE counter, R_A → counter = ${state.counter}`, 'blue');
+                }
+            } else {
+                if (stepNum === '1') {
+                    state.regB = state.counter;
+                    updateRegDisplay('B', state.regB);
+                    addLog(`[B] LOAD R_B, counter → R_B = ${state.regB}`, 'purple');
+                } else if (stepNum === '2') {
+                    state.regB = state.regB + 1;
+                    updateRegDisplay('B', state.regB);
+                    addLog(`[B] ADD R_B, 1 → R_B = ${state.regB}`, 'purple');
+                } else if (stepNum === '3') {
+                    state.counter = state.regB;
+                    updateCounterDisplay();
+                    addLog(`[B] STORE counter, R_B → counter = ${state.counter}`, 'purple');
+                }
+            }
+            
+            updateStepHighlight(step);
+            updateTimeline(step);
+        }
+
+        function updateCounterDisplay() {
+            counterValueEl.textContent = state.counter;
+            counterValueEl.classList.remove('value-changed');
+            void counterValueEl.offsetWidth;
+            counterValueEl.classList.add('value-changed');
+        }
+
+        function updateRegDisplay(thread, value) {
+            const el = thread === 'A' ? regAEl : regBEl;
+            const color = thread === 'A' ? 'text-blue-400' : 'text-purple-400';
+            el.innerHTML = `R<sub>${thread}</sub> = <span class="${color}">${value}</span>`;
+            el.classList.add('highlight');
+            setTimeout(() => el.classList.remove('highlight'), 300);
+        }
+
+        function updateStepHighlight(currentStep) {
+            document.querySelectorAll('.instruction-step').forEach(el => {
+                el.classList.remove('active', 'completed', 'pending');
+            });
+            
+            const allSteps = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
+            const executedSteps = state.sequence.slice(0, state.currentStepIndex + 1);
+            
+            allSteps.forEach(step => {
+                const el = document.querySelector(`[data-step="${step}"]`);
+                if (executedSteps.includes(step)) {
+                    if (step === currentStep) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.add('completed');
+                    }
+                } else {
+                    el.classList.add('pending');
+                }
+            });
+        }
+
+        function updateTimeline(step) {
+            if (state.currentStepIndex === 0) {
+                timelineEl.innerHTML = '';
+            }
+            
+            const color = step[0] === 'A' ? 'bg-blue-500 text-blue-500' : 'bg-purple-500 text-purple-500';
+            const marker = document.createdeElement('div');
+            marker.className = `flex flex-col items-center`;
+            marker.innerHTML = `
+                <div class="timeline-marker ${color.split(' ')[0]}"></div>
+                <span class="text-xs mt-1 ${color.split(' ')[1]} font-mono">${step}</span>
+            `;
+            timelineEl.appendChild(marker);
+            
+            if (state.currentStepIndex < state.sequence.length - 1) {
+                const arrow = document.createdeElement('div');
+                arrow.className = 'text-slate-600 interleave-arrow';
+                arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
+                timelineEl.appendChild(arrow);
+            }
+        }
+
+        function addLog(message, color) {
+            const colorClass = color === 'blue' ? 'text-blue-400' : 'text-purple-400';
+            executionLogEl.innerHTML += `<div class="${colorClass}">${message}</div>`;
+            executionLogEl.scrollTop = executionLogEl.scrollHeight;
+        }
+
+        function showResult() {
+            const isCorrect = state.counter === 2;
+            resultIndicatorEl.className = `p-4 rounded-xl text-center ${isCorrect ? 'bg-emerald-900/50 border border-emerald-500' : 'bg-red-900/50 border border-red-500 conflict-flash'}`;
+            resultIndicatorEl.innerHTML = isCorrect 
+                ? `<i class="fas fa-check-circle text-emerald-400 text-2xl mb-2"></i><br><span class="text-emerald-400 font-bold">Correct Result!</span> counter = 2`
+                : `<i class="fas fa-times-circle text-red-400 text-2xl mb-2"></i><br><span class="text-red-400 font-bold">Race Condition!</span> counter = ${state.counter} (asteptat: 2)`;
+        }
+
+        function reset() {
+            state.counter = 0;
+            state.regA = null;
+            state.regB = null;
+            state.currentStepIndex = 0;
+            state.isRunning = false;
+            
+            if (state.autoInterval) {
+                clearInterval(state.autoInterval);
+                state.autoInterval = null;
+            }
+            
+            counterValueEl.textContent = '0';
+            regAEl.innerHTML = `R<sub>A</sub> = <span class="text-blue-400">?</span>`;
+            regBEl.innerHTML = `R<sub>B</sub> = <span class="text-purple-400">?</span>`;
+            
+            document.querySelectorAll('.instruction-step').forEach(el => {
+                el.classList.remove('active', 'completed');
+                el.classList.add('pending');
+            });
+            
+            timelineEl.innerHTML = '<span class="text-slate-500 text-sm">Execute simulationa...</span>';
+            executionLogEl.innerHTML = '<div class="text-slate-500">// Log executie...</div>';
+            resultIndicatorEl.className = 'p-4 rounded-xl bg-slate-800/50 border border-slate-700 text-center';
+            resultIndicatorEl.innerHTML = '<span class="text-slate-400">Execute simulationa for a vedea rezultatul...</span>';
+            
+            updateButtons(false);
+        }
+
+        function updateButtons(running) {
+            document.getElementById('btnStep').disabled = running;
+            document.getElementById('btnAuto').disabled = running;
+            document.getElementById('btnPause').disabled = !running;
+        }
+
+        function loadSequence() {
+            const selected = interleavingSelect.value;
+            if (selected === 'random') {
+                state.sequence = getRandomSequence();
+            } else {
+                state.sequence = [...sequences[selected]];
+            }
+        }
+
+        function stepForward() {
+            if (state.currentStepIndex >= state.sequence.length) {
+                showResult();
+                state.isRunning = false;
+                updateButtons(false);
+                return false;
+            }
+            
+            executeStep(state.sequence[state.currentStepIndex]);
+            state.currentStepIndex++;
+            
+            if (state.currentStepIndex >= state.sequence.length) {
+                showResult();
+                state.isRunning = false;
+                updateButtons(false);
+                return false;
+            }
+            
+            return true;
+        }
+
+        function autoRun() {
+            if (state.isRunning) return;
+            
+            reset();
+            loadSequence();
+            state.isRunning = true;
+            updateButtons(true);
+            
+            state.autoInterval = setInterval(() => {
+                if (!stepForward()) {
+                    clearInterval(state.autoInterval);
+                    state.autoInterval = null;
+                }
+            }, state.speed);
+        }
+
+        function runMany(count = 100) {
+            reset();
+            state.stats = { total: 0, correct: 0, race: 0 };
+            
+            for (let i = 0; i < count; i++) {
+                // Quick simulation
+                let counter = 0;
+                let regA = null, regB = null;
+                const seq = getRandomSequence();
+                
+                for (const step of seq) {
+                    const thread = step[0];
+                    const stepNum = step[1];
+                    
+                    if (thread === 'A') {
+                        if (stepNum === '1') regA = counter;
+                        else if (stepNum === '2') regA++;
+                        else if (stepNum === '3') counter = regA;
+                    } else {
+                        if (stepNum === '1') regB = counter;
+                        else if (stepNum === '2') regB++;
+                        else if (stepNum === '3') counter = regB;
+                    }
+                }
+                
+                state.stats.total++;
+                if (counter === 2) {
+                    state.stats.correct++;
+                } else {
+                    state.stats.race++;
+                }
+            }
+            
+            // Update display
+            document.getElementById('statTotal').textContent = state.stats.total;
+            document.getElementById('statCorrect').textContent = state.stats.correct;
+            document.getElementById('statRace').textContent = state.stats.race;
+            
+            histogramChart.data.datasets[0].data = [state.stats.race, state.stats.correct];
+            histogramChart.update();
+        }
+
+        // Event Listeners
+        document.getElementById('btnStep').addEventListener('click', () => {
+            if (state.currentStepIndex === 0) {
+                reset();
+                loadSequence();
+            }
+            stepForward();
+        });
+
+        document.getElementById('btnAuto').addEventListener('click', autoRun);
+
+        document.getElementById('btnPause').addEventListener('click', () => {
+            if (state.autoInterval) {
+                clearInterval(state.autoInterval);
+                state.autoInterval = null;
+            }
+            state.isRunning = false;
+            updateButtons(false);
+        });
+
+        document.getElementById('btnReset').addEventListener('click', reset);
+
+        document.getElementById('btnRunMany').addEventListener('click', () => runMany(100));
+
+        speedSlider.addEventListener('input', (e) => {
+            state.speed = parseInt(e.target.value);
+            speedValueEl.textContent = `${state.speed}ms`;
+        });
+
+        // Init
+        loadSequence();
+    </script>
+</body>
+</html>
