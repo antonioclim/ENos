@@ -88,6 +88,8 @@ These apply to *all* projects. Master them before diving into specifics.
 
 Your scripts *will* fail. The question is: do they fail gracefully?
 
+> ⚠️ *Confession: In my early sysadmin days, I once wrote a cleanup script without `set -e` that silently failed halfway through and deleted the wrong directory. Cost me a weekend. The "holy trinity" below is non-negotiable in production scripts.*
+
 ```bash
 set -euo pipefail  # The holy trinity
 
@@ -102,7 +104,7 @@ trap cleanup EXIT
 
 ### 3.2 Logging
 
-`echo` is not logging. Logging has timestamps, levels, and destinations.
+`echo` is not logging. Logging has timestamps, levels and destinations.
 
 ```bash
 log_info "Starting backup"

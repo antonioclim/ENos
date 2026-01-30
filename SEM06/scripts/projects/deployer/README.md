@@ -2,7 +2,7 @@
 
 CAPSTONE Project - Seminar 6 Operating Systems
 
-SysDeployer is a complete deployment system for applications and services, implemented in Bash. It supports multiple deployment strategies, systemd service management, Docker containers, advanced health checks, and automatic rollback.
+SysDeployer is a complete deployment system for applications and services, implemented in Bash. It supports multiple deployment strategies, systemd service management, Docker containers, advanced health checks and automatic rollback.
 
 ## Contents
 

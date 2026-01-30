@@ -165,7 +165,7 @@ echo "📄 Current content: $(cat source/document.txt)"
 ```
 
 ### Key Moment
-"This is the principle behind git, Time Machine (macOS), and ZFS snapshots. Incremental backup in action."
+"This is the principle behind git, Time Machine (macOS) and ZFS snapshots. Incremental backup in action."
 
 ---
 
