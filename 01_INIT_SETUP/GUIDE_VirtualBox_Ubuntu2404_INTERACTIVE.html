@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VirtualBox + Ubuntu Server 24.04 Installation Guide - Operating Systems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #183A7C;
+            --primary-light: #2B5BB9;
+            --secondary: #E95420;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --powershell-bg: #012456;
+            --bash-bg: #1a1a1a;
+            --macos-bg: #2d2d2d;
+            --linux-bg: #300a24;
+            --ubuntu-vm-bg: #1a1a1a;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--secondary) 100%);
+            padding: 2rem 1rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: clamp(1.3rem, 4vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            opacity: 0.9;
+        }
+
+        .header .badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .header .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+
+        /* OS Selector */
+        .os-selector {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .os-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: transparent;
+            color: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .os-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .os-btn.active {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .os-btn .os-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 1rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #00ff88);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            position: sticky;
+            top: 60px;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1 1 auto;
+            min-width: 80px;
+            padding: 0.6rem 0.8rem;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab-btn.active {
+            background: var(--secondary);
+            box-shadow: 0 4px 15px rgba(233, 84, 32, 0.4);
+        }
+
+        .tab-btn.completed {
+            border: 2px solid var(--success);
+        }
+
+        .tab-btn .step-num {
+            background: rgba(0,0,0,0.3);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .tab-btn.completed .step-num {
+            background: var(--success);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* OS Specific Content */
+        .os-content {
+            display: none;
+        }
+
+        .os-content.active {
+            display: block;
+        }
+
+        .os-specific {
+            border-left: 4px solid;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .os-specific.windows {
+            border-color: #00a4ef;
+            background: rgba(0, 164, 239, 0.1);
+        }
+
+        .os-specific.macos {
+            border-color: #a3aaae;
+            background: rgba(163, 170, 174, 0.1);
+        }
+
+        .os-specific.linux {
+            border-color: #dd4814;
+            background: rgba(221, 72, 20, 0.1);
+        }
+
+        .os-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.15);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info {
+            background: rgba(23, 162, 184, 0.15);
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            position: relative;
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block.powershell .code-header {
+            background: #1e3a5f;
+            color: #7ec8e3;
+        }
+
+        .code-block.bash .code-header {
+            background: #2d2d2d;
+            color: #98c379;
+        }
+
+        .code-block.macos .code-header {
+            background: #3d3d3d;
+            color: #a3aaae;
+        }
+
+        .code-block.linux .code-header {
+            background: #3c1f28;
+            color: #dd4814;
+        }
+
+        .code-block.ubuntu-vm .code-header {
+            background: #2d2d2d;
+            color: #E95420;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .code-block.powershell pre { background: var(--powershell-bg); color: #dcdcdc; }
+        .code-block.bash pre { background: var(--bash-bg); color: #f8f8f2; }
+        .code-block.macos pre { background: var(--macos-bg); color: #f8f8f2; }
+        .code-block.linux pre { background: var(--linux-bg); color: #f8f8f2; }
+        .code-block.ubuntu-vm pre { background: var(--ubuntu-vm-bg); color: #00ff00; }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: inherit;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+        .copy-btn.copied { background: var(--success); color: white; }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        .step-content { flex: 1; }
+        .step-content h4 { margin-bottom: 0.5rem; color: var(--light); }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.7rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            background: rgba(233, 84, 32, 0.2);
+            font-weight: 600;
+        }
+
+        tr:hover { background: rgba(255,255,255,0.05); }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .checklist li:hover { background: rgba(255,255,255,0.1); }
+
+        .checklist input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--success);
+        }
+
+        .checklist li.checked {
+            background: rgba(40, 167, 69, 0.15);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn.prev {
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+        }
+
+        .nav-btn.next {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.complete { background: var(--success); }
+
+        /* Accordion */
+        .accordion { margin: 1rem 0; }
+
+        .accordion-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover { background: rgba(255,255,255,0.05); }
+
+        .accordion-header .arrow { transition: transform 0.3s ease; }
+
+        .accordion-item.open .accordion-header .arrow { transform: rotate(180deg); }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-item.open .accordion-content { max-height: 3000px; }
+
+        .accordion-inner { padding: 0 1rem 1rem; }
+
+        /* Mark done */
+        .mark-done {
+            background: transparent;
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .mark-done:hover, .mark-done.done {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+        }
+
+        /* Scroll top */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .scroll-top.visible { display: flex; }
+        .scroll-top:hover { transform: translateY(-3px); }
+
+        /* Misc */
+        code:not(pre code) {
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        a { color: #7ec8e3; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs-nav {
+                position: relative;
+                top: 0;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding: 0.5rem;
+            }
+
+            .tab-btn {
+                min-width: 70px;
+                padding: 0.5rem;
+                font-size: 0.65rem;
+            }
+
+            .card { padding: 1rem; }
+            .step { flex-direction: column; gap: 0.5rem; }
+            .nav-buttons { flex-direction: column; }
+            .code-block pre { font-size: 0.75rem; padding: 0.8rem; }
+            .os-selector { gap: 0.3rem; }
+            .os-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>VirtualBox + Ubuntu Server 24.04 Installation Guide</h1>
+        <p class="subtitle">Operating Systems 2024-2025 | ASE Bucharest - CSIE</p>
+        <div class="badges">
+            <span class="badge">Windows • macOS • Linux</span>
+        </div>
+    </header>
+
+    <div class="os-selector">
+        <button class="os-btn active" data-os="windows" onclick="setOS('windows')">
+            <span class="os-icon">🪟</span>
+            <span>Windows</span>
+        </button>
+        <button class="os-btn" data-os="macos" onclick="setOS('macos')">
+            <span class="os-icon">🍎</span>
+            <span>macOS</span>
+        </button>
+        <button class="os-btn" data-os="linux" onclick="setOS('linux')">
+            <span class="os-icon">🐧</span>
+            <span>Linux</span>
+        </button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">Progress: <span id="progressText">0%</span></div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <nav class="tabs-nav" id="tabsNav">
+            <button class="tab-btn active" data-tab="intro"><span class="step-num">0</span><span>Start</span></button>
+            <button class="tab-btn" data-tab="tab1"><span class="step-num">1</span><span>Check</span></button>
+            <button class="tab-btn" data-tab="tab2"><span class="step-num">2</span><span>Download</span></button>
+            <button class="tab-btn" data-tab="tab3"><span class="step-num">3</span><span>VBox Install</span></button>
+            <button class="tab-btn" data-tab="tab4"><span class="step-num">4</span><span>Extension</span></button>
+            <button class="tab-btn" data-tab="tab5"><span class="step-num">5</span><span>Create VM</span></button>
+            <button class="tab-btn" data-tab="tab6"><span class="step-num">6</span><span>Network</span></button>
+            <button class="tab-btn" data-tab="tab7"><span class="step-num">7</span><span>Install Ubuntu</span></button>
+            <button class="tab-btn" data-tab="tab8"><span class="step-num">8</span><span>Config Ubuntu</span></button>
+            <button class="tab-btn" data-tab="tab9"><span class="step-num">9</span><span>Packages</span></button>
+            <button class="tab-btn" data-tab="tab10"><span class="step-num">10</span><span>SSH</span></button>
+            <button class="tab-btn" data-tab="tab11"><span class="step-num">11</span><span>Connect</span></button>
+            <button class="tab-btn" data-tab="tab12"><span class="step-num">12</span><span>Folders</span></button>
+            <button class="tab-btn" data-tab="tab13"><span class="step-num">13</span><span>Verify</span></button>
+            <button class="tab-btn" data-tab="tab14"><span class="step-num">14</span><span>Problems</span></button>
+        </nav>
+
+        <!-- Tab: Intro -->
+        <div class="tab-content active" id="intro">
+            <div class="card">
+                <h2 class="card-title">Welcome!</h2>
+                
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>
+                        <strong>When should you use this guide?</strong><br>
+                        This guide is an <strong>alternative</strong> to WSL2. Use it if:
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li>You have <strong>Mac</strong> (macOS) or <strong>Linux</strong> instead of Windows</li>
+                            <li>You cannot install WSL2 on Windows</li>
+                            <li>You prefer a complete virtual machine</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 1.5rem;">What will you have at the end?</h3>
+                <p>A complete Ubuntu Linux server running in a window on your computer.</p>
+
+                <h3 style="margin-top: 1.5rem;">How long does it take?</h3>
+                <p>Approximately <strong>60-90 minutes</strong>.</p>
+
+                <h3 style="margin-top: 1.5rem;">Select your operating system</h3>
+                <p>In the bar above, select the operating system you use (Windows, macOS or Linux). The guide will adapt automatically.</p>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Types of commands</h2>
+                
+                <div class="os-content windows active">
+                    <h4 style="color: #00a4ef;">PowerShell Commands (Windows)</h4>
+                    <div class="code-block powershell">
+                        <div class="code-header"><span>🔵 POWERSHELL (Windows)</span></div>
+                        <pre>Get-Process</pre>
+                    </div>
+                </div>
+
+                <div class="os-content macos">
+                    <h4 style="color: #a3aaae;">Terminal Commands (macOS)</h4>
+                    <div class="code-block macos">
+                        <div class="code-header"><span>🍎 TERMINAL (macOS)</span></div>
+                        <pre>ls -la</pre>
+                    </div>
+                </div>
+
+                <div class="os-content linux">
+                    <h4 style="color: #dd4814;">Terminal Commands (Linux)</h4>
+                    <div class="code-block linux">
+                        <div class="code-header"><span>🐧 TERMINAL (Linux)</span></div>
+                        <pre>sudo apt install virtualbox</pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; color: #E95420;">Commands in Ubuntu VM (virtual machine)</h4>
+                <p>These are run in Ubuntu inside VirtualBox:</p>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span></div>
+                    <pre>sudo apt update</pre>
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">How to copy commands</h4>
+                <p>Click on the <strong>"📋 Copy"</strong> button in the top right corner of each command.</p>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" disabled>← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Start →</button>
+            </div>
+        </div>
+
+        <!-- Tab 1: System check -->
+        <div class="tab-content" id="tab1">
+            <div class="card">
+                <h2 class="card-title">1. Check system requirements</h2>
+                
+                <div class="table-responsive">
+                    <table>
+                        <tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr>
+                        <tr><td>Total RAM</td><td>8 GB</td><td>16 GB</td></tr>
+                        <tr><td>Free space</td><td>30 GB</td><td>50 GB</td></tr>
+                        <tr><td>Processor</td><td>64-bit with virtualisation</td><td>Intel i5+ / AMD Ryzen 5+</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Check virtualisation</h3>
+                
+                <div class="os-content windows active">
+                    <div class="os-specific windows">
+                        <div class="os-label">🪟 Windows</div>
+                        <ol style="margin-left: 1rem;">
+                            <li>Press <code>Ctrl + Shift + Esc</code> for Task Manager</li>
+                            <li>Click on the <strong>Performance</strong> tab</li>
+                            <li>Click on <strong>CPU</strong></li>
+                            <li>Look for <strong>"Virtualization: Enabled"</strong> in the bottom right</li>
+                        </ol>
+                        <div class="alert alert-success">
+                            <span class="alert-icon">✅</span>
+                            <div>If it says "Enabled" - you are OK!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="os-content macos">
+                    <div class="os-specific macos">
+                        <div class="os-label">🍎 macOS</div>
+                        <p>Open Terminal (Finder → Applications → Utilities → Terminal) and run:</p>
+                        <div class="code-block macos">
+                            <div class="code-header"><span>🍎 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                            <pre>sysctl -a | grep machdep.cpu.features | grep VMX</pre>
+                        </div>
+                        <p>If text with "VMX" appears, virtualisation is OK.</p>
+                        
+                        <h4 style="margin-top: 1rem;">Check processor type:</h4>
+                        <div class="code-block macos">
+                            <div class="code-header"><span>🍎 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                            <pre>uname -m</pre>
+                        </div>
+                        <ul style="margin-left: 1rem;">
+                            <li><code>x86_64</code> = Mac with Intel</li>
+                            <li><code>arm64</code> = Mac with Apple Silicon (M1/M2/M3)</li>
+                        </ul>
+                        <div class="alert alert-warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div>For Apple Silicon, VirtualBox has limited performance. Alternative: UTM (mac.getutm.app)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="os-content linux">
+                    <div class="os-specific linux">
+                        <div class="os-label">🐧 Linux</div>
+                        <p>Open the terminal and run:</p>
+                        <div class="code-block linux">
+                            <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                            <pre>egrep -c '(vmx|svm)' /proc/cpuinfo</pre>
+                        </div>
+                        <p>If the result is > 0, virtualisation is supported.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab1')">✓ I have checked</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 2: Download -->
+        <div class="tab-content" id="tab2">
+            <div class="card">
+                <h2 class="card-title">2. Download everything you need</h2>
+            </div>
+
+            <div class="card">
+                <h3>1⃣ Download VirtualBox</h3>
+                <p>Go to: <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">virtualbox.org/wiki/Downloads</a></p>
+                
+                <div class="os-content windows active">
+                    <p>Download: <strong>"Windows hosts"</strong></p>
+                </div>
+                <div class="os-content macos">
+                    <p>Download: <strong>"macOS / Intel hosts"</strong> or <strong>"macOS / Arm64 hosts"</strong> (for M1/M2/M3)</p>
+                </div>
+                <div class="os-content linux">
+                    <p>Download: <strong>"Linux distributions"</strong> and choose your distribution</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2⃣ Download Extension Pack</h3>
+                <p>On the same page, at the "VirtualBox Extension Pack" section, click on <strong>"All supported platforms"</strong></p>
+                <div class="alert alert-warning">
+                    <span class="alert-icon">⚠️</span>
+                    <div>The Extension Pack version MUST be the same as the VirtualBox version!</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3⃣ Download Ubuntu Server ISO</h3>
+                <p>Go to: <a href="https://ubuntu.com/download/server" target="_blank">ubuntu.com/download/server</a></p>
+                <p>Click on <strong>"Download Ubuntu Server 24.04 LTS"</strong></p>
+                <p style="color: var(--gray);">The file is ~2.5 GB, may take 10-30 minutes.</p>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab2')">✓ I have downloaded everything</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: VirtualBox Installation -->
+        <div class="tab-content" id="tab3">
+            <div class="card">
+                <h2 class="card-title">3. Install VirtualBox</h2>
+            </div>
+
+            <div class="os-content windows active">
+                <div class="card">
+                    <h3>Installation on Windows</h3>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Run the installer</h4>
+                            <p>Double-click on the file <code>VirtualBox-7.x.x-Win.exe</code></p>
+                            <p>Click <strong>Yes</strong> if it asks about permissions</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Go through the wizard</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Click <strong>Next</strong> (leave everything ticked)</li>
+                                <li>Click <strong>Next</strong></li>
+                                <li>Click <strong>Yes</strong> at the network warning</li>
+                                <li>Click <strong>Install</strong></li>
+                                <li>Click <strong>Install</strong> for each Oracle driver (may be 2-3)</li>
+                                <li>Click <strong>Finish</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-content macos">
+                <div class="card">
+                    <h3>Installation on macOS</h3>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Open the DMG</h4>
+                            <p>Double-click on <code>VirtualBox-7.x.x-macOS.dmg</code></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Run the installer</h4>
+                            <p>Double-click on <code>VirtualBox.pkg</code></p>
+                            <p>Click Continue → Install → enter password → Install Software</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Allow the extension</h4>
+                            <p>If "System Extension Blocked" appears:</p>
+                            <ol style="margin-left: 1rem;">
+                                <li>Open <strong>System Preferences → Security & Privacy</strong></li>
+                                <li>Click on the lock and enter password</li>
+                                <li>Click <strong>Allow</strong> for Oracle</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h4>RESTART the Mac!</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-content linux">
+                <div class="card">
+                    <h3>Installation on Linux</h3>
+                    
+                    <div class="accordion">
+                        <div class="accordion-item open">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Ubuntu / Debian / Linux Mint</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-inner">
+                                    <p>Run these commands one by one:</p>
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg</pre>
+                                    </div>
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list</pre>
+                                    </div>
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>sudo apt update && sudo apt install -y virtualbox-7.0</pre>
+                                    </div>
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>sudo usermod -aG vboxusers $USER</pre>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <span class="alert-icon">⚠️</span>
+                                        <div>After the last command, <strong>log out and log back in!</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Fedora</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-inner">
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>sudo dnf install -y VirtualBox && sudo usermod -aG vboxusers $USER</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Arch Linux / Manjaro</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-inner">
+                                    <div class="code-block linux">
+                                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                        <pre>sudo pacman -S virtualbox virtualbox-host-modules-arch && sudo modprobe vboxdrv && sudo usermod -aG vboxusers $USER</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab3')">✓ VirtualBox installed</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 4: Extension Pack -->
+        <div class="tab-content" id="tab4">
+            <div class="card">
+                <h2 class="card-title">4. Install Extension Pack</h2>
+                <p>This step is identical for Windows, macOS and Linux.</p>
+            </div>
+
+            <div class="card">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open VirtualBox</h4>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Go to Extension Pack Manager</h4>
+                        <p>From menu: <strong>File → Tools → Extension Pack Manager</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Install</h4>
+                        <p>Click on the <strong>"+"</strong> icon (Install)</p>
+                        <p>Navigate to the downloaded <code>.vbox-extpack</code> file</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h4>Accept the licence</h4>
+                        <p>Scroll to the bottom and click <strong>I Agree</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab4')">✓ Extension Pack installed</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 5: Create VM -->
+        <div class="tab-content" id="tab5">
+            <div class="card">
+                <h2 class="card-title">5. Create the virtual machine</h2>
+            </div>
+
+            <div class="card">
+                <h3>Start the wizard</h3>
+                <p>In VirtualBox, click on the <strong>New</strong> button</p>
+            </div>
+
+            <div class="card">
+                <h3>Step 1: Name and system</h3>
+                <div class="table-responsive">
+                    <table>
+                        <tr><th>Field</th><th>What to type/select</th></tr>
+                        <tr><td>Name</td><td><code>Ubuntu-Server-2404-SO</code></td></tr>
+                        <tr><td>ISO Image</td><td>Click dropdown → Other → select the downloaded Ubuntu ISO</td></tr>
+                        <tr><td>Type</td><td><code>Linux</code></td></tr>
+                        <tr><td>Version</td><td><code>Ubuntu (64-bit)</code></td></tr>
+                    </table>
+                </div>
+                <div class="alert alert-danger">
+                    <span class="alert-icon">⚠️</span>
+                    <div><strong>Important:</strong> Tick <strong>"Skip Unattended Installation"</strong>!</div>
+                </div>
+                <p>Click <strong>Next</strong></p>
+            </div>
+
+            <div class="card">
+                <h3>Step 2: Hardware</h3>
+                <div class="table-responsive">
+                    <table>
+                        <tr><th>Setting</th><th>Value</th></tr>
+                        <tr><td>Base Memory</td><td><code>4096</code> MB (4 GB)</td></tr>
+                        <tr><td>Processors</td><td><code>2</code></td></tr>
+                        <tr><td>Enable EFI</td><td>✅ Tick (optional)</td></tr>
+                    </table>
+                </div>
+                <p>Click <strong>Next</strong></p>
+            </div>
+
+            <div class="card">
+                <h3>Step 3: Hard Disk</h3>
+                <ul style="margin-left: 1rem;">
+                    <li>Select <strong>"Create a Virtual Hard Disk Now"</strong></li>
+                    <li>Disk Size: <code>25</code> GB (or 50 GB if you have space)</li>
+                    <li><strong>DO NOT</strong> tick "Pre-allocate Full Size"</li>
+                </ul>
+                <p>Click <strong>Next</strong> → check the summary → Click <strong>Finish</strong></p>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab5')">✓ VM created</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 6: Network -->
+        <div class="tab-content" id="tab6">
+            <div class="card">
+                <h2 class="card-title">6. Configure Bridge network</h2>
+                <p>Bridge makes Ubuntu appear as a separate computer in your network.</p>
+            </div>
+
+            <div class="card">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h4>Open VM settings</h4>
+                        <p>Select the VM → click <strong>Settings</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h4>Configure network</h4>
+                        <p>In the menu on the left, click on <strong>Network</strong></p>
+                        <ul style="margin-left: 1rem;">
+                            <li><strong>Enable Network Adapter:</strong> ✅ ticked</li>
+                            <li><strong>Attached to:</strong> select <code>Bridged Adapter</code></li>
+                            <li><strong>Name:</strong> select network interface:
+                                <ul>
+                                    <li>If on cable: something with "Ethernet"</li>
+                                    <li>If on Wi-Fi: something with "Wi-Fi" or "Wireless"</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h4>Save</h4>
+                        <p>Click <strong>OK</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab6')">✓ Network configured</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 7: Ubuntu Installation -->
+        <div class="tab-content" id="tab7">
+            <div class="card">
+                <h2 class="card-title">7. Install Ubuntu Server</h2>
+            </div>
+
+            <div class="card">
+                <h3>Start the VM</h3>
+                <p>Select the VM and click <strong>Start</strong></p>
+                <p>At the boot menu, select <strong>"Try or Install Ubuntu Server"</strong> and press Enter.</p>
+            </div>
+
+            <div class="card">
+                <h3>Go through the installer</h3>
+                <p>Use <strong>arrows</strong> and <strong>Tab</strong> to navigate. Press <strong>Enter</strong> to select.</p>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content"><h4>Language:</h4><p>Select <strong>English</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content"><h4>Keyboard:</h4><p>Leave English (US) → <strong>Done</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content"><h4>Type of install:</h4><p>Select <strong>Ubuntu Server</strong> → <strong>Done</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content"><h4>Network:</h4><p>Check that you have IP (e.g.: 192.168.x.x) → <strong>Done</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <div class="step-content"><h4>Proxy:</h4><p>Leave empty → <strong>Done</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">6</span>
+                    <div class="step-content"><h4>Mirror:</h4><p>Leave default → <strong>Done</strong></p></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">7</span>
+                    <div class="step-content"><h4>Storage:</h4><p>"Use an entire disk" → UNTICK "LVM" → <strong>Done</strong> → <strong>Done</strong> → <strong>Continue</strong></p></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>User profile</h3>
+                <div class="table-responsive">
+                    <table>
+                        <tr><th>Field</th><th>What to type</th></tr>
+                        <tr><td>Your name</td><td>First Name Surname (e.g.: <code>Ion Popescu</code>)</td></tr>
+                        <tr><td>Your server's name</td><td>Hostname: <code>INITIAL_GROUP_SERIES</code> (e.g.: <code>IP_1001_A</code>)</td></tr>
+                        <tr><td>Pick a username</td><td>Surname, lowercase (e.g.: <code>popescu</code>)</td></tr>
+                        <tr><td>Choose a password</td><td><code>stud</code></td></tr>
+                        <tr><td>Confirm password</td><td><code>stud</code></td></tr>
+                    </table>
+                </div>
+                <p>Click <strong>Done</strong></p>
+            </div>
+
+            <div class="card">
+                <h3>Rest of settings</h3>
+                <ul style="margin-left: 1rem;">
+                    <li><strong>Ubuntu Pro:</strong> Skip for now → Continue</li>
+                    <li><strong>SSH:</strong> ✅ <strong>TICK "Install OpenSSH server"</strong> → Done</li>
+                    <li><strong>Featured Snaps:</strong> DO NOT select anything → Done</li>
+                </ul>
+                <p>Wait for installation (5-15 minutes) → <strong>Reboot Now</strong></p>
+            </div>
+
+            <div class="card">
+                <h3>After reboot</h3>
+                <p>If it tries to boot from ISO again, stop the VM, go to Settings → Storage and remove the ISO.</p>
+                <p>At the prompt, log in with your username and password (<code>stud</code>).</p>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab7')">✓ Ubuntu installed</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 8: Ubuntu Configuration -->
+        <div class="tab-content" id="tab8">
+            <div class="card">
+                <h2 class="card-title">8. Post-installation configuration</h2>
+                <p>These commands are run in Ubuntu VM (the VirtualBox window).</p>
+            </div>
+
+            <div class="card">
+                <h3>Update the system</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>sudo apt update && sudo apt -y upgrade</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Configure timezone</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>sudo timedatectl set-timezone Europe/Bucharest</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Find out the IP address</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>hostname -I</pre>
+                </div>
+                <div class="alert alert-warning">
+                    <span class="alert-icon">📝</span>
+                    <div><strong>NOTE DOWN this IP address!</strong> (e.g.: 192.168.1.105)</div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab8')">✓ Ubuntu configured</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 9: Packages -->
+        <div class="tab-content" id="tab9">
+            <div class="card">
+                <h2 class="card-title">9. Install required software</h2>
+            </div>
+
+            <div class="card">
+                <h3>Install all packages</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>sudo apt update && sudo apt install -y build-essential git curl wget nano vim tree htop net-tools man-db manpages-posix software-properties-common gawk sed grep coreutils findutils diffutils moreutils procps sysstat iotop nmon lsof strace dstat tar gzip bzip2 xz-utils zstd zip unzip p7zip-full iproute2 iputils-ping dnsutils netcat-openbsd traceroute nmap tcpdump iftop nethogs gcc g++ make cmake gdb valgrind python3 python3-pip python3-venv shellcheck jq bc expect figlet toilet cowsay tree ncdu pv dialog tmux screen</pre>
+                </div>
+                <p style="color: var(--gray);">Takes 5-15 minutes.</p>
+            </div>
+
+            <div class="card">
+                <h3>Install Python libraries</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>pip3 install --break-system-packages rich tabulate psutil</pre>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab9')">✓ Packages installed</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 10: SSH -->
+        <div class="tab-content" id="tab10">
+            <div class="card">
+                <h2 class="card-title">10. Configure SSH</h2>
+            </div>
+
+            <div class="card">
+                <h3>Check and start SSH</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>sudo systemctl status ssh</pre>
+                </div>
+                <p>You should see "Active: <strong>active (running)</strong>". Press <code>q</code> to exit.</p>
+
+                <p style="margin-top: 1rem;">If it is not running:</p>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>sudo systemctl start ssh && sudo systemctl enable ssh</pre>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab10')">✓ SSH working</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 11: Connect -->
+        <div class="tab-content" id="tab11">
+            <div class="card">
+                <h2 class="card-title">11. Connect from the main computer</h2>
+            </div>
+
+            <div class="os-content windows active">
+                <div class="card">
+                    <h3>Connect with PuTTY (Windows)</h3>
+                    <ol style="margin-left: 1rem;">
+                        <li>Download and install PuTTY from <a href="https://www.putty.org" target="_blank">putty.org</a></li>
+                        <li>Open PuTTY</li>
+                        <li><strong>Host Name:</strong> the noted IP address (e.g.: 192.168.1.105)</li>
+                        <li><strong>Port:</strong> 22</li>
+                        <li>Configure colours: Window → Colours:
+                            <ul>
+                                <li>Default Background: R:0 G:0 B:0</li>
+                                <li>Default Foreground: R:255 G:255 B:255</li>
+                            </ul>
+                        </li>
+                        <li>Connection → Data → Auto-login username: your name (e.g.: popescu)</li>
+                        <li>Session → Saved Sessions: type <code>Ubuntu-VM-SO</code> → click <strong>Save</strong></li>
+                        <li>Click <strong>Open</strong></li>
+                        <li>Accept at security alert → enter password <code>stud</code></li>
+                    </ol>
+                </div>
+                <div class="card">
+                    <h3>Transfer files with WinSCP</h3>
+                    <ol style="margin-left: 1rem;">
+                        <li>Download and install from <a href="https://winscp.net" target="_blank">winscp.net</a></li>
+                        <li>File protocol: SFTP</li>
+                        <li>Host name: IP address</li>
+                        <li>Port: 22</li>
+                        <li>User name: your name</li>
+                        <li>Password: stud</li>
+                        <li>Save → Login</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="os-content macos">
+                <div class="card">
+                    <h3>Connect from Terminal (macOS)</h3>
+                    <p>Open Terminal and run (replace with your data):</p>
+                    <div class="code-block macos">
+                        <div class="code-header"><span>🍎 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                        <pre>ssh <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="31415e4154425244710008031f0007091f001f000104">[email&#160;protected]</a></pre>
+                    </div>
+                    <p>Type <code>yes</code> at first connection, then password <code>stud</code>.</p>
+                    
+                    <h4 style="margin-top: 1rem;">Transfer files:</h4>
+                    <div class="code-block macos">
+                        <div class="code-header"><span>🍎 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                        <pre>scp file.txt <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="60100f1005130315205159524e5156584e514e515055">[email&#160;protected]</a>:/home/popescu/</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-content linux">
+                <div class="card">
+                    <h3>Connect from Terminal (Linux)</h3>
+                    <div class="code-block linux">
+                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                        <pre>ssh <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7d0d120d180e1e083d4c444f534c4b45534c534c4d48">[email&#160;protected]</a></pre>
+                    </div>
+                    
+                    <h4 style="margin-top: 1rem;">Transfer files:</h4>
+                    <div class="code-block linux">
+                        <div class="code-header"><span>🐧 TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                        <pre>scp file.txt <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c1b1aeb1a4b2a2b481f0f8f3eff0f7f9eff0eff0f1f4">[email&#160;protected]</a>:/home/popescu/</pre>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab11')">✓ Connection successful</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 12: Folders -->
+        <div class="tab-content" id="tab12">
+            <div class="card">
+                <h2 class="card-title">12. Create working folders</h2>
+            </div>
+
+            <div class="card">
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>mkdir -p ~/Books ~/HomeworksOLD ~/Projects ~/ScriptsSTUD ~/test ~/TXT</pre>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <tr><th>Folder</th><th>Purpose</th></tr>
+                        <tr><td>Books</td><td>Books, PDFs</td></tr>
+                        <tr><td>HomeworksOLD</td><td>Old homework</td></tr>
+                        <tr><td>Projects</td><td>Projects</td></tr>
+                        <tr><td>ScriptsSTUD</td><td>Scripts from seminars</td></tr>
+                        <tr><td>test</td><td>Experiments</td></tr>
+                        <tr><td>TXT</td><td>Notes</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Folders created</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 13: Verify -->
+        <div class="tab-content" id="tab13">
+            <div class="card">
+                <h2 class="card-title">13. Verify the installation</h2>
+            </div>
+
+            <div class="card">
+                <h3>Run the verification script</h3>
+                <div class="code-block ubuntu-vm">
+                    <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                    <pre>echo "" && echo "========================================" && echo "   INSTALLATION VERIFICATION - OS ASE" && echo "   Ubuntu Server in VirtualBox" && echo "========================================" && echo "" && echo ">>> System information:" && echo "Hostname: $(hostname)" && echo "User: $(whoami)" && echo "Ubuntu: $(lsb_release -d 2>/dev/null | cut -f2)" && echo "Kernel: $(uname -r)" && echo "" && echo ">>> Network:" && echo "IP: $(hostname -I | awk '{print $1}')" && ping -c 1 google.com > /dev/null 2>&1 && echo "Internet: OK" || echo "Internet: NO CONNECTION" && echo "" && echo ">>> Essential commands:" && for cmd in bash git nano vim gcc python3 ssh tree htop awk sed grep find tar gzip nmap; do command -v $cmd > /dev/null 2>&1 && echo "  [OK] $cmd" || echo "  [MISSING] $cmd"; done && echo "" && echo ">>> SSH:" && systemctl is-active ssh > /dev/null 2>&1 && echo "  SSH server: ACTIVE" || echo "  SSH server: INACTIVE" && echo "" && echo ">>> Folders:" && for dir in Books HomeworksOLD Projects ScriptsSTUD test TXT; do [ -d ~/$dir ] && echo "  [OK] ~/$dir" || echo "  [MISSING] ~/$dir"; done && echo "" && echo "========================================" && echo "   VERIFICATION COMPLETE!" && echo "   Connect with: ssh $(whoami)@$(hostname -I | awk '{print $1}')" && echo "========================================"</pre>
+                </div>
+            </div>
+
+            <button class="mark-done" onclick="markDone(this, 'tab13')">✓ Verification OK</button>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next" onclick="nextTab()">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 14: Problems -->
+        <div class="tab-content" id="tab14">
+            <div class="card">
+                <h2 class="card-title">14. Common problems</h2>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ VirtualBox does not start - virtualisation error</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p>You need to enable virtualisation in BIOS:</p>
+                            <ol style="margin-left: 1rem;">
+                                <li>Restart the computer</li>
+                                <li>Press Del, F2, F10 or F12 at boot</li>
+                                <li>Look for "Virtualization", "VT-x", "AMD-V" or "SVM"</li>
+                                <li>Change to "Enabled"</li>
+                                <li>Save and exit</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ Ubuntu does not receive IP</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <p>Check Bridge settings in VirtualBox. Make sure you selected the correct interface (the one connected to internet).</p>
+                            <p>In Ubuntu, try:</p>
+                            <div class="code-block ubuntu-vm">
+                                <div class="code-header"><span>⬛ UBUNTU VM</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div>
+                                <pre>sudo dhclient -v enp0s3</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ Cannot connect via SSH</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <ol style="margin-left: 1rem;">
+                                <li>Is the Ubuntu VM running?</li>
+                                <li>Is SSH running? <code>sudo systemctl status ssh</code></li>
+                                <li>Is the IP correct? <code>hostname -I</code></li>
+                                <li>Can you ping from host to VM?</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>❌ I forgot the password</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner">
+                            <ol style="margin-left: 1rem;">
+                                <li>At boot, hold Shift for the GRUB menu</li>
+                                <li>Select "Advanced options" → "(recovery mode)"</li>
+                                <li>Select "root - Drop to root shell"</li>
+                                <li>Type: <code>passwd yourname</code></li>
+                                <li>Enter the new password twice</li>
+                                <li>Type: <code>reboot</code></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(0, 255, 136, 0.1)); border: 2px solid var(--success);">
+                <h2>Congratulations!</h2>
+                <p>You have finished installing Ubuntu Server in VirtualBox!</p>
+                
+                <h3 style="margin-top: 1rem;">Final checklist</h3>
+                <ul class="checklist" id="finalChecklist">
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> VirtualBox installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Extension Pack installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> VM created (4GB RAM, 2 CPU, 25GB disk)</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Bridge network configured</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Ubuntu Server installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Username = surname</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Hostname = INITIAL_GROUP_SERIES</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Packages installed</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> SSH working</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Connection from host successful</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Folders created</li>
+                    <li onclick="toggleCheck(this)"><input type="checkbox"> Verification OK</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn prev" onclick="prevTab()">← Back</button>
+                <button class="nav-btn next complete" onclick="alert('🎉 Congratulations! You have completed the guide!')">✓ Done!</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
+
+    <footer class="footer">
+        <p>Operating Systems 2024-2025 | ASE Bucharest - CSIE</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 2.1 | January 2025</p>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // OS Selection
+        let currentOS = 'windows';
+        
+        function setOS(os) {
+            currentOS = os;
+            document.querySelectorAll('.os-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.os === os);
+            });
+            document.querySelectorAll('.os-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.os-content.' + os).forEach(content => {
+                content.classList.add('active');
+            });
+            localStorage.setItem('vbox-os', os);
+        }
+
+        // Tab functionality
+        let currentTab = 'intro';
+        const tabs = ['intro', 'tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10', 'tab11', 'tab12', 'tab13', 'tab14'];
+        const completedTabs = new Set();
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+            currentTab = tabId;
+            updateProgress();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        function nextTab() {
+            const idx = tabs.indexOf(currentTab);
+            if (idx < tabs.length - 1) showTab(tabs[idx + 1]);
+        }
+
+        function prevTab() {
+            const idx = tabs.indexOf(currentTab);
+            if (idx > 0) showTab(tabs[idx - 1]);
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() { showTab(this.dataset.tab); });
+        });
+
+        // Copy code
+        function copyCode(btn) {
+            const pre = btn.closest('.code-block').querySelector('pre');
+            navigator.clipboard.writeText(pre.textContent).then(function() {
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(function() {
+                    btn.textContent = '📋 Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Mark done
+        function markDone(btn, tabId) {
+            btn.classList.add('done');
+            btn.textContent = '✓ Completed!';
+            completedTabs.add(tabId);
+            document.querySelector('[data-tab="' + tabId + '"]').classList.add('completed');
+            updateProgress();
+            saveProgress();
+        }
+
+        // Progress
+        function updateProgress() {
+            const progress = (completedTabs.size / (tabs.length - 1)) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }
+
+        // Accordion
+        function toggleAccordion(header) {
+            header.parentElement.classList.toggle('open');
+        }
+
+        // Checklist
+        function toggleCheck(li) {
+            li.classList.toggle('checked');
+            li.querySelector('input').checked = !li.querySelector('input').checked;
+        }
+
+        // Scroll
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('scroll', function() {
+            document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 500);
+        });
+
+        // Save/Load
+        function saveProgress() {
+            localStorage.setItem('vbox-progress', JSON.stringify(Array.from(completedTabs)));
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load saved OS preference
+            var savedOS = localStorage.getItem('vbox-os');
+            if (savedOS) {
+                setOS(savedOS);
+            } else {
+                // Make sure Windows content is visible by default
+                document.querySelectorAll('.os-content.windows').forEach(
