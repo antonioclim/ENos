@@ -1,1392 +1,906 @@
-# ROso — Operating Systems: Complete Educational Kit
+# ENos — Operating Systems: Complete Educational Kit
+
+<div align="center">
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│  🐧 LINUX    Ubuntu 24.04+    │  📋 BASH 5.0+   │  🐍 PYTHON 3.12+  │  📦 GIT 2.40+    │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│  LICENCE         RESTRICTIVE    │  UNITS              14      │  EST. HOURS         60+   │
-│  VERSION              5.3.1     │  SEMINARS            7      │  PROJECTS           23    │
-│  STATUS              ACTIVE     │  PNG DIAGRAMS       27      │  SCRIPTS          180+    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🐧 LINUX    Ubuntu 24.04+    │  📋 BASH 5.0+   │  🐍 PYTHON 3.12+  │  📦 GIT 2.40+         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│  LICENCE           RESTRICTIVE │  UNITS               14+4  │  EST. HOURS          60+      │
+│  VERSION               5.3.1   │  SEMINARS               7  │  PROJECTS             23      │
+│  STATUS               ACTIVE   │  HTML INTERACTIVE      71  │  SCRIPTS            180+      │
+│  LANGUAGE            ENGLISH   │  PNG DIAGRAMS          27  │  TEST COVERAGE       >80%     │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+[![GitHub](https://img.shields.io/badge/GitHub-ENos-blue?logo=github)](https://github.com/antonioclim/ENos)
+[![Romanian Version](https://img.shields.io/badge/🇷🇴_ROso-Romanian-red)](https://github.com/antonioclim/ROso)
+[![License](https://img.shields.io/badge/Licence-Restrictive-orange)](#licence)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04+-E95420?logo=ubuntu)](https://ubuntu.com/)
 
 **by ing. dr. Antonio Clim** | Bucharest University of Economic Studies — CSIE  
-Year I, Semester 2 | 2017-2030
+Year I, Semester 2 | 2017–2030
+
+</div>
 
 ---
 
-## What's New in v5.3
+## 📋 Table of Contents
 
-This release focuses on quality-of-life improvements for both students and instructors:
+<details open>
+<summary><strong>Click to expand/collapse</strong></summary>
 
-- **Print stylesheets** for HTML presentations — all slides can now be printed cleanly for offline study or handouts
-- **Link checking** integrated into the CI pipeline — automated validation catches broken documentation links before they reach students
-- **Expanded test suite** for shared utilities — the lib/ modules now have over 80% test coverage
-- **lib/ documentation** with usage examples — proper documentation for the Python utilities that power autograders and randomisation
+- [What's New in v5.3](#-whats-new-in-v53)
+- [Quick Navigation](#-quick-navigation)
+- [Kit Overview](#-kit-overview)
+- [Repository Structure](#-repository-structure)
+- [Part I: Setup and Configuration](#part-i-setup-and-configuration)
+- [Part II: Seminars (SEM01–SEM07)](#part-ii-seminars-sem01sem07)
+- [Part III: Lectures (14 Core + 4 Supplementary)](#part-iii-lectures-14-core--4-supplementary)
+- [Part IV: Projects](#part-iv-projects)
+- [Part V: Shared Utilities & Developer Tools](#part-v-shared-utilities--developer-tools)
+- [Part VI: Anti-Plagiarism Infrastructure](#part-vi-anti-plagiarism-infrastructure)
+- [Part VII: CI/CD Pipeline](#part-vii-cicd-pipeline)
+- [Part VIII: Pedagogy & Course Philosophy](#part-viii-pedagogy--course-philosophy)
+- [Annexes](#annexes)
+- [Licence](#licence)
 
----
-
-## Quick Navigation
-
-| Looking for... | Go to... |
-|----------------|----------|
-| Setup guide | [Step 0: Choose Your Installation](#step-0-choose-your-installation-option) |
-| Seminar materials | `SEM01/` through `SEM07/` |
-| Projects | `04_PROJECTS/` |
-| Lecture support | `05_LECTURES/` |
-| Quick reference | `NAVIGATION.md` |
-| Shared utilities | `lib/README.md` |
-| Developer tools | [PART VII: Developer Tools](#part-vii-developer-tools) |
-| Troubleshooting | [PART VI: Troubleshooting](#part-vi-troubleshooting) |
+</details>
 
 ---
 
-## What You Will Find Here
+## 🆕 What's New in v5.3
 
-This kit contains the materials for the Operating Systems course: 14 course units, 7 seminars with practical exercises and 23 projects at three difficulty levels. Everything is structured so you can work independently or in the laboratory.
-
-Bash seems simple at first glance — short commands, instant output — but when you try to automate something real, you suddenly discover that `$?` does not do what you think, that pipes lose variables and that a misplaced space in `[ $var ]` breaks your entire script. I have been through this with every generation of students, and the kit reflects exactly the problems I have seen in practice.
-
-An observation after several years of teaching: students who take notes of their commands and output as they go reach working solutions much faster. Not because they are cleverer, but because they can return to what worked and compare it with what does not. It is a trivial practice but surprisingly effective.
-
----
-
-## What You Will Be Able to Do After This Course
-
-By the end, you will have a solid understanding of how an operating system works — not just which buttons to press, but why what happens happens. Specifically:
-
-**Automation and scripting:** You will write Bash scripts that do in 30 seconds what you previously did manually in 30 minutes. Backups, log processing, deployment, reports — things that seem tedious become satisfying when you automate them once and then they work on their own.
-
-**Debugging and diagnostics:** You will know how to use `strace`, `top`, `htop`, `lsof` (or, at least, you will be able to say you have heard of them) to understand why a programme is not doing what it should. Instead of searching blindly, you will be able to trace exactly what is happening at system level.
-
-**System administration:** Permissions, processes, services, cron jobs — the basic vocabulary of any system administrator. Even if you will not work in sysadmin, you will understand what your devops colleagues mean when they talk about "giving chmod 755" or "sending SIGTERM".
-
-**Foundation for specialisations:** The knowledge here is the starting point for several directions (and here I mention just a few):
-
-| Direction | What you use from this course |
-|----------|----------------------------|
-| DevOps / SRE | Scripting, processes, services, containers |
-| Information security | Permissions, processes, system audits |
-| Backend development | IPC, threading, virtual memory |
-| Embedded / IoT | Processes, scheduling, kernel |
-| Cloud engineering | Virtualisation, containers, automation |
-| Data engineering | Text processing (grep/sed/awk), pipelines |
-
-You do not need to choose now — the idea is that the fundamentals you build here will help you wherever you end up.
+| Feature | Description | Status |
+|:-------:|-------------|:------:|
+| 🖨️ | **Print stylesheets** for HTML presentations (offline handouts) | ✅ NEW |
+| 🔗 | **Link checking** in CI pipeline (automated validation) | ✅ NEW |
+| 🧪 | **Expanded test suite** for shared utilities (>80% coverage) | ✅ NEW |
+| 📚 | **lib/ documentation** with comprehensive usage examples | ✅ NEW |
+| 🤖 | **AI fingerprint scanner** for detecting AI-generated submissions | ✅ Enhanced |
+| 📊 | **Randomisation utilities** for student-specific test parameters | ✅ Enhanced |
 
 ---
 
-## Why the Course Looks the Way It Does
+## 🚀 Quick Navigation
 
-A few principles I had in mind when structuring the materials:
+```mermaid
+flowchart LR
+    subgraph START["🎯 Start Here"]
+        A[New Student?] --> B[01_INIT_SETUP/]
+        C[Submit HW?] --> D[02_INIT_HOMEWORKS/]
+        E[Need Guides?] --> F[03_GUIDES/]
+    end
+    
+    subgraph CORE["📚 Core Content"]
+        G[Seminars] --> H[SEM01-SEM07/]
+        I[Lectures] --> J[05_LECTURES/]
+        K[Projects] --> L[04_PROJECTS/]
+    end
+    
+    subgraph SUPPORT["🔧 Support"]
+        M[Exam Prep] --> N[00_SUPPLEMENTARY/]
+        O[Grading] --> P[SEM07/]
+        Q[Dev Tools] --> R[lib/ & scripts/]
+    end
+```
 
-**There is no "programmer gene."** The ability to write code is acquired through deliberate practice, not an innate talent you are born with or not. Patitsas and colleagues demonstrated in 2016 that only 5.8% of grade distributions in computer science courses are bimodal — the rest of the myth "some can, some cannot" is self-fulfilling prophecy.
-
-**Beginners are not slowed-down experts.** They need different approaches, not just more time. That is why the materials include Parsons Problems (code reordering), Peer Instruction (questions with pair discussions) and structured Live Coding. These are techniques validated in recent computing education research!
-
-**Errors are opportunities, not failures.** I have normalised the idea (opportunity) of making mistakes throughout the kit. Every programmer has gone through the same stupid bugs — the misplaced space somewhere in a `[ $var ]`, forgotten quotation marks, off-by-one in for/while loops. When you see that the instructor also makes mistakes whilst correcting/fixing code typed in real time, it somehow becomes easier to accept that you too will make mistakes. (And you no longer feel alone in the dark ... although, sometimes, even GPT seems like a torch!)
-
-**LLMs are tools, not adversaries.** Today's students have access to ChatGPT, Claude, Gemini — there is no point in designing courses that ignore reality. I have included explicitly "LLM-aware" exercises where you must evaluate what the AI generates, not just copy. The aim is understanding, not task completion.
-
-**Attention works in sprints (but short ones!).** Neuroscience research shows that sustained attention for students is realistic in windows of 5-10 minutes, not 50. That is why assignments are structured in micro-milestones with immediate checks. Breaks are not wasted time — incubation helps knowledge consolidation. (Honestly, in my youth I tried incubation without having learnt anything beforehand ... I failed some exams doing that, but at least I failed them well-rested.)
-
-If it sounds strange that an Operating Systems course thinks about neuroscience and pedagogy: this is how any course should look. Traditional teaching — slides read monotonously for two hours, with students in a passive role — has never worked well; we have just collectively accepted that this is normal. It is not normal. It is industrial education: efficient for processing people, inefficient for teaching them anything.
-
-The materials here are the result of years of experimentation, testing and iteration. The methods of Peer Instruction, Productive Failure, Subgoal Labelling (obviously) were not invented by me. They are validated in research at SIGCSE, ICER, ITiCSE (see refs). What I have done is apply them in the concrete context of our course and see what works with students at ASE.
+| I want to... | Go to | Description |
+|:-------------|:------|:------------|
+| 🔧 Set up my environment | [`01_INIT_SETUP/`](./01_INIT_SETUP/) | WSL2/VirtualBox installation guides |
+| 📝 Submit homework | [`02_INIT_HOMEWORKS/`](./02_INIT_HOMEWORKS/) | Recording scripts, submission tools |
+| 📖 Find student guides | [`03_GUIDES/`](./03_GUIDES/) | FAQ, contributing, student handbook |
+| 💼 Browse projects | [`04_PROJECTS/`](./04_PROJECTS/) | 23 projects (Easy/Medium/Advanced) |
+| 📚 Read lecture notes | [`05_LECTURES/`](./05_LECTURES/) | 14 core + 4 supplementary units |
+| 🎓 Prepare for exam | [`00_SUPPLEMENTARY/`](./00_SUPPLEMENTARY/) | Exercises, quick reference, diagrams |
+| 📊 Understand grading | [`SEM07/`](./SEM07/) | Rubrics, grade calculator, policies |
+| 🛠️ Use shared utilities | [`lib/`](./lib/) | Logging, randomisation, testing |
 
 ---
 
-# PART I: SETUP AND CONFIGURATION
+## 📊 Kit Overview
 
-This section covers everything you need to do before the first seminar. Without a working environment, the rest is useless.
+### At a Glance
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ENos EDUCATIONAL KIT v5.3.1                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐     │
+│  │   14 + 4    │   │      7      │   │     23      │   │    180+     │     │
+│  │  LECTURES   │   │  SEMINARS   │   │  PROJECTS   │   │   SCRIPTS   │     │
+│  │ (Core+Supp) │   │ (Complete)  │   │ (3 Levels)  │   │(Bash+Python)│     │
+│  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘     │
+│                                                                             │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐     │
+│  │     71      │   │     27      │   │     26      │   │     28      │     │
+│  │    HTML     │   │     PNG     │   │     SVG     │   │    YAML     │     │
+│  │(Interactive)│   │ (Diagrams)  │   │ (Graphics)  │   │  (Quizzes)  │     │
+│  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Comprehensive Statistics
+
+| Category | Quantity | Location | Details |
+|:---------|:--------:|:---------|:--------|
+| **Theoretical Lectures** | 14 | `05_LECTURES/01-14` | Core OS concepts |
+| **Supplementary Lectures** | 4 | `05_LECTURES/15-18supp` | Network, Containers, Kernel, NPU |
+| **Practical Seminars** | 7 | `SEM01-SEM07/` | Including evaluation week |
+| **Semester Projects** | 23 | `04_PROJECTS/` | 5 Easy + 15 Medium + 3 Advanced |
+| **Markdown Documentation** | 362 | Throughout | Guides, materials, references |
+| **HTML Presentations** | 71 | Various `/docs/` folders | Interactive simulators |
+| **PNG Diagrams** | 27 | `00_SUPPLEMENTARY/diagrams_png/` | Concept visualisations |
+| **SVG Diagrams** | 26 | `SEM*/docs/images/` | Vector graphics |
+| **Python Scripts** | 65 | `*/scripts/python/` | Autograders, generators, tools |
+| **Bash Scripts** | 118 | `*/scripts/bash/`, `*/scripts/demo/` | Demos, utilities, validators |
+| **YAML Quiz Files** | 28 | `*/formative/` | Question banks |
+| **Test Files** | 25+ | `*/tests/` | pytest and shell tests |
+| **Estimated Hours** | 60+ | — | For complete coverage |
 
 ---
 
-## Step 0: Choose Your Installation Option
+## 📁 Repository Structure
 
-You have three main options. My recommendation is WSL2 if you are on Windows — it is the simplest and closest to the real Linux experience.
-
-| Option | For whom | Advantages | Disadvantages |
-|---------|-------------|----------|-------------|
-| **WSL2** | Windows 10/11 | Fast, integrated into Windows, no reboot | Requires updated Windows |
-| **VirtualBox** | Any OS | Complete isolation, snapshots | Slower, consumes more resources |
-| **Dual boot** | Advanced users | Native performance | Risk during installation, must reboot |
-
-**Quick decision:** If you have a recent Windows 10/11, go with WSL2. If you have an older Windows or want complete isolation, VirtualBox. Dual boot only if you know what you are doing.
-
----
-
-## Step 1: Installing WSL2 (Recommended Option)
-
-WSL2 has completely changed the way I teach — now students can practise Linux without dual boot or a separate virtual machine.
-
-### 1.1 Check the Requirements
-
-**Windows 10:** You need version 2004 or newer (Build 19041+)  
-**Windows 11:** Any version works
-
-Check your version:
-
-```powershell
-# POWERSHELL (Windows) - run as normal user
-winver
-```
-
-A window opens with information. Look for the Build number.
-
-### 1.2 Check Virtualisation
-
-Open Task Manager (`Ctrl+Shift+Esc`), Performance tab, click on CPU. In the bottom right you should see:
+### Top-Level Architecture
 
 ```
-Virtualization: Enabled
-```
-
-If it says "Disabled", you need to enable virtualisation from BIOS. The procedure differs depending on the motherboard manufacturer — search for "[laptop/PC brand] enable virtualization BIOS".
-
-### 1.3 Enable WSL2
-
-Open PowerShell **as Administrator** (right-click on Start → Terminal (Admin) or Windows PowerShell (Admin)):
-
-```powershell
-# POWERSHELL (Administrator)
-# Enable Windows Subsystem for Linux
-dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-
-# Enable Virtual Machine Platform
-dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-```
-
-**RESTART your computer.** Seriously, without a restart it will not work.
-
-### 1.4 Install Ubuntu
-
-After restart, open PowerShell as Administrator again:
-
-```powershell
-# POWERSHELL (Administrator)
-# Download and install the WSL2 kernel update
-wsl --update
-
-# Set WSL2 as the default version
-wsl --set-default-version 2
-
-# Install Ubuntu 24.04 LTS
-wsl --install -d Ubuntu-24.04
-```
-
-The download takes 5-15 minutes depending on your internet connection. At the end, a new window with Ubuntu opens automatically.
-
-### 1.5 Create Your Linux Account
-
-Ubuntu asks you to create a user.
-
-**Username:** Your surname, lowercase, without diacritics  
-Examples: `popescu`, `ionescu`, `stefanescu`
-
-**Password:** `stud` (for consistency in the lab)
-
-When you type the password, **you see nothing on the screen** — no stars, no dots. This is normal for Linux. Type and press Enter.
-
-### 1.6 Update the System
-
-The first command you run on any freshly installed Linux system:
-
-```bash
-# BASH (Ubuntu) - black background
-sudo apt update && sudo apt upgrade -y
-```
-
-`sudo` = "superuser do" — runs the command with administrator privileges  
-`apt` = the package manager from Debian/Ubuntu  
-`-y` = automatically answers "yes" to questions
-
-It takes a few minutes. Grab a coffee.
-
-### 1.7 Install the Required Packages
-
-```bash
-# BASH (Ubuntu)
-# Packages for seminars
-sudo apt install -y git vim nano tree htop ncdu shellcheck python3 python3-pip python3-venv build-essential openssh-server curl wget figlet lolcat cowsay fortune pv dialog jq bc
-
-# Verify the installation
-echo "Verifying installation..."
-for cmd in git vim nano tree htop python3 shellcheck ssh curl wget; do
-    command -v "$cmd" >/dev/null && echo "  [OK] $cmd" || echo "  [MISSING] $cmd"
-done
-```
-
-### 1.8 Configure SSH (for PuTTY and WinSCP)
-
-SSH allows you to connect to Ubuntu from Windows using PuTTY or to transfer files with WinSCP.
-
-```bash
-# BASH (Ubuntu)
-# Start the SSH service
-sudo service ssh start
-
-# Verify it is running
-sudo service ssh status
-
-# Find the IP address
-hostname -I
-```
-
-Note the IP address (probably `172.x.x.x`) — you will use it in PuTTY.
-
-### 1.9 Set the Hostname
-
-For identification in the lab, set a descriptive hostname:
-
-```bash
-# BASH (Ubuntu)
-# Replace AP_1001_A with your group and position
-# Format: [Specialisation]_[Group]_[PC Letter]
-# Example: AP_1029_B for Applied Informatics, group 1029, PC B
-
-sudo hostnamectl set-hostname AP_1029_A
-```
-
-Close and reopen the terminal to see the change.
-
----
-
-## Step 2: Recommended Folder Structure
-
-A good folder structure saves you from chaos during the semester. I have seen students with all files in a single folder — they would find `script.sh`, `script2.sh`, `script_final.sh`, `script_final_v2.sh` and no longer knew which was which.
-
-### 2.1 Create the Basic Structure
-
-```bash
-# BASH (Ubuntu)
-# Create the main structure
-mkdir -p ~/so-lab/{cursuri,seminarii,teme,proiecte,experimente,backup}
-
-# Create subdirectories for each seminar
-for i in $(seq -w 1 6); do
-    mkdir -p ~/so-lab/seminarii/SEM0$i/{exercitii,demo,notite}
-done
-
-# Create subdirectories for assignments
-for i in $(seq -w 1 7); do
-    mkdir -p ~/so-lab/teme/TEMA0$i
-done
-
-# Create subdirectories for courses
-for i in $(seq -w 1 14); do
-    mkdir -p ~/so-lab/cursuri/CURS$i/{notite,scripturi}
-done
-
-# Visualise the structure
-tree -L 3 ~/so-lab/
-```
-
-You should see:
-
-```
-/home/yourname/so-lab/
-├── backup/
-├── cursuri/
-│   ├── CURS01/
-│   │   ├── notite/
-│   │   └── scripturi/
-│   ├── CURS02/
-│   │   ├── notite/
-│   │   └── scripturi/
-│   └── ... (up to CURS14)
-├── experimente/
-├── proiecte/
-├── seminarii/
-│   ├── SEM01/
-│   │   ├── demo/
-│   │   ├── exercitii/
-│   │   └── notite/
-│   ├── SEM02/
-│   │   └── ...
-│   └── ... (up to SEM06)
-└── teme/
-    ├── TEMA01/
-    ├── TEMA02/
-    └── ... (up to TEMA07)
-```
-
-### 2.2 Why This Structure
-
-| Folder | What you put there | Why separate |
-|--------|--------------|---------------|
-| `cursuri/` | Notes and scripts from courses | Theory, separated from practice |
-| `seminarii/` | Exercises from the lab | Each seminar is independent |
-| `teme/` | Homework assignments | You submit them, do not mix them |
-| `proiecte/` | Semester project | Larger code, different structure |
-| `experimente/` | Tests, experiments | Place to "break things" |
-| `backup/` | Safety copies | Before major modifications |
-
-### 2.3 Create the Directory for Homework Recordings
-
-Assignments are recorded with a special script (more details in the assignments section):
-
-```bash
-# BASH (Ubuntu)
-mkdir -p ~/HOMEWORKS
-```
-
----
-
-## Step 3: Git Configuration
-
-Git is necessary to clone the kit and for versioning your own scripts. If you have not used Git before, now is the time to learn — it is a skill you will use in any programming job.
-
-### 3.1 Initial Configuration
-
-```bash
-# BASH (Ubuntu)
-# Set your identity (replace with your details)
-git config --global user.name "Popescu Ion"
-git config --global user.email "ion.popescu@student.ase.ro"
-
-# Useful settings
-git config --global init.defaultBranch main
-git config --global core.editor "nano"
-git config --global pull.rebase false
-
-# Verify the configuration
-git config --list
-```
-
-### 3.2 Clone the ROso Kit
-
-```bash
-# BASH (Ubuntu)
-cd ~/so-lab
-
-# Clone the repository
-git clone https://github.com/antonioclim/ROso.git
-
-# Verify the contents
-ls -la ROso/
-```
-
-If the repository is private or you received the materials another way, copy them manually to `~/so-lab/ROso/`.
-
-### 3.3 Create Repositories for Assignments
-
-Each assignment should have its own repository (or at least its own branch). This helps you:
-- Revert to previous versions if you break something
-- See what you modified and when
-- Demonstrate that you worked progressively (not everything on the last night)
-
-```bash
-# BASH (Ubuntu)
-# For each assignment, initialise a Git repo
-cd ~/so-lab/teme/TEMA01
-git init
-echo "# Tema 01 - SO" > README.md
-git add README.md
-git commit -m "Initial commit"
-
-# Create .gitignore
-cat > .gitignore << 'EOF'
-# Temporary files
-*.tmp
-*.bak
-*~
-*.swp
-
-# Outputs
-*.log
-*.out
-
-# Python cache
-__pycache__/
-*.pyc
-
-# System files
-.DS_Store
-Thumbs.db
-EOF
-
-git add .gitignore
-git commit -m "Add .gitignore"
-```
-
-### 3.4 Recommended Git Workflow for Assignments
-
-```bash
-# BASH (Ubuntu)
-# 1. Before starting work
-cd ~/so-lab/teme/TEMA01
-git status
-
-# 2. After each important milestone
-git add script.sh
-git commit -m "Implement backup function"
-
-# 3. At the end
-git add .
-git commit -m "Assignment complete - all requirements implemented"
-
-# 4. View the history
-git log --oneline
-```
-
-**Good commit messages:**
-- `"Add input validation function"`
-- `"Fix bug in processing files with spaces"`
-- `"Optimise main loop"`
-
-**Bad commit messages:**
-- `"update"`
-- `"asdfasdf"`
-- `"final final FINAL"`
-
----
-
-## Step 4: Verify the Installation
-
-Run this verification script to ensure everything is in order:
-
-```bash
-# BASH (Ubuntu)
-cat << 'EOF' > ~/verify_setup.sh
-#!/usr/bin/env bash
-# Verification script for the SO kit
-
-echo ""
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║          WORKING ENVIRONMENT VERIFICATION - SO ASE             ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
-echo ""
-
-# System information
-echo "▶ SYSTEM"
-echo "  Hostname: $(hostname)"
-echo "  User: $(whoami)"
-echo "  Ubuntu: $(lsb_release -ds 2>/dev/null || echo 'N/A')"
-echo "  Kernel: $(uname -r)"
-echo "  Bash: $(bash --version | head -1 | cut -d' ' -f4)"
-echo ""
-
-# Network
-echo "▶ NETWORK"
-echo "  IP: $(hostname -I 2>/dev/null | awk '{print $1}' || echo 'N/A')"
-if ping -c 1 -W 2 google.com >/dev/null 2>&1; then
-    echo "  Internet: OK"
-else
-    echo "  Internet: NO CONNECTION"
-fi
-echo ""
-
-# Required commands
-echo "▶ REQUIRED COMMANDS"
-CMDS="bash git nano vim python3 gcc shellcheck ssh tree htop awk sed grep find tar curl wget"
-for cmd in $CMDS; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-        printf "  [OK]      %s\n" "$cmd"
-    else
-        printf "  [MISSING] %s\n" "$cmd"
-    fi
-done
-echo ""
-
-# Optional commands
-echo "▶ OPTIONAL COMMANDS (for demos)"
-OPT_CMDS="figlet lolcat cowsay fortune pv dialog jq"
-for cmd in $OPT_CMDS; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-        printf "  [OK]      %s\n" "$cmd"
-    else
-        printf "  [--]      %s (optional)\n" "$cmd"
-    fi
-done
-echo ""
-
-# Folder structure
-echo "▶ FOLDER STRUCTURE"
-DIRS="so-lab so-lab/cursuri so-lab/seminarii so-lab/teme so-lab/proiecte HOMEWORKS"
-for dir in $DIRS; do
-    if [ -d ~/"$dir" ]; then
-        printf "  [OK]      ~/%s\n" "$dir"
-    else
-        printf "  [MISSING] ~/%s\n" "$dir"
-    fi
-done
-echo ""
-
-# Git
-echo "▶ GIT"
-if git config user.name >/dev/null 2>&1; then
-    echo "  User: $(git config user.name)"
-    echo "  Email: $(git config user.email)"
-else
-    echo "  [!] Git is not configured (run git config)"
-fi
-echo ""
-
-# SSH
-echo "▶ SSH"
-if systemctl is-active --quiet ssh 2>/dev/null || service ssh status 2>/dev/null | grep -q running; then
-    echo "  SSH Server: ACTIVE"
-else
-    echo "  SSH Server: INACTIVE (run: sudo service ssh start)"
-fi
-echo ""
-
-echo "════════════════════════════════════════════════════════════════"
-echo "Verification complete!"
-echo "════════════════════════════════════════════════════════════════"
-EOF
-
-chmod +x ~/verify_setup.sh
-~/verify_setup.sh
-```
-
----
-
-## Step 5: VirtualBox Installation (Alternative)
-
-If WSL2 does not work or you prefer complete isolation, use VirtualBox.
-
-### 5.1 Download and Install VirtualBox
-
-1. Download from https://www.virtualbox.org/wiki/Downloads
-2. Choose "Windows hosts" (or the variant for your OS)
-3. Run the installer with default settings
-
-### 5.2 Download Ubuntu 24.04 LTS
-
-1. Download the ISO from https://ubuntu.com/download/desktop
-2. Choose "Ubuntu 24.04 LTS"
-3. Save the `.iso` file (about 5 GB)
-
-### 5.3 Create the Virtual Machine
-
-1. Open VirtualBox → New
-2. Name: `Ubuntu-SO`
-3. Type: Linux, Version: Ubuntu (64-bit)
-4. Memory: minimum 4096 MB (4 GB), recommended 8192 MB
-5. Hard disk: Create a virtual hard disk now
-   - VDI, Dynamically allocated
-   - Minimum 25 GB, recommended 50 GB
-
-### 5.4 Configure the Machine
-
-Before starting, adjust the settings (Settings):
-
-**System → Processor:**
-- Processors: 2-4 (depending on how many cores you have)
-
-**Display → Screen:**
-- Video Memory: 128 MB
-- Enable 3D Acceleration: ticked (if it works)
-
-**Storage:**
-- Controller: IDE → Empty → click on the disc icon → Choose a disk file
-- Select the downloaded Ubuntu ISO
-
-### 5.5 Install Ubuntu
-
-1. Start → follow the installation wizard
-2. Install Ubuntu → Normal installation
-3. Username and password: same as for WSL2
-
-After installation, install Guest Additions for resolution and shared clipboard:
-
-```bash
-# BASH (Ubuntu in VirtualBox)
-sudo apt update
-sudo apt install -y virtualbox-guest-utils virtualbox-guest-x11
-sudo reboot
-```
-
-### 5.6 Snapshot Before the Lab
-
-VirtualBox has an excellent feature: snapshots. Before each lab, take a snapshot:
-
-1. Machine → Take Snapshot
-2. Name: "Before SEM03" (or whichever seminar follows)
-
-If you break something, you can instantly revert to the previous state.
-
----
-
-# PART II: KIT STRUCTURE
-
----
-
-## Overview
-
-```
-ROso/
-├── 001CONDITIIinit/          # ← STEP 1: Installation and configuration
-├── 002HWinit/          # ← STEP 2: Guides for students  
-├── 003GHID/          # ← STEP 3: Technical guides
+ENos/
+├── 📄 README.md                    # This comprehensive guide
+├── 📄 README_ADDITIONS.md          # Recent changes and additions
+├── 📄 NAVIGATION.md                # Quick navigation index
+├── 📄 LICENCE.md                   # Detailed licence terms
+├── 📄 LICENSE                      # Short licence reference
+├── 📄 pyproject.toml               # Python project configuration
 │
-├── SO_curs/                  # Course materials (theory)
-│   └── SO_curs01..14/        #   14 thematic units
+├── 📂 00_SUPPLEMENTARY/            # Exam prep, diagrams, references
+├── 📂 01_INIT_SETUP/               # Installation guides (WSL2, VirtualBox)
+├── 📂 02_INIT_HOMEWORKS/           # Homework submission infrastructure
+├── 📂 03_GUIDES/                   # Student guides, FAQ, contributing
+├── 📂 04_PROJECTS/                 # 23 semester projects
+├── 📂 05_LECTURES/                 # 14+4 lecture units
 │
-├── SEM01..06/                # Seminar materials (practice)
-│   └── [detailed structure below]
+├── 📂 SEM01/                       # Shell Fundamentals
+├── 📂 SEM02/                       # I/O Redirection & Loops
+├── 📂 SEM03/                       # Find, Xargs, Permissions
+├── 📂 SEM04/                       # Text Processing (grep/sed/awk)
+├── 📂 SEM05/                       # Functions & Arrays
+├── 📂 SEM06/                       # Capstone Project
+├── 📂 SEM07/                       # Evaluation & Grading
 │
-├── SEM-PROJ/                 # Semester projects
-│   ├── EASY/                 #   5 projects, 15-20 hours
-│   ├── MEDIUM/               #   15 projects, 25-35 hours
-│   └── ADVANCED/             #   3 projects, 40-50 hours
+├── 📂 lib/                         # Shared Python utilities
+├── 📂 scripts/                     # Global automation scripts
+└── 📂 assets/                      # CSS, images, resources
+```
+
+### Detailed Folder Breakdown
+
+<details>
+<summary><strong>📂 00_SUPPLEMENTARY/ — Exam Preparation Materials</strong></summary>
+
+```
+00_SUPPLEMENTARY/
+├── 📄 README.md                    # Folder overview
+├── 📄 QUICK_REFERENCE_CARD.md      # Command cheat sheet
+├── 📄 REFERENCES.md                # Bibliography and links
+├── 📄 Exam_Exercises_Part1.md      # Practice problems (99KB)
+├── 📄 Exam_Exercises_Part2.md      # Practice problems (83KB)
+├── 📄 Exam_Exercises_Part3.md      # Practice problems (90KB)
+├── 📂 diagrams_common/
+│   └── skin.puml                   # PlantUML theme
+├── 📂 diagrams_png/                # 27 concept diagrams
+│   ├── coffman_conditions.png
+│   ├── critical_section.png
+│   ├── dining_philosophers.png
+│   ├── docker_namespaces.png
+│   ├── fork_copy_on_write.png
+│   ├── hard_vs_symbolic_link.png
+│   ├── inode_structure.png
+│   ├── journaling_mechanism.png
+│   ├── kernel_architectures.png
+│   ├── mlfq_structure.png
+│   ├── multithreading_models.png
+│   ├── os_evolution.png
+│   ├── page_replacement_algorithms.png
+│   ├── paging_mechanism.png
+│   ├── process_state_diagram.png
+│   ├── producer_consumer.png
+│   ├── race_condition.png
+│   ├── scheduling_gantt_comparison.png
+│   ├── security_aaa_permissions.png
+│   ├── syscall_categories.png
+│   ├── syscall_mechanism.png
+│   ├── system_layers.png
+│   ├── thread_vs_process_memory.png
+│   ├── tlb_memory_access.png
+│   ├── virtual_address_space.png
+│   └── vm_vs_container.png
+├── 📄 generate_diagrams.py         # PlantUML → PNG converter
+└── 📄 validate.sh                  # Validation script
+```
+
+**Purpose:** Comprehensive exam preparation with 270+ pages of exercises covering all course topics.
+
+</details>
+
+<details>
+<summary><strong>📂 01_INIT_SETUP/ — Installation Guides</strong></summary>
+
+```
+01_INIT_SETUP/
+├── 📄 README.md                    # Setup overview
+├── 📄 QUICK_START_EN.md            # 5-minute quick start
+├── 📄 GUIDE_WSL2_Ubuntu2404_EN.md  # WSL2 detailed guide
+├── 📄 GUIDE_WSL2_Ubuntu2404_INTERACTIVE.html
+├── 📄 GUIDE_VirtualBox_Ubuntu2404_EN.md
+├── 📄 GUIDE_VirtualBox_Ubuntu2404_INTERACTIVE.html
+├── 📂 images/
+│   └── SCREENSHOTS_NEEDED.md       # Placeholder for screenshots
+└── 📄 verify_installation.sh       # Environment verification script
+```
+
+**Purpose:** Step-by-step setup guides for WSL2 (recommended) and VirtualBox with interactive HTML versions.
+
+</details>
+
+<details>
+<summary><strong>📂 02_INIT_HOMEWORKS/ & 03_GUIDES/ — Student Resources</strong></summary>
+
+```
+02_INIT_HOMEWORKS/                  03_GUIDES/
+├── 📄 README_EN.md                 ├── 📄 README_EN.md
+├── 📄 CHANGELOG_EN.md              ├── 📄 CHANGELOG_EN.md
+├── 📄 CONTRIBUTING_EN.md           ├── 📄 CONTRIBUTING_EN.md
+├── 📄 FAQ_EN.md                    ├── 📄 FAQ_EN.md
+├── 📄 STUDENT_GUIDE_EN.md          ├── 📄 STUDENT_GUIDE_EN.md
+├── 📄 STUDENT_GUIDE_EN.html        ├── 📄 STUDENT_GUIDE_EN.html
+├── 📄 record_homework_EN.sh        ├── 📄 record_homework_EN.sh
+└── 📄 record_homework_tui_EN.py    ├── 📄 record_homework_tui_EN.py
+                                    ├── 📄 check_my_submission.sh
+                                    └── 📂 examples/
+                                        └── sample_submission_demo.cast
+```
+
+**Purpose:** 
+- `02_INIT_HOMEWORKS/`: Homework recording and submission infrastructure
+- `03_GUIDES/`: Comprehensive student handbook, FAQ, contribution guidelines
+
+</details>
+
+<details>
+<summary><strong>📂 04_PROJECTS/ — Semester Projects (23 Total)</strong></summary>
+
+```
+04_PROJECTS/
+├── 📄 README.md                    # Project overview
+├── 📄 PROJECT_SELECTION_GUIDE.md   # How to choose
+├── 📄 GENERAL_EVALUATION.md        # Evaluation criteria
+├── 📄 TECHNICAL_GUIDE.md           # Best practices
+├── 📄 UNIVERSAL_RUBRIC.md          # Grading rubric
+├── 📄 KUBERNETES_INTRO.md          # K8s optional extension
+├── 📄 Makefile                     # Build automation
 │
-└── 000SUPPL/                 # Supplementary materials
-    ├── diagrame_png/         #   Pre-rendered diagrams
-    └── Exercitii_Examene_*.md
+├── 📂 b)EASY/                      # ⭐⭐ Beginner (5 projects)
+│   ├── E01_File_System_Auditor.md
+│   ├── E02_Log_Analyzer.md
+│   ├── E03_Bulk_File_Organizer.md
+│   ├── E04_System_Health_Reporter.md
+│   └── E05_Config_File_Manager.md
+│
+├── 📂 a)MEDIUM/                    # ⭐⭐⭐ Intermediate (15 projects)
+│   ├── M01_Incremental_Backup_System.md
+│   ├── M02_Process_Lifecycle_Monitor.md
+│   ├── M03_Service_Health_Watchdog.md
+│   ├── M04_Network_Security_Scanner.md
+│   ├── M05_Deployment_Pipeline.md
+│   ├── M06_Resource_Usage_Historian.md
+│   ├── M07_Security_Audit_Framework.md
+│   ├── M08_Disk_Storage_Manager.md
+│   ├── M09_Scheduled_Tasks_Manager.md
+│   ├── M10_Process_Tree_Analyzer.md
+│   ├── M11_Memory_Forensics_Tool.md
+│   ├── M12_File_Integrity_Monitor.md
+│   ├── M13_Log_Aggregator.md
+│   ├── M14_Environment_Config_Manager.md
+│   └── M15_Parallel_Execution_Engine.md
+│
+├── 📂 c)ADVANCED/                  # ⭐⭐⭐⭐⭐ Expert (3 projects)
+│   ├── A01_Mini_Job_Scheduler.md
+│   ├── A02_Interactive_Shell_Extension.md
+│   └── A03_Distributed_File_Sync.md
+│
+├── 📂 AUTOMATED_EVALUATION_SPEC/   # Test specifications
+│   ├── AUTOMATED_EVALUATION_SPEC.md
+│   ├── AUTOMATED_EVALUATION_SUMMARY.md
+│   ├── TEST_SPEC_EASY.md
+│   ├── TEST_SPEC_MEDIUM.md
+│   └── TEST_SPEC_ADVANCED.md
+│
+├── 📂 helpers/                     # Utility scripts
+│   ├── project_validator.sh
+│   ├── submission_packager.sh
+│   └── test_runner.sh
+│
+├── 📂 templates/                   # Project templates
+│   ├── project_structure.sh
+│   ├── README_template.md
+│   └── Makefile_template
+│
+└── 📂 formative/
+    └── project_readiness_quiz.yaml
 ```
 
----
+**Project Difficulty Matrix:**
 
-## Folder 001CONDITIIinit — Installation
+| Level | Projects | Est. Time | Requirements |
+|:------|:--------:|:---------:|:-------------|
+| 🟢 **EASY** | 5 | 15-20h | Bash only |
+| 🟡 **MEDIUM** | 15 | 25-35h | Bash + optional K8s |
+| 🔴 **ADVANCED** | 3 | 40-50h | Bash + C integration |
 
-Here you find the detailed installation guides:
+</details>
 
-| File | Contents |
-|--------|----------|
-| `GHID_WSL2_Ubuntu2404_INCEPATORI_SO_ASE.md` | Step-by-step guide for WSL2 |
-| `GHID_WSL2_Ubuntu2404_INTERACTIV.html` | Interactive version (open in browser) |
-| `GHID_VirtualBox_Ubuntu2404_INCEPATORI_SO_ASE.md` | Guide for VirtualBox |
-| `GHID_VirtualBox_Ubuntu2404_INTERACTIV.html` | Interactive version |
-| `TC0.A_RO-TC laborator 0C_*.pdf` | Lab 0 worksheet (prerequisites) |
+<details>
+<summary><strong>📂 05_LECTURES/ — 14 Core + 4 Supplementary Units</strong></summary>
 
-If you followed the steps in the previous section, you have already covered most of the content of these guides.
-
----
-
-## Folder 002HWinit — Guides for Students
-
-Contains instructions for submitting and recording assignments:
-
-| File | Contents |
-|--------|----------|
-| `GHID_STUDENT_RO.md` | How to use the recording script |
-| `record_homework_tui_RO.py` | Python script with text interface for assignments |
-| `record_homework_RO.sh` | Bash version (alternative) |
-
-### How Homework Recording Works
-
-Assignments are not submitted as files — terminal sessions are recorded. This means the instructor sees exactly what commands you gave and in what order.
-
-```bash
-# BASH (Ubuntu)
-# Download the script
-cd ~/HOMEWORKS
-wget -O record_homework_tui_RO.py "https://drive.google.com/uc?export=download&id=1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz"
-chmod +x record_homework_tui_RO.py
-
-# Run
-python3 record_homework_tui_RO.py
+```
+05_LECTURES/
+├── 📂 00-HTML_all_as_ZIP(again)/
+│   └── also_you_can_find_each_in_lectures_docs.zip
+│
+├── 📂 01-Introduction_to_Operating_Systems/
+│   ├── README.md
+│   ├── 📂 docs/
+│   │   ├── 01ex1_-_Dual_Mode_Simulator.html
+│   │   ├── 01ex2_-_Kernel_Architectures.html
+│   │   ├── C01_01_COURSE_PLAN.md
+│   │   ├── C01_02_CONCEPT_MAP.md
+│   │   ├── C01_03_DISCUSSION_QUESTIONS.md
+│   │   ├── C01_04_STUDY_GUIDE.md
+│   │   └── C01_05_FORMATIVE_ASSESSMENT.yaml
+│   └── 📂 scripts/
+│       └── batch_sim.py
+│
+├── 📂 02-Basic_OS_Concepts/
+├── 📂 03-Processes_(PCB+fork)/
+├── 📂 04-Process_Scheduling/
+├── 📂 05-Execution_Threads/
+├── 📂 06-Synchronisation_(Part1_Peterson+locks+mutex)/
+├── 📂 07-Synchronisation_(Part2_semaphore_buffer)/
+├── 📂 08-Deadlock_(Coffman)/
+├── 📂 09-Memory_Management_Part1_paging_segmentation/
+├── 📂 10-Virtual_Memory_(TLB_Belady)/
+├── 📂 11-File_System_(Part1_inode_pointers)/
+├── 📂 12-File_System_Part2_alloc_extent_struct/
+├── 📂 13-Security_in_Operating_Systems/
+├── 📂 14-Virtualization+Recap/
+│
+├── 📂 15supp-Network_Connection/           # Supplementary
+├── 📂 16supp-Advanced_Containerisation/    # Supplementary
+├── 📂 17supp-Kernel_Level_OS_Programming/  # Supplementary
+└── 📂 18supp-NPU_Integration_in_Operating_Systems/ # Supplementary
 ```
 
-On the first run, the script installs the necessary dependencies (`rich`, `questionary`, `asciinema`). Then it asks you for:
-- Name, surname, group
-- Assignment number (e.g.: `03a`)
+**Each lecture unit contains:**
 
-Recording starts. You do the assignment. When you finish, type `STOP_tema` or `Ctrl+D`. The script generates a cryptographically signed `.cast` file and uploads it to the server.
+| File Pattern | Purpose |
+|:-------------|:--------|
+| `README.md` | Unit overview |
+| `C##_01_COURSE_PLAN.md` | Learning objectives, timing |
+| `C##_02_CONCEPT_MAP.md` | Visual topic relationships |
+| `C##_03_DISCUSSION_QUESTIONS.md` | Peer instruction questions |
+| `C##_04_STUDY_GUIDE.md` | Self-study material |
+| `C##_05_FORMATIVE_ASSESSMENT.yaml` | Quiz questions |
+| `##ex#_-_*.html` | Interactive HTML simulators |
+| `diagrams/*.puml` | PlantUML source files |
+| `scripts/*.py`, `scripts/*.sh` | Demo scripts |
 
-Why recording, not files?
-- You cannot copy from colleagues (the signature is unique)
-- The thinking process is visible, not just the result
-- Mistakes and corrections are visible (and that is ok!)
+</details>
 
----
-
-## Folder 003GHID — Technical Guides
-
-Contains guides for scripting and debugging:
-
-| File | Contents |
-|--------|----------|
-| `00_Cum_se_utilizeaza_kitul.md` | General kit overview |
-| `01_Ghid_Scripting_Bash.md` | Best practices for Bash scripts |
-| `02_Ghid_Scripting_Python_pentru_SO.md` | Python in OS context |
-| `03_Ghid_Observabilitate_si_Debugging.md` | How to understand what the system does |
-| `04_Idei_de_proiecte.md` | Inspiration for projects |
-| `05_Ghid_PlantUML.md` | How to generate diagrams |
-
-### Extract from the Bash Scripting Guide
-
-The most important rules:
-
-**1. Shebang and strict mode**
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-```
-
-**2. Quotes everywhere**
-```bash
-# WRONG
-for f in *.txt; do
-    echo $f        # Bug if the name has spaces
-done
-
-# CORRECT
-for f in ./*.txt; do
-    [[ -e "$f" ]] || continue
-    echo "$f"
-done
-```
-
-**3. Small, testable functions**
-```bash
-ensure_cmd() {
-    command -v "$1" >/dev/null 2>&1 || {
-        echo "Error: missing command $1" >&2
-        exit 1
-    }
-}
-
-ensure_cmd git
-ensure_cmd python3
-```
-
-**4. Automatic cleanup**
-```bash
-tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"' EXIT
-```
-
----
-
-## Structure of a Seminar (SEM01-06)
-
-All seminars have the same organisation:
+<details>
+<summary><strong>📂 SEM01-SEM06/ — Seminar Packages (Standard Structure)</strong></summary>
 
 ```
 SEM0X/
-├── README.md                    # General overview
+├── 📄 README.md                    # Seminar overview
+├── 📄 CHANGELOG.md                 # Version history
+├── 📄 Makefile                     # Build/test automation
+├── 📄 requirements.txt             # Python dependencies
 │
-├── docs/                        # Documentation
-│   ├── S0X_00_ANALIZA_*.md      #   Pedagogical plan
-│   ├── S0X_01_GHID_INSTRUCTOR   #   For the instructor
-│   ├── S0X_02_MATERIAL_PRINCIPAL #   Central material
-│   ├── S0X_03_PEER_INSTRUCTION  #   MCQ questions
-│   ├── S0X_04_PARSONS_PROBLEMS  #   Code reordering
-│   ├── S0X_05_LIVE_CODING_*     #   Live coding script
-│   ├── S0X_06_EXERCITII_SPRINT  #   Short exercises
-│   ├── S0X_07_LLM_AWARE_*       #   Exercises with AI
-│   ├── S0X_08_DEMO_*            #   Spectacular demos
-│   ├── S0X_09_CHEAT_SHEET_*     #   1-page summary
-│   └── S0X_10_AUTOEVALUARE_*    #   Reflection
+├── 📂 ci/                          # CI/CD configuration
+│   ├── github_actions.yml          # GitHub Actions workflow
+│   └── linting.toml                # Linting configuration
 │
-├── scripts/
-│   ├── bash/                    #   Setup, quiz, validation
-│   ├── demo/                    #   Demonstration scripts
-│   └── python/                  #   Autograder, generators
+├── 📂 docs/                        # Pedagogical materials
+│   ├── S0X_00_PEDAGOGICAL_ANALYSIS_PLAN.md
+│   ├── S0X_01_INSTRUCTOR_GUIDE.md
+│   ├── S0X_02_MAIN_MATERIAL.md
+│   ├── S0X_03_PEER_INSTRUCTION.md
+│   ├── S0X_04_PARSONS_PROBLEMS.md
+│   ├── S0X_05_LIVE_CODING_GUIDE.md
+│   ├── S0X_06_SPRINT_EXERCISES.md
+│   ├── S0X_07_LLM_AWARE_EXERCISES.md
+│   ├── S0X_08_SPECTACULAR_DEMOS.md
+│   ├── S0X_09_VISUAL_CHEAT_SHEET.md
+│   ├── S0X_10_SELF_ASSESSMENT_REFLECTION.md
+│   ├── lo_traceability.md
+│   └── 📂 images/                  # SVG diagrams
 │
-├── prezentari/                  #   HTML slides
-├── resurse/                     #   Test files
-├── teme/                        #   Requirements and rubrics
-└── teste/                       #   Automated tests
+├── 📂 formative/                   # Quiz system
+│   ├── quiz.yaml                   # Question bank
+│   ├── quiz_lms.json               # LMS export format
+│   └── quiz_runner.py              # Interactive quiz runner
+│
+├── 📂 homework/                    # Assignments
+│   ├── S0X_01_HOMEWORK.md          # Assignment specification
+│   ├── S0X_03_EVALUATION_RUBRIC.md
+│   ├── S0X_04_ORAL_VERIFICATION*.md
+│   ├── 📂 OLD_HW/                  # Archive of previous assignments
+│   └── 📂 solutions/               # Reference solutions (instructor)
+│
+├── 📂 presentations/               # Interactive slides
+│   ├── S0X_01_presentation.html
+│   └── S0X_02_cheat_sheet.html
+│
+├── 📂 resources/
+│   └── S0X_RESOURCES.md            # Additional reading
+│
+├── 📂 scripts/
+│   ├── 📂 bash/                    # Utility scripts
+│   │   ├── S0X_01_setup_seminar.sh
+│   │   ├── S0X_02_interactive_quiz.sh
+│   │   └── S0X_03_validator.sh
+│   ├── 📂 demo/                    # Live coding demos
+│   │   └── S0X_0X_demo_*.sh
+│   └── 📂 python/                  # Automation tools
+│       ├── S0X_01_autograder.py
+│       ├── S0X_02_quiz_generator.py
+│       └── S0X_03_report_generator.py
+│
+└── 📂 tests/                       # Test suite
+    ├── README.md
+    ├── run_all_tests.sh
+    └── test_*.py
 ```
 
-### How to Go Through a Seminar
+</details>
 
-```bash
-# BASH (Ubuntu)
-cd ~/so-lab/ROso/SEM02
+<details>
+<summary><strong>📂 SEM07/ — Evaluation and Grading</strong></summary>
 
-# 1. Read the general overview
-less README.md
-
-# 2. Go through the main material
-less docs/S02_02_MATERIAL_PRINCIPAL.md
-
-# 3. Run the demos
-chmod +x scripts/demo/*.sh
-./scripts/demo/S02_01_hook_demo.sh
-
-# 4. Test your knowledge
-./scripts/bash/S02_02_quiz_interactiv.sh
-
-# 5. Do the exercises
-less docs/S02_06_EXERCITII_SPRINT.md
-
-# 6. Read the assignment requirements
-less teme/S02_01_TEMA.md
+```
+SEM07/
+├── 📄 README.md
+├── 📂 docs/
+│   ├── S07_00_PEDAGOGICAL_ANALYSIS_PLAN.md
+│   └── S07_01_INSTRUCTOR_GUIDE.md
+│
+├── 📂 external_tools/              # Plagiarism detection
+│   ├── MOSS_JPLAG_GUIDE.md
+│   ├── run_moss.sh
+│   └── run_plagiarism_check.sh
+│
+├── 📂 final_test/
+│   └── 📂 test_bank/
+│       └── questions_pool.yaml
+│
+├── 📂 grade_aggregation/
+│   ├── GRADING_POLICY.md
+│   ├── final_grade_calculator_EN.py
+│   └── 📂 templates/
+│       ├── homework_grades_template.csv
+│       ├── project_grades_template.csv
+│       └── test_grades_template.csv
+│
+├── 📂 homework_evaluation/
+│   ├── HOMEWORK_EVALUATION_GUIDE.md
+│   ├── grade_homework_EN.py
+│   ├── verify_homework_EN.sh
+│   └── 📂 homework_rubrics/
+│       ├── S01_HOMEWORK_RUBRIC.md
+│       ├── S02_HOMEWORK_RUBRIC.md
+│       ├── S03_HOMEWORK_RUBRIC.md
+│       ├── S04_HOMEWORK_RUBRIC.md
+│       ├── S05_HOMEWORK_RUBRIC.md
+│       └── S06_HOMEWORK_RUBRIC.md
+│
+└── 📂 project_evaluation/
+    ├── 📂 Docker/
+    │   └── Dockerfile
+    ├── manual_eval_checklist_EN.md
+    ├── oral_defence_questions_EN.md
+    └── run_auto_eval_EN.sh
 ```
 
----
+**Purpose:** Complete evaluation infrastructure including automated grading, plagiarism detection, oral defence protocols, and grade calculation.
 
-# PART III: DETAILED CONTENT
+</details>
 
----
+<details>
+<summary><strong>📂 lib/ — Shared Python Utilities (NEW in v5.3)</strong></summary>
 
-## Courses (SO_curs01-14)
-
-I structured the courses following the classical order from Silberschatz and Tanenbaum, with adjustments based on what works practically.
-
-| Course | Topic | Key Concepts | Hook |
-|------|------|----------------|------|
-| 01 | Introduction to OS | OS role, kernel architectures, evolution | Why is the computer not just hardware? |
-| 02 | System Calls | The syscall mechanism, strace, API vs ABI | What happens when you type `ls`? |
-| 03 | Processes | States, fork(), exec(), Copy-on-Write | How does Unix make copies without copying? |
-| 04 | Scheduling | FCFS, SJF, RR, MLFQ, CFS | Why do some programmes "skip the queue"? |
-| 05 | Threads | Models, pthread, race conditions | Why is doing 2 things simultaneously hard? |
-| 06 | Synchronisation | Mutex, semaphores, monitors | How do you prevent chaos when everyone wants the same resource? |
-| 07 | IPC | Pipes, sockets, shared memory | How do processes talk to each other? |
-| 08 | Deadlock | Coffman conditions, Banker's algorithm | Why does everything sometimes lock up? |
-| 09 | Virtual Memory | Address space, paging | How can a process use "more" memory than you have? |
-| 10 | Paging | TLB, replacement algorithms | Why does the cache matter so much? |
-| 11 | File Systems I | Inode, hard/soft links | What are those numbers from `ls -i`? |
-| 12 | File Systems II | Journaling, ext4, RAID | Why do you not lose data when the power goes off? |
-| 13 | Security | Permissions, ACL, capabilities | Why can you not delete any file? |
-| 14 | Virtualisation | VM vs containers, namespaces | How does Docker run in a shared kernel? |
-
----
-
-## Seminars (SEM01-06)
-
-### Seminar 1: Shell Basics
-
-We start from zero: navigation, variables, globbing. It seems trivial, but the difference between `$var` and `"$var"` produces bugs even in scripts written by experienced people.
-
-**What you will learn:**
-- Navigation (`cd`, `ls`, `pwd`, `tree`)
-- Local and environment variables
-- Quoting and escape sequences
-- File globbing (`*`, `?`, `[abc]`, `{a,b,c}`)
-- Configuring `.bashrc`
-
-**Thought challenge:** Why are there so many ways of quoting in Bash (`'...'`, `"..."`, `$'...'`, `$"..."`)?
-
-The short answer: historical compatibility. Thompson's shell from 1971 did not have variables. Bourne Shell from 1979 added variables, and single and double quotes acquired different meanings. Then came the ANSI-C extensions (`$'...'`) in Bash for escape sequences like `\n`. Each addition had to be compatible with existing scripts. The result is chaotic, but it works.
-
----
-
-### Seminar 2: Pipeline Master
-
-Ken Thompson implemented pipes in a single night in 1973, at Doug McIlroy's insistence. McIlroy wanted programmes to be able to connect "like a garden hose". The idea defined Unix.
-
-**What you will learn:**
-- Control operators (`;`, `&&`, `||`, `&`)
-- I/O redirection (`>`, `>>`, `<`, `2>`, `&>`)
-- Pipes and tee
-- Filters (`sort`, `uniq`, `cut`, `paste`, `tr`, `wc`)
-- Loops (`for`, `while`, `until`)
-
-**Thought challenge:** Why is `cat file | grep pattern` considered an "anti-pattern" (Useless Use of Cat)?
-
-The command `grep pattern file` does the same thing without the extra process. But it is not always bad — sometimes `cat` makes the code clearer, especially in long pipelines. The practical rule: if speed matters, avoid it; if readability matters, perhaps keep it.
-
----
-
-### SEM05-06: Find & Permissions
-
-`find` is probably the command with the most options in Unix. The first version had a completely different syntax from what we use today — they changed it because it was too complicated. And it still remained complicated.
-
-**What you will learn:**
-- `find` with multiple criteria and actions
-- `xargs` for parallel processing
-- Permissions: `chmod`, `chown`, `umask`
-- Special permissions: SUID, SGID, Sticky bit
-- `cron` for automation
-
-**Thought challenge:** Why does Sticky bit exist on `/tmp`?
-
-Without Sticky bit, anyone can delete other people's files from a directory with write permissions for all. Sticky bit (the `t` notation in `drwxrwxrwt`) allows only the file owner to delete it. It was invented for shared directories like `/tmp`. The irony: originally "Sticky" meant the programme stayed in memory after execution (for performance). The meaning changed completely.
-
----
-
-### SEM07-08: Text Processing
-
-Regular expressions were invented by Stephen Kleene in 1951 to describe formal languages. Ken Thompson brought them to computing in 1968 when he implemented a text editor (the precursor of `ed`). `grep` literally means "**g**lobal **r**egular **e**xpression **p**rint" — a command from `ed`.
-
-**What you will learn:**
-- Regular expressions: BRE and ERE
-- `grep` for searching
-- `sed` for transformations
-- `awk` for column processing
-
-**Thought challenge:** Why is `awk` called that?
-
-Aho, Weinberger, Kernighan — the creators' initials. Yes, the same Kernighan from "The C Programming Language". Awk was created in 1977 at Bell Labs, contemporary with the first C manual.
-
----
-
-### SEM09-10: Advanced Scripting
-
-After you know the basic commands, it is time to combine them into scripts that behave decently even when things go wrong.
-
-**What you will learn:**
-- Functions and libraries
-- Indexed and associative arrays
-- Signal handling with `trap`
-- Debugging and profiling
-- Best practices
-
-**Thought challenge:** Why are Bash arrays indexed from 0, but `$@` is indexed from 1?
-
-Positional parameters (`$1`, `$2`, etc.) existed before arrays. When they added arrays in Bash 2.0 (1996), they chose indexing from 0 for compatibility with C. But they could not change `$1` to `$0` (which already meant the script name). The result: inconsistency you have to memorise.
-
----
-
-### SEM11-12: CAPSTONE Projects
-
-Integration. Projects that combine everything: Monitor, Backup, Deployer.
-
-**What you will build:**
-- System Monitor with terminal dashboard
-- Incremental backup system
-- Automatic deployment tool
-
----
-
-# PART IV: SEMESTER PROJECTS
-
----
-
-## Choosing the Project
-
-You have 23 projects at three levels. My advice: do not choose the easiest just to finish — choose something that interests you or that would help you in the future.
-
-### Level EASY (5 projects, 15-20 hours)
-
-Bash only, no external dependencies. Good for consolidation.
-
-| Code | Project | Description |
-|-----|---------|-----------|
-| E01 | File System Auditor | Scans and reports directory structure |
-| E02 | Log Analyser | Parses and summarises log files |
-| E03 | Bulk File Organiser | Sorts files by extension/date/size |
-| E04 | System Health Reporter | Generates reports about system status |
-| E05 | Config File Manager | Backup and versioning for configurations |
-
-### Level MEDIUM (15 projects, 25-35 hours)
-
-Bash with optional Kubernetes integration for bonus.
-
-| Code | Project | Description |
-|-----|---------|-----------|
-| M01 | Incremental Backup | Backups that save only what has changed |
-| M02 | Process Monitor | Monitors process lifecycle |
-| M03 | Service Watchdog | Automatically restarts failed services |
-| M04 | Network Scanner | Detects open ports and services |
-| M05 | Deployment Pipeline | Automates application deployment |
-| M06 | Resource Historian | Resource usage history |
-| M07 | Security Audit | Framework for security audits |
-| M08 | Disk Manager | Disk space management |
-| M09 | Task Scheduler | Manager for scheduled tasks |
-| M10 | Process Tree Analyser | Analyses process hierarchy |
-| M11 | Memory Forensics | Tool for memory analysis |
-| M12 | File Integrity Monitor | Detects unauthorised modifications |
-| M13 | Log Aggregator | Centralises logs from multiple sources |
-| M14 | Config Manager | Configuration management for multiple environments |
-| M15 | Parallel Executor | Parallel task execution |
-
-### Level ADVANCED (3 projects, 40-50 hours)
-
-Bash + components in C.
-
-| Code | Project | Description |
-|-----|---------|-----------|
-| A01 | Mini Job Scheduler | Simplified scheduler in cron style |
-| A02 | Shell Extension | Extensions for bash |
-| A03 | Distributed File Sync | File synchronisation between machines |
-
----
-
-## Recommended Structure for Projects
-
-```bash
-# BASH (Ubuntu)
-mkdir -p ~/so-lab/proiecte/M05_Deployment_Pipeline/{src,tests,docs,config}
-cd ~/so-lab/proiecte/M05_Deployment_Pipeline
-
-# Initialise git
-git init
-
-# Create the structure
-cat > README.md << 'EOF'
-# M05 - Deployment Pipeline
-
-## Description
-[What the project does]
-
-## Requirements
-- Bash 5.0+
-- Git
-- [other dependencies]
-
-## Installation
-```bash
-chmod +x src/deploy.sh
+```
+lib/
+├── 📄 README.md                    # Comprehensive documentation
+├── 📄 __init__.py                  # Package initialisation
+├── 📄 logging_utils.py             # Coloured logging
+├── 📄 randomisation_utils.py       # Anti-plagiarism parameters
+├── 📄 test_logging_utils.py        # Unit tests
+└── 📄 test_randomisation_utils.py  # Unit tests
 ```
 
-## Usage
-```bash
-./src/deploy.sh --help
+**Purpose:** Centralised utility modules ensuring consistency across all seminar packages.
+
+</details>
+
+<details>
+<summary><strong>📂 scripts/ — Global Automation (NEW in v5.3)</strong></summary>
+
+```
+scripts/
+├── 📄 add_print_styles.sh          # Inject print CSS into HTML
+├── 📄 check_links.sh               # Documentation link validator
+└── 📄 verify_links.sh              # Alternative link checker
 ```
 
-## Structure
-```
-├── src/           # Source code
-├── tests/         # Tests
-├── docs/          # Documentation
-├── config/        # Configuration files
-└── README.md
-```
+**Purpose:** Kit-wide automation for quality assurance.
 
-## Author
-[Your name] - [group]
-EOF
+</details>
 
-# Create .gitignore
-cat > .gitignore << 'EOF'
-*.log
-*.tmp
-*.bak
-__pycache__/
-.env
-EOF
+---
 
-git add .
-git commit -m "Initial project structure"
+## Part I: Setup and Configuration
+
+### Step 0: Choose Your Installation Option
+
+```mermaid
+flowchart TD
+    A[🖥️ What OS?] --> B{Windows?}
+    B -->|Yes| C{Version?}
+    B -->|No| D[VirtualBox]
+    C -->|Win 10/11 Build 19041+| E[✨ WSL2 Recommended]
+    C -->|Older| D
+    D --> F[VirtualBox + Ubuntu 24.04]
+    E --> G[Native Linux Experience]
+    
+    style E fill:#90EE90
+    style G fill:#90EE90
 ```
 
----
+| Option | For whom | Advantages | Disadvantages |
+|:-------|:---------|:-----------|:--------------|
+| **WSL2** ⭐ | Windows 10/11 | Fast, integrated, no reboot | Requires updated Windows |
+| **VirtualBox** | Any OS | Complete isolation, snapshots | Slower, more resources |
+| **Dual boot** | Advanced users | Native performance | Risk, must reboot |
 
-# PART V: CHALLENGES AND OPEN QUESTIONS
-
----
-
-## Things I Still Have Not Completely Resolved
-
-Teaching operating systems has a few problems for which there are no perfectly satisfactory solutions. I mention them because honesty is more valuable than the illusion that everything is resolved.
-
-### The Problem of Abstraction vs. Detail
-
-Students need to understand how an operating system works, but:
-- If we go into too many details, they get lost in complexity
-- If we stay at a high level, they do not truly understand what is happening
-
-I have not found the perfect balance. I try to alternate: one session of "big picture", one session of "deep dive" on a specific concept.
-
-### The LLM Problem
-
-Students can generate Bash code with ChatGPT. How do you evaluate whether they understood or just copied?
-
-The current solution: LLM-aware exercises where you must evaluate the generated code, identify bugs, explain what it does. It works partially — some still copy the explanations. It is an arms race we will not completely win. At least, however, we can ask better questions.
-
-### The Problem of Different Working Environments
-
-Some students have new laptops, others have computers from 2015. Some have Windows, others macOS, a few Linux. WSL2 has helped enormously, but strange cases still appear.
-
-The partial solution: detailed guides, verification scripts, VirtualBox as plan B. It is not perfect.
-
----
-
-## Questions We Do Not Have Complete Answers To
-
-These are legitimate questions from computing education research that researchers are still debating:
-
-**1. How much code must a student write to understand a concept?**
-
-There is no magic number. Some understand from 10 lines, others need 100. Research suggests that "productive struggle" matters more than quantity, but it is hard to quantify.
-
-**2. Does immediate feedback help or harm in the long term?**
-
-Bjork's paradox: delayed feedback can lead to better long-term learning, although it feels harder at the moment. But how delayed? Research does not give a clear answer.
-
-**3. How do you teach debugging?**
-
-It is a different skill from writing code, but it is rarely taught explicitly. I have tried to include deliberate errors in live coding, but I do not know if it is enough.
-
----
-
-## Critical Thinking Exercises
-
-For each seminar, a few questions to think about:
-
-**Seminar 1:**
-- Why did Unix choose to treat everything as a file (including devices)?
-- What would have happened if environment variables did not exist?
-
-**Seminar 2:**
-- Why was the Unix philosophy "do one thing well" so influential?
-- What disadvantages does this approach have?
-
-**SEM05-06:**
-- Unix permissions are 50+ years old. What would replace them if we designed from scratch today?
-- Why is SUID considered a security risk, but still exists?
-
-**SEM07-08:**
-- Why do regular expressions have such cryptic syntax?
-- Would it have been better if `grep`, `sed`, `awk` had been a single tool?
-
-**SEM09-10:**
-- Why does Bash not have static typing? Would it be better if it did?
-- Should shell scripting be replaced with Python for automation?
-
----
-
-# PART VI: DETAILED TROUBLESHOOTING
-
----
-
-## Problems with WSL2 Installation
-
-### "WSL 2 requires an update to its kernel component"
+### Step 1: Installing WSL2 (Recommended)
 
 ```powershell
 # POWERSHELL (Administrator)
+# 1. Enable required features
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# 2. RESTART YOUR COMPUTER
+
+# 3. After restart, install Ubuntu
 wsl --update
-# Restart after update
+wsl --set-default-version 2
+wsl --install -d Ubuntu-24.04
 ```
 
-### "Error: 0x80370102" or "Please enable the Virtual Machine Platform"
+### Step 2: Configure Ubuntu
 
-Virtualisation is not enabled in BIOS. The procedure:
+```bash
+# BASH (Ubuntu)
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-1. Restart your computer
-2. When it starts, quickly press the BIOS key:
-   - **Dell:** F2 or F12
-   - **HP:** F10 or Esc
-   - **Lenovo:** F1 or F2
-   - **ASUS:** F2 or Del
-   - **Acer:** F2 or Del
-3. Look for "Virtualization Technology", "VT-x", "AMD-V" or "SVM"
-4. Change from Disabled to Enabled
-5. Save (usually F10) and exit
+# Install required packages
+sudo apt install -y git vim nano tree htop ncdu shellcheck \
+    python3 python3-pip python3-venv build-essential \
+    openssh-server curl wget figlet lolcat cowsay fortune pv dialog jq bc
 
-### "Error: 0x80370114" — cannot start the virtual machine
-
-Hyper-V or another virtualisation technology may be in conflict. Check:
-
-```powershell
-# POWERSHELL (Administrator)
-# Disable Hyper-V if it is enabled and you are not using it
-dism.exe /Online /Disable-Feature:Microsoft-Hyper-V
-
-# OR enable it completely for WSL2
-dism.exe /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
+# Verify installation
+./01_INIT_SETUP/verify_installation.sh
 ```
 
-### WSL opens but does not respond
+### Standard Lab Credentials
 
-```powershell
-# POWERSHELL
-# Completely stop WSL
-wsl --shutdown
+| System | Username | Password |
+|:-------|:---------|:---------|
+| Ubuntu/WSL | `stud` | `stud` |
+| Portainer | `stud` | `studstudstud` |
+| URL | — | `http://localhost:9000` |
 
-# Check the status
-wsl --status
+---
 
-# Restart
-wsl
+## Part II: Seminars (SEM01–SEM07)
+
+### Seminar Progression Map
+
+```mermaid
+graph LR
+    subgraph Foundation
+        S1[SEM01<br/>Shell Basics]
+        S2[SEM02<br/>I/O & Loops]
+    end
+    
+    subgraph Intermediate
+        S3[SEM03<br/>Find/Xargs/Perms]
+        S4[SEM04<br/>grep/sed/awk]
+    end
+    
+    subgraph Advanced
+        S5[SEM05<br/>Functions/Arrays]
+        S6[SEM06<br/>Capstone]
+    end
+    
+    subgraph Evaluation
+        S7[SEM07<br/>Assessment]
+    end
+    
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
+    
+    style S1 fill:#E8F5E9
+    style S2 fill:#E8F5E9
+    style S3 fill:#FFF3E0
+    style S4 fill:#FFF3E0
+    style S5 fill:#FFEBEE
+    style S6 fill:#FFEBEE
+    style S7 fill:#E3F2FD
+```
+
+### Seminar Overview Table
+
+| Week | Seminar | Topic | Key Skills | Hours |
+|:----:|:--------|:------|:-----------|:-----:|
+| 1 | **SEM01** | Shell Fundamentals | Navigation, variables, FHS, quoting, globbing | 3+3 |
+| 2 | **SEM02** | I/O Redirection & Loops | Pipes, filters, `for`/`while`, scripting basics | 3+3 |
+| 3 | **SEM03** | Find, Xargs, Permissions | `find -exec`, `xargs`, `chmod`, `getopts`, cron | 3+3 |
+| 4 | **SEM04** | Text Processing | Regular expressions, `grep`, `sed`, `awk` | 3+3 |
+| 5 | **SEM05** | Functions & Arrays | Robust scripting, `trap`, logging, debugging | 3+3 |
+| 6 | **SEM06** | Capstone Project | Monitor, Backup, Deployer integration | 6+6 |
+| 7 | **SEM07** | Evaluation | Assessment, oral defence, grading | 3 |
+
+### Seminar Document Types
+
+#### For Instructors
+
+| Document | Purpose |
+|:---------|:--------|
+| `S0X_00_PEDAGOGICAL_ANALYSIS_PLAN.md` | Learning design and objectives |
+| `S0X_01_INSTRUCTOR_GUIDE.md` | Session facilitation guide |
+| `S0X_05_LIVE_CODING_GUIDE.md` | Demo scripts and walkthroughs |
+| `S0X_08_SPECTACULAR_DEMOS.md` | Engaging demonstrations |
+
+#### For Students
+
+| Document | Purpose |
+|:---------|:--------|
+| `S0X_02_MAIN_MATERIAL.md` | Core content and explanations |
+| `S0X_03_PEER_INSTRUCTION.md` | Discussion questions |
+| `S0X_04_PARSONS_PROBLEMS.md` | Code ordering exercises |
+| `S0X_06_SPRINT_EXERCISES.md` | Timed practice problems |
+| `S0X_07_LLM_AWARE_EXERCISES.md` | AI-resistant tasks |
+| `S0X_09_VISUAL_CHEAT_SHEET.md` | Quick reference |
+| `S0X_10_SELF_ASSESSMENT_REFLECTION.md` | Self-evaluation |
+
+### Typical Seminar Flow (100 minutes)
+
+```
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                         SEMINAR STRUCTURE (100 min)                            │
+├────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                │
+│  0min        5min       20min       35min       45min   50min                 │
+│    │          │          │           │           │       │                    │
+│    ▼          ▼          ▼           ▼           ▼       ▼                    │
+│  ┌────┐    ┌─────┐    ┌─────┐    ┌─────┐    ┌────┐   ┌─────┐                 │
+│  │HOOK│───▶│ PI  │───▶│LIVE │───▶│SPRINT│───▶│ PI │──▶│BREAK│                │
+│  │DEMO│    │ Q1  │    │CODE │    │  1   │    │ Q2 │   │☕    │                │
+│  └────┘    └─────┘    └─────┘    └─────┘    └────┘   └─────┘                 │
+│                                                                                │
+│  60min       75min       85min       95min      100min                        │
+│    │          │           │           │           │                           │
+│    ▼          ▼           ▼           ▼           ▼                           │
+│  ┌─────┐   ┌─────┐    ┌─────┐    ┌─────┐    ┌─────┐                          │
+│  │LIVE │──▶│ PI  │───▶│SPRINT│───▶│WRAP │───▶│ HW  │                          │
+│  │CODE │   │ Q3  │    │  2   │    │ UP  │    │INTRO│                          │
+│  └─────┘   └─────┘    └─────┘    └─────┘    └─────┘                          │
+│                                                                                │
+│  Legend: PI = Peer Instruction, HW = Homework                                  │
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Problems in the Terminal
+## Part III: Lectures (14 Core + 4 Supplementary)
 
-### "Permission denied" when running scripts
+### Course Topic Map
 
-```bash
-# BASH (Ubuntu)
-# Cause 1: The script does not have execution permission
-chmod +x script.sh
-./script.sh
-
-# Cause 2: The file is on a Windows partition mounted without exec
-# Solution: move the file to Linux home
-cp /mnt/c/Users/.../script.sh ~/
-chmod +x ~/script.sh
-~/script.sh
-
-# Cause 3: Wrong or missing shebang
-# Check the first line:
-head -1 script.sh
-# It should be: #!/usr/bin/env bash or #!/bin/bash
+```mermaid
+mindmap
+  root((Operating<br/>Systems))
+    Foundations
+      01 Introduction
+      02 Basic Concepts
+    Processes
+      03 PCB & fork
+      04 Scheduling
+      05 Threads
+    Synchronisation
+      06 Locks & Mutex
+      07 Semaphores
+      08 Deadlock
+    Memory
+      09 Paging
+      10 Virtual Memory
+    Storage
+      11 File System I
+      12 File System II
+    Advanced
+      13 Security
+      14 Virtualisation
+    Supplementary
+      15 Network
+      16 Containers
+      17 Kernel
+      18 NPU
 ```
 
-### Romanian characters displayed incorrectly
+### Lecture Units Detailed
 
-```bash
-# BASH (Ubuntu)
-# Check the current locale
-locale
-
-# Set the correct locale
-export LANG=ro_RO.UTF-8
-export LC_ALL=ro_RO.UTF-8
-
-# If the locale is not installed
-sudo locale-gen ro_RO.UTF-8
-sudo update-locale LANG=ro_RO.UTF-8
-
-# Permanent - add to ~/.bashrc
-echo 'export LANG=ro_RO.UTF-8' >> ~/.bashrc
-echo 'export LC_ALL=ro_RO.UTF-8' >> ~/.bashrc
-source ~/.bashrc
-```
-
-### Variables from `while | read` do not persist
-
-This is a classic trap. When you use a pipe, the right side runs in a subshell, and changes do not propagate back.
-
-```bash
-# WRONG - subshell problem
-count=0
-cat file.txt | while read line; do
-    ((count++))
-done
-echo $count    # Displays 0!
-
-# CORRECT - use redirect instead of pipe
-count=0
-while read line; do
-    ((count++))
-done < file.txt
-echo $count    # Displays the correct value
-
-# ALTERNATIVE - use process substitution
-count=0
-while read line; do
-    ((count++))
-done < <(cat file.txt)
-echo $count    # Works
-```
-
-### The script works manually but not from cron
-
-Cron runs with a minimal PATH and without your environment variables.
-
-```bash
-# BASH (Ubuntu)
-# Solution 1: Add PATH in crontab
-crontab -e
-# Add at the beginning:
-# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-# Solution 2: Use absolute paths in the script
-# Instead of:
-grep pattern file.txt
-# Write:
-/usr/bin/grep pattern /home/user/file.txt
-
-# Solution 3: Source .bashrc at the beginning
-#!/usr/bin/env bash
-source ~/.bashrc
-# ... rest of the script
-```
-
-### Line endings Windows vs Linux (CRLF vs LF)
-
-Files edited in Windows have `\r\n` at the end of lines. Linux expects only `\n`. Symptoms: strange behaviour, error messages with `^M`.
-
-```bash
-# BASH (Ubuntu)
-# Check the file type
-file script.sh
-# If it says "with CRLF line terminators" - that is the problem
-
-# Convert with sed
-sed -i 's/\r$//' script.sh
-
-# OR with dos2unix
-sudo apt install dos2unix
-dos2unix script.sh
-
-# Verification
-cat -A script.sh | head -5
-# OK lines end in $ 
-# Lines with CRLF end in ^M$
-```
+| # | Topic | Interactive HTML | Key Concepts |
+|:-:|:------|:-----------------|:-------------|
+| 01 | Introduction to OS | Dual Mode Simulator, Kernel Architectures | History, structure, modes |
+| 02 | Basic OS Concepts | Interrupt Flow, Polling vs Interrupts | System calls, interrupts |
+| 03 | Processes (PCB+fork) | Process State Diagram, Fork Simulator, Zombie/Orphan | PCB, fork, exec, wait |
+| 04 | Process Scheduling | Scheduling Gantt, MLFQ Simulator, Starvation Demo | FCFS, SJF, RR, MLFQ |
+| 05 | Execution Threads | Thread vs Process Memory, Threading Models | User/kernel threads |
+| 06 | Synchronisation I | Race Condition, Peterson Algorithm, Mutex vs Spinlock | Critical section, locks |
+| 07 | Synchronisation II | Semaphore Operations, Producer-Consumer, Readers-Writers | Semaphores, monitors |
+| 08 | Deadlock | RAG Visualizer, Banker's Algorithm, Detection/Recovery | Coffman conditions |
+| 09 | Memory Management I | Memory Partitioning, Paging Visualizer, Segmentation | Paging, segmentation |
+| 10 | Virtual Memory | Page Replacement, Working Set, Thrashing Demo | TLB, Bélády's anomaly |
+| 11 | File System I | Inode Explorer, Pointer Indirection, Hard vs Symbolic | Inodes, links |
+| 12 | File System II | Allocation Methods, Journaling Demo | Allocation, journaling |
+| 13 | Security | Permissions Calculator, Buffer Overflow Demo | AAA, capabilities |
+| 14 | Virtualisation | VM vs Container | Type 1/2, containers |
+| 15 | Network (supp) | Socket API Flow, TCP vs UDP, I/O Multiplexing | Sockets, protocols |
+| 16 | Containers (supp) | Namespaces, Cgroups, Overlay FS | Docker internals |
+| 17 | Kernel (supp) | Module Lifecycle, Character Device | Kernel modules, eBPF |
+| 18 | NPU (supp) | Heterogeneous Computing, CPU/GPU/NPU | AI accelerators |
 
 ---
 
-## Problems with Git
+## Part IV: Projects
 
-### "fatal: not a git repository"
+### Project Selection Flowchart
 
-```bash
-# BASH (Ubuntu)
-# You are in the wrong directory
-pwd
-# Navigate to the directory with the repository
-cd ~/so-lab/proiecte/M05_Deployment_Pipeline
-
-# OR initialise a new repo
-git init
+```
+                          START HERE
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │ Have you written >500 lines   │
+              │ of Bash code before?          │
+              └───────────────────────────────┘
+                        │
+                 ┌──────┴──────┐
+                 │             │
+                YES            NO
+                 │             │
+                 ▼             ▼
+          ┌──────────┐   ┌──────────────────────┐
+          │ Do you   │   │ 👉 START WITH EASY   │
+          │ know C?  │   │    E01-E05           │
+          └──────────┘   │    (15-20 hours)     │
+                 │       └──────────────────────┘
+          ┌──────┴──────┐
+          │             │
+         YES            NO
+          │             │
+          ▼             ▼
+   ┌──────────────┐  ┌──────────────────────┐
+   │ 👉 ADVANCED  │  │ 👉 MEDIUM            │
+   │    A01-A03   │  │    M01-M15           │
+   │  (40-50 hrs) │  │    (25-35 hours)     │
+   └──────────────┘  └──────────────────────┘
 ```
 
-### "error: failed to push some refs"
+### Project Categories
 
-```bash
-# BASH (Ubuntu)
-# Someone modified the remote repository
-# Pull before push
-git pull origin main
-# Resolve any conflicts
-git push origin main
+| Level | Icon | Projects | Est. Hours | Requirements |
+|:------|:----:|:--------:|:----------:|:-------------|
+| **EASY** | 🟢 | E01–E05 | 15-20h | Bash only |
+| **MEDIUM** | 🟡 | M01–M15 | 25-35h | Bash + optional K8s |
+| **ADVANCED** | 🔴 | A01–A03 | 40-50h | Bash + C integration |
 
-# OR force the push (CAUTION: overwrites others' changes)
-git push -f origin main
+### All Projects List
+
+<details>
+<summary><strong>🟢 EASY Projects (5)</strong></summary>
+
+| ID | Name | Description |
+|:---|:-----|:------------|
+| E01 | File System Auditor | Scan directories, report statistics |
+| E02 | Log Analyzer | Parse and summarise log files |
+| E03 | Bulk File Organizer | Sort files by type/date/size |
+| E04 | System Health Reporter | Generate system status reports |
+| E05 | Config File Manager | Backup and manage configurations |
+
+</details>
+
+<details>
+<summary><strong>🟡 MEDIUM Projects (15)</strong></summary>
+
+| ID | Name | Description |
+|:---|:-----|:------------|
+| M01 | Incremental Backup System | rsync-based backup with rotation |
+| M02 | Process Lifecycle Monitor | Track process birth/death events |
+| M03 | Service Health Watchdog | Monitor and restart services |
+| M04 | Network Security Scanner | Port scanning and vulnerability check |
+| M05 | Deployment Pipeline | Automated deployment workflow |
+| M06 | Resource Usage Historian | Historical resource tracking |
+| M07 | Security Audit Framework | System security assessment |
+| M08 | Disk Storage Manager | Disk usage monitoring and cleanup |
+| M09 | Scheduled Tasks Manager | Enhanced cron job management |
+| M10 | Process Tree Analyzer | Visualise process hierarchies |
+| M11 | Memory Forensics Tool | Memory usage analysis |
+| M12 | File Integrity Monitor | Detect file modifications |
+| M13 | Log Aggregator | Centralise logs from multiple sources |
+| M14 | Environment Config Manager | Manage environment variables |
+| M15 | Parallel Execution Engine | Parallel task execution |
+
+</details>
+
+<details>
+<summary><strong>🔴 ADVANCED Projects (3)</strong></summary>
+
+| ID | Name | Description |
+|:---|:-----|:------------|
+| A01 | Mini Job Scheduler | Custom job scheduling system |
+| A02 | Interactive Shell Extension | Extended shell features |
+| A03 | Distributed File Sync | Multi-node file synchronisation |
+
+</details>
+
+### Project Timeline
+
+```
+Week 8         Week 10        Week 12        Week 14        Exam Session
+  │              │              │              │                 │
+  ▼              ▼              ▼              ▼                 ▼
+┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐      ┌────────┐
+│ SELECT │───▶│   M1   │───▶│   M2   │───▶│ SUBMIT │─────▶│PRESENT │
+│PROJECT │    │ CHECK  │    │ CHECK  │    │ FINAL  │      │& DEMO  │
+└────────┘    └────────┘    └────────┘    └────────┘      └────────┘
+     │              │              │              │
+     └── 2 weeks ───┴── 2 weeks ──┴── 2 weeks ──┘
 ```
 
-### How to undo the last commit
+### Evaluation Criteria
 
-```bash
-# BASH (Ubuntu)
-# Keep the changes, undo only the commit
-git reset --soft HEAD~1
-
-# Undo the commit AND the changes (CAUTION: data loss)
-git reset --hard HEAD~1
-```
+| Component | Weight |
+|:----------|:------:|
+| Correct functionality | 40% |
+| Code quality | 20% |
+| Documentation | 15% |
+| Automated tests | 15% |
+| Presentation | 10% |
 
 ---
 
-## Problems with SSH
+## Part V: Shared Utilities & Developer Tools
 
-### "Connection refused" when connecting with PuTTY
+### lib/ — Shared Python Modules
 
-1. Verify that Ubuntu is running (the WSL window must be open)
-2. Verify that SSH is started:
-   ```bash
-   # BASH (Ubuntu)
-   sudo service ssh status
-   # If it is stopped:
-   sudo service ssh start
-   ```
-3. Verify the IP address:
-   ```bash
-   hostname -I
-   # Use the first address displayed
-   ```
-4. Verify that Windows firewall is not blocking port 22
+#### logging_utils.py
 
-### "Host key verification failed"
-
-```bash
-# BASH (Ubuntu)
-# Delete the old key
-ssh-keygen -R hostname_or_ip
-
-# Reconnect (it will ask you to accept the new key)
-ssh user@hostname
-```
-
----
-
-# PART VII: DEVELOPER TOOLS
-
-This section documents the shared utilities and automation scripts available in the kit. If you are an instructor customising materials or a student debugging the autograder, this is where you will find the relevant documentation.
-
----
-
-## Shared Utilities (lib/)
-
-The `lib/` directory contains Python modules used across all seminars. These are not student-facing code — they power the autograders, quiz generators, and anti-plagiarism infrastructure.
-
-### logging_utils.py
-
-Provides consistent, coloured logging across all Python scripts. Every autograder and test script uses this module to produce readable output that distinguishes informational messages from warnings and errors.
+Provides consistent, coloured logging across all Python scripts.
 
 ```python
 from logging_utils import setup_logging
@@ -1397,11 +911,19 @@ logger.warning("Low disk space")
 logger.error("File not found")
 ```
 
-The colours are intentional: green for success, yellow for warnings, red for errors. When you run 20 test cases, this helps you find problems without reading every line.
+**Colour Scheme:**
 
-### randomisation_utils.py
+| Level | Colour | ANSI Code |
+|:------|:-------|:----------|
+| DEBUG | Cyan | `\033[0;36m` |
+| INFO | Green | `\033[0;32m` |
+| WARNING | Yellow | `\033[0;33m` |
+| ERROR | Red | `\033[0;31m` |
+| CRITICAL | Bold Red | `\033[1;31m` |
 
-Generates deterministic, student-specific test parameters for anti-plagiarism. The key insight is that each student gets different test inputs, but those inputs are reproducible — if you run the autograder twice with the same student email and assignment, you get the same parameters.
+#### randomisation_utils.py
+
+Generates deterministic, student-specific test parameters for anti-plagiarism.
 
 ```python
 from randomisation_utils import generate_student_seed, randomise_test_parameters
@@ -1411,336 +933,250 @@ params = randomise_test_parameters(seed)
 # Same student + assignment = same parameters (reproducible)
 ```
 
-This approach makes copying homework useless: two students with the same code will fail each other's tests, because their expected outputs differ.
+**Generated Parameters:**
 
-For complete documentation including all available functions and parameters, see `lib/README.md`.
+| Category | Fields |
+|:---------|:-------|
+| Network | `ip_addresses`, `ports` |
+| File System | `file_sizes`, `file_names`, `directory_names` |
+| Time | `timestamps`, `cron_hours`, `cron_days` |
+| Process | `pids`, `signals` |
+| Permissions | `usernames`, `permissions_octal` |
+| Text | `search_patterns`, `line_numbers` |
 
----
+### scripts/ — Automation Scripts
 
-## Automation Scripts (scripts/)
+#### check_links.sh
 
-The `scripts/` directory contains maintenance and CI automation. These are designed for instructors managing the kit, not for student use.
-
-### check_links.sh
-
-Validates documentation links across the entire kit. A broken link in a seminar handout is worse than no link at all — it wastes student time.
+Validates documentation links across the entire kit.
 
 ```bash
-# Check internal links only (fast, ~10 seconds)
+# Check internal links only (fast)
 ./scripts/check_links.sh
 
-# Check all links including external URLs (slow, ~2 minutes)
+# Check all links including external URLs (slow)
 ./scripts/check_links.sh --external
 
-# Show help
-./scripts/check_links.sh --help
+# Requirements: lychee (cargo install lychee)
 ```
 
-The script uses [lychee](https://github.com/lycheeverse/lychee) if installed, falling back to a simpler grep-based check otherwise. For best results:
+#### add_print_styles.sh
+
+Injects print stylesheets into HTML presentations for offline handouts.
 
 ```bash
-cargo install lychee
-# or on macOS
-brew install lychee
-```
-
-### add_print_styles.sh
-
-Injects print stylesheets into HTML presentations for offline handouts. Before this existed, printing slides produced unreadable output with cut-off text and broken layouts.
-
-```bash
-# Preview changes (shows what would be modified)
+# Preview changes
 ./scripts/add_print_styles.sh --dry-run
 
 # Apply changes
 ./scripts/add_print_styles.sh
 ```
 
-After running, presentations can be printed cleanly from any browser (Ctrl+P / Cmd+P). The stylesheet hides navigation elements, adjusts fonts for paper, and ensures code blocks do not overflow.
+---
+
+## Part VI: Anti-Plagiarism Infrastructure
+
+### Multi-Layer Detection System
+
+```mermaid
+flowchart TD
+    subgraph Layer1["🔍 Layer 1: Automated"]
+        A[Internal Detector] --> B[Similarity Check]
+        A --> C[AI Pattern Scan]
+    end
+    
+    subgraph Layer2["🔬 Layer 2: External Tools"]
+        D[MOSS] --> E[Structural Analysis]
+        F[JPlag] --> G[Token Comparison]
+    end
+    
+    subgraph Layer3["👤 Layer 3: Human"]
+        H[Oral Verification] --> I[Understanding Confirmation]
+    end
+    
+    Layer1 --> Layer2 --> Layer3
+```
+
+### Tools Overview
+
+| Tool | Command | Purpose |
+|:-----|:--------|:--------|
+| Internal Detector | `make plagiarism-check` | Fast similarity + AI patterns |
+| MOSS | `make moss-check` | Stanford structural comparison |
+| JPlag | `make jplag-check` | Offline detailed analysis |
+| Oral Verification | Manual | Understanding confirmation |
+
+### AI Fingerprint Scanner
+
+Located in `SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py`:
+
+```bash
+python3 S01_06_ai_fingerprint_scanner.py submission.sh
+```
+
+**Detects patterns indicating AI generation:**
+- Overly consistent comment style
+- Unusual vocabulary patterns
+- Suspicious formatting uniformity
+- Common AI-generated phrases
 
 ---
 
-## CI Pipeline
+## Part VII: CI/CD Pipeline
 
-Each seminar includes a GitHub Actions CI configuration (`ci/github_actions.yml`). Version 2.2 of the pipeline includes seven jobs:
+### GitHub Actions Workflow
 
-| Job | What It Does | Why It Matters |
-|-----|--------------|----------------|
-| `lint-bash` | ShellCheck on all Bash scripts | Catches common errors like unquoted variables |
-| `lint-python` | Ruff on all Python code | Enforces consistent style and catches bugs |
-| `validate-yaml` | Quiz and config validation | Ensures quiz files are well-formed |
-| `ai-check` | AI fingerprint detection | Flags suspiciously polished submissions |
-| `link-check` | Documentation link validation | Prevents broken links from reaching students |
-| `test` | pytest with coverage threshold | Verifies autograder correctness |
-| `structure-check` | Directory structure validation | Ensures standard kit layout |
+Each seminar includes a CI configuration (`ci/github_actions.yml`) with:
 
-The AI fingerprint detection deserves explanation: it looks for patterns common in LLM-generated code (overly verbose comments, certain phrasings, suspiciously complete error handling for a beginner). It is not definitive proof, but it flags submissions for manual review.
+| Job | Purpose | Tool |
+|:----|:--------|:-----|
+| `lint-bash` | Shell script linting | ShellCheck |
+| `lint-python` | Python code linting | Ruff |
+| `validate-yaml` | Quiz/config validation | yamllint |
+| `ai-check` | AI fingerprint detection | Custom scanner |
+| `link-check` | Documentation links | lychee |
+| `test` | Unit tests with coverage | pytest |
+| `structure-check` | Directory validation | Custom |
 
-Run locally with:
+### Running Locally
 
 ```bash
 cd SEM01
 make test        # Run tests
 make lint        # Run linters
 make ai-check    # Check for AI patterns
+make all         # Run everything
 ```
+
+### Test Coverage Requirements
+
+| Component | Target Coverage |
+|:----------|:---------------:|
+| lib/ | >80% |
+| Autograders | >75% |
+| Quiz generators | >70% |
 
 ---
 
-## Testing
+## Part VIII: Pedagogy & Course Philosophy
 
-### Running Tests
+### Core Principles
 
-The testing infrastructure uses pytest throughout. Tests live in `lib/` for shared utilities and in `SEM*/tests/` for seminar-specific validation.
+```mermaid
+mindmap
+  root((Course<br/>Design))
+    Growth Mindset
+      No programmer gene
+      Deliberate practice
+      Errors = learning
+    Active Learning
+      Peer Instruction
+      Parsons Problems
+      Live Coding
+    Attention Science
+      5-10 min sprints
+      Micro-milestones
+      Strategic breaks
+    AI Awareness
+      LLM-aware exercises
+      Understanding focus
+      Tool not crutch
+```
+
+### Teaching Methods
+
+| Method | Description | Research Basis |
+|:-------|:------------|:---------------|
+| **Peer Instruction** | Questions with pair discussions | Mazur (1997), Porter et al. (2016) |
+| **Parsons Problems** | Code reordering exercises | Parsons & Haden (2006) |
+| **Live Coding** | Real-time demonstration | Rubin (2013), Raj et al. (2018) |
+| **Sprint Exercises** | Timed practice in short bursts | Cognitive load theory |
+| **LLM-Aware Tasks** | Exercises requiring understanding | Contemporary necessity |
+
+### What Students Will Be Able to Do
+
+| Skill Area | Capabilities |
+|:-----------|:-------------|
+| **Automation** | Write scripts that automate complex tasks |
+| **Debugging** | Use `strace`, `top`, `htop`, `lsof` effectively |
+| **Administration** | Manage permissions, processes, services, cron |
+| **Foundation** | Understand OS internals for any specialisation |
+
+### Career Relevance
+
+| Direction | Course Knowledge Applied |
+|:----------|:-------------------------|
+| DevOps / SRE | Scripting, processes, services, containers |
+| Information Security | Permissions, processes, system audits |
+| Backend Development | IPC, threading, virtual memory |
+| Embedded / IoT | Processes, scheduling, kernel |
+| Cloud Engineering | Virtualisation, containers, automation |
+| Data Engineering | Text processing (grep/sed/awk), pipelines |
+
+---
+
+## Annexes
+
+### Annex A: Standard Lab Credentials
+
+| System | Username | Password |
+|:-------|:---------|:---------|
+| Ubuntu/WSL | `stud` | `stud` |
+| Portainer | `stud` | `studstudstud` |
+| Portainer URL | — | `http://localhost:9000` |
+
+### Annex B: Emergency Commands
 
 ```bash
-# Run all lib tests
-cd lib/
-pytest -v test_*.py
-
-# Run with coverage report
-pytest -v --cov=. --cov-report=term-missing
-
-# Run seminar-specific tests
-cd SEM01/tests/
-pytest -v
-```
-
-### Test Coverage Targets
-
-| Component | Target | Rationale |
-|-----------|--------|-----------|
-| lib/ | >80% | These modules are used everywhere; bugs propagate |
-| Autograders | >75% | Incorrect grading undermines student trust |
-| Quiz generators | >70% | Less critical; manual review catches most issues |
-
-The coverage targets are enforced in CI — a pull request that drops coverage below the threshold will not merge.
-
----
-
-# PART VIII: STORIES AND HISTORICAL CONTEXT
-
----
-
-## Where the Things We Use Come From
-
-Every command and concept in Unix has a history. Here are a few worth knowing.
-
-### Thompson and Ritchie at Bell Labs (1969-1973)
-
-Unix started as a personal project. Ken Thompson wanted to port a game (Space Travel) to an unused PDP-7. In the process, he created an operating system. Dennis Ritchie joined and created the C language so they could rewrite Unix portably.
-
-The PDP-7 had 18 KB of memory. The entire operating system, with shell and utilities, fit in there. Today, a web favicon takes up more.
-
-In 1983, Thompson and Ritchie received the Turing Award — the most prestigious award in computer science. Ritchie died in October 2011, a week after Steve Jobs. Jobs got the press attention; Ritchie went almost unnoticed. Ironically, Jobs's iPhone runs on a kernel derived from Unix.
-
-### Pipes — One Night's Work (1973)
-
-Doug McIlroy, Thompson's department head, kept insisting that programmes should be able to connect "like a garden hose" — the output of one should be the input of another.
-
-Thompson implemented pipes in a single night. The next day, the team rewrote all utilities to support them. The idea defined Unix and influenced everything that came after.
-
-The `|` notation for pipe comes from the convention used in mathematical logic for "or". It was chosen because it looks like a tube.
-
-### Why Commands Have Strange Names
-
-- `ls` = "list" (shortened to type faster)
-- `cd` = "change directory"
-- `pwd` = "print working directory"
-- `cat` = "concatenate" (originally for concatenating files, now also used to display them)
-- `grep` = "**g**lobal **r**egular **e**xpression **p**rint" — a command from the `ed` editor
-- `awk` = Aho, Weinberger, Kernighan — the creators' initials
-- `sed` = "**s**tream **ed**itor"
-- `cron` = Chronos, the Greek god of time
-
-Teletypes from the '70s were slow. The shorter the command name, the faster you could type. That is why `cp` instead of `copy`, `mv` instead of `move`, `rm` instead of `remove`.
-
-### Regular Expressions — From Mathematics to grep
-
-Stephen Kleene invented regular expressions in 1951 for formal language theory. Ken Thompson first implemented them in software in 1968, in a text editor.
-
-When Thompson created `grep` in 1973, he took the implementation from the editor and made it a standalone command. `grep` comes from `ed`, the Unix line editor: the command `g/re/p` meant "**g**lobal search for **r**egular **e**xpression and **p**rint".
-
-### The Creator of Bash
-
-Bash was created by Brian Fox in 1989 for the GNU project. The goal was to replace Bourne Shell (sh) with something compatible but improved. The name is an acronym and a pun: **B**ourne **A**gain **SH**ell.
-
-Fox worked alone on the first version. He left the project in 1994, and Chet Ramey took over maintenance. Ramey still maintains Bash today, after 30 years.
-
-### Why Linux Is Called Linux
-
-Linus Torvalds created the kernel in 1991, as a student at the University of Helsinki. He originally wanted to call it "Freax" (free + freak + x from Unix), but the administrator of the FTP server where he published it did not agree and put it in a folder named "Linux" (Linus + Unix).
-
-Torvalds accepted the name reluctantly. He wrote on the mailing list: "it's too egotistical, I can't name something after myself".
-
----
-
-## Why Some Things Are the Way They Are
-
-### Why 755 and 644?
-
-Unix permissions are stored as an octal number. Each digit represents permissions for owner, group, others:
-- 7 = rwx (read + write + execute) = 4 + 2 + 1
-- 5 = r-x (read + execute) = 4 + 0 + 1
-- 4 = r-- (read only) = 4 + 0 + 0
-
-755 for directories and scripts (executable by all, modifiable only by owner).
-644 for normal files (readable by all, modifiable only by owner).
-
-Could it have been different? Yes. But when you have billions of scripts that set `chmod 755`, you can no longer change.
-
-### Why $HOME and not something else?
-
-Environment variables were invented in Version 7 Unix (1979). The `$VARIABLE` convention comes from Bourne Shell. The `$` sign was chosen because it was not used for anything else in the syntax.
-
-Why uppercase? To distinguish them from local shell variables. The convention is just that — a convention. It is not enforced by the system.
-
-### Why is the shebang `#!`?
-
-The first line `#!/bin/bash` is called the "shebang" (or "hashbang"). When Unix sees an executable file that starts with `#!`, it uses the specified programme as the interpreter.
-
-Why `#!`? `#` was already used for comments in the shell. `!` is the character that meant, in some contexts, "execute". The combination was unused and distinctive.
-
-The term "shebang" comes from slang. Perhaps from "sharp bang" (#!), perhaps from the Irish expression "shebeen" (illegal bar). Nobody knows for sure.
-
----
-
-# PART IX: REFERENCES AND RESOURCES
-
----
-
-## Official Documentation
-
-- [GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/) — The complete reference
-- [POSIX Shell Specification](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html) — Portable standard
-- [Linux man pages](https://man7.org/linux/man-pages/) — Documentation for each command
-
-## Recommended Books
-
-- **"The Linux Command Line"** - William Shotts — Free online, excellent for beginners
-- **"Learning the bash Shell"** - O'Reilly — Classic for Bash
-- **"Operating Systems: Three Easy Pieces"** - Arpaci-Dusseau — OS theory, available free
-
-## Interactive Tutorials
-
-- [Exercism Bash Track](https://exercism.org/tracks/bash) — Exercises with feedback
-- [OverTheWire Bandit](https://overthewire.org/wargames/bandit/) — Wargame for shell
-- [ShellCheck](https://www.shellcheck.net/) — Online linter for scripts
-
-## Computing Education Research
-
-- [SIGCSE](https://sigcse.org/) — The main community
-- [ACM TOCE](https://dl.acm.org/journal/toce) — Reference journal
-- [Computing Education Research Blog](https://computinged.wordpress.com/) — Mark Guzdial's blog
-
----
-
-# PART X: LICENCE
-
-```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                           RESTRICTIVE LICENCE                                ║
-║                    Version 4.0.0 · January 2025                              ║
-║              © 2025 Antonio Clim. All rights reserved.                       ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-```
-
-### Permitted Uses
-
-✓ **Personal study** — download and use the materials for individual learning  
-✓ **Code execution** — run the examples on your devices  
-✓ **Local modification** — adapt the code for personal experiments  
-✓ **Personal notes** — create derivative notes for your own use
-
-### Prohibited Uses (without prior written agreement)
-
-✗ **Publication** — uploading or distributing the materials on any platform  
-✗ **Teaching** — use in courses, workshops or training sessions  
-✗ **Presentation** — teaching or presenting the materials to third parties  
-✗ **Redistribution** — redistribution in any form  
-✗ **Derivative works** — creating derivative works for public use  
-✗ **Commercial use** — commercial exploitation of any kind
-
-### Legal Provisions
-
-**No warranty** — The materials are provided "as is" without any warranty, express or implied, including, but not limited to, the warranties of merchantability, fitness for a particular purpose and non-infringement.
-
-**Limitation of liability** — In no circumstance shall the author be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from or in connection with the materials.
-
-**Applicable law** — These terms are governed by the laws of Romania. Disputes shall be subject to the exclusive jurisdiction of the courts of Bucharest.
-
-**Contact for permissions** — For requests regarding educational use, publication or other permissions, contact the author through official academic channels or through the repository issue tracker.
-
-### Attribution Requirements
-
-When citing these materials in academic works (where permitted):
-
-```
-Clim, A. (2025). ROso — Educational Kit for Operating Systems (Extended Edition).  
-Bucharest University of Economic Studies — CSIE.
-```
-
----
-
-# ANNEXES
-
----
-
-## Annex A: Standard Lab Credentials
-
-For consistency in the lab, we use these credentials:
-
-**Ubuntu/WSL:**
-```
-User: stud (or your surname)
-Pass: stud
-```
-
-**Portainer (Docker management):**
-```
-URL:  http://localhost:9000
-User: stud
-Pass: studstudstud
-```
-
----
-
-## Annex B: Emergency Commands
-
-When something does not work and you do not know why:
-
-```bash
-# BASH (Ubuntu)
-# Check the system version
+# System information
 lsb_release -a
 uname -a
 
-# Check disk space
-df -h
+# Resource status
+df -h          # Disk space
+free -h        # Memory
+top -bn1 | head -20  # Processes
 
-# Check memory
-free -h
-
-# Check processes
-top -bn1 | head -20
-
-# Check recent logs
+# Logs
 journalctl -xe --no-pager | tail -50
 
-# Restart WSL (from PowerShell)
-# wsl --shutdown
-# wsl
+# WSL restart (from PowerShell)
+wsl --shutdown
+wsl
 ```
 
----
+### Annex C: Weekly Workflow
 
-## Annex C: Complete .gitignore Template
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         THE COURSE WEEK                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
+│    │ BEFORE THE   │     │ DURING THE   │     │ AFTER THE    │              │
+│    │   SEMINAR    │────▶│   SEMINAR    │────▶│   SEMINAR    │              │
+│    └──────────────┘     └──────────────┘     └──────────────┘              │
+│           │                    │                    │                       │
+│           ▼                    ▼                    ▼                       │
+│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
+│    │ 1. Read      │     │ 1. Participate│    │ 1. Review    │              │
+│    │    README    │     │    actively  │     │    notes     │              │
+│    │              │     │              │     │               │              │
+│    │ 2. Go through│     │ 2. Note the  │     │ 2. Complete  │              │
+│    │    MATERIAL  │     │    commands  │     │    homework  │              │
+│    │              │     │              │     │               │              │
+│    │ 3. Prepare   │     │ 3. Ask when  │     │ 3. Run       │              │
+│    │    environment│    │    unclear   │     │    validator │              │
+│    └──────────────┘     └──────────────┘     └──────────────┘              │
+│                                                                             │
+│    Time: 30 min         Time: 100 min        Time: 60-90 min               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Annex D: Complete .gitignore Template
 
 ```gitignore
-# =============================================================================
-# .gitignore for SO Assignments/Projects
-# =============================================================================
-
 # Temporary files
 *.tmp
 *.temp
@@ -1763,7 +1199,7 @@ venv/
 env/
 .env
 
-# Build
+# Build artifacts
 *.o
 *.a
 *.so
@@ -1774,101 +1210,62 @@ env/
 .vscode/
 *.sublime-*
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 Desktop.ini
 
-# Archives (do not commit them)
+# Archives
 *.zip
 *.tar.gz
 *.rar
 *.7z
 
-# Generated directories
+# Generated
 output/
 results/
 build/
 dist/
 
-# Files with sensitive data
+# Sensitive
 *.key
 *.pem
 passwords.txt
 secrets.*
 ```
 
----
-
-## Annex D: Weekly Workflow
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         THE COURSE WEEK                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
-│    │ BEFORE THE   │     │ DURING THE   │     │ AFTER THE    │              │
-│    │   SEMINAR    │────▶│   SEMINAR    │────▶│   SEMINAR    │              │
-│    └──────────────┘     └──────────────┘     └──────────────┘              │
-│           │                    │                    │                       │
-│           ▼                    ▼                    ▼                       │
-│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
-│    │ 1. Read      │     │ 1. Participate│    │ 1. Review    │              │
-│    │    README    │     │    actively  │     │    notes     │              │
-│    │              │     │              │     │               │              │
-│    │ 2. Go through│     │ 2. Note the  │     │ 2. Complete  │              │
-│    │    MATERIAL_ │     │    commands  │     │    assignment│              │
-│    │    PRINCIPAL │     │              │     │               │              │
-│    │              │     │ 3. Ask when  │     │ 3. Run       │              │
-│    │ 3. Prepare   │     │    you don't │     │    validator │              │
-│    │    environment│    │    understand│     │               │              │
-│    └──────────────┘     └──────────────┘     └──────────────┘              │
-│                                                                             │
-│    Time: 30 min         Time: 100 min        Time: 60-90 min               │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Annex E: Kit Statistics
+### Annex E: Kit Statistics Summary
 
 | Category | Quantity | Details |
-|-----------|-----------|---------|
-| Theoretical courses | 14 | SO_curs01 to SO_curs14 |
-| Supplementary lectures | 4 | Network, Containers, Kernel, NPU |
-| Practical seminars | 7 | SEM01 to SEM07 |
-| Semester projects | 23 | 5 EASY + 15 MEDIUM + 3 ADVANCED |
-| Markdown files | 362 | Documentation, guides, and specifications |
-| HTML presentations | 71 | Interactive slides with print support |
-| PNG diagrams | 27 | In 00_SUPPLEMENTARY/ |
-| SVG diagrams | 26 | Vector graphics throughout |
-| Python scripts | 65 | Autograders, tools, tests |
-| Bash scripts | 118 | Demos, utilities, validators |
-| YAML quiz files | 28 | Structured question banks |
-| Test files | 25+ | pytest and shell tests |
-| Estimated hours (total) | 60+ | For complete coverage |
-| Demonstration scripts | 180+ | Combined Bash and Python |
-| Exam exercises | 3 sets | In 00_SUPPLEMENTARY/ |
+|:---------|:--------:|:--------|
+| Theoretical Lectures | 14 | Chapters 01–14 |
+| Supplementary Lectures | 4 | Chapters 15–18 |
+| Practical Seminars | 7 | SEM01–SEM07 |
+| Semester Projects | 23 | 5 EASY + 15 MEDIUM + 3 ADVANCED |
+| Markdown Files | 362 | Documentation and guides |
+| HTML Presentations | 71 | Interactive slides |
+| PNG Diagrams | 27 | In `00_SUPPLEMENTARY/` |
+| SVG Diagrams | 26 | Vector graphics |
+| Python Scripts | 65 | Autograders, tools, tests |
+| Bash Scripts | 118 | Demos, utilities, validators |
+| YAML Quiz Files | 28 | Question banks |
+| Test Files | 25+ | pytest and shell tests |
+| Estimated Hours | 60+ | For complete coverage |
 
----
+### Annex F: Changelog (Recent)
 
-## Annex F: Changelog
-
-### Version 5.3.1 (January 2026)
+#### Version 5.3.1 (January 2026)
 
 **New Features:**
-- Added print stylesheets to all HTML presentations (`assets/css/print.css`)
-- Added link checking to CI pipeline (`scripts/check_links.sh`)
-- Expanded test coverage for lib/ utilities to >80%
-- Added comprehensive lib/README.md documentation
+- ✅ Added print stylesheets to all HTML presentations
+- ✅ Added link checking to CI pipeline
+- ✅ Expanded test coverage for lib/ utilities (>80%)
+- ✅ Added lib/README.md documentation with usage examples
 
 **Improvements:**
 - Updated CI to version 2.2 with link-check job
-- Standardised script documentation across all seminars
-- Enhanced test templates with better error messages
-- Added SEM07 for evaluation and grading procedures
+- Standardised script documentation
+- Enhanced test templates
 
 **Files Added:**
 - `lib/README.md`
@@ -1879,28 +1276,63 @@ secrets.*
 - `assets/css/print.css`
 - `SEM01/tests/test_ai_fingerprint.py`
 
-### Version 5.3.0 (December 2025)
+---
 
-- Initial FAZA 5-6 release
-- Complete restructure with 14 weeks
-- AI-aware exercises integrated throughout
-- Anti-plagiarism infrastructure with MOSS/JPlag integration
+## Licence
 
-### Version 4.0.0 (September 2025)
+### Summary
 
-- Major reorganisation of folder structure
-- Added project difficulty classification (EASY/MEDIUM/ADVANCED)
-- Introduced autograder framework
-- Standardised seminar format
+| Permission | Status |
+|:-----------|:------:|
+| ✅ Personal study | Allowed |
+| ✅ Code execution for learning | Allowed |
+| ✅ Local modification for experimentation | Allowed |
+| ✅ Academic citation with attribution | Allowed |
+| ❌ Redistribution | **Prohibited** |
+| ❌ Derivative works for public use | **Prohibited** |
+| ❌ Commercial use | **Prohibited** |
+
+### Attribution
+
+When citing these materials in academic works:
+
+```
+Clim, A. (2026). ENos — Educational Kit for Operating Systems (v5.3.1).
+Bucharest University of Economic Studies — CSIE.
+https://github.com/antonioclim/ENos
+```
+
+### BibTeX
+
+```bibtex
+@misc{clim2026enos,
+  author       = {Clim, Antonio},
+  title        = {{ENos}: Operating Systems — Complete Educational Kit},
+  year         = {2026},
+  version      = {5.3.1},
+  institution  = {Bucharest University of Economic Studies},
+  howpublished = {\url{https://github.com/antonioclim/ENos}},
+  note         = {English language version. Romanian version: ROso}
+}
+```
+
+See [LICENCE.md](./LICENCE.md) for complete terms.
 
 ---
 
-*Kit updated: January 2026*  
-*Version: 5.3.1*  
-*Tested on: Ubuntu 24.04 LTS, WSL2 with Ubuntu 22.04/24.04*  
-*Feedback and errors: through GITHUB issue tracker*
+<div align="center">
+
+**Kit updated:** January 2026  
+**Version:** 5.3.1  
+**Tested on:** Ubuntu 24.04 LTS, WSL2 with Ubuntu 22.04/24.04  
+**Feedback:** [GitHub Issues](https://github.com/antonioclim/ENos/issues)
 
 ---
 
 **ing. dr. Antonio Clim**  
-Assistant Lecturer (fixed-term) | Bucharest University of Economic Studies — CSIE
+Assistant Lecturer (fixed-term)  
+Bucharest University of Economic Studies — CSIE
+
+🇬🇧 [ENos (English)](https://github.com/antonioclim/ENos) | 🇷🇴 [ROso (Romanian)](https://github.com/antonioclim/ROso)
+
+</div>
