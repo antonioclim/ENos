@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Pipeline și Redirecționare în Shell</text>
+  
+  <!-- STDIN Box -->
+  <rect x="30" y="150" width="100" height="60" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="80" y="175" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#1e40af">stdin</text>
+  <text x="80" y="195" text-anchor="middle" font-family="monospace" font-size="11" fill="#3b82f6">(fd 0)</text>
+  
+  <!-- Command 1 Box -->
+  <rect x="180" y="130" width="120" height="100" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="240" y="160" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">grep</text>
+  <text x="240" y="180" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">'pattern'</text>
+  <text x="240" y="200" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">file.txt</text>
+  
+  <!-- Pipe Symbol -->
+  <rect x="340" y="165" width="40" height="30" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="360" y="186" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="#92400e">|</text>
+  
+  <!-- Command 2 Box -->
+  <rect x="420" y="130" width="120" height="100" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="480" y="160" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">sed</text>
+  <text x="480" y="180" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">'s/old/new/g'</text>
+  
+  <!-- Pipe Symbol 2 -->
+  <rect x="580" y="165" width="40" height="30" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="600" y="186" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="#92400e">|</text>
+  
+  <!-- Command 3 Box -->
+  <rect x="660" y="130" width="100" height="100" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="710" y="160" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">awk</text>
+  <text x="710" y="180" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">'{print $1}'</text>
+  
+  <!-- Arrows -->
+  <line x1="130" y1="180" x2="175" y2="180" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="300" y1="180" x2="335" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  <line x1="380" y1="180" x2="415" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  <line x1="540" y1="180" x2="575" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  <line x1="620" y1="180" x2="655" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  
+  <!-- STDOUT Box -->
+  <rect x="660" y="270" width="100" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="710" y="295" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">stdout</text>
+  <text x="710" y="315" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">(fd 1)</text>
+  
+  <!-- STDERR Box -->
+  <rect x="500" y="270" width="100" height="60" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="550" y="295" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#991b1b">stderr</text>
+  <text x="550" y="315" text-anchor="middle" font-family="monospace" font-size="11" fill="#dc2626">(fd 2)</text>
+  
+  <!-- Output arrow -->
+  <line x1="710" y1="230" x2="710" y2="265" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  
+  <!-- Stderr arrow -->
+  <path d="M 690 230 L 690 250 L 550 250 L 550 265" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrowhead-red)" stroke-dasharray="5,5"/>
+  
+  <!-- Redirect examples -->
+  <rect x="30" y="280" width="400" height="100" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="1"/>
+  <text x="50" y="305" font-family="monospace" font-size="12" fill="#475569">Redirecționări comune:</text>
+  <text x="50" y="325" font-family="monospace" font-size="11" fill="#334155">&gt; file    # stdout → fișier (suprascrie)</text>
+  <text x="50" y="345" font-family="monospace" font-size="11" fill="#334155">&gt;&gt; file   # stdout → fișier (append)</text>
+  <text x="50" y="365" font-family="monospace" font-size="11" fill="#334155">2&gt; file   # stderr → fișier</text>
+  <text x="230" y="325" font-family="monospace" font-size="11" fill="#334155">&lt; file    # fișier → stdin</text>
+  <text x="230" y="345" font-family="monospace" font-size="11" fill="#334155">&amp;&gt; file   # stdout+stderr → fișier</text>
+  <text x="230" y="365" font-family="monospace" font-size="11" fill="#334155">2&gt;&amp;1     # stderr → stdout</text>
+  
+  <!-- Legend -->
+  <text x="30" y="75" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Legenda:</text>
+  <rect x="30" y="85" width="15" height="15" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="50" y="97" font-family="Arial, sans-serif" font-size="11" fill="#475569">Input</text>
+  <rect x="100" y="85" width="15" height="15" fill="#f0fdf4" stroke="#16a34a"/>
+  <text x="120" y="97" font-family="Arial, sans-serif" font-size="11" fill="#475569">Comandă</text>
+  <rect x="185" y="85" width="15" height="15" fill="#fef3c7" stroke="#d97706"/>
+  <text x="205" y="97" font-family="Arial, sans-serif" font-size="11" fill="#475569">Pipe</text>
+  <rect x="250" y="85" width="15" height="15" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="270" y="97" font-family="Arial, sans-serif" font-size="11" fill="#475569">stdout</text>
+  <rect x="320" y="85" width="15" height="15" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="340" y="97" font-family="Arial, sans-serif" font-size="11" fill="#475569">stderr</text>
+</svg>

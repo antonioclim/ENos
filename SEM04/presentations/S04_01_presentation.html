@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminar 4: Text Processing - grep, sed, awk</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow: hidden;
+        }
+        
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--dark) 0%, #0f172a 100%);
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .slide-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+        
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+        
+        .code-block .prompt {
+            color: var(--success);
+        }
+        
+        .code-block .command {
+            color: #f8fafc;
+        }
+        
+        .code-block .output {
+            color: #94a3b8;
+        }
+        
+        .code-block .highlight {
+            background: rgba(37, 99, 235, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .box-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        li {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        li::before {
+            content: "→";
+            position: absolute;
+            left: -24px;
+            color: var(--primary);
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.2));
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+        
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        
+        th {
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        
+        .progress {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            bottom: 25px;
+            left: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .emoji {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Title slide special */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide .slide-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .title-slide .slide-subtitle {
+            font-size: 1.5rem;
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide.active .slide-content > * {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .slide.active .slide-content > *:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active .slide-content > *:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active .slide-content > *:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active .slide-content > *:nth-child(4) { animation-delay: 0.4s; }
+        .slide.active .slide-content > *:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- SLIDE 1: Title -->
+        <div class="slide title-slide active" data-slide="1">
+            <div class="emoji">🔧</div>
+            <h1 class="slide-title">Text Processing in Linux</h1>
+            <p class="slide-subtitle">Seminar 4: grep, sed, awk + Regular Expressions</p>
+            <p style="margin-top: 40px; color: #64748b;">
+                Operating Systems | ASE Bucharest - CSIE<br>
+                <span style="font-size: 0.9rem;">Press → or Space to navigate</span>
+            </p>
+        </div>
+        
+        <!-- SLIDE 2: Agenda -->
+        <div class="slide" data-slide="2">
+            <h2 class="slide-title">Today's Agenda</h2>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="box">
+                        <div class="box-title">Part I (50 min)</div>
+                        <ul>
+                            <li>Regular Expressions (Regex)</li>
+                            <li>The grep command in detail</li>
+                            <li>Practical grep exercises</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <div class="box-title">Part II (50 min)</div>
+                        <ul>
+                            <li>Stream Editor (sed)</li>
+                            <li>AWK - structured processing</li>
+                            <li>Combined pipelines</li>
+                            <li>The nano editor (bonus)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <strong>💡 The most content-dense seminar in the course!</strong> Keep pace and ask if anything is unclear.
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 3: Why text processing? -->
+        <div class="slide" data-slide="3">
+            <h2 class="slide-title">Why Text Processing?</h2>
+            <div class="slide-content">
+                <p>In Linux, <strong>everything is a file</strong> and most files are <strong>text</strong>:</p>
+                <ul>
+                    <li>Configuration files (/etc/*)</li>
+                    <li>System and application logs</li>
+                    <li>Source code</li>
+                    <li>CSV, JSON, XML data</li>
+                    <li>Command output</li>
+                </ul>
+                <div class="success-box">
+                    <strong>Superpower:</strong> With grep, sed and awk you can process in seconds what would take others hours!
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 4: Regex Intro -->
+        <div class="slide" data-slide="4">
+            <h2 class="slide-title">Regular Expressions - Foundation</h2>
+            <div class="slide-content">
+                <p><strong>Regex</strong> = a language for describing patterns in text</p>
+                <div class="code-block">
+                    <span class="prompt"># </span><span class="command">Simple pattern - search for the text "error"</span><br>
+                    error<br><br>
+                    <span class="prompt"># </span><span class="command">Pattern with metacharacters - any line starting with #</span><br>
+                    ^#.*
+                </div>
+                <div class="highlight-box">
+                    <strong>⚠️ Regex ≠ Globbing!</strong><br>
+                    • Globbing (shell): <code>*.txt</code> = files with the .txt extension<br>
+                    • Regex: <code>.*\.txt</code> = text ending with .txt
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 5: Metacharacters -->
+        <div class="slide" data-slide="5">
+            <h2 class="slide-title">Basic Metacharacters</h2>
+            <div class="slide-content">
+                <table>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>.</code></td>
+                        <td>Any character (exactly 1)</td>
+                        <td><code>a.c</code> → abc, a1c, aXc</td>
+                    </tr>
+                    <tr>
+                        <td><code>^</code></td>
+                        <td>Start of line</td>
+                        <td><code>^Hello</code> → lines starting with Hello</td>
+                    </tr>
+                    <tr>
+                        <td><code>$</code></td>
+                        <td>End of line</td>
+                        <td><code>end$</code> → lines ending with end</td>
+                    </tr>
+                    <tr>
+                        <td><code>*</code></td>
+                        <td>0 or more (preceding)</td>
+                        <td><code>ab*c</code> → ac, abc, abbc</td>
+                    </tr>
+                    <tr>
+                        <td><code>\</code></td>
+                        <td>Escape special character</td>
+                        <td><code>\.</code> → literal dot</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- SLIDE 6: BRE vs ERE -->
+        <div class="slide" data-slide="6">
+            <h2 class="slide-title">BRE vs ERE - The CRITICAL Difference</h2>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="box">
+                        <div class="box-title">BRE (grep default)</div>
+                        <ul>
+                            <li><code>\+</code> = 1 or more</li>
+                            <li><code>\?</code> = 0 or 1</li>
+                            <li><code>\{n,m\}</code> = interval</li>
+                            <li><code>\( \)</code> = grouping</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <div class="box-title">ERE (grep -E)</div>
+                        <ul>
+                            <li><code>+</code> = 1 or more</li>
+                            <li><code>?</code> = 0 or 1</li>
+                            <li><code>{n,m}</code> = interval</li>
+                            <li><code>( )</code> = grouping</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>🚨 Common mistake:</strong> <code>grep 'ab+c'</code> searches literally for "ab+c"!<br>
+                    <strong>Correct:</strong> <code>grep -E 'ab+c'</code> or <code>grep 'ab\+c'</code>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 7: GREP Intro -->
+        <div class="slide" data-slide="7">
+            <h2 class="slide-title">GREP - Global Regular Expression Print</h2>
+            <div class="slide-content">
+                <p>Searches for patterns in files and displays matching lines.</p>
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">grep 'pattern' file.txt</span><br>
+                    <span class="output">the line containing pattern</span>
+                </div>
+                <div class="two-columns">
+                    <div>
+                        <strong>Variants:</strong>
+                        <ul>
+                            <li><code>grep</code> - BRE (basic)</li>
+                            <li><code>grep -E</code> / <code>egrep</code> - ERE</li>
+                            <li><code>grep -F</code> / <code>fgrep</code> - fixed string</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Format:</strong>
+                        <ul>
+                            <li><code>grep [options] pattern file</code></li>
+                            <li><code>command | grep pattern</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 8: GREP Options -->
+        <div class="slide" data-slide="8">
+            <h2 class="slide-title">GREP - Essential Options</h2>
+            <div class="slide-content">
+                <table>
+                    <tr><th>Option</th><th>Description</th></tr>
+                    <tr><td><code>-i</code></td><td>Case insensitive</td></tr>
+                    <tr><td><code>-v</code></td><td>Invert (lines that do NOT match)</td></tr>
+                    <tr><td><code>-n</code></td><td>Display line number</td></tr>
+                    <tr><td><code>-c</code></td><td>Count matching lines</td></tr>
+                    <tr><td><code>-o</code></td><td>Display ONLY the matched part</td></tr>
+                    <tr><td><code>-r</code></td><td>Recursive in directories</td></tr>
+                    <tr><td><code>-l</code></td><td>Display only file names</td></tr>
+                    <tr><td><code>-A n</code>, <code>-B n</code>, <code>-C n</code></td><td>Context: After, Before, Combined</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- SLIDE 9: GREP -c warning -->
+        <div class="slide" data-slide="9">
+            <h2 class="slide-title">GREP -c: Caution!</h2>
+            <div class="slide-content">
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">echo "error error error" | grep -c 'error'</span><br>
+                    <span class="output">1</span>  <span class="highlight">← Counts LINES, not occurrences!</span>
+                </div>
+                <div class="warning-box">
+                    <strong>-c counts LINES containing the pattern, not the total number of occurrences!</strong>
+                </div>
+                <p>To count ALL occurrences:</p>
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">echo "error error error" | grep -o 'error' | wc -l</span><br>
+                    <span class="output">3</span>  <span class="highlight">← Correct!</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 10: SED Intro -->
+        <div class="slide" data-slide="10">
+            <h2 class="slide-title">SED - Stream Editor</h2>
+            <div class="slide-content">
+                <p>Edits text in a stream - processes line by line without loading the entire file.</p>
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">sed 's/old/new/' file.txt</span><br>
+                    <span class="output">... text with "new" instead of "old" ...</span>
+                </div>
+                <div class="highlight-box">
+                    <strong>💡 Key insight:</strong> sed by default writes to <code>stdout</code>, it does NOT modify the original file!
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 11: SED Substitution -->
+        <div class="slide" data-slide="11">
+            <h2 class="slide-title">SED - The Substitution Command</h2>
+            <div class="slide-content">
+                <div class="code-block">
+                    s/PATTERN/REPLACEMENT/FLAGS
+                </div>
+                <table>
+                    <tr><th>Flag</th><th>Effect</th></tr>
+                    <tr><td><code>g</code></td><td>Global - all occurrences on a line</td></tr>
+                    <tr><td><code>i</code></td><td>Case insensitive</td></tr>
+                    <tr><td><code>n</code></td><td>The nth occurrence</td></tr>
+                </table>
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">echo "cat cat cat" | sed 's/cat/dog/'</span><br>
+                    <span class="output">dog cat cat</span>  <span class="highlight">← Only the first!</span><br><br>
+                    <span class="prompt">$ </span><span class="command">echo "cat cat cat" | sed 's/cat/dog/g'</span><br>
+                    <span class="output">dog dog dog</span>  <span class="highlight">← All of them!</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 12: SED In-Place -->
+        <div class="slide" data-slide="12">
+            <h2 class="slide-title">SED - Edit In-Place</h2>
+            <div class="slide-content">
+                <div class="warning-box">
+                    <strong>🚨 DANGER:</strong> <code>sed 's/x/y/' file > file</code><br>
+                    The shell empties the file BEFORE sed reads it!
+                </div>
+                <p><strong>Correct solutions:</strong></p>
+                <div class="code-block">
+                    <span class="prompt"># </span><span class="command">With backup (RECOMMENDED)</span><br>
+                    <span class="prompt">$ </span><span class="command">sed -i.bak 's/old/new/g' file.txt</span><br><br>
+                    <span class="prompt"># </span><span class="command">Without backup (DANGEROUS!)</span><br>
+                    <span class="prompt">$ </span><span class="command">sed -i 's/old/new/g' file.txt</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 13: AWK Intro -->
+        <div class="slide" data-slide="13">
+            <h2 class="slide-title">AWK - Structured Processing</h2>
+            <div class="slide-content">
+                <p>AWK treats each line as a <strong>record</strong> with separate <strong>fields</strong>.</p>
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">echo "John Smith 30" | awk '{print $1}'</span><br>
+                    <span class="output">John</span><br><br>
+                    <span class="prompt">$ </span><span class="command">echo "John Smith 30" | awk '{print $3}'</span><br>
+                    <span class="output">30</span>
+                </div>
+                <div class="two-columns">
+                    <div class="box">
+                        <div class="box-title">Variables</div>
+                        <code>$0</code> = the entire line<br>
+                        <code>$1, $2...</code> = fields<br>
+                        <code>$NF</code> = last field<br>
+                        <code>NR</code> = line number
+                    </div>
+                    <div class="box">
+                        <div class="box-title">Structure</div>
+                        <code>BEGIN { }</code> - before<br>
+                        <code>{ actions }</code> - per line<br>
+                        <code>END { }</code> - after
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 14: AWK Print -->
+        <div class="slide" data-slide="14">
+            <h2 class="slide-title">AWK - Print With and Without Comma</h2>
+            <div class="slide-content">
+                <div class="code-block">
+                    <span class="prompt">$ </span><span class="command">echo "a b" | awk '{print $1 $2}'</span><br>
+                    <span class="output">ab</span>  <span class="highlight">← Direct concatenation!</span><br><br>
+                    <span class="prompt">$ </span><span class="command">echo "a b" | awk '{print $1, $2}'</span><br>
+                    <span class="output">a b</span>  <span class="highlight">← With space (OFS)!</span>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Very common mistake!</strong><br>
+                    The comma in print inserts the Output Field Separator (default: space).<br>
+                    Without comma = direct concatenation with no separator.
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 15: AWK CSV -->
+        <div class="slide" data-slide="15">
+            <h2 class="slide-title">AWK - CSV Processing</h2>
+            <div class="slide-content">
+                <div class="code-block">
+                    <span class="prompt"># </span><span class="command">Set separator to comma</span><br>
+                    <span class="prompt">$ </span><span class="command">awk -F',' '{print $2}' employees.csv</span><br><br>
+                    <span class="prompt"># </span><span class="command">Skip header (NR > 1)</span><br>
+                    <span class="prompt">$ </span><span class="command">awk -F',' 'NR > 1 {print $2}' employees.csv</span><br><br>
+                    <span class="prompt"># </span><span class="command">Sum of salaries</span><br>
+                    <span class="prompt">$ </span><span class="command">awk -F',' 'NR > 1 {sum += $4} END {print sum}' employees.csv</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 16: Pipeline Magic -->
+        <div class="slide" data-slide="16">
+            <h2 class="slide-title">Pipeline Magic</h2>
+            <div class="slide-content">
+                <p>Combining grep, sed and awk creates powerful solutions:</p>
+                <div class="code-block">
+                    <span class="prompt"># </span><span class="command">Top 5 IPs from log</span><br>
+                    <span class="prompt">$ </span><span class="command">awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5</span><br><br>
+                    <span class="prompt"># </span><span class="command">Cleanup config</span><br>
+                    <span class="prompt">$ </span><span class="command">sed '/^#/d; /^$/d' config.txt | sort</span><br><br>
+                    <span class="prompt"># </span><span class="command">Unique errors with frequency</span><br>
+                    <span class="prompt">$ </span><span class="command">grep -i error log.txt | awk '{print $NF}' | sort | uniq -c | sort -rn</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 17: NANO -->
+        <div class="slide" data-slide="17">
+            <h2 class="slide-title">NANO - Simple Editor</h2>
+            <div class="slide-content">
+                <p>Essential commands (^ = CTRL):</p>
+                <table>
+                    <tr><th>Command</th><th>Action</th></tr>
+                    <tr><td><code>^O</code></td><td>Save (Write Out)</td></tr>
+                    <tr><td><code>^X</code></td><td>Exit</td></tr>
+                    <tr><td><code>^W</code></td><td>Search (Where is)</td></tr>
+                    <tr><td><code>^K</code></td><td>Cut line</td></tr>
+                    <tr><td><code>^U</code></td><td>Paste (Uncut)</td></tr>
+                    <tr><td><code>^G</code></td><td>Help</td></tr>
+                </table>
+                <div class="success-box">
+                    <strong>💡 Advantage:</strong> All commands are displayed in the bottom bar!
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 18: Summary -->
+        <div class="slide" data-slide="18">
+            <h2 class="slide-title">Summary</h2>
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div class="box">
+                        <div class="box-title">When to use what?</div>
+                        <ul>
+                            <li><strong>grep</strong> = search/filter</li>
+                            <li><strong>sed</strong> = replace/transform</li>
+                            <li><strong>awk</strong> = structured processing</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <div class="box-title">Mistakes to avoid</div>
+                        <ul>
+                            <li>grep without -E for +, ?</li>
+                            <li>sed without /g</li>
+                            <li>awk print without comma</li>
+                            <li>-c counts lines, not matches</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <strong>🎯 Practise!</strong> The best way to learn is by doing. Use the exercises from the seminar materials.
+                </div>
+            </div>
+        </div>
+        
+        <!-- SLIDE 19: Final -->
+        <div class="slide title-slide" data-slide="19">
+            <div class="emoji">🎉</div>
+            <h1 class="slide-title">Questions?</h1>
+            <p class="slide-subtitle">Good luck with the exercises!</p>
+            <p style="margin-top: 40px; color: #64748b; font-size: 1rem;">
+                Resources: regex101.com | explainshell.com<br>
+                <code>man grep</code> | <code>man sed</code> | <code>man awk</code>
+            </p>
+        </div>
+        
+    </div>
+    
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="prevSlide()">← Back</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+    
+    <div class="progress" id="progress"></div>
+    <div class="slide-counter" id="counter">1 / 19</div>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+            
+            // Update progress
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('counter').textContent = `${currentSlide} / ${totalSlides}`;
+        }
+        
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+        
+        function prevSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+        
+        // Initialize
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

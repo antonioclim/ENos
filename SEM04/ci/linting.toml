@@ -1,0 +1,142 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Configurare Linting — Seminarul 04: Text Processing
+# ═══════════════════════════════════════════════════════════════════════════════
+# Sisteme de Operare | ASE București - CSIE
+# Configurare pentru ruff (Python) și shellcheck (Bash)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RUFF — Python Linter
+# ═══════════════════════════════════════════════════════════════════════════════
+# Documentație: https://docs.astral.sh/ruff/
+
+[tool.ruff]
+# Versiune Python țintă
+target-version = "py311"
+
+# Lungime maximă linie
+line-length = 100
+
+# Directoare de exclus
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "*.pyc",
+    ".ruff_cache",
+]
+
+[tool.ruff.lint]
+# Reguli activate
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "SIM",    # flake8-simplify
+]
+
+# Reguli ignorate
+ignore = [
+    "E501",   # line too long (gestionat de line-length)
+    "B008",   # function-call-in-default-argument
+    "B905",   # zip without explicit strict
+    "SIM108", # use ternary operator (nu mereu mai clar)
+    "SIM105", # use contextlib.suppress (prea implicit)
+]
+
+# Permise în codul care e marcat ca fixabil
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Permisiuni speciale per fișier
+"quiz_runner.py" = ["E402"]  # import not at top (după verificare yaml)
+"*_autograder.py" = ["B904"] # raise from în except
+
+[tool.ruff.lint.isort]
+# Configurare sortare import-uri
+known-first-party = ["quiz_runner", "autograder"]
+
+[tool.ruff.format]
+# Stil formatare
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FLAKE8 — Alternativă Python Linter (fallback)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Folosit dacă ruff nu e disponibil
+
+[flake8]
+max-line-length = 100
+extend-ignore = [
+    "E203",   # whitespace before ':'
+    "E501",   # line too long
+    "W503",   # line break before binary operator
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+]
+per-file-ignores = [
+    "quiz_runner.py:E402",
+]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SHELLCHECK — Bash Linter
+# ═══════════════════════════════════════════════════════════════════════════════
+# Notă: shellcheck folosește directive în fișiere, nu TOML
+# Aceste setări sunt pentru referință și documentație
+#
+# Severități: error, warning, info, style
+# Recomandare: --severity=warning pentru CI
+#
+# Directive comune în scripturi:
+#   # shellcheck disable=SC2086  # Double quote to prevent globbing
+#   # shellcheck disable=SC2034  # Variable appears unused
+#   # shellcheck source=/dev/null
+#
+# Excluderi recomandate pentru scripturi educaționale:
+#   SC2086 - Ghilimele duble (uneori vrem word splitting)
+#   SC2034 - Variabile nefolosite (pot fi pentru demonstrație)
+#   SC1090 - Source dinamic (pentru flexibilitate)
+#
+# Rulare recomandată:
+#   shellcheck --severity=warning --exclude=SC2086,SC1090 script.sh
+
+[shellcheck]
+# Configurare documentată (shellcheck nu citește TOML nativ)
+severity = "warning"
+exclude = ["SC2086", "SC1090", "SC2034"]
+shell = "bash"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MYPY — Type Checking Python (opțional)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PYTEST — Configurare Teste Python (opțional)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "formative"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*", "self_test"]
+addopts = "-v --tb=short"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIN
+# ═══════════════════════════════════════════════════════════════════════════════

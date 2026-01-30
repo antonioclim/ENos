@@ -1,0 +1,564 @@
+{
+  "quiz": {
+    "title": "Seminar 04: Text Processing — Regex, GREP, SED, AWK",
+    "description": "Formative quiz for assessing knowledge about text processing in shell",
+    "time_limit_minutes": 18,
+    "passing_score": 60,
+    "shuffle_questions": true,
+    "shuffle_answers": true,
+    "show_correct_answers": true,
+    "show_correct_answers_after_submission": true,
+    "one_question_at_a_time": false,
+    "cant_go_back": false,
+    "access_code": null,
+    "ip_filter": null,
+    "due_date": null,
+    "lock_date": null,
+    "unlock_date": null,
+    "published": false,
+    "quiz_type": "practice_quiz",
+    "scoring_policy": "keep_highest",
+    "allowed_attempts": -1,
+    "metadata": {
+      "seminar": 4,
+      "subject": "Text Processing",
+      "language": "en",
+      "version": "1.1",
+      "bloom_distribution": {
+        "remember": 3,
+        "understand": 5,
+        "apply": 5,
+        "analyse": 2,
+        "evaluate": 2
+      },
+      "learning_outcomes": [
+        "LO1: Write functional BRE and ERE regular expressions",
+        "LO2: Use grep with main options for text searching",
+        "LO3: Transform text with sed (substitution, deletion, insertion)",
+        "LO4: Process structured data with awk (fields, calculations)",
+        "LO5: Combine tools in efficient pipelines"
+      ]
+    },
+    "questions": [
+      {
+        "id": "R1",
+        "question_type": "multiple_choice_question",
+        "question_name": "Dot metacharacter",
+        "question_text": "<p>Which regex metacharacter matches ANY single character (except newline)?</p>",
+        "points_possible": 6,
+        "bloom_level": "remember",
+        "learning_outcomes": ["LO1"],
+        "answers": [
+          {
+            "text": ".",
+            "weight": 100,
+            "feedback": "Correct! The dot matches exactly one character."
+          },
+          {
+            "text": "*",
+            "weight": 0,
+            "feedback": "Incorrect. * is a quantifier (zero or more of the preceding)."
+          },
+          {
+            "text": "?",
+            "weight": 0,
+            "feedback": "Incorrect. ? is a quantifier (zero or one of the preceding)."
+          },
+          {
+            "text": "+",
+            "weight": 0,
+            "feedback": "Incorrect. + is a quantifier (one or more of the preceding)."
+          }
+        ]
+      },
+      {
+        "id": "R2",
+        "question_type": "multiple_choice_question",
+        "question_name": "The grep -o option",
+        "question_text": "<p>Which grep option displays ONLY the text that matched, not the entire line?</p>",
+        "points_possible": 6,
+        "bloom_level": "remember",
+        "learning_outcomes": ["LO2"],
+        "answers": [
+          {
+            "text": "-o",
+            "weight": 100,
+            "feedback": "Correct! -o (only-matching) displays only the matched portion."
+          },
+          {
+            "text": "-v",
+            "weight": 0,
+            "feedback": "Incorrect. -v inverts the selection (lines that do NOT match)."
+          },
+          {
+            "text": "-c",
+            "weight": 0,
+            "feedback": "Incorrect. -c counts the matched lines."
+          },
+          {
+            "text": "-l",
+            "weight": 0,
+            "feedback": "Incorrect. -l displays only the file names with matches."
+          }
+        ]
+      },
+      {
+        "id": "R3",
+        "question_type": "multiple_choice_question",
+        "question_name": "The sed delete command",
+        "question_text": "<p>In sed, which command deletes lines that match a pattern?</p>",
+        "points_possible": 6,
+        "bloom_level": "remember",
+        "learning_outcomes": ["LO3"],
+        "answers": [
+          {
+            "text": "d",
+            "weight": 100,
+            "feedback": "Correct! d = delete (removes the entire line)."
+          },
+          {
+            "text": "p",
+            "weight": 0,
+            "feedback": "Incorrect. p = print (displays the line)."
+          },
+          {
+            "text": "s",
+            "weight": 0,
+            "feedback": "Incorrect. s = substitute (replaces text)."
+          },
+          {
+            "text": "q",
+            "weight": 0,
+            "feedback": "Incorrect. q = quit (stops processing)."
+          }
+        ]
+      },
+      {
+        "id": "U1",
+        "question_type": "multiple_choice_question",
+        "question_name": "BRE vs ERE difference",
+        "question_text": "<p>What is the MAIN difference between BRE and ERE in grep?</p>",
+        "points_possible": 7,
+        "bloom_level": "understand",
+        "learning_outcomes": ["LO1"],
+        "answers": [
+          {
+            "text": "In BRE, metacharacters +, ?, {}, (), | require escaping with backslash",
+            "weight": 100,
+            "feedback": "Correct! In BRE these are literal by default; in ERE they are metacharacters."
+          },
+          {
+            "text": "BRE is faster than ERE",
+            "weight": 0,
+            "feedback": "Incorrect. Performance is essentially the same."
+          },
+          {
+            "text": "ERE does not support grouping with parentheses",
+            "weight": 0,
+            "feedback": "Incorrect. ERE supports () directly as grouping."
+          },
+          {
+            "text": "BRE works only on Linux, ERE on all systems",
+            "weight": 0,
+            "feedback": "Incorrect. Both are POSIX standards available everywhere."
+          }
+        ]
+      },
+      {
+        "id": "U2",
+        "question_type": "multiple_choice_question",
+        "question_name": "Regex anchor vs negation",
+        "question_text": "<p>What does the regex pattern <code>^[^#]</code> match?</p>",
+        "points_possible": 7,
+        "bloom_level": "understand",
+        "learning_outcomes": ["LO1", "LO2"],
+        "answers": [
+          {
+            "text": "Lines that do NOT start with #",
+            "weight": 100,
+            "feedback": "Correct! First ^ is anchor, [^#] means 'not #'."
+          },
+          {
+            "text": "Lines that start with #",
+            "weight": 0,
+            "feedback": "Incorrect. [^#] negates the character class."
+          },
+          {
+            "text": "The character ^ followed by #",
+            "weight": 0,
+            "feedback": "Incorrect. The first ^ is an anchor, not literal."
+          },
+          {
+            "text": "Any line that contains #",
+            "weight": 0,
+            "feedback": "Incorrect. This pattern only checks the start of the line."
+          }
+        ]
+      },
+      {
+        "id": "U3",
+        "question_type": "multiple_choice_question",
+        "question_name": "grep -i case insensitive",
+        "question_text": "<p>What will this command display?</p><pre>echo -e \"abc\\nABC\\nabC\" | grep -i 'abc'</pre>",
+        "points_possible": 7,
+        "bloom_level": "understand",
+        "learning_outcomes": ["LO2"],
+        "answers": [
+          {
+            "text": "abc, ABC, abC (all three lines)",
+            "weight": 100,
+            "feedback": "Correct! The -i option makes the search case-insensitive."
+          },
+          {
+            "text": "only abc",
+            "weight": 0,
+            "feedback": "Incorrect. -i ignores case, so all variants match."
+          },
+          {
+            "text": "abc and ABC",
+            "weight": 0,
+            "feedback": "Incorrect. abC also matches with -i."
+          },
+          {
+            "text": "Error: invalid pattern",
+            "weight": 0,
+            "feedback": "Incorrect. The pattern 'abc' is perfectly valid."
+          }
+        ]
+      },
+      {
+        "id": "U4",
+        "question_type": "multiple_choice_question",
+        "question_name": "sed without global flag",
+        "question_text": "<p>What will this command display?</p><pre>echo \"hello world\" | sed 's/o/O/'</pre>",
+        "points_possible": 7,
+        "bloom_level": "understand",
+        "learning_outcomes": ["LO3"],
+        "answers": [
+          {
+            "text": "hellO world",
+            "weight": 100,
+            "feedback": "Correct! Without /g, sed replaces only the FIRST occurrence."
+          },
+          {
+            "text": "hellO wOrld",
+            "weight": 0,
+            "feedback": "Incorrect. This would require the /g flag."
+          },
+          {
+            "text": "HELLO WORLD",
+            "weight": 0,
+            "feedback": "Incorrect. sed only replaces 'o', not other characters."
+          },
+          {
+            "text": "hello world",
+            "weight": 0,
+            "feedback": "Incorrect. The first 'o' is definitely replaced."
+          }
+        ]
+      },
+      {
+        "id": "U5",
+        "question_type": "multiple_choice_question",
+        "question_name": "awk field extraction",
+        "question_text": "<p>What will this command display for the line \"ana:are:mere\"?</p><pre>echo \"ana:are:mere\" | awk -F: '{print $2}'</pre>",
+        "points_possible": 7,
+        "bloom_level": "understand",
+        "learning_outcomes": ["LO4"],
+        "answers": [
+          {
+            "text": "are",
+            "weight": 100,
+            "feedback": "Correct! -F: sets delimiter to ':', $2 is the second field."
+          },
+          {
+            "text": "ana",
+            "weight": 0,
+            "feedback": "Incorrect. 'ana' is $1 (the first field)."
+          },
+          {
+            "text": "mere",
+            "weight": 0,
+            "feedback": "Incorrect. 'mere' is $3 (the third field)."
+          },
+          {
+            "text": "ana:are:mere",
+            "weight": 0,
+            "feedback": "Incorrect. That would be $0 (the entire line)."
+          }
+        ]
+      },
+      {
+        "id": "A1",
+        "question_type": "multiple_choice_question",
+        "question_name": "IP address extraction",
+        "question_text": "<p>Which command extracts ALL IP addresses from the file log.txt?</p>",
+        "points_possible": 8,
+        "bloom_level": "apply",
+        "learning_outcomes": ["LO1", "LO2"],
+        "answers": [
+          {
+            "text": "grep -oE '([0-9]{1,3}\\\\.){3}[0-9]{1,3}' log.txt",
+            "weight": 100,
+            "feedback": "Correct! This pattern matches IP addresses with escaped dots."
+          },
+          {
+            "text": "grep -o '[0-9]*' log.txt",
+            "weight": 0,
+            "feedback": "Incorrect. This extracts any sequence of digits, not IPs."
+          },
+          {
+            "text": "grep 'IP' log.txt",
+            "weight": 0,
+            "feedback": "Incorrect. This searches for the literal text 'IP'."
+          },
+          {
+            "text": "grep -E '[0-9].[0-9].[0-9].[0-9]' log.txt",
+            "weight": 0,
+            "feedback": "Incorrect. The unescaped dot matches any character."
+          }
+        ]
+      },
+      {
+        "id": "A2",
+        "question_type": "multiple_choice_question",
+        "question_name": "Delete blank lines with sed",
+        "question_text": "<p>Which sed command deletes all blank lines from a file?</p>",
+        "points_possible": 8,
+        "bloom_level": "apply",
+        "learning_outcomes": ["LO3"],
+        "answers": [
+          {
+            "text": "sed '/^$/d' file.txt",
+            "weight": 100,
+            "feedback": "Correct! ^$ matches empty lines, d deletes them."
+          },
+          {
+            "text": "sed 's/^$//' file.txt",
+            "weight": 0,
+            "feedback": "Incorrect. This substitutes nothing for nothing; line remains."
+          },
+          {
+            "text": "sed '/./d' file.txt",
+            "weight": 0,
+            "feedback": "Incorrect. This deletes lines WITH content (the opposite)."
+          },
+          {
+            "text": "sed 'd' file.txt",
+            "weight": 0,
+            "feedback": "Incorrect. This deletes ALL lines unconditionally."
+          }
+        ]
+      },
+      {
+        "id": "A3",
+        "question_type": "multiple_choice_question",
+        "question_name": "awk sum calculation",
+        "question_text": "<p>Which awk command calculates the sum of values in column 3 of a CSV?</p>",
+        "points_possible": 8,
+        "bloom_level": "apply",
+        "learning_outcomes": ["LO4"],
+        "answers": [
+          {
+            "text": "awk -F, '{sum+=$3} END {print sum}' data.csv",
+            "weight": 100,
+            "feedback": "Correct! sum+=$3 accumulates, END prints the total."
+          },
+          {
+            "text": "awk '{print $3}' data.csv | sum",
+            "weight": 0,
+            "feedback": "Incorrect. There is no 'sum' command; this fails."
+          },
+          {
+            "text": "awk -F, 'BEGIN {print $3}' data.csv",
+            "weight": 0,
+            "feedback": "Incorrect. BEGIN runs before any lines are read."
+          },
+          {
+            "text": "awk '{sum=$3} END {print sum}' data.csv",
+            "weight": 0,
+            "feedback": "Incorrect. Missing + means it only keeps the last value."
+          }
+        ]
+      },
+      {
+        "id": "A4",
+        "question_type": "multiple_choice_question",
+        "question_name": "Unique ERROR lines pipeline",
+        "question_text": "<p>Which pipeline counts how many unique lines contain \"ERROR\" in all .log files?</p>",
+        "points_possible": 8,
+        "bloom_level": "apply",
+        "learning_outcomes": ["LO2", "LO5"],
+        "answers": [
+          {
+            "text": "grep -h 'ERROR' *.log | sort | uniq | wc -l",
+            "weight": 100,
+            "feedback": "Correct! -h removes filenames, sort|uniq finds unique lines."
+          },
+          {
+            "text": "grep 'ERROR' *.log | wc -l",
+            "weight": 0,
+            "feedback": "Incorrect. This counts ALL occurrences, not unique lines."
+          },
+          {
+            "text": "grep -c 'ERROR' *.log",
+            "weight": 0,
+            "feedback": "Incorrect. This shows count per file, not total unique."
+          },
+          {
+            "text": "grep 'ERROR' *.log | uniq | wc -l",
+            "weight": 0,
+            "feedback": "Incorrect. uniq needs sorted input to work correctly."
+          }
+        ]
+      },
+      {
+        "id": "A5",
+        "question_type": "fill_in_multiple_blanks_question",
+        "question_name": "sed global flag",
+        "question_text": "<p>Complete the sed command that replaces ALL occurrences of \"foo\" with \"bar\":</p><pre>sed 's/foo/bar/[blank1]' file.txt</pre>",
+        "points_possible": 8,
+        "bloom_level": "apply",
+        "learning_outcomes": ["LO3"],
+        "answers": [
+          {
+            "blank_id": "blank1",
+            "text": "g",
+            "weight": 100,
+            "feedback": "Correct! The 'g' flag means global (all occurrences)."
+          }
+        ]
+      },
+      {
+        "id": "AN1",
+        "question_type": "multiple_choice_question",
+        "question_name": "Debugging BRE alternation",
+        "question_text": "<p>A colleague wrote this command but it does not work:</p><pre>grep 'error|warning' server.log</pre><p>The file contains lines with both \"error\" and \"warning\", but nothing is found. What is the problem?</p>",
+        "points_possible": 9,
+        "bloom_level": "analyse",
+        "learning_outcomes": ["LO1", "LO2", "LO5"],
+        "answers": [
+          {
+            "text": "Missing -E; in BRE, | is literal, not alternation",
+            "weight": 0,
+            "feedback": "This is correct, but there's a more complete answer."
+          },
+          {
+            "text": "The pattern should be 'error\\|warning'",
+            "weight": 0,
+            "feedback": "This is also correct, but there's a more complete answer."
+          },
+          {
+            "text": "Both options A and B are correct",
+            "weight": 100,
+            "feedback": "Correct! Either use grep -E or escape the | in BRE."
+          },
+          {
+            "text": "Must use -i for case-insensitive",
+            "weight": 0,
+            "feedback": "Incorrect. -i is irrelevant to the | interpretation issue."
+          }
+        ]
+      },
+      {
+        "id": "AN2",
+        "question_type": "multiple_choice_question",
+        "question_name": "CSV processing efficiency",
+        "question_text": "<p>Which approach is MORE EFFICIENT for processing a 1GB CSV file and extracting only column 2?</p>",
+        "points_possible": 9,
+        "bloom_level": "analyse",
+        "learning_outcomes": ["LO3", "LO4", "LO5"],
+        "answers": [
+          {
+            "text": "awk -F, '{print $2}' large.csv",
+            "weight": 100,
+            "feedback": "Correct! awk is optimised for field processing."
+          },
+          {
+            "text": "cat large.csv | cut -d, -f2",
+            "weight": 0,
+            "feedback": "Incorrect. UUOC (Useless Use of Cat) + pipe overhead."
+          },
+          {
+            "text": "sed 's/[^,]*,\\\\([^,]*\\\\).*/\\\\1/' large.csv",
+            "weight": 0,
+            "feedback": "Incorrect. Complex regex for a simple task = slower."
+          },
+          {
+            "text": "All are equally efficient",
+            "weight": 0,
+            "feedback": "Incorrect. awk has less overhead for this task."
+          }
+        ]
+      },
+      {
+        "id": "E1",
+        "question_type": "multiple_choice_question",
+        "question_name": "Large file processing strategy",
+        "question_text": "<p>You need to extract all unique error messages from a 10GB log file and count their occurrences. Which approach is MOST efficient?</p>",
+        "points_possible": 8,
+        "bloom_level": "evaluate",
+        "learning_outcomes": ["LO5"],
+        "answers": [
+          {
+            "text": "grep 'ERROR' huge.log | sort | uniq -c | sort -rn",
+            "weight": 0,
+            "feedback": "This works but sort on 10GB of filtered output is expensive."
+          },
+          {
+            "text": "awk '/ERROR/ {errors[$0]++} END {for(e in errors) print errors[e], e}' huge.log | sort -rn",
+            "weight": 100,
+            "feedback": "Correct! awk does single-pass counting in memory, then only sorts the unique results."
+          },
+          {
+            "text": "cat huge.log | grep 'ERROR' | sort | uniq -c | sort -rn",
+            "weight": 0,
+            "feedback": "Incorrect. Useless cat adds overhead and sort is still expensive."
+          },
+          {
+            "text": "sed -n '/ERROR/p' huge.log | sort | uniq -c | sort -rn",
+            "weight": 0,
+            "feedback": "This is equivalent to the grep approach with the same efficiency issues."
+          }
+        ]
+      },
+      {
+        "id": "E2",
+        "question_type": "multiple_choice_question",
+        "question_name": "Email anonymisation regex evaluation",
+        "question_text": "<p>A colleague wrote this pipeline to anonymise email addresses in logs:</p><pre>sed 's/[a-z]*@[a-z]*\\.[a-z]*/[REDACTED]/g' access.log</pre><p>What is the PRIMARY issue with this approach?</p>",
+        "points_possible": 8,
+        "bloom_level": "evaluate",
+        "learning_outcomes": ["LO3", "LO4"],
+        "answers": [
+          {
+            "text": "The regex is too greedy and will match too much text",
+            "weight": 0,
+            "feedback": "Incorrect. The pattern is actually not greedy enough."
+          },
+          {
+            "text": "The regex is too restrictive (misses uppercase, numbers, dots in local part)",
+            "weight": 100,
+            "feedback": "Correct! [a-z]* misses uppercase, numbers and special characters in real emails."
+          },
+          {
+            "text": "sed cannot do global replacement with the /g flag",
+            "weight": 0,
+            "feedback": "Incorrect. The /g flag works correctly in sed."
+          },
+          {
+            "text": "The [REDACTED] string should be quoted differently",
+            "weight": 0,
+            "feedback": "Incorrect. Square brackets in replacement are valid literals."
+          }
+        ]
+      }
+    ]
+  },
+  "export_metadata": {
+    "format": "QTI 1.2",
+    "compatible_with": ["Moodle 3.x+", "Canvas", "Blackboard"],
+    "generated_at": "2025-01-29",
+    "generator": "SEM04 Quiz Generator v1.1"
+  }
+}

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 550">
+  <!-- Background -->
+  <rect width="850" height="550" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="425" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#1e293b">Metacaractere Regex — Referință Vizuală</text>
+  
+  <!-- Section 1: Anchors -->
+  <rect x="20" y="60" width="250" height="140" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="145" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8">ANCHORS</text>
+  
+  <text x="40" y="115" font-family="monospace" font-size="16" font-weight="bold" fill="#1e40af">^</text>
+  <text x="70" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Început de linie</text>
+  <text x="40" y="135" font-family="monospace" font-size="11" fill="#64748b">^Hello → "Hello world"</text>
+  
+  <text x="40" y="165" font-family="monospace" font-size="16" font-weight="bold" fill="#1e40af">$</text>
+  <text x="70" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Sfârșit de linie</text>
+  <text x="40" y="185" font-family="monospace" font-size="11" fill="#64748b">end$ → "the end"</text>
+  
+  <!-- Section 2: Character Classes -->
+  <rect x="290" y="60" width="260" height="140" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="420" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#166534">CHARACTER CLASSES</text>
+  
+  <text x="310" y="115" font-family="monospace" font-size="16" font-weight="bold" fill="#166534">.</text>
+  <text x="340" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice caracter (1)</text>
+  <text x="310" y="135" font-family="monospace" font-size="11" fill="#64748b">a.c → abc, a1c, aXc</text>
+  
+  <text x="310" y="165" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">[abc]</text>
+  <text x="370" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Unul din set</text>
+  <text x="310" y="185" font-family="monospace" font-size="11" fill="#64748b">[aeiou] → vocale</text>
+  
+  <!-- Section 3: Negation -->
+  <rect x="570" y="60" width="260" height="140" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+  <text x="700" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c">NEGAȚIE</text>
+  
+  <text x="590" y="115" font-family="monospace" font-size="14" font-weight="bold" fill="#b91c1c">[^abc]</text>
+  <text x="660" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice EXCEPTÂND</text>
+  <text x="590" y="135" font-family="monospace" font-size="11" fill="#64748b">[^0-9] → non-cifre</text>
+  
+  <text x="590" y="165" font-family="monospace" font-size="14" font-weight="bold" fill="#b91c1c">[^#]</text>
+  <text x="650" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice exceptând #</text>
+  <text x="590" y="185" font-family="monospace" font-size="11" fill="#64748b">^[^#] → linii fără #</text>
+  
+  <!-- Section 4: Quantifiers -->
+  <rect x="20" y="220" width="400" height="160" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="220" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#a16207">QUANTIFICATORI</text>
+  
+  <text x="40" y="275" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">*</text>
+  <text x="70" y="275" font-family="Arial, sans-serif" font-size="12" fill="#475569">Zero sau mai multe</text>
+  <text x="200" y="275" font-family="monospace" font-size="11" fill="#64748b">ab*c → ac, abc, abbc</text>
+  
+  <text x="40" y="305" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">+</text>
+  <text x="70" y="305" font-family="Arial, sans-serif" font-size="12" fill="#475569">Unul sau mai multe</text>
+  <text x="200" y="305" font-family="monospace" font-size="11" fill="#64748b">ab+c → abc, abbc (nu ac)</text>
+  
+  <text x="40" y="335" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">?</text>
+  <text x="70" y="335" font-family="Arial, sans-serif" font-size="12" fill="#475569">Zero sau unu</text>
+  <text x="200" y="335" font-family="monospace" font-size="11" fill="#64748b">colou?r → color, colour</text>
+  
+  <text x="40" y="365" font-family="monospace" font-size="14" font-weight="bold" fill="#a16207">{n,m}</text>
+  <text x="100" y="365" font-family="Arial, sans-serif" font-size="12" fill="#475569">Între n și m</text>
+  <text x="200" y="365" font-family="monospace" font-size="11" fill="#64748b">a{2,4} → aa, aaa, aaaa</text>
+  
+  <!-- Section 5: BRE vs ERE -->
+  <rect x="440" y="220" width="390" height="160" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="635" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9">BRE vs ERE — DIFERENȚE CRITICE</text>
+  
+  <!-- Table header -->
+  <text x="480" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">Funcție</text>
+  <text x="580" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">BRE (grep)</text>
+  <text x="700" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">ERE (grep -E)</text>
+  
+  <line x1="460" y1="285" x2="810" y2="285" stroke="#c4b5fd" stroke-width="1"/>
+  
+  <text x="480" y="305" font-family="Arial, sans-serif" font-size="11" fill="#475569">1+ repetări</text>
+  <text x="580" y="305" font-family="monospace" font-size="12" fill="#7c3aed">\+</text>
+  <text x="700" y="305" font-family="monospace" font-size="12" fill="#7c3aed">+</text>
+  
+  <text x="480" y="325" font-family="Arial, sans-serif" font-size="11" fill="#475569">0-1 repetări</text>
+  <text x="580" y="325" font-family="monospace" font-size="12" fill="#7c3aed">\?</text>
+  <text x="700" y="325" font-family="monospace" font-size="12" fill="#7c3aed">?</text>
+  
+  <text x="480" y="345" font-family="Arial, sans-serif" font-size="11" fill="#475569">Grupare</text>
+  <text x="580" y="345" font-family="monospace" font-size="12" fill="#7c3aed">\( \)</text>
+  <text x="700" y="345" font-family="monospace" font-size="12" fill="#7c3aed">( )</text>
+  
+  <text x="480" y="365" font-family="Arial, sans-serif" font-size="11" fill="#475569">Alternativă</text>
+  <text x="580" y="365" font-family="monospace" font-size="12" fill="#7c3aed">\|</text>
+  <text x="700" y="365" font-family="monospace" font-size="12" fill="#7c3aed">|</text>
+  
+  <!-- Section 6: Escape -->
+  <rect x="20" y="400" width="250" height="130" rx="10" fill="#fdf4ff" stroke="#d946ef" stroke-width="2"/>
+  <text x="145" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#a21caf">ESCAPE</text>
+  
+  <text x="40" y="455" font-family="monospace" font-size="16" font-weight="bold" fill="#a21caf">\</text>
+  <text x="70" y="455" font-family="Arial, sans-serif" font-size="12" fill="#475569">Escape caracter special</text>
+  
+  <text x="40" y="480" font-family="monospace" font-size="11" fill="#64748b">\. → punct literal</text>
+  <text x="40" y="500" font-family="monospace" font-size="11" fill="#64748b">\* → asterisc literal</text>
+  <text x="40" y="520" font-family="monospace" font-size="11" fill="#64748b">\[ → bracket literal</text>
+  
+  <!-- Section 7: Common Patterns -->
+  <rect x="290" y="400" width="540" height="130" rx="10" fill="#ecfeff" stroke="#06b6d4" stroke-width="2"/>
+  <text x="560" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0e7490">PATTERN-URI COMUNE</text>
+  
+  <text x="310" y="455" font-family="monospace" font-size="11" fill="#0891b2">[0-9]+</text>
+  <text x="400" y="455" font-family="Arial, sans-serif" font-size="11" fill="#475569">Numere</text>
+  
+  <text x="310" y="480" font-family="monospace" font-size="11" fill="#0891b2">[a-zA-Z]+</text>
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="11" fill="#475569">Cuvinte</text>
+  
+  <text x="310" y="505" font-family="monospace" font-size="11" fill="#0891b2">^$</text>
+  <text x="400" y="505" font-family="Arial, sans-serif" font-size="11" fill="#475569">Linie goală</text>
+  
+  <text x="520" y="455" font-family="monospace" font-size="11" fill="#0891b2">[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}</text>
+  <text x="520" y="475" font-family="Arial, sans-serif" font-size="11" fill="#475569">Adresă IP (simplificat)</text>
+  
+  <text x="520" y="505" font-family="monospace" font-size="11" fill="#0891b2">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</text>
+  <text x="520" y="525" font-family="Arial, sans-serif" font-size="11" fill="#475569">Email (simplificat)</text>
+</svg>

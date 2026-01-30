@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 600">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="600" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="350" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Structura unui Script Bash Bine Organizat</text>
+  
+  <!-- Box 1: SHEBANG -->
+  <rect x="250" y="60" width="200" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="350" y="90" text-anchor="middle" font-family="monospace" font-size="14" font-weight="bold" fill="#1e40af">#!/bin/bash</text>
+  <text x="470" y="90" font-family="Arial, sans-serif" font-size="11" fill="#64748b">← Shebang</text>
+  
+  <!-- Arrow 1 -->
+  <line x1="350" y1="110" x2="350" y2="135" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Box 2: SETUP -->
+  <rect x="200" y="140" width="300" height="70" rx="8" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="350" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#166534">SETUP ȘI VALIDARE</text>
+  <text x="350" y="185" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">set -euo pipefail</text>
+  <text x="350" y="200" text-anchor="middle" font-family="monospace" font-size="11" fill="#22c55e">readonly SCRIPT_NAME=$(basename "$0")</text>
+  
+  <!-- Arrow 2 -->
+  <line x1="350" y1="210" x2="350" y2="235" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Box 3: PARSE ARGS -->
+  <rect x="200" y="240" width="300" height="70" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="350" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#b45309">PARSARE ARGUMENTE</text>
+  <text x="350" y="285" text-anchor="middle" font-family="monospace" font-size="11" fill="#d97706">TARGET="${1:-.}"</text>
+  <text x="350" y="300" text-anchor="middle" font-family="monospace" font-size="11" fill="#d97706">[[ -d "$TARGET" ]] || { echo "Err"; exit 1; }</text>
+  
+  <!-- Arrow 3 -->
+  <line x1="350" y1="310" x2="350" y2="335" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Box 4: FUNCTIONS -->
+  <rect x="200" y="340" width="300" height="80" rx="8" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="350" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#6d28d9">DEFINIRE FUNCȚII</text>
+  <text x="350" y="385" text-anchor="middle" font-family="monospace" font-size="11" fill="#7c3aed">process_file() {</text>
+  <text x="350" y="400" text-anchor="middle" font-family="monospace" font-size="11" fill="#7c3aed">    local file="$1"</text>
+  <text x="350" y="415" text-anchor="middle" font-family="monospace" font-size="11" fill="#7c3aed">}</text>
+  
+  <!-- Arrow 4 -->
+  <line x1="350" y1="420" x2="350" y2="445" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Box 5: MAIN -->
+  <rect x="200" y="450" width="300" height="60" rx="8" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+  <text x="350" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#be185d">PROCESARE PRINCIPALĂ</text>
+  <text x="350" y="495" text-anchor="middle" font-family="monospace" font-size="11" fill="#db2777">main "$@"</text>
+  
+  <!-- Arrow 5 -->
+  <line x1="350" y1="510" x2="350" y2="535" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Box 6: OUTPUT -->
+  <rect x="250" y="540" width="200" height="50" rx="8" fill="#ecfeff" stroke="#06b6d4" stroke-width="2"/>
+  <text x="350" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0e7490">AFIȘARE REZULTATE</text>
+  
+  <!-- Side annotations -->
+  <rect x="520" y="140" width="160" height="280" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="600" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#475569">SUBGOAL LABELS</text>
+  
+  <text x="535" y="190" font-family="Arial, sans-serif" font-size="10" fill="#64748b">1. Setup și inițializare</text>
+  <text x="535" y="210" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Shebang corect</text>
+  <text x="535" y="230" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - set -euo pipefail</text>
+  
+  <text x="535" y="260" font-family="Arial, sans-serif" font-size="10" fill="#64748b">2. Validare input</text>
+  <text x="535" y="280" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Verifică argumente</text>
+  <text x="535" y="300" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Mesaje de eroare</text>
+  
+  <text x="535" y="330" font-family="Arial, sans-serif" font-size="10" fill="#64748b">3. Organizare cod</text>
+  <text x="535" y="350" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Funcții reutilizabile</text>
+  <text x="535" y="370" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Variabile locale</text>
+  
+  <text x="535" y="400" font-family="Arial, sans-serif" font-size="10" fill="#64748b">4. Ieșire clară</text>
+  <text x="535" y="420" font-family="Arial, sans-serif" font-size="10" fill="#64748b">   - Exit codes corecte</text>
+  
+  <!-- Left side: Best practices -->
+  <rect x="20" y="140" width="160" height="280" rx="8" fill="#fef2f2" stroke="#f87171" stroke-width="1"/>
+  <text x="100" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#b91c1c">GREȘELI DE EVITAT</text>
+  
+  <text x="35" y="190" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Fără shebang</text>
+  <text x="35" y="210" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Fără set -e</text>
+  <text x="35" y="230" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Variabile necitate</text>
+  <text x="35" y="250" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Spații la VAR = x</text>
+  <text x="35" y="270" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ [ ] în loc de [[ ]]</text>
+  <text x="35" y="290" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Backticks în loc de $()</text>
+  <text x="35" y="310" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Exit code ignorat</text>
+  <text x="35" y="330" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Hardcoded paths</text>
+  <text x="35" y="350" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Fără validare input</text>
+  <text x="35" y="370" font-family="Arial, sans-serif" font-size="10" fill="#991b1b">✗ Comentarii lipsă</text>
+</svg>

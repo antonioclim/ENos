@@ -1,0 +1,47 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# requirements.txt — Seminarul 04: Text Processing
+# ═══════════════════════════════════════════════════════════════════════════════
+# Sisteme de Operare | ASE București - CSIE
+# Dependențe Python pentru scripturi și quiz
+# ═══════════════════════════════════════════════════════════════════════════════
+# Instalare: pip install -r requirements.txt --break-system-packages
+# sau:       pip install -r requirements.txt (în virtual environment)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEPENDENȚE PRINCIPALE (obligatorii)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Parsare YAML pentru quiz.yaml
+pyyaml>=6.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEPENDENȚE PENTRU DEZVOLTARE (opționale)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Linting Python (alternativă la ruff)
+# flake8>=6.0
+
+# Type checking
+# mypy>=1.0
+
+# Testare
+# pytest>=7.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTĂ PENTRU STUDENȚI
+# ─────────────────────────────────────────────────────────────────────────────
+# Pe Ubuntu/WSL, dacă întâmpinați eroarea "externally-managed-environment",
+# folosiți una din următoarele metode:
+#
+# Metoda 1: Adăugați flag-ul --break-system-packages
+#   pip install -r requirements.txt --break-system-packages
+#
+# Metoda 2: Creați un virtual environment
+#   python3 -m venv venv
+#   source venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Metoda 3: Instalați cu apt (doar pyyaml)
+#   sudo apt install python3-yaml
+# ═══════════════════════════════════════════════════════════════════════════════

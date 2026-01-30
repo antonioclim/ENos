@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="recordGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E3F2FD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BBDEFB;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="fieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#C8E6C9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A5D6A7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">AWK Field Processing</text>
+  
+  <!-- Input Record ($0) -->
+  <rect x="50" y="60" width="700" height="50" rx="5" fill="url(#recordGrad)" stroke="#1976D2" stroke-width="2"/>
+  <text x="400" y="90" font-family="monospace" font-size="14" text-anchor="middle" fill="#333">John,Smith,IT,5500,2020-03-15</text>
+  <text x="770" y="90" font-family="Arial, sans-serif" font-size="12" fill="#1976D2" font-weight="bold">$0</text>
+  
+  <!-- FS indicator -->
+  <text x="400" y="135" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#666">FS = "," (Field Separator)</text>
+  
+  <!-- Field boxes -->
+  <g transform="translate(50, 150)">
+    <!-- $1 -->
+    <rect x="0" y="0" width="100" height="40" rx="3" fill="url(#fieldGrad)" stroke="#388E3C" stroke-width="2"/>
+    <text x="50" y="25" font-family="monospace" font-size="12" text-anchor="middle" fill="#333">John</text>
+    <text x="50" y="55" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C" font-weight="bold">$1</text>
+    
+    <!-- Comma -->
+    <text x="115" y="25" font-family="monospace" font-size="16" fill="#999">,</text>
+    
+    <!-- $2 -->
+    <rect x="130" y="0" width="100" height="40" rx="3" fill="url(#fieldGrad)" stroke="#388E3C" stroke-width="2"/>
+    <text x="180" y="25" font-family="monospace" font-size="12" text-anchor="middle" fill="#333">Smith</text>
+    <text x="180" y="55" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C" font-weight="bold">$2</text>
+    
+    <!-- Comma -->
+    <text x="245" y="25" font-family="monospace" font-size="16" fill="#999">,</text>
+    
+    <!-- $3 -->
+    <rect x="260" y="0" width="80" height="40" rx="3" fill="url(#fieldGrad)" stroke="#388E3C" stroke-width="2"/>
+    <text x="300" y="25" font-family="monospace" font-size="12" text-anchor="middle" fill="#333">IT</text>
+    <text x="300" y="55" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C" font-weight="bold">$3</text>
+    
+    <!-- Comma -->
+    <text x="355" y="25" font-family="monospace" font-size="16" fill="#999">,</text>
+    
+    <!-- $4 -->
+    <rect x="370" y="0" width="90" height="40" rx="3" fill="url(#fieldGrad)" stroke="#388E3C" stroke-width="2"/>
+    <text x="415" y="25" font-family="monospace" font-size="12" text-anchor="middle" fill="#333">5500</text>
+    <text x="415" y="55" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C" font-weight="bold">$4</text>
+    
+    <!-- Comma -->
+    <text x="475" y="25" font-family="monospace" font-size="16" fill="#999">,</text>
+    
+    <!-- $5 -->
+    <rect x="490" y="0" width="130" height="40" rx="3" fill="url(#fieldGrad)" stroke="#388E3C" stroke-width="2"/>
+    <text x="555" y="25" font-family="monospace" font-size="12" text-anchor="middle" fill="#333">2020-03-15</text>
+    <text x="555" y="55" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C" font-weight="bold">$5</text>
+    
+    <!-- $NF indicator -->
+    <text x="655" y="55" font-family="Arial, sans-serif" font-size="10" fill="#666">($NF = last)</text>
+  </g>
+  
+  <!-- Special Variables Box -->
+  <rect x="50" y="250" width="340" height="180" rx="5" fill="#FFF8E1" stroke="#FFA000" stroke-width="2"/>
+  <text x="220" y="275" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Special Variables</text>
+  
+  <text x="70" y="305" font-family="monospace" font-size="12" fill="#333">NF = 5</text>
+  <text x="200" y="305" font-family="Arial, sans-serif" font-size="11" fill="#666">Number of Fields</text>
+  
+  <text x="70" y="330" font-family="monospace" font-size="12" fill="#333">NR = 1</text>
+  <text x="200" y="330" font-family="Arial, sans-serif" font-size="11" fill="#666">Record Number (line)</text>
+  
+  <text x="70" y="355" font-family="monospace" font-size="12" fill="#333">FS = ","</text>
+  <text x="200" y="355" font-family="Arial, sans-serif" font-size="11" fill="#666">Field Separator</text>
+  
+  <text x="70" y="380" font-family="monospace" font-size="12" fill="#333">OFS = " "</text>
+  <text x="200" y="380" font-family="Arial, sans-serif" font-size="11" fill="#666">Output Field Separator</text>
+  
+  <text x="70" y="405" font-family="monospace" font-size="12" fill="#333">$NF</text>
+  <text x="200" y="405" font-family="Arial, sans-serif" font-size="11" fill="#666">Last field ($5 here)</text>
+  
+  <!-- Example Commands Box -->
+  <rect x="410" y="250" width="340" height="180" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="580" y="275" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Example Commands</text>
+  
+  <text x="430" y="305" font-family="monospace" font-size="10" fill="#333">awk -F, '{print $2}'</text>
+  <text x="430" y="320" font-family="Arial, sans-serif" font-size="10" fill="#666">→ Smith</text>
+  
+  <text x="430" y="350" font-family="monospace" font-size="10" fill="#333">awk -F, '{print $1, $4}'</text>
+  <text x="430" y="365" font-family="Arial, sans-serif" font-size="10" fill="#666">→ John 5500</text>
+  
+  <text x="430" y="395" font-family="monospace" font-size="10" fill="#333">awk -F, '$4 > 5000 {print $2}'</text>
+  <text x="430" y="410" font-family="Arial, sans-serif" font-size="10" fill="#666">→ Smith (if salary > 5000)</text>
+  
+  <!-- Note -->
+  <text x="400" y="445" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#666">Note: Field indexing starts at 1 ($1 = first field), $0 = entire line</text>
+</svg>

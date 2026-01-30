@@ -1,0 +1,247 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GitHub Actions CI Pipeline — Seminarul 04: Text Processing
+# ═══════════════════════════════════════════════════════════════════════════════
+# Sisteme de Operare | ASE București - CSIE
+# Verificări automate: linting, teste, validare quiz
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: SEM04 CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'SEM04/**'
+      - '.github/workflows/sem04-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'SEM04/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  SEMINAR_DIR: 'SEM04'
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 1: Linting Bash
+  # ═══════════════════════════════════════════════════════════════════════════
+  lint-bash:
+    name: Lint Bash Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on scripts
+        run: |
+          shellcheck --severity=warning \
+            ${{ env.SEMINAR_DIR }}/scripts/bash/*.sh \
+            ${{ env.SEMINAR_DIR }}/scripts/demo/*.sh \
+            ${{ env.SEMINAR_DIR }}/teme/solutii/*.sh \
+            ${{ env.SEMINAR_DIR }}/teste/*.sh
+        continue-on-error: true
+
+      - name: Check shebang and set -e
+        run: |
+          echo "Verificare shebang și set -e..."
+          errors=0
+          for script in ${{ env.SEMINAR_DIR }}/scripts/bash/*.sh \
+                        ${{ env.SEMINAR_DIR }}/scripts/demo/*.sh; do
+            if [[ -f "$script" ]]; then
+              if ! head -1 "$script" | grep -q '^#!/bin/bash'; then
+                echo "WARN: Lipsește shebang: $script"
+                errors=$((errors + 1))
+              fi
+              if ! grep -q 'set -e' "$script"; then
+                echo "WARN: Lipsește set -e: $script"
+                errors=$((errors + 1))
+              fi
+            fi
+          done
+          echo "Verificare completă. Probleme găsite: $errors"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 2: Linting Python
+  # ═══════════════════════════════════════════════════════════════════════════
+  lint-python:
+    name: Lint Python Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pyyaml
+
+      - name: Run ruff linter
+        run: |
+          ruff check ${{ env.SEMINAR_DIR }}/scripts/python/*.py \
+                     ${{ env.SEMINAR_DIR }}/formative/*.py \
+            --config ${{ env.SEMINAR_DIR }}/ci/linting.toml || true
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile ${{ env.SEMINAR_DIR }}/scripts/python/*.py
+          python -m py_compile ${{ env.SEMINAR_DIR }}/formative/*.py
+          echo "Sintaxă Python validă"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 3: Validare Quiz
+  # ═══════════════════════════════════════════════════════════════════════════
+  validate-quiz:
+    name: Validate Quiz Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pyyaml
+        run: pip install pyyaml
+
+      - name: Validate quiz.yaml
+        run: |
+          python -c "
+          import yaml
+          import sys
+          
+          with open('${{ env.SEMINAR_DIR }}/formative/quiz.yaml', 'r') as f:
+              data = yaml.safe_load(f)
+          
+          # Verificări de bază
+          assert 'metadata' in data, 'Lipsește metadata'
+          assert 'intrebari' in data, 'Lipsesc întrebările'
+          assert len(data['intrebari']) >= 10, 'Prea puține întrebări'
+          
+          # Verifică distribuția Bloom
+          bloom_counts = {}
+          for q in data['intrebari']:
+              bloom = q.get('bloom', 'unknown')
+              bloom_counts[bloom] = bloom_counts.get(bloom, 0) + 1
+          
+          print('Distribuție Bloom:')
+          for level, count in sorted(bloom_counts.items()):
+              print(f'  {level}: {count}')
+          
+          print('Quiz valid!')
+          "
+
+      - name: Validate quiz_lms.json
+        run: |
+          python -c "
+          import json
+          
+          with open('${{ env.SEMINAR_DIR }}/formative/quiz_lms.json', 'r') as f:
+              data = json.load(f)
+          
+          assert 'quiz' in data, 'Lipsește cheia quiz'
+          assert 'questions' in data['quiz'], 'Lipsesc întrebările'
+          
+          print(f'Quiz LMS valid: {len(data[\"quiz\"][\"questions\"])} întrebări')
+          "
+
+      - name: Run quiz self-test
+        run: |
+          cd ${{ env.SEMINAR_DIR }}
+          python formative/quiz_runner.py --self-test
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 4: Teste Automate
+  # ═══════════════════════════════════════════════════════════════════════════
+  run-tests:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    needs: [lint-bash, lint-python]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install pyyaml
+          
+      - name: Setup test environment
+        run: |
+          cd ${{ env.SEMINAR_DIR }}
+          mkdir -p ~/demo_sem4/data
+          # Creează date de test minimale
+          echo "192.168.1.1 - - [01/Jan/2025:10:00:00 +0000] \"GET / HTTP/1.1\" 200 1234" > ~/demo_sem4/data/access.log
+          echo "name,dept,salary" > ~/demo_sem4/data/employees.csv
+          echo "John,IT,50000" >> ~/demo_sem4/data/employees.csv
+
+      - name: Run test suite
+        run: |
+          cd ${{ env.SEMINAR_DIR }}
+          bash teste/run_all_tests.sh || echo "Some tests may have failed"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 5: Verificare Structură
+  # ═══════════════════════════════════════════════════════════════════════════
+  check-structure:
+    name: Check Seminar Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          echo "Verificare fișiere obligatorii..."
+          required_files=(
+            "${{ env.SEMINAR_DIR }}/README.md"
+            "${{ env.SEMINAR_DIR }}/Makefile"
+            "${{ env.SEMINAR_DIR }}/requirements.txt"
+            "${{ env.SEMINAR_DIR }}/formative/quiz.yaml"
+            "${{ env.SEMINAR_DIR }}/formative/quiz_lms.json"
+            "${{ env.SEMINAR_DIR }}/docs/lo_traceability.md"
+            "${{ env.SEMINAR_DIR }}/docs/S04_02_MATERIAL_PRINCIPAL.md"
+          )
+          
+          missing=0
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "LIPSĂ: $file"
+              missing=$((missing + 1))
+            else
+              echo "OK: $file"
+            fi
+          done
+          
+          if [[ $missing -gt 0 ]]; then
+            echo "Fișiere lipsă: $missing"
+            exit 1
+          fi
+          echo "Toate fișierele obligatorii există"
+
+      - name: Count documentation
+        run: |
+          echo "Statistici documentație:"
+          echo "  Markdown: $(find ${{ env.SEMINAR_DIR }} -name '*.md' | wc -l) fișiere"
+          echo "  Bash: $(find ${{ env.SEMINAR_DIR }} -name '*.sh' | wc -l) fișiere"
+          echo "  Python: $(find ${{ env.SEMINAR_DIR }} -name '*.py' | wc -l) fișiere"

@@ -1,0 +1,566 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Formative Quiz: Seminar 04 — Text Processing
+# ═══════════════════════════════════════════════════════════════════════════════
+# Operating Systems | ASE Bucharest — CSIE
+# Version: 1.2 | Date: January 2025
+# Run: python3 quiz_runner.py quiz.yaml
+# Updated: Added CREATE level question for complete Bloom coverage
+# Language: British English (no Oxford comma)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  seminar: 4
+  subject: "Text Processing — Regex, GREP, SED and AWK"
+  version: "1.2"
+  language: "en-GB"
+  estimated_time_minutes: 20
+  total_score: 128
+  pass_threshold: 65
+  
+  # Bloom distribution for beginners (Year 1)
+  # Updated to include CREATE level
+  bloom_distribution:
+    remember: 3      # 14%
+    understand: 5    # 24%
+    apply: 5         # 24%
+    analyse: 2       # 10%
+    evaluate: 2      # 10%
+    create: 1        # 5% (new)
+
+  learning_outcomes:
+    - id: LO1
+      description: "Write functional BRE and ERE regular expressions"
+    - id: LO2
+      description: "Use grep with main options for text searching"
+    - id: LO3
+      description: "Transform text with sed (substitution, deletion and insertion)"
+    - id: LO4
+      description: "Process structured data with awk (fields and calculations)"
+    - id: LO5
+      description: "Combine tools in efficient pipelines"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+questions:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REMEMBER (3 questions) — 16%
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: R1
+    type: mcq
+    bloom: remember
+    lo: [LO1]
+    score: 6
+    text: |
+      Which regex metacharacter matches ANY single character (except newline)?
+    options:
+      - "."
+      - "*"
+      - "?"
+      - "+"
+    correct: 0
+    explanation: |
+      The dot (.) matches exactly one character, whatever it may be.
+      * = zero or more of the preceding
+      ? = zero or one of the preceding
+      + = one or more of the preceding
+    misconceptions:
+      1: "Confusion with * from shell globbing (where * = any characters)"
+      2: "Confusion with ? from shell globbing (where ? = one character)"
+
+  - id: R2
+    type: mcq
+    bloom: remember
+    lo: [LO2]
+    score: 6
+    text: |
+      Which grep option displays ONLY the text that matched, not the entire line?
+    options:
+      - "-o"
+      - "-v"
+      - "-c"
+      - "-l"
+    correct: 0
+    explanation: |
+      -o (only-matching) displays only the portion that matched.
+      -v = inverts selection (lines that do NOT match)
+      -c = counts matched lines
+      -l = displays only file names with matches
+    misconceptions:
+      1: "Confusion of -v with 'verbose' (in grep it means invert)"
+      2: "Confusion of -c with 'count characters' (it counts lines)"
+
+  - id: R3
+    type: mcq
+    bloom: remember
+    lo: [LO3]
+    score: 6
+    text: |
+      In sed, which command deletes lines that match a pattern?
+    options:
+      - "d"
+      - "p"
+      - "s"
+      - "q"
+    correct: 0
+    explanation: |
+      d = delete (deletes the line)
+      p = print (displays the line)
+      s = substitute (replaces)
+      q = quit (stops processing)
+    misconceptions:
+      1: "Confusion with 'p' which does the opposite (prints)"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # UNDERSTAND (5 questions) — 26%
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: U1
+    type: mcq
+    bloom: understand
+    lo: [LO1]
+    score: 7
+    text: |
+      What is the MAIN difference between BRE and ERE in grep?
+    options:
+      - "In BRE, metacharacters +, ?, {}, (), | require escaping with backslash"
+      - "BRE is faster than ERE"
+      - "ERE does not support grouping with parentheses"
+      - "BRE works only on Linux, ERE on all systems"
+    correct: 0
+    explanation: |
+      In BRE (Basic Regular Expressions), the characters +, ?, {}, (), | are 
+      literal by default and must be escaped (\+, \?, etc.) to be metacharacters.
+      In ERE (Extended), these are metacharacters by default.
+      
+      Example:
+        grep 'ab+c' file       # BRE: searches literally for "ab+c"
+        grep -E 'ab+c' file    # ERE: searches for "a" followed by 1+ "b" followed by "c"
+    misconceptions:
+      0: "Common confusion about when to use escape"
+
+  - id: U2
+    type: mcq
+    bloom: understand
+    lo: [LO1, LO2]
+    score: 7
+    text: |
+      What does the regex pattern `^[^#]` match?
+    options:
+      - "Lines that do NOT start with #"
+      - "Lines that start with #"
+      - "The character ^ followed by #"
+      - "Any line that contains #"
+    correct: 0
+    explanation: |
+      The first ^ = anchor for the start of line
+      [^#] = any character EXCEPT #
+      Thus: lines that start with any character different from #
+      
+      Note: ^ has two different meanings:
+      - Outside [] = start of line
+      - Inside [] at the beginning = negation
+    misconceptions:
+      1: "Confusion: the second ^ is not an anchor, but negation in character class"
+
+  - id: U3
+    type: predict
+    bloom: understand
+    lo: [LO2]
+    score: 7
+    text: |
+      What will this command display?
+      
+      echo -e "abc\nABC\nabC" | grep -i 'abc'
+    options:
+      - "abc, ABC, abC (all three lines)"
+      - "only abc"
+      - "abc and ABC"
+      - "Error: invalid pattern"
+    correct: 0
+    explanation: |
+      The -i option makes the search case-insensitive.
+      All three variants (abc, ABC, abC) match.
+    misconceptions:
+      1: "Forgetting that -i ignores case for ALL characters"
+
+  - id: U4
+    type: predict
+    bloom: understand
+    lo: [LO3]
+    score: 7
+    text: |
+      What will this command display?
+      
+      echo "hello world" | sed 's/o/O/'
+    options:
+      - "hellO world"
+      - "hellO wOrld"
+      - "HELLO WORLD"
+      - "hello world"
+    correct: 0
+    explanation: |
+      Without the 'g' flag, sed replaces only the FIRST occurrence on each line.
+      To replace all occurrences: sed 's/o/O/g'
+    misconceptions:
+      1: "Assumption that sed replaces all occurrences by default"
+
+  - id: U5
+    type: predict
+    bloom: understand
+    lo: [LO4]
+    score: 7
+    text: |
+      What will this command display for the line "ana:are:mere"?
+      
+      echo "ana:are:mere" | awk -F: '{print $2}'
+    options:
+      - "are"
+      - "ana"
+      - "mere"
+      - "ana:are:mere"
+    correct: 0
+    explanation: |
+      -F: sets the delimiter to ":"
+      $2 = the second field
+      The line is split into: $1=ana, $2=are, $3=mere
+    misconceptions:
+      1: "Confusion about field indexing (starts at 1, not 0)"
+      2: "Forgetting that -F changes the default delimiter (space)"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # APPLY (5 questions) — 26%
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: A1
+    type: mcq
+    bloom: apply
+    lo: [LO1, LO2]
+    score: 8
+    text: |
+      Which command extracts ALL IP addresses from the file log.txt?
+    options:
+      - "grep -oE '([0-9]{1,3}\\.){3}[0-9]{1,3}' log.txt"
+      - "grep -o '[0-9]*' log.txt"
+      - "grep 'IP' log.txt"
+      - "grep -E '[0-9].[0-9].[0-9].[0-9]' log.txt"
+    correct: 0
+    explanation: |
+      The correct pattern:
+      - [0-9]{1,3} = 1-3 digits
+      - \\. = literal dot (escaped)
+      - (){3} = the group repeats 3 times
+      - -o = displays only matches
+      - -E = Extended regex (for {})
+      
+      Option D is wrong because the unescaped . matches any character.
+    misconceptions:
+      3: "The unescaped dot matches any character, not just '.'"
+
+  - id: A2
+    type: mcq
+    bloom: apply
+    lo: [LO3]
+    score: 8
+    text: |
+      Which sed command deletes all blank lines from a file?
+    options:
+      - "sed '/^$/d' file.txt"
+      - "sed 's/^$//' file.txt"
+      - "sed '/./d' file.txt"
+      - "sed 'd' file.txt"
+    correct: 0
+    explanation: |
+      ^$ = pattern for empty line (start followed immediately by end)
+      d = delete command
+      /pattern/d = deletes lines that match
+      
+      Option B only replaces the empty line with nothing, but the line remains.
+      Option C deletes lines that contain at least one character (the opposite).
+      Option D deletes ALL lines.
+    misconceptions:
+      1: "Confusion between substitution with empty string and line deletion"
+
+  - id: A3
+    type: mcq
+    bloom: apply
+    lo: [LO4]
+    score: 8
+    text: |
+      Which awk command calculates the sum of values in column 3 of a CSV?
+    options:
+      - "awk -F, '{sum+=$3} END {print sum}' data.csv"
+      - "awk '{print $3}' data.csv | sum"
+      - "awk -F, 'BEGIN {print $3}' data.csv"
+      - "awk '{sum=$3} END {print sum}' data.csv"
+    correct: 0
+    explanation: |
+      -F, = comma separator (CSV)
+      sum+=$3 = adds $3 to the variable sum (for each line)
+      END = block executed after processing all lines
+      
+      Option D resets sum to $3 instead of adding (missing +).
+    misconceptions:
+      3: "Difference between sum=$3 (assignment) and sum+=$3 (addition)"
+
+  - id: A4
+    type: mcq
+    bloom: apply
+    lo: [LO2, LO5]
+    score: 8
+    text: |
+      Which pipeline counts how many unique lines contain "ERROR" in all .log files?
+    options:
+      - "grep -h 'ERROR' *.log | sort | uniq | wc -l"
+      - "grep 'ERROR' *.log | wc -l"
+      - "grep -c 'ERROR' *.log"
+      - "grep 'ERROR' *.log | uniq | wc -l"
+    correct: 0
+    explanation: |
+      -h = suppress filename in output (otherwise each line has a prefix)
+      sort = necessary before uniq (uniq works on adjacent lines)
+      uniq = removes duplicates
+      wc -l = counts lines
+      
+      Option B counts ALL occurrences, not unique lines.
+      Option D: uniq without sort does not work correctly.
+    misconceptions:
+      3: "uniq MUST be preceded by sort (works on consecutive lines)"
+
+  - id: A5
+    type: fill
+    bloom: apply
+    lo: [LO3]
+    score: 8
+    text: |
+      Complete the sed command that replaces ALL occurrences of "foo" with "bar":
+      
+      sed 's/foo/bar/___' file.txt
+    correct_answer: "g"
+    explanation: |
+      The 'g' flag (global) makes the substitution on all occurrences in the line,
+      not just the first.
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # ANALYSE (2 questions) — 11%
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: AN1
+    type: mcq
+    bloom: analyse
+    lo: [LO1, LO2, LO5]
+    score: 9
+    text: |
+      A colleague wrote this command but it does not work as expected:
+      
+      grep 'error|warning' server.log
+      
+      The command finds nothing, even though the file contains lines with "error" and "warning".
+      What is the problem?
+    options:
+      - "Missing -E; in BRE, | is literal, not alternation"
+      - "The pattern should be 'error\\|warning'"
+      - "Both options A and B are correct"
+      - "Must use -i for case-insensitive"
+    correct: 2
+    explanation: |
+      In BRE (grep without -E), the | character is literal.
+      Two correct solutions:
+      1. grep -E 'error|warning' server.log   (uses ERE)
+      2. grep 'error\|warning' server.log     (escape in BRE)
+      
+      Option D does not solve the problem if the text is exactly "error"/"warning".
+    misconceptions:
+      0: "Understanding the BRE vs ERE difference is essential for debugging"
+
+  - id: AN2
+    type: mcq
+    bloom: analyse
+    lo: [LO3, LO4, LO5]
+    score: 9
+    text: |
+      Which approach is MORE EFFICIENT for processing a 1GB CSV file 
+      and extracting only column 2?
+    options:
+      - "awk -F, '{print $2}' large.csv"
+      - "cat large.csv | cut -d, -f2"
+      - "sed 's/[^,]*,\\([^,]*\\).*/\\1/' large.csv"
+      - "All are equally efficient"
+    correct: 0
+    explanation: |
+      awk is the most efficient for field extraction because:
+      - It parses the line only once
+      - It does not create additional processes
+      - It is optimised for field processing
+      
+      Option B: cat | cut = UUOC (Useless Use of Cat) + pipe overhead
+      Option C: sed with complex regex is slower for a simple task
+    misconceptions:
+      1: "UUOC (Useless Use of Cat) - cat is not needed here"
+      2: "sed is powerful but not ideal for simple field extraction"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # EVALUATE (2 questions) — 11%
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: E1
+    type: mcq
+    bloom: evaluate
+    lo: [LO5]
+    score: 8
+    text: |
+      You need to extract all unique error messages from a 10GB log file 
+      and count their occurrences. Which approach is MOST efficient?
+    options:
+      - "grep 'ERROR' huge.log | sort | uniq -c | sort -rn"
+      - "awk '/ERROR/ {errors[$0]++} END {for(e in errors) print errors[e], e}' huge.log | sort -rn"
+      - "cat huge.log | grep 'ERROR' | sort | uniq -c | sort -rn"
+      - "sed -n '/ERROR/p' huge.log | sort | uniq -c | sort -rn"
+    correct: 1
+    explanation: |
+      awk processes the file in a single pass, storing counts in memory.
+      The grep|sort|uniq pipeline requires multiple passes and disk I/O for sorting.
+      For very large files, awk's single-pass approach is significantly faster
+      (assuming sufficient memory for the unique error set).
+      
+      Option A works but sort on 10GB is expensive.
+      Option C has useless cat overhead.
+      Option D is equivalent to A with sed instead of grep.
+    misconceptions:
+      0: "grep|sort|uniq works but requires sorting the entire filtered output"
+      2: "Useless use of cat adds overhead and obscures data flow"
+      3: "sed -n '/pattern/p' is functionally identical to grep 'pattern'"
+
+  - id: E2
+    type: mcq
+    bloom: evaluate
+    lo: [LO3, LO4]
+    score: 8
+    text: |
+      A colleague wrote this pipeline to anonymise email addresses in logs:
+      
+      sed 's/[a-z]*@[a-z]*\.[a-z]*/[REDACTED]/g' access.log
+      
+      What is the PRIMARY issue with this approach?
+    options:
+      - "The regex is too greedy and will match too much text"
+      - "The regex is too restrictive (misses uppercase, numbers, dots in local part)"
+      - "sed cannot do global replacement with the /g flag"
+      - "The [REDACTED] string should be quoted differently"
+    correct: 1
+    explanation: |
+      The pattern [a-z]* only matches lowercase letters. Real email addresses contain:
+      - Uppercase: John.Doe@Company.COM
+      - Numbers: user123@domain.com  
+      - Dots and special chars: first.last+tag@sub.domain.co.uk
+      
+      A better pattern would be:
+      sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/[REDACTED]/g'
+      
+      Option A is incorrect because * is not greedy enough (matches zero or more).
+      Option C is incorrect; /g works correctly.
+      Option D is incorrect; the replacement string syntax is valid.
+    misconceptions:
+      0: "The pattern is actually not greedy enough, missing characters"
+      2: "The /g flag exists and works correctly in sed"
+      3: "Square brackets in replacement string are valid literal characters"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CREATE (1 question) — 5%
+  # This level requires students to construct a novel solution
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: C1
+    type: open
+    bloom: create
+    lo: [LO2, LO4, LO5]
+    score: 12
+    time_limit_seconds: 180
+    text: |
+      Construct a SINGLE pipeline command that:
+      1. Extracts all IP addresses from access.log
+      2. Counts how many times each IP appears
+      3. Shows the TOP 5 IPs by frequency (most frequent first)
+      4. Formats output as: "COUNT IP_ADDRESS"
+      
+      Write your complete command below:
+    
+    hints:
+      - "Start with grep -oE to extract IPs"
+      - "Remember: uniq needs sorted input"
+      - "sort -rn gives descending numeric sort"
+    
+    rubric:
+      - criterion: "Correct IP extraction with grep -oE and valid regex"
+        points: 3
+        examples:
+          - "grep -oE '([0-9]{1,3}\\.){3}[0-9]{1,3}'"
+          - "grep -oE '[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+'"
+      - criterion: "Proper sort before uniq -c"
+        points: 3
+        note: "uniq only works on adjacent lines"
+      - criterion: "Descending numeric sort (sort -rn)"
+        points: 3
+        note: "Must show highest counts first"
+      - criterion: "Correct head -5 or head -n 5"
+        points: 3
+    
+    sample_solutions:
+      - |
+        grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort | uniq -c | sort -rn | head -5
+      - |
+        grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' access.log | sort | uniq -c | sort -rn | head -n 5
+      - |
+        awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5
+    
+    common_errors:
+      - error: "uniq -c | sort instead of sort | uniq -c | sort -rn"
+        feedback: "uniq only removes adjacent duplicates — you must sort first"
+      - error: "Missing -rn on final sort"
+        feedback: "Without -rn, results are sorted ascending or alphabetically"
+      - error: "Using grep without -o"
+        feedback: "-o outputs only the match, not the entire line"
+    
+    explanation: |
+      This question tests the ability to combine multiple tools into a working
+      pipeline. The canonical solution is:
+      
+        grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort | uniq -c | sort -rn | head -5
+      
+      Breaking it down:
+      1. grep -oE extracts only matching IPs (not full lines)
+      2. First sort groups identical IPs together
+      3. uniq -c counts consecutive identical lines
+      4. sort -rn sorts by count, highest first
+      5. head -5 takes top 5
+      
+      Alternative using awk (if log format has IP as $1):
+        awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FEEDBACK CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+feedback:
+  score_90_100:
+    message: "Excellent! You have mastered text processing at an advanced level."
+    recommendation: "Try the projects from SEM-PROJ at MEDIUM level."
+  
+  score_70_89:
+    message: "Good! You have understood the main concepts."
+    recommendation: "Review the sections where you made mistakes and practise with sprint exercises."
+  
+  score_50_69:
+    message: "Satisfactory. You need more practice."
+    recommendation: "Reread the Main Material and redo the basic exercises."
+  
+  score_below_50:
+    message: "Requires significant improvement."
+    recommendation: "Attend consultations and work through all examples step by step."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END
+# ═══════════════════════════════════════════════════════════════════════════════
