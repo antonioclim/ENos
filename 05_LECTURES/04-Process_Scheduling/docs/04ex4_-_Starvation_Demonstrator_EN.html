@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starvation Demonstrator | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .process-bar {
+            transition: all 0.3s ease;
+        }
+        .process-bar.starving {
+            animation: starvePulse 1s ease-in-out infinite;
+        }
+        @keyframes starvePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        
+        .warning-banner {
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+        @keyframes warningPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .aging-boost {
+            animation: boostFlash 0.5s ease;
+        }
+        @keyframes boostFlash {
+            0% { background-color: #fef08a; transform: scale(1.05); }
+            100% { background-color: inherit; transform: scale(1); }
+        }
+        
+        .gantt-segment {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+        .gantt-segment:hover {
+            transform: scaleY(1.2);
+            z-index: 10;
+        }
+        
+        .scenario-card {
+            transition: all 0.3s ease;
+        }
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .scenario-card.active {
+            ring: 3px;
+            ring-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Starvation Demonstrator</h1>
+                    <p class="text-xs text-stone-500">Intelegerea and Prevenirea Starvation</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Scenario Selection -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div id="card-sjf" class="scenario-card active bg-white rounded-xl shadow-sm border border-stone-200 p-4 cursor-pointer" onclick="selectScenario('sjf')">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-sort-amount-down text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-sm">SJF Starvation</h3>
+                        <p class="text-xs text-stone-500">Procese scurte vs lung</p>
+                    </div>
+                </div>
+                <p class="text-xs text-stone-600">Procesul lung P1 este mereu depasit de procese scurte care sosesc continuu.</p>
+            </div>
+            
+            <div id="card-priority" class="scenario-card bg-white rounded-xl shadow-sm border border-stone-200 p-4 cursor-pointer" onclick="selectScenario('priority')">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                        <i class="fas fa-layer-group text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-sm">Priority Starvation</h3>
+                        <p class="text-xs text-stone-500">Priority joasa ignorata</p>
+                    </div>
+                </div>
+                <p class="text-xs text-stone-600">P_low cu prioritate 10 este ignorat de procesele cu prioritate mare.</p>
+            </div>
+            
+            <div id="card-aging" class="scenario-card bg-white rounded-xl shadow-sm border border-stone-200 p-4 cursor-pointer" onclick="selectScenario('aging')">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-sm">solution: Aging</h3>
+                        <p class="text-xs text-stone-500">Priority creste cu timpul</p>
+                    </div>
+                </div>
+                <p class="text-xs text-stone-600">Prioritya proceselor creste progresiv cu timpul de waiting.</p>
+            </div>
+        </div>
+
+        <!-- Warning Banner -->
+        <div id="starvationWarning" class="hidden warning-banner mb-6 bg-red-100 border border-red-300 rounded-xl p-4 flex items-center gap-4">
+            <div class="text-4xl">🚨</div>
+            <div>
+                <h3 class="font-bold text-red-800">STARVATION DETECTAT!</h3>
+                <p class="text-sm text-red-700">Procesul <span id="starvingProcess" class="font-bold">P1</span> waits de <span id="starvingTime" class="font-bold mono">0</span> unitati de timp!</p>
+            </div>
+            <div id="starvationCounter" class="ml-auto text-5xl font-bold mono text-red-600">0</div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel: Visualization -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Process List with Waiting Time Bars -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-list text-blue-500"></i>
+                            Procese and Timp de Waiting
+                        </h2>
+                        <div class="text-sm">
+                            Timp: <span id="currentTime" class="mono font-bold text-blue-600">0</span>
+                        </div>
+                    </div>
+                    
+                    <div id="processList" class="space-y-3">
+                        <!-- Processes will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Gantt Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-chart-gantt text-purple-500 mr-2"></i>Gantt Chart
+                    </h3>
+                    <div class="relative h-12 bg-stone-100 rounded overflow-hidden" id="ganttChart">
+                        <!-- Gantt segments will be rendered here -->
+                    </div>
+                    <div id="ganttTimeAxis" class="flex text-xs text-stone-500 mono mt-1"></div>
+                </div>
+
+                <!-- Waiting Time Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-chart-line text-red-500 mr-2"></i>Timp de Waiting in Timp
+                    </h3>
+                    <div style="height: 200px;">
+                        <canvas id="waitingChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Comparison Table -->
+                <div id="comparisonSection" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 hidden">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-table text-green-500 mr-2"></i>Comparison: Without Aging vs Cu Aging
+                    </h3>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-stone-50">
+                                <th class="p-2 text-left">Metrica</th>
+                                <th class="p-2 text-center">Without Aging</th>
+                                <th class="p-2 text-center">Cu Aging</th>
+                                <th class="p-2 text-center">Diferenta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonBody">
+                            <!-- Comparison data will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controale Simulare
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button id="btnPlay" onclick="togglePlay()" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button onclick="stepSimulation()" class="btn-action p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button onclick="runToEnd()" class="btn-action p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-fast-forward"></i>
+                        </button>
+                        <button onclick="resetSimulation()" class="btn-action p-3 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 block mb-1">Speed simulare</label>
+                        <input type="range" id="speedSlider" min="50" max="500" value="200" class="w-full h-2 bg-stone-200 rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Aging Configuration -->
+                <div id="agingConfig" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-sliders-h text-green-500 mr-2"></i>configuration Aging
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="agingEnabled" class="w-4 h-4 text-green-600 rounded" onchange="toggleAging()">
+                            <span class="text-sm text-stone-600">Activeaza Aging</span>
+                        </label>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Interval Aging (unitati de timp)</label>
+                            <input type="number" id="agingInterval" value="5" min="1" max="20" class="w-full p-2 border border-stone-300 rounded-lg text-sm mono">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Crestere Priority</label>
+                            <input type="number" id="agingAmount" value="1" min="1" max="5" class="w-full p-2 border border-stone-300 rounded-lg text-sm mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Scenario Info -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-200 p-4">
+                    <h3 class="text-sm font-semibold text-amber-800 mb-3">
+                        <i class="fas fa-info-circle text-amber-500 mr-2"></i>Scenariu Curent
+                    </h3>
+                    <div id="scenarioInfo" class="text-xs text-amber-700 space-y-2">
+                        <!-- Scenario info will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-chart-pie text-blue-500 mr-2"></i>Statistics
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="p-3 bg-stone-50 rounded-lg text-center">
+                            <div class="text-xs text-stone-500">Max Wait Time</div>
+                            <div id="statMaxWait" class="font-bold mono text-red-600">0</div>
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-lg text-center">
+                            <div class="text-xs text-stone-500">Avg Wait Time</div>
+                            <div id="statAvgWait" class="font-bold mono text-blue-600">0</div>
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-lg text-center">
+                            <div class="text-xs text-stone-500">Fairness Index</div>
+                            <div id="statFairness" class="font-bold mono text-green-600">-</div>
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-lg text-center">
+                            <div class="text-xs text-stone-500">Completed</div>
+                            <div id="statCompleted" class="font-bold mono text-purple-600">0/0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal"></i> Event Log
+                    </h3>
+                    <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
+                        <div class="text-stone-500">// Select un scenariu for a start</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Section -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                    What is Starvation?
+                </h3>
+                <div class="space-y-3 text-sm text-stone-600">
+                    <p><strong>Starvation</strong> (infometare) apare when un proces nu primeste niciodata acces la CPU, desi este gata de executie.</p>
+                    <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                        <strong>Cauze comune:</strong>
+                        <ul class="list-disc list-inside mt-1 text-red-700">
+                            <li>SJF: Procese scurte sosesc continuu</li>
+                            <li>Priority: Procese cu prioritate mai mare sosesc mereu</li>
+                            <li>MLFQ without boost: Procese coboara and nu mai urca</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                        <strong>Diferenta fata de Deadlock:</strong>
+                        <p class="text-amber-700">In starvation, procesul may fi executat teoretic, dar nu primeste niciodata sansa. In deadlock, procesele sunt blocate permanent asteptand resurse.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-lightbulb text-green-500"></i>
+                    Solutions for Starvation
+                </h3>
+                <div class="space-y-3 text-sm text-stone-600">
+                    <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                        <strong>1. Aging</strong>
+                        <p class="text-green-700">Creste progresiv prioritatea proceselor care waits mult. after suficient timp, orice proces devine prioritar.</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <strong>2. Round Robin</strong>
+                        <p class="text-blue-700">Garanteaza ca fiecare proces primeste CPU periodic, indiferent de burst time or prioritate.</p>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                        <strong>3. MLFQ cu Boost</strong>
+                        <p class="text-purple-700">Periodic, toate procesele sunt mutate inapoi in coada de prioritate maxima.</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                        <strong>4. Fair Share Scheduling</strong>
+                        <p class="text-amber-700">Garanteaza ca fiecare user/grup primeste o cota echitabila de CPU.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== Constants ====================
+        const PROCESS_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+        const STARVATION_THRESHOLD = 10;
+        
+        // ==================== Scenarios ====================
+        const SCENARIOS = {
+            sjf: {
+                name: 'SJF Starvation',
+                algorithm: 'SJF',
+                description: 'Procesul P1 (burst=100) este ignorat de procesele scurte care sosesc continuu.',
+                processes: [
+                    { name: 'P1', arrival: 0, burst: 30, priority: 1 },
+                    { name: 'P2', arrival: 1, burst: 2, priority: 1 },
+                    { name: 'P3', arrival: 3, burst: 3, priority: 1 },
+                    { name: 'P4', arrival: 5, burst: 2, priority: 1 },
+                    { name: 'P5', arrival: 7, burst: 2, priority: 1 },
+                    { name: 'P6', arrival: 9, burst: 3, priority: 1 },
+                    { name: 'P7', arrival: 12, burst: 2, priority: 1 },
+                    { name: 'P8', arrival: 15, burst: 2, priority: 1 }
+                ],
+                agingAvailable: false
+            },
+            priority: {
+                name: 'Priority Starvation',
+                algorithm: 'PRIORITY',
+                description: 'P_low (prioritate=10) este ignorat de procesele cu prioritate mare (1-3).',
+                processes: [
+                    { name: 'P_low', arrival: 0, burst: 15, priority: 10 },
+                    { name: 'P_hi1', arrival: 1, burst: 3, priority: 1 },
+                    { name: 'P_hi2', arrival: 4, burst: 4, priority: 2 },
+                    { name: 'P_hi3', arrival: 8, burst: 3, priority: 1 },
+                    { name: 'P_hi4', arrival: 12, burst: 4, priority: 2 },
+                    { name: 'P_hi5', arrival: 16, burst: 3, priority: 3 }
+                ],
+                agingAvailable: true
+            },
+            aging: {
+                name: 'solution Aging',
+                algorithm: 'PRIORITY_AGING',
+                description: 'Cu aging activat, prioritatea P_low creste progresiv pana when devine executat.',
+                processes: [
+                    { name: 'P_low', arrival: 0, burst: 10, priority: 10 },
+                    { name: 'P_hi1', arrival: 1, burst: 3, priority: 1 },
+                    { name: 'P_hi2', arrival: 4, burst: 4, priority: 2 },
+                    { name: 'P_hi3', arrival: 8, burst: 3, priority: 1 },
+                    { name: 'P_hi4', arrival: 12, burst: 4, priority: 2 }
+                ],
+                agingAvailable: true,
+                agingEnabled: true
+            }
+        };
+
+        // ==================== State ====================
+        let currentScenario = 'sjf';
+        let processes = [];
+        let simulation = {
+            time: 0,
+            running: false,
+            interval: null,
+            currentProcess: null,
+            ganttSegments: [],
+            waitingHistory: {},
+            completed: 0
+        };
+        let waitingChart = null;
+
+        // ==================== Initialization ====================
+        function selectScenario(scenario) {
+            currentScenario = scenario;
+            
+            // Update UI
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`card-${scenario}`).classList.add('active');
+            
+            // Update aging config visibility
+            const agingConfig = document.getElementById('agingConfig');
+            const scenarioData = SCENARIOS[scenario];
+            agingConfig.style.display = scenarioData.agingAvailable ? 'block' : 'none';
+            
+            if (scenarioData.agingEnabled) {
+                document.getElementById('agingEnabled').checked = true;
+            }
+            
+            // Update scenario info
+            document.getElementById('scenarioInfo').innerHTML = `
+                <p><strong>Algoritm:</strong> ${scenarioData.algorithm}</p>
+                <p><strong>description:</strong> ${scenarioData.description}</p>
+            `;
+            
+            resetSimulation();
+            log(`Scenariu selectat: ${scenarioData.name}`);
+        }
+
+        function initProcesses() {
+            const scenarioData = SCENARIOS[currentScenario];
+            processes = scenarioData.processes.map((p, i) => ({
+                ...p,
+                id: i + 1,
+                color: PROCESS_COLORS[i % PROCESS_COLORS.length],
+                remaining: p.burst,
+                originalPriority: p.priority,
+                currentPriority: p.priority,
+                waitingTime: 0,
+                startTime: null,
+                finishTime: null,
+                lastAging: 0
+            }));
+            
+            // Initialize waiting history
+            simulation.waitingHistory = {};
+            processes.forEach(p => {
+                simulation.waitingHistory[p.name] = [];
+            });
+        }
+
+        // ==================== Simulation ====================
+        function stepSimulation() {
+            const scenarioData = SCENARIOS[currentScenario];
+            const agingEnabled = document.getElementById('agingEnabled')?.checked && scenarioData.agingAvailable;
+            const agingInterval = parseInt(document.getElementById('agingInterval').value);
+            const agingAmount = parseInt(document.getElementById('agingAmount').value);
+            
+            // Get ready processes
+            const readyProcesses = processes.filter(p => 
+                p.arrival <= simulation.time && 
+                p.remaining > 0 && 
+                simulation.currentProcess !== p
+            );
+            
+            // Apply aging
+            if (agingEnabled) {
+                readyProcesses.forEach(p => {
+                    if (simulation.time > 0 && (simulation.time - p.lastAging) >= agingInterval) {
+                        const oldPriority = p.currentPriority;
+                        p.currentPriority = Math.max(1, p.currentPriority - agingAmount);
+                        p.lastAging = simulation.time;
+                        
+                        if (oldPriority !== p.currentPriority) {
+                            log(`t=${simulation.time}: ${p.name} AGED: priority ${oldPriority} → ${p.currentPriority}`);
+                            
+                            // Visual feedback
+                            const processEl = document.querySelector(`[data-process="${p.name}"]`);
+                            if (processEl) {
+                                processEl.classList.add('aging-boost');
+                                setTimeout(() => processEl.classList.remove('aging-boost'), 500);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Update waiting times
+            readyProcesses.forEach(p => {
+                p.waitingTime++;
+            });
+            
+            // Record waiting history
+            processes.forEach(p => {
+                simulation.waitingHistory[p.name].push({
+                    time: simulation.time,
+                    waiting: p.waitingTime
+                });
+            });
+            
+            // Select next process if none running
+            if (!simulation.currentProcess) {
+                let selected = null;
+                
+                if (readyProcesses.length > 0) {
+                    if (scenarioData.algorithm === 'SJF') {
+                        selected = readyProcesses.reduce((min, p) => p.remaining < min.remaining ? p : min);
+                    } else {
+                        // Priority based (lower number = higher priority)
+                        selected = readyProcesses.reduce((min, p) => p.currentPriority < min.currentPriority ? p : min);
+                    }
+                    
+                    simulation.currentProcess = selected;
+                    if (selected.startTime === null) {
+                        selected.startTime = simulation.time;
+                    }
+                    log(`t=${simulation.time}: ${selected.name} started (priority=${selected.currentPriority})`);
+                }
+            }
+            
+            // Execute current process
+            if (simulation.currentProcess) {
+                const p = simulation.currentProcess;
+                
+                // Add to Gantt
+                const lastSeg = simulation.ganttSegments[simulation.ganttSegments.length - 1];
+                if (lastSeg && lastSeg.process === p && lastSeg.end === simulation.time) {
+                    lastSeg.end = simulation.time + 1;
+                } else {
+                    simulation.ganttSegments.push({
+                        process: p,
+                        start: simulation.time,
+                        end: simulation.time + 1
+                    });
+                }
+                
+                p.remaining--;
+                
+                if (p.remaining === 0) {
+                    p.finishTime = simulation.time + 1;
+                    simulation.completed++;
+                    log(`t=${simulation.time + 1}: ${p.name} COMPLETED (waited ${p.waitingTime} units)`);
+                    simulation.currentProcess = null;
+                }
+            }
+            
+            simulation.time++;
+            document.getElementById('currentTime').textContent = simulation.time;
+            
+            // Check for starvation
+            checkStarvation();
+            
+            // Update UI
+            renderProcessList();
+            renderGantt();
+            updateChart();
+            updateStats();
+            
+            // Check if done
+            if (simulation.completed === processes.length) {
+                stopSimulation();
+                log('=== Simulare completa! ===');
+                calculateFairness();
+            }
+        }
+
+        function checkStarvation() {
+            const starving = processes.find(p => 
+                p.arrival <= simulation.time && 
+                p.remaining > 0 && 
+                simulation.currentProcess !== p && 
+                p.waitingTime >= STARVATION_THRESHOLD
+            );
+            
+            const warning = document.getElementById('starvationWarning');
+            
+            if (starving) {
+                warning.classList.remove('hidden');
+                document.getElementById('starvingProcess').textContent = starving.name;
+                document.getElementById('starvingTime').textContent = starving.waitingTime;
+                document.getElementById('starvationCounter').textContent = starving.waitingTime;
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        function togglePlay() {
+            if (simulation.running) {
+                stopSimulation();
+            } else {
+                startSimulation();
+            }
+        }
+
+        function startSimulation() {
+            simulation.running = true;
+            document.getElementById('btnPlay').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            const speed = parseInt(document.getElementById('speedSlider').value);
+            simulation.interval = setInterval(stepSimulation, speed);
+        }
+
+        function stopSimulation() {
+            simulation.running = false;
+            document.getElementById('btnPlay').innerHTML = '<i class="fas fa-play"></i>';
+            
+            if (simulation.interval) {
+                clearInterval(simulation.interval);
+                simulation.interval = null;
+            }
+        }
+
+        function runToEnd() {
+            stopSimulation();
+            while (simulation.completed < processes.length && simulation.time < 200) {
+                stepSimulation();
+            }
+        }
+
+        function resetSimulation() {
+            stopSimulation();
+            
+            simulation = {
+                time: 0,
+                running: false,
+                interval: null,
+                currentProcess: null,
+                ganttSegments: [],
+                waitingHistory: {},
+                completed: 0
+            };
+            
+            initProcesses();
+            
+            document.getElementById('currentTime').textContent = '0';
+            document.getElementById('starvationWarning').classList.add('hidden');
+            
+            renderProcessList();
+            renderGantt();
+            initChart();
+            updateStats();
+            
+            document.getElementById('eventLog').innerHTML = '<div class="text-stone-500">// Simulare resetata</div>';
+        }
+
+        // ==================== Rendering ====================
+        function renderProcessList() {
+            const container = document.getElementById('processList');
+            const maxWait = Math.max(1, ...processes.map(p => p.waitingTime));
+            
+            container.innerHTML = processes.map(p => {
+                const isRunning = simulation.currentProcess === p;
+                const isStarving = p.waitingTime >= STARVATION_THRESHOLD && p.remaining > 0;
+                const isCompleted = p.remaining === 0;
+                const waitPercent = (p.waitingTime / Math.max(maxWait, 30)) * 100;
+                
+                let statusIcon = '';
+                if (isRunning) statusIcon = '<i class="fas fa-play text-green-500 animate-pulse"></i>';
+                else if (isCompleted) statusIcon = '<i class="fas fa-check text-green-500"></i>';
+                else if (isStarving) statusIcon = '<i class="fas fa-exclamation-triangle text-red-500"></i>';
+                else if (p.arrival > simulation.time) statusIcon = '<i class="fas fa-clock text-stone-400"></i>';
+                
+                return `
+                    <div class="process-bar ${isStarving ? 'starving' : ''} flex items-center gap-3 p-3 rounded-lg border ${isRunning ? 'bg-green-50 border-green-300' : isStarving ? 'bg-red-50 border-red-300' : 'bg-stone-50 border-stone-200'}" data-process="${p.name}">
+                        <div class="w-4 h-4 rounded" style="background: ${p.color}"></div>
+                        <div class="w-16 font-semibold text-sm">${p.name}</div>
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs text-stone-500 mb-1">
+                                <span>Wait: ${p.waitingTime}</span>
+                                <span>Rem: ${p.remaining}/${p.burst}</span>
+                                <span>Pri: ${p.currentPriority}${p.currentPriority !== p.originalPriority ? ` (was ${p.originalPriority})` : ''}</span>
+                            </div>
+                            <div class="h-2 bg-stone-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-300 ${isStarving ? 'bg-red-500' : 'bg-blue-500'}" style="width: ${waitPercent}%"></div>
+                            </div>
+                        </div>
+                        <div class="w-6 text-center">${statusIcon}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGantt() {
+            const container = document.getElementById('ganttChart');
+            const timeAxis = document.getElementById('ganttTimeAxis');
+            
+            if (simulation.ganttSegments.length === 0) {
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 text-sm">Gantt chart va aparea aici</div>';
+                timeAxis.innerHTML = '';
+                return;
+            }
+            
+            const maxTime = Math.max(simulation.time, 20);
+            const unitWidth = Math.max(15, Math.min(30, 600 / maxTime));
+            
+            container.innerHTML = simulation.ganttSegments.map(seg => {
+                const width = (seg.end - seg.start) * unitWidth;
+                const left = seg.start * unitWidth;
+                return `
+                    <div class="gantt-segment" 
+                         style="background: ${seg.process.color}; left: ${left}px; width: ${width}px;"
+                         title="${seg.process.name}: ${seg.start}-${seg.end}">
+                    </div>
+                `;
+            }).join('');
+            
+            // Time axis
+            timeAxis.innerHTML = '';
+            const step = Math.ceil(maxTime / 15);
+            for (let t = 0; t <= maxTime; t += step) {
+                const span = document.createElement('span');
+                span.style.width = (unitWidth * step) + 'px';
+                span.textContent = t;
+                timeAxis.appendChild(span);
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('waitingChart').getContext('2d');
+            
+            if (waitingChart) {
+                waitingChart.destroy();
+            }
+            
+            waitingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: processes.map(p => ({
+                        label: p.name,
+                        data: [],
+                        borderColor: p.color,
+                        backgroundColor: p.color + '20',
+                        fill: false,
+                        tension: 0.1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Timp' } },
+                        y: { title: { display: true, text: 'Waiting Time' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!waitingChart) return;
+            
+            const labels = Array.from({ length: simulation.time + 1 }, (_, i) => i);
+            waitingChart.data.labels = labels;
+            
+            processes.forEach((p, i) => {
+                const history = simulation.waitingHistory[p.name] || [];
+                waitingChart.data.datasets[i].data = history.map(h => h.waiting);
+            });
+            
+            waitingChart.update('none');
+        }
+
+        function updateStats() {
+            const activeProcesses = processes.filter(p => p.arrival <= simulation.time);
+            const waitingTimes = activeProcesses.map(p => p.waitingTime);
+            
+            const maxWait = Math.max(0, ...waitingTimes);
+            const avgWait = waitingTimes.length > 0 ? (waitingTimes.reduce((a, b) => a + b, 0) / waitingTimes.length).toFixed(1) : 0;
+            
+            document.getElementById('statMaxWait').textContent = maxWait;
+            document.getElementById('statAvgWait').textContent = avgWait;
+            document.getElementById('statCompleted').textContent = `${simulation.completed}/${processes.length}`;
+        }
+
+        function calculateFairness() {
+            const completedProcesses = processes.filter(p => p.finishTime !== null);
+            if (completedProcesses.length < 2) {
+                document.getElementById('statFairness').textContent = '-';
+                return;
+            }
+            
+            const waitingTimes = completedProcesses.map(p => p.waitingTime);
+            const mean = waitingTimes.reduce((a, b) => a + b, 0) / waitingTimes.length;
+            const variance = waitingTimes.reduce((sum, w) => sum + Math.pow(w - mean, 2), 0) / waitingTimes.length;
+            const stdDev = Math.sqrt(variance);
+            
+            // Jain's fairness index
+            const sumSquared = Math.pow(waitingTimes.reduce((a, b) => a + b, 0), 2);
+            const sumOfSquares = waitingTimes.reduce((sum, w) => sum + w * w, 0);
+            const fairness = sumSquared / (waitingTimes.length * sumOfSquares);
+            
+            document.getElementById('statFairness').textContent = fairness.toFixed(3);
+            
+            if (fairness < 0.5) {
+                document.getElementById('statFairness').className = 'font-bold mono text-red-600';
+            } else if (fairness < 0.8) {
+                document.getElementById('statFairness').className = 'font-bold mono text-amber-600';
+            } else {
+                document.getElementById('statFairness').className = 'font-bold mono text-green-600';
+            }
+        }
+
+        function toggleAging() {
+            log(`Aging ${document.getElementById('agingEnabled').checked ? 'ACTIVAT' : 'DEZACTIVAT'}`);
+        }
+
+        // ==================== Logging ====================
+        function log(message) {
+            const container = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            
+            if (message.includes('COMPLETED')) {
+                entry.className = 'text-green-400';
+            } else if (message.includes('AGED')) {
+                entry.className = 'text-yellow-400';
+            } else if (message.includes('STARVATION') || message.includes('starving')) {
+                entry.className = 'text-red-400';
+            }
+            
+            entry.textContent = message;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+            
+            while (container.children.length > 100) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
+        // ==================== Initialization ====================
+        selectScenario('sjf');
+    </script>
+</body>
+</html>

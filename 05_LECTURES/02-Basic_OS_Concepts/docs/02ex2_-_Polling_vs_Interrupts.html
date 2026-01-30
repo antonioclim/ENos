@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polling vs Interrupts Comparator - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .polling-side {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.02) 100%);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .interrupt-side {
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.02) 100%);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        
+        .cpu-block {
+            transition: all 0.15s ease;
+        }
+        
+        .cpu-busy {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+        
+        .cpu-idle {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+        
+        .cpu-working {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        
+        .device-ready {
+            animation: devicePulse 0.5s ease-out;
+        }
+        
+        @keyframes devicePulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
+        }
+        
+        .message-arrow {
+            animation: arrowMove 0.3s ease-out;
+        }
+        
+        @keyframes arrowMove {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        .irq-flash {
+            animation: irqFlash 0.4s ease-out;
+        }
+        
+        @keyframes irqFlash {
+            0% { background: #fbbf24; }
+            100% { background: transparent; }
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #374151;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .comm-line {
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 4px,
+                #6b7280 4px,
+                #6b7280 8px
+            );
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-red-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+                <i class="fas fa-exchange-alt mr-3"></i>Polling vs Interrupts
+            </h1>
+            <p class="text-gray-400 text-lg">Visual comparison of I/O strategies</p>
+        </header>
+
+        <!-- Controls -->
+        <div class="glass-card rounded-2xl p-4 mb-6">
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="slider-container">
+                    <label class="text-sm text-gray-400 mb-2 block">Device Latency (when data arrives)</label>
+                    <input type="range" id="device-latency" min="500" max="5000" value="2000" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0.5s</span>
+                        <span id="latency-value" class="text-purple-400">2.0s</span>
+                        <span>5s</span>
+                    </div>
+                </div>
+                
+                <div class="slider-container">
+                    <label class="text-sm text-gray-400 mb-2 block">Polling Interval</label>
+                    <input type="range" id="poll-interval" min="100" max="1000" value="300" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>100ms</span>
+                        <span id="poll-value" class="text-purple-400">300ms</span>
+                        <span>1000ms</span>
+                    </div>
+                </div>
+                
+                <div class="slider-container">
+                    <label class="text-sm text-gray-400 mb-2 block">Useful Work Time</label>
+                    <input type="range" id="work-time" min="50" max="500" value="150" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>50ms</span>
+                        <span id="work-value" class="text-purple-400">150ms</span>
+                        <span>500ms</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-end gap-2">
+                    <button onclick="startSimulation()" id="start-btn" class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-semibold transition">
+                        <i class="fas fa-play mr-2"></i>Start
+                    </button>
+                    <button onclick="resetSimulation()" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Comparison -->
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <!-- Polling Side -->
+            <div class="polling-side glass-card rounded-2xl p-5 border">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-red-400">
+                    <i class="fas fa-sync-alt mr-2"></i>POLLING
+                    <span class="ml-auto text-sm font-normal text-gray-400">Busy-waiting</span>
+                </h3>
+                
+                <!-- Visual Diagram -->
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <!-- CPU -->
+                    <div class="text-center">
+                        <div id="poll-cpu" class="cpu-block w-20 h-20 rounded-xl flex items-center justify-center text-2xl bg-gray-700">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-2">CPU</div>
+                        <div id="poll-cpu-status" class="text-xs text-gray-500 mono">Idle</div>
+                    </div>
+                    
+                    <!-- Communication -->
+                    <div class="flex-1 relative">
+                        <div class="comm-line"></div>
+                        <div id="poll-messages" class="absolute inset-0 flex flex-col items-center justify-center text-xs">
+                            <!-- Messages will appear here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Device -->
+                    <div class="text-center">
+                        <div id="poll-device" class="w-20 h-20 rounded-xl bg-gray-700 flex items-center justify-center text-2xl border-2 border-gray-600">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-2">Device</div>
+                        <div id="poll-device-status" class="text-xs text-gray-500 mono">No data</div>
+                    </div>
+                </div>
+                
+                <!-- Sequence Log -->
+                <div class="bg-gray-900/50 rounded-xl p-3 mb-4">
+                    <div class="text-xs text-gray-400 mb-2">Communication sequence:</div>
+                    <div id="poll-log" class="h-24 overflow-y-auto mono text-xs space-y-1">
+                        <div class="text-gray-600">Waiting to start...</div>
+                    </div>
+                </div>
+                
+                <!-- Metrics -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-red-400" id="poll-checks">0</div>
+                        <div class="text-xs text-gray-400">Poll Checks</div>
+                    </div>
+                    <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-red-400" id="poll-waste">0%</div>
+                        <div class="text-xs text-gray-400">CPU Waste</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interrupt Side -->
+            <div class="interrupt-side glass-card rounded-2xl p-5 border">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-green-400">
+                    <i class="fas fa-bolt mr-2"></i>INTERRUPTS
+                    <span class="ml-auto text-sm font-normal text-gray-400">Event-driven</span>
+                </h3>
+                
+                <!-- Visual Diagram -->
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <!-- CPU -->
+                    <div class="text-center">
+                        <div id="int-cpu" class="cpu-block w-20 h-20 rounded-xl flex items-center justify-center text-2xl bg-gray-700">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-2">CPU</div>
+                        <div id="int-cpu-status" class="text-xs text-gray-500 mono">Idle</div>
+                    </div>
+                    
+                    <!-- Communication -->
+                    <div class="flex-1 relative">
+                        <div class="comm-line"></div>
+                        <div id="int-messages" class="absolute inset-0 flex flex-col items-center justify-center text-xs">
+                            <!-- Messages will appear here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Device -->
+                    <div class="text-center">
+                        <div id="int-device" class="w-20 h-20 rounded-xl bg-gray-700 flex items-center justify-center text-2xl border-2 border-gray-600">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-2">Device</div>
+                        <div id="int-device-status" class="text-xs text-gray-500 mono">No data</div>
+                    </div>
+                </div>
+                
+                <!-- Sequence Log -->
+                <div class="bg-gray-900/50 rounded-xl p-3 mb-4">
+                    <div class="text-xs text-gray-400 mb-2">Communication sequence:</div>
+                    <div id="int-log" class="h-24 overflow-y-auto mono text-xs space-y-1">
+                        <div class="text-gray-600">Waiting to start...</div>
+                    </div>
+                </div>
+                
+                <!-- Metrics -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-green-400" id="int-work">0</div>
+                        <div class="text-xs text-gray-400">Useful Work Aits</div>
+                    </div>
+                    <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-green-400" id="int-efficiency">0%</div>
+                        <div class="text-xs text-gray-400">Efficiency</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <!-- CPU Utilization Chart -->
+            <div class="glass-card rounded-2xl p-5">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>CPU Utilization Over Time
+                </h3>
+                <div class="h-64">
+                    <canvas id="utilizationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Response Latency Chart -->
+            <div class="glass-card rounded-2xl p-5">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-stopwatch mr-2 text-amber-400"></i>Response Latency
+                </h3>
+                <div class="h-64">
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold mb-4 flex items-center">
+                <i class="fas fa-table mr-2 text-purple-400"></i>Trade-offs Comparison
+            </h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="text-left py-3 px-4">Aspect</th>
+                            <th class="text-center py-3 px-4 text-red-400">
+                                <i class="fas fa-sync-alt mr-1"></i>Polling
+                            </th>
+                            <th class="text-center py-3 px-4 text-green-400">
+                                <i class="fas fa-bolt mr-1"></i>Interrupts
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">CPU Waste</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-red-900/30 text-red-400 rounded">Large</span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Small</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Response Latency</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded">≤ Polling interval</span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Aproape instant</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Complexity Implementare</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Simple</span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded">More complex</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-3 px-4 font-medium">Predictibilitate</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Good</span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded">Handler overhead</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-medium">Best For</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="text-gray-300">High-frequency I/O, Real-time</span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="text-gray-300">General purpose, Low-frequency</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-lg font-bold mb-4 flex items-center">
+                <i class="fas fa-chart-bar mr-2 text-cyan-400"></i>Resulte Simulare
+            </h3>
+            
+            <div class="grid md:grid-cols-4 gap-4" id="summary-stats">
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">Total Time</div>
+                    <div class="text-2xl font-bold text-white" id="total-time">-</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">Polling Response</div>
+                    <div class="text-2xl font-bold text-red-400" id="poll-response">-</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">Interrupt Response</div>
+                    <div class="text-2xl font-bold text-green-400" id="int-response">-</div>
+                </div>
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-400 mb-1">Efficiency Gain</div>
+                    <div class="text-2xl font-bold text-purple-400" id="efficiency-gain">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let isRunning = false;
+        let simulationInterval = null;
+        let utilizationChart = null;
+        let latencyChart = null;
+        
+        // Metrics
+        let pollMetrics = { checks: 0, wastedTime: 0, totalTime: 0, responseTime: 0 };
+        let intMetrics = { workAits: 0, usefulTime: 0, totalTime: 0, responseTime: 0 };
+        let chartData = { labels: [], polling: [], interrupts: [] };
+
+        // Initialize charts
+        function initCharts() {
+            const ctxUtil = document.getElementById('utilizationChart').getContext('2d');
+            const ctxLat = document.getElementById('latencyChart').getContext('2d');
+            
+            utilizationChart = new Chart(ctxUtil, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Polling CPU Usage',
+                            data: [],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Interrupt CPU Usage',
+                            data: [],
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e5e7eb' }
+                        }
+                    }
+                }
+            });
+
+            latencyChart = new Chart(ctxLat, {
+                type: 'bar',
+                data: {
+                    labels: ['Response Latency'],
+                    datasets: [
+                        {
+                            label: 'Polling',
+                            data: [0],
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: '#ef4444',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Interrupts',
+                            data: [0],
+                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                            borderColor: '#22c55e',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' },
+                            title: {
+                                display: true,
+                                text: 'Milliseconds',
+                                color: '#9ca3af'
+                            }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e5e7eb' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update slider displays
+        document.getElementById('device-latency').addEventListener('input', (e) => {
+            document.getElementById('latency-value').textContent = (e.target.value / 1000).toFixed(1) + 's';
+        });
+        
+        document.getElementById('poll-interval').addEventListener('input', (e) => {
+            document.getElementById('poll-value').textContent = e.target.value + 'ms';
+        });
+        
+        document.getElementById('work-time').addEventListener('input', (e) => {
+            document.getElementById('work-value').textContent = e.target.value + 'ms';
+        });
+
+        // Log helpers
+        function pollLog(msg, type = 'info') {
+            const log = document.getElementById('poll-log');
+            const colors = {
+                'info': 'text-gray-400',
+                'check': 'text-yellow-400',
+                'no': 'text-red-400',
+                'yes': 'text-green-400',
+                'done': 'text-cyan-400'
+            };
+            const entry = document.createdeElement('div');
+            entry.className = colors[type];
+            entry.textContent = msg;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function intLog(msg, type = 'info') {
+            const log = document.getElementById('int-log');
+            const colors = {
+                'info': 'text-gray-400',
+                'work': 'text-blue-400',
+                'irq': 'text-amber-400',
+                'handler': 'text-purple-400',
+                'done': 'text-green-400'
+            };
+            const entry = document.createdeElement('div');
+            entry.className = colors[type];
+            entry.textContent = msg;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // CPU state updates
+        function setPollCPU(state) {
+            const cpu = document.getElementById('poll-cpu');
+            const status = document.getElementById('poll-cpu-status');
+            cpu.classList.remove('cpu-busy', 'cpu-idle', 'cpu-working');
+            
+            if (state === 'polling') {
+                cpu.classList.add('cpu-busy');
+                status.textContent = 'Polling...';
+                status.className = 'text-xs text-red-400 mono';
+            } else if (state === 'working') {
+                cpu.classList.add('cpu-working');
+                status.textContent = 'Working';
+                status.className = 'text-xs text-blue-400 mono';
+            } else {
+                cpu.classList.add('cpu-idle');
+                status.textContent = 'Idle';
+                status.className = 'text-xs text-gray-500 mono';
+            }
+        }
+
+        function setIntCPU(state) {
+            const cpu = document.getElementById('int-cpu');
+            const status = document.getElementById('int-cpu-status');
+            cpu.classList.remove('cpu-busy', 'cpu-idle', 'cpu-working');
+            
+            if (state === 'working') {
+                cpu.classList.add('cpu-working');
+                status.textContent = 'Working';
+                status.className = 'text-xs text-blue-400 mono';
+            } else if (state === 'handler') {
+                cpu.classList.add('cpu-busy');
+                status.textContent = 'IRQ Handler';
+                status.className = 'text-xs text-amber-400 mono';
+            } else {
+                cpu.classList.add('cpu-idle');
+                status.textContent = 'Idle';
+                status.className = 'text-xs text-gray-500 mono';
+            }
+        }
+
+        // Device state
+        function setDevice(side, hasData) {
+            const device = document.getElementById(`${side}-device`);
+            const status = document.getElementById(`${side}-device-status`);
+            
+            if (hasData) {
+                device.classList.add('device-ready');
+                device.style.borderColor = '#fbbf24';
+                device.style.background = 'linear-gradient(135deg, #78350f 0%, #451a03 100%)';
+                status.textContent = 'DATA READY!';
+                status.className = 'text-xs text-amber-400 mono font-bold';
+            } else {
+                device.classList.remove('device-ready');
+                device.style.borderColor = '#4b5563';
+                device.style.background = '#374151';
+                status.textContent = 'No data';
+                status.className = 'text-xs text-gray-500 mono';
+            }
+        }
+
+        // Show message arrow
+        function showMessage(side, direction, text) {
+            const container = document.getElementById(`${side}-messages`);
+            const arrow = direction === 'right' ? '→' : '←';
+            container.innerHTML = `<div class="message-arrow px-2 py-1 bg-gray-800 rounded text-${direction === 'right' ? 'yellow' : 'cyan'}-400">${text} ${arrow}</div>`;
+            setTimeout(() => container.innerHTML = '', 400);
+        }
+
+        // Update metrics display
+        function updateMetrics() {
+            document.getElementById('poll-checks').textContent = pollMetrics.checks;
+            const pollWaste = pollMetrics.totalTime > 0 ? Math.round((pollMetrics.wastedTime / pollMetrics.totalTime) * 100) : 0;
+            document.getElementById('poll-waste').textContent = pollWaste + '%';
+            
+            document.getElementById('int-work').textContent = intMetrics.workAits;
+            const intEff = intMetrics.totalTime > 0 ? Math.round((intMetrics.usefulTime / intMetrics.totalTime) * 100) : 0;
+            document.getElementById('int-efficiency').textContent = intEff + '%';
+        }
+
+        // Update charts
+        function updateCharts(time, pollUsage, intUsage) {
+            if (chartData.labels.length > 20) {
+                chartData.labels.shift();
+                chartData.polling.shift();
+                chartData.interrupts.shift();
+            }
+            
+            chartData.labels.push(time + 's');
+            chartData.polling.push(pollUsage);
+            chartData.interrupts.push(intUsage);
+            
+            utilizationChart.data.labels = chartData.labels;
+            utilizationChart.data.datasets[0].data = chartData.polling;
+            utilizationChart.data.datasets[1].data = chartData.interrupts;
+            utilizationChart.update('none');
+        }
+
+        // Main simulation
+        async function startSimulation() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('start-btn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Running...';
+            
+            // Reset
+            resetMetrics();
+            document.getElementById('poll-log').innerHTML = '';
+            document.getElementById('int-log').innerHTML = '';
+            
+            const deviceLatency = parseInt(document.getElementById('device-latency').value);
+            const pollInterval = parseInt(document.getElementById('poll-interval').value);
+            const workTime = parseInt(document.getElementById('work-time').value);
+            
+            let elapsedTime = 0;
+            let dataArrived = false;
+            let pollComplete = false;
+            let intComplete = false;
+            const startTime = Date.now();
+            
+            pollLog('start polling...', 'info');
+            intLog('CPU executing useful work...', 'work');
+            
+            // Simulation loop
+            const tick = 100; // ms per tick
+            
+            const interval = setInterval(async () => {
+                elapsedTime += tick;
+                
+                // Check if data arrived
+                if (!dataArrived && elapsedTime >= deviceLatency) {
+                    dataArrived = true;
+                    setDevice('poll', true);
+                    setDevice('int', true);
+                    
+                    // Interrupt fires immediately
+                    intLog(`⚡ IRQ! Data ready @ ${elapsedTime}ms`, 'irq');
+                    setIntCPU('handler');
+                    intMetrics.responseTime = 50; // Handler overhead
+                    
+                    setTimeout(() => {
+                        intLog('Handler processing data...', 'handler');
+                        setTimeout(() => {
+                            intLog('✓ Transfer complete!', 'done');
+                            setIntCPU('working');
+                            intComplete = true;
+                        }, 100);
+                    }, 50);
+                }
+                
+                // Polling logic
+                if (!pollComplete) {
+                    if (elapsedTime % pollInterval < tick) {
+                        pollMetrics.checks++;
+                        setPollCPU('polling');
+                        showMessage('poll', 'right', 'Ready?');
+                        
+                        setTimeout(() => {
+                            if (dataArrived && !pollComplete) {
+                                pollLog(`✓ YES! Data found @ ${elapsedTime}ms`, 'yes');
+                                showMessage('poll', 'left', 'YES!');
+                                pollMetrics.responseTime = elapsedTime - deviceLatency;
+                                pollComplete = true;
+                                
+                                setTimeout(() => {
+                                    pollLog('Transfer data...', 'done');
+                                    setPollCPU('working');
+                                    setDevice('poll', false);
+                                }, 200);
+                            } else if (!pollComplete) {
+                                pollLog(`✗ No @ ${elapsedTime}ms`, 'no');
+                                showMessage('poll', 'left', 'No');
+                                pollMetrics.wastedTime += 50; // Time wasted per check
+                            }
+                        }, 100);
+                    }
+                }
+                
+                // Interrupt side - doing useful work
+                if (!intComplete && !dataArrived) {
+                    if (elapsedTime % workTime < tick) {
+                        intMetrics.workAits++;
+                        intMetrics.usefulTime += workTime;
+                        intLog(`Work unit #${intMetrics.workAits} completed`, 'work');
+                    }
+                    setIntCPU('working');
+                }
+                
+                // Update metrics
+                pollMetrics.totalTime = elapsedTime;
+                intMetrics.totalTime = elapsedTime;
+                updateMetrics();
+                
+                // Update chart
+                const pollUsage = dataArrived && pollComplete ? 20 : 80;
+                const intUsage = dataArrived ? 30 : 25;
+                updateCharts((elapsedTime / 1000).toFixed(1), pollUsage, intUsage);
+                
+                // End condition
+                if (elapsedTime >= deviceLatency + 1500 || (pollComplete && intComplete)) {
+                    clearInterval(interval);
+                    finishSimulation();
+                }
+                
+            }, tick);
+        }
+
+        function finishSimulation() {
+            isRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('start-btn').innerHTML = '<i class="fas fa-play mr-2"></i>Start';
+            
+            // Update summary
+            document.getElementById('total-time').textContent = (pollMetrics.totalTime / 1000).toFixed(1) + 's';
+            document.getElementById('poll-response').textContent = pollMetrics.responseTime + 'ms';
+            document.getElementById('int-response').textContent = intMetrics.responseTime + 'ms';
+            
+            const gain = pollMetrics.responseTime > 0 ? 
+                Math.round(((pollMetrics.responseTime - intMetrics.responseTime) / pollMetrics.responseTime) * 100) : 0;
+            document.getElementById('efficiency-gain').textContent = gain + '%';
+            
+            // Update latency chart
+            latencyChart.data.datasets[0].data = [pollMetrics.responseTime];
+            latencyChart.data.datasets[1].data = [intMetrics.responseTime];
+            latencyChart.update();
+            
+            setDevice('int', false);
+        }
+
+        function resetMetrics() {
+            pollMetrics = { checks: 0, wastedTime: 0, totalTime: 0, responseTime: 0 };
+            intMetrics = { workAits: 0, usefulTime: 0, totalTime: 0, responseTime: 0 };
+            chartData = { labels: [], polling: [], interrupts: [] };
+            
+            utilizationChart.data.labels = [];
+            utilizationChart.data.datasets[0].data = [];
+            utilizationChart.data.datasets[1].data = [];
+            utilizationChart.update();
+        }
+
+        function resetSimulation() {
+            if (isRunning) return;
+            
+            resetMetrics();
+            updateMetrics();
+            
+            document.getElementById('poll-log').innerHTML = '<div class="text-gray-600">Waiting to start...</div>';
+            document.getElementById('int-log').innerHTML = '<div class="text-gray-600">Waiting to start...</div>';
+            
+            setPollCPU('idle');
+            setIntCPU('idle');
+            setDevice('poll', false);
+            setDevice('int', false);
+            
+            document.getElementById('total-time').textContent = '-';
+            document.getElementById('poll-response').textContent = '-';
+            document.getElementById('int-response').textContent = '-';
+            document.getElementById('efficiency-gain').textContent = '-';
+            
+            latencyChart.data.datasets[0].data = [0];
+            latencyChart.data.datasets[1].data = [0];
+            latencyChart.update();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+        });
+    </script>
+</body>
+</html>

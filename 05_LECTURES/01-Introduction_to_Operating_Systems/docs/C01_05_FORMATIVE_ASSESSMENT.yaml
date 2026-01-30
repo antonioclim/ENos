@@ -1,0 +1,178 @@
+# C01_05_FORMATIVE_ASSESSMENT.yaml
+# Course 1: Introduction to Operating Systems
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 1
+  subject: "Introduction to Operating Systems"
+  version: "1.0"
+  creation_date: "2026-01-30"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 12
+  bloom_distribution:
+    remember: 4
+    understand: 4
+    analyse: 2
+    apply: 2
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (4 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What are the two fundamental roles of an operating system?"
+    options:
+      - "Compiler and debugger"
+      - "Extended machine (abstraction) and resource manager (allocation)"
+      - "Browser and file manager"
+      - "Database and web server"
+    correct: 1
+    explanation: "The OS abstracts hardware complexity (extended machine) and manages shared resources fairly (resource manager)."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "Which of the following is a monolithic kernel operating system?"
+    options:
+      - "Minix"
+      - "QNX"
+      - "Linux"
+      - "seL4"
+    correct: 2
+    explanation: "Linux uses a monolithic architecture where all kernel services run in the same address space."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "In what year was UNIX created?"
+    options:
+      - "1956"
+      - "1969"
+      - "1981"
+      - "1991"
+    correct: 1
+    explanation: "UNIX was created in 1969 by Ken Thompson and Dennis Ritchie at Bell Labs."
+
+  - id: q04
+    bloom: remember
+    difficulty: easy
+    text: "What are the five core functions of an operating system?"
+    options:
+      - "Compile, link, load, execute, terminate"
+      - "Process, memory, file, I/O, and security management"
+      - "Input, processing, output, storage, feedback"
+      - "Create, read, update, delete, search"
+    correct: 1
+    explanation: "The OS manages processes, memory, files, I/O devices and enforces security policies."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (4 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "Why can't user applications access hardware directly in modern operating systems?"
+    options:
+      - "Hardware is too slow"
+      - "Applications would interfere with each other and could crash the system"
+      - "It would be too easy for users"
+      - "Hardware doesn't support direct access"
+    correct: 1
+    explanation: "Direct access would allow one application to corrupt another's data or crash the entire system. The OS provides protected abstractions."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What is the main advantage of a microkernel architecture over a monolithic kernel?"
+    options:
+      - "Higher performance"
+      - "Fault isolation — a bug in one component doesn't crash the whole system"
+      - "Smaller memory footprint"
+      - "Easier to programme"
+    correct: 1
+    explanation: "Microkernels run services in user space; if the file server crashes, the rest of the system continues."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why did batch processing dramatically increase CPU utilisation in the 1950s?"
+    options:
+      - "CPUs became faster"
+      - "It eliminated idle time between jobs by automating job sequencing"
+      - "Memory increased"
+      - "Programmers became more efficient"
+    correct: 1
+    explanation: "Before batch processing, the CPU sat idle while operators manually loaded the next job. Automation eliminated this delay."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What is the difference between kernel space and user space?"
+    options:
+      - "Kernel space is on disk, user space is in memory"
+      - "Kernel space has unrestricted hardware access; user space has protected, limited access"
+      - "Kernel space is for the administrator, user space is for regular users"
+      - "There is no practical difference"
+    correct: 1
+    explanation: "Kernel space runs in privileged CPU mode with full hardware access; user space is restricted for safety."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (2 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "Why might Linux (monolithic) dominate the server market despite microkernel's theoretical advantages?"
+    options:
+      - "Linux is free"
+      - "Performance: monolithic kernels avoid inter-process communication overhead"
+      - "Microkernel patents"
+      - "Linux has better documentation"
+    correct: 1
+    explanation: "Monolithic kernels use direct function calls instead of IPC, reducing latency — critical for high-performance servers."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "Comparing 1950s batch processing to modern CI/CD pipelines, what fundamental problem do both solve?"
+    options:
+      - "Code compilation"
+      - "Maximising resource utilisation by automating sequential task execution"
+      - "User interface design"
+      - "Network communication"
+    correct: 1
+    explanation: "Both batch processing and CI/CD pipelines automate task sequencing to keep compute resources busy without human intervention."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (2 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q11
+    bloom: apply
+    difficulty: hard
+    text: "You run 'ps aux | wc -l' and see 247 processes. The system has 8 CPU cores. How is this possible?"
+    options:
+      - "The command is broken"
+      - "The OS uses time-sharing: processes take turns on the CPU"
+      - "Each process uses 1/247th of a core"
+      - "247 is the maximum allowed"
+    correct: 1
+    explanation: "Time-sharing (scheduling) allows many more processes than cores by rapidly switching between them."
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "For a safety-critical pacemaker, would you choose a monolithic or microkernel architecture?"
+    options:
+      - "Monolithic, for maximum performance"
+      - "Microkernel, for fault isolation and formal verification potential"
+      - "Hybrid, for balance"
+      - "No OS is needed"
+    correct: 1
+    explanation: "Medical devices benefit from fault isolation and the ability to formally verify a small kernel (e.g., seL4)."

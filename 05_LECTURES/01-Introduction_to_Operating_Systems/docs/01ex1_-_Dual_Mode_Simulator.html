@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Mode Simulator - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --user-color: #3b82f6;
+            --user-light: #dbeafe;
+            --kernel-color: #dc2626;
+            --kernel-gold: #f59e0b;
+            --kernel-light: #fef2f2;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .mode-bit {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .user-mode {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+        }
+        
+        .kernel-mode {
+            background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+        }
+        
+        .space-card {
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .trap-arrow {
+            animation: trapMove 0.5s ease-out;
+        }
+        
+        @keyframes trapMove {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .glow-user { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .glow-kernel { box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+        
+        .instruction-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .instruction-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .transition-flash {
+            animation: flash 0.3s ease-out;
+        }
+        
+        @keyframes flash {
+            0% { background-color: rgba(255, 255, 255, 0.3); }
+            100% { background-color: transparent; }
+        }
+
+        .register-highlight {
+            animation: regHighlight 0.5s ease-out;
+        }
+
+        @keyframes regHighlight {
+            0% { background-color: #fbbf24; }
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
+                <i class="fas fa-microchip mr-3"></i>Dual Mode Operation Simulator
+            </h1>
+            <p class="text-gray-400 text-lg">User Mode vs Kernel Mode in Operating Systems</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: CPU Visualization -->
+            <div class="lg:col-span-1">
+                <!-- CPU Box -->
+                <div class="space-card bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-microchip mr-2 text-purple-400"></i>CPU
+                    </h2>
+                    
+                    <!-- Registers -->
+                    <div class="bg-gray-900/50 rounded-xl p-4 mb-4 mono text-sm">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex justify-between"><span class="text-gray-500">PC</span><span id="reg-pc" class="text-green-400">0x00401000</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">SP</span><span id="reg-sp" class="text-green-400">0x7FFF0100</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">R1</span><span id="reg-r1" class="text-cyan-400">42</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">R2</span><span id="reg-r2" class="text-cyan-400">100</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">FLAGS</span><span id="reg-flags" class="text-yellow-400">0x0200</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Mode Bit Display -->
+                    <div class="text-center">
+                        <p class="text-gray-400 text-sm mb-2">MODE BIT</p>
+                        <div id="mode-bit-container" class="mode-bit user-mode rounded-2xl p-6 mx-auto max-w-[200px]">
+                            <div class="text-6xl font-bold mono" id="mode-bit-value">1</div>
+                            <div class="mt-2 flex items-center justify-center gap-2">
+                                <span id="mode-icon" class="text-2xl">👤</span>
+                                <span id="mode-text" class="font-semibold">USER MODE</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500 mono">
+                            <div>0 = Kernel Mode 👑</div>
+                            <div>1 = User Mode 👤</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Interrupt -->
+                <div class="space-card bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-clock mr-2 text-amber-400"></i>Timer Interrupt
+                    </h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <button id="timer-toggle" onclick="toggleTimer()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
+                            <i class="fas fa-play mr-2"></i>Start Timer
+                        </button>
+                        <div class="flex-1">
+                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div id="timer-progress" class="h-full bg-amber-500 transition-all duration-100" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400">The timer generates periodic interrupts, forcing the CPU to enter Kernel Mode for scheduling.</p>
+                </div>
+            </div>
+
+            <!-- Center Column: User & Kernel Spaces -->
+            <div class="lg:col-span-1">
+                <!-- User Space -->
+                <div id="user-space" class="space-card bg-blue-900/30 border-blue-500/30 rounded-2xl p-5 mb-4 glow-user">
+                    <h3 class="text-lg font-bold mb-3 flex items-center text-blue-300">
+                        <i class="fas fa-user mr-2"></i>USER SPACE
+                    </h3>
+                    
+                    <!-- Applications -->
+                    <div class="grid grid-cols-4 gap-2 mb-4">
+                        <div class="bg-blue-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-terminal text-lg mb-1"></i>
+                            <div>App 1</div>
+                        </div>
+                        <div class="bg-blue-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-code text-lg mb-1"></i>
+                            <div>App 2</div>
+                        </div>
+                        <div class="bg-blue-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-globe text-lg mb-1"></i>
+                            <div>Browser</div>
+                        </div>
+                        <div class="bg-blue-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-edit text-lg mb-1"></i>
+                            <div>Editor</div>
+                        </div>
+                    </div>
+
+                    <!-- Permitted Instructions -->
+                    <div class="text-sm">
+                        <p class="text-blue-300 font-semibold mb-2">Permitted instructions:</p>
+                        <div class="space-y-1 text-xs">
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span class="mono">ADD, SUB, MUL, DIV</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span class="mono">MOV, JMP, CALL, RET</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span>Own memory access</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i><span class="mono">IN/OUT</span> <span class="text-gray-500">(I/O direct)</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i><span class="mono">CLI/STI</span> <span class="text-gray-500">(disable IRQ)</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i><span class="mono">HLT</span> <span class="text-gray-500">(halt CPU)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transition Arrow -->
+                <div id="transition-arrow" class="text-center py-2 opacity-0 transition-opacity duration-300">
+                    <div class="inline-flex flex-col items-center text-amber-400">
+                        <i class="fas fa-bolt text-2xl animate-bounce"></i>
+                        <span id="transition-text" class="text-sm font-bold">TRAP!</span>
+                    </div>
+                </div>
+
+                <!-- Kernel Space -->
+                <div id="kernel-space" class="space-card bg-red-900/30 border-red-500/30 rounded-2xl p-5 glow-kernel">
+                    <h3 class="text-lg font-bold mb-3 flex items-center text-amber-300">
+                        <i class="fas fa-crown mr-2"></i>KERNEL SPACE
+                    </h3>
+                    
+                    <!-- Kernel Components -->
+                    <div class="grid grid-cols-4 gap-2 mb-4">
+                        <div class="bg-red-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-tasks text-lg mb-1"></i>
+                            <div>Scheduler</div>
+                        </div>
+                        <div class="bg-red-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-memory text-lg mb-1"></i>
+                            <div>Mem Mgr</div>
+                        </div>
+                        <div class="bg-red-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-folder text-lg mb-1"></i>
+                            <div>FS</div>
+                        </div>
+                        <div class="bg-red-800/50 rounded-lg p-2 text-center text-xs">
+                            <i class="fas fa-cogs text-lg mb-1"></i>
+                            <div>Drivers</div>
+                        </div>
+                    </div>
+
+                    <!-- All Instructions -->
+                    <div class="text-sm">
+                        <p class="text-amber-300 font-semibold mb-2">Permitted instructions:</p>
+                        <div class="space-y-1 text-xs">
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span>ALL instructions</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span class="mono">IN/OUT</span> <span class="text-gray-500">(I/O direct)</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span>Modify page tables</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span class="mono">CLI/STI</span> <span class="text-gray-500">(manage IRQ)</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i><span>Access ALL memory</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Controls & Log -->
+            <div class="lg:col-span-1">
+                <!-- System Call Simulation -->
+                <div class="space-card bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-exchange-alt mr-2 text-green-400"></i>System Call Simulation
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <button onclick="simulateSystemCall('read')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl text-left">
+                            <div class="font-semibold"><i class="fas fa-file-import mr-2"></i>read(fd, buf, 100)</div>
+                            <div class="text-xs text-green-200">Read data from a file</div>
+                        </button>
+                        
+                        <button onclick="simulateSystemCall('write')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-left">
+                            <div class="font-semibold"><i class="fas fa-file-export mr-2"></i>write(fd, data, len)</div>
+                            <div class="text-xs text-blue-200">Write data to a file</div>
+                        </button>
+                        
+                        <button onclick="simulateSystemCall('fork')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl text-left">
+                            <div class="font-semibold"><i class="fas fa-code-branch mr-2"></i>fork()</div>
+                            <div class="text-xs text-purple-200">Create a child process</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Privileged Instruction Test -->
+                <div class="space-card bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Privileged Instructions Test
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <button onclick="tryPrivilegedInstruction('HLT')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 rounded-xl text-left">
+                            <div class="font-semibold mono"><i class="fas fa-power-off mr-2"></i>HLT</div>
+                            <div class="text-xs text-red-200">Try to halt the CPU</div>
+                        </button>
+                        
+                        <button onclick="tryPrivilegedInstruction('OUT')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-orange-700 to-orange-600 hover:from-orange-600 hover:to-orange-500 rounded-xl text-left">
+                            <div class="font-semibold mono"><i class="fas fa-plug mr-2"></i>OUT 0x60, AL</div>
+                            <div class="text-xs text-orange-200">Try direct I/O access</div>
+                        </button>
+                        
+                        <button onclick="tryPrivilegedInstruction('KERNEL_MEM')" class="instruction-btn w-full px-4 py-3 bg-gradient-to-r from-yellow-700 to-yellow-600 hover:from-yellow-600 hover:to-yellow-500 rounded-xl text-left">
+                            <div class="font-semibold"><i class="fas fa-lock mr-2"></i>MOV [0xC0000000], EAX</div>
+                            <div class="text-xs text-yellow-200">Try kernel memory access</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="space-card bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-list-alt mr-2 text-cyan-400"></i>Event Log
+                        <button onclick="clearLog()" class="ml-auto text-sm text-gray-400 hover:text-white">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </h3>
+                    <div id="event-log" class="h-48 overflow-y-auto space-y-2 text-sm mono">
+                        <div class="text-gray-500 text-center py-4">
+                            <i class="fas fa-info-circle mr-2"></i>Press a button to start the simulation
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="mt-8 space-card bg-gray-800/50 rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-lightbulb mr-2 text-yellow-400"></i>Why is Dual Mode Important?
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6 text-gray-300">
+                <div class="bg-gray-900/50 rounded-xl p-4">
+                    <h4 class="font-semibold text-blue-400 mb-2"><i class="fas fa-shield-alt mr-2"></i>Protection</h4>
+                    <p class="text-sm">Prevents applications from directly accessing hardware or other processes memory, avoiding crashes and security breaches.</p>
+                </div>
+                <div class="bg-gray-900/50 rounded-xl p-4">
+                    <h4 class="font-semibold text-green-400 mb-2"><i class="fas fa-balance-scale mr-2"></i>Isolation</h4>
+                    <p class="text-sm">Each application runs in a virtual sandbox, unable to affect other applications or the operating system.</p>
+                </div>
+                <div class="bg-gray-900/50 rounded-xl p-4">
+                    <h4 class="font-semibold text-amber-400 mb-2"><i class="fas fa-gavel mr-2"></i>Control</h4>
+                    <p class="text-sm">The kernel mediates all sensitive operations, ensuring proper resource allocation and system security.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let currentMode = 'user'; // 'user' or 'kernel'
+        let timerRunning = false;
+        let timerInterval = null;
+        let timerProgress = 0;
+        let stepTimeout = null;
+
+        // DOM Elements
+        const modeBitContainer = document.getElementById('mode-bit-container');
+        const modeBitValue = document.getElementById('mode-bit-value');
+        const modeIcon = document.getElementById('mode-icon');
+        const modeText = document.getElementById('mode-text');
+        const transitionArrow = document.getElementById('transition-arrow');
+        const transitionText = document.getElementById('transition-text');
+        const eventLog = document.getElementById('event-log');
+        const userSpace = document.getElementById('user-space');
+        const kernelSpace = document.getElementById('kernel-space');
+
+        // Set mode with animation
+        function setMode(mode, instant = false) {
+            currentMode = mode;
+            
+            if (mode === 'kernel') {
+                modeBitContainer.classList.remove('user-mode');
+                modeBitContainer.classList.add('kernel-mode');
+                modeBitValue.textContent = '0';
+                modeIcon.textContent = '👑';
+                modeText.textContent = 'KERNEL MODE';
+                kernelSpace.classList.add('transition-flash');
+                setTimeout(() => kernelSpace.classList.remove('transition-flash'), 300);
+            } else {
+                modeBitContainer.classList.remove('kernel-mode');
+                modeBitContainer.classList.add('user-mode');
+                modeBitValue.textContent = '1';
+                modeIcon.textContent = '👤';
+                modeText.textContent = 'USER MODE';
+                userSpace.classList.add('transition-flash');
+                setTimeout(() => userSpace.classList.remove('transition-flash'), 300);
+            }
+        }
+
+        // Show transition arrow
+        function showTransition(text, direction = 'down') {
+            transitionText.textContent = text;
+            transitionArrow.classList.remove('opacity-0');
+            transitionArrow.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                transitionArrow.classList.remove('opacity-100');
+                transitionArrow.classList.add('opacity-0');
+            }, 800);
+        }
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const colors = {
+                'info': 'text-gray-300',
+                'user': 'text-blue-400',
+                'kernel': 'text-amber-400',
+                'error': 'text-red-400',
+                'success': 'text-green-400'
+            };
+            
+            // Remove placeholder if exists
+            const placeholder = eventLog.querySelector('.text-gray-500.text-center');
+            if (placeholder) placeholder.remove();
+            
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const entry = document.createdeElement('div');
+            entry.className = `log-entry ${colors[type]} bg-gray-900/30 rounded px-2 py-1`;
+            entry.innerHTML = `<span class="text-gray-600">[${time}]</span> ${message}`;
+            eventLog.appendChild(entry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        // Clear log
+        function clearLog() {
+            eventLog.innerHTML = `<div class="text-gray-500 text-center py-4">
+                <i class="fas fa-info-circle mr-2"></i>Log cleared
+            </div>`;
+        }
+
+        // Update register display
+        function updateRegister(reg, value) {
+            const el = document.getElementById(`reg-${reg}`);
+            if (el) {
+                el.textContent = value;
+                el.classList.add('register-highlight');
+                setTimeout(() => el.classList.remove('register-highlight'), 500);
+            }
+        }
+
+        // Simulate System Call
+        async function simulateSystemCall(callType) {
+            if (currentMode === 'kernel') {
+                addLog('⚠️ Already in Kernel Mode', 'error');
+                return;
+            }
+
+            const callNames = {
+                'read': 'read(fd, buf, 100)',
+                'write': 'write(fd, data, len)',
+                'fork': 'fork()'
+            };
+
+            // Step 1: User mode execution
+            addLog(`📱 User: Application executing normal code...`, 'user');
+            await delay(500);
+
+            // Step 2: System call requested
+            addLog(`📞 User: Calls ${callNames[callType]}`, 'user');
+            await delay(500);
+
+            // Step 3: TRAP/SYSCALL instruction
+            addLog(`⚡ SYSCALL instruction (INT 0x80)`, 'info');
+            showTransition('TRAP!');
+            await delay(300);
+
+            // Step 4: Mode switch
+            setMode('kernel');
+            addLog(`🔄 Mode bit: 1 → 0`, 'kernel');
+            updateRegister('pc', '0xC0001000');
+            await delay(500);
+
+            // Step 5: Kernel handles request
+            addLog(`👑 Kernel: Saves user context`, 'kernel');
+            await delay(400);
+            addLog(`👑 Kernel: Executes handler for ${callType}`, 'kernel');
+            await delay(600);
+
+            if (callType === 'read') {
+                addLog(`👑 Kernel: Accesses disk (privileged I/O)`, 'kernel');
+                await delay(500);
+                addLog(`👑 Kernel: Copies data to user buffer`, 'kernel');
+            } else if (callType === 'write') {
+                addLog(`👑 Kernel: Verifies permissions`, 'kernel');
+                await delay(300);
+                addLog(`👑 Kernel: Writes to disk`, 'kernel');
+            } else if (callType === 'fork') {
+                addLog(`👑 Kernel: Allocates new PCB`, 'kernel');
+                await delay(300);
+                addLog(`👑 Kernel: Copies address space`, 'kernel');
+            }
+            await delay(500);
+
+            // Step 6: Return to user
+            addLog(`🔄 IRET - Return to User Mode`, 'kernel');
+            showTransition('IRET');
+            await delay(300);
+            
+            setMode('user');
+            addLog(`🔄 Mode bit: 0 → 1`, 'user');
+            updateRegister('pc', '0x00401004');
+            await delay(300);
+
+            addLog(`✅ System call completed successfully`, 'success');
+        }
+
+        // Try privileged instruction
+        async function tryPrivilegedInstruction(instruction) {
+            if (currentMode === 'kernel') {
+                addLog(`✅ Kernel Mode: ${instruction} executed successfully`, 'success');
+                return;
+            }
+
+            addLog(`📱 User: Attempting to execute ${instruction}...`, 'user');
+            await delay(500);
+
+            // Trigger exception
+            const errorMessages = {
+                'HLT': 'Privileged Instruction Fault (HLT)',
+                'OUT': 'General Protection Fault (I/O Port Access)',
+                'KERNEL_MEM': 'Page Fault / Access Violation (Kernel Memory)'
+            };
+
+            modeBitContainer.classList.add('shake');
+            setTimeout(() => modeBitContainer.classList.remove('shake'), 500);
+
+            addLog(`❌ EXCEPTION: ${errorMessages[instruction]}`, 'error');
+            showTransition('EXCEPTION!');
+            await delay(500);
+
+            // Kernel handles exception
+            setMode('kernel');
+            addLog(`🔄 Trap to Kernel for exception handling`, 'kernel');
+            await delay(500);
+
+            addLog(`👑 Kernel: Analysing exception...`, 'kernel');
+            await delay(400);
+            addLog(`👑 Kernel: Process terminated (SIGKILL)`, 'kernel');
+            await delay(300);
+
+            setMode('user');
+            addLog(`⚠️ Process was terminated by kernel`, 'error');
+        }
+
+        // Timer interrupt
+        function toggleTimer() {
+            const btn = document.getElementById('timer-toggle');
+            const progress = document.getElementById('timer-progress');
+            
+            if (timerRunning) {
+                // Stop timer
+                clearInterval(timerInterval);
+                timerRunning = false;
+                btn.innerHTML = '<i class="fas fa-play mr-2"></i>Start Timer';
+                btn.classList.remove('bg-red-600', 'hover:bg-red-500');
+                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+                progress.style.width = '0%';
+            } else {
+                // Start timer
+                timerRunning = true;
+                timerProgress = 0;
+                btn.innerHTML = '<i class="fas fa-stop mr-2"></i>Stop Timer';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                btn.classList.add('bg-red-600', 'hover:bg-red-500');
+                
+                timerInterval = setInterval(async () => {
+                    timerProgress += 2;
+                    progress.style.width = `${timerProgress}%`;
+                    
+                    if (timerProgress >= 100) {
+                        timerProgress = 0;
+                        progress.style.width = '0%';
+                        
+                        // Timer interrupt fired
+                        addLog(`⏰ Timer Interrupt (IRQ 0)`, 'info');
+                        
+                        if (currentMode === 'user') {
+                            showTransition('IRQ!');
+                            setMode('kernel');
+                            addLog(`🔄 Forced switch to Kernel Mode`, 'kernel');
+                            
+                            setTimeout(() => {
+                                addLog(`👑 Kernel: Checking scheduling...`, 'kernel');
+                            }, 300);
+                            
+                            setTimeout(() => {
+                                setMode('user');
+                                addLog(`🔄 Return to User Mode`, 'user');
+                            }, 800);
+                        } else {
+                            addLog(`👑 Kernel: Timer handled in Kernel Mode`, 'kernel');
+                        }
+                    }
+                }, 50);
+            }
+        }
+
+        // Helper delay function
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initial log message
+        addLog('🚀 Simulator initialised - User Mode activee', 'info');
+    </script>
+</body>
+</html>

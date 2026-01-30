@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrupt Flow Visualizer - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .cpu-box {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+        
+        .ivt-box {
+            background: linear-gradient(145deg, #1e1b2e 0%, #2d1f3d 100%);
+            border: 2px solid #8b5cf6;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+        }
+        
+        .stack-box {
+            background: linear-gradient(145deg, #1a2e1a 0%, #0f2a1a 100%);
+            border: 2px solid #22c55e;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+        
+        .step-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .step-card.activee {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.4);
+            border-color: #fbbf24 !important;
+        }
+        
+        .step-card.completed {
+            opacity: 0.6;
+        }
+        
+        .irq-indicator {
+            animation: irqPulse 0.5s ease-out;
+        }
+        
+        @keyframes irqPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        
+        .stack-push {
+            animation: stackPush 0.4s ease-out;
+        }
+        
+        @keyframes stackPush {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .stack-pop {
+            animation: stackPop 0.4s ease-out;
+        }
+        
+        @keyframes stackPop {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+        
+        .highlight-row {
+            animation: rowHighlight 0.5s ease-out;
+            background: rgba(251, 191, 36, 0.3) !important;
+        }
+        
+        @keyframes rowHighlight {
+            0% { background: rgba(251, 191, 36, 0.6); }
+            100% { background: rgba(251, 191, 36, 0.3); }
+        }
+        
+        .register-flash {
+            animation: regFlash 0.5s ease-out;
+        }
+        
+        @keyframes regFlash {
+            0% { background: #fbbf24; color: #000; }
+            100% { background: transparent; }
+        }
+        
+        .mode-transition {
+            animation: modeSwitch 0.6s ease-out;
+        }
+        
+        @keyframes modeSwitch {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+
+        .interrupt-types-tab.activee {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .arrow-bounce {
+            animation: arrowBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+                <i class="fas fa-bolt mr-3"></i>Interrupt Flow Visualizer
+            </h1>
+            <p class="text-gray-400 text-lg">From interrupt arrival to execution return</p>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+            <!-- Left: CPU + Stack -->
+            <div class="xl:col-span-1 space-y-4">
+                <!-- CPU Box -->
+                <div class="cpu-box rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-3 flex items-center text-blue-400">
+                        <i class="fas fa-microchip mr-2"></i>CPU
+                    </h3>
+                    
+                    <!-- Registers -->
+                    <div class="space-y-2 mono text-sm">
+                        <div class="flex justify-between items-center p-2 rounded bg-gray-800/50">
+                            <span class="text-gray-400">PC</span>
+                            <span id="reg-pc" class="text-green-400 transition-all">0x00401234</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-gray-800/50">
+                            <span class="text-gray-400">SP</span>
+                            <span id="reg-sp" class="text-green-400 transition-all">0x7FFF0100</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-gray-800/50">
+                            <span class="text-gray-400">FLAGS</span>
+                            <span id="reg-flags" class="text-yellow-400 transition-all">0x0202</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-gray-800/50">
+                            <span class="text-gray-400">CS</span>
+                            <span id="reg-cs" class="text-cyan-400 transition-all">0x0023</span>
+                        </div>
+                    </div>
+
+                    <!-- Mode Indicator -->
+                    <div class="mt-4 text-center">
+                        <div id="mode-indicator" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/30 border border-blue-500/50">
+                            <span id="mode-icon">👤</span>
+                            <span id="mode-text" class="font-semibold">USER MODE</span>
+                        </div>
+                    </div>
+
+                    <!-- IRQ Indicator -->
+                    <div class="mt-4 text-center">
+                        <div id="irq-led" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50">
+                            <div id="irq-dot" class="w-3 h-3 rounded-full bg-gray-600"></div>
+                            <span class="text-sm text-gray-400">IRQ Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stack -->
+                <div class="stack-box rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-3 flex items-center text-green-400">
+                        <i class="fas fa-layer-group mr-2"></i>Stack
+                    </h3>
+                    <div id="stack-view" class="space-y-1 mono text-xs min-h-[150px]">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-inbox text-2xl mb-2"></i>
+                            <div>Stack gol</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: IVT + Steps -->
+            <div class="xl:col-span-2 space-y-4">
+                <!-- Interrupt Vector Table -->
+                <div class="ivt-box rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-3 flex items-center text-purple-400">
+                        <i class="fas fa-table mr-2"></i>Interrupt Vector Table (IVT)
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mono text-xs">
+                        <div id="ivt-0" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">0</span><span class="text-red-400">divide_err</span>
+                        </div>
+                        <div id="ivt-1" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">1</span><span class="text-red-400">debug</span>
+                        </div>
+                        <div id="ivt-6" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">6</span><span class="text-red-400">invalid_op</span>
+                        </div>
+                        <div id="ivt-13" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">13</span><span class="text-red-400">gen_prot</span>
+                        </div>
+                        <div id="ivt-14" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">14</span><span class="text-orange-400">page_fault</span>
+                        </div>
+                        <div id="ivt-32" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">32</span><span class="text-amber-400">timer</span>
+                        </div>
+                        <div id="ivt-33" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">33</span><span class="text-cyan-400">keyboard</span>
+                        </div>
+                        <div id="ivt-128" class="ivt-entry p-2 rounded bg-gray-800/50 flex justify-between">
+                            <span class="text-gray-500">128</span><span class="text-green-400">syscall</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Steps -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-list-ol mr-2 text-amber-400"></i>Interrupt Handling Steps
+                    </h3>
+                    
+                    <div id="steps-container" class="space-y-2">
+                        <div id="step-1" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-red-600/30 flex items-center justify-center text-red-400 font-bold shrink-0">1</div>
+                            <div>
+                                <div class="font-semibold text-red-400">Interrupt Arrives</div>
+                                <div class="text-sm text-gray-400">Hardware generates IRQ signal to CPU</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-2" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-orange-600/30 flex items-center justify-center text-orange-400 font-bold shrink-0">2</div>
+                            <div>
+                                <div class="font-semibold text-orange-400">CPU Completes Instruction</div>
+                                <div class="text-sm text-gray-400">Finishes current instruction before responding</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-3" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-600/30 flex items-center justify-center text-yellow-400 font-bold shrink-0">3</div>
+                            <div>
+                                <div class="font-semibold text-yellow-400">Automatic Save to Stack</div>
+                                <div class="text-sm text-gray-400">FLAGS, CS, PC (return address) → Stack</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-4" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center text-purple-400 font-bold shrink-0">4</div>
+                            <div>
+                                <div class="font-semibold text-purple-400">Lookup IVT</div>
+                                <div class="text-sm text-gray-400">Finds handler address in Interrupt Vector Table</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-5" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-400 font-bold shrink-0">5</div>
+                            <div>
+                                <div class="font-semibold text-blue-400">Switch la Kernel Mode</div>
+                                <div class="text-sm text-gray-400">Mode bit: 1 → 0, acum CPU are privilegii complete</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-6" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-cyan-600/30 flex items-center justify-center text-cyan-400 font-bold shrink-0">6</div>
+                            <div>
+                                <div class="font-semibold text-cyan-400">Jump la Handler</div>
+                                <div class="text-sm text-gray-400">PC = address from IVT, begins handler execution</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-7" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-emerald-600/30 flex items-center justify-center text-emerald-400 font-bold shrink-0">7</div>
+                            <div>
+                                <div class="font-semibold text-emerald-400">Handler Executes</div>
+                                <div class="text-sm text-gray-400">Processes interrupt, may save additional registers</div>
+                            </div>
+                        </div>
+                        
+                        <div id="step-8" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-600/30 flex items-center justify-center text-green-400 font-bold shrink-0">8</div>
+                            <div>
+                                <div class="font-semibold text-green-400">IRET - Return</div>
+                                <div class="text-sm text-gray-400">Restores PC, FLAGS, returns to User Mode</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Controls + Types -->
+            <div class="xl:col-span-1 space-y-4">
+                <!-- Interrupt Triggers -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-bolt mr-2 text-yellow-400"></i>Trigger Interrupt
+                    </h3>
+                    
+                    <div class="space-y-2">
+                        <button onclick="triggerInterrupt('timer')" class="w-full p-3 rounded-xl bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 transition text-left">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-clock text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Timer (IRQ 0)</div>
+                                    <div class="text-xs text-amber-200">Vector 32</div>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="triggerInterrupt('keyboard')" class="w-full p-3 rounded-xl bg-gradient-to-r from-cyan-700 to-cyan-600 hover:from-cyan-600 hover:to-cyan-500 transition text-left">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-keyboard text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Keyboard (IRQ 1)</div>
+                                    <div class="text-xs text-cyan-200">Vector 33</div>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="triggerInterrupt('syscall')" class="w-full p-3 rounded-xl bg-gradient-to-r from-green-700 to-green-600 hover:from-green-600 hover:to-green-500 transition text-left">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-terminal text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">System Call</div>
+                                    <div class="text-xs text-green-200">INT 0x80 (Vector 128)</div>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="triggerInterrupt('pagefault')" class="w-full p-3 rounded-xl bg-gradient-to-r from-orange-700 to-orange-600 hover:from-orange-600 hover:to-orange-500 transition text-left">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-exclamation-triangle text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Page Fault</div>
+                                    <div class="text-xs text-orange-200">Vector 14 (Exception)</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- Speed Control -->
+                    <div class="mt-4">
+                        <label class="text-sm text-gray-400 mb-2 block">Animation speed</label>
+                        <input type="range" id="speed-slider" min="200" max="1500" value="600" class="w-full">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Fast</span>
+                            <span>Slow</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interrupt Types -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-3 flex items-center">
+                        <i class="fas fa-tags mr-2 text-purple-400"></i>Interrupt Types
+                    </h3>
+                    
+                    <div class="flex gap-2 mb-3">
+                        <button onclick="showInterruptType('hardware')" id="tab-hardware" class="interrupt-types-tab activee flex-1 px-3 py-2 rounded-lg border border-gray-700 text-sm transition">
+                            Hardware
+                        </button>
+                        <button onclick="showInterruptType('software')" id="tab-software" class="interrupt-types-tab flex-1 px-3 py-2 rounded-lg border border-gray-700 text-sm transition">
+                            Software
+                        </button>
+                    </div>
+                    
+                    <div id="type-hardware" class="type-content text-sm space-y-2">
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-amber-400 font-medium"><i class="fas fa-clock mr-1"></i> Timer</div>
+                            <div class="text-xs text-gray-400">Periodic, for scheduling</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-cyan-400 font-medium"><i class="fas fa-keyboard mr-1"></i> Keyboard</div>
+                            <div class="text-xs text-gray-400">On key press</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-blue-400 font-medium"><i class="fas fa-hdd mr-1"></i> Disk</div>
+                            <div class="text-xs text-gray-400">I/O operation complete</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-purple-400 font-medium"><i class="fas fa-network-wired mr-1"></i> Network</div>
+                            <div class="text-xs text-gray-400">Packet arrived</div>
+                        </div>
+                    </div>
+                    
+                    <div id="type-software" class="type-content hidden text-sm space-y-2">
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-green-400 font-medium"><i class="fas fa-terminal mr-1"></i> System Call</div>
+                            <div class="text-xs text-gray-400">INT 0x80 / SYSCALL</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-red-400 font-medium"><i class="fas fa-divide mr-1"></i> Division by Zero</div>
+                            <div class="text-xs text-gray-400">Synchronous exception</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-orange-400 font-medium"><i class="fas fa-memory mr-1"></i> Page Fault</div>
+                            <div class="text-xs text-gray-400">Invalid page access</div>
+                        </div>
+                        <div class="p-2 rounded bg-gray-800/50">
+                            <div class="text-pink-400 font-medium"><i class="fas fa-bug mr-1"></i> Breakpoint</div>
+                            <div class="text-xs text-gray-400">INT 3 (debugging)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Log -->
+                <div class="glass-panel rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-3 flex items-center">
+                        <i class="fas fa-terminal mr-2 text-green-400"></i>Status
+                    </h3>
+                    <div id="status-log" class="h-32 overflow-y-auto mono text-xs space-y-1">
+                        <div class="text-gray-500">System ready...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-6 glass-panel rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i>Concepte Cheie
+            </h3>
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-gray-800/30 rounded-xl p-4">
+                    <h4 class="font-semibold text-amber-400 mb-2">Asincron vs Sincron</h4>
+                    <p class="text-gray-400"><strong>Hardware IRQ</strong> = asynchronous (anytime). <strong>Exceptions/Traps</strong> = synchronous (caused by current instruction).</p>
+                </div>
+                <div class="bg-gray-800/30 rounded-xl p-4">
+                    <h4 class="font-semibold text-green-400 mb-2">Context Switch</h4>
+                    <p class="text-gray-400">Hardware automatically saves minimum (PC, FLAGS). Handler saves the rest if needed.</p>
+                </div>
+                <div class="bg-gray-800/30 rounded-xl p-4">
+                    <h4 class="font-semibold text-purple-400 mb-2">Nested Interrupts</h4>
+                    <p class="text-gray-400">A higher priority interrupt can interrupt a running handler.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let isAnimating = false;
+        let currentStep = 0;
+        let stackContent = [];
+        let savedContext = {
+            pc: '0x00401234',
+            flags: '0x0202',
+            cs: '0x0023',
+            sp: '0x7FFF0100'
+        };
+
+        // Get animation speed
+        function getSpeed() {
+            return parseInt(document.getElementById('speed-slider').value);
+        }
+
+        // Log status
+        function logStatus(message, type = 'info') {
+            const log = document.getElementById('status-log');
+            const colors = {
+                'info': 'text-gray-300',
+                'irq': 'text-red-400',
+                'save': 'text-yellow-400',
+                'kernel': 'text-purple-400',
+                'handler': 'text-cyan-400',
+                'return': 'text-green-400'
+            };
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const entry = document.createdeElement('div');
+            entry.className = colors[type] || 'text-gray-300';
+            entry.innerHTML = `<span class="text-gray-600">[${time}]</span> ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Update register display
+        function updateRegister(reg, value, flash = true) {
+            const el = document.getElementById(`reg-${reg}`);
+            if (el) {
+                el.textContent = value;
+                if (flash) {
+                    el.classList.add('register-flash');
+                    setTimeout(() => el.classList.remove('register-flash'), 500);
+                }
+            }
+        }
+
+        // Update mode indicator
+        function setMode(mode) {
+            const indicator = document.getElementById('mode-indicator');
+            const icon = document.getElementById('mode-icon');
+            const text = document.getElementById('mode-text');
+            
+            indicator.classList.add('mode-transition');
+            
+            setTimeout(() => {
+                if (mode === 'kernel') {
+                    indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/30 border border-amber-500/50';
+                    icon.textContent = '👑';
+                    text.textContent = 'KERNEL MODE';
+                } else {
+                    indicator.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/30 border border-blue-500/50';
+                    icon.textContent = '👤';
+                    text.textContent = 'USER MODE';
+                }
+            }, 300);
+            
+            setTimeout(() => indicator.classList.remove('mode-transition'), 600);
+        }
+
+        // IRQ indicator
+        function flashIRQ() {
+            const dot = document.getElementById('irq-dot');
+            dot.className = 'w-3 h-3 rounded-full bg-red-500 irq-indicator';
+            setTimeout(() => {
+                dot.className = 'w-3 h-3 rounded-full bg-gray-600';
+            }, 1000);
+        }
+
+        // Highlight IVT entry
+        function highlightIVT(vector) {
+            // Map interrupt types to IVT IDs
+            const ivtMap = {
+                'timer': 'ivt-32',
+                'keyboard': 'ivt-33',
+                'syscall': 'ivt-128',
+                'pagefault': 'ivt-14'
+            };
+            
+            const id = ivtMap[vector] || `ivt-${vector}`;
+            const entry = document.getElementById(id);
+            if (entry) {
+                entry.classList.add('highlight-row');
+                setTimeout(() => entry.classList.remove('highlight-row'), 2000);
+            }
+        }
+
+        // Stack operations
+        function pushStack(label, value) {
+            stackContent.unshift({ label, value });
+            renderStack();
+        }
+
+        function popStack() {
+            if (stackContent.length > 0) {
+                stackContent.shift();
+                renderStack();
+            }
+        }
+
+        function clearStack() {
+            stackContent = [];
+            renderStack();
+        }
+
+        function renderStack() {
+            const view = document.getElementById('stack-view');
+            if (stackContent.length === 0) {
+                view.innerHTML = `<div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-inbox text-2xl mb-2"></i>
+                    <div>Stack gol</div>
+                </div>`;
+                return;
+            }
+            
+            view.innerHTML = stackContent.map((item, i) => `
+                <div class="stack-push flex justify-between items-center p-2 rounded ${i === 0 ? 'bg-green-800/30 border border-green-500/30' : 'bg-gray-800/50'}">
+                    <span class="text-gray-400">${item.label}</span>
+                    <span class="text-green-400">${item.value}</span>
+                </div>
+            `).join('');
+        }
+
+        // Highlight step
+        function highlightStep(stepNum) {
+            document.querySelectorAll('.step-card').forEach((card, i) => {
+                card.classList.remove('activee', 'completed');
+                if (i + 1 < stepNum) {
+                    card.classList.add('completed');
+                } else if (i + 1 === stepNum) {
+                    card.classList.add('activee');
+                }
+            });
+        }
+
+        // Reset all
+        function resetAll() {
+            currentStep = 0;
+            clearStack();
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('activee', 'completed');
+            });
+            updateRegister('pc', savedContext.pc, false);
+            updateRegister('sp', savedContext.sp, false);
+            updateRegister('flags', savedContext.flags, false);
+            updateRegister('cs', savedContext.cs, false);
+            setMode('user');
+        }
+
+        // Main interrupt simulation
+        async function triggerInterrupt(type) {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            resetAll();
+            const speed = getSpeed();
+            
+            const handlers = {
+                'timer': { vector: 32, name: 'timer_handler', addr: '0xC0010000' },
+                'keyboard': { vector: 33, name: 'keyboard_handler', addr: '0xC0010100' },
+                'syscall': { vector: 128, name: 'syscall_handler', addr: '0xC0020000' },
+                'pagefault': { vector: 14, name: 'page_fault_handler', addr: '0xC0008000' }
+            };
+            
+            const handler = handlers[type];
+            
+            // Step 1: IRQ arrives
+            highlightStep(1);
+            flashIRQ();
+            logStatus(`⚡ IRQ! ${type.toUpperCase()} interrupt received`, 'irq');
+            await delay(speed);
+            
+            // Step 2: Finish current instruction
+            highlightStep(2);
+            logStatus('CPU completes current instruction...', 'info');
+            await delay(speed);
+            
+            // Step 3: Save to stack
+            highlightStep(3);
+            logStatus('Automatic save to stack (hardware)...', 'save');
+            await delay(speed / 2);
+            
+            pushStack('FLAGS', savedContext.flags);
+            await delay(speed / 3);
+            pushStack('CS', savedContext.cs);
+            await delay(speed / 3);
+            pushStack('PC (ret)', savedContext.pc);
+            updateRegister('sp', '0x7FFF00F4');
+            logStatus('FLAGS, CS, PC → Stack', 'save');
+            await delay(speed);
+            
+            // Step 4: IVT lookup
+            highlightStep(4);
+            highlightIVT(type);
+            logStatus(`IVT lookup: Vector ${handler.vector} → ${handler.name}`, 'info');
+            await delay(speed);
+            
+            // Step 5: Switch to kernel mode
+            highlightStep(5);
+            setMode('kernel');
+            logStatus('Mode bit: 1 → 0 (KERNEL MODE)', 'kernel');
+            await delay(speed);
+            
+            // Step 6: Jump to handler
+            highlightStep(6);
+            updateRegister('pc', handler.addr);
+            updateRegister('cs', '0x0008');
+            logStatus(`PC = ${handler.addr} (${handler.name})`, 'handler');
+            await delay(speed);
+            
+            // Step 7: Handler executes
+            highlightStep(7);
+            logStatus(`Execute ${handler.name}()...`, 'handler');
+            await delay(speed);
+            logStatus('Handler: processes interrupt', 'handler');
+            await delay(speed);
+            logStatus('Handler: prepares return', 'handler');
+            await delay(speed);
+            
+            // Step 8: IRET
+            highlightStep(8);
+            logStatus('IRET - restaurare context...', 'return');
+            await delay(speed / 2);
+            
+            popStack(); // PC
+            updateRegister('pc', savedContext.pc);
+            await delay(speed / 3);
+            popStack(); // CS
+            updateRegister('cs', savedContext.cs);
+            await delay(speed / 3);
+            popStack(); // FLAGS
+            updateRegister('flags', savedContext.flags);
+            updateRegister('sp', savedContext.sp);
+            
+            setMode('user');
+            logStatus('✅ Return to User Mode - normal execution', 'return');
+            
+            await delay(speed);
+            highlightStep(9); // Clear all highlights
+            
+            isAnimating = false;
+        }
+
+        // Show interrupt type tab
+        function showInterruptType(type) {
+            document.querySelectorAll('.interrupt-types-tab').forEach(t => t.classList.remove('activee'));
+            document.querySelectorAll('.type-content').forEach(c => c.classList.add('hidden'));
+            
+            document.getElementById(`tab-${type}`).classList.add('activee');
+            document.getElementById(`type-${type}`).classList.remove('hidden');
+        }
+
+        // Helper
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize
+        logStatus('🖥️ Simulator ready', 'info');
+    </script>
+</body>
+</html>

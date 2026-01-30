@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fork() & Exec() Simulator - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .memory-segment {
+            transition: all 0.4s ease;
+        }
+        
+        .memory-segment:hover {
+            transform: translateX(4px);
+            filter: brightness(1.05);
+        }
+        
+        .process-container {
+            transition: all 0.5s ease;
+        }
+        
+        .process-container.spawning {
+            animation: spawn 0.6s ease-out;
+        }
+        
+        @keyframes spawn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .cow-line {
+            stroke-dasharray: 5;
+            animation: dash 0.5s linear infinite;
+        }
+        
+        @keyframes dash {
+            to { stroke-dashoffset: -10; }
+        }
+        
+        .page-shared {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 3px,
+                rgba(59, 130, 246, 0.1) 3px,
+                rgba(59, 130, 246, 0.1) 6px
+            );
+        }
+        
+        .page-copied {
+            animation: copyFlash 0.5s ease;
+        }
+        
+        @keyframes copyFlash {
+            0% { background-color: #fbbf24; }
+            100% { background-color: inherit; }
+        }
+        
+        .exec-wipe {
+            animation: wipe 0.8s ease-in-out;
+        }
+        
+        @keyframes wipe {
+            0% { clip-path: inset(0 0 0 0); }
+            50% { clip-path: inset(0 0 100% 0); background: #94a3b8; }
+            100% { clip-path: inset(0 0 0 0); }
+        }
+        
+        .code-highlight {
+            background: linear-gradient(90deg, #fef08a 0%, #fef08a 100%);
+            border-radius: 2px;
+        }
+        
+        .fd-box {
+            transition: all 0.3s ease;
+        }
+        
+        .fd-box.preserved {
+            animation: preservePulse 1s ease infinite;
+        }
+        
+        @keyframes preservePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                    <i class="fas fa-code-branch text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Fork() & Exec() Simulator</h1>
+                    <p class="text-xs text-stone-500">Address Space Visualisation</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Stats Bar -->
+        <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+                <div class="text-xs text-stone-500 mb-1">Active Processes</div>
+                <div id="statProcesses" class="text-2xl font-bold text-blue-600">1</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+                <div class="text-xs text-stone-500 mb-1">Shared Pages (CoW)</div>
+                <div id="statShared" class="text-2xl font-bold text-green-600">0</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+                <div class="text-xs text-stone-500 mb-1">Copied Pages</div>
+                <div id="statCopied" class="text-2xl font-bold text-amber-600">0</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+                <div class="text-xs text-stone-500 mb-1">Total Memory</div>
+                <div id="statMemory" class="text-2xl font-bold text-purple-600">64 KB</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel: Memory Visualization -->
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-memory text-purple-500"></i>
+                        Virtual Address Spaces
+                    </h2>
+                    
+                    <div id="memoryVisualization" class="flex flex-wrap gap-6 justify-center">
+                        <!-- Parent Process - Always visible -->
+                        <div id="parentProcess" class="process-container">
+                            <div class="text-center mb-3">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-user mr-1"></i> PARENT
+                                </span>
+                                <div class="text-xs text-stone-500 mt-1 mono">PID: <span id="parentPID">1000</span></div>
+                                <div class="text-xs text-stone-500 mono">PPID: <span id="parentPPID">1</span></div>
+                            </div>
+                            <div class="w-48 border-2 border-blue-300 rounded-lg overflow-hidden bg-stone-50">
+                                <!-- Text/Code Segment -->
+                                <div class="memory-segment h-14 bg-blue-400 flex items-center justify-center text-white text-xs font-medium border-b border-blue-500 relative" data-segment="text">
+                                    <i class="fas fa-code mr-1"></i> Text/Code
+                                    <span class="absolute right-1 top-1 text-[10px] opacity-70 mono" id="parentTextAddr">0x400000</span>
+                                </div>
+                                <!-- Data Segment -->
+                                <div class="memory-segment h-10 bg-green-400 flex items-center justify-center text-white text-xs font-medium border-b border-green-500 relative" data-segment="data">
+                                    <i class="fas fa-database mr-1"></i> Data
+                                    <span class="absolute right-1 top-1 text-[10px] opacity-70 mono">0x600000</span>
+                                </div>
+                                <!-- Heap -->
+                                <div class="memory-segment h-12 bg-amber-400 flex items-center justify-center text-white text-xs font-medium border-b border-amber-500 relative" data-segment="heap">
+                                    <i class="fas fa-arrow-down mr-1"></i> Heap ↓
+                                    <span class="absolute right-1 top-1 text-[10px] opacity-70 mono">0x700000</span>
+                                </div>
+                                <!-- Free Space -->
+                                <div class="h-16 bg-stone-100 flex items-center justify-center text-stone-400 text-xs border-b border-stone-200">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </div>
+                                <!-- Stack -->
+                                <div class="memory-segment h-12 bg-red-400 flex items-center justify-center text-white text-xs font-medium relative" data-segment="stack">
+                                    <i class="fas fa-arrow-up mr-1"></i> Stack ↑
+                                    <span class="absolute right-1 top-1 text-[10px] opacity-70 mono">0x7fff0000</span>
+                                </div>
+                            </div>
+                            <!-- File Descriptors -->
+                            <div class="mt-3 p-2 bg-stone-50 rounded-lg border border-stone-200">
+                                <div class="text-xs font-medium text-stone-600 mb-2">File Descriptors:</div>
+                                <div class="flex gap-1 flex-wrap">
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">0:stdin</span>
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">1:stdout</span>
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">2:stderr</span>
+                                    <span class="fd-box px-2 py-1 bg-blue-200 rounded text-xs mono" id="parentFD3">3:file.txt</span>
+                                </div>
+                            </div>
+                            <!-- Return Value -->
+                            <div id="parentReturnVal" class="mt-2 text-center text-xs mono text-stone-500 hidden">
+                                fork() returned: <span class="font-bold text-blue-600">1001</span>
+                            </div>
+                        </div>
+
+                        <!-- CoW Connection Lines (SVG) -->
+                        <svg id="cowLines" class="hidden absolute" width="100" height="300" style="pointer-events: none;">
+                            <line class="cow-line" x1="0" y1="50" x2="100" y2="50" stroke="#3b82f6" stroke-width="2"/>
+                            <line class="cow-line" x1="0" y1="100" x2="100" y2="100" stroke="#22c55e" stroke-width="2"/>
+                            <line class="cow-line" x1="0" y1="150" x2="100" y2="150" stroke="#f59e0b" stroke-width="2"/>
+                            <line class="cow-line" x1="0" y1="230" x2="100" y2="230" stroke="#ef4444" stroke-width="2"/>
+                        </svg>
+
+                        <!-- Child Process - Hidden initially -->
+                        <div id="childProcess" class="process-container hidden">
+                            <div class="text-center mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-child mr-1"></i> CHILD
+                                </span>
+                                <div class="text-xs text-stone-500 mt-1 mono">PID: <span id="childPID">1001</span></div>
+                                <div class="text-xs text-stone-500 mono">PPID: <span id="childPPID">1000</span></div>
+                            </div>
+                            <div id="childMemory" class="w-48 border-2 border-green-300 rounded-lg overflow-hidden bg-stone-50">
+                                <!-- Text/Code Segment -->
+                                <div class="memory-segment h-14 bg-blue-400 flex items-center justify-center text-white text-xs font-medium border-b border-blue-500 page-shared relative" data-segment="text">
+                                    <i class="fas fa-code mr-1"></i> Text/Code
+                                    <span class="absolute left-1 top-1 text-[10px] bg-blue-600 px-1 rounded">CoW</span>
+                                </div>
+                                <!-- Data Segment -->
+                                <div class="memory-segment h-10 bg-green-400 flex items-center justify-center text-white text-xs font-medium border-b border-green-500 page-shared relative" data-segment="data">
+                                    <i class="fas fa-database mr-1"></i> Data
+                                    <span class="absolute left-1 top-1 text-[10px] bg-green-600 px-1 rounded">CoW</span>
+                                </div>
+                                <!-- Heap -->
+                                <div class="memory-segment h-12 bg-amber-400 flex items-center justify-center text-white text-xs font-medium border-b border-amber-500 page-shared relative" data-segment="heap">
+                                    <i class="fas fa-arrow-down mr-1"></i> Heap ↓
+                                    <span class="absolute left-1 top-1 text-[10px] bg-amber-600 px-1 rounded">CoW</span>
+                                </div>
+                                <!-- Free Space -->
+                                <div class="h-16 bg-stone-100 flex items-center justify-center text-stone-400 text-xs border-b border-stone-200">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </div>
+                                <!-- Stack -->
+                                <div class="memory-segment h-12 bg-red-400 flex items-center justify-center text-white text-xs font-medium page-shared relative" data-segment="stack">
+                                    <i class="fas fa-arrow-up mr-1"></i> Stack ↑
+                                    <span class="absolute left-1 top-1 text-[10px] bg-red-600 px-1 rounded">CoW</span>
+                                </div>
+                            </div>
+                            <!-- File Descriptors -->
+                            <div class="mt-3 p-2 bg-stone-50 rounded-lg border border-stone-200">
+                                <div class="text-xs font-medium text-stone-600 mb-2">File Descriptors:</div>
+                                <div class="flex gap-1 flex-wrap">
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">0:stdin</span>
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">1:stdout</span>
+                                    <span class="fd-box px-2 py-1 bg-stone-200 rounded text-xs mono">2:stderr</span>
+                                    <span class="fd-box px-2 py-1 bg-green-200 rounded text-xs mono" id="childFD3">3:file.txt</span>
+                                </div>
+                            </div>
+                            <!-- Return Value -->
+                            <div id="childReturnVal" class="mt-2 text-center text-xs mono text-stone-500 hidden">
+                                fork() returned: <span class="font-bold text-green-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CoW Counter -->
+                    <div id="cowCounter" class="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-copy text-amber-500"></i>
+                                <span class="text-sm font-medium text-amber-800">Copy-on-Write Status</span>
+                            </div>
+                            <div class="text-sm">
+                                <span class="text-stone-600">Pagini partajate:</span>
+                                <span id="sharedPages" class="font-bold text-blue-600 ml-1">4</span>
+                                <span class="mx-2 text-stone-300">|</span>
+                                <span class="text-stone-600">Pagini copiate:</span>
+                                <span id="copiedPages" class="font-bold text-amber-600 ml-1">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console Log -->
+                <div class="mt-6 bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal"></i> Kernel Messages
+                    </h3>
+                    <div id="logConsole" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
+                        <div class="text-stone-500">// System ready. Parent process (PID 1000) is running.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls & Code -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Action Buttons -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Main Actions
+                    </h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button id="btnFork" class="btn-action w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                            <i class="fas fa-code-branch"></i> fork()
+                        </button>
+                        <button id="btnExec" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
+                            <i class="fas fa-exchange-alt"></i> exec()
+                        </button>
+                        <div class="flex gap-2">
+                            <button id="btnModifyParent" class="btn-action flex-1 p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
+                                <i class="fas fa-edit"></i> Modify (P)
+                            </button>
+                            <button id="btnModifyChild" class="btn-action flex-1 p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
+                                <i class="fas fa-edit"></i> Modify (C)
+                            </button>
+                        </div>
+                        <button id="btnWait" class="btn-action w-full p-3 bg-stone-500 hover:bg-stone-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
+                            <i class="fas fa-hourglass-half"></i> wait()
+                        </button>
+                        <button id="btnExit" class="btn-action w-full p-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
+                            <i class="fas fa-door-open"></i> exit(0) - Copil
+                        </button>
+                        <button id="btnReset" class="btn-action w-full p-3 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                            <i class="fas fa-redo"></i> Reset Simulation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exec Program Selector -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-terminal text-purple-500 mr-2"></i>Program for exec()
+                    </h3>
+                    <select id="execProgram" class="w-full p-3 border border-stone-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-purple-500">
+                        <option value="/bin/ls">ls</option>
+                        <option value="/bin/cat">cat</option>
+                        <option value="/bin/grep">grep</option>
+                        <option value="./my_program">./my_program (custom)</option>
+                    </select>
+                </div>
+
+                <!-- Options -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cog text-stone-500 mr-2"></i>Visualisation Options
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="showAddresses" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <span class="text-sm text-stone-600">Show memory addresses</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="slowAnimation" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <span class="text-sm text-stone-600">Slow animation (for demo)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="highlightCoW" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <span class="text-sm text-stone-600">Highlight CoW</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Equivalent C Code -->
+                <div class="bg-stone-800 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-code"></i> Equivalent C Code
+                    </h3>
+                    <pre id="cCode" class="text-xs mono text-stone-300 leading-relaxed overflow-x-auto"><code><span id="line1">pid_t pid = fork();</span>
+<span id="line2">if (pid == 0) {</span>
+<span id="line3">    // Child code</span>
+<span id="line4">    exec("program", args);</span>
+<span id="line5">} else {</span>
+<span id="line6">    // Parent code</span>
+<span id="line7">    wait(NULL);</span>
+<span id="line8">}</span></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Section -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- What fork() copies -->
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-copy text-blue-500"></i>
+                    What does fork copy()?
+                </h3>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded border-l-4 border-green-500">
+                        <i class="fas fa-check text-green-500"></i>
+                        <span>Address space (CoW)</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded border-l-4 border-green-500">
+                        <i class="fas fa-check text-green-500"></i>
+                        <span>File descriptors</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded border-l-4 border-green-500">
+                        <i class="fas fa-check text-green-500"></i>
+                        <span>Signal handlers</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded border-l-4 border-green-500">
+                        <i class="fas fa-check text-green-500"></i>
+                        <span>Environment variables</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded border-l-4 border-red-500">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span>PID (new for child)</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded border-l-4 border-red-500">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span>PPID (different)</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded border-l-4 border-red-500">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span>Locks held</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded border-l-4 border-red-500">
+                        <i class="fas fa-times text-red-500"></i>
+                        <span>Pending signals</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What exec() does -->
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-exchange-alt text-purple-500"></i>
+                    What does exec do()?
+                </h3>
+                <div class="space-y-3">
+                    <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <h4 class="text-sm font-semibold text-amber-800 mb-1">
+                            <i class="fas fa-eraser mr-1"></i> Replaces:
+                        </h4>
+                        <p class="text-xs text-amber-700">Code segment, Data segment, Heap, Stack — the entire address space is replaced with the new program.</p>
+                    </div>
+                    <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                        <h4 class="text-sm font-semibold text-green-800 mb-1">
+                            <i class="fas fa-save mr-1"></i> Preserves:
+                        </h4>
+                        <p class="text-xs text-green-700">PID, PPID, File descriptors (if they do not have FD_CLOEXEC), Current working directory, Resource limits.</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 class="text-sm font-semibold text-blue-800 mb-1">
+                            <i class="fas fa-info-circle mr-1"></i> Important:
+                        </h4>
+                        <p class="text-xs text-blue-700">exec() does NOT create a new process — it replaces the content of the existing process. If successful, it does not return!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State Management ====================
+        let state = {
+            parentPID: 1000,
+            childPID: null,
+            childExists: false,
+            childExec: false,
+            childExited: false,
+            sharedPages: 0,
+            copiedPages: 0,
+            parentCopied: new Set(),
+            childCopied: new Set()
+        };
+
+        const animationSpeed = () => document.getElementById('slowAnimation').checked ? 1500 : 500;
+
+        // ==================== Logging ====================
+        function log(message, type = 'info') {
+            const console = document.getElementById('logConsole');
+            const time = new Date().toLocaleTimeString('en-GB');
+            const entry = document.createElement('div');
+            
+            let colorClass = 'text-green-300';
+            if (type === 'fork') colorClass = 'text-blue-400';
+            if (type === 'exec') colorClass = 'text-purple-400';
+            if (type === 'cow') colorClass = 'text-amber-400';
+            if (type === 'exit') colorClass = 'text-red-400';
+            
+            entry.innerHTML = `<span class="text-stone-500">[${time}]</span> <span class="${colorClass}">${message}</span>`;
+            console.appendChild(entry);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // ==================== Code Highlighting ====================
+        function highlightLine(lineNum) {
+            // Clear all highlights
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`line${i}`).classList.remove('code-highlight');
+            }
+            // Highlight specific line
+            if (lineNum) {
+                document.getElementById(`line${lineNum}`).classList.add('code-highlight');
+            }
+        }
+
+        // ==================== Update UI ====================
+        function updateStats() {
+            document.getElementById('statProcesses').textContent = state.childExists && !state.childExited ? 2 : 1;
+            document.getElementById('statShared').textContent = state.sharedPages;
+            document.getElementById('statCopied').textContent = state.copiedPages;
+            
+            const baseMemory = 64;
+            const additionalMemory = state.childExists && !state.childExec ? state.copiedPages * 4 : (state.childExists ? 64 : 0);
+            document.getElementById('statMemory').textContent = `${baseMemory + additionalMemory} KB`;
+            
+            if (state.childExists) {
+                document.getElementById('sharedPages').textContent = state.sharedPages;
+                document.getElementById('copiedPages').textContent = state.copiedPages;
+            }
+        }
+
+        function updateButtons() {
+            document.getElementById('btnFork').disabled = state.childExists;
+            document.getElementById('btnExec').disabled = !state.childExists || state.childExec || state.childExited;
+            document.getElementById('btnModifyParent').disabled = !state.childExists || state.childExited;
+            document.getElementById('btnModifyChild').disabled = !state.childExists || state.childExec || state.childExited;
+            document.getElementById('btnWait').disabled = !state.childExited;
+            document.getElementById('btnExit').disabled = !state.childExists || state.childExited;
+        }
+
+        // ==================== Fork ====================
+        function doFork() {
+            state.childPID = state.parentPID + 1;
+            state.childExists = true;
+            state.sharedPages = 4; // text, data, heap, stack
+            state.copiedPages = 0;
+            
+            const childProcess = document.getElementById('childProcess');
+            childProcess.classList.remove('hidden');
+            childProcess.classList.add('spawning');
+            
+            document.getElementById('childPID').textContent = state.childPID;
+            document.getElementById('childPPID').textContent = state.parentPID;
+            
+            // Show return values
+            document.getElementById('parentReturnVal').classList.remove('hidden');
+            document.getElementById('parentReturnVal').querySelector('span').textContent = state.childPID;
+            document.getElementById('childReturnVal').classList.remove('hidden');
+            
+            // Show CoW counter
+            document.getElementById('cowCounter').classList.remove('hidden');
+            
+            // Highlight fork line
+            highlightLine(1);
+            
+            log(`[fork] Created child process PID=${state.childPID}, PPID=${state.parentPID}`, 'fork');
+            log(`[fork] Memory: Copy-on-Write enabled, ${state.sharedPages} pages shared`, 'fork');
+            
+            setTimeout(() => {
+                highlightLine(2);
+                log(`[fork] Parent: fork() returned ${state.childPID}`, 'fork');
+                log(`[fork] Child: fork() returned 0`, 'fork');
+            }, animationSpeed());
+            
+            updateStats();
+            updateButtons();
+        }
+
+        // ==================== Exec ====================
+        function doExec() {
+            const program = document.getElementById('execProgram').value;
+            state.childExec = true;
+            state.sharedPages = 0;
+            state.copiedPages = 0;
+            
+            const childMemory = document.getElementById('childMemory');
+            childMemory.classList.add('exec-wipe');
+            
+            highlightLine(4);
+            log(`[exec] Process ${state.childPID} loading new image: ${program}`, 'exec');
+            
+            setTimeout(() => {
+                // Change child memory segments to show new program
+                const segments = childMemory.querySelectorAll('.memory-segment');
+                segments.forEach(seg => {
+                    seg.classList.remove('page-shared');
+                    const cowBadge = seg.querySelector('span');
+                    if (cowBadge) cowBadge.remove();
+                });
+                
+                // Update text segment to show new program
+                const textSeg = segments[0];
+                textSeg.innerHTML = `<i class="fas fa-code mr-1"></i> ${program.split('/').pop()}`;
+                textSeg.style.backgroundColor = '#a855f7';
+                
+                // Mark FDs as preserved
+                document.querySelectorAll('#childProcess .fd-box').forEach(fd => {
+                    fd.classList.add('preserved');
+                });
+                
+                childMemory.classList.remove('exec-wipe');
+                
+                log(`[exec] Code segment replaced with ${program}`, 'exec');
+                log(`[exec] Stack and heap reinitialized`, 'exec');
+                log(`[exec] File descriptors preserved (no FD_CLOEXEC)`, 'exec');
+                
+                document.getElementById('cowCounter').classList.add('hidden');
+                
+                updateStats();
+                updateButtons();
+            }, animationSpeed());
+        }
+
+        // ==================== Copy-on-Write ====================
+        function triggerCoW(isParent) {
+            const processName = isParent ? 'parent' : 'child';
+            const pid = isParent ? state.parentPID : state.childPID;
+            const copiedSet = isParent ? state.parentCopied : state.childCopied;
+            
+            // Pick a random segment to modify
+            const segments = ['data', 'heap', 'stack'];
+            const available = segments.filter(s => !copiedSet.has(s));
+            
+            if (available.length === 0) {
+                log(`[cow] No more shared pages to copy for ${processName}`, 'cow');
+                return;
+            }
+            
+            const segment = available[Math.floor(Math.random() * available.length)];
+            copiedSet.add(segment);
+            
+            // Visual feedback
+            const container = isParent ? 'parentProcess' : 'childProcess';
+            const segElement = document.querySelector(`#${container} [data-segment="${segment}"]`);
+            
+            if (segElement) {
+                segElement.classList.add('page-copied');
+                segElement.classList.remove('page-shared');
+                const cowBadge = segElement.querySelector('span');
+                if (cowBadge) cowBadge.remove();
+                
+                // Add "copied" indicator
+                const indicator = document.createElement('span');
+                indicator.className = 'absolute left-1 top-1 text-[10px] bg-amber-600 px-1 rounded text-white';
+                indicator.textContent = 'Copied';
+                segElement.appendChild(indicator);
+            }
+            
+            state.copiedPages++;
+            state.sharedPages = Math.max(0, state.sharedPages - 1);
+            
+            log(`[cow] Page 0x${Math.random().toString(16).substr(2,6)} (${segment}) copied for process ${pid}`, 'cow');
+            
+            updateStats();
+        }
+
+        // ==================== Exit ====================
+        function doExit() {
+            state.childExited = true;
+            
+            highlightLine(4); // In child block
+            log(`[exit] Process ${state.childPID} called exit(0)`, 'exit');
+            log(`[exit] Process ${state.childPID} terminated with status 0`, 'exit');
+            log(`[exit] Process ${state.childPID} is now ZOMBIE (waiting for parent to reap)`, 'exit');
+            
+            const childProcess = document.getElementById('childProcess');
+            childProcess.style.opacity = '0.5';
+            childProcess.querySelector('span').innerHTML = '<i class="fas fa-skull mr-1"></i> ZOMBIE';
+            childProcess.querySelector('span').className = 'px-3 py-1 bg-stone-400 text-white rounded-full text-sm font-semibold';
+            
+            updateButtons();
+        }
+
+        // ==================== Wait ====================
+        function doWait() {
+            highlightLine(7);
+            log(`[wait] Process ${state.parentPID} calling wait()`, 'info');
+            
+            setTimeout(() => {
+                log(`[wait] Process ${state.parentPID} reaped child ${state.childPID}`, 'info');
+                log(`[wait] Child exit status: 0`, 'info');
+                
+                // Remove child process
+                const childProcess = document.getElementById('childProcess');
+                childProcess.classList.add('hidden');
+                childProcess.style.opacity = '1';
+                
+                state.childExists = false;
+                state.childExited = false;
+                state.childExec = false;
+                state.sharedPages = 0;
+                state.copiedPages = 0;
+                
+                document.getElementById('cowCounter').classList.add('hidden');
+                document.getElementById('parentReturnVal').classList.add('hidden');
+                
+                highlightLine(8);
+                
+                updateStats();
+                updateButtons();
+            }, animationSpeed());
+        }
+
+        // ==================== Reset ====================
+        function doReset() {
+            state = {
+                parentPID: 1000,
+                childPID: null,
+                childExists: false,
+                childExec: false,
+                childExited: false,
+                sharedPages: 0,
+                copiedPages: 0,
+                parentCopied: new Set(),
+                childCopied: new Set()
+            };
+            
+            // Reset child process
+            const childProcess = document.getElementById('childProcess');
+            childProcess.classList.add('hidden');
+            childProcess.classList.remove('spawning');
+            childProcess.style.opacity = '1';
+            childProcess.querySelector('span').innerHTML = '<i class="fas fa-child mr-1"></i> CHILD';
+            childProcess.querySelector('span').className = 'px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold';
+            
+            // Reset child memory
+            const childMemory = document.getElementById('childMemory');
+            childMemory.innerHTML = `
+                <div class="memory-segment h-14 bg-blue-400 flex items-center justify-center text-white text-xs font-medium border-b border-blue-500 page-shared relative" data-segment="text">
+                    <i class="fas fa-code mr-1"></i> Text/Code
+                    <span class="absolute left-1 top-1 text-[10px] bg-blue-600 px-1 rounded">CoW</span>
+                </div>
+                <div class="memory-segment h-10 bg-green-400 flex items-center justify-center text-white text-xs font-medium border-b border-green-500 page-shared relative" data-segment="data">
+                    <i class="fas fa-database mr-1"></i> Data
+                    <span class="absolute left-1 top-1 text-[10px] bg-green-600 px-1 rounded">CoW</span>
+                </div>
+                <div class="memory-segment h-12 bg-amber-400 flex items-center justify-center text-white text-xs font-medium border-b border-amber-500 page-shared relative" data-segment="heap">
+                    <i class="fas fa-arrow-down mr-1"></i> Heap ↓
+                    <span class="absolute left-1 top-1 text-[10px] bg-amber-600 px-1 rounded">CoW</span>
+                </div>
+                <div class="h-16 bg-stone-100 flex items-center justify-center text-stone-400 text-xs border-b border-stone-200">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="memory-segment h-12 bg-red-400 flex items-center justify-center text-white text-xs font-medium page-shared relative" data-segment="stack">
+                    <i class="fas fa-arrow-up mr-1"></i> Stack ↑
+                    <span class="absolute left-1 top-1 text-[10px] bg-red-600 px-1 rounded">CoW</span>
+                </div>
+            `;
+            
+            // Reset FDs
+            document.querySelectorAll('.fd-box').forEach(fd => {
+                fd.classList.remove('preserved');
+            });
+            
+            // Hide elements
+            document.getElementById('cowCounter').classList.add('hidden');
+            document.getElementById('parentReturnVal').classList.add('hidden');
+            document.getElementById('childReturnVal').classList.add('hidden');
+            
+            highlightLine(null);
+            
+            // Clear log
+            document.getElementById('logConsole').innerHTML = '<div class="text-stone-500">// System reset. The parent process (PID 1000) is running.</div>';
+            
+            updateStats();
+            updateButtons();
+        }
+
+        // ==================== Event Listeners ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btnFork').addEventListener('click', doFork);
+            document.getElementById('btnExec').addEventListener('click', doExec);
+            document.getElementById('btnModifyParent').addEventListener('click', () => triggerCoW(true));
+            document.getElementById('btnModifyChild').addEventListener('click', () => triggerCoW(false));
+            document.getElementById('btnWait').addEventListener('click', doWait);
+            document.getElementById('btnExit').addEventListener('click', doExit);
+            document.getElementById('btnReset').addEventListener('click', doReset);
+            
+            // Address visibility toggle
+            document.getElementById('showAddresses').addEventListener('change', (e) => {
+                const addresses = document.querySelectorAll('.memory-segment .mono');
+                addresses.forEach(addr => {
+                    addr.style.display = e.target.checked ? 'block' : 'none';
+                });
+            });
+            
+            updateButtons();
+        });
+    </script>
+</body>
+</html>
