@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>07ex2 - Producer-Consumer Problem | OS Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: linear-gradient(135deg, #0f0a1a 0%, #1a1025 50%, #0f0a1a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(26, 16, 37, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .buffer-slot {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .buffer-slot.empty {
+            background: rgba(71, 85, 105, 0.3);
+            border: 2px dashed #475569;
+        }
+        
+        .buffer-slot.filled {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            border: 2px solid #a78bfa;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .buffer-slot.producing {
+            animation: produce-pulse 0.5s ease;
+        }
+        
+        .buffer-slot.consuming {
+            animation: consume-pulse 0.5s ease;
+        }
+        
+        @keyframes produce-pulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes consume-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+        
+        .producer-panel {
+            border-left: 4px solid #22c55e;
+        }
+        
+        .consumer-panel {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .actor-status {
+            transition: all 0.3s ease;
+        }
+        
+        .actor-status.active {
+            box-shadow: 0 0 20px currentColor;
+        }
+        
+        .actor-status.blocked {
+            animation: blocked-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blocked-glow {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px #ef4444; }
+            50% { opacity: 0.6; box-shadow: 0 0 20px #ef4444; }
+        }
+        
+        .semaphore-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        .semaphore-indicator.zero {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .semaphore-indicator.positive {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .code-line {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .code-line.executing {
+            background: rgba(251, 191, 36, 0.15);
+            border-left-color: #fbbf24;
+        }
+        
+        .code-line.blocked {
+            background: rgba(239, 68, 68, 0.15);
+            border-left-color: #ef4444;
+        }
+        
+        .item-counter {
+            transition: all 0.3s ease;
+        }
+        
+        .item-counter.changed {
+            animation: counter-pop 0.3s ease;
+        }
+        
+        @keyframes counter-pop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .arrow-flow {
+            animation: flow-arrow 1s ease-in-out infinite;
+        }
+        
+        @keyframes flow-arrow {
+            0%, 100% { transform: translateX(0); opacity: 0.5; }
+            50% { transform: translateX(10px); opacity: 1; }
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="text-slate-200 p-4 lg:p-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                            <i class="fas fa-exchange-other text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                Producer-Consumer Problem
+                            </h1>
+                            <p class="text-slate-400 text-sm">Course 07 • Synchronisation Part 2 • Bounded Buffer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <i class="fas fa-industry mr-1"></i> Producer
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        <i class="fas fa-shopping-cart mr-1"></i> Consumer
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Bounded Buffer Visualization -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-database"></i> Bounded Buffer (N = <span id="bufferSizeDisplay">5</span>)
+            </h2>
+            
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <!-- Producer siof -->
+                <div class="text-center">
+                    <div id="producerStatus" class="actor-status w-16 h-16 rounded-full bg-emerald-600/30 border-2 border-emerald-500 flex items-center justify-center mb-2">
+                        <i class="fas fa-industry text-2xl text-emerald-400"></i>
+                    </div>
+                    <span class="text-xs text-emerald-400">Producer</span>
+                </div>
+                
+                <i class="fas fa-arrow-right text-2xl text-emerald-400 arrow-flow"></i>
+                
+                <!-- Buffer -->
+                <div id="bufferContainer" class="flex gap-2 p-4 bg-slate-900/50 rounded-xl border border-slate-700">
+                    <!-- Buffer slots generated by JS -->
+                </div>
+                
+                <i class="fas fa-arrow-right text-2xl text-amber-400 arrow-flow"></i>
+                
+                <!-- Consumer siof -->
+                <div class="text-center">
+                    <div id="consumerStatus" class="actor-status w-16 h-16 rounded-full bg-amber-600/30 border-2 border-amber-500 flex items-center justify-center mb-2">
+                        <i class="fas fa-shopping-cart text-2xl text-amber-400"></i>
+                    </div>
+                    <span class="text-xs text-amber-400">Consumer</span>
+                </div>
+            </div>
+            
+            <!-- Buffer Stats -->
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="p-3 bg-slate-800/50 rounded-lg">
+                    <div class="text-xs text-slate-500 mb-1">In Buffer</div>
+                    <div id="itemsInBuffer" class="item-counter mono text-2xl font-bold text-purple-400">0</div>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg">
+                    <div class="text-xs text-slate-500 mb-1">Total Produced</div>
+                    <div id="totalProduced" class="item-counter mono text-2xl font-bold text-emerald-400">0</div>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-lg">
+                    <div class="text-xs text-slate-500 mb-1">Total Consumed</div>
+                    <div id="totalConsumed" class="item-counter mono text-2xl font-bold text-amber-400">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Semaphores -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-traffic-light"></i> Semaphore State
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div id="semEmpty" class="semaphore-indicator positive p-4 rounded-xl border-2 text-center">
+                    <div class="text-xs text-slate-400 mb-1">empty</div>
+                    <div class="mono text-3xl font-bold" id="emptyValue">5</div>
+                    <div class="text-xs mt-1 text-slate-500">Free slots</div>
+                </div>
+                <div id="semFull" class="semaphore-indicator zero p-4 rounded-xl border-2 text-center">
+                    <div class="text-xs text-slate-400 mb-1">full</div>
+                    <div class="mono text-3xl font-bold" id="fullValue">0</div>
+                    <div class="text-xs mt-1 text-slate-500">Occupied slots</div>
+                </div>
+                <div id="semMutex" class="semaphore-indicator positive p-4 rounded-xl border-2 text-center">
+                    <div class="text-xs text-slate-400 mb-1">mutex</div>
+                    <div class="mono text-3xl font-bold" id="mutexValue">1</div>
+                    <div class="text-xs mt-1 text-slate-500">Exclusive access</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Producer & Consumer Coof -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Producer -->
+            <section class="glass-card rounded-2xl p-5 producer-panel">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fas fa-industry"></i> Producer
+                    </h3>
+                    <span id="producerState" class="text-xs px-2 py-1 rounded bg-slate-700 text-slate-400">IDLE</span>
+                </div>
+                
+                <div class="bg-slate-900 rounded-lg p-3 mono text-xs space-y-1 mb-4">
+                    <div id="p-line-1" class="code-line px-2 py-1 rounded"><span class="text-purple-400">while</span> (true) {</div>
+                    <div id="p-line-2" class="code-line px-2 py-1 rounded pl-4"><span class="text-slate-500">// produce item</span></div>
+                    <div id="p-line-3" class="code-line px-2 py-1 rounded pl-4 text-emerald-300">wait(empty);</div>
+                    <div id="p-line-4" class="code-line px-2 py-1 rounded pl-4 text-cyan-300">wait(mutex);</div>
+                    <div id="p-line-5" class="code-line px-2 py-1 rounded pl-4"><span class="text-slate-500">// add to buffer</span></div>
+                    <div id="p-line-6" class="code-line px-2 py-1 rounded pl-4 text-cyan-300">signal(mutex);</div>
+                    <div id="p-line-7" class="code-line px-2 py-1 rounded pl-4 text-amber-300">signal(full);</div>
+                    <div id="p-line-8" class="code-line px-2 py-1 rounded">}</div>
+                </div>
+                
+                <button id="btnProduce" class="btn-action w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-plus-circle"></i> Produce Item
+                </button>
+            </section>
+
+            <!-- Consumer -->
+            <section class="glass-card rounded-2xl p-5 consumer-panel">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fas fa-shopping-cart"></i> Consumer
+                    </h3>
+                    <span id="consumerState" class="text-xs px-2 py-1 rounded bg-slate-700 text-slate-400">IDLE</span>
+                </div>
+                
+                <div class="bg-slate-900 rounded-lg p-3 mono text-xs space-y-1 mb-4">
+                    <div id="c-line-1" class="code-line px-2 py-1 rounded"><span class="text-purple-400">while</span> (true) {</div>
+                    <div id="c-line-2" class="code-line px-2 py-1 rounded pl-4 text-amber-300">wait(full);</div>
+                    <div id="c-line-3" class="code-line px-2 py-1 rounded pl-4 text-cyan-300">wait(mutex);</div>
+                    <div id="c-line-4" class="code-line px-2 py-1 rounded pl-4"><span class="text-slate-500">// remove from buffer</span></div>
+                    <div id="c-line-5" class="code-line px-2 py-1 rounded pl-4 text-cyan-300">signal(mutex);</div>
+                    <div id="c-line-6" class="code-line px-2 py-1 rounded pl-4 text-emerald-300">signal(empty);</div>
+                    <div id="c-line-7" class="code-line px-2 py-1 rounded pl-4"><span class="text-slate-500">// consume item</span></div>
+                    <div id="c-line-8" class="code-line px-2 py-1 rounded">}</div>
+                </div>
+                
+                <button id="btnConsume" class="btn-action w-full px-4 py-3 bg-amber-600 hover:bg-amber-500 rounded-lg font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-minus-circle"></i> Consume Item
+                </button>
+            </section>
+        </div>
+
+        <!-- Controls -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-sliders-h text-purple-400"></i> Simulation Control
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="text-sm text-slate-400 block mb-2">Buffer Size (N):</label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" id="bufferSizeSlider" min="3" max="10" value="5" class="flex-1 accent-purple-500">
+                        <span id="bufferSizeValue" class="mono text-purple-400 w-8 text-center">5</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm text-slate-400 block mb-2">Animation Speed:</label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" id="speedSlider" min="100" max="1000" value="400" class="flex-1 accent-purple-500">
+                        <span id="speedValue" class="mono text-purple-400 w-16 text-right">400ms</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 mt-4">
+                <button id="btnAutoRun" class="btn-action px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium">
+                    <i class="fas fa-play mr-1"></i> Auto Run
+                </button>
+                <button id="btnStop" class="btn-action px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-sm font-medium" disabled>
+                    <i class="fas fa-stop mr-1"></i> Stop
+                </button>
+                <button id="btnReset" class="btn-action px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium">
+                    <i class="fas fa-redo mr-1"></i> Reset
+                </button>
+            </div>
+        </section>
+
+        <!-- Operation Log -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-amber-400"></i> Operations Log
+            </h3>
+            
+            <div id="operationLog" class="bg-slate-900 rounded-lg p-4 h-48 overflow-y-auto mono text-xs space-y-1">
+                <div class="text-slate-500">// Operations will appear here...</div>
+            </div>
+        </section>
+
+        <!-- Theory -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-amber-400"></i> Producer-Consumer Problem
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-purple-400 mb-3">Description:</h4>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span><strong>Producer</strong>: generates data and puts it in buffer</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span><strong>Consumer</strong>: removes data from buffer and processes it</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-emerald-400 mt-1"></i>
+                            <span><strong>Buffer</strong>: fixed size N (bounded buffer)</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-cyan-400 mb-3">The 3 Semaphores:</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-2 rounded bg-emerald-900/30 border border-emerald-500/30">
+                            <coof class="text-emerald-400">empty = N</code>: free slots available
+                        </div>
+                        <div class="p-2 rounded bg-amber-900/30 border border-amber-500/30">
+                            <coof class="text-amber-400">full = 0</code>: occupied slots available
+                        </div>
+                        <div class="p-2 rounded bg-cyan-900/30 border border-cyan-500/30">
+                            <coof class="text-cyan-400">mutex = 1</code>: exclusive access to buffer
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto mt-8 text-center text-slate-500 text-sm pb-4">
+        <div class="glass-card rounded-xl py-3 px-6 inline-block">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            bufferSize: 5,
+            buffer: [],
+            empty: 5,
+            full: 0,
+            mutex: 1,
+            totalProduced: 0,
+            totalConsumed: 0,
+            nextItemId: 1,
+            speed: 400,
+            isAutoRunning: false,
+            autoInterval: null,
+            producerBlocked: false,
+            consumerBlocked: false
+        };
+
+        // DOM Elements
+        const elements = {
+            bufferContainer: document.getElementById('bufferContainer'),
+            itemsInBuffer: document.getElementById('itemsInBuffer'),
+            totalProduced: document.getElementById('totalProduced'),
+            totalConsumed: document.getElementById('totalConsumed'),
+            emptyValue: document.getElementById('emptyValue'),
+            fullValue: document.getElementById('fullValue'),
+            mutexValue: document.getElementById('mutexValue'),
+            semEmpty: document.getElementById('semEmpty'),
+            semFull: document.getElementById('semFull'),
+            semMutex: document.getElementById('semMutex'),
+            producerStatus: document.getElementById('producerStatus'),
+            consumerStatus: document.getElementById('consumerStatus'),
+            producerState: document.getElementById('producerState'),
+            consumerState: document.getElementById('consumerState'),
+            operationLog: document.getElementById('operationLog'),
+            bufferSizeDisplay: document.getElementById('bufferSizeDisplay')
+        };
+
+        // Functions
+        function initBuffer() {
+            elements.bufferContainer.innerHTML = '';
+            for (let i = 0; i < state.bufferSize; i++) {
+                const slot = document.createdeElement('div');
+                slot.id = `slot-${i}`;
+                slot.className = 'buffer-slot empty w-12 h-12 rounded-lg flex items-center justify-center';
+                slot.innerHTML = '<span class="text-slate-600 text-xs">—</span>';
+                elements.bufferContainer.appendChild(slot);
+            }
+        }
+
+        function updateBufferDisplay() {
+            for (let i = 0; i < state.bufferSize; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                if (i < state.buffer.length) {
+                    slot.className = 'buffer-slot filled w-12 h-12 rounded-lg flex items-center justify-center';
+                    slot.innerHTML = `<span class="text-white font-bold text-sm">${state.buffer[i]}</span>`;
+                } else {
+                    slot.className = 'buffer-slot empty w-12 h-12 rounded-lg flex items-center justify-center';
+                    slot.innerHTML = '<span class="text-slate-600 text-xs">—</span>';
+                }
+            }
+        }
+
+        function updateSemaphoreDisplay() {
+            elements.emptyValue.textContent = state.empty;
+            elements.fullValue.textContent = state.full;
+            elements.mutexValue.textContent = state.mutex;
+            
+            // Update visual states
+            elements.semEmpty.className = `semaphore-indicator ${state.empty > 0 ? 'positive' : 'zero'} p-4 rounded-xl border-2 text-center`;
+            elements.semFull.className = `semaphore-indicator ${state.full > 0 ? 'positive' : 'zero'} p-4 rounded-xl border-2 text-center`;
+            elements.semMutex.className = `semaphore-indicator ${state.mutex > 0 ? 'positive' : 'zero'} p-4 rounded-xl border-2 text-center`;
+        }
+
+        function updateStats() {
+            elements.itemsInBuffer.textContent = state.buffer.length;
+            elements.totalProduced.textContent = state.totalProduced;
+            elements.totalConsumed.textContent = state.totalConsumed;
+            
+            [elements.itemsInBuffer, elements.totalProduced, elements.totalConsumed].forEach(el => {
+                el.classList.add('changed');
+                setTimeout(() => el.classList.remove('changed'), 300);
+            });
+        }
+
+        function highlightCode(actor, lineNum, isBlocked = false) {
+            const prefix = actor === 'producer' ? 'p' : 'c';
+            
+            // Clear previous highlights
+            for (let i = 1; i <= 8; i++) {
+                const line = document.getElementById(`${prefix}-line-${i}`);
+                if (line) line.classList.remove('executing', 'blocked');
+            }
+            
+            if (lineNum > 0) {
+                const line = document.getElementById(`${prefix}-line-${lineNum}`);
+                if (line) {
+                    line.classList.add(isBlocked ? 'blocked' : 'executing');
+                }
+            }
+        }
+
+        function setActorState(actor, state, isBlocked = false) {
+            const stateEl = actor === 'producer' ? elements.producerState : elements.consumerState;
+            const statusEl = actor === 'producer' ? elements.producerStatus : elements.consumerStatus;
+            
+            stateEl.textContent = state;
+            
+            statusEl.classList.remove('active', 'blocked');
+            if (isBlocked) {
+                statusEl.classList.add('blocked');
+                stateEl.className = 'text-xs px-2 py-1 rounded bg-red-600 text-white';
+            } else if (state !== 'IDLE') {
+                statusEl.classList.add('active');
+                stateEl.className = 'text-xs px-2 py-1 rounded bg-emerald-600 text-white';
+            } else {
+                stateEl.className = 'text-xs px-2 py-1 rounded bg-slate-700 text-slate-400';
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const colors = {
+                info: 'text-slate-400',
+                producer: 'text-emerald-400',
+                consumer: 'text-amber-400',
+                blocked: 'text-red-400',
+                semaphore: 'text-cyan-400'
+            };
+            
+            const entry = document.createdeElement('div');
+            entry.className = colors[type];
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            elements.operationLog.appendChild(entry);
+            elements.operationLog.scrollTop = elements.operationLog.scrollHeight;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function produce() {
+            if (state.producerBlocked) return;
+            
+            // Step 1: Produce item
+            highlightCode('producer', 2);
+            setActorState('producer', 'PRODUCING');
+            addLog('Producer: Producing item...', 'producer');
+            await sleep(state.speed);
+            
+            // Step 2: wait(empty)
+            highlightCode('producer', 3);
+            addLog(`Producer: wait(empty) - empty=${state.empty}`, 'semaphore');
+            
+            if (state.empty <= 0) {
+                highlightCode('producer', 3, true);
+                setActorState('producer', 'BLOCKED', true);
+                state.producerBlocked = true;
+                addLog('Producer: BLOCKED! Buffer full, waiting for empty slot...', 'blocked');
+                return;
+            }
+            
+            state.empty--;
+            updateSemaphoreDisplay();
+            await sleep(state.speed);
+            
+            // Step 3: wait(mutex)
+            highlightCode('producer', 4);
+            addLog(`Producer: wait(mutex) - mutex=${state.mutex}`, 'semaphore');
+            state.mutex--;
+            updateSemaphoreDisplay();
+            await sleep(state.speed);
+            
+            // Step 4: Add to buffer
+            highlightCode('producer', 5);
+            const itemId = state.nextItemId++;
+            state.buffer.push(itemId);
+            state.totalProduced++;
+            
+            // Animate slot
+            const filledSlot = document.getElementById(`slot-${state.buffer.length - 1}`);
+            filledSlot.classList.add('producing');
+            updateBufferDisplay();
+            updateStats();
+            addLog(`Producer: Added item #${itemId} to buffer (position ${state.buffer.length})`, 'producer');
+            await sleep(state.speed);
+            filledSlot.classList.remove('producing');
+            
+            // Step 5: signal(mutex)
+            highlightCode('producer', 6);
+            state.mutex++;
+            updateSemaphoreDisplay();
+            addLog(`Producer: signal(mutex) - mutex=${state.mutex}`, 'semaphore');
+            await sleep(state.speed);
+            
+            // Step 6: signal(full)
+            highlightCode('producer', 7);
+            state.full++;
+            updateSemaphoreDisplay();
+            addLog(`Producer: signal(full) - full=${state.full}`, 'semaphore');
+            
+            // Check if consumer was blocked
+            if (state.consumerBlocked && state.full > 0) {
+                state.consumerBlocked = false;
+                setActorState('consumer', 'IDLE');
+                highlightCode('consumer', 0);
+                addLog('Consumer: UNBLOCKED! Item available in buffer.', 'consumer');
+            }
+            
+            await sleep(state.speed);
+            
+            highlightCode('producer', 0);
+            setActorState('producer', 'IDLE');
+        }
+
+        async function consume() {
+            if (state.consumerBlocked) return;
+            
+            // Step 1: wait(full)
+            highlightCode('consumer', 2);
+            setActorState('consumer', 'CONSUMING');
+            addLog(`Consumer: wait(full) - full=${state.full}`, 'semaphore');
+            
+            if (state.full <= 0) {
+                highlightCode('consumer', 2, true);
+                setActorState('consumer', 'BLOCKED', true);
+                state.consumerBlocked = true;
+                addLog('Consumer: BLOCKED! Buffer empty, waiting for item...', 'blocked');
+                return;
+            }
+            
+            state.full--;
+            updateSemaphoreDisplay();
+            await sleep(state.speed);
+            
+            // Step 2: wait(mutex)
+            highlightCode('consumer', 3);
+            addLog(`Consumer: wait(mutex) - mutex=${state.mutex}`, 'semaphore');
+            state.mutex--;
+            updateSemaphoreDisplay();
+            await sleep(state.speed);
+            
+            // Step 3: Remove from buffer
+            highlightCode('consumer', 4);
+            const consumingSlot = document.getElementById(`slot-${state.buffer.length - 1}`);
+            consumingSlot.classList.add('consuming');
+            await sleep(state.speed / 2);
+            
+            const item = state.buffer.shift();
+            state.totalConsumed++;
+            updateBufferDisplay();
+            updateStats();
+            addLog(`Consumer: Removed item #${item} from buffer`, 'consumer');
+            await sleep(state.speed / 2);
+            
+            // Step 4: signal(mutex)
+            highlightCode('consumer', 5);
+            state.mutex++;
+            updateSemaphoreDisplay();
+            addLog(`Consumer: signal(mutex) - mutex=${state.mutex}`, 'semaphore');
+            await sleep(state.speed);
+            
+            // Step 5: signal(empty)
+            highlightCode('consumer', 6);
+            state.empty++;
+            updateSemaphoreDisplay();
+            addLog(`Consumer: signal(empty) - empty=${state.empty}`, 'semaphore');
+            
+            // Check if producer was blocked
+            if (state.producerBlocked && state.empty > 0) {
+                state.producerBlocked = false;
+                setActorState('producer', 'IDLE');
+                highlightCode('producer', 0);
+                addLog('Producer: UNBLOCKED! Empty slot available in buffer.', 'producer');
+            }
+            
+            await sleep(state.speed);
+            
+            // Step 6: Consume
+            highlightCode('consumer', 7);
+            addLog(`Consumer: Consuming item #${item}...`, 'consumer');
+            await sleep(state.speed);
+            
+            highlightCode('consumer', 0);
+            setActorState('consumer', 'IDLE');
+        }
+
+        function reset() {
+            stopAuto();
+            state.buffer = [];
+            state.empty = state.bufferSize;
+            state.full = 0;
+            state.mutex = 1;
+            state.totalProduced = 0;
+            state.totalConsumed = 0;
+            state.nextItemId = 1;
+            state.producerBlocked = false;
+            state.consumerBlocked = false;
+            
+            initBuffer();
+            updateSemaphoreDisplay();
+            updateStats();
+            highlightCode('producer', 0);
+            highlightCode('consumer', 0);
+            setActorState('producer', 'IDLE');
+            setActorState('consumer', 'IDLE');
+            elements.operationLog.innerHTML = '<div class="text-slate-500">// Operations will appear here...</div>';
+        }
+
+        function startAuto() {
+            state.isAutoRunning = true;
+            document.getElementById('btnAutoRun').disabled = true;
+            document.getElementById('btnStop').disabled = false;
+            
+            state.autoInterval = setInterval(() => {
+                if (Math.random() < 0.5) {
+                    produce();
+                } else {
+                    consume();
+                }
+            }, state.speed * 3);
+        }
+
+        function stopAuto() {
+            state.isAutoRunning = false;
+            if (state.autoInterval) {
+                clearInterval(state.autoInterval);
+                state.autoInterval = null;
+            }
+            document.getElementById('btnAutoRun').disabled = false;
+            document.getElementById('btnStop').disabled = true;
+        }
+
+        // Event Listeners
+        document.getElementById('btnProduce').addEventListener('click', produce);
+        document.getElementById('btnConsume').addEventListener('click', consume);
+        document.getElementById('btnReset').addEventListener('click', reset);
+        document.getElementById('btnAutoRun').addEventListener('click', startAuto);
+        document.getElementById('btnStop').addEventListener('click', stopAuto);
+
+        document.getElementById('bufferSizeSlider').addEventListener('input', (e) => {
+            state.bufferSize = parseInt(e.target.value);
+            document.getElementById('bufferSizeValue').textContent = state.bufferSize;
+            elements.bufferSizeDisplay.textContent = state.bufferSize;
+            reset();
+        });
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            state.speed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = state.speed + 'ms';
+        });
+
+        // Initialize
+        initBuffer();
+        updateSemaphoreDisplay();
+    </script>
+</body>
+</html>

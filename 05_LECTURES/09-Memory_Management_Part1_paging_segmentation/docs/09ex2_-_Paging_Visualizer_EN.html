@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paging Visualiser | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .page-cell, .frame-cell {
+            transition: all 0.3s ease;
+        }
+        .page-cell:hover, .frame-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .page-cell.highlighted, .frame-cell.highlighted {
+            animation: highlightPulse 1s ease;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        
+        .translation-arrow {
+            stroke-dasharray: 5;
+            animation: dashMove 0.5s linear infinite;
+        }
+        @keyframes dashMove {
+            to { stroke-dashoffset: -10; }
+        }
+        
+        .page-fault-flash {
+            animation: faultFlash 0.5s ease;
+        }
+        @keyframes faultFlash {
+            0%, 100% { background-color: inherit; }
+            50% { background-color: #fecaca; }
+        }
+        
+        .tlb-hit {
+            animation: tlbHit 0.5s ease;
+        }
+        @keyframes tlbHit {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: #bbf7d0; }
+            100% { transform: scale(1); }
+        }
+        
+        .address-bit {
+            display: inline-block;
+            width: 20px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border: 1px solid #d4d4d4;
+            margin: 0 1px;
+            font-size: 12px;
+        }
+        .address-bit.page-num { background-color: #dbeafe; }
+        .address-bit.offset { background-color: #fef3c7; }
+        .address-bit.frame-num { background-color: #d1fae5; }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-file-alt text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Paging Visualiser</h1>
+                    <p class="text-xs text-stone-500">Translatere Adrese Logice → Fizice</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Address Translation Visualization -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-exchange-alt text-indigo-500"></i>
+                        Translatere Address
+                    </h2>
+                    
+                    <!-- Address Input -->
+                    <div class="mb-6 p-4 bg-stone-50 rounded-lg">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div>
+                                <label class="text-xs text-stone-500 block mb-1">Address Logica (decimala)</label>
+                                <input type="number" id="logicalAddress" value="1234" min="0" class="w-32 p-2 border border-stone-300 rounded mono text-sm">
+                            </div>
+                            <button onclick="translateAddress()" class="btn-action px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-medium">
+                                <i class="fas fa-arrow-right mr-1"></i> Translate
+                            </button>
+                            <div id="physicalAddressResult" class="text-lg font-bold text-green-600 mono hidden">
+                                → Fizica: <span id="physicalValue">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Binary Breakdown -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3">Descompunere Binara</h3>
+                        <div class="flex flex-wrap gap-8">
+                            <div>
+                                <div class="text-xs text-stone-500 mb-2">Address Logica</div>
+                                <div id="logicalBinary" class="flex">
+                                    <!-- Binary bits will be rendered here -->
+                                </div>
+                                <div class="flex mt-1 text-xs">
+                                    <div id="pageNumLabel" class="text-blue-600"></div>
+                                    <div id="offsetLabel" class="text-amber-600 ml-auto"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-2xl text-stone-400">→</div>
+                            <div>
+                                <div class="text-xs text-stone-500 mb-2">Address Fizica</div>
+                                <div id="physicalBinary" class="flex">
+                                    <!-- Binary bits will be rendered here -->
+                                </div>
+                                <div class="flex mt-1 text-xs">
+                                    <div id="frameNumLabel" class="text-green-600"></div>
+                                    <div id="offsetLabel2" class="text-amber-600 ml-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Translation Steps -->
+                    <div id="translationSteps" class="p-4 bg-blue-50 rounded-lg text-sm space-y-2">
+                        <div class="text-blue-800">Introduceti o address logica and apasati "Translate"</div>
+                    </div>
+                </div>
+
+                <!-- Memory Visualization -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Logical Memory (Pages) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-file text-blue-500"></i>
+                            Memorie Logica (Pagini)
+                        </h3>
+                        <div id="logicalMemory" class="grid grid-cols-4 gap-1">
+                            <!-- Pages will be rendered here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Physical Memory (Frames) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-memory text-green-500"></i>
+                            Physical Memory (Frame-uri)
+                        </h3>
+                        <div id="physicalMemory" class="grid grid-cols-4 gap-1">
+                            <!-- Frames will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-table text-purple-500"></i>
+                        Page Table
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-stone-50">
+                                    <th class="p-2 text-left">Page #</th>
+                                    <th class="p-2 text-center">Valid</th>
+                                    <th class="p-2 text-center">Frame #</th>
+                                    <th class="p-2 text-center">Dirty</th>
+                                    <th class="p-2 text-center">Referenced</th>
+                                    <th class="p-2 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pageTable">
+                                <!-- Page table entries will be rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TLB -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                            <i class="fas fa-bolt text-amber-500"></i>
+                            TLB (Translation Lookaside Buffer)
+                        </h3>
+                        <div class="flex items-center gap-4 text-xs">
+                            <span>Hits: <strong id="tlbHits" class="text-green-600">0</strong></span>
+                            <span>Misses: <strong id="tlbMisses" class="text-red-600">0</strong></span>
+                            <span>Hit Rate: <strong id="tlbHitRate" class="text-blue-600">0%</strong></span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-amber-50">
+                                    <th class="p-2 text-left">Entry</th>
+                                    <th class="p-2 text-center">Page #</th>
+                                    <th class="p-2 text-center">Frame #</th>
+                                    <th class="p-2 text-center">Valid</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tlbTable">
+                                <!-- TLB entries will be rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button onclick="clearTLB()" class="mt-2 text-xs text-red-600 hover:text-red-800">
+                        <i class="fas fa-trash mr-1"></i> Goleste TLB
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Configuration -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cogs text-indigo-500 mr-2"></i>configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Dimensiune Page (bytes)</label>
+                            <select id="pageSize" class="w-full p-2 border border-stone-300 rounded text-sm" onchange="updateConfig()">
+                                <option value="256">256 B (8 biti offset)</option>
+                                <option value="512">512 B (9 biti offset)</option>
+                                <option value="1024" selected>1 KB (10 biti offset)</option>
+                                <option value="4096">4 KB (12 biti offset)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Number Pagini</label>
+                            <input type="number" id="numPages" value="16" min="4" max="64" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Number Frame-uri</label>
+                            <input type="number" id="numFrames" value="8" min="4" max="32" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Dimensiune TLB</label>
+                            <input type="number" id="tlbSize" value="4" min="2" max="16" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
+                        </div>
+                        <button onclick="initializeSystem()" class="w-full p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded text-sm transition-colors">
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Actions Rapide
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="randomTranslation()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
+                            <i class="fas fa-random mr-1"></i> Translatere Aleatorie
+                        </button>
+                        <button onclick="simulatePageFault()" class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Simuleaza Page Fault
+                        </button>
+                        <button onclick="runAccesssSequence()" class="btn-action w-full p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded text-sm">
+                            <i class="fas fa-play mr-1"></i> Secventa de Accessuri
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-chart-bar text-green-500 mr-2"></i>Statistici
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between p-2 bg-stone-50 rounded">
+                            <span>Pagini in memorie:</span>
+                            <span id="pagesInMemory" class="font-bold mono">0</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-stone-50 rounded">
+                            <span>Frame-uri libere:</span>
+                            <span id="freeFrames" class="font-bold mono">0</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-stone-50 rounded">
+                            <span>Page Faults:</span>
+                            <span id="pageFaults" class="font-bold mono text-red-600">0</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-stone-50 rounded">
+                            <span>Accessuri totale:</span>
+                            <span id="totalAccessses" class="font-bold mono">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Calculation Info -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl shadow-sm border border-indigo-200 p-4">
+                    <h3 class="text-sm font-semibold text-indigo-800 mb-3">
+                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formule
+                    </h3>
+                    <div class="space-y-2 text-xs text-indigo-700 mono">
+                        <div class="p-2 bg-white/50 rounded">
+                            page_num = addr / page_size
+                        </div>
+                        <div class="p-2 bg-white/50 rounded">
+                            offset = addr % page_size
+                        </div>
+                        <div class="p-2 bg-white/50 rounded">
+                            physical = frame * page_size + offset
+                        </div>
+                        <div class="p-2 bg-white/50 rounded">
+                            offset_bits = log₂(page_size)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Educational Info -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>Concepte
+                    </h3>
+                    <div class="space-y-2 text-xs text-stone-600">
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <strong>Page:</strong> Bloc de dimensiune fixa in memoria logica
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg">
+                            <strong>Frame:</strong> Bloc corespunzator in memoria fizica
+                        </div>
+                        <div class="p-2 bg-amber-50 rounded-lg">
+                            <strong>TLB:</strong> Cache for traduceri recente (foarte rapid)
+                        </div>
+                        <div class="p-2 bg-red-50 rounded-lg">
+                            <strong>Page Fault:</strong> Pagina nu este in memorie, must incarcata
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let pageSize = 1024;
+        let numPages = 16;
+        let numFrames = 8;
+        let tlbSize = 4;
+        
+        let pageTable = [];
+        let tlb = [];
+        let physicalMemory = [];
+        
+        let stats = {
+            pageFaults: 0,
+            totalAccessses: 0,
+            tlbHits: 0,
+            tlbMisses: 0
+        };
+
+        // ==================== Initialization ====================
+        function initializeSystem() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            numPages = parseInt(document.getElementById('numPages').value);
+            numFrames = parseInt(document.getElementById('numFrames').value);
+            tlbSize = parseInt(document.getElementById('tlbSize').value);
+            
+            // Initialize page table
+            pageTable = [];
+            for (let i = 0; i < numPages; i++) {
+                pageTable.push({
+                    pageNum: i,
+                    frameNum: null,
+                    valid: false,
+                    dirty: false,
+                    referenced: false
+                });
+            }
+            
+            // Initially map some pages randomly
+            const initialPages = Math.min(numFrames, Math.floor(numPages / 2));
+            const shuffledFrames = Array.from({length: numFrames}, (_, i) => i)
+                .sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < initialPages; i++) {
+                const pageIdx = Math.floor(Math.random() * numPages);
+                if (!pageTable[pageIdx].valid) {
+                    pageTable[pageIdx].valid = true;
+                    pageTable[pageIdx].frameNum = shuffledFrames[i];
+                }
+            }
+            
+            // Initialize physical memory
+            physicalMemory = Array(numFrames).fill(null);
+            pageTable.forEach((entry, pageNum) => {
+                if (entry.valid) {
+                    physicalMemory[entry.frameNum] = pageNum;
+                }
+            });
+            
+            // Clear TLB
+            tlb = Array(tlbSize).fill(null).map(() => ({ pageNum: null, frameNum: null, valid: false }));
+            
+            // Reset stats
+            stats = { pageFaults: 0, totalAccessses: 0, tlbHits: 0, tlbMisses: 0 };
+            
+            renderAll();
+        }
+
+        function updateConfig() {
+            // Just for preview, actual update happens on initialize
+        }
+
+        // ==================== Address Translation ====================
+        function translateAddress() {
+            const logicalAddr = parseInt(document.getElementById('logicalAddress').value);
+            
+            if (isNaN(logicalAddr) || logicalAddr < 0) {
+                alert('Address invalida!');
+                return;
+            }
+            
+            const maxAddr = numPages * pageSize - 1;
+            if (logicalAddr > maxAddr) {
+                alert(`Adresa ${logicalAddr} depaseste spatiul de adresare (max: ${maxAddr})`);
+                return;
+            }
+            
+            stats.totalAccessses++;
+            
+            const pageNum = Math.floor(logicalAddr / pageSize);
+            const offset = logicalAddr % pageSize;
+            
+            // Check TLB first
+            let frameNum = null;
+            let tlbHit = false;
+            
+            for (let i = 0; i < tlb.length; i++) {
+                if (tlb[i].valid && tlb[i].pageNum === pageNum) {
+                    frameNum = tlb[i].frameNum;
+                    tlbHit = true;
+                    stats.tlbHits++;
+                    
+                    // Highlight TLB entry
+                    document.querySelectorAll('#tlbTable tr')[i + 1]?.classList.add('tlb-hit');
+                    setTimeout(() => {
+                        document.querySelectorAll('#tlbTable tr')[i + 1]?.classList.remove('tlb-hit');
+                    }, 500);
+                    break;
+                }
+            }
+            
+            let pageFault = false;
+            
+            if (!tlbHit) {
+                stats.tlbMisses++;
+                
+                // Check page table
+                if (pageTable[pageNum].valid) {
+                    frameNum = pageTable[pageNum].frameNum;
+                    pageTable[pageNum].referenced = true;
+                    
+                    // Update TLB (FIFO replacement)
+                    updateTLB(pageNum, frameNum);
+                } else {
+                    // Page fault!
+                    pageFault = true;
+                    stats.pageFaults++;
+                    
+                    // Handle page fault (simplified: just allocate a free frame or replace)
+                    frameNum = handlePageFault(pageNum);
+                    
+                    // Flash effect
+                    document.getElementById('translationSteps').classList.add('page-fault-flash');
+                    setTimeout(() => {
+                        document.getElementById('translationSteps').classList.remove('page-fault-flash');
+                    }, 500);
+                }
+            }
+            
+            const physicalAddr = frameNum * pageSize + offset;
+            
+            // Update UI
+            renderBinaryBreakdown(logicalAddr, physicalAddr, pageNum, offset, frameNum);
+            renderTranslationSteps(logicalAddr, pageNum, offset, frameNum, physicalAddr, tlbHit, pageFault);
+            
+            document.getElementById('physicalAddressResult').classList.remove('hidden');
+            document.getElementById('physicalValue').textContent = physicalAddr;
+            
+            // Highlight relevant cells
+            highlightCells(pageNum, frameNum);
+            
+            renderAll();
+        }
+
+        function handlePageFault(pageNum) {
+            // Find a free frame
+            let freeFrame = physicalMemory.findIndex(p => p === null);
+            
+            if (freeFrame === -1) {
+                // Need to replace a page (simple FIFO)
+                freeFrame = Math.floor(Math.random() * numFrames);
+                const victimPage = physicalMemory[freeFrame];
+                
+                if (victimPage !== null) {
+                    pageTable[victimPage].valid = false;
+                    pageTable[victimPage].frameNum = null;
+                    
+                    // Invalidate in TLB
+                    tlb.forEach(entry => {
+                        if (entry.pageNum === victimPage) {
+                            entry.valid = false;
+                        }
+                    });
+                }
+            }
+            
+            // Map the page
+            pageTable[pageNum].valid = true;
+            pageTable[pageNum].frameNum = freeFrame;
+            pageTable[pageNum].referenced = true;
+            physicalMemory[freeFrame] = pageNum;
+            
+            // Update TLB
+            updateTLB(pageNum, freeFrame);
+            
+            return freeFrame;
+        }
+
+        function updateTLB(pageNum, frameNum) {
+            // Check if already in TLB
+            for (let entry of tlb) {
+                if (entry.pageNum === pageNum) {
+                    entry.frameNum = frameNum;
+                    entry.valid = true;
+                    return;
+                }
+            }
+            
+            // Find invalid entry or replace oldest (FIFO)
+            let replaceIdx = tlb.findIndex(e => !e.valid);
+            if (replaceIdx === -1) {
+                // Shift and add at end (FIFO)
+                tlb.shift();
+                tlb.push({ pageNum, frameNum, valid: true });
+            } else {
+                tlb[replaceIdx] = { pageNum, frameNum, valid: true };
+            }
+        }
+
+        function clearTLB() {
+            tlb = Array(tlbSize).fill(null).map(() => ({ pageNum: null, frameNum: null, valid: false }));
+            stats.tlbHits = 0;
+            stats.tlbMisses = 0;
+            renderAll();
+        }
+
+        // ==================== Rendering ====================
+        function renderAll() {
+            renderLogicalMemory();
+            renderPhysicalMemory();
+            renderPageTable();
+            renderTLB();
+            renderStats();
+        }
+
+        function renderBinaryBreakdown(logical, physical, pageNum, offset, frameNum) {
+            const offsetBits = Math.log2(pageSize);
+            const pageBits = Math.ceil(Math.log2(numPages));
+            const frameBits = Math.ceil(Math.log2(numFrames));
+            const totalLogicalBits = pageBits + offsetBits;
+            const totalPhysicalBits = frameBits + offsetBits;
+            
+            // Logical address binary
+            const logicalBin = logical.toString(2).padStart(totalLogicalBits, '0');
+            document.getElementById('logicalBinary').innerHTML = 
+                logicalBin.split('').map((bit, idx) => 
+                    `<span class="address-bit ${idx < pageBits ? 'page-num' : 'offset'} mono">${bit}</span>`
+                ).join('');
+            
+            document.getElementById('pageNumLabel').textContent = `Page: ${pageNum}`;
+            document.getElementById('offsetLabel').textContent = `Offset: ${offset}`;
+            
+            // Physical address binary
+            const physicalBin = physical.toString(2).padStart(totalPhysicalBits, '0');
+            document.getElementById('physicalBinary').innerHTML = 
+                physicalBin.split('').map((bit, idx) => 
+                    `<span class="address-bit ${idx < frameBits ? 'frame-num' : 'offset'} mono">${bit}</span>`
+                ).join('');
+            
+            document.getElementById('frameNumLabel').textContent = `Frame: ${frameNum}`;
+            document.getElementById('offsetLabel2').textContent = `Offset: ${offset}`;
+        }
+
+        function renderTranslationSteps(logical, pageNum, offset, frameNum, physical, tlbHit, pageFault) {
+            const steps = document.getElementById('translationSteps');
+            steps.innerHTML = `
+                <div class="font-semibold text-blue-800 mb-2">steps Translatere for adresa ${logical}:</div>
+                <ol class="list-decimal list-inside space-y-1 text-blue-700">
+                    <li>Extrage numarul paginii: ${logical} / ${pageSize} = <strong>${pageNum}</strong></li>
+                    <li>Extrage offset-ul: ${logical} % ${pageSize} = <strong>${offset}</strong></li>
+                    <li>Check TLB: ${tlbHit ? '<span class="text-green-600 font-bold">HIT!</span>' : '<span class="text-amber-600">MISS</span>'}</li>
+                    ${!tlbHit ? `<li>Consulta tabela de pagini for pagina ${pageNum}</li>` : ''}
+                    ${pageFault ? '<li class="text-red-600 font-bold">⚠️ PAGE FAULT! Pagina incarcata in frame-ul ' + frameNum + '</li>' : ''}
+                    <li>Frame-ul corespunzator: <strong>${frameNum}</strong></li>
+                    <li>Calculeaza adresa fizica: ${frameNum} × ${pageSize} + ${offset} = <strong class="text-green-700">${physical}</strong></li>
+                </ol>
+            `;
+        }
+
+        function renderLogicalMemory() {
+            const container = document.getElementById('logicalMemory');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < numPages; i++) {
+                const entry = pageTable[i];
+                const div = document.createElement('div');
+                div.className = `page-cell p-2 rounded text-center text-xs cursor-pointer ${entry.valid ? 'bg-blue-100 border border-blue-300' : 'bg-stone-100 border border-stone-200'}`;
+                div.innerHTML = `
+                    <div class="font-bold">P${i}</div>
+                    <div class="text-stone-500">${entry.valid ? 'F' + entry.frameNum : '-'}</div>
+                `;
+                div.dataset.page = i;
+                div.onclick = () => accessPage(i);
+                container.appendChild(div);
+            }
+        }
+
+        function renderPhysicalMemory() {
+            const container = document.getElementById('physicalMemory');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < numFrames; i++) {
+                const pageNum = physicalMemory[i];
+                const div = document.createElement('div');
+                div.className = `frame-cell p-2 rounded text-center text-xs ${pageNum !== null ? 'bg-green-100 border border-green-300' : 'bg-stone-100 border border-stone-200'}`;
+                div.innerHTML = `
+                    <div class="font-bold">F${i}</div>
+                    <div class="text-stone-500">${pageNum !== null ? 'P' + pageNum : '-'}</div>
+                `;
+                div.dataset.frame = i;
+                container.appendChild(div);
+            }
+        }
+
+        function renderPageTable() {
+            const tbody = document.getElementById('pageTable');
+            tbody.innerHTML = pageTable.map((entry, idx) => `
+                <tr class="${entry.valid ? 'bg-green-50' : 'bg-stone-50'} hover:bg-blue-50">
+                    <td class="p-2 font-mono font-bold">P${entry.pageNum}</td>
+                    <td class="p-2 text-center">
+                        <span class="${entry.valid ? 'text-green-600' : 'text-red-600'}">
+                            ${entry.valid ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td class="p-2 text-center mono">${entry.frameNum !== null ? entry.frameNum : '-'}</td>
+                    <td class="p-2 text-center">${entry.dirty ? '✓' : '-'}</td>
+                    <td class="p-2 text-center">${entry.referenced ? '✓' : '-'}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="togglePageValidity(${idx})" class="text-xs text-blue-600 hover:text-blue-800">
+                            ${entry.valid ? 'Invalidate' : 'Load'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTLB() {
+            const tbody = document.getElementById('tlbTable');
+            tbody.innerHTML = tlb.map((entry, idx) => `
+                <tr class="${entry.valid ? 'bg-amber-50' : 'bg-stone-50'}">
+                    <td class="p-2">${idx}</td>
+                    <td class="p-2 text-center mono">${entry.pageNum !== null ? entry.pageNum : '-'}</td>
+                    <td class="p-2 text-center mono">${entry.frameNum !== null ? entry.frameNum : '-'}</td>
+                    <td class="p-2 text-center">${entry.valid ? '✓' : '-'}</td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('tlbHits').textContent = stats.tlbHits;
+            document.getElementById('tlbMisses').textContent = stats.tlbMisses;
+            const total = stats.tlbHits + stats.tlbMisses;
+            document.getElementById('tlbHitRate').textContent = total > 0 ? 
+                ((stats.tlbHits / total) * 100).toFixed(1) + '%' : '0%';
+        }
+
+        function renderStats() {
+            const pagesInMemory = pageTable.filter(e => e.valid).length;
+            const freeFrames = physicalMemory.filter(p => p === null).length;
+            
+            document.getElementById('pagesInMemory').textContent = pagesInMemory;
+            document.getElementById('freeFrames').textContent = freeFrames;
+            document.getElementById('pageFaults').textContent = stats.pageFaults;
+            document.getElementById('totalAccessses').textContent = stats.totalAccessses;
+        }
+
+        function highlightCells(pageNum, frameNum) {
+            // Clear previous highlights
+            document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
+            
+            // Highlight page
+            const pageCell = document.querySelector(`.page-cell[data-page="${pageNum}"]`);
+            if (pageCell) pageCell.classList.add('highlighted');
+            
+            // Highlight frame
+            const frameCell = document.querySelector(`.frame-cell[data-frame="${frameNum}"]`);
+            if (frameCell) frameCell.classList.add('highlighted');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
+            }, 2000);
+        }
+
+        // ==================== Actions ====================
+        function accessPage(pageNum) {
+            const addr = pageNum * pageSize + Math.floor(Math.random() * pageSize);
+            document.getElementById('logicalAddress').value = addr;
+            translateAddress();
+        }
+
+        function togglePageValidity(pageIdx) {
+            if (pageTable[pageIdx].valid) {
+                // Invalidate
+                const frameNum = pageTable[pageIdx].frameNum;
+                physicalMemory[frameNum] = null;
+                pageTable[pageIdx].valid = false;
+                pageTable[pageIdx].frameNum = null;
+                
+                // Remove from TLB
+                tlb.forEach(entry => {
+                    if (entry.pageNum === pageIdx) entry.valid = false;
+                });
+            } else {
+                // Load into memory
+                handlePageFault(pageIdx);
+            }
+            renderAll();
+        }
+
+        function randomTranslation() {
+            const maxAddr = numPages * pageSize - 1;
+            const randomAddr = Math.floor(Math.random() * maxAddr);
+            document.getElementById('logicalAddress').value = randomAddr;
+            translateAddress();
+        }
+
+        function simulatePageFault() {
+            // Find an invalid page
+            const invalidPages = pageTable.filter(e => !e.valid);
+            if (invalidPages.length === 0) {
+                alert('Toate paginile sunt deja in memorie!');
+                return;
+            }
+            const page = invalidPages[Math.floor(Math.random() * invalidPages.length)];
+            const addr = page.pageNum * pageSize;
+            document.getElementById('logicalAddress').value = addr;
+            translateAddress();
+        }
+
+        async function runAccesssSequence() {
+            const sequence = Array.from({length: 10}, () => 
+                Math.floor(Math.random() * numPages * pageSize)
+            );
+            
+            for (const addr of sequence) {
+                document.getElementById('logicalAddress').value = addr;
+                translateAddress();
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', initializeSystem);
+    </script>
+</body>
+</html>
