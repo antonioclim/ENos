@@ -1149,27 +1149,27 @@ wsl
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         THE COURSE WEEK                                      │
+│                         THE COURSE WEEK                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
-│    │ BEFORE THE   │     │ DURING THE   │     │ AFTER THE    │              │
+│    ┌──────────────┐      ┌──────────────┐     ┌──────────────┐              │
+│    │ BEFORE THE   │      │ DURING THE   │     │ AFTER THE    │              │
 │    │   SEMINAR    │────▶│   SEMINAR    │────▶│   SEMINAR    │              │
-│    └──────────────┘     └──────────────┘     └──────────────┘              │
+│    └──────────────┘      └──────────────┘     └──────────────┘              │
 │           │                    │                    │                       │
 │           ▼                    ▼                    ▼                       │
-│    ┌──────────────┐     ┌──────────────┐     ┌──────────────┐              │
-│    │ 1. Read      │     │ 1. Participate│    │ 1. Review    │              │
-│    │    README    │     │    actively  │     │    notes     │              │
-│    │              │     │              │     │               │              │
-│    │ 2. Go through│     │ 2. Note the  │     │ 2. Complete  │              │
-│    │    MATERIAL  │     │    commands  │     │    homework  │              │
-│    │              │     │              │     │               │              │
-│    │ 3. Prepare   │     │ 3. Ask when  │     │ 3. Run       │              │
-│    │    environment│    │    unclear   │     │    validator │              │
-│    └──────────────┘     └──────────────┘     └──────────────┘              │
+│    ┌───────────────┐    ┌───────────────┐    ┌──────────────┐               │
+│    │ 1. Read       │    │ 1. Participate│    │ 1. Review    │               │
+│    │    README     │    │    actively   │    │    notes     │               │
+│    │               │    │               │    │              │               │
+│    │ 2. Go through │    │ 2. Note the   │    │ 2. Complete  │               │
+│    │    MATERIAL   │    │    commands   │    │    homework  │               │
+│    │               │    │               │    │              │               │
+│    │ 3. Prepare    │    │ 3. Ask when   │    │ 3. Run       │               │
+│    │    environment│    │    unclear    │    │    validator │               │
+│    └───────────────┘    └───────────────┘    └──────────────┘               │
 │                                                                             │
-│    Time: 30 min         Time: 100 min        Time: 60-90 min               │
+│    Time: 30 min         Time: 100 min        Time: 60-90 min                │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
