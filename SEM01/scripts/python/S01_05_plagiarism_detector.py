@@ -15,6 +15,7 @@ Algorithm:
 Version: 2.1 - Added AI code pattern detection
 """
 
+import logging
 import sys
 import re
 import json
@@ -24,6 +25,12 @@ from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 import hashlib
+
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
 
 
 @dataclass
@@ -517,6 +524,7 @@ def main():
     submissions_dir = Path(sys.argv[1])
     
     if not submissions_dir.exists():
+        logger.error(f"Directory '{submissions_dir}' does not exist!")
         print(f"{Colours.RED}Error: Directory '{submissions_dir}' does not exist!{Colours.NC}")
         sys.exit(1)
     
@@ -527,25 +535,32 @@ def main():
         if idx + 1 < len(sys.argv):
             threshold = float(sys.argv[idx + 1])
     
+    logger.info(f"Scanning {submissions_dir} for similarities and AI patterns...")
     print(f"{Colours.CYAN}Scanning {submissions_dir} for similarities and AI patterns...{Colours.NC}")
     print(f"Similarity threshold: {threshold*100:.0f}%\n")
     
     # Find all scripts
     scripts = find_all_scripts(submissions_dir)
+    logger.info(f"Found {len(scripts)} .sh scripts")
     print(f"Found {len(scripts)} .sh scripts")
     
     if len(scripts) < 1:
+        logger.warning("No scripts found for analysis.")
         print("No scripts found for analysis.")
         sys.exit(0)
     
     # AI pattern analysis
+    logger.info("Analysing AI patterns...")
     print("\n>>> Analysing AI patterns...")
     ai_results = analyse_ai_patterns(scripts)
-    print(f"  Found {len([r for r in ai_results if r.ai_score >= 0.25])} scripts with AI indicators")
+    ai_count = len([r for r in ai_results if r.ai_score >= 0.25])
+    logger.info(f"Found {ai_count} scripts with AI indicators")
+    print(f"  Found {ai_count} scripts with AI indicators")
     
     # Similarity comparison (only if multiple scripts)
     similarity_results = []
     if len(scripts) >= 2:
+        logger.info("Comparing pairs for similarity...")
         print("\n>>> Comparing pairs for similarity...")
         similarity_results = compare_all_pairs(scripts, threshold)
     
@@ -555,6 +570,7 @@ def main():
     print(report)
     
     report_path.write_text(report)
+    logger.info(f"Report saved: {report_path}")
     print(f"\n[OK] Report saved: {report_path}")
     
     # Exit code for CI (non-zero if issues found)

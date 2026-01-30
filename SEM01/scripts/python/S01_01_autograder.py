@@ -9,6 +9,7 @@ Usage: python3 S01_01_autograder.py <student_directory> [--json output.json]
 Version: 2.0 - with support for randomised variants and understanding verification
 """
 
+import logging
 import os
 import sys
 import subprocess
@@ -19,6 +20,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
+
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
 
 
 class Colours:
@@ -35,22 +42,26 @@ class Colours:
 
 def log_info(msg: str) -> None:
     """Display informational message."""
-    print(f"{Colours.BLUE}[INFO]{Colours.NC} {msg}")
+    logger.info(msg)
 
 
 def log_success(msg: str) -> None:
-    """Display success message."""
+    """Display success message (student-facing with colour)."""
+    # Student-facing coloured output preserved
     print(f"{Colours.GREEN}[PASS]{Colours.NC} {msg}")
+    logger.info(f"PASS: {msg}")
 
 
 def log_error(msg: str) -> None:
-    """Display error message."""
+    """Display error message (student-facing with colour)."""
+    # Student-facing coloured output preserved
     print(f"{Colours.RED}[FAIL]{Colours.NC} {msg}")
+    logger.warning(f"FAIL: {msg}")
 
 
 def log_warning(msg: str) -> None:
     """Display warning message."""
-    print(f"{Colours.YELLOW}[WARN]{Colours.NC} {msg}")
+    logger.warning(msg)
 
 
 # =============================================================================

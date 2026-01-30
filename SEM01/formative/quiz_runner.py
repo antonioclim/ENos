@@ -18,7 +18,7 @@ except ImportError:
     sys.exit(1)
 
 
-class Colors:
+class Colours:
     """ANSI codes for terminal colours."""
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -31,7 +31,7 @@ class Colors:
 def colorize(text: str, color: str, use_color: bool) -> str:
     """Apply colour to text if enabled."""
     if use_color:
-        return f"{color}{text}{Colors.RESET}"
+        return f"{color}{text}{Colours.RESET}"
     return text
 
 
@@ -45,10 +45,10 @@ def display_question(q: dict, index: int, total: int, use_color: bool) -> None:
     """Display a question with its options."""
     print(f"\n{'─' * 50}")
     bloom = q.get('bloom', 'N/A').upper()
-    print(colorize(f"Question {index}/{total}", Colors.BOLD, use_color))
+    print(colorize(f"Question {index}/{total}", Colours.BOLD, use_color))
     print(f"[Bloom: {bloom}]")
     print()
-    print(colorize(q['text'], Colors.YELLOW, use_color))
+    print(colorize(q['text'], Colours.YELLOW, use_color))
     print()
     
     for opt in q['options']:
@@ -71,9 +71,9 @@ def show_feedback(q: dict, answer: str, use_color: bool) -> bool:
     is_correct = (answer == correct)
     
     if is_correct:
-        print(colorize("\n✓ CORRECT!", Colors.GREEN, use_color))
+        print(colorize("\n✓ CORRECT!", Colours.GREEN, use_color))
     else:
-        print(colorize(f"\n✗ WRONG! The correct answer: {correct}", Colors.RED, use_color))
+        print(colorize(f"\n✗ WRONG! The correct answer: {correct}", Colours.RED, use_color))
     
     print(f"\nExplanation: {q['explanation']}")
     return is_correct
@@ -93,7 +93,7 @@ def show_quiz_header(meta: dict, total: int, use_color: bool) -> None:
     """Display the quiz header."""
     print("\n" + "═" * 60)
     title = meta.get('title', 'Formative Quiz')
-    print(colorize(f"  QUIZ: {title}", Colors.BOLD, use_color))
+    print(colorize(f"  QUIZ: {title}", Colours.BOLD, use_color))
     print(f"  Questions: {total} | Estimated time: {meta.get('estimated_time', 'N/A')}")
     print("═" * 60)
 
@@ -104,13 +104,13 @@ def show_final_score(score: int, total: int, use_color: bool) -> None:
     print("\n" + "═" * 60)
     
     if percentage >= 80:
-        result_color = Colors.GREEN
+        result_color = Colours.GREEN
         message = "Excellent!"
     elif percentage >= 60:
-        result_color = Colors.YELLOW
+        result_color = Colours.YELLOW
         message = "Good, but revise the concepts you got wrong."
     else:
-        result_color = Colors.RED
+        result_color = Colours.RED
         message = "Recommendation: review the material and try again."
     
     print(colorize(f"  FINAL SCORE: {score}/{total} ({percentage:.0f}%)", result_color, use_color))

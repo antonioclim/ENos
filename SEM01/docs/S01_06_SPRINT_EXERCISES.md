@@ -79,7 +79,7 @@ FORM PAIRS!
 
 Choose one challenge:
 
-1. **One-liner Challenge:** Display user, home, and shell in ONE command
+1. **One-liner Challenge:** Display user, home and shell in ONE command
    ```bash
    # Hint: echo "User: $(whoami), Home: $HOME, Shell: $SHELL"
    ```
