@@ -1,0 +1,401 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PRINT STYLES — ENos Educational Kit
+   
+   Operating Systems | ASE Bucharest — CSIE
+   Author: ing. dr. Antonio Clim
+   Version: 1.0 | January 2025
+   
+   Purpose: Enable clean printing of HTML presentations as handouts
+   Usage: Include this stylesheet in HTML presentations via <link> or inline <style>
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+    /* ═══════════════════════════════════════════════════════════════════════════
+       BASE RESET
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+    
+    html, body {
+        background: white !important;
+        color: black !important;
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        overflow: visible !important;
+        height: auto !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       PRESENTATION CONTAINER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    .presentation,
+    .slides,
+    .reveal,
+    .reveal .slides {
+        height: auto !important;
+        width: 100% !important;
+        position: static !important;
+        overflow: visible !important;
+        transform: none !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SLIDE LAYOUT
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    .slide,
+    section,
+    .reveal section {
+        display: block !important;
+        position: static !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: none !important;
+        
+        /* Page break control */
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        
+        /* Dimensions */
+        width: 100% !important;
+        min-height: 200mm !important;
+        max-height: 270mm !important;
+        
+        /* Spacing */
+        padding: 15mm 12mm !important;
+        margin: 0 0 5mm 0 !important;
+        
+        /* Visual */
+        background: white !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+    
+    .slide:last-child,
+    section:last-child {
+        page-break-after: auto !important;
+    }
+    
+    /* Hide non-active slide markers */
+    .slide:not(.active),
+    section.future,
+    section.past {
+        display: block !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TYPOGRAPHY
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: black !important;
+        background: none !important;
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        -webkit-text-fill-color: black !important;
+        text-shadow: none !important;
+        page-break-after: avoid !important;
+    }
+    
+    h1 {
+        font-size: 18pt !important;
+        margin-bottom: 8pt !important;
+    }
+    
+    h2 {
+        font-size: 14pt !important;
+        margin-bottom: 6pt !important;
+    }
+    
+    h3 {
+        font-size: 12pt !important;
+        margin-bottom: 4pt !important;
+    }
+    
+    h4, h5, h6 {
+        font-size: 11pt !important;
+    }
+    
+    p, li, td, th {
+        color: black !important;
+        font-size: 10pt !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       CODE BLOCKS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    pre,
+    code,
+    .code-block,
+    .hljs,
+    [class*="language-"] {
+        background: #f5f5f5 !important;
+        color: black !important;
+        border: 1px solid #ddd !important;
+        border-radius: 3px !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-size: 9pt !important;
+        line-height: 1.2 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        page-break-inside: avoid !important;
+    }
+    
+    pre {
+        padding: 8pt !important;
+        margin: 6pt 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    code {
+        padding: 1pt 3pt !important;
+    }
+    
+    /* Syntax highlighting - flatten to black */
+    .hljs-keyword,
+    .hljs-string,
+    .hljs-number,
+    .hljs-comment,
+    .hljs-built_in,
+    .hljs-function,
+    .hljs-variable,
+    .token {
+        color: black !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TABLES
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        font-size: 9pt !important;
+        page-break-inside: avoid !important;
+        margin: 6pt 0 !important;
+    }
+    
+    th, td {
+        border: 1px solid #333 !important;
+        padding: 4pt 6pt !important;
+        text-align: left !important;
+        vertical-align: top !important;
+    }
+    
+    th {
+        background: #e0e0e0 !important;
+        font-weight: bold !important;
+    }
+    
+    tr:nth-child(even) td {
+        background: #f9f9f9 !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LISTS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    ul, ol {
+        margin: 6pt 0 !important;
+        padding-left: 20pt !important;
+    }
+    
+    li {
+        margin-bottom: 2pt !important;
+    }
+    
+    /* Nested lists */
+    ul ul, ol ol, ul ol, ol ul {
+        margin: 2pt 0 !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LINKS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    a {
+        color: black !important;
+        text-decoration: underline !important;
+    }
+    
+    /* Show URL for external links */
+    a[href^="http"]:after,
+    a[href^="https"]:after {
+        content: " (" attr(href) ")" !important;
+        font-size: 8pt !important;
+        color: #666 !important;
+        word-break: break-all !important;
+    }
+    
+    /* Don't show URL for internal links */
+    a[href^="#"]:after,
+    a[href^="./"]:after,
+    a[href^="../"]:after {
+        content: "" !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       IMAGES AND MEDIA
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    img, svg {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* Scale down large images */
+    img {
+        max-height: 150mm !important;
+    }
+    
+    /* Hide video/audio elements */
+    video, audio, iframe {
+        display: none !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       HIDDEN ELEMENTS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    /* Navigation controls */
+    .nav-controls,
+    .controls,
+    .progress,
+    .progress-bar,
+    .slide-number,
+    .slide-menu-button,
+    .playback,
+    .navigate-left,
+    .navigate-right,
+    .navigate-up,
+    .navigate-down {
+        display: none !important;
+    }
+    
+    /* Interactive elements */
+    button,
+    .copy-btn,
+    .run-btn,
+    .toggle-btn,
+    [role="button"] {
+        display: none !important;
+    }
+    
+    /* Keyboard hints */
+    .keyboard-hint,
+    .keyboard-shortcuts,
+    .help-overlay {
+        display: none !important;
+    }
+    
+    /* Speaker notes */
+    .notes,
+    .speaker-notes,
+    aside.notes {
+        display: none !important;
+    }
+    
+    /* Animations and transitions */
+    .fragment {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SLIDE NUMBERING
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    .slide-number-display,
+    .slide-header .slide-number {
+        color: #666 !important;
+        font-size: 9pt !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       PAGE SETUP
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    @page {
+        size: A4 portrait;
+        margin: 12mm 10mm 15mm 10mm;
+    }
+    
+    @page :first {
+        margin-top: 15mm;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SPECIAL ELEMENTS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    /* Callouts/alerts */
+    .callout,
+    .alert,
+    .warning,
+    .info,
+    .tip,
+    .note {
+        border: 1px solid #333 !important;
+        background: #f9f9f9 !important;
+        padding: 6pt !important;
+        margin: 6pt 0 !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* Two-column layouts */
+    .two-columns,
+    .columns,
+    .split {
+        display: block !important;
+    }
+    
+    .two-columns > *,
+    .columns > *,
+    .split > * {
+        width: 100% !important;
+        float: none !important;
+    }
+    
+    /* Reveal.js specific */
+    .reveal .slide-background {
+        display: none !important;
+    }
+    
+    .reveal .slides > section > section {
+        page-break-before: always !important;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    
+    /* Add footer with course info */
+    .slide::after,
+    section::after {
+        content: "Operating Systems | ASE Bucharest — CSIE";
+        position: absolute;
+        bottom: 5mm;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 8pt;
+        color: #999;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   END OF PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════════════════ */

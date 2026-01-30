@@ -1,7 +1,7 @@
 # .github/workflows/ci.yml
 # CI Pipeline for SEM01 - Shell Fundamentals
 # Operating Systems | ASE Bucharest - CSIE
-# Version: 2.1
+# Version: 2.2 — Added link checking
 
 name: SEM01 CI
 
@@ -128,6 +128,55 @@ jobs:
             echo "[WARN] AI patterns detected in documentation - review recommended"
           fi
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NEW: Link Checking Job (v2.2)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  link-check:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install lychee link checker
+        run: |
+          curl -sLO https://github.com/lycheeverse/lychee/releases/download/v0.14.3/lychee-v0.14.3-x86_64-unknown-linux-gnu.tar.gz
+          tar -xzf lychee-v0.14.3-x86_64-unknown-linux-gnu.tar.gz
+          chmod +x lychee
+          sudo mv lychee /usr/local/bin/
+      
+      - name: Check internal links in Markdown
+        run: |
+          echo ">>> Checking internal links in documentation"
+          lychee --no-progress --offline \
+            --include-fragments \
+            --exclude-path 'OLD_HW' \
+            --exclude-path 'solutions' \
+            'docs/**/*.md' \
+            'homework/*.md' \
+            'README.md' \
+            || echo "[WARN] Some internal links may need review"
+      
+      - name: Check external links (non-blocking)
+        continue-on-error: true
+        run: |
+          echo ">>> Checking external links (informational only)"
+          lychee --no-progress \
+            --exclude 'localhost' \
+            --exclude '127.0.0.1' \
+            --exclude 'example.com' \
+            --exclude-path 'OLD_HW' \
+            --timeout 30 \
+            --max-retries 2 \
+            'docs/**/*.md' \
+            'README.md' \
+            2>&1 | tee external_links.log
+          
+          BROKEN=$(grep -c "✗" external_links.log || true)
+          if [ "$BROKEN" -gt 0 ]; then
+            echo "[INFO] $BROKEN external links may need manual review"
+          fi
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -231,23 +280,24 @@ jobs:
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [lint-bash, lint-python, validate-yaml, ai-check, test, structure-check]
+    needs: [lint-bash, lint-python, validate-yaml, ai-check, link-check, test, structure-check]
     if: always()
     steps:
       - name: Check job results
         run: |
-          echo "====================================================================="
-          echo "        CI SUMMARY - SEM01 v2.1"
-          echo "====================================================================="
+          echo "======================================================================"
+          echo "        CI SUMMARY - SEM01 v2.2"
+          echo "======================================================================"
           echo "Lint Bash:       ${{ needs.lint-bash.result }}"
           echo "Lint Python:     ${{ needs.lint-python.result }}"
           echo "Validate YAML:   ${{ needs.validate-yaml.result }}"
           echo "AI Check:        ${{ needs.ai-check.result }}"
+          echo "Link Check:      ${{ needs.link-check.result }}"
           echo "Tests:           ${{ needs.test.result }}"
           echo "Structure:       ${{ needs.structure-check.result }}"
-          echo "====================================================================="
+          echo "======================================================================"
           echo "Coverage threshold: ${{ env.COVERAGE_THRESHOLD }}%"
-          echo "====================================================================="
+          echo "======================================================================"
           
           # Fail if any required job failed
           if [ "${{ needs.validate-yaml.result }}" == "failure" ] || \
