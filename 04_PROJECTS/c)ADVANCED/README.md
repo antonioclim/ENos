@@ -8,7 +8,7 @@
 
 Advanced projects require C integration and deep OS knowledge. They are only recommended for students with prior C experience and strong systems programming background.
 
-> ⚠️ **Instructor's warning:** These projects are genuinely difficult. I have seen experienced programmers struggle with the C integration. If you choose an ADVANCED project, you are signing up for long debugging sessions, segmentation faults, and memory leaks. The reward is deep understanding and an impressive portfolio piece.
+> ⚠️ **Instructor's warning:** These projects are genuinely difficult. I have seen experienced programmers struggle with the C integration. If you choose an ADVANCED project, you are signing up for long debugging sessions, segmentation faults and memory leaks. The reward is deep understanding and an impressive portfolio piece.
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-Medium projects are recommended for students with moderate Bash experience. They require multiple components, comprehensive error handling, and often involve system-level interactions.
+Medium projects are recommended for students with moderate Bash experience. They require multiple components, comprehensive error handling and often involve system-level interactions.
 
 > 💡 **Instructor's note:** This is where most students should aim. The MEDIUM projects teach you patterns you will use throughout your career: monitoring, backup, deployment, security scanning. Choose one that solves a problem you actually have — the motivation will carry you through the debugging sessions.
 
