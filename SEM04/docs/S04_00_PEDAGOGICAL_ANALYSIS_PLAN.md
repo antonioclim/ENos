@@ -261,7 +261,7 @@ Conclusion: For an introductory OS course where editing is auxiliary (not the ma
 - Regex: `+ ? {n,m} () |`
 - grep: `-o -E -r --include`
 - sed: addressing, `-i.bak`, `&`
-- awk: `NR > 1`, `$3 > 100`, `BEGIN/END`, and also nano: search, cut/paste
+- awk: `NR > 1`, `$3 > 100`, `BEGIN/END` and also nano: search, cut/paste
 
 #### Advanced Level (30% students)
 - Regex: backreferences `\1`, lookahead (PCRE)
@@ -375,7 +375,7 @@ Invalid: not-an-email
 
 #### Quality Criteria
 - [ ] All .md files have consistent header
-- [ ] ASCII diagrams for complex concepts, and also [ ] Examples based on real data (logs, CSVs)
+- [ ] ASCII diagrams for complex concepts and also [ ] Examples based on real data (logs, CSVs)
 - [ ] Deliberate errors documented in live coding
 - [ ] Solutions available for all exercises
 

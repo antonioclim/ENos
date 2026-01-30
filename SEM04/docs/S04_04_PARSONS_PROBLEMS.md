@@ -402,7 +402,7 @@ awk -F',' 'BEGIN { printf "%-15s %10s\n", "Name", "Salary"; printf "%-15s %10s\n
 
 ### Explanation
 
-Three things matter here: BEGIN runs only once, perfect for header, `%-15s` = string 15 characters, left-aligned, and `$%9d` = $ followed by number 9 characters.
+Three things matter here: BEGIN runs only once, perfect for header, `%-15s` = string 15 characters, left-aligned and `$%9d` = $ followed by number 9 characters.
 
 
 ---
@@ -579,7 +579,7 @@ sed '1d' data.csv | sort -t',' -k3 | awk -F',' '{ printf "%-10s | %-10s | %s\n",
 ## PP-X1: Complex One-Liner
 
 ### Objective
-Find all .log files modified in the last 24h, search for "ERROR" in them, and display a summary per file.
+Find all .log files modified in the last 24h, search for "ERROR" in them and display a summary per file.
 
 ### Scrambled Lines
 

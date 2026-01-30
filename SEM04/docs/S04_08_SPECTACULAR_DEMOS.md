@@ -43,7 +43,7 @@ Spectacular demos serve multiple pedagogical purposes:
 # DEMO 1: LOG ANALYSIS IN SECONDS (Hook Demo)
 
 ## The Story
-> "The boss comes to you: 'The site was attacked last night. I need a report in 5 minutes: who, from where, and what they tried to access.'"
+> "The boss comes to you: 'The site was attacked last night. I need a report in 5 minutes: who, from where and what they tried to access.'"
 
 ## Setup (pre-seminar)
 

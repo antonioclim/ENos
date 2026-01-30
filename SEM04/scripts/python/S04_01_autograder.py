@@ -13,6 +13,7 @@ Author: Operating Systems Course, ASE Bucharest - CSIE
 Version: 1.1
 """
 
+import logging
 import subprocess
 import sys
 import os
@@ -21,6 +22,12 @@ import tempfile
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List, Dict, Any
+
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
@@ -478,6 +485,7 @@ def main() -> None:
         sys.exit(1)
     
     if sys.argv[1] == '--self-test':
+        logger.info("Running self-test...")
         success = self_test()
         sys.exit(0 if success else 1)
     
@@ -485,11 +493,14 @@ def main() -> None:
     verbose = '--verbose' in sys.argv or '-v' in sys.argv
     
     if not submission_file.exists():
+        logger.error(f"File not found: {submission_file}")
         print(f"Error: File not found: {submission_file}")
         sys.exit(1)
     
+    logger.info(f"Grading submission: {submission_file}")
     results = grade_submission(submission_file, verbose)
     print_results(results)
+    logger.info(f"Grading complete: {results['total_score']}/{results['max_score']} points")
 
 
 if __name__ == '__main__':
