@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inode Structure Explorer - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .inode-box {
+            background: linear-gradient(145deg, #1a1f2e 0%, #0f131a 100%);
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        .field-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .field-row:hover {
+            background: rgba(59, 130, 246, 0.15);
+            transform: translateX(4px);
+        }
+        
+        .field-row.selected {
+            background: rgba(59, 130, 246, 0.25);
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .block-pointer {
+            transition: all 0.2s ease;
+        }
+        
+        .block-pointer:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+        
+        .block-pointer.activee {
+            animation: blockPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes blockPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+        }
+        
+        .detail-panel {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fs-tree-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .fs-tree-item:hover {
+            background: rgba(139, 92, 246, 0.15);
+        }
+        
+        .fs-tree-item.selected {
+            background: rgba(139, 92, 246, 0.25);
+            border-left: 3px solid #8b5cf6;
+        }
+        
+        .permission-bit {
+            transition: all 0.15s ease;
+        }
+        
+        .permission-bit:hover {
+            transform: scale(1.1);
+        }
+        
+        .permission-bit.set {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+        
+        .permission-bit.unset {
+            background: #374151;
+        }
+
+        .tooltip {
+            position: absolute;
+            z-index: 50;
+            padding: 8px 12px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            font-size: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
+                <i class="fas fa-cube mr-3"></i>Inode Structure Explorer
+            </h1>
+            <p class="text-gray-400 text-lg">Explore the detailed structure of an inode in UNIX/Linux systems</p>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+            <!-- Left: File System Tree -->
+            <div class="xl:col-span-1">
+                <div class="glass-card rounded-2xl p-4">
+                    <h3 class="text-lg font-bold mb-4 flex items-center text-purple-400">
+                        <i class="fas fa-folder-tree mr-2"></i>File System Browser
+                    </h3>
+                    
+                    <div id="fs-tree" class="space-y-1 text-sm">
+                        <!-- Root -->
+                        <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="2" data-type="dir" data-name="/">
+                            <i class="fas fa-folder text-yellow-400"></i>
+                            <span>/</span>
+                            <span class="text-gray-500 mono text-xs ml-auto">inode 2</span>
+                        </div>
+                        
+                        <!-- /home -->
+                        <div class="pl-4">
+                            <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="1001" data-type="dir" data-name="/home">
+                                <i class="fas fa-folder text-yellow-400"></i>
+                                <span>home</span>
+                                <span class="text-gray-500 mono text-xs ml-auto">inode 1001</span>
+                            </div>
+                            
+                            <!-- /home/user -->
+                            <div class="pl-4">
+                                <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="2001" data-type="dir" data-name="/home/user">
+                                    <i class="fas fa-folder text-yellow-400"></i>
+                                    <span>user</span>
+                                    <span class="text-gray-500 mono text-xs ml-auto">inode 2001</span>
+                                </div>
+                                
+                                <!-- Files in /home/user -->
+                                <div class="pl-4 space-y-1">
+                                    <div class="fs-tree-item selected p-2 rounded-lg flex items-center gap-2" data-inode="12345" data-type="file" data-name="document.txt">
+                                        <i class="fas fa-file-alt text-blue-400"></i>
+                                        <span>document.txt</span>
+                                        <span class="text-gray-500 mono text-xs ml-auto">inode 12345</span>
+                                    </div>
+                                    <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="12346" data-type="file" data-name="photo.jpg">
+                                        <i class="fas fa-file-image text-green-400"></i>
+                                        <span>photo.jpg</span>
+                                        <span class="text-gray-500 mono text-xs ml-auto">inode 12346</span>
+                                    </div>
+                                    <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="12347" data-type="file" data-name="script.sh">
+                                        <i class="fas fa-file-code text-amber-400"></i>
+                                        <span>script.sh</span>
+                                        <span class="text-gray-500 mono text-xs ml-auto">inode 12347</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- /etc -->
+                        <div class="pl-4">
+                            <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="1002" data-type="dir" data-name="/etc">
+                                <i class="fas fa-folder text-yellow-400"></i>
+                                <span>etc</span>
+                                <span class="text-gray-500 mono text-xs ml-auto">inode 1002</span>
+                            </div>
+                        </div>
+                        
+                        <!-- /var -->
+                        <div class="pl-4">
+                            <div class="fs-tree-item p-2 rounded-lg flex items-center gap-2" data-inode="1003" data-type="dir" data-name="/var">
+                                <i class="fas fa-folder text-yellow-400"></i>
+                                <span>var</span>
+                                <span class="text-gray-500 mono text-xs ml-auto">inode 1003</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-amber-900/20 border border-amber-500/30 rounded-xl text-xs">
+                        <div class="flex items-center gap-2 text-amber-400 font-semibold mb-1">
+                            <i class="fas fa-lightbulb"></i> Important note
+                        </div>
+                        <p class="text-gray-400">The filename is stored in <strong>directory</strong>, not in the inode! Click on a file to view its inode.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Inode Visualization -->
+            <div class="xl:col-span-2">
+                <div class="inode-box rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold flex items-center text-blue-400">
+                            <i class="fas fa-cube mr-2"></i>INODE #<span id="inode-number">12345</span>
+                        </h3>
+                        <div class="text-sm text-gray-400">
+                            <span id="file-path">/home/user/document.txt</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Inode Fields -->
+                    <div class="space-y-1">
+                        <!-- Mode -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="mode" onclick="showFieldDetail('mode')">
+                            <span class="w-24 text-gray-400 text-sm">Mode:</span>
+                            <span class="mono text-cyan-400" id="inode-mode">-rwxr-xr-x</span>
+                            <span class="ml-2 text-gray-500 mono text-sm" id="inode-mode-octal">(0755)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- UID -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="uid" onclick="showFieldDetail('uid')">
+                            <span class="w-24 text-gray-400 text-sm">UID:</span>
+                            <span class="mono text-green-400" id="inode-uid">1000</span>
+                            <span class="ml-2 text-gray-500 text-sm" id="inode-user">(user)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- GID -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="gid" onclick="showFieldDetail('gid')">
+                            <span class="w-24 text-gray-400 text-sm">GID:</span>
+                            <span class="mono text-green-400" id="inode-gid">1000</span>
+                            <span class="ml-2 text-gray-500 text-sm" id="inode-group">(users)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- Size -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="size" onclick="showFieldDetail('size')">
+                            <span class="w-24 text-gray-400 text-sm">Size:</span>
+                            <span class="mono text-amber-400" id="inode-size">45678</span>
+                            <span class="ml-2 text-gray-500 text-sm">bytes</span>
+                            <span class="ml-2 text-gray-600 text-sm" id="inode-size-human">(44.6 KB)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- Links -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="links" onclick="showFieldDetail('links')">
+                            <span class="w-24 text-gray-400 text-sm">Links:</span>
+                            <span class="mono text-purple-400" id="inode-links">3</span>
+                            <span class="ml-2 text-gray-500 text-sm">(hard link count)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- Timestamps Section -->
+                        <div class="mt-4 mb-2 text-sm text-gray-500 font-semibold">
+                            <i class="fas fa-clock mr-1"></i> Timestamps
+                        </div>
+                        
+                        <!-- atime -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="atime" onclick="showFieldDetail('atime')">
+                            <span class="w-24 text-gray-400 text-sm">atime:</span>
+                            <span class="mono text-blue-300 text-sm" id="inode-atime">2024-01-15 10:30:00</span>
+                            <span class="ml-2 text-gray-600 text-xs">(last access)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- mtime -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="mtime" onclick="showFieldDetail('mtime')">
+                            <span class="w-24 text-gray-400 text-sm">mtime:</span>
+                            <span class="mono text-blue-300 text-sm" id="inode-mtime">2024-01-10 14:22:00</span>
+                            <span class="ml-2 text-gray-600 text-xs">(last modify)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- ctime -->
+                        <div class="field-row p-3 rounded-lg bg-gray-800/30 flex items-center" data-field="ctime" onclick="showFieldDetail('ctime')">
+                            <span class="w-24 text-gray-400 text-sm">ctime:</span>
+                            <span class="mono text-blue-300 text-sm" id="inode-ctime">2024-01-10 14:22:00</span>
+                            <span class="ml-2 text-gray-600 text-xs">(last change)</span>
+                            <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
+                        </div>
+                        
+                        <!-- Blockk Pointers Section -->
+                        <div class="mt-4 mb-2 text-sm text-gray-500 font-semibold">
+                            <i class="fas fa-th mr-1"></i> Blockk Pointers
+                        </div>
+                        
+                        <!-- Direct Blockks -->
+                        <div class="p-3 rounded-lg bg-gray-800/30">
+                            <div class="text-sm text-gray-400 mb-2">Direct Pointers [0-11]:</div>
+                            <div class="grid grid-cols-6 gap-2" id="direct-blocks">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+                        
+                        <!-- Indirect Blockks -->
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <div class="block-pointer p-3 rounded-lg bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 border border-yellow-500/30 text-center cursor-pointer" onclick="showFieldDetail('single')">
+                                <div class="text-xs text-yellow-400 mb-1">Single Indirect</div>
+                                <div class="mono text-sm" id="single-indirect">→ block 2000</div>
+                            </div>
+                            <div class="block-pointer p-3 rounded-lg bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-500/30 text-center cursor-pointer" onclick="showFieldDetail('double')">
+                                <div class="text-xs text-orange-400 mb-1">Double Indirect</div>
+                                <div class="mono text-sm" id="double-indirect">→ block 3000</div>
+                            </div>
+                            <div class="block-pointer p-3 rounded-lg bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-500/30 text-center cursor-pointer" onclick="showFieldDetail('triple')">
+                                <div class="text-xs text-red-400 mb-1">Triple Indirect</div>
+                                <div class="mono text-sm text-gray-500" id="triple-indirect">(null)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- What Inode Does NOT Contain -->
+                <div class="mt-4 glass-card rounded-2xl p-4">
+                    <h4 class="text-lg font-bold mb-3 flex items-center text-red-400">
+                        <i class="fas fa-times-circle mr-2"></i>What the Inode does NOT contain
+                    </h4>
+                    <div class="grid grid-cols-3 gap-3 text-sm">
+                        <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-center">
+                            <i class="fas fa-file-signature text-2xl text-red-400 mb-2"></i>
+                            <div class="font-semibold text-red-300">The filename</div>
+                            <div class="text-xs text-gray-400 mt-1">Stored in directory!</div>
+                        </div>
+                        <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-center">
+                            <i class="fas fa-route text-2xl text-red-400 mb-2"></i>
+                            <div class="font-semibold text-red-300">Path-ul complet</div>
+                            <div class="text-xs text-gray-400 mt-1">Derivat din structura FS</div>
+                        </div>
+                        <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-center">
+                            <i class="fas fa-database text-2xl text-red-400 mb-2"></i>
+                            <div class="font-semibold text-red-300">Contentul the file</div>
+                            <div class="text-xs text-gray-400 mt-1">only pointeri la blocks!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Detail Panel -->
+            <div class="xl:col-span-1">
+                <div id="detail-panel" class="glass-card rounded-2xl p-4 sticky top-4">
+                    <h3 class="text-lg font-bold mb-4 flex items-center text-cyan-400">
+                        <i class="fas fa-info-circle mr-2"></i>Field Details
+                    </h3>
+                    
+                    <div id="detail-content">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-hand-pointer text-3xl mb-3"></i>
+                            <div>Click on an inode field for details</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // Inode data for different files
+        const inodeData = {
+            12345: {
+                number: 12345,
+                path: '/home/user/document.txt',
+                type: 'file',
+                mode: '-rwxr-xr-x',
+                modeOctal: '0755',
+                uid: 1000,
+                user: 'user',
+                gid: 1000,
+                group: 'users',
+                size: 45678,
+                links: 3,
+                atime: '2024-01-15 10:30:00',
+                mtime: '2024-01-10 14:22:00',
+                ctime: '2024-01-10 14:22:00',
+                directBlockks: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012],
+                singleIndirect: 2000,
+                doubleIndirect: 3000,
+                tripleIndirect: null
+            },
+            12346: {
+                number: 12346,
+                path: '/home/user/photo.jpg',
+                type: 'file',
+                mode: '-rw-r--r--',
+                modeOctal: '0644',
+                uid: 1000,
+                user: 'user',
+                gid: 1000,
+                group: 'users',
+                size: 2456789,
+                links: 1,
+                atime: '2024-01-14 09:15:00',
+                mtime: '2024-01-01 18:00:00',
+                ctime: '2024-01-01 18:00:00',
+                directBlockks: [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+                singleIndirect: 2500,
+                doubleIndirect: 3500,
+                tripleIndirect: null
+            },
+            12347: {
+                number: 12347,
+                path: '/home/user/script.sh',
+                type: 'file',
+                mode: '-rwxr-xr-x',
+                modeOctal: '0755',
+                uid: 1000,
+                user: 'user',
+                gid: 1000,
+                group: 'users',
+                size: 1234,
+                links: 1,
+                atime: '2024-01-15 11:00:00',
+                mtime: '2024-01-12 20:30:00',
+                ctime: '2024-01-12 20:30:00',
+                directBlockks: [3001, 3002, null, null, null, null, null, null, null, null, null, null],
+                singleIndirect: null,
+                doubleIndirect: null,
+                tripleIndirect: null
+            },
+            2: {
+                number: 2,
+                path: '/',
+                type: 'dir',
+                mode: 'drwxr-xr-x',
+                modeOctal: '0755',
+                uid: 0,
+                user: 'root',
+                gid: 0,
+                group: 'root',
+                size: 4096,
+                links: 23,
+                atime: '2024-01-15 12:00:00',
+                mtime: '2024-01-10 08:00:00',
+                ctime: '2024-01-10 08:00:00',
+                directBlockks: [100, null, null, null, null, null, null, null, null, null, null, null],
+                singleIndirect: null,
+                doubleIndirect: null,
+                tripleIndirect: null
+            },
+            2001: {
+                number: 2001,
+                path: '/home/user',
+                type: 'dir',
+                mode: 'drwxr-xr-x',
+                modeOctal: '0755',
+                uid: 1000,
+                user: 'user',
+                gid: 1000,
+                group: 'users',
+                size: 4096,
+                links: 5,
+                atime: '2024-01-15 10:35:00',
+                mtime: '2024-01-15 10:30:00',
+                ctime: '2024-01-15 10:30:00',
+                directBlockks: [500, 501, null, null, null, null, null, null, null, null, null, null],
+                singleIndirect: null,
+                doubleIndirect: null,
+                tripleIndirect: null
+            }
+        };
+
+        // Field explanations
+        const fieldDetails = {
+            mode: {
+                title: 'Mode (Permissions)',
+                icon: 'fa-lock',
+                color: 'cyan',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">The field <strong>mode</strong> contains the type of the file and access permissions.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-400 mb-2">Descompunere:</div>
+                            <div class="mono text-lg mb-2" id="mode-breakdown">-rwxr-xr-x</div>
+                            <div class="grid grid-cols-4 gap-1 text-xs">
+                                <div class="text-center p-1 bg-purple-900/30 rounded">
+                                    <div class="font-bold text-purple-400">-</div>
+                                    <div class="text-gray-500">Type</div>
+                                </div>
+                                <div class="text-center p-1 bg-green-900/30 rounded">
+                                    <div class="font-bold text-green-400">rwx</div>
+                                    <div class="text-gray-500">Owner</div>
+                                </div>
+                                <div class="text-center p-1 bg-blue-900/30 rounded">
+                                    <div class="font-bold text-blue-400">r-x</div>
+                                    <div class="text-gray-500">Group</div>
+                                </div>
+                                <div class="text-center p-1 bg-amber-900/30 rounded">
+                                    <div class="font-bold text-amber-400">r-x</div>
+                                    <div class="text-gray-500">Others</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-400 mb-2">Special Bits:</div>
+                            <div class="space-y-1 text-xs">
+                                <div><span class="text-red-400">SUID (4000)</span> - execute as owner</div>
+                                <div><span class="text-orange-400">SGID (2000)</span> - execute as group</div>
+                                <div><span class="text-yellow-400">Sticky (1000)</span> - only owner can delete</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            uid: {
+                title: 'User ID (UID)',
+                icon: 'fa-user',
+                color: 'green',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Identificatorul numeric al <strong>owner-ului</strong> the file.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">UID:</span>
+                                <span class="mono text-green-400 text-lg">1000</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-gray-400">Username:</span>
+                                <span class="text-green-300">user</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>• UID 0 = root (superuser)</p>
+                            <p>• UID 1-999 = system accounts</p>
+                            <p>• UID 1000+ = regular users</p>
+                        </div>
+                    </div>
+                `
+            },
+            gid: {
+                title: 'Group ID (GID)',
+                icon: 'fa-users',
+                color: 'green',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Identificatorul numeric al <strong>grupului</strong> the file.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">GID:</span>
+                                <span class="mono text-green-400 text-lg">1000</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-gray-400">Group:</span>
+                                <span class="text-green-300">users</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400 mt-2">
+                            All users in this group have the permissions defined in "group" from mode.
+                        </div>
+                    </div>
+                `
+            },
+            size: {
+                title: 'Size',
+                icon: 'fa-weight',
+                color: 'amber',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">The size of the file in <strong>bytes</strong>.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-amber-400 mono" id="detail-size">45,678</div>
+                                <div class="text-gray-400">bytes</div>
+                            </div>
+                            <div class="text-center mt-2 text-gray-300" id="detail-size-human">
+                                ≈ 44.6 KB
+                            </div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>• for directoare: dimensiunea metadatelor</p>
+                            <p>• For files: the content size</p>
+                            <p>• for symlinks: lungimea path-ului</p>
+                        </div>
+                    </div>
+                `
+            },
+            links: {
+                title: 'Hard Link Count',
+                icon: 'fa-link',
+                color: 'purple',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">The number of <strong>hard links</strong> pointing to this inode.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-4xl font-bold text-purple-400" id="detail-links">3</div>
+                            <div class="text-gray-400">hard links</div>
+                        </div>
+                        
+                        <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 text-xs">
+                            <div class="text-red-400 font-semibold mb-1">⚠️ Important:</div>
+                            <p class="text-gray-300">When link count becomes <strong>0</strong>, the inode and the data is deleted (freed).</p>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>• Directories have min. 2 (. and link from parent)</p>
+                            <p>• Files have min. 1</p>
+                        </div>
+                    </div>
+                `
+            },
+            atime: {
+                title: 'Access Time (atime)',
+                icon: 'fa-eye',
+                color: 'blue',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Timpul ultimului <strong>acces</strong> (citire) al the file.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-400">Last accessed:</div>
+                            <div class="mono text-blue-400" id="detail-atime">2024-01-15 10:30:00</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>Updated when:</p>
+                            <p>• The file este citit</p>
+                            <p>• Directoryul este listat</p>
+                            <p class="mt-2 text-amber-400">Note: Can be disabled (noatime) for performance.</p>
+                        </div>
+                    </div>
+                `
+            },
+            mtime: {
+                title: 'Modification Time (mtime)',
+                icon: 'fa-edit',
+                color: 'blue',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Time of the last <strong>modification</strong> of the content.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-400">Last modified:</div>
+                            <div class="mono text-blue-400" id="detail-mtime">2024-01-10 14:22:00</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>Updated when:</p>
+                            <p>• The file content changes</p>
+                            <p>• Does NOT change on read</p>
+                            <p>• Used by <span class="mono">ls -l</span> and <span class="mono">make</span></p>
+                        </div>
+                    </div>
+                `
+            },
+            ctime: {
+                title: 'Change Time (ctime)',
+                icon: 'fa-history',
+                color: 'blue',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Time of the last <strong>change</strong> of the inode (metadata).</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-400">Last inode change:</div>
+                            <div class="mono text-blue-400" id="detail-ctime">2024-01-10 14:22:00</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>Updated when:</p>
+                            <p>• Permissions change (chmod)</p>
+                            <p>• Owner changes (chown)</p>
+                            <p>• Hard link is createded</p>
+                            <p>• Content is modified (includes mtime)</p>
+                            <p class="mt-2 text-red-400">⚠️ NU may fi setat manual!</p>
+                        </div>
+                    </div>
+                `
+            },
+            single: {
+                title: 'Single Indirect Pointer',
+                icon: 'fa-arrow-right',
+                color: 'yellow',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Pointer to a block containing <strong>pointers to data blocks</strong>.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-sm text-gray-400">Inode → Index Blockk → Data Blockks</div>
+                            <div class="flex items-center justify-center gap-2 mt-2">
+                                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-xs">I</div>
+                                <i class="fas fa-arrow-right text-yellow-400"></i>
+                                <div class="w-8 h-8 bg-yellow-600 rounded flex items-center justify-center text-xs">Idx</div>
+                                <i class="fas fa-arrow-right text-yellow-400"></i>
+                                <div class="flex gap-1">
+                                    <div class="w-6 h-6 bg-green-600 rounded text-xs flex items-center justify-center">D</div>
+                                    <div class="w-6 h-6 bg-green-600 rounded text-xs flex items-center justify-center">D</div>
+                                    <div class="w-6 h-6 bg-green-600 rounded text-xs flex items-center justify-center">D</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>With block size 4KB and pointers of 4 bytes:</p>
+                            <p class="mono text-green-400">1024 pointeri × 4KB = 4MB extra</p>
+                        </div>
+                    </div>
+                `
+            },
+            double: {
+                title: 'Double Indirect Pointer',
+                icon: 'fa-arrow-right',
+                color: 'orange',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Pointer to a block with pointers to <strong>other index blocks</strong>.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center text-xs">
+                            <div class="text-gray-400">Inode → Index → Index → Data</div>
+                            <div class="mt-2 text-orange-400">2 nivele de indirectare</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>With block size 4KB:</p>
+                            <p class="mono text-green-400">1024 × 1024 × 4KB = 4GB extra</p>
+                        </div>
+                    </div>
+                `
+            },
+            triple: {
+                title: 'Triple Indirect Pointer',
+                icon: 'fa-arrow-right',
+                color: 'red',
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-300">Pointer cu <strong>3 nivele</strong> de indirectare.</p>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center text-xs">
+                            <div class="text-gray-400">Inode → Idx → Idx → Idx → Data</div>
+                            <div class="mt-2 text-red-400">3 nivele de indirectare</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            <p>With block size 4KB:</p>
+                            <p class="mono text-green-400">1024³ × 4KB = 4TB extra</p>
+                            <p class="mt-2">Rar folosit - only for filee foarte mari.</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Current selected inode
+        let currentInode = 12345;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup file system tree click handlers
+            document.querySelectorAll('.fs-tree-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const inodeNum = parseInt(item.dataset.inode);
+                    if (inodeData[inodeNum]) {
+                        selectInode(inodeNum);
+                        
+                        // Update selection
+                        document.querySelectorAll('.fs-tree-item').forEach(i => i.classList.remove('selected'));
+                        item.classList.add('selected');
+                    }
+                });
+            });
+            
+            // Initialize with default inode
+            selectInode(12345);
+        });
+
+        // Select and display inode
+        function selectInode(inodeNum) {
+            currentInode = inodeNum;
+            const data = inodeData[inodeNum];
+            if (!data) return;
+            
+            // Update header
+            document.getElementById('inode-number').textContent = data.number;
+            document.getElementById('file-path').textContent = data.path;
+            
+            // Update fields
+            document.getElementById('inode-mode').textContent = data.mode;
+            document.getElementById('inode-mode-octal').textContent = `(${data.modeOctal})`;
+            document.getElementById('inode-uid').textContent = data.uid;
+            document.getElementById('inode-user').textContent = `(${data.user})`;
+            document.getElementById('inode-gid').textContent = data.gid;
+            document.getElementById('inode-group').textContent = `(${data.group})`;
+            document.getElementById('inode-size').textContent = data.size.toLocaleString();
+            document.getElementById('inode-size-human').textContent = `(${formatSize(data.size)})`;
+            document.getElementById('inode-links').textContent = data.links;
+            document.getElementById('inode-atime').textContent = data.atime;
+            document.getElementById('inode-mtime').textContent = data.mtime;
+            document.getElementById('inode-ctime').textContent = data.ctime;
+            
+            // Update direct blocks
+            const directContainer = document.getElementById('direct-blocks');
+            directContainer.innerHTML = data.directBlockks.map((block, i) => `
+                <div class="block-pointer p-2 rounded bg-gradient-to-br ${block ? 'from-green-900/30 to-green-800/20 border border-green-500/30' : 'from-gray-800/30 to-gray-700/20 border border-gray-600/30'} text-center text-xs cursor-pointer" onclick="showBlockkDetail(${i}, ${block})">
+                    <div class="text-gray-500">[${i}]</div>
+                    <div class="${block ? 'text-green-400' : 'text-gray-600'}">${block || 'null'}</div>
+                </div>
+            `).join('');
+            
+            // Update indirect pointers
+            document.getElementById('single-indirect').textContent = data.singleIndirect ? `→ block ${data.singleIndirect}` : '(null)';
+            document.getElementById('single-indirect').className = `mono text-sm ${data.singleIndirect ? '' : 'text-gray-500'}`;
+            
+            document.getElementById('double-indirect').textContent = data.doubleIndirect ? `→ block ${data.doubleIndirect}` : '(null)';
+            document.getElementById('double-indirect').className = `mono text-sm ${data.doubleIndirect ? '' : 'text-gray-500'}`;
+            
+            document.getElementById('triple-indirect').textContent = data.tripleIndirect ? `→ block ${data.tripleIndirect}` : '(null)';
+        }
+
+        // Show field detail
+        function showFieldDetail(field) {
+            const detail = fieldDetails[field];
+            if (!detail) return;
+            
+            // Highlight selected field
+            document.querySelectorAll('.field-row').forEach(row => row.classList.remove('selected'));
+            const selectedRow = document.querySelector(`[data-field="${field}"]`);
+            if (selectedRow) selectedRow.classList.add('selected');
+            
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="detail-panel">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-${detail.color}-600/30 flex items-center justify-center">
+                            <i class="fas ${detail.icon} text-${detail.color}-400"></i>
+                        </div>
+                        <div class="font-bold text-${detail.color}-400">${detail.title}</div>
+                    </div>
+                    ${detail.content}
+                </div>
+            `;
+        }
+
+        // Show block detail
+        function showBlockkDetail(index, blockNum) {
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="detail-panel">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-600/30 flex items-center justify-center">
+                            <i class="fas fa-cube text-green-400"></i>
+                        </div>
+                        <div class="font-bold text-green-400">Direct Blockk [${index}]</div>
+                    </div>
+                    
+                    ${blockNum ? `
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center mb-3">
+                            <div class="text-xs text-gray-400">Blockk Number:</div>
+                            <div class="text-2xl font-bold text-green-400 mono">${blockNum}</div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-sm">
+                            <div class="text-gray-400 mb-2">Contains:</div>
+                            <div class="mono text-xs text-green-300">
+                                Up to 4096 bytes of file data
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 text-xs text-gray-400">
+                            <p>Blockksle directe permit acces fast without indirectare.</p>
+                            <p class="mt-1">12 pointeri × 4KB = <span class="text-green-400">48KB</span> direct accesibil</p>
+                        </div>
+                    ` : `
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-gray-500">Blockk nealocat</div>
+                            <div class="text-xs text-gray-600 mt-1">The file does not use this slot</div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        // Format size helper
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+    </script>
+</body>
+</html>
