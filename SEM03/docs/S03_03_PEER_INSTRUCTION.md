@@ -6,6 +6,36 @@
 
 ---
 
+## Peer Instruction Protocol
+
+### Standard Voting Procedure
+
+For each question in this document, follow this protocol:
+
+1. **Display question** (30 seconds for reading)
+2. **Individual vote** — Students vote A/B/C/D silently (no discussion)
+3. **Record distribution** — Note percentages on board: A:__% B:__% C:__% D:__%
+4. **Decision point:**
+   - If **>70% correct**: Brief explanation, move on
+   - If **30-70% correct**: Peer discussion (2-3 min), then re-vote
+   - If **<30% correct**: Mini-lecture needed before re-vote
+5. **Reveal answer** with explanation (2 min)
+
+### Optimal Conditions
+
+- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
+- **Discussion groups:** 2-3 students with different initial answers
+- **Re-vote improvement:** Expect 20-30% increase after discussion
+
+### Question Notation
+
+Each question includes:
+- **Bloom level:** Cognitive level being assessed
+- **Misconception target:** Which common error this question tests
+- **Distractor analysis:** Why wrong answers are tempting
+
+---
+
 ## Contents
 
 1. [find and xargs Questions (PI-01 to PI-05)](#-find-and-xargs-questions)

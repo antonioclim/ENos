@@ -80,7 +80,7 @@ CATEGORIES = {
 }
 
 # ANSI colours
-class Colors:
+class Colours:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
     CYAN = '\033[96m'
@@ -93,7 +93,7 @@ class Colors:
 
 def color(text: str, c: str, use_color: bool = True) -> str:
     """Apply colour to text."""
-    return f"{c}{text}{Colors.END}" if use_color else text
+    return f"{c}{text}{Colours.END}" if use_color else text
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DATA MODELS
@@ -489,18 +489,18 @@ class ReportGenerator:
         # Header
         lines.append("═" * 70)
         lines.append(color(f"  📊 PROGRESS REPORT - {student.name.upper()}", 
-                          Colors.BOLD + Colors.CYAN, self.use_color))
+                          Colours.BOLD + Colours.CYAN, self.use_color))
         lines.append(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         lines.append("═" * 70)
         
         # Estimated final grade
         final_score, grade = student.calculate_final_grade()
-        grade_color = Colors.GREEN if int(grade) >= 5 else Colors.RED
-        lines.append(f"\n  📝 ESTIMATED FINAL GRADE: {color(grade, grade_color + Colors.BOLD, self.use_color)}")
+        grade_color = Colours.GREEN if int(grade) >= 5 else Colours.RED
+        lines.append(f"\n  📝 ESTIMATED FINAL GRADE: {color(grade, grade_color + Colours.BOLD, self.use_color)}")
         lines.append(f"  📈 Overall score: {final_score:.1f}%")
         
         # Quiz statistics
-        lines.append(color("\n  🎯 QUIZZES", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  🎯 QUIZZES", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         if student.quiz_results:
             lines.append(f"  Quizzes completed:   {len(student.quiz_results)}")
@@ -515,7 +515,7 @@ class ReportGenerator:
             lines.append("  ⚠️  You haven't completed any quizzes.")
         
         # Assignment statistics
-        lines.append(color("\n  📚 ASSIGNMENTS (AUTOGRADER)", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  📚 ASSIGNMENTS (AUTOGRADER)", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         if student.autograder_results:
             lines.append(f"  Assignments graded:  {len(student.autograder_results)}")
@@ -527,12 +527,12 @@ class ReportGenerator:
             
             if last.security_issues:
                 lines.append(color(f"  ⚠️  Security issues: {len(last.security_issues)}", 
-                                  Colors.RED, self.use_color))
+                                  Colours.RED, self.use_color))
         else:
             lines.append("  ⚠️  You haven't submitted any graded assignments.")
         
         # Categories
-        lines.append(color("\n  📊 STRENGTHS / WEAKNESSES BY CATEGORY", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  📊 STRENGTHS / WEAKNESSES BY CATEGORY", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         
         strengths = student.category_strengths
@@ -543,13 +543,13 @@ class ReportGenerator:
             
             bar_len = int(score / 5)
             bar = "█" * bar_len + "░" * (20 - bar_len)
-            score_color = Colors.GREEN if score >= 70 else (Colors.YELLOW if score >= 50 else Colors.RED)
+            score_color = Colours.GREEN if score >= 70 else (Colours.YELLOW if score >= 50 else Colours.RED)
             
             lines.append(f"  {emoji} {name:20} [{bar}] {color(f'{score:.0f}%', score_color, self.use_color)}")
         
         # Suggestions
         suggestions = DataAnalyser.get_improvement_suggestions(student)
-        lines.append(color("\n  💡 IMPROVEMENT SUGGESTIONS", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  💡 IMPROVEMENT SUGGESTIONS", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         for suggestion in suggestions:
             wrapped = textwrap.wrap(suggestion, width=60)
@@ -559,7 +559,7 @@ class ReportGenerator:
         
         # Progress
         if len(student.quiz_results) >= 2:
-            lines.append(color("\n  📈 QUIZ PROGRESS", Colors.YELLOW, self.use_color))
+            lines.append(color("\n  📈 QUIZ PROGRESS", Colours.YELLOW, self.use_color))
             lines.append("  " + "─" * 40)
             for i, quiz in enumerate(student.quiz_results[-5:], 1):
                 date = quiz.timestamp.strftime('%Y-%m-%d')
@@ -862,12 +862,12 @@ class ReportGenerator:
         lines = []
         
         lines.append("═" * 70)
-        lines.append(color("  📊 CLASS REPORT - SEMINAR 5-6", Colors.BOLD + Colors.CYAN, self.use_color))
+        lines.append(color("  📊 CLASS REPORT - SEMINAR 5-6", Colours.BOLD + Colours.CYAN, self.use_color))
         lines.append(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         lines.append("═" * 70)
         
         # General statistics
-        lines.append(color("\n  📈 GENERAL STATISTICS", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  📈 GENERAL STATISTICS", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         lines.append(f"  Total students:        {stats.total_students}")
         lines.append(f"  With submissions:      {stats.students_with_submissions}")
@@ -878,7 +878,7 @@ class ReportGenerator:
         lines.append(f"  Maximum score:         {stats.max_score:.1f}%")
         
         # Grade distribution
-        lines.append(color("\n  📊 GRADE DISTRIBUTION", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  📊 GRADE DISTRIBUTION", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         for grade in ['10', '9', '8', '7', '6', '5', '4']:
             count = stats.grade_distribution.get(grade, 0)
@@ -886,7 +886,7 @@ class ReportGenerator:
             lines.append(f"  Grade {grade}: {bar} ({count})")
         
         # Category averages
-        lines.append(color("\n  📚 AVERAGES BY CATEGORY", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  📚 AVERAGES BY CATEGORY", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         for cat_id, avg in sorted(stats.category_averages.items(), key=lambda x: -x[1]):
             cat = CATEGORIES.get(cat_id, {})
@@ -897,7 +897,7 @@ class ReportGenerator:
             lines.append(f"  {emoji} {name:20} [{bar}] {avg:.0f}%")
         
         # Top 5 students
-        lines.append(color("\n  🏆 TOP 5 STUDENTS", Colors.YELLOW, self.use_color))
+        lines.append(color("\n  🏆 TOP 5 STUDENTS", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         top = DataAnalyser.identify_top_performers(students, 5)
         for i, s in enumerate(top, 1):
@@ -907,7 +907,7 @@ class ReportGenerator:
         # Students with difficulties
         struggling = DataAnalyser.identify_struggling_students(students)
         if struggling:
-            lines.append(color("\n  ⚠️  STUDENTS WITH DIFFICULTIES", Colors.RED, self.use_color))
+            lines.append(color("\n  ⚠️  STUDENTS WITH DIFFICULTIES", Colours.RED, self.use_color))
             lines.append("  " + "─" * 40)
             for s in struggling[:5]:
                 score, _ = s.calculate_final_grade()
@@ -918,11 +918,11 @@ class ReportGenerator:
         # Security issues
         if stats.security_issues_count > 0:
             lines.append(color(f"\n  🔒 SECURITY ISSUES: {stats.security_issues_count} total", 
-                              Colors.RED, self.use_color))
+                              Colours.RED, self.use_color))
         
         # Common mistakes
         if stats.common_mistakes:
-            lines.append(color("\n  ❌ COMMON QUIZ MISTAKES", Colors.YELLOW, self.use_color))
+            lines.append(color("\n  ❌ COMMON QUIZ MISTAKES", Colours.YELLOW, self.use_color))
             lines.append("  " + "─" * 40)
             for q_id, count in stats.common_mistakes[:5]:
                 lines.append(f"  • Question {q_id}: {count} mistakes")
@@ -1176,7 +1176,7 @@ Examples:
     
     # Demo with synthetic data
     if args.demo:
-        print(color("🧪 Generating synthetic data for demo...\n", Colors.CYAN, use_color))
+        print(color("🧪 Generating synthetic data for demo...\n", Colours.CYAN, use_color))
         
         # Generate synthetic class
         students = SyntheticDataGenerator.generate_class(25)
@@ -1195,7 +1195,7 @@ Examples:
         
         # Individual report example
         print("\n" + "═" * 70)
-        print(color("\n📄 Individual report example:\n", Colors.YELLOW, use_color))
+        print(color("\n📄 Individual report example:\n", Colours.YELLOW, use_color))
         sample_student = students[0]
         
         if args.format == 'html' and args.output:

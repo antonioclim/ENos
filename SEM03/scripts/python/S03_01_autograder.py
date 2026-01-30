@@ -33,6 +33,7 @@ AUTHOR: OS Team | VERSION: 1.0 | DATE: 2025
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+import logging
 import os
 import sys
 import re
@@ -48,11 +49,17 @@ from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
 import traceback
 
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
+
 # 
 # TERMINAL COLOUR CONFIGURATION
 # 
 
-class Colors:
+class Colours:
     """ANSI codes for terminal colours"""
     RED = '\033[0;31m'
     GREEN = '\033[0;32m'
@@ -75,7 +82,7 @@ class Colors:
 
 # Automatic detection if terminal supports colours
 if not sys.stdout.isatty():
-    Colors.disable()
+    Colours.disable()
 
 # 
 # DATA MODELS
@@ -823,11 +830,11 @@ class Autograder:
             return
         
         prefix = {
-            "info": f"{Colors.CYAN}ℹ️ {Colors.RESET}",
-            "success": f"{Colors.GREEN}✅{Colors.RESET}",
-            "warning": f"{Colors.YELLOW}⚠️ {Colors.RESET}",
-            "error": f"{Colors.RED}❌{Colors.RESET}",
-            "debug": f"{Colors.GRAY}🔍{Colors.RESET}",
+            "info": f"{Colours.CYAN}ℹ️ {Colours.RESET}",
+            "success": f"{Colours.GREEN}✅{Colours.RESET}",
+            "warning": f"{Colours.YELLOW}⚠️ {Colours.RESET}",
+            "error": f"{Colours.RED}❌{Colours.RESET}",
+            "debug": f"{Colours.GRAY}🔍{Colours.RESET}",
         }.get(level, "")
         
         print(f"{prefix} {message}")
@@ -1577,10 +1584,11 @@ Usage examples:
     args = parser.parse_args()
     
     if args.no_color:
-        Colors.disable()
+        Colours.disable()
     
     # Create sample submission
     if args.create_sample:
+        logger.info("Creating sample submission...")
         create_sample_submission()
         return 0
     
@@ -1623,6 +1631,7 @@ Usage examples:
     
     # Grade submission
     if args.submission:
+        logger.info(f"Starting grading for: {args.submission}")
         grader = Autograder(args.submission, verbose=args.verbose)
         result = grader.grade()
         
@@ -1637,8 +1646,10 @@ Usage examples:
             elif args.output.endswith('.md'):
                 with open(args.output, 'w') as f:
                     f.write(ReportGenerator.generate_markdown_report(result))
+            logger.info(f"Report saved to: {args.output}")
             print(f"Report saved to: {args.output}")
         
+        logger.info(f"Final result: {result.percentage:.1f}% (Grade: {result.grade})")
         return 0 if result.percentage >= 50 else 1
     
     # Batch grading

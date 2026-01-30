@@ -44,7 +44,7 @@ VERSION = "1.0"
 PROGRAM_NAME = "Quiz Generator - SEM03"
 
 # ANSI colours for terminal
-class Colors:
+class Colours:
     """ANSI colours for terminal formatting."""
     HEADER = '\033[95m'
     BLUE = '\033[94m'
@@ -66,7 +66,7 @@ def color_text(text: str, color: str, use_color: bool = True) -> str:
     """Apply colour to text if enabled."""
     if not use_color:
         return text
-    return f"{color}{text}{Colors.END}"
+    return f"{color}{text}{Colours.END}"
 
 # 
 # DATA MODELS
@@ -1853,12 +1853,12 @@ class Quiz:
         """Run the quiz in interactive mode in terminal."""
         os.system('clear' if os.name == 'posix' else 'cls')
         
-        print(color_text(f"\n{'═' * 60}", Colors.CYAN, self.use_color))
-        print(color_text(f"  🎯 {self.title}", Colors.BOLD + Colors.CYAN, self.use_color))
-        print(color_text(f"  📝 {len(self.questions)} questions", Colors.CYAN, self.use_color))
-        print(color_text(f"{'═' * 60}\n", Colors.CYAN, self.use_color))
+        print(color_text(f"\n{'═' * 60}", Colours.CYAN, self.use_color))
+        print(color_text(f"  🎯 {self.title}", Colours.BOLD + Colours.CYAN, self.use_color))
+        print(color_text(f"  📝 {len(self.questions)} questions", Colours.CYAN, self.use_color))
+        print(color_text(f"{'═' * 60}\n", Colours.CYAN, self.use_color))
         
-        input(color_text("  Press ENTER to start...", Colors.YELLOW, self.use_color))
+        input(color_text("  Press ENTER to start...", Colours.YELLOW, self.use_color))
         
         start_time = time.time()
         results = []
@@ -1869,9 +1869,9 @@ class Quiz:
             
             # Header
             diff_color = {
-                Difficulty.EASY: Colors.GREEN,
-                Difficulty.MEDIUM: Colors.YELLOW,
-                Difficulty.HARD: Colors.RED
+                Difficulty.EASY: Colours.GREEN,
+                Difficulty.MEDIUM: Colours.YELLOW,
+                Difficulty.HARD: Colours.RED
             }[q.difficulty]
             
             print(f"\n  Question {i}/{len(self.questions)}")
@@ -1885,10 +1885,10 @@ class Quiz:
             
             # Code snippet
             if q.code_snippet:
-                print(color_text("  ┌" + "─" * 56 + "┐", Colors.GRAY, self.use_color))
+                print(color_text("  ┌" + "─" * 56 + "┐", Colours.GRAY, self.use_color))
                 for line in q.code_snippet.split('\n'):
-                    print(color_text(f"  │ {line:<54} │", Colors.GRAY, self.use_color))
-                print(color_text("  └" + "─" * 56 + "┘", Colors.GRAY, self.use_color))
+                    print(color_text(f"  │ {line:<54} │", Colours.GRAY, self.use_color))
+                print(color_text("  └" + "─" * 56 + "┘", Colours.GRAY, self.use_color))
                 print()
             
             # Options
@@ -1900,10 +1900,10 @@ class Quiz:
             # Input
             while True:
                 answer = input(color_text("  Your answer (A/B/C/D or S to skip): ", 
-                                         Colors.CYAN, self.use_color)).strip().upper()
+                                         Colours.CYAN, self.use_color)).strip().upper()
                 if answer in ['A', 'B', 'C', 'D', 'S']:
                     break
-                print(color_text("  ⚠️ Invalid option!", Colors.RED, self.use_color))
+                print(color_text("  ⚠️ Invalid option!", Colours.RED, self.use_color))
             
             # Check answer
             is_correct = answer == q.correct_answer
@@ -1916,17 +1916,17 @@ class Quiz:
             
             if skipped:
                 categories_breakdown[cat]['skipped'] += 1
-                print(color_text("\n  ⏭️  Skipped", Colors.YELLOW, self.use_color))
+                print(color_text("\n  ⏭️  Skipped", Colours.YELLOW, self.use_color))
             elif is_correct:
                 categories_breakdown[cat]['correct'] += 1
-                print(color_text("\n  ✅ Correct!", Colors.GREEN, self.use_color))
+                print(color_text("\n  ✅ Correct!", Colours.GREEN, self.use_color))
             else:
                 categories_breakdown[cat]['wrong'] += 1
                 print(color_text(f"\n  ❌ Wrong! Correct answer: {q.correct_answer}", 
-                               Colors.RED, self.use_color))
+                               Colours.RED, self.use_color))
             
             # Explanation
-            print(color_text(f"\n  💡 Explanation:", Colors.CYAN, self.use_color))
+            print(color_text(f"\n  💡 Explanation:", Colours.CYAN, self.use_color))
             for line in textwrap.wrap(q.explanation, 55):
                 print(f"     {line}")
             
@@ -1940,7 +1940,7 @@ class Quiz:
             })
             
             if i < len(self.questions):
-                input(color_text("\n  Press ENTER to continue...", Colors.GRAY, self.use_color))
+                input(color_text("\n  Press ENTER to continue...", Colours.GRAY, self.use_color))
         
         end_time = time.time()
         
@@ -2358,17 +2358,17 @@ def print_banner(use_color: bool = True):
     ║              Seminar 3: Find, Permissions, Cron                  ║
     ╚══════════════════════════════════════════════════════════════════╝
     """
-    print(color_text(banner, Colors.CYAN, use_color))
+    print(color_text(banner, Colours.CYAN, use_color))
 
 def print_statistics(bank: QuestionBank, use_color: bool = True):
     """Display statistics about the question bank."""
     stats = bank.get_statistics()
     
-    print(color_text("\n📊 Question Bank Statistics", Colors.BOLD + Colors.CYAN, use_color))
+    print(color_text("\n📊 Question Bank Statistics", Colours.BOLD + Colours.CYAN, use_color))
     print("═" * 50)
-    print(f"  Total questions: {color_text(str(stats['total']), Colors.GREEN, use_color)}")
+    print(f"  Total questions: {color_text(str(stats['total']), Colours.GREEN, use_color)}")
     
-    print(color_text("\n  By category:", Colors.YELLOW, use_color))
+    print(color_text("\n  By category:", Colours.YELLOW, use_color))
     cat_emojis = {
         'find_xargs': '🔍',
         'parameters': '📝',
@@ -2379,8 +2379,8 @@ def print_statistics(bank: QuestionBank, use_color: bool = True):
         emoji = cat_emojis.get(cat, '📋')
         print(f"    {emoji} {cat:15} : {count:3}")
     
-    print(color_text("\n  By difficulty:", Colors.YELLOW, use_color))
-    diff_colors = {'easy': Colors.GREEN, 'medium': Colors.YELLOW, 'hard': Colors.RED}
+    print(color_text("\n  By difficulty:", Colours.YELLOW, use_color))
+    diff_colors = {'easy': Colours.GREEN, 'medium': Colours.YELLOW, 'hard': Colours.RED}
     for diff, count in stats['by_difficulty'].items():
         print(f"    {color_text(diff.ljust(8), diff_colors.get(diff, ''), use_color)} : {count:3}")
 
@@ -2389,14 +2389,14 @@ def print_result(result: QuizResult, use_color: bool = True):
     os.system('clear' if os.name == 'posix' else 'cls')
     
     print("\n" + "═" * 70)
-    print(color_text("  🏆 FINAL RESULTS", Colors.BOLD + Colors.CYAN, use_color))
+    print(color_text("  🏆 FINAL RESULTS", Colours.BOLD + Colours.CYAN, use_color))
     print("═" * 70)
     
     # Large score
-    score_color = Colors.GREEN if result.score_percentage >= 60 else Colors.RED
+    score_color = Colours.GREEN if result.score_percentage >= 60 else Colours.RED
     print(color_text(f"\n  Score: {result.score_percentage:.1f}%", 
-                    Colors.BOLD + score_color, use_color))
-    print(color_text(f"  Estimated grade: {result.grade}", Colors.BOLD, use_color))
+                    Colours.BOLD + score_color, use_color))
+    print(color_text(f"  Estimated grade: {result.grade}", Colours.BOLD, use_color))
     
     # Statistics
     minutes = int(result.time_taken_seconds // 60)
@@ -2408,7 +2408,7 @@ def print_result(result: QuizResult, use_color: bool = True):
     print(f"  ⏱️  Time:     {minutes}:{seconds:02d}")
     
     # Breakdown by category
-    print(color_text("\n  📊 By category:", Colors.YELLOW, use_color))
+    print(color_text("\n  📊 By category:", Colours.YELLOW, use_color))
     for cat, data in result.categories_breakdown.items():
         total = data['correct'] + data['wrong'] + data['skipped']
         if total > 0:
@@ -2479,9 +2479,9 @@ Examples:
         print_banner(use_color)
         for q in bank.questions:
             diff_color = {
-                Difficulty.EASY: Colors.GREEN,
-                Difficulty.MEDIUM: Colors.YELLOW,
-                Difficulty.HARD: Colors.RED
+                Difficulty.EASY: Colours.GREEN,
+                Difficulty.MEDIUM: Colours.YELLOW,
+                Difficulty.HARD: Colours.RED
             }[q.difficulty]
             print(f"[{q.id}] {color_text(q.difficulty.value[:1].upper(), diff_color, use_color)} "
                   f"{q.category.value:12} | {q.text[:60]}...")
@@ -2500,7 +2500,7 @@ Examples:
     
     if not questions:
         print(color_text("❌ No questions found with the specified filters!", 
-                        Colors.RED, use_color))
+                        Colours.RED, use_color))
         return 1
     
     # Create quiz

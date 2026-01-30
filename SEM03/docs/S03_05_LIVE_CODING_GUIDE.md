@@ -349,7 +349,7 @@ find . -type f ! -name "*.tmp"
 
 ### Session Objectives
 
-Three things matter here: students understand why xargs exists, students can use xargs with find safely, and students recognise the problem of spaces in names.
+Three things matter here: students understand why xargs exists, students can use xargs with find safely and students recognise the problem of spaces in names.
 
 
 ---

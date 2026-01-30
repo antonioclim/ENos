@@ -139,7 +139,7 @@ These are the main Sprint exercises. Most students should complete them with tim
 1. Find all `.sh` files modified in the last 7 days
 2. Find files larger than 1MB that are NOT in `/proc` or `/sys`
 3. Find empty directories and list them
-4. Combine: find `.log` files over 100KB, older than 30 days, and show their sizes
+4. Combine: find `.log` files over 100KB, older than 30 days and show their sizes
 
 ### C2. Script Professional (15 minutes)
 

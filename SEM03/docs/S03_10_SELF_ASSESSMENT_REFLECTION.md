@@ -226,7 +226,7 @@ done
 ```
 Arguments: 2
 
-Three things count here: hello, world, and test.
+Three things count here: hello, world and test.
 
 ```
 

@@ -50,7 +50,7 @@ The goal isn't catching cheaters. The goal is graduates who can tell the differe
 
 ```
 "Generate a find command that finds all .log files 
-larger than 100MB, older than 30 days, and deletes them 
+larger than 100MB, older than 30 days and deletes them 
 to free up disk space."
 ```
 
@@ -136,7 +136,7 @@ find /var/log -type f -name "*.log" -size +100M -mtime +30 \
 
 ```
 "Write a bash script that accepts -v for verbose,
--o for output file, and processes files given as arguments."
+-o for output file and processes files given as arguments."
 ```
 
 ### LLM OUTPUT
@@ -177,7 +177,7 @@ Analyse the script and:
 
 2. Mentally test with these inputs:
 
-Three things matter here: ./script.sh -v -o result.txt file1.txt "file 2.txt", ./script.sh file.txt  (without -o), and ./script.sh -o  (without argument for -o).
+Three things matter here: ./script.sh -v -o result.txt file1.txt "file 2.txt", ./script.sh file.txt  (without -o) and ./script.sh -o  (without argument for -o).
 
 
 3. Rewrite the script correctly and solidly

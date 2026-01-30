@@ -354,6 +354,8 @@ Problem: The shell has limits for command line length. With very many files, `fi
 
 Solution: `xargs` reads from stdin and builds commands efficiently.
 
+> 💡 *Personal note: The choice between `find -exec {} \;` and `find | xargs` confuses students every semester. My rule of thumb: use `-exec {} +` for simplicity, switch to `xargs -0` with `-print0` only when dealing with filenames containing spaces or special characters. The performance difference is negligible for most practical cases.*
+
 ```bash
 # Conceptual difference
 echo "file1 file2 file3" | cat       # cat reads STDIN

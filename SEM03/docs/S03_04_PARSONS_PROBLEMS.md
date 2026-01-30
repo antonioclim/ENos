@@ -186,7 +186,7 @@ find /tmp -type f -name "*.tmp" -mtime +30 -ok rm {} \;
 
 📝 REQUIREMENT:
 Find all .c files from src/, correctly handling 
-files with spaces in names, and display line count.
+files with spaces in names and display line count.
 
 📦 SCRAMBLED LINES:
 ─────────────────────────────────────────────────────────────────
@@ -789,7 +789,7 @@ Create a cron job that:
 
 📝 REQUIREMENT:
 Build a cron job that runs every hour on the hour,
-sets PATH explicitly, and prevents overlapping executions.
+sets PATH explicitly and prevents overlapping executions.
 
 📦 SCRAMBLED LINES (order in crontab):
 ─────────────────────────────────────────────────────────────────
