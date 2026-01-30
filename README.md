@@ -11,7 +11,7 @@
 ```
 
 **by ing. dr. Antonio Clim** | Bucharest University of Economic Studies — CSIE  
-Year I, Semester 2 | 2017-2027
+Year I, Semester 2 | 2017-2030
 
 ---
 

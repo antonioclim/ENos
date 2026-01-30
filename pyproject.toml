@@ -1,0 +1,180 @@
+[project]
+name = "enos-educational-kit"
+version = "2.0.0"
+description = "Operating Systems Educational Kit for ASE Bucharest"
+authors = [{name = "ing. dr. Antonio Clim", email = "antonio.clim@csie.ase.ro"}]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+keywords = [
+    "education",
+    "operating-systems",
+    "linux",
+    "bash",
+    "scripting",
+    "ASE-Bucharest",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: System :: Operating System",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pylint>=2.17.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# =============================================================================
+# PYTEST CONFIGURATION
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = [
+    "SEM01/tests",
+    "SEM02/tests",
+    "SEM03/tests",
+    "SEM04/tests",
+    "SEM05/tests",
+    "SEM06/tests",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+# =============================================================================
+# PYLINT CONFIGURATION
+# =============================================================================
+[tool.pylint.main]
+max-line-length = 100
+jobs = 0  # Use all available processors
+
+[tool.pylint."messages control"]
+disable = [
+    "C0114",  # missing-module-docstring (we have our style)
+    "C0115",  # missing-class-docstring
+    "C0116",  # missing-function-docstring
+    "R0903",  # too-few-public-methods
+    "W0511",  # fixme/todo comments
+    "R0801",  # duplicate-code (educational examples may be similar)
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.design]
+max-args = 7
+max-locals = 15
+max-returns = 6
+max-branches = 12
+max-statements = 50
+
+[tool.pylint.similarities]
+min-similarity-lines = 10
+ignore-comments = true
+ignore-docstrings = true
+
+# =============================================================================
+# MYPY CONFIGURATION
+# =============================================================================
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "yaml.*",
+    "pytest.*",
+]
+ignore_missing_imports = true
+
+# =============================================================================
+# BLACK CONFIGURATION
+# =============================================================================
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | OLD_HW
+)/
+'''
+
+# =============================================================================
+# ISORT CONFIGURATION
+# =============================================================================
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+# =============================================================================
+# COVERAGE CONFIGURATION
+# =============================================================================
+[tool.coverage.run]
+source = [
+    "SEM01/scripts/python",
+    "SEM02/scripts/python",
+    "SEM03/scripts/python",
+    "SEM04/scripts/python",
+    "SEM05/scripts/python",
+    "SEM06/scripts/python",
+    "lib",
+]
+omit = [
+    "*/__pycache__/*",
+    "*/tests/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
