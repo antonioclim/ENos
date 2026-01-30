@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heterogeneous Computing | Lecture 18 - NPU Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #050608;
+            --bg-secondary: #0a0c10;
+            --bg-tertiary: #10141a;
+            --cpu-color: #3b82f6;
+            --gpu-color: #10b981;
+            --npu-color: #f59e0b;
+            --memory-color: #8b5cf6;
+            --pcie-color: #ec4899;
+        }
+        
+        * {
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at 10% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(ellipse at 90% 90%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(10, 12, 16, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .processor-card {
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .processor-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .processor-card.cpu::before {
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+        }
+        
+        .processor-card.gpu::before {
+            background: radial-gradient(circle at center, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+        }
+        
+        .processor-card.npu::before {
+            background: radial-gradient(circle at center, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+        }
+        
+        .processor-card.active::before {
+            opacity: 1;
+        }
+        
+        .processor-card.active {
+            transform: scale(1.02);
+        }
+        
+        .chip-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .chip-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 20px;
+            background: inherit;
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+        
+        .chip-icon.cpu {
+            background: linear-gradient(135deg, var(--cpu-color), #1d4ed8);
+        }
+        
+        .chip-icon.gpu {
+            background: linear-gradient(135deg, var(--gpu-color), #059669);
+        }
+        
+        .chip-icon.npu {
+            background: linear-gradient(135deg, var(--npu-color), #d97706);
+        }
+        
+        .core-grid {
+            display: grid;
+            gap: 4px;
+        }
+        
+        .core-unit {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+        
+        .core-unit.idle {
+            background: rgba(75, 85, 99, 0.3);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+        }
+        
+        .core-unit.active {
+            animation: coreActive 0.5s ease-in-out infinite alternate;
+        }
+        
+        .core-unit.cpu.active {
+            background: rgba(59, 130, 246, 0.6);
+            border: 1px solid var(--cpu-color);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+        
+        .core-unit.gpu.active {
+            background: rgba(16, 185, 129, 0.6);
+            border: 1px solid var(--gpu-color);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+        
+        .core-unit.npu.active {
+            background: rgba(245, 158, 11, 0.6);
+            border: 1px solid var(--npu-color);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+        }
+        
+        @keyframes coreActive {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .data-bus {
+            height: 8px;
+            background: linear-gradient(90deg, 
+                rgba(139, 92, 246, 0.1) 0%, 
+                rgba(139, 92, 246, 0.3) 50%, 
+                rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .data-bus::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
+            animation: dataPulse 2s linear infinite;
+        }
+        
+        @keyframes dataPulse {
+            0% { left: -50px; }
+            100% { left: 100%; }
+        }
+        
+        .data-bus.active::after {
+            animation-duration: 0.5s;
+        }
+        
+        .task-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .task-card.processing {
+            animation: taskPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes taskPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+            50% { box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.1); }
+        }
+        
+        .task-card.completed {
+            opacity: 0.5;
+        }
+        
+        .utilization-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .utilization-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .utilization-ring .value {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        
+        .memory-bar {
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(139, 92, 246, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .memory-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .workflow-step {
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .workflow-step.active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .workflow-step.completed {
+            border-left: 3px solid var(--gpu-color);
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 via-emerald-500 to-amber-500 flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Heterogeneous Computing</h1>
+                        <p class="text-sm text-gray-400">Lecture 18 • CPU + GPU + NPU Architecture</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="btnReset" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button id="btnRunWorkload" class="px-5 py-2 bg-gradient-to-r from-blue-500 via-emerald-500 to-amber-500 hover:from-blue-400 hover:via-emerald-400 hover:to-amber-400 rounded-lg transition flex items-center gap-2 font-semibold">
+                        <i class="fas fa-play"></i> Run Workload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Concept Overview -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-microchip text-purple-400 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="font-bold text-lg mb-2">What is Heterogeneous Computing?</h2>
+                    <p class="text-gray-400 text-sm mb-3">
+                        Systems that combine different processors (CPU, GPU, NPU/TPU) for a executa task-uri 
+                        pe unitatea cea mai potrivita. Each processor type excels at certain types of computations.
+                    </p>
+                    <div class="grid grid-cols-3 gap-4 text-xs">
+                        <div class="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                            <i class="fas fa-microchip text-blue-400"></i>
+                            <span><strong class="text-blue-400">CPU:</strong> Complex logic, branching</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
+                            <i class="fas fa-th text-emerald-400"></i>
+                            <span><strong class="text-emerald-400">GPU:</strong> Massive parallelism, graphics</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                            <i class="fas fa-brain text-amber-400"></i>
+                            <span><strong class="text-amber-400">NPU:</strong> AI/ML, matrix ops</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left: Processor Cards -->
+            <div class="col-span-8">
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <!-- CPU Card -->
+                    <div id="cpuCard" class="processor-card cpu glass-panel rounded-2xl p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="chip-icon cpu">
+                                <i class="fas fa-microchip text-3xl text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-blue-400">CPU</h3>
+                                <p class="text-xs text-gray-500">8 Cores / 16 Threads</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-400 mb-2">Cores:</p>
+                            <div class="core-grid" style="grid-template-columns: repeat(4, 1fr);" id="cpuCores">
+                                <!-- 8 cores -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Utilization</p>
+                                <p id="cpuUtil" class="text-xl font-bold text-blue-400">0%</p>
+                            </div>
+                            <div class="utilization-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="25" stroke="#1f2937" stroke-width="5" fill="none"/>
+                                    <circle id="cpuRing" cx="30" cy="30" r="25" stroke="#3b82f6" stroke-width="5" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <span class="value text-blue-400" id="cpuRingValue">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-blue-500/10 rounded-lg">
+                            <p class="text-xs text-blue-300">
+                                <i class="fas fa-check mr-1"></i> Optimal for: Control flow, I/O, OS tasks
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- GPU Card -->
+                    <div id="gpuCard" class="processor-card gpu glass-panel rounded-2xl p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="chip-icon gpu">
+                                <i class="fas fa-th text-3xl text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-emerald-400">GPU</h3>
+                                <p class="text-xs text-gray-500">4096 CUDA Cores</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-400 mb-2">Streaming Multiprocessors:</p>
+                            <div class="core-grid" style="grid-template-columns: repeat(8, 1fr);" id="gpuCores">
+                                <!-- 32 SM units (representing many cores) -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Utilization</p>
+                                <p id="gpuUtil" class="text-xl font-bold text-emerald-400">0%</p>
+                            </div>
+                            <div class="utilization-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="25" stroke="#1f2937" stroke-width="5" fill="none"/>
+                                    <circle id="gpuRing" cx="30" cy="30" r="25" stroke="#10b981" stroke-width="5" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <span class="value text-emerald-400" id="gpuRingValue">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-emerald-500/10 rounded-lg">
+                            <p class="text-xs text-emerald-300">
+                                <i class="fas fa-check mr-1"></i> Optimal for: Graphics, SIMD, parallel data
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- NPU Card -->
+                    <div id="npuCard" class="processor-card npu glass-panel rounded-2xl p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="chip-icon npu">
+                                <i class="fas fa-brain text-3xl text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-amber-400">NPU</h3>
+                                <p class="text-xs text-gray-500">45 TOPS INT8</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-400 mb-2">Neural Engines:</p>
+                            <div class="core-grid" style="grid-template-columns: repeat(4, 1fr);" id="npuCores">
+                                <!-- 16 neural engines -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500">Utilization</p>
+                                <p id="npuUtil" class="text-xl font-bold text-amber-400">0%</p>
+                            </div>
+                            <div class="utilization-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="25" stroke="#1f2937" stroke-width="5" fill="none"/>
+                                    <circle id="npuRing" cx="30" cy="30" r="25" stroke="#f59e0b" stroke-width="5" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <span class="value text-amber-400" id="npuRingValue">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-amber-500/10 rounded-lg">
+                            <p class="text-xs text-amber-300">
+                                <i class="fas fa-check mr-1"></i> Optimal for: AI inference, ML models
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Shared Memory & PCIe Bus -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-memory text-purple-400"></i>
+                        System Memory & Interconnect
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- System RAM -->
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-400">System RAM (DDR5)</span>
+                                <span id="ramUsage" class="text-purple-400">0 / 32 GB</span>
+                            </div>
+                            <div class="memory-bar">
+                                <div id="ramFill" class="memory-fill bg-gradient-to-r from-purple-500 to-violet-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- GPU VRAM -->
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-400">GPU VRAM (GDDR6)</span>
+                                <span id="vramUsage" class="text-emerald-400">0 / 16 GB</span>
+                            </div>
+                            <div class="memory-bar">
+                                <div id="vramFill" class="memory-fill bg-gradient-to-r from-emerald-500 to-teal-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- PCIe Bus -->
+                        <div class="p-4 bg-pink-500/10 rounded-xl border border-pink-500/30">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-pink-400 font-semibold">PCIe 4.0 x16 Bus</span>
+                                <span id="pcieStatus" class="text-xs text-gray-500">Idle</span>
+                            </div>
+                            <div id="pcieBus" class="data-bus"></div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>CPU ↔ GPU: 32 GB/s</span>
+                                <span>CPU ↔ NPU: 8 GB/s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Workload Distribution Chart -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-cyan-400"></i>
+                        Workload Distribution
+                    </h3>
+                    <div class="h-48">
+                        <canvas id="workloadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Tasks & Workflow -->
+            <div class="col-span-4">
+                <!-- Task Queue -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-tasks text-cyan-400"></i>
+                        Task Queue
+                    </h3>
+                    
+                    <div id="taskQueue" class="space-y-3">
+                        <div class="task-card p-3 bg-blue-500/10 rounded-xl border border-blue-500/30" data-target="cpu" data-task="os">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <i class="fas fa-cog text-blue-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">OS Scheduler</p>
+                                    <p class="text-xs text-gray-500">Control flow task</p>
+                                </div>
+                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">CPU</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30" data-target="gpu" data-task="render">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                    <i class="fas fa-image text-emerald-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">Image Processing</p>
+                                    <p class="text-xs text-gray-500">4K frames batch</p>
+                                </div>
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">GPU</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card p-3 bg-amber-500/10 rounded-xl border border-amber-500/30" data-target="npu" data-task="inference">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                                    <i class="fas fa-robot text-amber-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">Object Detection</p>
+                                    <p class="text-xs text-gray-500">YOLOv8 inference</p>
+                                </div>
+                                <span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">NPU</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30" data-target="gpu" data-task="matrix">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                    <i class="fas fa-th text-emerald-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">Matrix Multiply</p>
+                                    <p class="text-xs text-gray-500">1024x1024 GEMM</p>
+                                </div>
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">GPU</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card p-3 bg-amber-500/10 rounded-xl border border-amber-500/30" data-target="npu" data-task="nlp">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                                    <i class="fas fa-language text-amber-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">NLP Processing</p>
+                                    <p class="text-xs text-gray-500">BERT tokenization</p>
+                                </div>
+                                <span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">NPU</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Execution Log -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-terminal text-green-400"></i>
+                        Execution Log
+                    </h3>
+                    
+                    <div id="execLog" class="bg-black rounded-xl p-4 h-64 overflow-y-auto scroll-area mono text-xs">
+                        <div class="text-gray-500">[system] Heterogeneous system ready</div>
+                        <div class="text-gray-500">[system] CPU: 8 cores online</div>
+                        <div class="text-gray-500">[system] GPU: 4096 CUDA cores ready</div>
+                        <div class="text-gray-500">[system] NPU: 45 TOPS available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 p-3 text-xs text-gray-500">
+        By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            isRunning: false,
+            cpuUtil: 0,
+            gpuUtil: 0,
+            npuUtil: 0,
+            ramUsage: 0,
+            vramUsage: 0,
+            currentTask: null
+        };
+
+        // DOM Elements
+        const elements = {
+            cpuCard: document.getElementById('cpuCard'),
+            gpuCard: document.getElementById('gpuCard'),
+            npuCard: document.getElementById('npuCard'),
+            cpuCores: document.getElementById('cpuCores'),
+            gpuCores: document.getElementById('gpuCores'),
+            npuCores: document.getElementById('npuCores'),
+            cpuUtil: document.getElementById('cpuUtil'),
+            gpuUtil: document.getElementById('gpuUtil'),
+            npuUtil: document.getElementById('npuUtil'),
+            cpuRing: document.getElementById('cpuRing'),
+            gpuRing: document.getElementById('gpuRing'),
+            npuRing: document.getElementById('npuRing'),
+            cpuRingValue: document.getElementById('cpuRingValue'),
+            gpuRingValue: document.getElementById('gpuRingValue'),
+            npuRingValue: document.getElementById('npuRingValue'),
+            ramUsage: document.getElementById('ramUsage'),
+            ramFill: document.getElementById('ramFill'),
+            vramUsage: document.getElementById('vramUsage'),
+            vramFill: document.getElementById('vramFill'),
+            pcieBus: document.getElementById('pcieBus'),
+            pcieStatus: document.getElementById('pcieStatus'),
+            taskQueue: document.getElementById('taskQueue'),
+            execLog: document.getElementById('execLog'),
+            btnRunWorkload: document.getElementById('btnRunWorkload'),
+            btnReset: document.getElementById('btnReset')
+        };
+
+        // Chart
+        let workloadChart;
+
+        function initChart() {
+            const ctx = document.getElementById('workloadChart').getContext('2d');
+            workloadChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CPU', 'GPU', 'NPU', 'Idle'],
+                    datasets: [{
+                        data: [0, 0, 0, 100],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#374151'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 11 } }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        function initCores() {
+            // CPU cores (8)
+            elements.cpuCores.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const core = document.createElement('div');
+                core.className = 'core-unit cpu idle';
+                core.id = `cpu-core-${i}`;
+                elements.cpuCores.appendChild(core);
+            }
+            
+            // GPU cores (32 SM units)
+            elements.gpuCores.innerHTML = '';
+            for (let i = 0; i < 32; i++) {
+                const core = document.createElement('div');
+                core.className = 'core-unit gpu idle';
+                core.id = `gpu-core-${i}`;
+                elements.gpuCores.appendChild(core);
+            }
+            
+            // NPU cores (16)
+            elements.npuCores.innerHTML = '';
+            for (let i = 0; i < 16; i++) {
+                const core = document.createElement('div');
+                core.className = 'core-unit npu idle';
+                core.id = `npu-core-${i}`;
+                elements.npuCores.appendChild(core);
+            }
+        }
+
+        function log(message, type = 'info') {
+            const colors = {
+                info: 'text-gray-400',
+                cpu: 'text-blue-400',
+                gpu: 'text-emerald-400',
+                npu: 'text-amber-400',
+                success: 'text-green-400',
+                data: 'text-purple-400'
+            };
+            
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const div = document.createElement('div');
+            div.className = colors[type] || colors.info;
+            div.innerHTML = `<span class="text-gray-600">[${time}]</span> ${message}`;
+            elements.execLog.appendChild(div);
+            elements.execLog.scrollTop = elements.execLog.scrollHeight;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function updateUtilization(proc, value) {
+            const circumference = 157; // 2 * PI * 25
+            const offset = circumference - (value / 100 * circumference);
+            
+            if (proc === 'cpu') {
+                state.cpuUtil = value;
+                elements.cpuUtil.textContent = value + '%';
+                elements.cpuRing.style.strokeDashoffset = offset;
+                elements.cpuRingValue.textContent = value + '%';
+            } else if (proc === 'gpu') {
+                state.gpuUtil = value;
+                elements.gpuUtil.textContent = value + '%';
+                elements.gpuRing.style.strokeDashoffset = offset;
+                elements.gpuRingValue.textContent = value + '%';
+            } else if (proc === 'npu') {
+                state.npuUtil = value;
+                elements.npuUtil.textContent = value + '%';
+                elements.npuRing.style.strokeDashoffset = offset;
+                elements.npuRingValue.textContent = value + '%';
+            }
+            
+            updateChart();
+        }
+
+        function updateChart() {
+            const total = state.cpuUtil + state.gpuUtil + state.npuUtil;
+            const idle = Math.max(0, 100 - total);
+            
+            workloadChart.data.datasets[0].data = [
+                state.cpuUtil,
+                state.gpuUtil,
+                state.npuUtil,
+                idle
+            ];
+            workloadChart.update();
+        }
+
+        function activateCores(type, percentage) {
+            const cores = document.querySelectorAll(`.core-unit.${type}`);
+            const activeCount = Math.floor(cores.length * percentage / 100);
+            
+            cores.forEach((core, i) => {
+                if (i < activeCount) {
+                    core.classList.remove('idle');
+                    core.classList.add('active');
+                } else {
+                    core.classList.remove('active');
+                    core.classList.add('idle');
+                }
+            });
+        }
+
+        function updateMemory(ram, vram) {
+            state.ramUsage = ram;
+            state.vramUsage = vram;
+            
+            elements.ramUsage.textContent = `${ram} / 32 GB`;
+            elements.ramFill.style.width = (ram / 32 * 100) + '%';
+            
+            elements.vramUsage.textContent = `${vram} / 16 GB`;
+            elements.vramFill.style.width = (vram / 16 * 100) + '%';
+        }
+
+        async function processTask(taskEl) {
+            const target = taskEl.dataset.target;
+            const taskName = taskEl.dataset.task;
+            
+            taskEl.classList.add('processing');
+            
+            // Activate processor card
+            const cardMap = { cpu: elements.cpuCard, gpu: elements.gpuCard, npu: elements.npuCard };
+            cardMap[target].classList.add('active');
+            
+            // PCIe transfer
+            elements.pcieBus.classList.add('active');
+            elements.pcieStatus.textContent = 'Transferring...';
+            elements.pcieStatus.className = 'text-xs text-pink-400';
+            
+            log(`Task "${taskName}" dispatched to ${target.toUpperCase()}`, target);
+            await sleep(300);
+            
+            log(`PCIe: Transferring data to ${target.toUpperCase()}...`, 'data');
+            await sleep(400);
+            
+            // Simulate processing
+            const utilizations = {
+                os: { cpu: 40, gpu: 0, npu: 0, ram: 2, vram: 0 },
+                render: { cpu: 15, gpu: 85, npu: 0, ram: 4, vram: 8 },
+                inference: { cpu: 10, gpu: 0, npu: 90, ram: 2, vram: 0 },
+                matrix: { cpu: 5, gpu: 95, npu: 0, ram: 2, vram: 6 },
+                nlp: { cpu: 15, gpu: 0, npu: 80, ram: 3, vram: 0 }
+            };
+            
+            const util = utilizations[taskName] || { cpu: 30, gpu: 30, npu: 30, ram: 2, vram: 2 };
+            
+            updateUtilization('cpu', util.cpu);
+            updateUtilization('gpu', util.gpu);
+            updateUtilization('npu', util.npu);
+            updateMemory(util.ram, util.vram);
+            
+            activateCores('cpu', util.cpu);
+            activateCores('gpu', util.gpu);
+            activateCores('npu', util.npu);
+            
+            log(`${target.toUpperCase()}: Processing "${taskName}"...`, target);
+            
+            // Processing time
+            await sleep(1500);
+            
+            log(`${target.toUpperCase()}: Task "${taskName}" completed`, 'success');
+            
+            // Reset
+            taskEl.classList.remove('processing');
+            taskEl.classList.add('completed');
+            cardMap[target].classList.remove('active');
+            
+            elements.pcieBus.classList.remove('active');
+            elements.pcieStatus.textContent = 'Idle';
+            elements.pcieStatus.className = 'text-xs text-gray-500';
+        }
+
+        async function runWorkload() {
+            if (state.isRunning) return;
+            state.isRunning = true;
+            
+            elements.btnRunWorkload.disabled = true;
+            elements.btnRunWorkload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            
+            const tasks = elements.taskQueue.querySelectorAll('.task-card:not(.completed)');
+            
+            log('Starting heterogeneous workload...', 'info');
+            
+            for (const task of tasks) {
+                await processTask(task);
+                await sleep(500);
+            }
+            
+            // Cool down
+            log('All tasks completed. System cooling down...', 'info');
+            await sleep(500);
+            
+            updateUtilization('cpu', 5);
+            updateUtilization('gpu', 0);
+            updateUtilization('npu', 0);
+            activateCores('cpu', 5);
+            activateCores('gpu', 0);
+            activateCores('npu', 0);
+            updateMemory(1, 0);
+            
+            log('Workload complete!', 'success');
+            
+            state.isRunning = false;
+            elements.btnRunWorkload.disabled = false;
+            elements.btnRunWorkload.innerHTML = '<i class="fas fa-play"></i> Run Workload';
+        }
+
+        function reset() {
+            state.isRunning = false;
+            
+            // Reset utilizations
+            updateUtilization('cpu', 0);
+            updateUtilization('gpu', 0);
+            updateUtilization('npu', 0);
+            
+            // Reset cores
+            activateCores('cpu', 0);
+            activateCores('gpu', 0);
+            activateCores('npu', 0);
+            
+            // Reset memory
+            updateMemory(0, 0);
+            
+            // Reset cards
+            [elements.cpuCard, elements.gpuCard, elements.npuCard].forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Reset tasks
+            elements.taskQueue.querySelectorAll('.task-card').forEach(task => {
+                task.classList.remove('processing', 'completed');
+            });
+            
+            // Reset PCIe
+            elements.pcieBus.classList.remove('active');
+            elements.pcieStatus.textContent = 'Idle';
+            elements.pcieStatus.className = 'text-xs text-gray-500';
+            
+            // Clear log
+            elements.execLog.innerHTML = `
+                <div class="text-gray-500">[system] Heterogeneous system reset</div>
+                <div class="text-gray-500">[system] CPU: 8 cores online</div>
+                <div class="text-gray-500">[system] GPU: 4096 CUDA cores ready</div>
+                <div class="text-gray-500">[system] NPU: 45 TOPS available</div>
+            `;
+            
+            elements.btnRunWorkload.disabled = false;
+            elements.btnRunWorkload.innerHTML = '<i class="fas fa-play"></i> Run Workload';
+        }
+
+        // Event Listeners
+        elements.btnRunWorkload.addEventListener('click', runWorkload);
+        elements.btnReset.addEventListener('click', reset);
+
+        // Initialize
+        initChart();
+        initCores();
+    </script>
+</body>
+</html>
