@@ -1,0 +1,80 @@
+@startuml scheduling_algorithms_gantt_comparison
+!include ../../diagrams_common/skin.puml
+title Scheduling Algorithms Comparison - Gantt Charts
+
+skinparam rectangle {
+    roundCorner 3
+}
+
+' Data: P1(8), P2(4), P3(2), P4(1), all arrive at t=0
+
+rectangle "**FCFS** (First-Come, First-Served)" as fcfs #E8F5E9 {
+    rectangle "P1 (8)" as fcfs_p1 #4CAF50
+    rectangle "P2 (4)" as fcfs_p2 #8BC34A
+    rectangle "P3 (2)" as fcfs_p3 #CDDC39
+    rectangle "P4 (1)" as fcfs_p4 #FFEB3B
+    
+    fcfs_p1 -right[hidden]-> fcfs_p2
+    fcfs_p2 -right[hidden]-> fcfs_p3
+    fcfs_p3 -right[hidden]-> fcfs_p4
+    
+    note bottom of fcfs
+    **Timeline**: 0→8→12→14→15
+    **Avg Wait**: (0+8+12+14)/4 = **8.5**
+    ✗ Convoy effect
+    end note
+}
+
+rectangle "**SJF** (Shortest Job First)" as sjf #E3F2FD {
+    rectangle "P4 (1)" as sjf_p4 #FFEB3B
+    rectangle "P3 (2)" as sjf_p3 #CDDC39
+    rectangle "P2 (4)" as sjf_p2 #8BC34A
+    rectangle "P1 (8)" as sjf_p1 #4CAF50
+    
+    sjf_p4 -right[hidden]-> sjf_p3
+    sjf_p3 -right[hidden]-> sjf_p2
+    sjf_p2 -right[hidden]-> sjf_p1
+    
+    note bottom of sjf
+    **Timeline**: 0→1→3→7→15
+    **Avg Wait**: (7+3+1+0)/4 = **2.75**
+    ✓ Optimal! ✗ Starvation
+    end note
+}
+
+rectangle "**Round Robin** (Q=2)" as rr #FFF3E0 {
+    rectangle "P1" as rr1 #4CAF50
+    rectangle "P2" as rr2 #8BC34A
+    rectangle "P3" as rr3 #CDDC39
+    rectangle "P4" as rr4 #FFEB3B
+    rectangle "P1" as rr5 #4CAF50
+    rectangle "P2" as rr6 #8BC34A
+    rectangle "P1" as rr7 #4CAF50
+    rectangle "P1" as rr8 #4CAF50
+    
+    rr1 -right[hidden]-> rr2
+    rr2 -right[hidden]-> rr3
+    rr3 -right[hidden]-> rr4
+    rr4 -right[hidden]-> rr5
+    rr5 -right[hidden]-> rr6
+    rr6 -right[hidden]-> rr7
+    rr7 -right[hidden]-> rr8
+    
+    note bottom of rr
+    **Timeline**: 0→2→4→6→7→9→11→13→15
+    **Avg Wait**: 6.0  **Avg Response**: **3.0**
+    ✓ Fair, good for interactive
+    end note
+}
+
+fcfs -[hidden]down-> sjf
+sjf -[hidden]down-> rr
+
+legend right
+  |= Algorithm |= Avg Wait |= Best For |
+  | FCFS | 8.5 | Simple, batch |
+  | SJF | **2.75** | Min wait |
+  | RR | 6.0 | Interactive |
+endlegend
+
+@enduml

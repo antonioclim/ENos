@@ -1,0 +1,178 @@
+# C03_05_FORMATIVE_ASSESSMENT.yaml
+# Course 3: Processes (PCB + fork)
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 3
+  subject: "Processes (PCB + fork)"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a process?"
+    options:
+      - "An executable file stored on disk"
+      - "A program in execution with allocated resources"
+      - "A function from the source code"
+      - "A type of memory"
+    correct: 1
+    explanation: "A process = program in execution + address space + resources (files, memory, etc.)."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What does the PCB (Process Control Block) contain?"
+    options:
+      - "Only the program code"
+      - "PID, state, CPU registers, scheduling information, resources"
+      - "Only the heap memory"
+      - "The user password"
+    correct: 1
+    explanation: "The PCB contains all the information the OS needs to manage the process."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What does fork() return in the child process?"
+    options:
+      - "The parent's PID"
+      - "0"
+      - "-1"
+      - "The child's PID"
+    correct: 1
+    explanation: "fork() returns 0 in the child, the child's PID in the parent, -1 on error."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "What are the 5 main states of a process?"
+    options:
+      - "Start, Run, Stop, Pause, End"
+      - "New, Ready, Running, Waiting, Terminated"
+      - "Init, Active, Sleep, Wake, Exit"
+      - "Create, Execute, Block, Resume, Kill"
+    correct: 1
+    explanation: "The standard 5-state model: New → Ready ↔ Running → Terminated, with Waiting for I/O."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What does the exec() family of functions do?"
+    options:
+      - "Creates a new process"
+      - "Replaces the current process image with a new program"
+      - "Terminates the current process"
+      - "Duplicates the process"
+    correct: 1
+    explanation: "exec() replaces the code, data and stack with those of the new program; the PID remains the same."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What is a zombie process?"
+    options:
+      - "A process that consumes too much memory"
+      - "A terminated process whose parent has not called wait()"
+      - "A process blocked on I/O"
+      - "A virus"
+    correct: 1
+    explanation: "Zombie = terminated process but the parent has not read the exit status; it occupies a slot in the process table."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "What is an orphan process and what happens to it?"
+    options:
+      - "A process without open files"
+      - "A process whose parent has died; it is adopted by init (PID 1)"
+      - "A process in the New state"
+      - "A process without allocated memory"
+    correct: 1
+    explanation: "When the parent dies, the children become orphans and are adopted by the init process for cleanup."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "Why does fork() create a copy of the process instead of creating an empty process?"
+    options:
+      - "For compatibility with Windows"
+      - "To allow the child to inherit the parent's context and resources"
+      - "To save memory"
+      - "It is a design error"
+    correct: 1
+    explanation: "Inheritance allows the child to continue where the parent left off, with the same variables and files."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "What technique makes fork() efficient on modern systems?"
+    options:
+      - "Immediate copying of the entire memory"
+      - "Copy-on-Write (COW): pages are shared and copied only on write"
+      - "Memory compression"
+      - "Automatic swap"
+    correct: 1
+    explanation: "COW delays copying until a process modifies a page, saving memory and time."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "Why does the shell use fork() + exec() instead of a single call?"
+    options:
+      - "For historical reasons, without practical benefits"
+      - "It allows configuring the child process (redirections, pipes) between fork and exec"
+      - "exec() does not exist on modern systems"
+      - "fork() is faster alone"
+    correct: 1
+    explanation: "Between fork() and exec(), the shell can redirect stdin/stdout, set environment variables, etc."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "A program calls fork() 3 times in sequence. How many processes exist at the end?"
+    options:
+      - "3"
+      - "4"
+      - "8"
+      - "6"
+    correct: 2
+    explanation: "Each fork() doubles the processes: 1→2→4→8. Formula: 2^n processes for n fork() calls."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You write a program that creates a child to execute 'ls -la'. What is the correct sequence?"
+    options:
+      - "exec('ls -la'); fork();"
+      - "pid = fork(); if (pid == 0) execlp('ls', 'ls', '-la', NULL); else wait(NULL);"
+      - "fork(); exec('ls'); wait();"
+      - "wait(); fork(); exec();"
+    correct: 1
+    explanation: "fork() creates the child, the child (pid==0) executes ls, the parent waits with wait()."

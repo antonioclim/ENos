@@ -1,0 +1,178 @@
+# C05_05_FORMATIVE_ASSESSMENT.yaml
+# Course 5: Execution Threads
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 5
+  subject: "Execution Threads"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a thread (execution thread)?"
+    options:
+      - "An independent process"
+      - "The smallest unit of execution, shares the address space with other threads in the same process"
+      - "A type of memory"
+      - "An executable file"
+    correct: 1
+    explanation: "Thread = lightweight process, shares the code, data and resources of the process, has its own stack."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What do threads of the same process share?"
+    options:
+      - "Nothing, they are completely isolated"
+      - "The code, global data, heap and open files"
+      - "Only the stack"
+      - "Only the CPU registers"
+    correct: 1
+    explanation: "Threads share the entire address space (code, data, heap) and resources; each has its own stack."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What do threads of the same process NOT share?"
+    options:
+      - "The programme code"
+      - "Global variables"
+      - "The stack, CPU registers and thread ID"
+      - "Open files"
+    correct: 2
+    explanation: "Each thread has its own stack, its own registers and TID; the rest is shared."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "Why is creating a thread faster than fork()?"
+    options:
+      - "Threads do not need memory"
+      - "The address space does not need to be duplicated, only a new stack allocated"
+      - "Threads do not run code"
+      - "Fork() is deprecated"
+    correct: 1
+    explanation: "The thread reuses the existing address space; fork() must create/copy the entire space."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What is the difference between user-level threads and kernel-level threads?"
+    options:
+      - "There is no difference"
+      - "User threads are managed by a library, kernel threads by the OS; kernel threads can run in parallel on multi-core"
+      - "Kernel threads are slower"
+      - "User threads cannot do I/O"
+    correct: 1
+    explanation: "User threads: invisible to the kernel, fast but no real parallelism. Kernel threads: higher overhead but true parallelism."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What threading model do most modern systems (Linux, Windows) use?"
+    options:
+      - "Many-to-One"
+      - "One-to-One (1:1)"
+      - "Many-to-Many"
+      - "None-to-None"
+    correct: 1
+    explanation: "The 1:1 model maps each user thread to a kernel thread, allowing full parallelism."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why are threads called 'lightweight processes'?"
+    options:
+      - "They consume less energy"
+      - "They have lower overhead for creation/switch and share resources"
+      - "They are slower"
+      - "They cannot access hardware"
+    correct: 1
+    explanation: "Threads have a smaller context to save/restore and do not require resource duplication."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "What problem can occur when a thread modifies a global variable?"
+    options:
+      - "The variable becomes read-only"
+      - "Race condition: other threads may read inconsistent values"
+      - "The programme terminates"
+      - "Memory doubles"
+    correct: 1
+    explanation: "Unsynchronised concurrent access to shared data can cause race conditions and unpredictable behaviour."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "A web server creates one thread per request. Why is it more efficient than fork() per request?"
+    options:
+      - "Threads cannot handle requests"
+      - "Threads share the cache, DB connections and have much lower creation/switch overhead"
+      - "Fork() is faster"
+      - "There is no difference"
+    correct: 1
+    explanation: "Threads reuse the process resources and have minimal overhead; fork() duplicates everything."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "On a system with 4 cores, how many CPU-bound threads should you create for optimal performance?"
+    options:
+      - "1 thread"
+      - "4 threads (one per core)"
+      - "100 threads"
+      - "8 threads"
+    correct: 1
+    explanation: "For CPU-bound: #threads ≈ #cores. More threads only add context switch overhead."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "Why can the Many-to-One model not exploit parallelism on multi-core?"
+    options:
+      - "It does not have enough memory"
+      - "All user threads are mapped to a single kernel thread, so the OS sees a single context"
+      - "It is too fast"
+      - "It does not support I/O"
+    correct: 1
+    explanation: "With a single kernel thread, the OS schedules everything on a single core, regardless of how many user threads exist."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "You are implementing a programme that reads large files and processes them. What threading strategy do you choose?"
+    options:
+      - "A single thread for everything"
+      - "Separate thread for I/O and worker threads for processing (producer-consumer)"
+      - "One thread per byte"
+      - "You do not use threads"
+    correct: 1
+    explanation: "Separating I/O from processing allows parallelism: the I/O thread reads, worker threads process in a pipeline."

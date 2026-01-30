@@ -1,0 +1,74 @@
+@startuml mlfq_structure
+!include ../../diagrams_common/skin.puml
+title Multi-Level Feedback Queue (MLFQ)
+
+skinparam rectangle {
+    roundCorner 8
+}
+
+rectangle "**MLFQ - Structure**" as mlfq #FAFAFA {
+    
+    rectangle "**Queue 0** - HIGHEST Priority\nQuantum: 8ms, Round Robin" as q0 #FFCDD2 {
+        rectangle "P1" as q0p1 #FFFFFF
+        rectangle "P7" as q0p2 #FFFFFF
+        rectangle "P12" as q0p3 #FFFFFF
+        note right of q0
+        New or interactive
+        processes
+        end note
+    }
+    
+    rectangle "**Queue 1** - Medium Priority\nQuantum: 16ms, Round Robin" as q1 #FFE0B2 {
+        rectangle "P3" as q1p1 #FFFFFF
+        rectangle "P5" as q1p2 #FFFFFF
+        note right of q1
+        Processes that
+        exhausted Q0
+        end note
+    }
+    
+    rectangle "**Queue 2** - Low Priority\nQuantum: 32ms, Round Robin" as q2 #FFF9C4 {
+        rectangle "P2" as q2p1 #FFFFFF
+        rectangle "P6" as q2p2 #FFFFFF
+        note right of q2
+        CPU-bound
+        processes
+        end note
+    }
+    
+    rectangle "**Queue 3** - LOWEST Priority\nFCFS (batch)" as q3 #C8E6C9 {
+        rectangle "P4" as q3p1 #FFFFFF
+        rectangle "P8" as q3p2 #FFFFFF
+        rectangle "P10" as q3p3 #FFFFFF
+        note right of q3
+        Batch jobs
+        Background
+        end note
+    }
+}
+
+rectangle "**MLFQ RULES**" as rules #E3F2FD {
+    note as rules_note
+    **R1**: Priority(A) > Priority(B) → A runs
+    **R2**: Priority(A) = Priority(B) → Round Robin
+    **R3**: New process → Queue 0
+    **R4a**: Exhausts quantum → Demoted
+    **R4b**: Yields CPU (I/O) → Stays
+    **R5**: **Priority Boost** periodic
+    end note
+}
+
+q0 -[#E74C3C,bold]-> q1 : Exhausts\nquantum
+q1 -[#E74C3C,bold]-> q2 : Exhausts\nquantum
+q2 -[#E74C3C,bold]-> q3 : Exhausts\nquantum
+
+q3 -[#27AE60,dashed]-> q0 : **BOOST**\n(periodic)
+q2 -[#27AE60,dashed]-> q0 : **BOOST**
+q1 -[#27AE60,dashed]-> q0 : **BOOST**
+
+note bottom of mlfq
+**Advantage**: Automatically separates I/O-bound processes (high priority)
+from CPU-bound ones (low priority) **without knowing the burst time**
+end note
+
+@enduml

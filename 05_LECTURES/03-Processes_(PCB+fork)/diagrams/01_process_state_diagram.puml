@@ -1,0 +1,74 @@
+@startuml process_state_diagram
+!include ../../diagrams_common/skin.puml
+title Process State Diagram
+
+skinparam state {
+    BackgroundColor #FAFAFA
+    BorderColor #2C3E50
+    FontSize 14
+}
+
+[*] --> NEW : fork()/exec()
+
+state NEW #E8F5E9 {
+}
+note right of NEW
+  PCB allocation
+  and resources
+end note
+
+NEW --> READY : admitted\n(scheduler accepts)
+
+state READY #BBDEFB {
+}
+note right of READY
+  In Ready Queue
+  Waiting for CPU
+end note
+
+READY --> RUNNING : **dispatch**\n(scheduler selects)
+
+state RUNNING #C8E6C9 {
+}
+note right of RUNNING
+  Executing on CPU
+  (single process)
+end note
+
+RUNNING --> READY : **preemption**\n(timer/priority)
+
+RUNNING --> WAITING : I/O request\nor wait()
+
+state WAITING #FFF9C4 {
+}
+note left of WAITING
+  Blocked on:
+  • I/O
+  • Semaphore
+  • Child process
+end note
+
+WAITING --> READY : I/O complete\nor event
+
+RUNNING --> TERMINATED : exit()
+
+state TERMINATED #FFCDD2 {
+}
+note right of TERMINATED
+  **ZOMBIE**
+  Waiting for wait()
+  from parent
+end note
+
+TERMINATED --> [*] : parent calls\nwait()
+
+legend right
+  |= State |= Description |
+  | NEW | Process created |
+  | READY | Prepared, waiting for CPU |
+  | RUNNING | Actively executing |
+  | WAITING | Blocked on event |
+  | TERMINATED | Finished (zombie) |
+endlegend
+
+@enduml

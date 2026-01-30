@@ -1,0 +1,93 @@
+@startuml fork_copy_on_write
+!include ../../diagrams_common/skin.puml
+title fork() and Copy-on-Write (CoW)
+
+skinparam rectangle {
+    roundCorner 5
+}
+
+rectangle "**BEFORE fork()**" as before {
+    rectangle "Parent Process (PID 1000)" as parent1 #E3F2FD {
+        rectangle "Page Table" as pt1 #FFFFFF {
+            note as pt1_note
+            Page 0 → Frame 100
+            Page 1 → Frame 101
+            Page 2 → Frame 102
+            end note
+        }
+    }
+    
+    rectangle "Physical Memory" as mem1 #C8E6C9 {
+        rectangle "Frame 100: code" as f100
+        rectangle "Frame 101: data (x=5)" as f101
+        rectangle "Frame 102: stack" as f102
+    }
+    
+    parent1 -[#3498DB]-> mem1
+}
+
+rectangle "**AFTER fork() - CoW ACTIVE**" as after #FFF9C4 {
+    rectangle "Parent (PID 1000)" as parent2 #E3F2FD {
+        note as pt2_note
+        Page 0 → Frame 100
+        Page 1 → Frame 101 **[R-O]**
+        Page 2 → Frame 102 **[R-O]**
+        end note
+    }
+    
+    rectangle "Child (PID 1001)" as child2 #FCE4EC {
+        note as pt3_note
+        Page 0 → Frame 100
+        Page 1 → Frame 101 **[R-O]**
+        Page 2 → Frame 102 **[R-O]**
+        end note
+    }
+    
+    rectangle "Physical Memory\n(SHARED!)" as mem2 #C8E6C9 {
+        rectangle "Frame 100: code" as f100b
+        rectangle "Frame 101: data" as f101b
+        rectangle "Frame 102: stack" as f102b
+    }
+    
+    parent2 -[#3498DB]-> mem2
+    child2 -[#E74C3C]-> mem2
+    
+    note bottom of after
+    **Pages are marked Read-Only!**
+    Nothing has been copied yet.
+    end note
+}
+
+rectangle "**AFTER WRITE (child writes x=10)**" as write {
+    rectangle "Parent (PID 1000)" as parent3 #E3F2FD {
+        note as pt4_note
+        Page 1 → Frame 101 [RW]
+        (x = 5)
+        end note
+    }
+    
+    rectangle "Child (PID 1001)" as child3 #FCE4EC {
+        note as pt5_note
+        Page 1 → **Frame 103** [RW]
+        (x = 10)
+        end note
+    }
+    
+    rectangle "Physical Memory" as mem3 #C8E6C9 {
+        rectangle "Frame 101:\ndata (x=5)" as f101c #BBDEFB
+        rectangle "Frame 103:\ndata (x=10)" as f103c #F8BBD9
+    }
+    
+    parent3 -[#3498DB]-> f101c
+    child3 -[#E74C3C]-> f103c
+    
+    note bottom of write
+    **Page Fault → Kernel copies the page**
+    Now each has its own copy
+    end note
+}
+
+before -[hidden]down-> after
+after -[hidden]down-> write
+
+@enduml

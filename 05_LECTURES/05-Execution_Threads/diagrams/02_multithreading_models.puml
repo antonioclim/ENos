@@ -1,0 +1,103 @@
+@startuml modele_multithreading
+!include ../../diagrams_common/skin.puml
+title Multithreading Models
+
+skinparam rectangle {
+    roundCorner 8
+}
+
+rectangle "**Many-to-One (N:1)**" as n1 #FFCDD2 {
+    rectangle "User Space" as n1_user #FFFFFF {
+        rectangle "T1" as n1_t1 #E3F2FD
+        rectangle "T2" as n1_t2 #E3F2FD
+        rectangle "T3" as n1_t3 #E3F2FD
+        rectangle "T4" as n1_t4 #E3F2FD
+    }
+    
+    rectangle "Thread Library" as n1_lib #FFF9C4
+    
+    rectangle "Kernel Space" as n1_kernel #FFE0B2 {
+        rectangle "K1" as n1_k1 #C8E6C9
+    }
+    
+    n1_t1 --> n1_lib
+    n1_t2 --> n1_lib
+    n1_t3 --> n1_lib
+    n1_t4 --> n1_lib
+    n1_lib --> n1_k1
+    
+    note bottom
+    ✓ Fast switch (user space)
+    ✓ Portable
+    ✗ One syscall blocks **all**
+    ✗ No real parallelism
+    //Ex: GNU Pth//
+    end note
+}
+
+rectangle "**One-to-One (1:1)**" as o1 #C8E6C9 {
+    rectangle "User Space" as o1_user #FFFFFF {
+        rectangle "T1" as o1_t1 #E3F2FD
+        rectangle "T2" as o1_t2 #E3F2FD
+        rectangle "T3" as o1_t3 #E3F2FD
+        rectangle "T4" as o1_t4 #E3F2FD
+    }
+    
+    rectangle "Kernel Space" as o1_kernel #FFE0B2 {
+        rectangle "K1" as o1_k1 #C8E6C9
+        rectangle "K2" as o1_k2 #C8E6C9
+        rectangle "K3" as o1_k3 #C8E6C9
+        rectangle "K4" as o1_k4 #C8E6C9
+    }
+    
+    o1_t1 --> o1_k1
+    o1_t2 --> o1_k2
+    o1_t3 --> o1_k3
+    o1_t4 --> o1_k4
+    
+    note bottom
+    ✓ **Real parallelism** on multi-core
+    ✓ One blocked thread does not affect others
+    ✗ Thread creation overhead
+    //Ex: Linux NPTL, Windows, macOS//
+    end note
+}
+
+rectangle "**Many-to-Many (M:N)**" as mn #E3F2FD {
+    rectangle "User Space" as mn_user #FFFFFF {
+        rectangle "T1" as mn_t1 #E3F2FD
+        rectangle "T2" as mn_t2 #E3F2FD
+        rectangle "T3" as mn_t3 #E3F2FD
+        rectangle "T4" as mn_t4 #E3F2FD
+        rectangle "T5" as mn_t5 #E3F2FD
+        rectangle "T6" as mn_t6 #E3F2FD
+    }
+    
+    rectangle "User Scheduler" as mn_sched #FFF9C4
+    
+    rectangle "Kernel Space" as mn_kernel #FFE0B2 {
+        rectangle "K1" as mn_k1 #C8E6C9
+        rectangle "K2" as mn_k2 #C8E6C9
+    }
+    
+    mn_t1 --> mn_sched
+    mn_t2 --> mn_sched
+    mn_t3 --> mn_sched
+    mn_t4 --> mn_sched
+    mn_t5 --> mn_sched
+    mn_t6 --> mn_sched
+    mn_sched --> mn_k1
+    mn_sched --> mn_k2
+    
+    note bottom
+    ✓ Flexible (M >> N possible)
+    ✓ Scales to thousands of "threads"
+    ✗ Complex to implement
+    //Ex: **Go goroutines**, Erlang//
+    end note
+}
+
+n1 -[hidden]right-> o1
+o1 -[hidden]right-> mn
+
+@enduml

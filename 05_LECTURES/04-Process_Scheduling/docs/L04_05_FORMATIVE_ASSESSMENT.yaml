@@ -1,0 +1,178 @@
+# L04_05_FORMATIVE_ASSESSMENT.yaml
+# Lecture 4: Process Scheduling
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  lecture: 4
+  subject: "Process Scheduling"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  question_count: 12
+  estimated_time_minutes: 15
+  bloom_distribution:
+    remember: 3
+    understand: 5
+    analyse: 3
+    apply: 1
+
+questions:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REMEMBER (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is a scheduler?"
+    options:
+      - "A code compiler"
+      - "The OS component that decides which process runs on the CPU"
+      - "A type of memory"
+      - "A network protocol"
+    correct: 1
+    explanation: "The scheduler selects the next process from the Ready queue for execution on the CPU."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "What does preemption mean?"
+    options:
+      - "Forced termination of a process"
+      - "The OS can interrupt a running process to run another one"
+      - "Creation of a new process"
+      - "Memory allocation"
+    correct: 1
+    explanation: "Preemption = the OS's ability to forcibly suspend a process to give the CPU to another."
+
+  - id: q03
+    bloom: remember
+    difficulty: easy
+    text: "What is turnaround time?"
+    options:
+      - "System boot time"
+      - "Total time from submission to process completion"
+      - "CPU execution time"
+      - "Queue waiting time"
+    correct: 1
+    explanation: "Turnaround time = total time (submission → completion), includes waiting + execution."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UNDERSTAND (5 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "What is the difference between FCFS and SJF?"
+    options:
+      - "FCFS is preemptive, SJF is not"
+      - "FCFS serves in arrival order, SJF serves the shortest job first"
+      - "SJF is slower"
+      - "There is no difference"
+    correct: 1
+    explanation: "FCFS = First Come First Served (arrival order). SJF = Shortest Job First (shortest first)."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What problem does Round Robin (RR) solve?"
+    options:
+      - "Minimises turnaround time"
+      - "Ensures fairness through equal time quanta for all processes"
+      - "Eliminates deadlocks"
+      - "Reduces memory consumption"
+    correct: 1
+    explanation: "RR gives each process a time quantum, preventing starvation and ensuring fairness."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "What is starvation in the context of scheduling?"
+    options:
+      - "A process that consumes too much CPU"
+      - "A process that never receives CPU because others have higher priority"
+      - "Lack of RAM memory"
+      - "Disk error"
+    correct: 1
+    explanation: "Starvation = a process waits indefinitely for CPU because other processes always preempt it."
+
+  - id: q07
+    bloom: understand
+    difficulty: medium
+    text: "Why does SJF have the lowest average waiting time but is not used directly?"
+    options:
+      - "It is too fast"
+      - "We cannot know the exact CPU burst duration in advance"
+      - "It consumes too much memory"
+      - "It does not work on multi-core"
+    correct: 1
+    explanation: "SJF is theoretically optimal but requires duration prediction, which must be estimated (exponential averaging)."
+
+  - id: q08
+    bloom: understand
+    difficulty: medium
+    text: "How does aging work in priority scheduling?"
+    options:
+      - "Terminates old processes"
+      - "Gradually increases the priority of waiting processes, preventing starvation"
+      - "Reduces the priority of CPU-bound processes"
+      - "Deletes inactive processes"
+    correct: 1
+    explanation: "Aging = periodic increment of priority for waiting processes to prevent starvation."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANALYSE (3 questions)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "For interactive processes (text editors), which algorithm is more suitable?"
+    options:
+      - "FCFS - for predictability"
+      - "SJF - for maximum throughput"
+      - "Round Robin or MLFQ with priority for I/O-bound"
+      - "Batch processing"
+    correct: 2
+    explanation: "Interactive processes are I/O-bound and benefit from fast response; RR/MLFQ favour them."
+
+  - id: q10
+    bloom: analyse
+    difficulty: hard
+    text: "The time quantum in RR is 10ms. A process requires 25ms CPU. How many times will it be preempted?"
+    options:
+      - "1 time"
+      - "2 times"
+      - "3 times"
+      - "Never"
+    correct: 1
+    explanation: "Runs 10ms (preempted), 10ms (preempted), 5ms (finishes). So 2 preemptions."
+
+  - id: q11
+    bloom: analyse
+    difficulty: hard
+    text: "Why is MLFQ (Multi-Level Feedback Queue) considered the most versatile algorithm?"
+    options:
+      - "It is the simplest to implement"
+      - "It combines the advantages of multiple algorithms and adapts to process behaviour"
+      - "It uses the least CPU"
+      - "It does not require priorities"
+    correct: 1
+    explanation: "MLFQ dynamically adjusts priorities: interactive processes rise, CPU-bound fall, preventing starvation."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLY (1 question)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  - id: q12
+    bloom: apply
+    difficulty: hard
+    text: "Three processes: P1(burst=6), P2(burst=2), P3(burst=4) arrive at t=0. With SJF, what is the average waiting time?"
+    options:
+      - "4.0"
+      - "3.33"
+      - "2.67"
+      - "5.0"
+    correct: 2
+    explanation: "SJF order: P2(2), P3(4), P1(6). Waiting: P2=0, P3=2, P1=6. Average = (0+2+6)/3 = 2.67."
