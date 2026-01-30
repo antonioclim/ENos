@@ -5,8 +5,8 @@
 │  🐧 LINUX    Ubuntu 24.04+    │  📋 BASH 5.0+   │  🐍 PYTHON 3.12+  │  📦 GIT 2.40+    │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │  LICENCE         RESTRICTIVE    │  UNITS              14      │  EST. HOURS         60+   │
-│  VERSION              4.0.0     │  SEMINARS            6      │  PROJECTS           23    │
-│  STATUS              ACTIVE     │  PNG DIAGRAMS       27      │  SCRIPTS          100+    │
+│  VERSION              5.3.1     │  SEMINARS            7      │  PROJECTS           23    │
+│  STATUS              ACTIVE     │  PNG DIAGRAMS       27      │  SCRIPTS          180+    │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -15,9 +15,35 @@ Year I, Semester 2 | 2017-2030
 
 ---
 
+## What's New in v5.3
+
+This release focuses on quality-of-life improvements for both students and instructors:
+
+- **Print stylesheets** for HTML presentations — all slides can now be printed cleanly for offline study or handouts
+- **Link checking** integrated into the CI pipeline — automated validation catches broken documentation links before they reach students
+- **Expanded test suite** for shared utilities — the lib/ modules now have over 80% test coverage
+- **lib/ documentation** with usage examples — proper documentation for the Python utilities that power autograders and randomisation
+
+---
+
+## Quick Navigation
+
+| Looking for... | Go to... |
+|----------------|----------|
+| Setup guide | [Step 0: Choose Your Installation](#step-0-choose-your-installation-option) |
+| Seminar materials | `SEM01/` through `SEM07/` |
+| Projects | `04_PROJECTS/` |
+| Lecture support | `05_LECTURES/` |
+| Quick reference | `NAVIGATION.md` |
+| Shared utilities | `lib/README.md` |
+| Developer tools | [PART VII: Developer Tools](#part-vii-developer-tools) |
+| Troubleshooting | [PART VI: Troubleshooting](#part-vi-troubleshooting) |
+
+---
+
 ## What You Will Find Here
 
-This kit contains the materials for the Operating Systems course: 14 course units, 6 seminars with practical exercises and 23 projects at three difficulty levels. Everything is structured so you can work independently or in the laboratory.
+This kit contains the materials for the Operating Systems course: 14 course units, 7 seminars with practical exercises and 23 projects at three difficulty levels. Everything is structured so you can work independently or in the laboratory.
 
 Bash seems simple at first glance — short commands, instant output — but when you try to automate something real, you suddenly discover that `$?` does not do what you think, that pipes lose variables and that a misplaced space in `[ $var ]` breaks your entire script. I have been through this with every generation of students, and the kit reflects exactly the problems I have seen in practice.
 
@@ -1348,7 +1374,151 @@ ssh user@hostname
 
 ---
 
-# PART VII: STORIES AND HISTORICAL CONTEXT
+# PART VII: DEVELOPER TOOLS
+
+This section documents the shared utilities and automation scripts available in the kit. If you are an instructor customising materials or a student debugging the autograder, this is where you will find the relevant documentation.
+
+---
+
+## Shared Utilities (lib/)
+
+The `lib/` directory contains Python modules used across all seminars. These are not student-facing code — they power the autograders, quiz generators, and anti-plagiarism infrastructure.
+
+### logging_utils.py
+
+Provides consistent, coloured logging across all Python scripts. Every autograder and test script uses this module to produce readable output that distinguishes informational messages from warnings and errors.
+
+```python
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
+logger.info("Processing started")
+logger.warning("Low disk space")
+logger.error("File not found")
+```
+
+The colours are intentional: green for success, yellow for warnings, red for errors. When you run 20 test cases, this helps you find problems without reading every line.
+
+### randomisation_utils.py
+
+Generates deterministic, student-specific test parameters for anti-plagiarism. The key insight is that each student gets different test inputs, but those inputs are reproducible — if you run the autograder twice with the same student email and assignment, you get the same parameters.
+
+```python
+from randomisation_utils import generate_student_seed, randomise_test_parameters
+
+seed = generate_student_seed("student@ase.ro", "SEM03_HW")
+params = randomise_test_parameters(seed)
+# Same student + assignment = same parameters (reproducible)
+```
+
+This approach makes copying homework useless: two students with the same code will fail each other's tests, because their expected outputs differ.
+
+For complete documentation including all available functions and parameters, see `lib/README.md`.
+
+---
+
+## Automation Scripts (scripts/)
+
+The `scripts/` directory contains maintenance and CI automation. These are designed for instructors managing the kit, not for student use.
+
+### check_links.sh
+
+Validates documentation links across the entire kit. A broken link in a seminar handout is worse than no link at all — it wastes student time.
+
+```bash
+# Check internal links only (fast, ~10 seconds)
+./scripts/check_links.sh
+
+# Check all links including external URLs (slow, ~2 minutes)
+./scripts/check_links.sh --external
+
+# Show help
+./scripts/check_links.sh --help
+```
+
+The script uses [lychee](https://github.com/lycheeverse/lychee) if installed, falling back to a simpler grep-based check otherwise. For best results:
+
+```bash
+cargo install lychee
+# or on macOS
+brew install lychee
+```
+
+### add_print_styles.sh
+
+Injects print stylesheets into HTML presentations for offline handouts. Before this existed, printing slides produced unreadable output with cut-off text and broken layouts.
+
+```bash
+# Preview changes (shows what would be modified)
+./scripts/add_print_styles.sh --dry-run
+
+# Apply changes
+./scripts/add_print_styles.sh
+```
+
+After running, presentations can be printed cleanly from any browser (Ctrl+P / Cmd+P). The stylesheet hides navigation elements, adjusts fonts for paper, and ensures code blocks do not overflow.
+
+---
+
+## CI Pipeline
+
+Each seminar includes a GitHub Actions CI configuration (`ci/github_actions.yml`). Version 2.2 of the pipeline includes seven jobs:
+
+| Job | What It Does | Why It Matters |
+|-----|--------------|----------------|
+| `lint-bash` | ShellCheck on all Bash scripts | Catches common errors like unquoted variables |
+| `lint-python` | Ruff on all Python code | Enforces consistent style and catches bugs |
+| `validate-yaml` | Quiz and config validation | Ensures quiz files are well-formed |
+| `ai-check` | AI fingerprint detection | Flags suspiciously polished submissions |
+| `link-check` | Documentation link validation | Prevents broken links from reaching students |
+| `test` | pytest with coverage threshold | Verifies autograder correctness |
+| `structure-check` | Directory structure validation | Ensures standard kit layout |
+
+The AI fingerprint detection deserves explanation: it looks for patterns common in LLM-generated code (overly verbose comments, certain phrasings, suspiciously complete error handling for a beginner). It is not definitive proof, but it flags submissions for manual review.
+
+Run locally with:
+
+```bash
+cd SEM01
+make test        # Run tests
+make lint        # Run linters
+make ai-check    # Check for AI patterns
+```
+
+---
+
+## Testing
+
+### Running Tests
+
+The testing infrastructure uses pytest throughout. Tests live in `lib/` for shared utilities and in `SEM*/tests/` for seminar-specific validation.
+
+```bash
+# Run all lib tests
+cd lib/
+pytest -v test_*.py
+
+# Run with coverage report
+pytest -v --cov=. --cov-report=term-missing
+
+# Run seminar-specific tests
+cd SEM01/tests/
+pytest -v
+```
+
+### Test Coverage Targets
+
+| Component | Target | Rationale |
+|-----------|--------|-----------|
+| lib/ | >80% | These modules are used everywhere; bugs propagate |
+| Autograders | >75% | Incorrect grading undermines student trust |
+| Quiz generators | >70% | Less critical; manual review catches most issues |
+
+The coverage targets are enforced in CI — a pull request that drops coverage below the threshold will not merge.
+
+---
+
+# PART VIII: STORIES AND HISTORICAL CONTEXT
 
 ---
 
@@ -1435,7 +1605,7 @@ The term "shebang" comes from slang. Perhaps from "sharp bang" (#!), perhaps fro
 
 ---
 
-# PART VIII: REFERENCES AND RESOURCES
+# PART IX: REFERENCES AND RESOURCES
 
 ---
 
@@ -1465,7 +1635,7 @@ The term "shebang" comes from slang. Perhaps from "sharp bang" (#!), perhaps fro
 
 ---
 
-# PART IX: LICENCE
+# PART X: LICENCE
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -1667,18 +1837,68 @@ secrets.*
 | Category | Quantity | Details |
 |-----------|-----------|---------|
 | Theoretical courses | 14 | SO_curs01 to SO_curs14 |
-| Practical seminars | 6 | SEM01 to SEM06 |
+| Supplementary lectures | 4 | Network, Containers, Kernel, NPU |
+| Practical seminars | 7 | SEM01 to SEM07 |
 | Semester projects | 23 | 5 EASY + 15 MEDIUM + 3 ADVANCED |
-| PNG diagrams | 27 | In 000SUPPL/diagrame_png/ |
+| Markdown files | 362 | Documentation, guides, and specifications |
+| HTML presentations | 71 | Interactive slides with print support |
+| PNG diagrams | 27 | In 00_SUPPLEMENTARY/ |
+| SVG diagrams | 26 | Vector graphics throughout |
+| Python scripts | 65 | Autograders, tools, tests |
+| Bash scripts | 118 | Demos, utilities, validators |
+| YAML quiz files | 28 | Structured question banks |
+| Test files | 25+ | pytest and shell tests |
 | Estimated hours (total) | 60+ | For complete coverage |
-| Demonstration scripts | 100+ | Bash and Python |
-| Exam exercises | 3 sets | In 000SUPPL/ |
+| Demonstration scripts | 180+ | Combined Bash and Python |
+| Exam exercises | 3 sets | In 00_SUPPLEMENTARY/ |
 
 ---
 
-*Kit updated: January 2025*  
+## Annex F: Changelog
+
+### Version 5.3.1 (January 2026)
+
+**New Features:**
+- Added print stylesheets to all HTML presentations (`assets/css/print.css`)
+- Added link checking to CI pipeline (`scripts/check_links.sh`)
+- Expanded test coverage for lib/ utilities to >80%
+- Added comprehensive lib/README.md documentation
+
+**Improvements:**
+- Updated CI to version 2.2 with link-check job
+- Standardised script documentation across all seminars
+- Enhanced test templates with better error messages
+- Added SEM07 for evaluation and grading procedures
+
+**Files Added:**
+- `lib/README.md`
+- `lib/test_logging_utils.py`
+- `lib/test_randomisation_utils.py`
+- `scripts/check_links.sh`
+- `scripts/add_print_styles.sh`
+- `assets/css/print.css`
+- `SEM01/tests/test_ai_fingerprint.py`
+
+### Version 5.3.0 (December 2025)
+
+- Initial FAZA 5-6 release
+- Complete restructure with 14 weeks
+- AI-aware exercises integrated throughout
+- Anti-plagiarism infrastructure with MOSS/JPlag integration
+
+### Version 4.0.0 (September 2025)
+
+- Major reorganisation of folder structure
+- Added project difficulty classification (EASY/MEDIUM/ADVANCED)
+- Introduced autograder framework
+- Standardised seminar format
+
+---
+
+*Kit updated: January 2026*  
+*Version: 5.3.1*  
 *Tested on: Ubuntu 24.04 LTS, WSL2 with Ubuntu 22.04/24.04*  
-*Feedback and errors: through official ASE-CSIE channels or issue tracker*
+*Feedback and errors: through GITHUB issue tracker*
 
 ---
 
