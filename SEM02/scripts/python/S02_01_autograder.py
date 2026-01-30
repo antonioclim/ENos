@@ -17,6 +17,7 @@ Version: 2.0 | January 2025
 Note: v2.0 switches to English filenames and adds AI penalty system
 """
 
+import logging
 import os
 import sys
 import json
@@ -29,12 +30,18 @@ from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
+# Logging setup — import shared utilities from kit lib
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+from logging_utils import setup_logging
+
+logger = setup_logging(__name__)
+
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
-class Colors:
+class Colours:
     """ANSI colours for terminal output."""
     RED = '\033[1;31m'
     GREEN = '\033[1;32m'
@@ -55,7 +62,7 @@ class Colors:
 
 # Disable colours if output isn't a terminal
 if not sys.stdout.isatty():
-    Colors.disable()
+    Colours.disable()
 
 # Expected files - ENGLISH names (standardised in v2.0)
 # Points reflect complexity: ex5 is worth more because it's integrative
@@ -232,26 +239,26 @@ def print_header(title: str) -> None:
     """Display a formatted header."""
     width = 70
     print()
-    print(f"{Colors.CYAN}{'═' * width}{Colors.RESET}")
-    print(f"{Colors.CYAN}║{Colors.RESET} {Colors.WHITE}{title:<{width-4}}{Colors.RESET} {Colors.CYAN}║{Colors.RESET}")
-    print(f"{Colors.CYAN}{'═' * width}{Colors.RESET}")
+    print(f"{Colours.CYAN}{'═' * width}{Colours.RESET}")
+    print(f"{Colours.CYAN}║{Colours.RESET} {Colours.WHITE}{title:<{width-4}}{Colours.RESET} {Colours.CYAN}║{Colours.RESET}")
+    print(f"{Colours.CYAN}{'═' * width}{Colours.RESET}")
 
 def print_subheader(title: str) -> None:
-    print(f"\n{Colors.YELLOW}━━━ {title} ━━━{Colors.RESET}\n")
+    print(f"\n{Colours.YELLOW}━━━ {title} ━━━{Colours.RESET}\n")
 
 def print_check(result: CheckResult) -> None:
     """Show result of one check."""
     if result.passed:
-        status = f"{Colors.GREEN}✓ PASS{Colors.RESET}"
+        status = f"{Colours.GREEN}✓ PASS{Colours.RESET}"
     else:
-        status = f"{Colors.RED}✗ FAIL{Colors.RESET}"
+        status = f"{Colours.RED}✗ FAIL{Colours.RESET}"
     
     points_str = f"[{result.points:.1f}/{result.max_points:.1f}]"
-    print(f"  {status} {result.name:<40} {Colors.CYAN}{points_str}{Colors.RESET}")
+    print(f"  {status} {result.name:<40} {Colours.CYAN}{points_str}{Colours.RESET}")
     
     if result.details:
         for detail in result.details[:3]:
-            print(f"       {Colors.DIM}{detail}{Colors.RESET}")
+            print(f"       {Colours.DIM}{detail}{Colours.RESET}")
 
 def run_command(cmd: List[str], timeout: int = 10) -> Tuple[int, str, str]:
     """Run command, return (code, stdout, stderr)."""
@@ -399,24 +406,24 @@ def apply_ai_penalty(report: GradeReport) -> None:
 def print_ai_indicators(indicators: List[AIIndicatorResult], penalty: float) -> None:
     """Display AI detection results."""
     if not indicators:
-        print(f"  {Colors.GREEN}✓{Colors.RESET} No significant AI indicators detected")
+        print(f"  {Colours.GREEN}✓{Colours.RESET} No significant AI indicators detected")
         return
     
-    print(f"  {Colors.YELLOW}⚠ AI PATTERNS DETECTED{Colors.RESET}")
+    print(f"  {Colours.YELLOW}⚠ AI PATTERNS DETECTED{Colours.RESET}")
     if penalty > 0:
-        print(f"  {Colors.RED}Penalty applied: -{penalty:.1f} points{Colors.RESET}")
+        print(f"  {Colours.RED}Penalty applied: -{penalty:.1f} points{Colours.RESET}")
     print()
     
     for indicator in indicators:
-        print(f"    • {Colors.YELLOW}{indicator.description}{Colors.RESET}")
+        print(f"    • {Colours.YELLOW}{indicator.description}{Colours.RESET}")
         print(f"      Found: {indicator.matches_found} occurrence(s)")
         if indicator.sample_matches:
             for sample in indicator.sample_matches[:2]:
                 sample_short = sample[:60] + "..." if len(sample) > 60 else sample
-                print(f"      {Colors.DIM}Example: {sample_short}{Colors.RESET}")
+                print(f"      {Colours.DIM}Example: {sample_short}{Colours.RESET}")
         print()
     
-    print(f"  {Colors.DIM}These are heuristic signals. Verify via Part 6 oral check.{Colors.RESET}")
+    print(f"  {Colours.DIM}These are heuristic signals. Verify via Part 6 oral check.{Colours.RESET}")
 
 
 # ============================================================================
@@ -902,8 +909,8 @@ def print_final_report(report: GradeReport) -> None:
     """Display final results."""
     print_header("📊 FINAL REPORT")
     
-    print(f"\n  {Colors.WHITE}Directory:{Colors.RESET} {report.student_dir}")
-    print(f"  {Colors.WHITE}Date:{Colors.RESET}     {report.timestamp}")
+    print(f"\n  {Colours.WHITE}Directory:{Colours.RESET} {report.student_dir}")
+    print(f"  {Colours.WHITE}Date:{Colours.RESET}     {report.timestamp}")
     print()
     
     # Progress bar
@@ -911,24 +918,24 @@ def print_final_report(report: GradeReport) -> None:
     filled = int(report.percentage / 100 * bar_width)
     bar = '█' * filled + '░' * (bar_width - filled)
     
-    colour = Colors.GREEN if report.percentage >= 70 else (
-        Colors.YELLOW if report.percentage >= 50 else Colors.RED)
+    colour = Colours.GREEN if report.percentage >= 70 else (
+        Colours.YELLOW if report.percentage >= 50 else Colours.RED)
     
-    print(f"  {Colors.WHITE}Score:{Colors.RESET}     {report.total_score:.1f} / {report.max_score:.1f}")
+    print(f"  {Colours.WHITE}Score:{Colours.RESET}     {report.total_score:.1f} / {report.max_score:.1f}")
     if report.ai_penalty_applied > 0:
-        print(f"  {Colors.RED}AI Penalty:{Colors.RESET} -{report.ai_penalty_applied:.1f}")
-    print(f"  {Colors.WHITE}Percentage:{Colors.RESET} {colour}{report.percentage:.1f}%{Colors.RESET}")
-    print(f"  {Colors.WHITE}Progress:{Colors.RESET}  [{colour}{bar}{Colors.RESET}]")
+        print(f"  {Colours.RED}AI Penalty:{Colours.RESET} -{report.ai_penalty_applied:.1f}")
+    print(f"  {Colours.WHITE}Percentage:{Colours.RESET} {colour}{report.percentage:.1f}%{Colours.RESET}")
+    print(f"  {Colours.WHITE}Progress:{Colours.RESET}  [{colour}{bar}{Colours.RESET}]")
     print()
-    print(f"  {Colors.WHITE}FINAL GRADE:{Colors.RESET}  {colour}{Colors.WHITE}{report.grade}{Colors.RESET}")
+    print(f"  {Colours.WHITE}FINAL GRADE:{Colours.RESET}  {colour}{Colours.WHITE}{report.grade}{Colours.RESET}")
     
     if report.warnings:
-        print(f"\n  {Colors.YELLOW}⚠ WARNINGS:{Colors.RESET}")
+        print(f"\n  {Colours.YELLOW}⚠ WARNINGS:{Colours.RESET}")
         for w in report.warnings:
             print(f"    • {w}")
     
     if report.errors:
-        print(f"\n  {Colors.RED}✗ ERRORS:{Colors.RESET}")
+        print(f"\n  {Colours.RED}✗ ERRORS:{Colours.RESET}")
         for e in report.errors:
             print(f"    • {e}")
     
@@ -959,7 +966,7 @@ def save_report(report: GradeReport, output_path: str) -> None:
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(report_dict, f, indent=2, ensure_ascii=False)
     
-    print(f"  {Colors.GREEN}✓{Colors.RESET} Report saved: {output_path}")
+    print(f"  {Colours.GREEN}✓{Colours.RESET} Report saved: {output_path}")
 
 
 # ============================================================================
@@ -986,8 +993,9 @@ Examples:
     args = parser.parse_args()
     
     if args.quiet:
-        Colors.disable()
+        Colours.disable()
     
+    logger.info(f"Starting autograder for: {args.directory}")
     print_header("🎓 AUTOGRADER - Seminar 2 OS (v2.0)")
     
     report = grade_submission(args.directory)
@@ -995,6 +1003,9 @@ Examples:
     
     if args.output:
         save_report(report, args.output)
+        logger.info(f"Report saved: {args.output}")
+    
+    logger.info(f"Final grade: {report.grade} ({report.final_score:.1f}/100)")
     
     # Exit code based on grade
     if report.grade in ['A', 'B', 'C']:

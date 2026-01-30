@@ -41,7 +41,7 @@ except ImportError:
 # COLOUR CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class Colors:
+class Colours:
     """ANSI colours for terminal."""
     RED = '\033[1;31m'
     GREEN = '\033[1;32m'
@@ -63,7 +63,7 @@ class Colors:
 
 
 if not sys.stdout.isatty():
-    Colors.disable()
+    Colours.disable()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -96,9 +96,9 @@ def clear_screen() -> None:
 def print_header(title: str) -> None:
     """Display a formatted header."""
     width = 70
-    print(f"\n{Colors.CYAN}{'═' * width}{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.WHITE}{title.center(width)}{Colors.RESET}")
-    print(f"{Colors.CYAN}{'═' * width}{Colors.RESET}\n")
+    print(f"\n{Colours.CYAN}{'═' * width}{Colours.RESET}")
+    print(f"{Colours.BOLD}{Colours.WHITE}{title.center(width)}{Colours.RESET}")
+    print(f"{Colours.CYAN}{'═' * width}{Colours.RESET}\n")
 
 
 def print_question(num: int, total: int, question: Dict[str, Any]) -> None:
@@ -107,20 +107,20 @@ def print_question(num: int, total: int, question: Dict[str, Any]) -> None:
     category = question.get('categorie', 'general')
     
     bloom_colors = {
-        'REMEMBER': Colors.GREEN,
-        'UNDERSTAND': Colors.BLUE,
-        'APPLY': Colors.YELLOW,
-        'ANALYSE': Colors.MAGENTA,
-        'EVALUATE': Colors.RED,
-        'CREATE': Colors.CYAN
+        'REMEMBER': Colours.GREEN,
+        'UNDERSTAND': Colours.BLUE,
+        'APPLY': Colours.YELLOW,
+        'ANALYSE': Colours.MAGENTA,
+        'EVALUATE': Colours.RED,
+        'CREATE': Colours.CYAN
     }
-    bloom_color = bloom_colors.get(bloom, Colors.WHITE)
+    bloom_color = bloom_colors.get(bloom, Colours.WHITE)
     
-    print(f"{Colors.DIM}─────────────────────────────────────────────────────{Colors.RESET}")
-    print(f"{Colors.BOLD}Question {num}/{total}{Colors.RESET} "
-          f"[{bloom_color}{bloom}{Colors.RESET}] "
-          f"[{Colors.DIM}{category}{Colors.RESET}]")
-    print(f"{Colors.DIM}─────────────────────────────────────────────────────{Colors.RESET}\n")
+    print(f"{Colours.DIM}─────────────────────────────────────────────────────{Colours.RESET}")
+    print(f"{Colours.BOLD}Question {num}/{total}{Colours.RESET} "
+          f"[{bloom_color}{bloom}{Colours.RESET}] "
+          f"[{Colours.DIM}{category}{Colours.RESET}]")
+    print(f"{Colours.DIM}─────────────────────────────────────────────────────{Colours.RESET}\n")
     
     # Question text
     text = question.get('text', '').strip()
@@ -130,7 +130,7 @@ def print_question(num: int, total: int, question: Dict[str, Any]) -> None:
     options = question.get('optiuni', [])
     for i, opt in enumerate(options):
         letter = chr(65 + i)  # A, B, C, D
-        print(f"  {Colors.BOLD}{letter}){Colors.RESET} {opt}")
+        print(f"  {Colours.BOLD}{letter}){Colours.RESET} {opt}")
     print()
 
 
@@ -141,7 +141,7 @@ def get_answer(num_options: int) -> int:
     
     while True:
         try:
-            prompt = f"{Colors.YELLOW}Your answer ({'/'.join(valid_letters)}): {Colors.RESET}"
+            prompt = f"{Colours.YELLOW}Your answer ({'/'.join(valid_letters)}): {Colours.RESET}"
             answer = input(prompt).strip().upper()
             
             if answer in valid_letters:
@@ -149,9 +149,9 @@ def get_answer(num_options: int) -> int:
             elif answer.isdigit() and 0 <= int(answer) < num_options:
                 return int(answer)
             else:
-                print(f"{Colors.RED}Invalid answer. Enter {'/'.join(valid_letters)}.{Colors.RESET}")
+                print(f"{Colours.RED}Invalid answer. Enter {'/'.join(valid_letters)}.{Colours.RESET}")
         except (KeyboardInterrupt, EOFError):
-            print(f"\n{Colors.YELLOW}Quiz interrupted.{Colors.RESET}")
+            print(f"\n{Colours.YELLOW}Quiz interrupted.{Colours.RESET}")
             sys.exit(0)
 
 
@@ -161,17 +161,17 @@ def show_feedback(question: Dict[str, Any], user_answer: int, correct: bool) -> 
     options = question.get('optiuni', [])
     
     if correct:
-        print(f"{Colors.GREEN}✓ CORRECT!{Colors.RESET}")
+        print(f"{Colours.GREEN}✓ CORRECT!{Colours.RESET}")
     else:
         correct_letter = chr(65 + correct_idx)
         correct_text = options[correct_idx] if correct_idx < len(options) else "?"
-        print(f"{Colors.RED}✗ WRONG!{Colors.RESET}")
-        print(f"  Correct answer: {Colors.GREEN}{correct_letter}) {correct_text}{Colors.RESET}")
+        print(f"{Colours.RED}✗ WRONG!{Colours.RESET}")
+        print(f"  Correct answer: {Colours.GREEN}{correct_letter}) {correct_text}{Colours.RESET}")
     
     # Explanation
     explicatie = question.get('explicatie', '').strip()
     if explicatie:
-        print(f"\n{Colors.CYAN}Explanation:{Colors.RESET}")
+        print(f"\n{Colours.CYAN}Explanation:{Colours.RESET}")
         for line in explicatie.split('\n'):
             print(f"  {line}")
     
@@ -180,10 +180,10 @@ def show_feedback(question: Dict[str, Any], user_answer: int, correct: bool) -> 
         misconceptii = question.get('misconceptii', {})
         if str(user_answer) in misconceptii:
             misc = misconceptii[str(user_answer)]
-            print(f"\n{Colors.YELLOW}Why you got it wrong:{Colors.RESET} {misc}")
+            print(f"\n{Colours.YELLOW}Why you got it wrong:{Colours.RESET} {misc}")
     
     print()
-    input(f"{Colors.DIM}Press Enter to continue...{Colors.RESET}")
+    input(f"{Colours.DIM}Press Enter to continue...{Colours.RESET}")
 
 
 def print_results(result: QuizResult, quiz_title: str) -> None:
@@ -191,29 +191,29 @@ def print_results(result: QuizResult, quiz_title: str) -> None:
     clear_screen()
     print_header("FINAL RESULTS")
     
-    print(f"{Colors.BOLD}Quiz:{Colors.RESET} {quiz_title}\n")
+    print(f"{Colours.BOLD}Quiz:{Colours.RESET} {quiz_title}\n")
     
     # Overall score
     if result.score_percent >= 90:
-        score_color = Colors.GREEN
+        score_color = Colours.GREEN
         grade = "EXCELLENT"
     elif result.score_percent >= 75:
-        score_color = Colors.BLUE
+        score_color = Colours.BLUE
         grade = "GOOD"
     elif result.score_percent >= 60:
-        score_color = Colors.YELLOW
+        score_color = Colours.YELLOW
         grade = "SATISFACTORY"
     else:
-        score_color = Colors.RED
+        score_color = Colours.RED
         grade = "NEEDS IMPROVEMENT"
     
-    print(f"{Colors.BOLD}Score:{Colors.RESET} {score_color}{result.correct_answers}/{result.total_questions} "
-          f"({result.score_percent:.1f}%){Colors.RESET}")
-    print(f"{Colors.BOLD}Grade:{Colors.RESET} {score_color}{grade}{Colors.RESET}\n")
+    print(f"{Colours.BOLD}Score:{Colours.RESET} {score_color}{result.correct_answers}/{result.total_questions} "
+          f"({result.score_percent:.1f}%){Colours.RESET}")
+    print(f"{Colours.BOLD}Grade:{Colours.RESET} {score_color}{grade}{Colours.RESET}\n")
     
     # Breakdown by Bloom levels
     if result.bloom_breakdown:
-        print(f"{Colors.BOLD}Performance by cognitive levels:{Colors.RESET}")
+        print(f"{Colours.BOLD}Performance by cognitive levels:{Colours.RESET}")
         for bloom, stats in sorted(result.bloom_breakdown.items()):
             correct = stats.get('correct', 0)
             total = stats.get('total', 0)
@@ -226,20 +226,20 @@ def print_results(result: QuizResult, quiz_title: str) -> None:
     
     # Breakdown by categories
     if result.category_breakdown:
-        print(f"{Colors.BOLD}Performance by categories:{Colors.RESET}")
+        print(f"{Colours.BOLD}Performance by categories:{Colours.RESET}")
         for cat, stats in sorted(result.category_breakdown.items()):
             correct = stats.get('correct', 0)
             total = stats.get('total', 0)
             if total > 0:
                 pct = (correct / total) * 100
                 status = "✓" if pct >= 70 else "△" if pct >= 50 else "✗"
-                color = Colors.GREEN if pct >= 70 else Colors.YELLOW if pct >= 50 else Colors.RED
-                print(f"  {color}{status}{Colors.RESET} {cat}: {correct}/{total} ({pct:.0f}%)")
+                color = Colours.GREEN if pct >= 70 else Colours.YELLOW if pct >= 50 else Colours.RED
+                print(f"  {color}{status}{Colours.RESET} {cat}: {correct}/{total} ({pct:.0f}%)")
         print()
     
     # Time
-    print(f"{Colors.DIM}Started: {result.time_started}{Colors.RESET}")
-    print(f"{Colors.DIM}Finished: {result.time_finished}{Colors.RESET}")
+    print(f"{Colours.DIM}Started: {result.time_started}{Colours.RESET}")
+    print(f"{Colours.DIM}Finished: {result.time_finished}{Colours.RESET}")
 
 
 def save_results(result: QuizResult, output_path: Path) -> None:
@@ -259,7 +259,7 @@ def save_results(result: QuizResult, output_path: Path) -> None:
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"{Colors.GREEN}Results saved to: {output_path}{Colors.RESET}")
+    print(f"{Colours.GREEN}Results saved to: {output_path}{Colours.RESET}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -277,7 +277,7 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
     questions = quiz_data.get('intrebari', [])
     
     if not questions:
-        print(f"{Colors.RED}Error: The quiz contains no questions.{Colors.RESET}")
+        print(f"{Colours.RED}Error: The quiz contains no questions.{Colours.RESET}")
         sys.exit(1)
     
     # Shuffle if requested
@@ -303,7 +303,7 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
     print(f"Estimated time: {metadata.get('timp_estimat_minute', 20)} minutes")
     print(f"\nAnswer with the corresponding letter (A, B, C, D).")
     print(f"You can exit at any time with Ctrl+C.\n")
-    input(f"{Colors.CYAN}Press Enter to begin...{Colors.RESET}")
+    input(f"{Colours.CYAN}Press Enter to begin...{Colours.RESET}")
     
     # Run through questions
     for i, question in enumerate(questions, 1):
@@ -378,10 +378,10 @@ Examples:
     args = parser.parse_args()
     
     if args.no_color:
-        Colors.disable()
+        Colours.disable()
     
     if not args.quiz_file.exists():
-        print(f"{Colors.RED}Error: The file '{args.quiz_file}' does not exist.{Colors.RESET}")
+        print(f"{Colours.RED}Error: The file '{args.quiz_file}' does not exist.{Colours.RESET}")
         sys.exit(1)
     
     try:
@@ -403,7 +403,7 @@ Examples:
             save_results(result, args.output)
             
     except KeyboardInterrupt:
-        print(f"\n{Colors.YELLOW}Quiz interrupted by user.{Colors.RESET}")
+        print(f"\n{Colours.YELLOW}Quiz interrupted by user.{Colours.RESET}")
         sys.exit(0)
 
 

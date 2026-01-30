@@ -1,4 +1,4 @@
-# Seminar 2: Control Operators, I/O Redirection, Filters, and Loops
+# Seminar 2: Control Operators, I/O Redirection, Filters and Loops
 
 > Lab observation: note down key commands and relevant output (2–3 lines) as you work. It helps with debugging and, honestly, by the end you'll have a decent README with no extra effort.
 > Operating Systems | Bucharest University of Economic Studies - CSIE  

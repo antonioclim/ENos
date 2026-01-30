@@ -941,7 +941,7 @@ class ComparisonAnalyzer:
 # SECTION 6: CLI INTERFACE
 # 
 
-class Colors:
+class Colours:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
     CYAN = '\033[96m'
@@ -963,7 +963,7 @@ def print_banner():
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 """
-    print(f"{Colors.CYAN}{banner}{Colors.ENDC}")
+    print(f"{Colours.CYAN}{banner}{Colours.ENDC}")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1010,15 +1010,15 @@ Usage examples:
     elif input_path.suffix == '.csv':
         results = ResultLoader.load_csv(str(input_path))
     else:
-        print(f"{Colors.RED}❌ Unknown format: {input_path}{Colors.ENDC}")
+        print(f"{Colours.RED}❌ Unknown format: {input_path}{Colours.ENDC}")
         return 1
     
     if not results:
-        print(f"{Colors.RED}❌ No results found!{Colors.ENDC}")
+        print(f"{Colours.RED}❌ No results found!{Colours.ENDC}")
         return 1
     
     if not args.quiet:
-        print(f"{Colors.GREEN}✓ Loaded {len(results)} results{Colors.ENDC}")
+        print(f"{Colours.GREEN}✓ Loaded {len(results)} results{Colours.ENDC}")
     
     # Optional filtering
     if args.filter_group:
@@ -1049,7 +1049,7 @@ Usage examples:
         progress = comparator.analyze_progress()
         
         if not args.quiet:
-            print(f"\n{Colors.BOLD}📈 PROGRESS ANALYSIS{Colors.ENDC}")
+            print(f"\n{Colours.BOLD}📈 PROGRESS ANALYSIS{Colours.ENDC}")
             print(f"  Common students: {progress['common_students']}")
             print(f"  Improvements: {len(progress['improvements'])} "
                   f"(mean: +{progress['avg_improvement']:.1f}%)")
@@ -1058,7 +1058,7 @@ Usage examples:
             print(f"  Unchanged: {len(progress['unchanged'])}")
             
             if progress['improvements']:
-                print(f"\n  {Colors.GREEN}Top improvements:{Colors.ENDC}")
+                print(f"\n  {Colours.GREEN}Top improvements:{Colours.ENDC}")
                 for e in progress['improvements'][:5]:
                     print(f"    • {e['student']} ({e['group']}): "
                           f"{e['before']:.0f}% → {e['after']:.0f}% (+{e['diff']:.0f}%)")
@@ -1090,7 +1090,7 @@ Usage examples:
             
             if not args.quiet:
                 print(f"\n{content}")
-                print(f"\n{Colors.GREEN}✓ Saved: {filepath}{Colors.ENDC}")
+                print(f"\n{Colours.GREEN}✓ Saved: {filepath}{Colours.ENDC}")
         
         elif fmt == 'html':
             content = ReportExporter.to_html(report)
@@ -1099,21 +1099,21 @@ Usage examples:
                 f.write(content)
             
             if not args.quiet:
-                print(f"{Colors.GREEN}✓ Saved HTML report: {filepath}{Colors.ENDC}")
+                print(f"{Colours.GREEN}✓ Saved HTML report: {filepath}{Colours.ENDC}")
         
         elif fmt == 'csv':
             filepath = output_file or output_dir / 'results.csv'
             ReportExporter.to_csv(report, str(filepath))
             
             if not args.quiet:
-                print(f"{Colors.GREEN}✓ Saved CSV: {filepath}{Colors.ENDC}")
+                print(f"{Colours.GREEN}✓ Saved CSV: {filepath}{Colours.ENDC}")
         
         elif fmt == 'moodle':
             filepath = output_file or output_dir / 'moodle_grades.csv'
             ReportExporter.to_moodle_csv(report, str(filepath))
             
             if not args.quiet:
-                print(f"{Colors.GREEN}✓ Saved Moodle CSV: {filepath}{Colors.ENDC}")
+                print(f"{Colours.GREEN}✓ Saved Moodle CSV: {filepath}{Colours.ENDC}")
     
     return 0
 

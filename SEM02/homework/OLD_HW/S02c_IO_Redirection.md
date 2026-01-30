@@ -26,7 +26,7 @@
 
 By the end of this laboratory, the student will be able to:
 
-Three things matter here: redirect input and output of commands, use pipes for chaining commands, and manage stdin, stdout and stderr.
+Three things matter here: redirect input and output of commands, use pipes for chaining commands and manage stdin, stdout and stderr.
 
 
 ---

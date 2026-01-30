@@ -74,7 +74,7 @@ Someone will write `cat file | while read line; do ((count++)); done` and wonder
 Usually a hidden Windows line ending (`\r\n` vs `\n`). Keep `dos2unix` ready. Since 2023, also check for students accidentally using PowerShell syntax in Bash.
 
 ### The AI Dump (new problem since 2023)
-Students submit scripts with perfect comments, elaborate variable names, and broken logic. The autograder now includes AI pattern detection. If you see suspiciously polished code, ask the student to explain a random line. Usually reveals the gap quickly.
+Students submit scripts with perfect comments, elaborate variable names and broken logic. The autograder now includes AI pattern detection. If you see suspiciously polished code, ask the student to explain a random line. Usually reveals the gap quickly.
 
 ### The `{1..$n}` Bug
 Despite explicit warnings, ~20% still try this. I now write on the whiteboard in red: **BRACE EXPANSION BEFORE VARIABLE EXPANSION**. Then immediately show `seq` and C-style alternatives.

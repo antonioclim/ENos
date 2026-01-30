@@ -1264,7 +1264,7 @@ class QuizExporter:
 # 
 
 # ANSI Colours
-class Colors:
+class Colours:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
     CYAN = '\033[96m'
@@ -1286,7 +1286,7 @@ def print_banner():
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 """
-    print(f"{Colors.CYAN}{banner}{Colors.ENDC}")
+    print(f"{Colours.CYAN}{banner}{Colours.ENDC}")
 
 def read_students_file(filepath: str) -> List[Tuple[str, str]]:
     """Read the student list from file (format: Name,Group)."""
@@ -1346,14 +1346,14 @@ Usage examples:
     
     # Mode: bank statistics
     if args.stats:
-        print(f"{Colors.BOLD}📊 Question Bank Statistics:{Colors.ENDC}\n")
+        print(f"{Colours.BOLD}📊 Question Bank Statistics:{Colours.ENDC}\n")
         categories = {}
         difficulties = {}
         for q in bank.questions:
             categories[q.category] = categories.get(q.category, 0) + 1
             difficulties[q.difficulty] = difficulties.get(q.difficulty, 0) + 1
         
-        print(f"  Total questions: {Colors.GREEN}{len(bank.questions)}{Colors.ENDC}")
+        print(f"  Total questions: {Colours.GREEN}{len(bank.questions)}{Colours.ENDC}")
         print(f"\n  Per category:")
         for cat, count in sorted(categories.items()):
             print(f"    • {cat}: {count}")
@@ -1364,7 +1364,7 @@ Usage examples:
     
     # Mode: list questions
     if args.list_questions:
-        print(f"{Colors.BOLD}📋 Question List:{Colors.ENDC}\n")
+        print(f"{Colours.BOLD}📋 Question List:{Colours.ENDC}\n")
         for q in bank.questions:
             print(f"  [{q.id}] [{q.category:12}] [{q.difficulty:6}] {q.question_text[:60]}...")
         return 0
@@ -1373,15 +1373,15 @@ Usage examples:
     students = []
     if args.students:
         if not os.path.exists(args.students):
-            print(f"{Colors.RED}❌ Error: File {args.students} does not exist!{Colors.ENDC}")
+            print(f"{Colours.RED}❌ Error: File {args.students} does not exist!{Colours.ENDC}")
             return 1
         students = read_students_file(args.students)
-        print(f"{Colors.GREEN}✓ Loaded {len(students)} students from {args.students}{Colors.ENDC}\n")
+        print(f"{Colours.GREEN}✓ Loaded {len(students)} students from {args.students}{Colours.ENDC}\n")
     elif args.student and args.grupa:
         students = [(args.student, args.grupa)]
     else:
         parser.print_help()
-        print(f"\n{Colors.YELLOW}⚠️ Specify --student and --grupa OR --students{Colors.ENDC}")
+        print(f"\n{Colours.YELLOW}⚠️ Specify --student and --grupa OR --students{Colours.ENDC}")
         return 1
     
     # Create output directory
@@ -1389,7 +1389,7 @@ Usage examples:
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate quizzes
-    print(f"{Colors.BOLD}🔄 Generating quizzes...{Colors.ENDC}\n")
+    print(f"{Colours.BOLD}🔄 Generating quizzes...{Colours.ENDC}\n")
     
     for name, group in students:
         quiz = generator.generate_quiz(name, group, args.count)
@@ -1418,7 +1418,7 @@ Usage examples:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
             
-            print(f"  {Colors.GREEN}✓{Colors.ENDC} {name} ({group}): {filepath}")
+            print(f"  {Colours.GREEN}✓{Colours.ENDC} {name} ({group}): {filepath}")
         
         # Export answer version for instructor
         if not args.answers and args.format != 'json':
@@ -1429,9 +1429,9 @@ Usage examples:
             filepath = output_dir / f"{answers_filename}.txt"
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"  {Colors.CYAN}✓{Colors.ENDC} (answers): {filepath}")
+            print(f"  {Colours.CYAN}✓{Colours.ENDC} (answers): {filepath}")
     
-    print(f"\n{Colors.GREEN}✓ Generation complete! {len(students)} quizzes created.{Colors.ENDC}")
+    print(f"\n{Colours.GREEN}✓ Generation complete! {len(students)} quizzes created.{Colours.ENDC}")
     print(f"  📁 Output: {output_dir.absolute()}")
     
     return 0
