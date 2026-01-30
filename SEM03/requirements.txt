@@ -1,0 +1,58 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# requirements.txt — Seminar 03: System Administration
+# Operating Systems | Bucharest UES - CSIE
+# ═══════════════════════════════════════════════════════════════════════════════
+# Installation: pip install -r requirements.txt
+# Or with virtual environment:
+#   python -m venv venv
+#   source venv/bin/activate  # Linux/macOS
+#   venv\Scripts\activate     # Windows
+#   pip install -r requirements.txt
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORE DEPENDENCIES (required for execution)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# YAML parsing for quizzes
+PyYAML>=6.0.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OPTIONAL DEPENDENCIES (for extended functionality)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Rich text reporting (optional)
+# rich>=13.0.0
+
+# JSON Schema validation (optional)
+# jsonschema>=4.0.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEVELOPMENT DEPENDENCIES (for linting and testing)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Fast Python linter
+ruff>=0.1.0
+
+# Testing framework
+pytest>=7.0.0
+
+# Test coverage
+pytest-cov>=4.0.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INSTALLATION NOTES
+# ─────────────────────────────────────────────────────────────────────────────
+# 
+# For seminar environment (minimal):
+#   pip install pyyaml
+#
+# For complete development:
+#   pip install -r requirements.txt
+#
+# For shellcheck (Bash linter):
+#   Ubuntu/Debian: sudo apt install shellcheck
+#   macOS: brew install shellcheck
+#   Windows: scoop install shellcheck
+#
+# ═══════════════════════════════════════════════════════════════════════════════

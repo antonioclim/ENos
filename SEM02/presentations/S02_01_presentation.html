@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐧 Seminar 2: Operators, Redirection, Filters and Loops | OS ASE-CSIE</title>
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/night.min.css">
+    
+    <!-- Highlight.js for code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    
+    <style>
+        /* Custom styles */
+        :root {
+            --r-main-font-size: 32px;
+            --r-heading1-size: 2.0em;
+            --r-heading2-size: 1.6em;
+            --r-heading3-size: 1.3em;
+        }
+        
+        .reveal {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+        }
+        
+        .reveal pre {
+            width: 100%;
+            font-size: 0.7em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        .reveal code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: #2d2d2d;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .reveal pre code {
+            padding: 15px;
+            max-height: 500px;
+        }
+        
+        /* Coloured boxes */
+        .box-green {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4caf50;
+        }
+        
+        .box-blue {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #3182ce;
+        }
+        
+        .box-orange {
+            background: linear-gradient(135deg, #5c3d1a 0%, #7c5a2d 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #ed8936;
+        }
+        
+        .box-red {
+            background: linear-gradient(135deg, #5c1a1a 0%, #7c2d2d 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #e53e3e;
+        }
+        
+        .box-purple {
+            background: linear-gradient(135deg, #3d1a5c 0%, #553d7c 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #9f7aea;
+        }
+        
+        /* Two columns */
+        .two-columns {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .two-columns > div {
+            flex: 1;
+        }
+        
+        /* Emoji sizing */
+        .emoji-large {
+            font-size: 3em;
+        }
+        
+        /* Tables */
+        .reveal table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            font-size: 0.75em;
+        }
+        
+        .reveal table th {
+            background: #3182ce;
+            padding: 12px 15px;
+        }
+        
+        .reveal table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .reveal table tr:nth-child(even) {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        /* Diagrams ASCII */
+        .ascii-diagram {
+            font-family: 'Courier New', monospace;
+            font-size: 0.65em;
+            text-align: left;
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.4;
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            background: #2d3748;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            height: 100%;
+            transition: width 0.5s;
+        }
+        
+        /* Highlight fragments */
+        .highlight-current {
+            opacity: 0.5;
+        }
+        
+        .highlight-current.current-fragment {
+            opacity: 1;
+        }
+        
+        /* Quiz styling */
+        .quiz-option {
+            text-align: left;
+            padding: 10px 20px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* Slide specific */
+        .slide-title {
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        /* Animation for code reveal */
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        /* Print styles */
+        @media print {
+            .reveal .slides section {
+                page-break-after: always;
+            }
+        }
+        
+        /* Smaller text helper */
+        .small-text {
+            font-size: 0.7em;
+        }
+        
+        .tiny-text {
+            font-size: 0.55em;
+        }
+        
+        /* Warning box */
+        .warning {
+            background: linear-gradient(135deg, #744210 0%, #975a16 100%);
+            border-left: 5px solid #fbd38d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        /* Success box */
+        .success {
+            background: linear-gradient(135deg, #22543d 0%, #276749 100%);
+            border-left: 5px solid #68d391;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        /* Command showcase */
+        .command-showcase {
+            display: inline-block;
+            background: #1e1e3f;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            border: 2px solid #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- ==================== SECTION 0: INTRO ==================== -->
+            
+            <!-- Slide 1: Title -->
+            <section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)">
+                <h1 class="slide-title">Seminar 2</h1>
+<p><strong>Lab observation:</strong> note down key commands and relevant output (2–3 lines) as you work. It helps with debugging and, honestly, by the end you'll have a decent README without extra effort.</p>
+
+                <h2>Operators, Redirection, Filters and Loops</h2>
+                <p style="margin-top: 50px;">
+                    <strong>Operating Systems</strong><br>
+                    <span class="small-text">Bucharest University of Economic Studies - CSIE</span>
+                </p>
+                <p style="margin-top: 30px;" class="tiny-text">
+                    January 2025 | Press <kbd>Space</kbd> or <kbd>→</kbd> to continue
+                </p>
+            </section>
+            
+            <!-- Slide 2: Objectives -->
+            <section>
+                <h2>Learning Objectives</h2>
+                <div class="box-blue">
+                    <p>By the end of this seminar, you will be able to:</p>
+                    <ol style="font-size: 0.8em;">
+                        <li class="fragment">Combine commands using the operators <code>;</code>, <code>&&</code>, <code>||</code>, <code>&</code></li>
+                        <li class="fragment">Redirect I/O with <code>&gt;</code>, <code>&gt;&gt;</code>, <code>&lt;</code>, <code>2&gt;&amp;1</code></li>
+                        <li class="fragment">Build efficient pipelines with <code>|</code></li>
+                        <li class="fragment">Use filters: <code>sort</code>, <code>uniq</code>, <code>cut</code>, <code>tr</code>, <code>wc</code></li>
+                        <li class="fragment">Write <code>for</code>, <code>while</code>, <code>until</code> loops</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <!-- Slide 3: Agenda -->
+            <section>
+                <h2>Agenda (100 minutes)</h2>
+                <table>
+                    <tr><th>Time</th><th>Section</th><th>Content</th></tr>
+                    <tr><td>0:00-0:05</td><td>🎬 Hook</td><td>Spectacular demo with pipes</td></tr>
+                    <tr><td>0:05-0:25</td><td>⚡ Operators</td><td>Control flow: ; && || & |</td></tr>
+                    <tr><td>0:25-0:45</td><td>📂 Redirection</td><td>File descriptors, >, >>, 2>&1</td></tr>
+                    <tr><td>0:45-0:50</td><td>☕ Break</td><td>5 minutes</td></tr>
+                    <tr><td>0:50-1:15</td><td>🔧 Filters</td><td>sort, uniq, cut, tr, wc, tee</td></tr>
+                    <tr><td>1:15-1:35</td><td>🔄 Loops</td><td>for, while, until, break</td></tr>
+                    <tr><td>1:35-1:40</td><td>📝 Wrap-up</td><td>Recap and homework</td></tr>
+                </table>
+            </section>
+            
+            <!-- Slide 4: Recap SEM01-02 -->
+            <section>
+                <h2>What Do We Already Know?</h2>
+                <div class="two-columns">
+                    <div class="box-green">
+                        <h3>From SEM01-02</h3>
+                        <ul class="small-text">
+                            <li>Navigation: <code>cd</code>, <code>ls</code>, <code>pwd</code></li>
+                            <li>Files: <code>cp</code>, <code>mv</code>, <code>rm</code></li>
+                            <li>Viewing: <code>cat</code>, <code>less</code></li>
+                            <li>Variables: <code>$VAR</code>, <code>export</code></li>
+                            <li>Globbing: <code>*</code>, <code>?</code>, <code>[abc]</code></li>
+                        </ul>
+                    </div>
+                    <div class="box-purple">
+                        <h3>Today We Will Learn</h3>
+                        <ul class="small-text">
+                            <li>Control operators</li>
+                            <li>I/O Redirection</li>
+                            <li>Pipelines</li>
+                            <li>Text filters</li>
+                            <li>Loops</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ==================== SECTION 1: HOOK DEMO ==================== -->
+            
+            <!-- Slide 5: Hook Demo -->
+            <section data-background-gradient="linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)">
+                <h2>The Power of Pipelines</h2>
+                <p>Find the 5 largest files in the system with a single command:</p>
+                <pre><code class="language-bash">find /usr -type f -printf '%s %p\n' 2>/dev/null | \
+    sort -rn | \
+    head -5 | \
+    while read size path; do
+        printf "%'.0f bytes → %s\n" "$size" "$path"
+    done</code></pre>
+                <div class="fragment box-green" style="margin-top: 20px;">
+                    <p class="small-text">
+                        🔥 <strong>A single command</strong> that combines: search, sort, limit and format!
+                    </p>
+                </div>
+            </section>
+            
+            <!-- ==================== SECTION 2: OPERATORS ==================== -->
+            
+            <!-- Slide 6: Operators - Intro -->
+            <section data-background-color="#1a365d">
+                <h1>MODULE 1</h1>
+                <h2>Control Operators</h2>
+                <p class="small-text"><code>;</code> <code>&&</code> <code>||</code> <code>&</code> <code>|</code></p>
+            </section>
+            
+            <!-- Slide 7: Exit Codes -->
+            <section>
+                <h2>Exit Codes - Foundation</h2>
+                <div class="box-blue">
+                    <p>Every command returns an <strong>exit code</strong> (0-255)</p>
+                </div>
+                <div class="two-columns" style="margin-top: 20px;">
+                    <div>
+                        <h4 style="color: #68d391;">Success: 0</h4>
+                        <pre><code class="language-bash">ls /home
+echo $?  # 0</code></pre>
+                    </div>
+                    <div>
+                        <h4 style="color: #fc8181;">Error: ≠0</h4>
+                        <pre><code class="language-bash">ls /nonexistent
+echo $?  # 2</code></pre>
+                    </div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px;">
+                    💡 The variable <code>$?</code> contains the exit code of the last command
+                </p>
+            </section>
+            
+            <!-- Slide 8: Sequential Operator ; -->
+            <section>
+                <h2>Sequential Operator <code>;</code></h2>
+                <div class="box-orange">
+                    <p>Executes commands <strong>one after another</strong>, regardless of success/failure</p>
+                </div>
+                <pre><code class="language-bash"># Both commands execute
+echo "First" ; echo "Second"
+
+# Even if the first fails
+ls /nonexistent ; echo "Continues anyway"
+# Output: error + "Continues anyway"</code></pre>
+                <div class="fragment warning" style="margin-top: 20px;">
+                    <p class="small-text">⚠️ <strong>Use case:</strong> Independent commands that don't depend on each other</p>
+                </div>
+            </section>
+            
+            <!-- Slide 9: AND Operator && -->
+            <section>
+                <h2>AND Operator <code>&&</code></h2>
+                <div class="box-green">
+                    <p>Executes the second command <strong>ONLY if</strong> the first succeeded (exit 0)</p>
+                </div>
+                <pre><code class="language-bash"># mkdir succeeds → cd executes
+mkdir project && cd project && echo "We are in project"
+
+# mkdir fails → cd does NOT execute
+mkdir /root/test && echo "You won't see this"</code></pre>
+                <div class="fragment ascii-diagram" style="margin-top: 20px;">
+cmd1 ──→ exit=0? ──YES──→ cmd2 ──→ exit=0? ──YES──→ cmd3
+              │                         │
+              NO                        NO
+              ↓                         ↓
+           [STOP]                    [STOP]
+                </div>
+            </section>
+            
+            <!-- Slide 10: OR Operator || -->
+            <section>
+                <h2>OR Operator <code>||</code></h2>
+                <div class="box-red">
+                    <p>Executes the second command <strong>ONLY if</strong> the first failed (exit ≠0)</p>
+                </div>
+                <pre><code class="language-bash"># mkdir fails → echo executes
+mkdir /root/test || echo "Could not create!"
+
+# mkdir succeeds → echo does NOT execute
+mkdir my_dir || echo "You won't see this"</code></pre>
+                <div class="fragment success" style="margin-top: 20px;">
+                    <p class="small-text">💡 <strong>Common pattern:</strong> Simple error handling</p>
+                    <pre><code class="language-bash">cd /some/path || { echo "Error!"; exit 1; }</code></pre>
+                </div>
+            </section>
+            
+            <!-- Slide 11: && and || Combinations -->
+            <section>
+                <h2>Combinations: && and ||</h2>
+                <pre><code class="language-bash"># Pattern: cmd && success_msg || error_msg
+mkdir backup && echo "✓ Created" || echo "✗ Error"</code></pre>
+                
+                <div class="fragment box-orange" style="margin-top: 20px;">
+                    <h4>Watch out for evaluation order!</h4>
+                    <pre><code class="language-bash"># CORRECT: clear structure
+[ -f config.txt ] && source config.txt || echo "Config missing"
+
+# WRONG: echo can fail and trigger ||
+false && echo "OK" || echo "Error"  # Output: Error</code></pre>
+                </div>
+            </section>
+            
+            <!-- Slide 12: Peer Instruction Q1 -->
+            <section data-background-color="#2d3748">
+                <h2>PEER INSTRUCTION</h2>
+                <div class="box-purple">
+                    <pre><code class="language-bash">mkdir test && cd test && echo "In test" || echo "Error"</code></pre>
+                    <p>If the directory <code>test</code> <strong>ALREADY EXISTS</strong>, what is displayed?</p>
+                </div>
+                <div style="margin-top: 30px;">
+                    <div class="quiz-option">A) In test</div>
+                    <div class="quiz-option">B) Error</div>
+                    <div class="quiz-option">C) In test and Error</div>
+                    <div class="quiz-option">D) Nothing</div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px; color: #68d391;">
+                    ✅ Answer: <strong>B</strong> - mkdir fails when the directory already exists
+                </p>
+            </section>
+            
+            <!-- Slide 13: Background Operator & -->
+            <section>
+                <h2>Background Operator <code>&</code></h2>
+                <div class="box-blue">
+                    <p>Executes the command in the <strong>background</strong> and continues immediately</p>
+                </div>
+                <pre><code class="language-bash"># Start in background
+sleep 10 &
+echo "Continues immediately!"  # Displays instantly
+
+# Check background jobs
+jobs
+
+# Bring to foreground
+fg %1</code></pre>
+                <table class="fragment small-text" style="margin-top: 20px;">
+                    <tr><th>Command</th><th>Action</th></tr>
+                    <tr><td><code>jobs</code></td><td>Lists background processes</td></tr>
+                    <tr><td><code>fg %N</code></td><td>Brings job N to foreground</td></tr>
+                    <tr><td><code>bg %N</code></td><td>Continues job N in background</td></tr>
+                    <tr><td><code>Ctrl+Z</code></td><td>Suspends the current process</td></tr>
+                </table>
+            </section>
+            
+            <!-- Slide 14: Pipe Operator -->
+            <section>
+                <h2>Pipe Operator <code>|</code></h2>
+                <div class="box-green">
+                    <p>Connects the <strong>stdout</strong> of the first command to the <strong>stdin</strong> of the second</p>
+                </div>
+                <div class="ascii-diagram">
+┌─────────┐     stdout     ┌─────────┐     stdout     ┌─────────┐
+│  cmd1   │ ─────────────→ │  cmd2   │ ─────────────→ │  cmd3   │
+└─────────┘       |        └─────────┘       |        └─────────┘
+                pipe                       pipe
+                </div>
+                <pre class="fragment"><code class="language-bash"># Example: Count .txt files
+ls -la | grep ".txt" | wc -l
+
+# Filter and sort processes
+ps aux | grep python | sort -k4 -rn</code></pre>
+            </section>
+            
+            <!-- Slide 15: Command Grouping -->
+            <section>
+                <h2>Command Grouping</h2>
+                <div class="two-columns">
+                    <div class="box-blue">
+                        <h4><code>{ cmd; }</code> - Inline group</h4>
+                        <ul class="small-text">
+                            <li>Executes in the current shell</li>
+                            <li>Variables persist</li>
+                            <li>Requires <code>;</code> and spaces</li>
+                        </ul>
+                        <pre><code class="language-bash">{ cd /tmp; pwd; }
+# We remain in /tmp</code></pre>
+                    </div>
+                    <div class="box-orange">
+                        <h4><code>( cmd )</code> - Subshell</h4>
+                        <ul class="small-text">
+                            <li>Executes in a new subshell</li>
+                            <li>Variables do NOT persist</li>
+                            <li>Isolated from parent shell</li>
+                        </ul>
+                        <pre><code class="language-bash">( cd /tmp; pwd )
+# We return to the initial directory</code></pre>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ==================== SECTION 3: REDIRECTION ==================== -->
+            
+            <!-- Slide 16: Redirection - Intro -->
+            <section data-background-color="#22543d">
+                <h1>MODULE 2</h1>
+                <h2>I/O Redirection</h2>
+                <p class="small-text"><code>&gt;</code> <code>&gt;&gt;</code> <code>&lt;</code> <code>2&gt;</code> <code>2&gt;&amp;1</code> <code>&lt;&lt;</code></p>
+            </section>
+            
+            <!-- Slide 17: File Descriptors -->
+            <section>
+                <h2>File Descriptors</h2>
+                <div class="ascii-diagram">
+┌──────────────────────────────────────────────────────────────┐
+│                         PROCESS                              │
+│  ┌──────────┐                                                │
+│  │ FD 0     │ ← stdin  (keyboard/file)                       │
+│  │ (stdin)  │                                                │
+│  ├──────────┤                                                │
+│  │ FD 1     │ → stdout (terminal/file)                       │
+│  │ (stdout) │                                                │
+│  ├──────────┤                                                │
+│  │ FD 2     │ → stderr (terminal/file)                       │
+│  │ (stderr) │                                                │
+│  └──────────┘                                                │
+└──────────────────────────────────────────────────────────────┘
+                </div>
+                <table class="fragment small-text">
+                    <tr><th>FD</th><th>Name</th><th>Description</th><th>Default</th></tr>
+                    <tr><td>0</td><td>stdin</td><td>Standard input</td><td>Keyboard</td></tr>
+                    <tr><td>1</td><td>stdout</td><td>Standard output</td><td>Terminal</td></tr>
+                    <tr><td>2</td><td>stderr</td><td>Standard error</td><td>Terminal</td></tr>
+                </table>
+            </section>
+            
+            <!-- Slide 18: Output Redirection -->
+            <section>
+                <h2>Output Redirection</h2>
+                <div class="two-columns">
+                    <div class="box-blue">
+                        <h4><code>&gt;</code> Overwrite</h4>
+                        <pre><code class="language-bash"># Create/overwrite
+echo "Line 1" > out.txt
+echo "Line 2" > out.txt
+cat out.txt
+# Output: Line 2</code></pre>
+                    </div>
+                    <div class="box-green">
+                        <h4><code>&gt;&gt;</code> Append</h4>
+                        <pre><code class="language-bash"># Append to end
+echo "Line 1" > out.txt
+echo "Line 2" >> out.txt
+cat out.txt
+# Output: Line 1
+#         Line 2</code></pre>
+                    </div>
+                </div>
+                <div class="fragment warning" style="margin-top: 20px;">
+                    <p class="small-text">⚠️ <code>&gt;</code> deletes existing content without warning!</p>
+                </div>
+            </section>
+            
+            <!-- Slide 19: Stderr Redirection -->
+            <section>
+                <h2>stderr Redirection</h2>
+                <pre><code class="language-bash"># stderr separately
+ls /nonexistent 2> errors.txt
+
+# stdout and stderr to different files
+command > output.txt 2> errors.txt
+
+# Combine stdout and stderr
+command > all.txt 2>&1
+
+# Short syntax (bash 4+)
+command &> all.txt</code></pre>
+                
+                <div class="fragment box-red" style="margin-top: 20px;">
+                    <h4>Order matters!</h4>
+                    <pre><code class="language-bash"># CORRECT: first stdout, then 2>&1
+cmd > file 2>&1
+
+# WRONG: 2>&1 points to terminal (original stdout)
+cmd 2>&1 > file</code></pre>
+                </div>
+            </section>
+            
+            <!-- Slide 20: Input Redirection -->
+            <section>
+                <h2>Input Redirection</h2>
+                <pre><code class="language-bash"># From file
+wc -l < /etc/passwd
+
+# Equivalent (but with extra process)
+cat /etc/passwd | wc -l</code></pre>
+                
+                <div class="fragment box-green" style="margin-top: 20px;">
+                    <h4>Why is <code>&lt;</code> more efficient?</h4>
+                    <table class="tiny-text">
+                        <tr><th>Method</th><th>Processes</th><th>Efficiency</th></tr>
+                        <tr><td><code>wc -l < file</code></td><td>1 process</td><td>⭐⭐⭐</td></tr>
+                        <tr><td><code>cat file | wc</code></td><td>2 processes + pipe</td><td>⭐⭐</td></tr>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Slide 21: Here Document -->
+            <section>
+                <h2>Here Document <code>&lt;&lt;</code></h2>
+                <div class="box-blue">
+                    <p>Sends multi-line text directly to stdin</p>
+                </div>
+                <pre><code class="language-bash"># Create file with content
+cat > config.txt << 'EOF'
+# Application configuration
+HOST=localhost
+PORT=8080
+DEBUG=true
+EOF
+
+# Usage in script
+mysql << EOF
+SELECT * FROM users;
+SHOW TABLES;
+EOF</code></pre>
+                <p class="fragment small-text">💡 <code>&lt;&lt; 'EOF'</code> (with quotes) disables variable expansion</p>
+            </section>
+            
+            <!-- Slide 22: Here String -->
+            <section>
+                <h2>Here String <code>&lt;&lt;&lt;</code></h2>
+                <div class="box-orange">
+                    <p>Sends a <strong>string</strong> directly to stdin (single line)</p>
+                </div>
+                <pre><code class="language-bash"># Instead of echo + pipe
+echo "hello world" | tr 'a-z' 'A-Z'
+
+# More efficient with here string
+tr 'a-z' 'A-Z' <<< "hello world"
+
+# With variable
+name="John Smith"
+cut -d' ' -f1 <<< "$name"  # Output: John</code></pre>
+            </section>
+            
+            <!-- Slide 23: /dev/null -->
+            <section>
+                <h2>The Black Hole: <code>/dev/null</code></h2>
+                <div class="box-purple">
+                    <p>Special device that <strong>swallows</strong> everything it receives</p>
+                </div>
+                <pre><code class="language-bash"># Suppress errors
+find / -name "*.txt" 2>/dev/null
+
+# Suppress all output
+command > /dev/null 2>&1
+
+# Check only exit code
+if grep -q "pattern" file 2>/dev/null; then
+    echo "Found!"
+fi</code></pre>
+                <p class="fragment small-text">💡 <code>grep -q</code> = quiet mode, only exit code</p>
+            </section>
+            
+            <!-- Slide 24: tee Command -->
+            <section>
+                <h2>The <code>tee</code> Command</h2>
+                <div class="box-green">
+                    <p>Sends output simultaneously to file AND to screen</p>
+                </div>
+                <div class="ascii-diagram">
+                        ┌─────────────┐
+stdin ───→ tee ───┬───→ │   stdout    │ ───→ terminal
+                  │     └─────────────┘
+                  │     ┌─────────────┐
+                  └───→ │   file.txt  │
+                        └─────────────┘
+                </div>
+                <pre><code class="language-bash"># Save and display simultaneously
+make 2>&1 | tee build.log
+
+# Append to file (-a = append)
+echo "Log entry" | tee -a app.log</code></pre>
+            </section>
+            
+            <!-- Slide 25: Peer Instruction Q2 -->
+            <section data-background-color="#2d3748">
+                <h2>PEER INSTRUCTION</h2>
+                <div class="box-purple">
+                    <pre><code class="language-bash">ls /home /nonexistent 2>&1 > output.txt</code></pre>
+                    <p>What does <code>output.txt</code> contain?</p>
+                </div>
+                <div style="margin-top: 30px;">
+                    <div class="quiz-option">A) Only the listing of /home</div>
+                    <div class="quiz-option">B) Only the error for /nonexistent</div>
+                    <div class="quiz-option">C) Both (listing + error)</div>
+                    <div class="quiz-option">D) Empty file</div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px; color: #68d391;">
+                    ✅ Answer: <strong>A</strong> - Order matters! 2>&1 applies before > 
+                </p>
+            </section>
+            
+            <!-- ==================== SECTION 4: FILTERS ==================== -->
+            
+            <!-- Slide 26: Filters - Intro -->
+            <section data-background-color="#553c9a">
+                <h1>MODULE 3</h1>
+                <h2>Text Filters</h2>
+                <p class="small-text"><code>sort</code> <code>uniq</code> <code>cut</code> <code>tr</code> <code>wc</code> <code>head</code> <code>tail</code></p>
+            </section>
+            
+            <!-- Slide 27: Unix Philosophy -->
+            <section>
+                <h2>Unix Philosophy: Filters</h2>
+                <div class="box-blue">
+                    <p><em>"Do one thing and do it well"</em></p>
+                </div>
+                <div class="ascii-diagram">
+┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
+│  Input  │ ──→ │ Filter1 │ ──→ │ Filter2 │ ──→ │ Output  │
+│ (stdin) │     │ (sort)  │     │ (uniq)  │     │(stdout) │
+└─────────┘     └─────────┘     └─────────┘     └─────────┘
+                </div>
+                <p class="fragment" style="margin-top: 20px;">
+                    🎯 Each filter does <strong>ONE</strong> thing → we combine them with <code>|</code>
+                </p>
+            </section>
+            
+            <!-- Slide 28: sort -->
+            <section>
+                <h2>The <code>sort</code> Command</h2>
+                <table class="small-text">
+                    <tr><th>Option</th><th>Effect</th><th>Example</th></tr>
+                    <tr><td><code>-n</code></td><td>Numeric</td><td><code>sort -n</code></td></tr>
+                    <tr><td><code>-r</code></td><td>Reverse</td><td><code>sort -rn</code></td></tr>
+                    <tr><td><code>-k N</code></td><td>By column N</td><td><code>sort -k2</code></td></tr>
+                    <tr><td><code>-t 'C'</code></td><td>Delimiter</td><td><code>sort -t: -k3</code></td></tr>
+                    <tr><td><code>-u</code></td><td>Unique</td><td><code>sort -u</code></td></tr>
+                    <tr><td><code>-h</code></td><td>Human-readable</td><td><code>du -h | sort -h</code></td></tr>
+                </table>
+                <pre class="fragment"><code class="language-bash"># Top 5 directories by size
+du -sh /var/* 2>/dev/null | sort -rh | head -5
+
+# Sort /etc/passwd by UID
+sort -t: -k3 -n /etc/passwd | head</code></pre>
+            </section>
+            
+            <!-- Slide 29: uniq IMPORTANT -->
+            <section>
+                <h2>The <code>uniq</code> Command</h2>
+                <div class="box-red" style="margin-bottom: 20px;">
+                    <p>⚠️ <strong>CRITICAL:</strong> uniq removes only <strong>CONSECUTIVE</strong> duplicates!</p>
+                </div>
+                <div class="two-columns">
+                    <div>
+                        <h4 style="color: #fc8181;">Wrong</h4>
+                        <pre><code class="language-bash">echo -e "a\nb\na" | uniq
+# Output:
+# a
+# b
+# a  ← still exists!</code></pre>
+                    </div>
+                    <div>
+                        <h4 style="color: #68d391;">Correct</h4>
+                        <pre><code class="language-bash">echo -e "a\nb\na" | sort | uniq
+# Output:
+# a
+# b</code></pre>
+                    </div>
+                </div>
+                <table class="fragment small-text" style="margin-top: 20px;">
+                    <tr><th>Option</th><th>Effect</th></tr>
+                    <tr><td><code>-c</code></td><td>Count occurrences</td></tr>
+                    <tr><td><code>-d</code></td><td>Show ONLY duplicates</td></tr>
+                    <tr><td><code>-u</code></td><td>Show ONLY unique lines</td></tr>
+                </table>
+            </section>
+            
+            <!-- Slide 30: cut -->
+            <section>
+                <h2>The <code>cut</code> Command</h2>
+                <div class="box-blue">
+                    <p>Extracts columns or characters from each line</p>
+                </div>
+                <table class="small-text">
+                    <tr><th>Option</th><th>Effect</th><th>Example</th></tr>
+                    <tr><td><code>-d 'C'</code></td><td>Delimiter</td><td><code>-d:</code></td></tr>
+                    <tr><td><code>-f N</code></td><td>Field N</td><td><code>-f1,3</code> or <code>-f1-3</code></td></tr>
+                    <tr><td><code>-c N</code></td><td>Character N</td><td><code>-c1-10</code></td></tr>
+                </table>
+                <pre class="fragment"><code class="language-bash"># Extract username and shell from /etc/passwd
+cut -d: -f1,7 /etc/passwd
+
+# First 20 characters from each line
+cut -c1-20 /etc/passwd
+
+# Multiple fields
+echo "a:b:c:d" | cut -d: -f2,4  # b:d</code></pre>
+            </section>
+            
+            <!-- Slide 31: tr -->
+            <section>
+                <h2>The <code>tr</code> Command</h2>
+                <div class="box-orange">
+                    <p>Translate/Delete <strong>CHARACTERS</strong> (not strings!)</p>
+                </div>
+                <pre><code class="language-bash"># Transform lowercase → uppercase
+echo "hello" | tr 'a-z' 'A-Z'  # HELLO
+
+# Replace spaces with newlines
+echo "one two three" | tr ' ' '\n'
+
+# Delete characters (-d)
+echo "Hello123World" | tr -d '0-9'  # HelloWorld
+
+# Squeeze repetitions (-s)
+echo "hellooooo" | tr -s 'o'  # hello</code></pre>
+                <div class="fragment warning">
+                    <p class="small-text">⚠️ <code>tr</code> does NOT replace strings! Use <code>sed</code> for that</p>
+                </div>
+            </section>
+            
+            <!-- Slide 32: wc -->
+            <section>
+                <h2>The <code>wc</code> Command</h2>
+                <div class="box-green">
+                    <p>Word Count - counts lines, words, bytes</p>
+                </div>
+                <table class="small-text">
+                    <tr><th>Option</th><th>Counts</th><th>Example</th></tr>
+                    <tr><td><code>-l</code></td><td>Lines</td><td><code>wc -l file</code></td></tr>
+                    <tr><td><code>-w</code></td><td>Words</td><td><code>wc -w file</code></td></tr>
+                    <tr><td><code>-c</code></td><td>Bytes</td><td><code>wc -c file</code></td></tr>
+                    <tr><td><code>-m</code></td><td>Characters</td><td><code>wc -m file</code></td></tr>
+                </table>
+                <pre class="fragment"><code class="language-bash"># How many lines in /etc/passwd?
+wc -l < /etc/passwd
+
+# How many users are logged in?
+who | wc -l
+
+# How many .txt files?
+ls *.txt 2>/dev/null | wc -l</code></pre>
+            </section>
+            
+            <!-- Slide 33: head and tail -->
+            <section>
+                <h2>The <code>head</code> and <code>tail</code> Commands</h2>
+                <div class="two-columns">
+                    <div class="box-blue">
+                        <h4><code>head</code> - The Beginning</h4>
+                        <pre><code class="language-bash"># First 10 lines (default)
+head file.txt
+
+# First N lines
+head -n 5 file.txt
+
+# First N bytes
+head -c 100 file.txt</code></pre>
+                    </div>
+                    <div class="box-green">
+                        <h4><code>tail</code> - The End</h4>
+                        <pre><code class="language-bash"># Last 10 lines
+tail file.txt
+
+# Last N lines
+tail -n 5 file.txt
+
+# LIVE monitoring! (-f)
+tail -f /var/log/syslog</code></pre>
+                    </div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px;">
+                    🔥 <code>tail -f</code> = follow the file in real time (very useful for logs!)
+                </p>
+            </section>
+            
+            <!-- Slide 34: Complex Pipeline -->
+            <section>
+                <h2>Complex Pipeline: Practical Example</h2>
+                <p>Find the top 5 most common commands from history:</p>
+                <pre><code class="language-bash">history | \
+    awk '{print $2}' | \
+    sort | \
+    uniq -c | \
+    sort -rn | \
+    head -5</code></pre>
+                <div class="fragment ascii-diagram" style="font-size: 0.55em;">
+history → extract → sort      → count      → sort      → limit
+          cmd      alphabetic   duplicates   descending   top 5
+
+ 1 ls    →  ls   →   ls    →  45 ls    →  45 ls   →  45 ls
+ 2 cd       cd       cd       32 cd       32 cd      32 cd
+ 3 ls       ls       git      28 git      28 git     28 git
+ 4 git      cat      cat      15 cat      22 pwd     22 pwd
+ 5 cat      pwd      pwd      22 pwd      15 cat     15 cat
+                </div>
+            </section>
+            
+            <!-- Slide 35: Peer Instruction Q3 -->
+            <section data-background-color="#2d3748">
+                <h2>PEER INSTRUCTION</h2>
+                <div class="box-purple">
+                    <pre><code class="language-bash">echo -e "red\ngreen\nred\nblue\ngreen\nred" | uniq | wc -l</code></pre>
+                    <p>What number is displayed?</p>
+                </div>
+                <div style="margin-top: 30px;">
+                    <div class="quiz-option">A) 3 (unique colours)</div>
+                    <div class="quiz-option">B) 5</div>
+                    <div class="quiz-option">C) 6 (all lines)</div>
+                    <div class="quiz-option">D) 1</div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px; color: #68d391;">
+                    ✅ Answer: <strong>B</strong> - uniq removes only consecutive duplicates!<br>
+                    <span class="tiny-text">red, green, red, blue, green → 5 lines (missing sort!)</span>
+                </p>
+            </section>
+            
+            <!-- ==================== SECTION 5: LOOPS ==================== -->
+            
+            <!-- Slide 36: Loops - Intro -->
+            <section data-background-color="#744210">
+                <h1>MODULE 4</h1>
+                <h2>Loops in Bash</h2>
+                <p class="small-text"><code>for</code> <code>while</code> <code>until</code> <code>break</code> <code>continue</code></p>
+            </section>
+            
+            <!-- Slide 37: for - List -->
+            <section>
+                <h2>The <code>for</code> Loop - List</h2>
+                <pre><code class="language-bash"># Basic syntax
+for variable in list; do
+    commands
+done
+
+# Example with explicit list
+for colour in red green blue; do
+    echo "Colour: $colour"
+done
+
+# Example with globbing
+for file in *.txt; do
+    echo "Processing: $file"
+    wc -l "$file"
+done</code></pre>
+            </section>
+            
+            <!-- Slide 38: for - Brace Expansion -->
+            <section>
+                <h2>The <code>for</code> Loop - Brace Expansion</h2>
+                <pre><code class="language-bash"># Sequence of numbers
+for i in {1..5}; do
+    echo "Number: $i"
+done
+
+# With step
+for i in {0..10..2}; do
+    echo $i  # 0, 2, 4, 6, 8, 10
+done
+
+# Letters
+for letter in {a..z}; do
+    echo -n "$letter "
+done</code></pre>
+                <div class="fragment box-red" style="margin-top: 20px;">
+                    <h4>IMPORTANT PITFALL!</h4>
+                    <pre><code class="language-bash"># Does NOT work with variables!
+N=5
+for i in {1..$N}; do echo $i; done
+# Output: {1..5} (literal!)</code></pre>
+                    <p class="small-text">Brace expansion happens at <strong>parse time</strong>, before variable expansion!</p>
+                </div>
+            </section>
+            
+            <!-- Slide 39: Solutions for {1..$N} -->
+            <section>
+                <h2>Solutions for <code>{1..$N}</code></h2>
+                <div class="two-columns">
+                    <div class="box-green">
+                        <h4>Method 1: <code>seq</code></h4>
+                        <pre><code class="language-bash">N=5
+for i in $(seq 1 $N); do
+    echo $i
+done</code></pre>
+                    </div>
+                    <div class="box-blue">
+                        <h4>Method 2: C-style</h4>
+                        <pre><code class="language-bash">N=5
+for ((i=1; i<=N; i++)); do
+    echo $i
+done</code></pre>
+                    </div>
+                </div>
+                <div class="box-orange fragment" style="margin-top: 20px;">
+                    <h4>Method 3: <code>while</code></h4>
+                    <pre><code class="language-bash">N=5; i=1
+while [ $i -le $N ]; do
+    echo $i
+    ((i++))
+done</code></pre>
+                </div>
+            </section>
+            
+            <!-- Slide 40: while -->
+            <section>
+                <h2>The <code>while</code> Loop</h2>
+                <pre><code class="language-bash"># Syntax
+while condition; do
+    commands
+done
+
+# Example: countdown
+count=5
+while [ $count -gt 0 ]; do
+    echo "T minus $count"
+    ((count--))
+    sleep 1
+done
+echo "LAUNCH!"
+
+# Infinite loop (useful for daemons)
+while true; do
+    echo "Running..."
+    sleep 60
+done</code></pre>
+            </section>
+            
+            <!-- Slide 41: while read - IMPORTANT -->
+            <section>
+                <h2>Pattern: <code>while read</code></h2>
+                <div class="box-green">
+                    <p>Read a file line by line</p>
+                </div>
+                <pre><code class="language-bash"># CORRECT: with redirection
+while IFS= read -r line; do
+    echo "Line: $line"
+done < input.txt
+
+# IFS= preserves leading/trailing spaces
+# -r disables backslash interpretation</code></pre>
+                <div class="fragment box-red" style="margin-top: 20px;">
+                    <h4>PITFALL: Pipe creates SUBSHELL!</h4>
+                    <pre><code class="language-bash"># WRONG - variables do NOT persist!
+count=0
+cat file.txt | while read line; do
+    ((count++))
+done
+echo $count  # 0 - subshell problem!</code></pre>
+                </div>
+            </section>
+            
+            <!-- Slide 42: until -->
+            <section>
+                <h2>The <code>until</code> Loop</h2>
+                <div class="box-orange">
+                    <p>Opposite of <code>while</code>: executes <strong>UNTIL</strong> the condition becomes true</p>
+                </div>
+                <pre><code class="language-bash"># Wait until the file exists
+until [ -f /tmp/ready.flag ]; do
+    echo "Waiting..."
+    sleep 5
+done
+echo "File is ready!"
+
+# Equivalent with while NOT
+while [ ! -f /tmp/ready.flag ]; do
+    echo "Waiting..."
+    sleep 5
+done</code></pre>
+                <p class="fragment small-text">💡 Useful for wait-for-condition patterns</p>
+            </section>
+            
+            <!-- Slide 43: break and continue -->
+            <section>
+                <h2>⏹️ Control Flow: <code>break</code> and <code>continue</code></h2>
+                <div class="two-columns">
+                    <div class="box-red">
+                        <h4><code>break</code></h4>
+                        <p class="small-text">Exits the current loop</p>
+                        <pre><code class="language-bash">for i in {1..10}; do
+    if [ $i -eq 5 ]; then
+        break
+    fi
+    echo $i
+done
+# Output: 1 2 3 4</code></pre>
+                    </div>
+                    <div class="box-blue">
+                        <h4><code>continue</code></h4>
+                        <p class="small-text">Skips to the next iteration</p>
+                        <pre><code class="language-bash">for i in {1..5}; do
+    if [ $i -eq 3 ]; then
+        continue
+    fi
+    echo $i
+done
+# Output: 1 2 4 5</code></pre>
+                    </div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px;">
+                    💡 <code>break N</code> and <code>continue N</code> affect N levels of loops
+                </p>
+            </section>
+            
+            <!-- Slide 44: Peer Instruction Q4 -->
+            <section data-background-color="#2d3748">
+                <h2>PEER INSTRUCTION</h2>
+                <div class="box-purple">
+                    <pre><code class="language-bash">total=0
+cat numbers.txt | while read num; do
+    ((total += num))
+done
+echo $total</code></pre>
+                    <p>If numbers.txt contains 1, 2, 3 (on separate lines), what is displayed?</p>
+                </div>
+                <div style="margin-top: 30px;">
+                    <div class="quiz-option">A) 6</div>
+                    <div class="quiz-option">B) 0</div>
+                    <div class="quiz-option">C) 3</div>
+                    <div class="quiz-option">D) Error</div>
+                </div>
+                <p class="fragment small-text" style="margin-top: 20px; color: #68d391;">
+                    ✅ Answer: <strong>B</strong> - the while runs in a subshell, $total doesn't persist!
+                </p>
+            </section>
+            
+            <!-- ==================== SECTION 6: EXERCISES ==================== -->
+            
+            <!-- Slide 45: Sprint Exercise -->
+            <section data-background-color="#1a365d">
+                <h2>SPRINT: Pipeline Master (10 min)</h2>
+                <div class="box-green">
+                    <p><strong>PAIR PROGRAMMING</strong> - Switch at minute 5!</p>
+                </div>
+                <div class="warning" style="margin-top: 20px; text-align: left;">
+                    <h4>Requirements:</h4>
+                    <ol class="small-text">
+                        <li>Find all users with shell <code>/bin/bash</code> from <code>/etc/passwd</code></li>
+                        <li>Sort them alphabetically</li>
+                        <li>Display only the usernames (first column)</li>
+                        <li>Save the result to <code>bash_users.txt</code></li>
+                    </ol>
+                </div>
+                <pre class="fragment"><code class="language-bash"># Solution:
+grep "/bin/bash$" /etc/passwd | cut -d: -f1 | sort > bash_users.txt</code></pre>
+            </section>
+            
+            <!-- Slide 46: Integrated Script -->
+            <section>
+                <h2>Example: Integrated Script</h2>
+                <pre><code class="language-bash">#!/bin/bash
+# system_report.sh - System report
+
+REPORT="report_$(date +%Y%m%d_%H%M%S).txt"
+
+{
+    echo "=== SYSTEM REPORT ==="
+    echo "Generated: $(date)"
+    echo "Hostname: $(hostname)"
+    echo ""
+    
+    echo "--- TOP 5 BY MEMORY ---"
+    ps aux --sort=-%mem | head -6
+    echo ""
+    
+    echo "--- DISK USAGE ---"
+    df -h | grep -v tmpfs
+    
+} | tee "$REPORT"
+
+echo -e "\n✓ Report saved to: $REPORT"</code></pre>
+            </section>
+            
+            <!-- ==================== SECTION 7: WRAP-UP ==================== -->
+            
+            <!-- Slide 47: Quick Reference Cheat Sheet -->
+            <section>
+                <h2>Quick Reference Cheat Sheet</h2>
+                <div class="two-columns tiny-text">
+                    <div>
+                        <h4>Operators</h4>
+                        <table>
+                            <tr><td><code>;</code></td><td>Sequential</td></tr>
+                            <tr><td><code>&&</code></td><td>AND (if success)</td></tr>
+                            <tr><td><code>||</code></td><td>OR (if failure)</td></tr>
+                            <tr><td><code>&</code></td><td>Background</td></tr>
+                            <tr><td><code>|</code></td><td>Pipe</td></tr>
+                        </table>
+                        <h4 style="margin-top: 15px;">Redirection</h4>
+                        <table>
+                            <tr><td><code>&gt;</code></td><td>Overwrite</td></tr>
+                            <tr><td><code>&gt;&gt;</code></td><td>Append</td></tr>
+                            <tr><td><code>2&gt;</code></td><td>stderr</td></tr>
+                            <tr><td><code>&amp;&gt;</code></td><td>all</td></tr>
+                            <tr><td><code>&lt;</code></td><td>Input</td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Filters</h4>
+                        <table>
+                            <tr><td><code>sort</code></td><td>Sort</td></tr>
+                            <tr><td><code>uniq</code></td><td>Duplicates (consecutive!)</td></tr>
+                            <tr><td><code>cut</code></td><td>Extract columns</td></tr>
+                            <tr><td><code>tr</code></td><td>Translate characters</td></tr>
+                            <tr><td><code>wc</code></td><td>Count</td></tr>
+                        </table>
+                        <h4 style="margin-top: 15px;">Loops</h4>
+                        <table>
+                            <tr><td><code>for x in list</code></td><td>Iterate list</td></tr>
+                            <tr><td><code>for ((;;))</code></td><td>C-style</td></tr>
+                            <tr><td><code>while cond</code></td><td>While true</td></tr>
+                            <tr><td><code>until cond</code></td><td>Until true</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 48: Pitfalls to Avoid -->
+            <section>
+                <h2>Pitfalls to Avoid</h2>
+                <div class="box-red">
+                    <ol class="small-text" style="text-align: left;">
+                        <li class="fragment"><strong><code>uniq</code> without <code>sort</code></strong> - removes ONLY consecutive duplicates</li>
+                        <li class="fragment"><strong><code>{1..$N}</code></strong> - brace expansion does NOT work with variables</li>
+                        <li class="fragment"><strong><code>cat file | while read</code></strong> - subshell problem, variables don't persist</li>
+                        <li class="fragment"><strong><code>2>&1 > file</code></strong> - order matters! Correct: <code>> file 2>&1</code></li>
+                        <li class="fragment"><strong><code>tr</code> for strings</strong> - tr works on characters, not strings</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <!-- Slide 49: Homework -->
+            <section data-background-gradient="linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%)">
+                <h2>Seminar 2 Homework</h2>
+                <div class="box-blue" style="text-align: left;">
+                    <h4>Pipeline Master</h4>
+                    <p class="small-text">Consult <code>teme/S02_01_TEMA.md</code> for:</p>
+                    <ul class="small-text">
+                        <li>Operator exercises (20%)</li>
+                        <li>Redirection exercises (20%)</li>
+                        <li>Filter exercises (25%)</li>
+                        <li>Loop exercises (25%)</li>
+                        <li>Integrated project (10%)</li>
+                    </ul>
+                </div>
+                <p style="margin-top: 30px;">
+                    <strong>Deadline:</strong> Next seminar<br>
+                    <span class="small-text">Generate the structure with: <code>./S02_02_creeaza_tema.sh "Name" Group</code></span>
+                </p>
+            </section>
+            
+            <!-- Slide 50: Resources -->
+            <section>
+                <h2>Additional Resources</h2>
+                <div class="two-columns small-text">
+                    <div class="box-blue">
+                        <h4>Documentation</h4>
+                        <ul>
+                            <li><code>man bash</code></li>
+                            <li><a href="https://www.gnu.org/software/bash/manual/">GNU Bash Manual</a></li>
+                            <li><a href="https://tldp.org/LDP/abs/html/">Advanced Bash Scripting Guide</a></li>
+                        </ul>
+                    </div>
+                    <div class="box-green">
+                        <h4>Practice</h4>
+                        <ul>
+                            <li><a href="https://overthewire.org/wargames/bandit/">OverTheWire: Bandit</a></li>
+                            <li><a href="https://cmdchallenge.com/">Command Challenge</a></li>
+                            <li><a href="https://explainshell.com/">ExplainShell</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 51: Final -->
+            <section data-background-gradient="linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)">
+                <h1>Thank You!</h1>
+                <h3>Questions?</h3>
+                <p style="margin-top: 50px;">
+                    <span class="emoji-large">🐧</span>
+                </p>
+                <p class="small-text" style="margin-top: 30px;">
+                    Seminar 2 | Operating Systems<br>
+                    Bucharest University of Economic Studies - CSIE
+                </p>
+            </section>
+            
+        </div>
+    </div>
+    
+    <!-- Reveal.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/markdown/markdown.min.js"></script>
+    
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            progress: true,
+            center: true,
+            transition: 'slide',
+            transitionSpeed: 'default',
+            backgroundTransition: 'fade',
+            
+            // Aspect ratio
+            width: 1920,
+            height: 1080,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 2.0,
+            
+            plugins: [
+                RevealHighlight,
+                RevealNotes,
+                RevealMarkdown
+            ]
+        });
+        
+        // Keyboard shortcuts
+        Reveal.addKeyBinding({keyCode: 66, key: 'B'}, function() {
+            document.body.classList.toggle('blackout');
+        });
+    </script>
+</body>
+</html>

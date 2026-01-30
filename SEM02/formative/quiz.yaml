@@ -1,0 +1,749 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Formative Quiz - Seminar 02: Operators, Redirection, Filters, Loops
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Operating Systems | Bucharest UES - CSIE
+# Format: YAML runnable with quiz_runner.py
+# Total: 25 questions | Estimated duration: 20-30 minutes
+#
+# Bloom Distribution (adjusted for beginners):
+#   REMEMBER:    5 questions (20%)
+#   UNDERSTAND:  7 questions (28%)
+#   APPLY:       8 questions (32%)
+#   ANALYSE:     4 questions (16%)
+#   EVALUATE:    1 question (4%)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  seminar: 2
+  subject: "Control Operators, I/O Redirection, Filters and Loops"
+  version: "1.0"
+  date: "2025-01"
+  author: "OS Pedagogical Kit | Bucharest UES - CSIE"
+  language: "en"
+  estimated_time_minutes: 25
+  bloom_distribution:
+    remember: 5
+    understand: 7
+    apply: 8
+    analyse: 4
+    evaluate: 1
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: CONTROL OPERATORS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+questions:
+
+  # --- REMEMBER ---
+  
+  - id: q01
+    type: mcq
+    bloom: remember
+    category: "operators"
+    text: |
+      Which operator executes the second command ONLY if the first one succeeds (exit code 0)?
+    options:
+      - ";"
+      - "&&"
+      - "||"
+      - "&"
+    correct: 1
+    explanation: |
+      The && operator (logical AND) executes the command on the right ONLY if the one on the left
+      returns exit code 0 (success). It is useful for chains of dependent commands.
+    misconceptions:
+      0: "The ; operator always executes both commands, regardless of result"
+      2: "The || operator executes the second command when the first one FAILS"
+      3: "The & operator launches the command in background, does not check exit code"
+
+  - id: q02
+    type: mcq
+    bloom: remember
+    category: "operators"
+    text: |
+      What does the & operator do when placed at the end of a command?
+    options:
+      - "Executes the command twice"
+      - "Launches the command in background"
+      - "Connects stdout to the stdin of another command"
+      - "Redirects stderr to stdout"
+    correct: 1
+    explanation: |
+      The & operator placed at the end of a command sends it to the background,
+      immediately freeing the terminal for other commands.
+    misconceptions:
+      0: "Confusion with other operators"
+      2: "This is the pipe operator |"
+      3: "This is the 2>&1 syntax"
+
+  # --- UNDERSTAND ---
+
+  - id: q03
+    type: mcq
+    bloom: understand
+    category: "operators"
+    text: |
+      ```bash
+      mkdir test && echo "Created" || echo "Error"
+      ```
+      If the directory `test` ALREADY EXISTS, what is displayed?
+    options:
+      - "Created"
+      - "Error"
+      - "Created and Error"
+      - "Nothing (command fails silently)"
+    correct: 1
+    explanation: |
+      mkdir fails (non-zero exit code) when the directory exists.
+      && is not executed (echo "Created" skipped).
+      || IS executed because the previous chain failed.
+      Result: "Error"
+    misconceptions:
+      0: "Does not understand that mkdir returns error when the directory exists"
+      2: "Believes that || always executes after &&"
+      3: "Confusion with error suppression via 2>/dev/null"
+
+  - id: q04
+    type: mcq
+    bloom: understand
+    category: "operators"
+    text: |
+      ```bash
+      ls /inexistent | wc -l
+      echo "Exit code: $?"
+      ```
+      What will the displayed exit code be?
+    options:
+      - "The exit code of ls (non-zero, error)"
+      - "The exit code of wc (0, success)"
+      - "The sum of exit codes"
+      - "Syntax error"
+    correct: 1
+    explanation: |
+      $? returns only the exit code of the LAST command in the pipeline.
+      wc -l succeeds (even with empty input), so it returns 0.
+      For all exit codes: ${PIPESTATUS[@]}
+    misconceptions:
+      0: "Believes the pipe transmits the first command's exit code"
+      2: "Invents a non-existent behaviour"
+      3: "Confusion about pipe syntax"
+
+  - id: q05
+    type: mcq
+    bloom: understand
+    category: "operators"
+    text: |
+      ```bash
+      x=1
+      { x=2; echo "In braces: $x"; }
+      echo "After braces: $x"
+      
+      y=1
+      ( y=2; echo "In parentheses: $y"; )
+      echo "After parentheses: $y"
+      ```
+      What are the final values for x and y in the main shell?
+    options:
+      - "x=2, y=2"
+      - "x=2, y=1"
+      - "x=1, y=2"
+      - "x=1, y=1"
+    correct: 1
+    explanation: |
+      {} executes in the CURRENT shell - modifications persist (x=2).
+      () executes in a SUBSHELL - modifications are lost (y remains 1).
+    misconceptions:
+      0: "Does not understand that () creates a subshell"
+      2: "Reverses the behaviour of {} and ()"
+      3: "Believes both create a subshell"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: I/O REDIRECTION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: q06
+    type: mcq
+    bloom: remember
+    category: "redirection"
+    text: |
+      Which operator appends text to the END of an existing file (without overwriting it)?
+    options:
+      - ">"
+      - ">>"
+      - "<"
+      - "2>"
+    correct: 1
+    explanation: |
+      >> (append) adds to the end of the file.
+      > overwrites the file completely.
+      < redirects input.
+      2> redirects stderr.
+    misconceptions:
+      0: "> overwrites the file"
+      2: "< is for input, not output"
+      3: "2> is for stderr"
+
+  - id: q07
+    type: mcq
+    bloom: understand
+    category: "redirection"
+    text: |
+      ```bash
+      # Variant A:
+      ls /home /inexistent > out.txt 2>&1
+      
+      # Variant B:
+      ls /home /inexistent 2>&1 > out.txt
+      ```
+      Which variant sends BOTH (stdout and stderr) to out.txt?
+    options:
+      - "Variant A"
+      - "Variant B"
+      - "Both variants"
+      - "Neither - you need &>"
+    correct: 0
+    explanation: |
+      Redirections are evaluated from left to right!
+      
+      Variant A: 
+      1. > out.txt: stdout → out.txt
+      2. 2>&1: stderr → where stdout is NOW (out.txt)
+      
+      Variant B:
+      1. 2>&1: stderr → where stdout is NOW (terminal)
+      2. > out.txt: stdout → out.txt (stderr remains on terminal!)
+    misconceptions:
+      1: "Does not understand the evaluation order of redirections"
+      2: "Believes the order does not matter"
+      3: "Does not know the classic syntax, believes only &> works"
+
+  - id: q08
+    type: mcq
+    bloom: understand
+    category: "redirection"
+    text: |
+      ```bash
+      ls /inexistent 2>/dev/null
+      echo $?
+      ```
+      What value will $? (exit code) have?
+    options:
+      - "0 (success, because the error was suppressed)"
+      - "Non-zero (error, because the directory does not exist)"
+      - "Nothing - $? is not defined"
+      - "Syntax error"
+    correct: 1
+    explanation: |
+      2>/dev/null suppresses only the OUTPUT of the error, not the exit code!
+      The command still fails (non-zero exit code), we just do not see the message.
+    misconceptions:
+      0: "COMMON: Believes that suppressing the message = success"
+      2: "Confusion about $?"
+      3: "Does not know the syntax"
+
+  - id: q09
+    type: mcq
+    bloom: apply
+    category: "redirection"
+    text: |
+      How do you save BOTH stdout AND stderr to a file log.txt using Bash?
+    options:
+      - "cmd > log.txt 2> log.txt"
+      - "cmd &> log.txt"
+      - "cmd 2> log.txt 1> log.txt"
+      - "cmd | tee log.txt"
+    correct: 1
+    explanation: |
+      &> is the Bash syntax for redirecting both streams.
+      Equivalent to: cmd > log.txt 2>&1
+      
+      Option A/C can cause overwriting problems.
+      Option D (tee) does not capture stderr.
+    misconceptions:
+      0: "Can cause concurrency problems during writing"
+      2: "Same problem as option A"
+      3: "tee does not redirect stderr"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: TEXT FILTERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: q10
+    type: mcq
+    bloom: understand
+    category: "filters"
+    text: |
+      ```bash
+      echo -e "a\nb\na\nb" | uniq
+      ```
+      What does this command display?
+    options:
+      - "a\nb"
+      - "a\nb\na\nb"
+      - "a\na\nb\nb"
+      - "Error - uniq requires a file"
+    correct: 1
+    explanation: |
+      CLASSIC TRAP: uniq removes only CONSECUTIVE duplicates!
+      Input: a, b, a, b - none is consecutive with another identical one.
+      All remain.
+      Correct pattern: sort | uniq or sort -u
+    misconceptions:
+      0: "80% believe this! Do not know that uniq removes only CONSECUTIVE duplicates"
+      2: "Believes uniq also sorts"
+      3: "Does not know pipes"
+
+  - id: q11
+    type: mcq
+    bloom: understand
+    category: "filters"
+    text: |
+      ```bash
+      echo "one two three" | cut -f2
+      ```
+      What does it display?
+    options:
+      - "two"
+      - "one two three"
+      - "Error"
+      - "(nothing/empty line)"
+    correct: 1
+    explanation: |
+      cut -f uses TAB as the default delimiter, not space!
+      The string "one two three" does not contain TAB.
+      With no TAB found, it returns the entire line.
+      For spaces: cut -d' ' -f2
+    misconceptions:
+      0: "Believes that cut splits by spaces by default"
+      2: "Invents an error"
+      3: "Confusion with empty output"
+
+  - id: q12
+    type: mcq
+    bloom: apply
+    category: "filters"
+    text: |
+      Which command counts how many UNIQUE lines (without duplicates) a file contains?
+    options:
+      - "wc -l file.txt"
+      - "sort file.txt | uniq | wc -l"
+      - "uniq file.txt | wc -l"
+      - "cat file.txt | wc -u"
+    correct: 1
+    explanation: |
+      sort | uniq removes all duplicates (by sorting first).
+      wc -l counts the resulting lines.
+      
+      Option A counts ALL lines.
+      Option C does not sort, so uniq does not remove all duplicates.
+      Option D - wc does not have a -u flag.
+    misconceptions:
+      0: "Counts all lines, including duplicates"
+      2: "uniq without sort does not remove all duplicates"
+      3: "wc -u does not exist"
+
+  - id: q13
+    type: mcq
+    bloom: apply
+    category: "filters"
+    text: |
+      How do you extract ONLY column 3 from a CSV file (comma separator)?
+    options:
+      - "cut -f3 file.csv"
+      - "cut -d',' -f3 file.csv"
+      - "awk '{print $3}' file.csv"
+      - "grep -o ',[^,]*,' file.csv"
+    correct: 1
+    explanation: |
+      cut -d',' sets the delimiter to comma.
+      -f3 selects field 3.
+      
+      Option A uses TAB by default (wrong for CSV).
+      Option C: awk by default uses spaces/tabs.
+      Option D: complicated and incorrect regex.
+    misconceptions:
+      0: "cut by default uses TAB, not comma"
+      2: "awk by default does not use comma as separator"
+      3: "The regex does not correctly extract the column"
+
+  - id: q14
+    type: mcq
+    bloom: remember
+    category: "filters"
+    text: |
+      Which command displays the last 20 lines of a file?
+    options:
+      - "head -20 file.txt"
+      - "tail -20 file.txt"
+      - "cat -n 20 file.txt"
+      - "less -20 file.txt"
+    correct: 1
+    explanation: |
+      tail -N displays the last N lines.
+      head -N displays the FIRST N lines.
+      cat -n numbers lines, does not limit them.
+      less -20 is not valid syntax for this purpose.
+    misconceptions:
+      0: "head displays from the BEGINNING"
+      2: "cat -n numbers, does not limit"
+      3: "less is for interactive viewing"
+
+  - id: q15
+    type: mcq
+    bloom: apply
+    category: "filters"
+    text: |
+      ```bash
+      echo "hello" | tr 'a-z' 'A-Z'
+      ```
+      What does it display?
+    options:
+      - "hello"
+      - "HELLO"
+      - "Hello"
+      - "hELLO"
+    correct: 1
+    explanation: |
+      tr 'a-z' 'A-Z' transforms ALL lowercase letters to uppercase.
+      Each character from the first set is replaced with its correspondent from the second.
+    misconceptions:
+      0: "Does not understand the tr function"
+      2: "Confusion with partial capitalisation"
+      3: "Confusion with transformation order"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: LOOPS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: q16
+    type: mcq
+    bloom: understand
+    category: "loops"
+    text: |
+      ```bash
+      N=5
+      for i in {1..$N}; do
+          echo $i
+      done
+      ```
+      What does this script display?
+    options:
+      - "1 2 3 4 5 (on separate lines)"
+      - "{1..5}"
+      - "Syntax error"
+      - "Nothing (empty loop)"
+    correct: 1
+    explanation: |
+      TRAP: Brace expansion happens BEFORE variable expansion!
+      {1..$N} cannot be expanded because $N is not yet interpreted.
+      It remains literal: "{1..5}"
+      The loop iterates once with i="{1..5}"
+      
+      Solutions: seq, for ((i=1; i<=N; i++))
+    misconceptions:
+      0: "70% believe this! Do not know the expansion order"
+      2: "Believes it is wrong syntax"
+      3: "Believes the loop does not execute at all"
+
+  - id: q17
+    type: mcq
+    bloom: analyse
+    category: "loops"
+    text: |
+      ```bash
+      count=0
+      echo -e "a\nb\nc" | while read line; do
+          ((count++))
+      done
+      echo "Count: $count"
+      ```
+      What does it display?
+    options:
+      - "Count: 3"
+      - "Count: 0"
+      - "Count: 1"
+      - "Error - count is not defined"
+    correct: 1
+    explanation: |
+      SUBSHELL PROBLEM: The right side of the pipe runs in a SUBSHELL!
+      Modifications to count are made in the subshell.
+      When the subshell ends, the modifications are LOST.
+      The main shell sees count=0.
+      
+      Solution: while read line; do ... done < <(echo -e "a\nb\nc")
+    misconceptions:
+      0: "65% believe this! Do not know the subshell problem"
+      2: "Partially understands but counts wrong"
+      3: "Confusion about variable scope"
+
+  - id: q18
+    type: mcq
+    bloom: understand
+    category: "loops"
+    text: |
+      ```bash
+      for i in 1 2 3; do
+          if [ $i -eq 2 ]; then
+              break
+          fi
+          echo $i
+      done
+      echo "After loop"
+      ```
+      What is displayed?
+    options:
+      - "1\nAfter loop"
+      - "1 (nothing more - the script stopped)"
+      - "1\n2\nAfter loop"
+      - "1\n2\n3\nAfter loop"
+    correct: 0
+    explanation: |
+      break exits only the loop, not the script!
+      At i=1: echo 1
+      At i=2: break (exit from loop before echo)
+      Continues with "After loop"
+      
+      exit would have stopped the script completely.
+    misconceptions:
+      1: "Confuses break with exit"
+      2: "Believes echo executes before break"
+      3: "Does not understand break"
+
+  - id: q19
+    type: mcq
+    bloom: apply
+    category: "loops"
+    text: |
+      What is the CORRECT way to iterate through .txt files in the current directory?
+    options:
+      - "for f in $(ls *.txt); do"
+      - "for f in *.txt; do"
+      - "for f in `cat *.txt`; do"
+      - "while f in *.txt; do"
+    correct: 1
+    explanation: |
+      for f in *.txt uses glob expansion which preserves complete names.
+      
+      Option A: $(ls *.txt) splits incorrectly on spaces in names.
+      Option C: cat reads the CONTENT of files, not names.
+      Option D: invalid syntax for while.
+    misconceptions:
+      0: "$(ls *.txt) causes problems with spaces in names"
+      2: "cat reads content, not file names"
+      3: "while does not have this syntax"
+
+  - id: q20
+    type: mcq
+    bloom: apply
+    category: "loops"
+    text: |
+      How do you read a file line by line in Bash?
+    options:
+      - "for line in $(cat file.txt); do"
+      - "while read line; do ... done < file.txt"
+      - "cat file.txt | for line; do"
+      - "read file.txt line"
+    correct: 1
+    explanation: |
+      while read line; do ... done < file.txt is the correct pattern.
+      
+      Option A: $(cat) splits on spaces and newlines.
+      Option C: invalid syntax.
+      Option D: invalid syntax for read.
+    misconceptions:
+      0: "$(cat) does not preserve lines intact"
+      2: "Invalid for syntax with pipe"
+      3: "Invalid read syntax"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: INTEGRATED / ADVANCED QUESTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: q21
+    type: mcq
+    bloom: analyse
+    category: "integrated"
+    text: |
+      ```bash
+      cat access.log | grep "404" | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5
+      ```
+      What does this pipeline do?
+    options:
+      - "Displays the first 5 lines with 404 errors"
+      - "Displays top 5 IPs with the most 404 errors"
+      - "Counts total 404 errors in log"
+      - "Sorts the file and displays the first 5 lines"
+    correct: 1
+    explanation: |
+      Step by step:
+      1. cat access.log: reads the file
+      2. grep "404": filters lines with 404
+      3. cut -d' ' -f1: extracts the first field (IP)
+      4. sort: sorts IPs (required for uniq)
+      5. uniq -c: counts occurrences
+      6. sort -rn: sorts numerically descending
+      7. head -5: first 5 results
+      
+      Result: Top 5 IPs with the most 404 errors
+    misconceptions:
+      0: "Does not understand that uniq -c counts"
+      2: "Does not follow the entire pipeline"
+      3: "Confusion about sort -rn function"
+
+  - id: q22
+    type: mcq
+    bloom: analyse
+    category: "integrated"
+    text: |
+      Which command is equivalent to `cat file.txt | grep pattern`?
+    options:
+      - "grep pattern file.txt"
+      - "grep file.txt pattern"
+      - "pattern | grep file.txt"
+      - "file.txt | grep pattern"
+    correct: 0
+    explanation: |
+      grep pattern file.txt is the direct form, without useless cat (UUOC).
+      grep accepts the file as an argument, does not require pipe from cat.
+      This is the recommended form for efficiency.
+    misconceptions:
+      1: "Argument order for grep: pattern THEN file"
+      2: "Reversed syntax, impossible"
+      3: "You cannot pipe a file name"
+
+  - id: q23
+    type: mcq
+    bloom: apply
+    category: "integrated"
+    text: |
+      How do you run a command in background and make it immune to terminal closure?
+    options:
+      - "cmd &"
+      - "nohup cmd &"
+      - "bg cmd"
+      - "daemon cmd"
+    correct: 1
+    explanation: |
+      nohup cmd & makes the command immune to SIGHUP (hangup signal on terminal closure).
+      
+      cmd & only sends to background, but the process dies on terminal closure.
+      bg moves an ALREADY suspended job to background.
+      daemon is not a standard command.
+    misconceptions:
+      0: "& alone does not protect from SIGHUP"
+      2: "bg is for suspended jobs, not for launching"
+      3: "daemon does not exist as a standard command"
+
+  - id: q24
+    type: mcq
+    bloom: remember
+    category: "integrated"
+    text: |
+      What does the special variable $? contain in Bash?
+    options:
+      - "The PID of the current process"
+      - "The exit code of the last command executed"
+      - "The number of arguments received"
+      - "The script name"
+    correct: 1
+    explanation: |
+      $? contains the exit code of the last command.
+      $$ = PID of the current process
+      $# = number of arguments
+      $0 = script name
+    misconceptions:
+      0: "$$ is for PID"
+      2: "$# is for number of arguments"
+      3: "$0 is for script name"
+
+  - id: q25
+    type: mcq
+    bloom: evaluate
+    category: "integrated"
+    text: |
+      A colleague wrote:
+      ```bash
+      for f in $(find . -name "*.log"); do
+          rm "$f"
+      done
+      ```
+      What is the best practice for deleting .log files?
+    options:
+      - "The code is correct and safe"
+      - "find . -name '*.log' -delete"
+      - "rm *.log"
+      - "ls *.log | xargs rm"
+    correct: 1
+    explanation: |
+      find -delete is the safest and most efficient:
+      - Correctly handles spaces and special characters in names
+      - A single process, no fork for each file
+      - Atomic: deletes exactly what it finds
+      
+      The colleague's code: problems with spaces in file names.
+      rm *.log: not recursive, may fail with "argument list too long".
+      ls | xargs rm: problems with spaces and special characters.
+    misconceptions:
+      0: "$(find) causes problems with spaces in names"
+      2: "rm *.log is not recursive and has limits"
+      3: "ls | xargs rm has problems with special characters"
+
+
+  - id: q26
+    type: mcq
+    bloom: analyse
+    category: "llm_evaluation"
+    text: |
+      An LLM generated this backup script:
+      ```bash
+      #!/bin/bash
+      for f in *; do
+          cp $f backup_$f
+      done
+      echo "Done"
+      ```
+      What is the MOST CRITICAL problem with this code?
+    options:
+      - "Missing shebang"
+      - "Unquoted variable $f fails for filenames with spaces"
+      - "No error checking for cp command"
+      - "The script lacks comments"
+    correct: 1
+    explanation: |
+      The most critical problem is the unquoted variable $f.
+      When filenames contain spaces, $f without quotes causes word splitting.
+      Example: "my file.txt" becomes two arguments: "my" and "file.txt".
+      
+      Correct: cp "$f" "backup_$f"
+      
+      The shebang IS present (#!/bin/bash).
+      Missing error checking is important but less critical than broken functionality.
+      Comments are good practice but don't affect functionality.
+    misconceptions:
+      0: "The shebang IS present in the code"
+      2: "Error checking is important but less critical than broken core functionality"
+      3: "Comments are style, not functionality"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SCORING CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+scoring:
+  points_per_question: 4
+  total_maximum: 104
+  thresholds:
+    excellent: 90
+    good: 75
+    satisfactory: 60
+    insufficient: 0
+  feedback:
+    excellent: "Congratulations! You have excellent mastery of shell scripting concepts."
+    good: "Good level! Review pipes and subshells for improvement."
+    satisfactory: "Good progress! Practise more with redirection and loops."
+    insufficient: "Additional study required. Review the material and practise."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END
+# ═══════════════════════════════════════════════════════════════════════════════

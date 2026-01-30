@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
+  <defs>
+    <style>
+      .process { fill: #2c5282; stroke: #4299e1; stroke-width: 2; rx: 6; }
+      .file { fill: #276749; stroke: #48bb78; stroke-width: 2; rx: 3; }
+      .stream { fill: #553c9a; stroke: #9f7aea; stroke-width: 2; rx: 3; }
+      .terminal { fill: #744210; stroke: #ed8936; stroke-width: 2; rx: 3; }
+      .text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 12px; text-anchor: middle; }
+      .text-title { font-size: 16px; font-weight: bold; }
+      .text-label { font-size: 11px; fill: #a0aec0; }
+      .arrow { stroke: #48bb78; stroke-width: 2; fill: none; marker-end: url(#arrow-green); }
+      .arrow-red { stroke: #fc8181; stroke-width: 2; fill: none; marker-end: url(#arrow-red); }
+      .arrow-pipe { stroke: #4299e1; stroke-width: 3; fill: none; marker-end: url(#arrow-blue); }
+      .pipe-symbol { fill: #4299e1; font-size: 24px; font-weight: bold; }
+    </style>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#48bb78" />
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fc8181" />
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4299e1" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="500" fill="#1a202c"/>
+  
+  <!-- Title -->
+  <text x="350" y="30" class="text text-title">Pipes și Redirecționare I/O</text>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECȚIUNEA 1: FLUX STANDARD -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  
+  <text x="350" y="60" class="text text-label">─── Flux Standard ───</text>
+  
+  <!-- stdin -->
+  <rect x="30" y="80" width="80" height="40" class="stream"/>
+  <text x="70" y="105" class="text">stdin</text>
+  <text x="70" y="130" class="text text-label">fd 0</text>
+  
+  <!-- Process -->
+  <rect x="160" y="75" width="100" height="50" class="process"/>
+  <text x="210" y="105" class="text">comandă</text>
+  
+  <!-- stdout -->
+  <rect x="310" y="70" width="80" height="35" class="stream"/>
+  <text x="350" y="93" class="text">stdout</text>
+  <text x="350" y="115" class="text text-label">fd 1</text>
+  
+  <!-- stderr -->
+  <rect x="310" y="110" width="80" height="35" class="stream"/>
+  <text x="350" y="133" class="text">stderr</text>
+  <text x="350" y="155" class="text text-label">fd 2</text>
+  
+  <!-- Terminal -->
+  <rect x="440" y="80" width="90" height="50" class="terminal"/>
+  <text x="485" y="110" class="text">Terminal</text>
+  
+  <!-- Arrows -->
+  <path d="M110 100 L155 100" class="arrow"/>
+  <path d="M260 95 L305 88" class="arrow"/>
+  <path d="M260 105 L305 127" class="arrow-red"/>
+  <path d="M390 88 L435 100" class="arrow"/>
+  <path d="M390 127 L435 110" class="arrow-red"/>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECȚIUNEA 2: PIPELINE -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  
+  <text x="350" y="195" class="text text-label">─── Pipeline: cmd1 | cmd2 | cmd3 ───</text>
+  
+  <!-- cmd1 -->
+  <rect x="50" y="215" width="90" height="45" class="process"/>
+  <text x="95" y="243" class="text">cmd1</text>
+  
+  <!-- Pipe 1 -->
+  <text x="167" y="243" class="pipe-symbol">|</text>
+  
+  <!-- cmd2 -->
+  <rect x="195" y="215" width="90" height="45" class="process"/>
+  <text x="240" y="243" class="text">cmd2</text>
+  
+  <!-- Pipe 2 -->
+  <text x="312" y="243" class="pipe-symbol">|</text>
+  
+  <!-- cmd3 -->
+  <rect x="340" y="215" width="90" height="45" class="process"/>
+  <text x="385" y="243" class="text">cmd3</text>
+  
+  <!-- Output -->
+  <rect x="480" y="215" width="90" height="45" class="terminal"/>
+  <text x="525" y="243" class="text">output</text>
+  
+  <!-- Arrows Pipeline -->
+  <path d="M140 237 L155 237" class="arrow-pipe"/>
+  <path d="M285 237 L300 237" class="arrow-pipe"/>
+  <path d="M430 237 L475 237" class="arrow-pipe"/>
+  
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECȚIUNEA 3: REDIRECȚIONĂRI -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  
+  <text x="350" y="295" class="text text-label">─── Redirecționări ───</text>
+  
+  <!-- > file -->
+  <rect x="50" y="310" width="120" height="35" class="process"/>
+  <text x="110" y="333" class="text">cmd > file</text>
+  <rect x="200" y="310" width="80" height="35" class="file"/>
+  <text x="240" y="333" class="text">file.txt</text>
+  <path d="M170 327 L195 327" class="arrow"/>
+  <text x="110" y="360" class="text text-label">suprascrie</text>
+  
+  <!-- >> file -->
+  <rect x="320" y="310" width="120" height="35" class="process"/>
+  <text x="380" y="333" class="text">cmd >> file</text>
+  <rect x="470" y="310" width="80" height="35" class="file"/>
+  <text x="510" y="333" class="text">file.txt</text>
+  <path d="M440 327 L465 327" class="arrow"/>
+  <text x="380" y="360" class="text text-label">append</text>
+  
+  <!-- 2>&1 -->
+  <rect x="50" y="380" width="180" height="35" class="process"/>
+  <text x="140" y="403" class="text">cmd > f.txt 2>&1</text>
+  <rect x="260" y="380" width="80" height="35" class="file"/>
+  <text x="300" y="403" class="text">f.txt</text>
+  <path d="M230 397 L255 397" class="arrow"/>
+  <text x="300" y="430" class="text text-label">stdout + stderr</text>
+  
+  <!-- < file -->
+  <rect x="380" y="380" width="120" height="35" class="process"/>
+  <text x="440" y="403" class="text">cmd < file</text>
+  <rect x="520" y="380" width="80" height="35" class="file"/>
+  <text x="560" y="403" class="text">file.txt</text>
+  <path d="M520 397 L500 397" class="arrow"/>
+  <text x="440" y="430" class="text text-label">input din fișier</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="455" width="15" height="15" class="process"/>
+  <text x="75" y="467" class="text text-label" text-anchor="start">Proces</text>
+  
+  <rect x="150" y="455" width="15" height="15" class="file"/>
+  <text x="175" y="467" class="text text-label" text-anchor="start">Fișier</text>
+  
+  <rect x="250" y="455" width="15" height="15" class="stream"/>
+  <text x="275" y="467" class="text text-label" text-anchor="start">Stream</text>
+  
+  <rect x="350" y="455" width="15" height="15" class="terminal"/>
+  <text x="375" y="467" class="text text-label" text-anchor="start">Terminal</text>
+  
+  <text x="630" y="467" class="text text-label">SEM02 SO</text>
+</svg>

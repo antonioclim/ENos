@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
+  <defs>
+    <style>
+      .box { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
+      .box-setup { fill: #2c5282; }
+      .box-parse { fill: #285e61; }
+      .box-func { fill: #553c9a; }
+      .box-main { fill: #9c4221; }
+      .box-output { fill: #276749; }
+      .text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 14px; text-anchor: middle; }
+      .text-title { font-size: 18px; font-weight: bold; }
+      .text-code { font-size: 11px; fill: #a0aec0; }
+      .arrow { stroke: #718096; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .label { fill: #e2e8f0; font-family: 'Segoe UI', sans-serif; font-size: 12px; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="600" height="700" fill="#1a202c"/>
+  
+  <!-- Title -->
+  <text x="300" y="35" class="text text-title">Structura Script Bash</text>
+  <text x="300" y="55" class="text text-code">(Subgoal Labels Pattern)</text>
+  
+  <!-- SETUP_SI_VALIDARE -->
+  <rect x="150" y="80" width="300" height="80" class="box box-setup"/>
+  <text x="300" y="105" class="text">SETUP_SI_VALIDARE</text>
+  <text x="300" y="125" class="text text-code">#!/bin/bash</text>
+  <text x="300" y="142" class="text text-code">set -euo pipefail</text>
+  
+  <!-- Arrow -->
+  <path d="M300 160 L300 190" class="arrow"/>
+  
+  <!-- PARSEAZA_ARGUMENTE -->
+  <rect x="150" y="190" width="300" height="80" class="box box-parse"/>
+  <text x="300" y="215" class="text">PARSEAZA_ARGUMENTE</text>
+  <text x="300" y="235" class="text text-code">getopts, $1, $2, ...</text>
+  <text x="300" y="252" class="text text-code">validare input</text>
+  
+  <!-- Arrow -->
+  <path d="M300 270 L300 300" class="arrow"/>
+  
+  <!-- DEFINIRE_FUNCTII -->
+  <rect x="150" y="300" width="300" height="80" class="box box-func"/>
+  <text x="300" y="325" class="text">DEFINIRE_FUNCTII</text>
+  <text x="300" y="345" class="text text-code">functie_ajutor() { ... }</text>
+  <text x="300" y="362" class="text text-code">procesare_date() { ... }</text>
+  
+  <!-- Arrow -->
+  <path d="M300 380 L300 410" class="arrow"/>
+  
+  <!-- PROCESARE_PRINCIPALA -->
+  <rect x="150" y="410" width="300" height="80" class="box box-main"/>
+  <text x="300" y="435" class="text">PROCESARE_PRINCIPALA</text>
+  <text x="300" y="455" class="text text-code">logica principală</text>
+  <text x="300" y="472" class="text text-code">apeluri funcții</text>
+  
+  <!-- Arrow -->
+  <path d="M300 490 L300 520" class="arrow"/>
+  
+  <!-- AFISARE_REZULTATE -->
+  <rect x="150" y="520" width="300" height="80" class="box box-output"/>
+  <text x="300" y="545" class="text">AFISARE_REZULTATE</text>
+  <text x="300" y="565" class="text text-code">echo, printf</text>
+  <text x="300" y="582" class="text text-code">exit code</text>
+  
+  <!-- Side annotations -->
+  <text x="80" y="120" class="label" text-anchor="end">Inițializare</text>
+  <text x="80" y="230" class="label" text-anchor="end">Input</text>
+  <text x="80" y="340" class="label" text-anchor="end">Definiții</text>
+  <text x="80" y="450" class="label" text-anchor="end">Execuție</text>
+  <text x="80" y="560" class="label" text-anchor="end">Output</text>
+  
+  <!-- Footer -->
+  <text x="300" y="640" class="text text-code">Seminarul 02 SO | ASE București - CSIE</text>
+  <text x="300" y="660" class="text text-code">Pattern: Subgoal Labels pentru claritate</text>
+</svg>

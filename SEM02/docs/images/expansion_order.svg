@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 450" width="650" height="450">
+  <defs>
+    <style>
+      .step { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
+      .step-active { fill: #2c5282; stroke: #4299e1; }
+      .step-problem { fill: #9b2c2c; stroke: #fc8181; }
+      .text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 12px; text-anchor: middle; }
+      .text-title { font-size: 16px; font-weight: bold; }
+      .text-code { font-size: 11px; fill: #faf089; }
+      .text-note { font-size: 10px; fill: #a0aec0; }
+      .arrow { stroke: #718096; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .num { fill: #4299e1; font-size: 14px; font-weight: bold; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="650" height="450" fill="#1a202c"/>
+  
+  <!-- Title -->
+  <text x="325" y="30" class="text text-title">Ordinea Expansion în Bash</text>
+  <text x="325" y="50" class="text text-note">(De ce {1..$N} nu funcționează)</text>
+  
+  <!-- Step 1: Brace Expansion -->
+  <text x="30" y="95" class="num">1</text>
+  <rect x="50" y="75" width="180" height="50" class="step step-active"/>
+  <text x="140" y="97" class="text">Brace Expansion</text>
+  <text x="140" y="115" class="text text-code">{1..5} → 1 2 3 4 5</text>
+  
+  <!-- Arrow -->
+  <path d="M230 100 L260 100" class="arrow"/>
+  
+  <!-- Step 2: Tilde Expansion -->
+  <text x="270" y="95" class="num">2</text>
+  <rect x="290" y="75" width="150" height="50" class="step"/>
+  <text x="365" y="97" class="text">Tilde Expansion</text>
+  <text x="365" y="115" class="text text-code">~ → /home/user</text>
+  
+  <!-- Arrow -->
+  <path d="M440 100 L470 100" class="arrow"/>
+  
+  <!-- Step 3: Parameter Expansion -->
+  <text x="480" y="95" class="num">3</text>
+  <rect x="500" y="75" width="130" height="50" class="step step-active"/>
+  <text x="565" y="97" class="text">Variable Exp.</text>
+  <text x="565" y="115" class="text text-code">$VAR → valoare</text>
+  
+  <!-- Step 4: Command Substitution -->
+  <text x="30" y="175" class="num">4</text>
+  <rect x="50" y="155" width="180" height="50" class="step"/>
+  <text x="140" y="177" class="text">Command Subst.</text>
+  <text x="140" y="195" class="text text-code">$(cmd) → output</text>
+  
+  <!-- Arrow -->
+  <path d="M230 180 L260 180" class="arrow"/>
+  
+  <!-- Step 5: Arithmetic Expansion -->
+  <text x="270" y="175" class="num">5</text>
+  <rect x="290" y="155" width="150" height="50" class="step"/>
+  <text x="365" y="177" class="text">Arithmetic Exp.</text>
+  <text x="365" y="195" class="text text-code">$((1+2)) → 3</text>
+  
+  <!-- Arrow -->
+  <path d="M440 180 L470 180" class="arrow"/>
+  
+  <!-- Step 6: Word Splitting -->
+  <text x="480" y="175" class="num">6</text>
+  <rect x="500" y="155" width="130" height="50" class="step"/>
+  <text x="565" y="177" class="text">Word Splitting</text>
+  <text x="565" y="195" class="text text-code">pe spații/IFS</text>
+  
+  <!-- PROBLEMA -->
+  <rect x="50" y="240" width="580" height="90" class="step step-problem"/>
+  <text x="340" y="265" class="text text-title">⚠ PROBLEMA: {1..$N}</text>
+  <text x="340" y="290" class="text">Brace Expansion (pasul 1) se face ÎNAINTE de Variable Expansion (pasul 3)</text>
+  <text x="340" y="310" class="text text-code">N=5; for i in {1..$N}  →  {1..$N} rămâne LITERAL (nu expandat)</text>
+  
+  <!-- SOLUȚII -->
+  <rect x="50" y="350" width="270" height="80" class="step"/>
+  <text x="185" y="375" class="text">✓ Soluție 1: seq</text>
+  <text x="185" y="400" class="text text-code">for i in $(seq 1 $N)</text>
+  <text x="185" y="418" class="text text-note">$(seq) e command subst., după var exp.</text>
+  
+  <rect x="340" y="350" width="290" height="80" class="step"/>
+  <text x="485" y="375" class="text">✓ Soluție 2: C-style for</text>
+  <text x="485" y="400" class="text text-code">for ((i=1; i&lt;=N; i++))</text>
+  <text x="485" y="418" class="text text-note">Arithmetic context, N e evaluat</text>
+</svg>

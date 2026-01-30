@@ -1,0 +1,603 @@
+{
+  "$schema": "https://raw.githubusercontent.com/moodle/moodle/master/question/format/json/schema.json",
+  "metadata": {
+    "title": "Seminar 03: System Administration",
+    "description": "Formative quiz for find, xargs, getopts, Unix permissions, CRON",
+    "course": "Operating Systems",
+    "institution": "Bucharest UES - CSIE",
+    "version": "1.0",
+    "created": "2025-01",
+    "language": "en",
+    "estimated_time_minutes": 25,
+    "passing_grade": 60,
+    "bloom_distribution": {
+      "remember": "20%",
+      "understand": "25%",
+      "apply": "35%",
+      "analyse": "15%",
+      "evaluate": "5%"
+    }
+  },
+  "quiz_settings": {
+    "shuffle_questions": true,
+    "shuffle_answers": true,
+    "time_limit_minutes": 30,
+    "attempts_allowed": 2,
+    "grading_method": "highest",
+    "show_correct_answers": "after_close",
+    "review_options": {
+      "during_attempt": ["feedback"],
+      "immediately_after": ["feedback", "marks"],
+      "later_while_open": ["feedback", "marks", "correct_answers"],
+      "after_close": ["feedback", "marks", "correct_answers", "general_feedback"]
+    }
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multichoice",
+      "category": "find and xargs",
+      "bloom_level": "remember",
+      "points": 6,
+      "question_text": "Which option of the `find` command specifies the type of file being searched?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "-type",
+          "fraction": 100,
+          "feedback": "Correct! `-type f` for files, `-type d` for directories, `-type l` for symlinks."
+        },
+        {
+          "text": "-name",
+          "fraction": 0,
+          "feedback": "Incorrect. `-name` searches by filename (pattern matching), not by type."
+        },
+        {
+          "text": "-size",
+          "fraction": 0,
+          "feedback": "Incorrect. `-size` searches by file size."
+        },
+        {
+          "text": "-mtime",
+          "fraction": 0,
+          "feedback": "Incorrect. `-mtime` searches by last modification date."
+        }
+      ],
+      "general_feedback": "The `-type` option specifies the type: `f` for files, `d` for directories, `l` for symlinks.",
+      "tags": ["find", "syntax", "remember"]
+    },
+    {
+      "id": "q02",
+      "type": "multichoice",
+      "category": "find and xargs",
+      "bloom_level": "understand",
+      "points": 7,
+      "question_text": "You've just created a new file: `touch ~/test.txt`\nImmediately you run: `locate test.txt`\n\nWhat happens?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Finds the file instantly",
+          "fraction": 0,
+          "feedback": "Incorrect. `locate` uses a pre-indexed database, it does not search in real-time."
+        },
+        {
+          "text": "Does not find the file (database not updated)",
+          "fraction": 100,
+          "feedback": "Correct! The database updates periodically (typically overnight). Use `sudo updatedb` or `find` for immediate searches."
+        },
+        {
+          "text": "Error - locate does not search in home",
+          "fraction": 0,
+          "feedback": "Incorrect. `locate` searches all indexed directories, including home."
+        },
+        {
+          "text": "Finds all test.txt files, including the new one",
+          "fraction": 0,
+          "feedback": "Incorrect. The new file has not yet been indexed in the database."
+        }
+      ],
+      "general_feedback": "`locate` uses a pre-indexed database for fast searches. For new files, use `find` or run `sudo updatedb` first.",
+      "tags": ["find", "locate", "understand"]
+    },
+    {
+      "id": "q03",
+      "type": "multichoice",
+      "category": "find and xargs",
+      "bloom_level": "apply",
+      "points": 8,
+      "question_text": "You want to find all `.log` files larger than 10MB modified in the last 7 days. Which command is correct?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "find . -name '*.log' -size +10M -mtime -7",
+          "fraction": 100,
+          "feedback": "Correct! `-name '*.log'` with quotes, `-size +10M` (+ = larger), `-mtime -7` (- = within the last N days)."
+        },
+        {
+          "text": "find . -name '*.log' -size 10M -mtime 7",
+          "fraction": 0,
+          "feedback": "Incorrect. Missing `+` for size (exactly 10M, not larger) and `-` for mtime (exactly 7 days, not last 7)."
+        },
+        {
+          "text": "find . -type f '*.log' -size +10M -mtime -7",
+          "fraction": 0,
+          "feedback": "Incorrect. Wrong syntax: `-type f` does not take pattern directly, you need `-name '*.log'`."
+        },
+        {
+          "text": "find . -name *.log -size +10M -mtime -7",
+          "fraction": 0,
+          "feedback": "Incorrect. Missing quotes: the shell will expand `*.log` prematurely in the current directory."
+        }
+      ],
+      "general_feedback": "The `+`/`-` signs with `-size` and `-mtime` are critical: `+` = larger/older, `-` = smaller/more recent, no sign = exact.",
+      "tags": ["find", "apply", "syntax"]
+    },
+    {
+      "id": "q04",
+      "type": "multichoice",
+      "category": "find and xargs",
+      "bloom_level": "understand",
+      "points": 7,
+      "question_text": "What does this command return?\n\n```bash\nfind . -type f -name \"*.txt\" -o -name \"*.md\"\n```",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "All .txt files and all .md files",
+          "fraction": 0,
+          "feedback": "Incorrect. AND has higher precedence than OR in find."
+        },
+        {
+          "text": "All FILES with .txt and ANYTHING (file or directory) with .md",
+          "fraction": 100,
+          "feedback": "Correct! It is interpreted as: `(-type f AND -name \"*.txt\") OR (-name \"*.md\")`. For both as files, use parentheses."
+        },
+        {
+          "text": "Syntax error",
+          "fraction": 0,
+          "feedback": "Incorrect. The syntax is valid, just the result is not as expected."
+        },
+        {
+          "text": "Nothing - conditions are mutually exclusive",
+          "fraction": 0,
+          "feedback": "Incorrect. OR combines conditions, it does not exclude them."
+        }
+      ],
+      "general_feedback": "Correct solution: `find . -type f \\( -name \"*.txt\" -o -name \"*.md\" \\)` - parentheses group the OR.",
+      "tags": ["find", "operators", "understand"]
+    },
+    {
+      "id": "q05",
+      "type": "multichoice",
+      "category": "find and xargs",
+      "bloom_level": "apply",
+      "points": 8,
+      "question_text": "You have files with spaces in their names. Which combination is safe?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "find . -name '*.txt' | xargs rm",
+          "fraction": 0,
+          "feedback": "Incorrect. xargs implicitly splits on spaces: \"important document.txt\" becomes 2 separate arguments."
+        },
+        {
+          "text": "find . -name '*.txt' -print0 | xargs -0 rm",
+          "fraction": 50,
+          "feedback": "Correct, but not the only solution. `-print0` and `-0` use null as separator."
+        },
+        {
+          "text": "find . -name '*.txt' -exec rm {} +",
+          "fraction": 50,
+          "feedback": "Correct, but not the only solution. `-exec {} +` passes arguments directly, without space problems."
+        },
+        {
+          "text": "Both B and C are correct",
+          "fraction": 100,
+          "feedback": "Correct! Both methods correctly handle files with spaces in their names."
+        }
+      ],
+      "general_feedback": "For files with special characters: use `-print0 | xargs -0` or `-exec {} +`. Never use simple `| xargs`!",
+      "tags": ["find", "xargs", "apply", "security"]
+    },
+    {
+      "id": "q06",
+      "type": "multichoice",
+      "category": "getopts and parameters",
+      "bloom_level": "remember",
+      "points": 6,
+      "question_text": "Which variable contains the number of arguments passed to a script?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "$#",
+          "fraction": 100,
+          "feedback": "Correct! `$#` returns the number of arguments (count)."
+        },
+        {
+          "text": "$@",
+          "fraction": 0,
+          "feedback": "Incorrect. `$@` contains all arguments as a separated list."
+        },
+        {
+          "text": "$*",
+          "fraction": 0,
+          "feedback": "Incorrect. `$*` contains all arguments as a single string."
+        },
+        {
+          "text": "$0",
+          "fraction": 0,
+          "feedback": "Incorrect. `$0` contains the script name."
+        }
+      ],
+      "general_feedback": "Special variables: `$#` = count, `$@` = list, `$*` = string, `$0` = script name, `$1-$9` = individual arguments.",
+      "tags": ["bash", "variables", "remember"]
+    },
+    {
+      "id": "q07",
+      "type": "multichoice",
+      "category": "getopts and parameters",
+      "bloom_level": "understand",
+      "points": 7,
+      "question_text": "Script called with: `./script.sh \"Hello World\" Test`\n\nHow many elements does `for arg in \"$@\"` iterate?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "1 element",
+          "fraction": 0,
+          "feedback": "Incorrect. There are 2 distinct arguments."
+        },
+        {
+          "text": "2 elements",
+          "fraction": 100,
+          "feedback": "Correct! \"Hello World\" is a single argument (due to quotes), Test is the second."
+        },
+        {
+          "text": "3 elements",
+          "fraction": 0,
+          "feedback": "Incorrect. It would be 3 only without quotes: \"$@\" preserves the original arguments."
+        },
+        {
+          "text": "4 elements",
+          "fraction": 0,
+          "feedback": "Incorrect. $0 (script name) is not included in $@."
+        }
+      ],
+      "general_feedback": "With double quotes, `\"$@\"` preserves arguments as they were passed. Without quotes, it would re-split on spaces.",
+      "tags": ["bash", "variables", "understand"]
+    },
+    {
+      "id": "q08",
+      "type": "multichoice",
+      "category": "getopts and parameters",
+      "bloom_level": "apply",
+      "points": 8,
+      "question_text": "To parse `-v` (flag) and `-f FILE` (with argument), which is correct?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "while getopts \"vf\" opt; do",
+          "fraction": 0,
+          "feedback": "Incorrect. Neither `-v` nor `-f` will receive argument."
+        },
+        {
+          "text": "while getopts \"v:f:\" opt; do",
+          "fraction": 0,
+          "feedback": "Incorrect. Both receive argument, but `-v` is just a simple flag."
+        },
+        {
+          "text": "while getopts \"vf:\" opt; do",
+          "fraction": 100,
+          "feedback": "Correct! `v` = simple flag, `f:` = option with mandatory argument (`:` after letter)."
+        },
+        {
+          "text": "while getopts \":vf\" opt; do",
+          "fraction": 0,
+          "feedback": "Incorrect. `:` at beginning activates silent error mode, does not solve the argument problem."
+        }
+      ],
+      "general_feedback": "In getopts, `:` after letter = requires argument. `\":vf:\"` = silent mode + v flag + f with argument.",
+      "tags": ["getopts", "apply", "arguments"]
+    },
+    {
+      "id": "q09",
+      "type": "multichoice",
+      "category": "Unix permissions",
+      "bloom_level": "remember",
+      "points": 6,
+      "question_text": "What permissions does the octal value `755` represent?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "rwxr-xr-x",
+          "fraction": 100,
+          "feedback": "Correct! 7=rwx (4+2+1), 5=r-x (4+0+1), 5=r-x (4+0+1)."
+        },
+        {
+          "text": "rwxrwxrwx",
+          "fraction": 0,
+          "feedback": "Incorrect. That is 777."
+        },
+        {
+          "text": "rw-r--r--",
+          "fraction": 0,
+          "feedback": "Incorrect. That is 644."
+        },
+        {
+          "text": "rwx------",
+          "fraction": 0,
+          "feedback": "Incorrect. That is 700."
+        }
+      ],
+      "general_feedback": "Calculation: r=4, w=2, x=1. 755 = (4+2+1)(4+0+1)(4+0+1) = rwxr-xr-x. Typical for executables.",
+      "tags": ["permissions", "octal", "remember"]
+    },
+    {
+      "id": "q10",
+      "type": "multichoice",
+      "category": "Unix permissions",
+      "bloom_level": "understand",
+      "points": 7,
+      "question_text": "A file has permissions `rw-r--r--`. After `chmod g+w file`, what permissions does it have?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "rw-rw-r--",
+          "fraction": 100,
+          "feedback": "Correct! `g+w` adds write for group: r-- becomes rw-."
+        },
+        {
+          "text": "rwxrw-r--",
+          "fraction": 0,
+          "feedback": "Incorrect. `g+w` adds only write to group, not x to owner."
+        },
+        {
+          "text": "rw-r--rw-",
+          "fraction": 0,
+          "feedback": "Incorrect. You're confusing `g` (group) with `o` (others)."
+        },
+        {
+          "text": "rw-rwxr--",
+          "fraction": 0,
+          "feedback": "Incorrect. `+w` adds only write, not execute."
+        }
+      ],
+      "general_feedback": "Symbolic notation: u=user/owner, g=group, o=others, a=all. +/- adds/removes permissions.",
+      "tags": ["permissions", "chmod", "understand"]
+    },
+    {
+      "id": "q11",
+      "type": "multichoice",
+      "category": "Unix permissions",
+      "bloom_level": "analyse",
+      "points": 9,
+      "question_text": "A script `backup.sh` has permissions `rw-r--r--`.\nYou run `./backup.sh` and receive \"Permission denied\".\n\nWhat is the problem and solution?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Missing execute permission; solution: chmod +x backup.sh",
+          "fraction": 100,
+          "feedback": "Correct! For `./script.sh` you need x. Alternatively: `bash backup.sh` (does not require x)."
+        },
+        {
+          "text": "Missing read permission; solution: chmod +r backup.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. Read exists (r--), the problem is missing execute."
+        },
+        {
+          "text": "File is owned by root; solution: sudo ./backup.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. Ownership is not mentioned and sudo does not solve missing x permission."
+        },
+        {
+          "text": "Shebang is wrong; solution: check first line",
+          "fraction": 0,
+          "feedback": "Incorrect. Shebang affects interpreter, not execution permissions."
+        }
+      ],
+      "general_feedback": "rw-r--r-- = 644 does not include execute. Solutions: `chmod +x` or `chmod 755` or `bash script.sh`.",
+      "tags": ["permissions", "debugging", "analyse"]
+    },
+    {
+      "id": "q12",
+      "type": "multichoice",
+      "category": "Unix permissions",
+      "bloom_level": "apply",
+      "points": 8,
+      "question_text": "You want a script to run with the owner's permissions, not those of the person executing it. What do you do?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "chmod u+s script.sh",
+          "fraction": 100,
+          "feedback": "Correct! SUID (Set User ID) makes the script run with the owner's UID. CAUTION: SUID on scripts is ignored on most modern systems!"
+        },
+        {
+          "text": "chmod g+s script.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. SGID (g+s) runs with the group's GID, not the owner's."
+        },
+        {
+          "text": "chmod +t script.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. Sticky bit (+t) protects file deletion in public directories."
+        },
+        {
+          "text": "chmod 777 script.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. 777 grants permissions to everyone, but does not change process identity."
+        }
+      ],
+      "general_feedback": "SUID/SGID are special permission bits. SUID on shell scripts is disabled for security reasons.",
+      "tags": ["permissions", "suid", "apply"]
+    },
+    {
+      "id": "q13",
+      "type": "multichoice",
+      "category": "CRON",
+      "bloom_level": "remember",
+      "points": 6,
+      "question_text": "What is the order of fields in a crontab line?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "minute hour day_of_month month day_of_week command",
+          "fraction": 100,
+          "feedback": "Correct! m h dom mon dow command (minute, hour, day of month, month, day of week)."
+        },
+        {
+          "text": "hour minute day_of_month month day_of_week command",
+          "fraction": 0,
+          "feedback": "Incorrect. Minute comes first, not hour."
+        },
+        {
+          "text": "minute hour month day_of_month day_of_week command",
+          "fraction": 0,
+          "feedback": "Incorrect. Day_of_month comes before month."
+        },
+        {
+          "text": "day_of_week month day_of_month hour minute command",
+          "fraction": 0,
+          "feedback": "Incorrect. The order is completely reversed."
+        }
+      ],
+      "general_feedback": "Mnemonic: \"Minute Hour Day-of-month Month Day-of-week\" (from small to large in time).",
+      "tags": ["cron", "syntax", "remember"]
+    },
+    {
+      "id": "q14",
+      "type": "multichoice",
+      "category": "CRON",
+      "bloom_level": "understand",
+      "points": 7,
+      "question_text": "What does this crontab line do?\n\n```\n30 2 * * 1 /home/user/backup.sh\n```",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Runs backup.sh every Monday at 2:30 AM",
+          "fraction": 100,
+          "feedback": "Correct! 30=min, 2=hour, *=any day, *=any month, 1=Monday."
+        },
+        {
+          "text": "Runs backup.sh on the 2nd of each month at 00:30",
+          "fraction": 0,
+          "feedback": "Incorrect. You're confusing hour position (2) with day of month."
+        },
+        {
+          "text": "Runs backup.sh every day at 2:30 AM",
+          "fraction": 0,
+          "feedback": "Incorrect. Field 5 (day_of_week=1) restricts to Monday."
+        },
+        {
+          "text": "Runs backup.sh once a month, on Monday",
+          "fraction": 0,
+          "feedback": "Incorrect. Runs EVERY Monday, not once a month."
+        }
+      ],
+      "general_feedback": "Field 5: 0 and 7 = Sunday, 1 = Monday, ..., 6 = Saturday.",
+      "tags": ["cron", "interpret", "understand"]
+    },
+    {
+      "id": "q15",
+      "type": "multichoice",
+      "category": "CRON",
+      "bloom_level": "apply",
+      "points": 8,
+      "question_text": "You want to run a script every 15 minutes. Which line is correct?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "*/15 * * * * /path/script.sh",
+          "fraction": 100,
+          "feedback": "Correct! `*/15` = step value, runs at minutes 0, 15, 30, 45."
+        },
+        {
+          "text": "15 * * * * /path/script.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. Runs only at minute 15 of each hour, not every 15 minutes."
+        },
+        {
+          "text": "0-15 * * * * /path/script.sh",
+          "fraction": 0,
+          "feedback": "Incorrect. Range 0-15 = runs at minutes 0, 1, 2, ..., 15 (16 times per hour!)."
+        },
+        {
+          "text": "0,15,30,45 * * * * /path/script.sh",
+          "fraction": 80,
+          "feedback": "Functionally correct, but `*/15` is more elegant and easier to read."
+        }
+      ],
+      "general_feedback": "Syntax: `*/n` = step value (every n), `n-m` = range, `n,m,o` = list.",
+      "tags": ["cron", "apply", "interval"]
+    },
+    {
+      "id": "q16",
+      "type": "multichoice",
+      "category": "CRON",
+      "bloom_level": "analyse",
+      "points": 9,
+      "question_text": "A cron job is not running. The script works manually.\nCrontab line: `0 3 * * * backup.sh`\n\nWhat is the most likely cause?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Missing absolute path to script",
+          "fraction": 100,
+          "feedback": "Correct! Cron runs with minimal PATH. Use `/home/user/backup.sh` or set PATH in crontab."
+        },
+        {
+          "text": "Hour 3 does not exist (daylight saving)",
+          "fraction": 0,
+          "feedback": "Incorrect. DST is a rare problem and not the first to check."
+        },
+        {
+          "text": "Cron daemon is not running",
+          "fraction": 0,
+          "feedback": "Incorrect. If the script runs manually from terminal, the system is working."
+        },
+        {
+          "text": "Insufficient permissions on crontab",
+          "fraction": 0,
+          "feedback": "Incorrect. Permission error would be different (crontab: permission denied)."
+        }
+      ],
+      "general_feedback": "Common cron problems: minimal PATH, missing environment variables, unredirected output. Test with `* * * * *` for debugging.",
+      "tags": ["cron", "debugging", "analyse"]
+    },
+    {
+      "id": "q17",
+      "type": "multichoice",
+      "category": "General evaluation",
+      "bloom_level": "evaluate",
+      "points": 10,
+      "question_text": "You need to process 10,000 .log files, deleting empty lines.\nWhich approach is the most efficient?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "for f in *.log; do sed -i '/^$/d' \"$f\"; done",
+          "fraction": 20,
+          "feedback": "Works, but starts 10,000 sed processes - very slow."
+        },
+        {
+          "text": "find . -name '*.log' -exec sed -i '/^$/d' {} \\;",
+          "fraction": 20,
+          "feedback": "Works, but `\\;` starts one sed per file - equally slow."
+        },
+        {
+          "text": "find . -name '*.log' -exec sed -i '/^$/d' {} +",
+          "fraction": 100,
+          "feedback": "Correct! `+` groups files and minimises the number of forked processes."
+        },
+        {
+          "text": "find . -name '*.log' | xargs sed -i '/^$/d'",
+          "fraction": 40,
+          "feedback": "Almost correct, but has problems with spaces in names. Should be `-print0 | xargs -0`."
+        }
+      ],
+      "general_feedback": "For batch processing: `-exec {} +` or `-print0 | xargs -0` are the most efficient and safe.",
+      "tags": ["performance", "evaluate", "best-practice"]
+    }
+  ],
+  "export_info": {
+    "format_version": "1.0",
+    "compatible_with": ["Moodle 4.x", "Canvas LMS", "Blackboard"],
+    "import_instructions": "Import as GIFT or JSON format in your LMS quiz bank."
+  }
+}

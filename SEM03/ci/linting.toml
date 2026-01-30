@@ -1,0 +1,153 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Linting Configuration — Seminar 03
+# Operating Systems | Bucharest UES - CSIE
+# ═══════════════════════════════════════════════════════════════════════════════
+# File: ci/linting.toml
+# Contains configurations for shellcheck and ruff
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RUFF - Python Linter
+# ═══════════════════════════════════════════════════════════════════════════════
+# Documentation: https://docs.astral.sh/ruff/configuration/
+# Usage: ruff check scripts/python/*.py
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.ruff]
+# Target Python version
+target-version = "py311"
+
+# Maximum line length
+line-length = 100
+
+# Directories to exclude
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg-info",
+    "build",
+    "dist",
+]
+
+# Source directories
+src = ["scripts/python"]
+
+[tool.ruff.lint]
+# Rules enabled
+# E = pycodestyle errors
+# F = Pyflakes
+# W = pycodestyle warnings
+# I = isort
+# N = pep8-naming
+# D = pydocstyle
+# UP = pyupgrade
+# B = flake8-bugbear
+# C4 = flake8-comprehensions
+# SIM = flake8-simplify
+select = [
+    "E",      # pycodestyle errors
+    "F",      # Pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+]
+
+# Rules ignored
+ignore = [
+    "D100",   # Missing docstring in public module
+    "D104",   # Missing docstring in public package
+    "D107",   # Missing docstring in __init__
+    "E501",   # Line too long (handled by line-length)
+    "B008",   # Do not perform function calls in argument defaults
+    "B905",   # `zip()` without explicit `strict=`
+    "SIM108", # Use ternary operator instead of if-else
+]
+
+# Rules auto-fixable
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore certain rules in test files
+"**/test_*.py" = ["D", "S101"]
+"**/*_test.py" = ["D", "S101"]
+
+[tool.ruff.lint.isort]
+# Import sorting configuration
+known-first-party = ["scripts"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+# Docstring style
+convention = "google"
+
+[tool.ruff.format]
+# Formatting style
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SHELLCHECK - Bash Linter
+# ═══════════════════════════════════════════════════════════════════════════════
+# Documentation: https://www.shellcheck.net/wiki/
+# Usage: shellcheck -f gcc scripts/bash/*.sh
+# 
+# Note: Shellcheck does not use TOML natively, but supports in-code directives.
+# These settings are for reference and can be applied via CLI arguments.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.shellcheck]
+# Default shell
+shell = "bash"
+
+# Severity level: error, warning, info, style
+severity = "warning"
+
+# Codes to exclude globally
+# SC1090 - Can't follow non-constant source
+# SC1091 - Not following sourced file
+# SC2034 - Variable appears unused
+# SC2086 - Double quote to prevent globbing (sometimes intentional)
+exclude = [
+    "SC1090",
+    "SC1091",
+]
+
+# Output format
+format = "tty"  # or: gcc, json, checkstyle, diff
+
+# Common directives to add in scripts:
+# shellcheck disable=SC2086  # for one line
+# shellcheck source=./lib.sh  # for source
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# USAGE EXAMPLES
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Ruff:
+#   ruff check scripts/python/           # Check
+#   ruff check scripts/python/ --fix     # Auto-fix
+#   ruff format scripts/python/          # Format
+#
+# Shellcheck:
+#   shellcheck scripts/bash/*.sh         # Check
+#   shellcheck -f gcc scripts/bash/*.sh  # GCC format (for IDE)
+#   shellcheck -x scripts/bash/*.sh      # Follow external sources
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PYPROJECT.TOML SNIPPET
+# ═══════════════════════════════════════════════════════════════════════════════
+# If you prefer pyproject.toml, copy the [tool.ruff.*] sections there.
+# ═══════════════════════════════════════════════════════════════════════════════

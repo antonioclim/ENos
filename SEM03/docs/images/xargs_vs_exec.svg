@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 550" width="800" height="550">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4A90D9"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="550" fill="#0D1117"/>
+  
+  <!-- Title -->
+  <text x="400" y="35" font-family="monospace" font-size="22" fill="#E6EDF3" text-anchor="middle" font-weight="bold">-exec \; vs -exec + vs xargs</text>
+  
+  <!-- Section 1: -exec \; -->
+  <rect x="30" y="60" width="240" height="180" rx="8" fill="#161B22" stroke="#F85149" stroke-width="2"/>
+  <text x="150" y="90" font-family="monospace" font-size="14" fill="#F85149" text-anchor="middle" font-weight="bold">-exec cmd {} \;</text>
+  <text x="150" y="115" font-family="monospace" font-size="11" fill="#8B949E" text-anchor="middle">One process per file</text>
+  
+  <!-- Diagram for \; -->
+  <rect x="50" y="130" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="80" y="147" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file1</text>
+  <line x1="110" y1="142" x2="140" y2="142" stroke="#4A90D9" stroke-width="1" marker-end="url(#arrow)"/>
+  <rect x="145" y="130" width="45" height="25" rx="4" fill="#1F4529" stroke="#3FB950"/>
+  <text x="167" y="147" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">rm</text>
+  
+  <rect x="50" y="160" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="80" y="177" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file2</text>
+  <line x1="110" y1="172" x2="140" y2="172" stroke="#4A90D9" stroke-width="1" marker-end="url(#arrow)"/>
+  <rect x="145" y="160" width="45" height="25" rx="4" fill="#1F4529" stroke="#3FB950"/>
+  <text x="167" y="177" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">rm</text>
+  
+  <rect x="50" y="190" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="80" y="207" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file3</text>
+  <line x1="110" y1="202" x2="140" y2="202" stroke="#4A90D9" stroke-width="1" marker-end="url(#arrow)"/>
+  <rect x="145" y="190" width="45" height="25" rx="4" fill="#1F4529" stroke="#3FB950"/>
+  <text x="167" y="207" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">rm</text>
+  
+  <text x="200" y="145" font-family="monospace" font-size="18" fill="#F85149">}</text>
+  <text x="215" y="170" font-family="monospace" font-size="10" fill="#F85149">3 proc</text>
+  
+  <!-- Section 2: -exec + -->
+  <rect x="280" y="60" width="240" height="180" rx="8" fill="#161B22" stroke="#3FB950" stroke-width="2"/>
+  <text x="400" y="90" font-family="monospace" font-size="14" fill="#3FB950" text-anchor="middle" font-weight="bold">-exec cmd {} +</text>
+  <text x="400" y="115" font-family="monospace" font-size="11" fill="#8B949E" text-anchor="middle">Batch - one process</text>
+  
+  <!-- Diagram for + -->
+  <rect x="300" y="130" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="330" y="147" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file1</text>
+  
+  <rect x="300" y="160" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="330" y="177" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file2</text>
+  
+  <rect x="300" y="190" width="60" height="25" rx="4" fill="#2D3748" stroke="#58A6FF"/>
+  <text x="330" y="207" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">file3</text>
+  
+  <line x1="360" y1="142" x2="420" y2="172" stroke="#4A90D9" stroke-width="1"/>
+  <line x1="360" y1="172" x2="420" y2="172" stroke="#4A90D9" stroke-width="1"/>
+  <line x1="360" y1="202" x2="420" y2="172" stroke="#4A90D9" stroke-width="1" marker-end="url(#arrow)"/>
+  
+  <rect x="425" y="157" width="80" height="30" rx="4" fill="#1F4529" stroke="#3FB950"/>
+  <text x="465" y="177" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">rm f1 f2 f3</text>
+  
+  <text x="465" y="210" font-family="monospace" font-size="10" fill="#3FB950">1 proc ✓</text>
+  
+  <!-- Section 3: xargs -->
+  <rect x="530" y="60" width="240" height="180" rx="8" fill="#161B22" stroke="#58A6FF" stroke-width="2"/>
+  <text x="650" y="90" font-family="monospace" font-size="14" fill="#58A6FF" text-anchor="middle" font-weight="bold">| xargs cmd</text>
+  <text x="650" y="115" font-family="monospace" font-size="11" fill="#8B949E" text-anchor="middle">Pipe + batch</text>
+  
+  <!-- Diagram for xargs -->
+  <rect x="550" y="135" width="60" height="70" rx="4" fill="#2D3748" stroke="#F0883E"/>
+  <text x="580" y="157" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">file1</text>
+  <text x="580" y="172" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">file2</text>
+  <text x="580" y="187" font-family="monospace" font-size="9" fill="#E6EDF3" text-anchor="middle">file3</text>
+  <text x="580" y="130" font-family="monospace" font-size="8" fill="#F0883E" text-anchor="middle">stdin</text>
+  
+  <line x1="610" y1="170" x2="660" y2="170" stroke="#4A90D9" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="635" y="163" font-family="monospace" font-size="8" fill="#8B949E" text-anchor="middle">xargs</text>
+  
+  <rect x="665" y="155" width="90" height="30" rx="4" fill="#1F4529" stroke="#3FB950"/>
+  <text x="710" y="175" font-family="monospace" font-size="10" fill="#E6EDF3" text-anchor="middle">rm f1 f2 f3</text>
+  
+  <text x="710" y="210" font-family="monospace" font-size="10" fill="#58A6FF">flexible ✓</text>
+  
+  <!-- Comparison Table -->
+  <rect x="30" y="260" width="740" height="170" rx="8" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  
+  <!-- Headers -->
+  <text x="150" y="290" font-family="monospace" font-size="12" fill="#F85149" text-anchor="middle" font-weight="bold">-exec {} \;</text>
+  <text x="400" y="290" font-family="monospace" font-size="12" fill="#3FB950" text-anchor="middle" font-weight="bold">-exec {} +</text>
+  <text x="650" y="290" font-family="monospace" font-size="12" fill="#58A6FF" text-anchor="middle" font-weight="bold">xargs</text>
+  
+  <line x1="40" y1="300" x2="760" y2="300" stroke="#30363D" stroke-width="1"/>
+  
+  <!-- Row: Performance -->
+  <text x="50" y="325" font-family="monospace" font-size="11" fill="#8B949E">Speed</text>
+  <text x="150" y="325" font-family="monospace" font-size="11" fill="#F85149" text-anchor="middle">Slow</text>
+  <text x="400" y="325" font-family="monospace" font-size="11" fill="#3FB950" text-anchor="middle">Fast</text>
+  <text x="650" y="325" font-family="monospace" font-size="11" fill="#3FB950" text-anchor="middle">Fast</text>
+  
+  <!-- Row: Spaces -->
+  <text x="50" y="355" font-family="monospace" font-size="11" fill="#8B949E">Spaces</text>
+  <text x="150" y="355" font-family="monospace" font-size="11" fill="#3FB950" text-anchor="middle">Safe</text>
+  <text x="400" y="355" font-family="monospace" font-size="11" fill="#3FB950" text-anchor="middle">Safe</text>
+  <text x="650" y="355" font-family="monospace" font-size="11" fill="#F0883E" text-anchor="middle">Need -0</text>
+  
+  <!-- Row: Use case -->
+  <text x="50" y="385" font-family="monospace" font-size="11" fill="#8B949E">Best for</text>
+  <text x="150" y="385" font-family="monospace" font-size="11" fill="#E6EDF3" text-anchor="middle">Per-file ops</text>
+  <text x="400" y="385" font-family="monospace" font-size="11" fill="#E6EDF3" text-anchor="middle">Batch (built-in)</text>
+  <text x="650" y="385" font-family="monospace" font-size="11" fill="#E6EDF3" text-anchor="middle">Complex pipes</text>
+  
+  <!-- Row: Parallel -->
+  <text x="50" y="415" font-family="monospace" font-size="11" fill="#8B949E">Parallel</text>
+  <text x="150" y="415" font-family="monospace" font-size="11" fill="#F85149" text-anchor="middle">No</text>
+  <text x="400" y="415" font-family="monospace" font-size="11" fill="#F85149" text-anchor="middle">No</text>
+  <text x="650" y="415" font-family="monospace" font-size="11" fill="#3FB950" text-anchor="middle">-P N</text>
+  
+  <!-- Examples -->
+  <rect x="30" y="445" width="740" height="90" rx="8" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+  <text x="50" y="475" font-family="monospace" font-size="12" fill="#7EE787">Examples:</text>
+  <text x="50" y="500" font-family="monospace" font-size="11" fill="#E6EDF3">find . -name "*.log" -exec rm {} \;           # Slow: 100 files = 100 rm processes</text>
+  <text x="50" y="520" font-family="monospace" font-size="11" fill="#E6EDF3">find . -name "*.log" -exec rm {} +            # Fast: 100 files = 1-2 rm processes</text>
+  <text x="50" y="540" font-family="monospace" font-size="11" fill="#E6EDF3">find . -name "*.log" -print0 | xargs -0 rm    # Safe with spaces, parallel ready</text>
+</svg>

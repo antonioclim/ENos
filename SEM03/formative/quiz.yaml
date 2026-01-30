@@ -1,0 +1,721 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Formative Quiz — Seminar 03: System Administration
+# Operating Systems | Bucharest UES - CSIE
+# ═══════════════════════════════════════════════════════════════════════════════
+# Version: 1.0 | Date: January 2025
+# Topics: find, xargs, getopts, Unix permissions, CRON
+# Bloom Distribution: Remember 20%, Understand 25%, Apply 35%, Analyse 15%, Evaluate 5%
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  seminar: 3
+  title: "System Administration: find, xargs, getopts, permissions, CRON"
+  version: "1.0"
+  creation_date: "2025-01"
+  language: "en"
+  level: "beginner"
+  estimated_duration_minutes: 25
+  total_score: 100
+  passing_threshold: 60
+  bloom_distribution:
+    remember: 3      # 20%
+    understand: 4    # 25%
+    apply: 5         # 35%
+    analyse: 2       # 15%
+    evaluate: 1      # 5%
+
+instructions: |
+  This quiz assesses understanding of system administration concepts in Linux.
+  Answer all questions. There is only one correct answer per question.
+  Recommended time: 25 minutes.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: FIND AND XARGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+questions:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q01: REMEMBER - find syntax
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q01
+    section: "find and xargs"
+    type: mcq
+    bloom: remember
+    score: 6
+    text: |
+      Which option of the `find` command specifies the type of file being searched?
+    options:
+      - "-type"
+      - "-name"
+      - "-size"
+      - "-mtime"
+    correct: 0
+    explanation: |
+      The `-type` option specifies the type: `f` for files, `d` for directories,
+      `l` for symlinks. Example: `find . -type f` finds only files.
+    misconceptions:
+      1: "Confuses -name (searches by name, not type)"
+      2: "Confuses -size (searches by size)"
+      3: "Confuses -mtime (searches by modification date)"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#find"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q02: UNDERSTAND - find vs locate
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q02
+    section: "find and xargs"
+    type: mcq
+    bloom: understand
+    score: 7
+    text: |
+      You've just created a new file: `touch ~/test.txt`
+      Immediately you run: `locate test.txt`
+      
+      What happens?
+    options:
+      - "Finds the file instantly"
+      - "Does not find the file (database not updated)"
+      - "Error - locate does not search in home"
+      - "Finds all test.txt files, including the new one"
+    correct: 1
+    explanation: |
+      `locate` uses a pre-indexed database that updates periodically
+      (typically overnight via cron). New files don't appear until `sudo updatedb`.
+      Use `find` for real-time searches.
+    misconceptions:
+      0: "Believes locate performs live search like find"
+      2: "Does not understand the purpose of locate"
+      3: "Confuses with find's behaviour"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-01"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q03: APPLY - Building find command
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q03
+    section: "find and xargs"
+    type: mcq
+    bloom: apply
+    score: 8
+    text: |
+      You want to find all `.log` files larger than 10MB modified
+      in the last 7 days. Which command is correct?
+    options:
+      - "find . -name '*.log' -size +10M -mtime -7"
+      - "find . -name '*.log' -size 10M -mtime 7"
+      - "find . -type f '*.log' -size +10M -mtime -7"
+      - "find . -name *.log -size +10M -mtime -7"
+    correct: 0
+    explanation: |
+      Correct: `-name '*.log'` (pattern with quotes), `-size +10M` (larger than),
+      `-mtime -7` (modified in the last 7 days). The + sign means "larger than",
+      the - sign with mtime means "within the last N days".
+    misconceptions:
+      1: "Missing + for size, missing - for mtime"
+      2: "Wrong syntax: -type does not take pattern directly"
+      3: "Missing quotes around pattern (shell expands prematurely)"
+    reference: "docs/S03_05_LIVE_CODING_GUIDE.md#LC-01"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q04: UNDERSTAND - find operator precedence
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q04
+    section: "find and xargs"
+    type: mcq
+    bloom: understand
+    score: 7
+    text: |
+      What does this command return?
+      
+      ```bash
+      find . -type f -name "*.txt" -o -name "*.md"
+      ```
+    options:
+      - "All .txt files and all .md files"
+      - "All FILES with .txt and ANYTHING (file or directory) with .md"
+      - "Syntax error"
+      - "Nothing - conditions are mutually exclusive"
+    correct: 1
+    explanation: |
+      AND has higher precedence than OR in find!
+      It is interpreted as: `(-type f AND -name "*.txt") OR (-name "*.md")`
+      Correct solution: `find . -type f \( -name "*.txt" -o -name "*.md" \)`
+    misconceptions:
+      0: "Does not understand operator precedence"
+      2: "Syntax is valid, does not produce error"
+      3: "Conditions are not exclusive, OR combines them"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-02"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q05: APPLY - xargs with spaces
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q05
+    section: "find and xargs"
+    type: mcq
+    bloom: apply
+    score: 8
+    text: |
+      You have files with spaces in their names. Which combination is safe?
+    options:
+      - "find . -name '*.txt' | xargs rm"
+      - "find . -name '*.txt' -print0 | xargs -0 rm"
+      - "find . -name '*.txt' -exec rm {} +"
+      - "Both B and C are correct"
+    correct: 3
+    explanation: |
+      Both variants are correct for files with spaces:
+      - `-print0 | xargs -0` uses null as separator
+      - `-exec {} +` groups arguments and passes them directly
+      Variant A fails for "important document.txt" (becomes 2 arguments).
+    misconceptions:
+      0: "xargs implicitly splits on spaces - dangerous!"
+      1: "Correct, but not the only solution"
+      2: "Correct, but not the only solution"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-04"
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # SECTION 2: GETOPTS AND SCRIPT PARAMETERS
+  # ═══════════════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q06: REMEMBER - Special variables
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q06
+    section: "getopts and parameters"
+    type: mcq
+    bloom: remember
+    score: 6
+    text: |
+      Which variable contains the number of arguments passed to a script?
+    options:
+      - "$#"
+      - "$@"
+      - "$*"
+      - "$0"
+    correct: 0
+    explanation: |
+      `$#` = number of arguments (count)
+      `$@` = all arguments as list
+      `$*` = all arguments as string
+      `$0` = script name
+    misconceptions:
+      1: "Confuses with the list of arguments"
+      2: "Confuses with the string of arguments"
+      3: "Confuses with the script name"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#parameters"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q07: UNDERSTAND - Difference $@ vs $*
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q07
+    section: "getopts and parameters"
+    type: mcq
+    bloom: understand
+    score: 7
+    text: |
+      Script called with: `./script.sh "Hello World" Test`
+      
+      How many elements does `for arg in "$@"` iterate?
+    options:
+      - "1 element"
+      - "2 elements"
+      - "3 elements"
+      - "4 elements"
+    correct: 1
+    explanation: |
+      With double quotes, `"$@"` preserves the original arguments:
+      - Argument 1: "Hello World" (a single argument)
+      - Argument 2: "Test"
+      Total: 2 elements. Without quotes, it would be 3 ("Hello", "World", "Test").
+    misconceptions:
+      0: "Believes everything becomes a single string"
+      2: "Confuses with behaviour without quotes"
+      3: "Counts the script name as well"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-07"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q08: APPLY - getopts
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q08
+    section: "getopts and parameters"
+    type: mcq
+    bloom: apply
+    score: 8
+    text: |
+      To parse `-v` (flag) and `-f FILE` (with argument), which is correct?
+    options:
+      - 'while getopts "vf" opt; do'
+      - 'while getopts "v:f:" opt; do'
+      - 'while getopts "vf:" opt; do'
+      - 'while getopts ":vf" opt; do'
+    correct: 2
+    explanation: |
+      A colon (`:`) after a letter means "requires argument".
+      - `v` = simple flag (no argument)
+      - `f:` = option with mandatory argument
+      Therefore: `"vf:"` is correct.
+    misconceptions:
+      0: "Neither v nor f receive argument"
+      1: "Both receive argument (wrong for -v)"
+      3: ": at beginning = silent error mode, does not solve the problem"
+    reference: "docs/S03_05_LIVE_CODING_GUIDE.md#LC-03"
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # SECTION 3: UNIX PERMISSIONS
+  # ═══════════════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q09: REMEMBER - Octal permissions
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q09
+    section: "Unix permissions"
+    type: mcq
+    bloom: remember
+    score: 6
+    text: |
+      What permissions does the octal value `755` represent?
+    options:
+      - "rwxr-xr-x"
+      - "rwxrwxrwx"
+      - "rw-r--r--"
+      - "rwx------"
+    correct: 0
+    explanation: |
+      7 = rwx (4+2+1), 5 = r-x (4+0+1), 5 = r-x (4+0+1)
+      Owner: read+write+execute, Group: read+execute, Others: read+execute
+      Typical for executable scripts.
+    misconceptions:
+      1: "777 = rwxrwxrwx"
+      2: "644 = rw-r--r--"
+      3: "700 = rwx------"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#permissions"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q10: UNDERSTAND - chmod effect
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q10
+    section: "Unix permissions"
+    type: mcq
+    bloom: understand
+    score: 7
+    text: |
+      A file has permissions `rw-r--r--`. After `chmod g+w file`, what permissions does it have?
+    options:
+      - "rw-rw-r--"
+      - "rwxrw-r--"
+      - "rw-r--rw-"
+      - "rw-rwxr--"
+    correct: 0
+    explanation: |
+      `g+w` = add write for group
+      Initially: rw- r-- r-- (owner, group, others)
+      After: rw- rw- r-- (group receives w)
+    misconceptions:
+      1: "Confuses with adding x"
+      2: "Confuses g (group) with o (others)"
+      3: "Adds too many permissions"
+    reference: "docs/S03_05_LIVE_CODING_GUIDE.md#LC-04"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q11: ANALYSE - Permission diagnostics
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q11
+    section: "Unix permissions"
+    type: mcq
+    bloom: analyse
+    score: 9
+    text: |
+      A script `backup.sh` has permissions `rw-r--r--`.
+      You run `./backup.sh` and receive "Permission denied".
+      
+      What is the problem and solution?
+    options:
+      - "Missing execute permission; solution: chmod +x backup.sh"
+      - "Missing read permission; solution: chmod +r backup.sh"
+      - "File is owned by root; solution: sudo ./backup.sh"
+      - "Shebang is wrong; solution: check first line"
+    correct: 0
+    explanation: |
+      To run a script with `./script.sh`, you need execute permission.
+      `rw-r--r--` = 644 does not include x. Solution: `chmod +x backup.sh` or `chmod 755 backup.sh`.
+      Alternatively, you can run with `bash backup.sh` (does not require x).
+    misconceptions:
+      1: "Read is for reading content, not execution"
+      2: "Ownership is not the problem here"
+      3: "Shebang affects interpreter, not permissions"
+    reference: "docs/S03_06_SPRINT_EXERCISES.md#permissions"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q12: APPLY - SUID/SGID
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q12
+    section: "Unix permissions"
+    type: mcq
+    bloom: apply
+    score: 8
+    text: |
+      You want a script to run with the owner's permissions, not those of
+      the person executing it. What do you do?
+    options:
+      - "chmod u+s script.sh"
+      - "chmod g+s script.sh"
+      - "chmod +t script.sh"
+      - "chmod 777 script.sh"
+    correct: 0
+    explanation: |
+      SUID (Set User ID): `chmod u+s` or `chmod 4755`
+      The script runs with the owner's UID.
+      CAUTION: SUID on scripts is ignored on most modern systems!
+      It is used for binaries like /usr/bin/passwd.
+    misconceptions:
+      1: "SGID (g+s) = runs with group's GID"
+      2: "Sticky bit (+t) = protects deletion in directories"
+      3: "777 grants permissions, does not change identity"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#suid-sgid"
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # SECTION 4: CRON
+  # ═══════════════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q13: REMEMBER - Crontab format
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q13
+    section: "CRON"
+    type: mcq
+    bloom: remember
+    score: 6
+    text: |
+      What is the order of fields in a crontab line?
+    options:
+      - "minute hour day_of_month month day_of_week command"
+      - "hour minute day_of_month month day_of_week command"
+      - "minute hour month day_of_month day_of_week command"
+      - "day_of_week month day_of_month hour minute command"
+    correct: 0
+    explanation: |
+      Crontab format: `m h dom mon dow command`
+      - m = minute (0-59)
+      - h = hour (0-23)
+      - dom = day of month (1-31)
+      - mon = month (1-12)
+      - dow = day of week (0-7, 0 and 7 = Sunday)
+    misconceptions:
+      1: "Swaps minute and hour"
+      2: "Swaps month and day"
+      3: "Completely wrong order"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#cron"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q14: UNDERSTAND - Crontab interpretation
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q14
+    section: "CRON"
+    type: mcq
+    bloom: understand
+    score: 7
+    text: |
+      What does this crontab line do?
+      
+      ```
+      30 2 * * 1 /home/user/backup.sh
+      ```
+    options:
+      - "Runs backup.sh every Monday at 2:30 AM"
+      - "Runs backup.sh on the 2nd of each month at 00:30"
+      - "Runs backup.sh every day at 2:30 AM"
+      - "Runs backup.sh once a month, on Monday"
+    correct: 0
+    explanation: |
+      30 = minute 30, 2 = hour 2, * = any day, * = any month, 1 = Monday
+      Therefore: every Monday at 02:30 in the morning.
+    misconceptions:
+      1: "Confuses hour position with day_of_month"
+      2: "Ignores day_of_week field (1=Monday)"
+      3: "Does not understand field combination"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-15"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q15: APPLY - Writing crontab
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q15
+    section: "CRON"
+    type: mcq
+    bloom: apply
+    score: 8
+    text: |
+      You want to run a script every 15 minutes. Which line is correct?
+    options:
+      - "*/15 * * * * /path/script.sh"
+      - "15 * * * * /path/script.sh"
+      - "0-15 * * * * /path/script.sh"
+      - "0,15,30,45 * * * * /path/script.sh"
+    correct: 0
+    explanation: |
+      `*/15` = every 15 minutes (0, 15, 30, 45)
+      `15 * * * *` = only at minute 15 of each hour
+      Variant D is equivalent to A, but A is more elegant.
+    misconceptions:
+      1: "Runs only once per hour, at minute 15"
+      2: "0-15 = minutes 0-15, not interval of 15"
+      3: "Functionally correct, but inefficient"
+    reference: "docs/S03_05_LIVE_CODING_GUIDE.md#LC-05"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q16: ANALYSE - Debugging cron
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q16
+    section: "CRON"
+    type: mcq
+    bloom: analyse
+    score: 9
+    text: |
+      A cron job is not running. The script works manually.
+      Crontab line: `0 3 * * * backup.sh`
+      
+      What is the most likely cause?
+    options:
+      - "Missing absolute path to script"
+      - "Hour 3 does not exist (daylight saving)"
+      - "Cron daemon is not running"
+      - "Insufficient permissions on crontab"
+    correct: 0
+    explanation: |
+      Cron runs with a minimal PATH. `backup.sh` without absolute path is not found.
+      Solution: use `/home/user/backup.sh` or set PATH in crontab.
+      Other common causes: missing environment variables, unredirected output.
+    misconceptions:
+      1: "DST is a rare problem, not the first to check"
+      2: "If script runs manually, daemon is working"
+      3: "Error would be different for permissions"
+    reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#cron-debug"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Q17: EVALUATE - Strategy selection
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: q17
+    section: "General evaluation"
+    type: mcq
+    bloom: evaluate
+    score: 10
+    text: |
+      You need to process 10,000 .log files, deleting empty lines.
+      Which approach is the most efficient?
+    options:
+      - "for f in *.log; do sed -i '/^$/d' \"$f\"; done"
+      - "find . -name '*.log' -exec sed -i '/^$/d' {} \\;"
+      - "find . -name '*.log' -exec sed -i '/^$/d' {} +"
+      - "find . -name '*.log' | xargs sed -i '/^$/d'"
+    correct: 2
+    explanation: |
+      Variant C with `+` groups files and calls sed once
+      (or a few times for large batches). It is much more efficient than:
+      - A/B: starts a sed process for EACH file (10,000 processes)
+      - D: problems with spaces in names (would need -print0 | xargs -0)
+    misconceptions:
+      0: "Works, but 10,000 forks = slow"
+      1: "\\; = one sed per file, inefficient"
+      3: "Problems with spaces, not robust"
+    reference: "docs/S03_03_PEER_INSTRUCTION.md#PI-03"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRAP QUESTIONS (AI-Resistant)
+# ═══════════════════════════════════════════════════════════════════════════════
+# These questions test whether you UNDERSTAND or just recognise patterns.
+# The "obvious" answer is often wrong.
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # T1: TRAP - Plausible but dangerous
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: trap_01
+    section: "Trap Questions"
+    type: mcq
+    bloom: evaluate
+    score: 8
+    text: |
+      A colleague shows you this "elegant" one-liner:
+      
+        find / -name "*.log" -delete 2>/dev/null
+      
+      What do you tell them?
+    options:
+      - "Excellent! Suppressing errors makes it cleaner"
+      - "Dangerous: deletes ALL .log files including critical ones"
+      - "Does not work - -delete requires -depth"
+      - "Needs sudo to actually delete system files"
+    correct: 1
+    explanation: |
+      This command deletes /var/log/auth.log, /var/log/syslog and everything!
+      The error suppression (2>/dev/null) hides permission denied but does not
+      prevent deletion of user-owned logs.
+      Answer A sounds like AI-generated feedback (focuses on style not consequences).
+    trap_note: |
+      LLMs often validate "correct syntax" without considering real-world impact.
+    misconceptions:
+      0: "AI-style answer - validates syntax but ignores danger"
+      2: "-delete works without -depth (though -depth is recommended)"
+      3: "Without sudo it still deletes user logs"
+    reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#trap-t1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # T2: TRAP - Partial correctness
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: trap_02
+    section: "Trap Questions"
+    type: mcq
+    bloom: analyse
+    score: 8
+    text: |
+      Your script processes files from user input:
+      
+        read -p "Enter filename: " filename
+        cat $filename | process_data
+      
+      What is wrong?
+    options:
+      - "Should use printf instead of read"
+      - "Useless use of cat - just use: process_data < $filename"
+      - "Missing quotes: cat \"$filename\""
+      - "Both B and C are correct"
+    correct: 2
+    explanation: |
+      Missing quotes is a SECURITY vulnerability plus it breaks on spaces.
+      While "useless use of cat" (option B) is a style concern it is not security.
+      Option D is the trap - LLMs love "both X and Y" to sound comprehensive.
+      But in security there is a hierarchy: quotes are CRITICAL while UUOC is cosmetic.
+    trap_note: |
+      LLMs tend to give "comprehensive" answers that treat all issues equally.
+    misconceptions:
+      0: "printf is for output not input"
+      1: "Style preference not security requirement"
+      3: "B is style while C is security - they are not equivalent"
+    reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#trap-t2"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # T3: TRAP - Most likely cause
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: trap_03
+    section: "Trap Questions"
+    type: mcq
+    bloom: analyse
+    score: 8
+    text: |
+      This cron job runs at 2:30 AM but sometimes fails silently:
+      
+        30 2 * * * /home/user/backup.sh
+      
+      What is the MOST LIKELY cause?
+    options:
+      - "backup.sh uses relative paths that do not exist in cron"
+      - "2:30 AM falls during DST transition in some months"
+      - "The script needs >> log 2>&1 to capture errors"
+      - "cron uses a different shell than your terminal"
+    correct: 0
+    explanation: |
+      Scripts that work interactively often use `cd`, `~` or commands without
+      full path. Cron has minimal PATH and no user environment.
+      All answers are partially true but A is MOST LIKELY (90%+ of cases).
+      B is rare (1 hour/year), C hides but does not cause failure and D is usually not fatal.
+    trap_note: |
+      This requires real-world experience to answer - not just pattern matching.
+    misconceptions:
+      1: "DST edge case - true but rare"
+      2: "Hides errors but does not cause them"
+      3: "Usually not the cause of failure"
+    reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#trap-t3"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # TACIT_01: The 3 AM debugging question
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: tacit_01
+    section: "Tacit Knowledge"
+    type: mcq
+    bloom: evaluate
+    score: 10
+    text: |
+      You wrote a backup script that works perfectly when you run it manually.
+      Scheduled via cron at 3 AM, it fails silently — no backup file appears.
+      
+      You checked: syntax is correct, script is executable, cron service is running.
+      
+      What do you check FIRST?
+    options:
+      - "The script's shebang line"
+      - "Whether the disk is full"
+      - "Environment variables (PATH, HOME, etc.)"
+      - "The cron log in /var/log/syslog"
+    correct: 2
+    explanation: |
+      Cron runs with a minimal environment. PATH is usually just /usr/bin:/bin.
+      HOME may be unset or wrong. Scripts that rely on ~/.bashrc, ~/bin in PATH,
+      or environment variables from your interactive shell will fail silently.
+      
+      This is the kind of thing you learn by debugging at 3 AM. Textbooks mention
+      it but don't emphasise how COMMON this problem is (easily 70% of cron issues).
+      
+      The other options are valid but less likely:
+      - Shebang issues would usually show an error
+      - Disk full would affect manual runs too
+      - Log checking is useful but environment is the first suspect
+    tacit_note: |
+      AI often suggests "check syntax" or "check logs" because those are the
+      textbook answers. Experienced sysadmins check environment FIRST because
+      they've been burned by it repeatedly.
+    misconceptions:
+      0: "Shebang issues usually produce visible errors"
+      1: "Would also affect manual execution"
+      3: "Good for post-mortem but not first diagnostic step"
+    reference: "docs/S03_07_LLM_AWARE_EXERCISES.md"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # TACIT_02: The "it works on my machine" permission issue
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: tacit_02
+    section: "Tacit Knowledge"
+    type: mcq
+    bloom: evaluate
+    score: 10
+    text: |
+      A colleague asks: "My script runs fine as root but fails as normal user.
+      The script only reads files in /opt/app/data/ which has permissions 755."
+      
+      What is the MOST LIKELY cause?
+    options:
+      - "The files inside /opt/app/data/ have restrictive permissions"
+      - "The script itself is not executable for normal users"
+      - "A parent directory (/opt or /opt/app) lacks execute permission"
+      - "The script uses absolute paths that only root can access"
+    correct: 2
+    explanation: |
+      The sneaky one: you need execute (x) permission on EVERY directory in the
+      path to reach a file, not just the final directory.
+      
+      If /opt has permissions 750 and the user is not in the group, they cannot
+      traverse through it even if /opt/app/data is 755.
+      
+      This catches people every time. The directory you're looking at seems fine,
+      but you forgot to check the parents.
+    tacit_note: |
+      Classic "works for me" scenario. Root ignores most permission checks,
+      so testing as root hides these issues until deployment.
+    misconceptions:
+      0: "Possible but 755 on data/ suggests they checked that already"
+      1: "Would fail for root too"
+      3: "Would fail for root too"
+    reference: "docs/S03_02_MAIN_MATERIAL.md#permissions"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DISTRIBUTION SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Remember (3):    Q01, Q06, Q09, Q13              = 24 points
+# Understand (4):  Q02, Q04, Q07, Q10, Q14         = 35 points
+# Apply (5):       Q03, Q05, Q08, Q12, Q15         = 40 points
+# Analyse (4):     Q11, Q16, T2, T3                = 34 points
+# Evaluate (4):    Q17, T1, TACIT_01, TACIT_02     = 38 points
+# ───────────────────────────────────────────────────────────────────────────────
+# TOTAL:           22 questions                    = 171 points (scaled to 100)
+# 
+# TRAP QUESTIONS: T1, T2, T3 (24 points, ~14%)
+# TACIT KNOWLEDGE: TACIT_01, TACIT_02 (20 points, ~12%)
+# These require real-world experience, not just pattern matching.
+# ═══════════════════════════════════════════════════════════════════════════════

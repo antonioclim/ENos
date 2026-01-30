@@ -1,0 +1,120 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# linting.toml - Linting Configuration for Seminar 02
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Operating Systems | ASE Bucharest - CSIE
+# Configuration for: ruff, shellcheck
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RUFF CONFIGURATION (Python)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Copy this section to pyproject.toml if using ruff
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # function calls in argument defaults
+    "C901",   # too complex
+    "W503",   # line break before binary operator
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports in __init__
+"tests/*" = ["B011"]      # assert False allowed in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FLAKE8 CONFIGURATION (Alternative to ruff)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Copy this section to .flake8 or setup.cfg if using flake8
+
+# [flake8]
+# max-line-length = 100
+# ignore = E501,W503,E203
+# exclude = 
+#     .git,
+#     __pycache__,
+#     .pytest_cache,
+#     *.egg-info
+# per-file-ignores =
+#     __init__.py:F401
+#     tests/*:B011
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SHELLCHECK CONFIGURATION (Bash)
+# ═══════════════════════════════════════════════════════════════════════════════
+# ShellCheck uses command-line arguments or inline directives
+# Common directives to add at script top:
+#
+#   # shellcheck shell=bash
+#   # shellcheck disable=SC2086  # Word splitting intentional
+#   # shellcheck disable=SC2034  # Variable appears unused
+#   # shellcheck disable=SC1091  # Not following sourced file
+#
+# Severity levels:
+#   --severity=error    Only errors
+#   --severity=warning  Errors and warnings (recommended)
+#   --severity=info     Errors, warnings, and info
+#   --severity=style    All including style suggestions
+#
+# Common warnings to consider:
+#   SC2086 - Double quote to prevent globbing and word splitting
+#   SC2046 - Quote this to prevent word splitting
+#   SC2034 - Variable appears unused
+#   SC2155 - Declare and assign separately
+#   SC2181 - Check exit code directly
+#   SC1090 - Can't follow non-constant source
+#
+# Usage:
+#   shellcheck --severity=warning scripts/bash/*.sh
+#   shellcheck -e SC2086,SC2034 script.sh
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PYTEST CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COVERAGE CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[tool.coverage.run]
+source = ["scripts/python"]
+omit = ["tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

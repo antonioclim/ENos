@@ -1,0 +1,298 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GitHub Actions CI Pipeline — Seminar 03
+# Operating Systems | Bucharest UES - CSIE
+# ═══════════════════════════════════════════════════════════════════════════════
+# File: .github/workflows/ci.yml (copied from ci/github_actions.yml)
+# Issues: Open an issue in GitHub
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: SEM03 CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'scripts/**'
+      - 'formative/**'
+      - 'tests/**'
+      - 'homework/**'
+      - 'Makefile'
+      - 'requirements.txt'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:  # Allows manual execution
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # JOB 1: LINTING
+  # ═══════════════════════════════════════════════════════════════════════════════
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Lint Bash scripts
+        run: |
+          echo "═══ Bash verification with shellcheck ═══"
+          shellcheck --shell=bash --severity=warning \
+            scripts/bash/*.sh \
+            scripts/demo/*.sh \
+            homework/*.sh 2>/dev/null || true
+          echo "✓ Shellcheck complete"
+
+      - name: Check Bash syntax
+        run: |
+          echo "═══ Bash syntax verification ═══"
+          for f in scripts/bash/*.sh scripts/demo/*.sh; do
+            if [ -f "$f" ]; then
+              bash -n "$f" || exit 1
+            fi
+          done
+          echo "✓ Bash syntax OK"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python linters
+        run: |
+          pip install --upgrade pip
+          pip install ruff
+
+      - name: Lint Python with ruff
+        run: |
+          echo "═══ Python verification with ruff ═══"
+          ruff check scripts/python/*.py --output-format=github || true
+          echo "✓ Ruff complete"
+
+      - name: Check Python syntax
+        run: |
+          echo "═══ Python syntax verification ═══"
+          for f in scripts/python/*.py; do
+            if [ -f "$f" ]; then
+              python -m py_compile "$f" || exit 1
+            fi
+          done
+          echo "✓ Python syntax OK"
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # JOB 2: VALIDATE STRUCTURE
+  # ═══════════════════════════════════════════════════════════════════════════════
+  validate:
+    name: Validate Structure
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate required files
+        run: |
+          echo "═══ Required files verification ═══"
+          ERRORS=0
+          
+          # Verify docs/
+          for f in S03_00_PEDAGOGICAL_ANALYSIS_PLAN.md \
+                   S03_01_INSTRUCTOR_GUIDE.md \
+                   S03_02_MAIN_MATERIAL.md \
+                   S03_03_PEER_INSTRUCTION.md \
+                   S03_04_PARSONS_PROBLEMS.md \
+                   S03_05_LIVE_CODING_GUIDE.md \
+                   S03_06_SPRINT_EXERCISES.md \
+                   S03_07_LLM_AWARE_EXERCISES.md \
+                   S03_08_SPECTACULAR_DEMOS.md \
+                   S03_09_VISUAL_CHEAT_SHEET.md \
+                   S03_10_SELF_ASSESSMENT_REFLECTION.md \
+                   lo_traceability.md; do
+            if [ -f "docs/$f" ]; then
+              echo "  ✓ docs/$f"
+            else
+              echo "  ✗ docs/$f MISSING"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+          
+          # Verify root
+          for f in README.md Makefile requirements.txt; do
+            if [ -f "$f" ]; then
+              echo "  ✓ $f"
+            else
+              echo "  ✗ $f MISSING"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+          
+          # Verify formative/
+          for f in quiz.yaml quiz_lms.json; do
+            if [ -f "formative/$f" ]; then
+              echo "  ✓ formative/$f"
+            else
+              echo "  ✗ formative/$f MISSING"
+              ERRORS=$((ERRORS+1))
+            fi
+          done
+          
+          # Verify docs/images/
+          if [ -d "docs/images" ] && [ "$(ls -A docs/images 2>/dev/null)" ]; then
+            echo "  ✓ docs/images/ contains files"
+          else
+            echo "  ⚠ docs/images/ is empty or missing"
+          fi
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "═══ $ERRORS files missing! ═══"
+            exit 1
+          fi
+          echo "═══ All files present ═══"
+
+      - name: Validate YAML quiz
+        run: |
+          echo "═══ Validating quiz.yaml ═══"
+          python -c "
+          import yaml
+          import sys
+          
+          with open('formative/quiz.yaml', 'r', encoding='utf-8') as f:
+              quiz = yaml.safe_load(f)
+          
+          # Basic verifications
+          assert 'metadata' in quiz, 'Missing metadata'
+          assert 'questions' in quiz, 'Missing questions'
+          
+          questions = quiz['questions']
+          print(f'  Questions found: {len(questions)}')
+          
+          # Verify question structure
+          for i, q in enumerate(questions):
+              assert 'id' in q, f'Question {i}: missing id'
+              assert 'text' in q, f'Question {i}: missing text'
+              assert 'options' in q, f'Question {i}: missing options'
+              assert 'correct' in q, f'Question {i}: missing correct answer'
+          
+          print('✓ Quiz YAML valid and complete')
+          "
+
+      - name: Validate JSON quiz
+        run: |
+          echo "═══ Validating quiz_lms.json ═══"
+          python -c "
+          import json
+          
+          with open('formative/quiz_lms.json', 'r', encoding='utf-8') as f:
+              quiz = json.load(f)
+          
+          assert 'questions' in quiz, 'Missing questions'
+          print(f'  Questions found: {len(quiz[\"questions\"])}')
+          print('✓ Quiz JSON valid')
+          "
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # JOB 3: RUN TESTS
+  # ═══════════════════════════════════════════════════════════════════════════════
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run test suite
+        run: |
+          echo "═══ Running tests ═══"
+          if [ -f "tests/run_all_tests.sh" ]; then
+            chmod +x tests/run_all_tests.sh
+            bash tests/run_all_tests.sh
+          else
+            echo "Basic tests (without dedicated runner)..."
+            # Verify Python imports
+            for f in scripts/python/*.py; do
+              if [ -f "$f" ]; then
+                python -c "import sys; sys.path.insert(0, '.'); exec(open('$f').read())" 2>/dev/null || true
+              fi
+            done
+            echo "✓ Basic verifications complete"
+          fi
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # JOB 4: CHECK AI PATTERNS (optional)
+  # ═══════════════════════════════════════════════════════════════════════════════
+  ai-check:
+    name: Check AI Patterns
+    runs-on: ubuntu-latest
+    needs: lint
+    continue-on-error: true  # Does not block the pipeline
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for AI signal words
+        run: |
+          echo "═══ AI signal words verification ═══"
+          AI_WORDS="delve|leverage|comprehensive|robust|seamless|cutting-edge|foster|cultivate|harness|pivotal|paramount|utilize|facilitate|streamline|embark|journey|landscape|ecosystem"
+          
+          COUNT=$(grep -riE "$AI_WORDS" --include="*.md" --include="*.sh" . 2>/dev/null | wc -l || echo "0")
+          
+          if [ "$COUNT" -gt 5 ]; then
+            echo "⚠️ Warning: $COUNT AI word instances detected"
+            grep -riE "$AI_WORDS" --include="*.md" . 2>/dev/null | head -20 || true
+          else
+            echo "✓ Acceptable AI word count: $COUNT"
+          fi
+
+      - name: Check naming consistency
+        run: |
+          echo "═══ Naming consistency verification ═══"
+          ISSUES=$(grep -rE "Seminar 5-6|sem56|SEM05-06" --include="*.md" --include="*.sh" . 2>/dev/null | wc -l || echo "0")
+          
+          if [ "$ISSUES" -gt 0 ]; then
+            echo "⚠️ Warning: $ISSUES inconsistent numbering references"
+            grep -rE "Seminar 5-6|sem56" --include="*.md" . 2>/dev/null | head -10 || true
+          else
+            echo "✓ Naming consistent"
+          fi
+          
+      - name: Check British English spelling
+        run: |
+          echo "═══ British English spelling verification ═══"
+          AMERICAN=$(grep -rE "\banalyze\b|\bbehavior\b|\bcolor\b|\bfavor\b|\bhonor\b|\borganize\b|\brealize\b|\brecognize\b" --include="*.md" . 2>/dev/null | grep -v "color=" | grep -v "\.sh:" | wc -l || echo "0")
+          
+          if [ "$AMERICAN" -gt 0 ]; then
+            echo "⚠️ Warning: $AMERICAN American spelling instances detected"
+            grep -rE "\banalyze\b|\bbehavior\b|\bcolor\b|\bfavor\b|\bhonor\b" --include="*.md" . 2>/dev/null | head -10 || true
+          else
+            echo "✓ British English spelling OK"
+          fi

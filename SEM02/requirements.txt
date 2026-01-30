@@ -1,0 +1,39 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# requirements.txt - Seminar 02 Dependencies
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Operating Systems | ASE Bucharest - CSIE
+# Install: pip install -r requirements.txt
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Core dependencies (required)
+PyYAML>=6.0
+
+# Testing (recommended)
+pytest>=7.0
+pytest-cov>=4.0
+
+# Linting (optional but recommended)
+ruff>=0.1.0
+
+# Report generation
+jinja2>=3.0
+
+# Type checking (optional)
+# mypy>=1.0
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Usage Notes:
+#
+# Minimal install (quiz and autograder only):
+#   pip install PyYAML
+#
+# Full install (with testing and linting):
+#   pip install -r requirements.txt
+#
+# Development install:
+#   pip install -r requirements.txt
+#   pip install mypy black isort
+#
+# ═══════════════════════════════════════════════════════════════════════════════

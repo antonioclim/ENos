@@ -1,0 +1,615 @@
+{
+  "metadata": {
+    "title": "Formative Quiz - Seminar 02: Operators, Redirection, Filters, Loops",
+    "course": "Operating Systems",
+    "institution": "Bucharest UES - CSIE",
+    "version": "1.0",
+    "date": "2025-01",
+    "language": "en",
+    "estimated_time_minutes": 25,
+    "total_questions": 25,
+    "points_per_question": 4,
+    "total_points": 100,
+    "bloom_distribution": {
+      "remember": 5,
+      "understand": 7,
+      "apply": 8,
+      "analyse": 4,
+      "evaluate": 1
+    },
+    "lms_compatibility": ["moodle", "canvas", "blackboard"]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "category": "operators",
+      "points": 4,
+      "question_text": "Which operator executes the second command ONLY if the first one succeeds (exit code 0)?",
+      "options": [
+        {"id": "A", "text": ";"},
+        {"id": "B", "text": "&&"},
+        {"id": "C", "text": "||"},
+        {"id": "D", "text": "&"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! The && operator (logical AND) executes the command on the right ONLY if the one on the left returns exit code 0.",
+        "incorrect": {
+          "A": "The ; operator always executes both commands, regardless of result.",
+          "C": "The || operator executes the second command when the first one FAILS.",
+          "D": "The & operator launches the command in background, does not check exit code."
+        }
+      }
+    },
+    {
+      "id": "q02",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "category": "operators",
+      "points": 4,
+      "question_text": "What does the & operator do when placed at the end of a command?",
+      "options": [
+        {"id": "A", "text": "Executes the command twice"},
+        {"id": "B", "text": "Launches the command in background"},
+        {"id": "C", "text": "Connects stdout to the stdin of another command"},
+        {"id": "D", "text": "Redirects stderr to stdout"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! & placed at the end of a command sends it to the background.",
+        "incorrect": {
+          "A": "This is not the function of the & operator.",
+          "C": "This is the pipe operator |.",
+          "D": "This is the 2>&1 syntax."
+        }
+      }
+    },
+    {
+      "id": "q03",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "operators",
+      "points": 4,
+      "question_text": "```bash\nmkdir test && echo \"Created\" || echo \"Error\"\n```\nIf the directory `test` ALREADY EXISTS, what is displayed?",
+      "options": [
+        {"id": "A", "text": "Created"},
+        {"id": "B", "text": "Error"},
+        {"id": "C", "text": "Created and Error"},
+        {"id": "D", "text": "Nothing (command fails silently)"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! mkdir fails when the directory exists, && is not executed, but || IS executed.",
+        "incorrect": {
+          "A": "mkdir returns error when the directory already exists.",
+          "C": "|| is not always executed after &&.",
+          "D": "Errors are displayed by default (without 2>/dev/null)."
+        }
+      }
+    },
+    {
+      "id": "q04",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "operators",
+      "points": 4,
+      "question_text": "```bash\nls /inexistent | wc -l\necho \"Exit code: $?\"\n```\nWhat will the displayed exit code be?",
+      "options": [
+        {"id": "A", "text": "The exit code of ls (non-zero, error)"},
+        {"id": "B", "text": "The exit code of wc (0, success)"},
+        {"id": "C", "text": "The sum of exit codes"},
+        {"id": "D", "text": "Syntax error"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! $? returns only the exit code of the LAST command in the pipeline.",
+        "incorrect": {
+          "A": "The pipe does not transmit the first command's exit code to $?.",
+          "C": "There is no mechanism for summing exit codes.",
+          "D": "The syntax is correct."
+        }
+      }
+    },
+    {
+      "id": "q05",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "operators",
+      "points": 4,
+      "question_text": "```bash\nx=1\n{ x=2; echo \"In braces: $x\"; }\necho \"After braces: $x\"\n\ny=1\n( y=2; echo \"In parentheses: $y\"; )\necho \"After parentheses: $y\"\n```\nWhat are the final values for x and y in the main shell?",
+      "options": [
+        {"id": "A", "text": "x=2, y=2"},
+        {"id": "B", "text": "x=2, y=1"},
+        {"id": "C", "text": "x=1, y=2"},
+        {"id": "D", "text": "x=1, y=1"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! {} executes in the current shell (x persists), () executes in a subshell (y is lost).",
+        "incorrect": {
+          "A": "() creates a subshell, modifications do not persist.",
+          "C": "{} does NOT create a subshell, modifications persist.",
+          "D": "{} executes in the current shell, so x=2."
+        }
+      }
+    },
+    {
+      "id": "q06",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "category": "redirection",
+      "points": 4,
+      "question_text": "Which operator appends text to the END of an existing file (without overwriting it)?",
+      "options": [
+        {"id": "A", "text": ">"},
+        {"id": "B", "text": ">>"},
+        {"id": "C", "text": "<"},
+        {"id": "D", "text": "2>"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! >> (append) adds to the end of the file.",
+        "incorrect": {
+          "A": "> overwrites the file completely.",
+          "C": "< redirects input, not output.",
+          "D": "2> redirects stderr."
+        }
+      }
+    },
+    {
+      "id": "q07",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "redirection",
+      "points": 4,
+      "question_text": "```bash\n# Variant A:\nls /home /inexistent > out.txt 2>&1\n\n# Variant B:\nls /home /inexistent 2>&1 > out.txt\n```\nWhich variant sends BOTH (stdout and stderr) to out.txt?",
+      "options": [
+        {"id": "A", "text": "Variant A"},
+        {"id": "B", "text": "Variant B"},
+        {"id": "C", "text": "Both variants"},
+        {"id": "D", "text": "Neither - you need &>"}
+      ],
+      "correct_answer": "A",
+      "feedback": {
+        "correct": "Correct! Redirections are evaluated left→right. In A: stdout→file, then stderr→where stdout is (file).",
+        "incorrect": {
+          "B": "In B: stderr→terminal (where stdout is NOW), then stdout→file. stderr remains on terminal!",
+          "C": "Order matters crucially for redirections.",
+          "D": "&> works, but A is equivalent and correct."
+        }
+      }
+    },
+    {
+      "id": "q08",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "redirection",
+      "points": 4,
+      "question_text": "```bash\nls /inexistent 2>/dev/null\necho $?\n```\nWhat value will $? (exit code) have?",
+      "options": [
+        {"id": "A", "text": "0 (success, because the error was suppressed)"},
+        {"id": "B", "text": "Non-zero (error, because the directory does not exist)"},
+        {"id": "C", "text": "Nothing - $? is not defined"},
+        {"id": "D", "text": "Syntax error"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! 2>/dev/null suppresses only the OUTPUT of the error, not the exit code!",
+        "incorrect": {
+          "A": "COMMON MISTAKE: suppressing the message does NOT mean success.",
+          "C": "$? is always defined after a command.",
+          "D": "The syntax is correct."
+        }
+      }
+    },
+    {
+      "id": "q09",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "redirection",
+      "points": 4,
+      "question_text": "How do you save BOTH stdout AND stderr to a file log.txt using Bash?",
+      "options": [
+        {"id": "A", "text": "cmd > log.txt 2> log.txt"},
+        {"id": "B", "text": "cmd &> log.txt"},
+        {"id": "C", "text": "cmd 2> log.txt 1> log.txt"},
+        {"id": "D", "text": "cmd | tee log.txt"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! &> redirects both streams in Bash. Equivalent to: cmd > log.txt 2>&1",
+        "incorrect": {
+          "A": "Can cause overwriting/concurrency problems.",
+          "C": "Same problem as A.",
+          "D": "tee does not capture stderr."
+        }
+      }
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "filters",
+      "points": 4,
+      "question_text": "```bash\necho -e \"a\\nb\\na\\nb\" | uniq\n```\nWhat does this command display?",
+      "options": [
+        {"id": "A", "text": "a\\nb"},
+        {"id": "B", "text": "a\\nb\\na\\nb"},
+        {"id": "C", "text": "a\\na\\nb\\nb"},
+        {"id": "D", "text": "Error - uniq requires a file"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "CLASSIC TRAP! uniq removes only CONSECUTIVE duplicates. None is consecutive, all remain.",
+        "incorrect": {
+          "A": "80% believe this! uniq does NOT remove all duplicates, only consecutive ones.",
+          "C": "uniq does not sort.",
+          "D": "uniq works with pipe as well."
+        }
+      }
+    },
+    {
+      "id": "q11",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "filters",
+      "points": 4,
+      "question_text": "```bash\necho \"one two three\" | cut -f2\n```\nWhat does it display?",
+      "options": [
+        {"id": "A", "text": "two"},
+        {"id": "B", "text": "one two three"},
+        {"id": "C", "text": "Error"},
+        {"id": "D", "text": "(nothing/empty line)"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! cut -f uses TAB by default. With no TAB in string, it returns the entire line.",
+        "incorrect": {
+          "A": "cut -f does NOT split by spaces by default!",
+          "C": "It is not an error, just no TAB found.",
+          "D": "Returns the complete line, not nothing."
+        }
+      }
+    },
+    {
+      "id": "q12",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "filters",
+      "points": 4,
+      "question_text": "Which command counts how many UNIQUE lines (without duplicates) a file contains?",
+      "options": [
+        {"id": "A", "text": "wc -l file.txt"},
+        {"id": "B", "text": "sort file.txt | uniq | wc -l"},
+        {"id": "C", "text": "uniq file.txt | wc -l"},
+        {"id": "D", "text": "cat file.txt | wc -u"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! sort | uniq removes all duplicates, then wc -l counts the remaining lines.",
+        "incorrect": {
+          "A": "wc -l counts ALL lines, including duplicates.",
+          "C": "uniq without sort does not remove non-consecutive duplicates.",
+          "D": "wc does not have a -u flag."
+        }
+      }
+    },
+    {
+      "id": "q13",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "filters",
+      "points": 4,
+      "question_text": "How do you extract ONLY column 3 from a CSV file (comma separator)?",
+      "options": [
+        {"id": "A", "text": "cut -f3 file.csv"},
+        {"id": "B", "text": "cut -d',' -f3 file.csv"},
+        {"id": "C", "text": "awk '{print $3}' file.csv"},
+        {"id": "D", "text": "grep -o ',[^,]*,' file.csv"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! -d',' sets the delimiter to comma, -f3 selects field 3.",
+        "incorrect": {
+          "A": "cut by default uses TAB, not comma.",
+          "C": "awk by default uses spaces/tabs as separator.",
+          "D": "The regex does not correctly extract the column."
+        }
+      }
+    },
+    {
+      "id": "q14",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "category": "filters",
+      "points": 4,
+      "question_text": "Which command displays the last 20 lines of a file?",
+      "options": [
+        {"id": "A", "text": "head -20 file.txt"},
+        {"id": "B", "text": "tail -20 file.txt"},
+        {"id": "C", "text": "cat -n 20 file.txt"},
+        {"id": "D", "text": "less -20 file.txt"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! tail -N displays the last N lines.",
+        "incorrect": {
+          "A": "head displays the FIRST lines.",
+          "C": "cat -n numbers lines, does not limit them.",
+          "D": "less is for interactive viewing."
+        }
+      }
+    },
+    {
+      "id": "q15",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "filters",
+      "points": 4,
+      "question_text": "```bash\necho \"hello\" | tr 'a-z' 'A-Z'\n```\nWhat does it display?",
+      "options": [
+        {"id": "A", "text": "hello"},
+        {"id": "B", "text": "HELLO"},
+        {"id": "C", "text": "Hello"},
+        {"id": "D", "text": "hELLO"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! tr 'a-z' 'A-Z' transforms all lowercase letters to uppercase.",
+        "incorrect": {
+          "A": "tr performs the transformation.",
+          "C": "tr transforms ALL letters, not just the first.",
+          "D": "All letters are transformed, including h."
+        }
+      }
+    },
+    {
+      "id": "q16",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "loops",
+      "points": 4,
+      "question_text": "```bash\nN=5\nfor i in {1..$N}; do\n    echo $i\ndone\n```\nWhat does this script display?",
+      "options": [
+        {"id": "A", "text": "1 2 3 4 5 (on separate lines)"},
+        {"id": "B", "text": "{1..5}"},
+        {"id": "C", "text": "Syntax error"},
+        {"id": "D", "text": "Nothing (empty loop)"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "TRAP! Brace expansion happens BEFORE variable expansion. {1..$N} remains literal.",
+        "incorrect": {
+          "A": "70% believe this! Brace expansion does not work with variables.",
+          "C": "It is not an error, just does not expand as expected.",
+          "D": "The loop executes once with i=\"{1..5}\"."
+        }
+      }
+    },
+    {
+      "id": "q17",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "category": "loops",
+      "points": 4,
+      "question_text": "```bash\ncount=0\necho -e \"a\\nb\\nc\" | while read line; do\n    ((count++))\ndone\necho \"Count: $count\"\n```\nWhat does it display?",
+      "options": [
+        {"id": "A", "text": "Count: 3"},
+        {"id": "B", "text": "Count: 0"},
+        {"id": "C", "text": "Count: 1"},
+        {"id": "D", "text": "Error - count is not defined"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "SUBSHELL PROBLEM! while from pipe runs in a subshell. Modifications to count are lost.",
+        "incorrect": {
+          "A": "65% believe this! The pipe creates a subshell, variables do not persist.",
+          "C": "Even if something persisted, it would be 3, not 1.",
+          "D": "count is defined, but in the subshell."
+        }
+      }
+    },
+    {
+      "id": "q18",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "category": "loops",
+      "points": 4,
+      "question_text": "```bash\nfor i in 1 2 3; do\n    if [ $i -eq 2 ]; then\n        break\n    fi\n    echo $i\ndone\necho \"After loop\"\n```\nWhat is displayed?",
+      "options": [
+        {"id": "A", "text": "1\\nAfter loop"},
+        {"id": "B", "text": "1 (nothing more - the script stopped)"},
+        {"id": "C", "text": "1\\n2\\nAfter loop"},
+        {"id": "D", "text": "1\\n2\\n3\\nAfter loop"}
+      ],
+      "correct_answer": "A",
+      "feedback": {
+        "correct": "Correct! break exits only the loop, not the script. Continues with 'After loop'.",
+        "incorrect": {
+          "B": "break does NOT stop the script, only the loop. exit would stop the script.",
+          "C": "At i=2, break executes BEFORE echo.",
+          "D": "break stops the loop at i=2."
+        }
+      }
+    },
+    {
+      "id": "q19",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "loops",
+      "points": 4,
+      "question_text": "What is the CORRECT way to iterate through .txt files in the current directory?",
+      "options": [
+        {"id": "A", "text": "for f in $(ls *.txt); do"},
+        {"id": "B", "text": "for f in *.txt; do"},
+        {"id": "C", "text": "for f in `cat *.txt`; do"},
+        {"id": "D", "text": "while f in *.txt; do"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! for f in *.txt uses glob expansion which preserves complete names.",
+        "incorrect": {
+          "A": "$(ls *.txt) splits incorrectly on spaces in file names.",
+          "C": "cat reads the CONTENT of files, not names.",
+          "D": "while does not have this syntax."
+        }
+      }
+    },
+    {
+      "id": "q20",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "loops",
+      "points": 4,
+      "question_text": "How do you read a file line by line in Bash?",
+      "options": [
+        {"id": "A", "text": "for line in $(cat file.txt); do"},
+        {"id": "B", "text": "while read line; do ... done < file.txt"},
+        {"id": "C", "text": "cat file.txt | for line; do"},
+        {"id": "D", "text": "read file.txt line"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! while read ... done < file is the standard pattern.",
+        "incorrect": {
+          "A": "$(cat) splits on spaces AND newlines.",
+          "C": "Invalid for syntax.",
+          "D": "Invalid read syntax."
+        }
+      }
+    },
+    {
+      "id": "q21",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "category": "integrated",
+      "points": 4,
+      "question_text": "```bash\ncat access.log | grep \"404\" | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5\n```\nWhat does this pipeline do?",
+      "options": [
+        {"id": "A", "text": "Displays the first 5 lines with 404 errors"},
+        {"id": "B", "text": "Displays top 5 IPs with the most 404 errors"},
+        {"id": "C", "text": "Counts total 404 errors in log"},
+        {"id": "D", "text": "Sorts the file and displays the first 5 lines"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! Pipeline: filters 404 → extracts IP → sorts → counts → top 5.",
+        "incorrect": {
+          "A": "uniq -c counts, does not just display lines.",
+          "C": "Displays top 5, not the total.",
+          "D": "grep filters only the 404s."
+        }
+      }
+    },
+    {
+      "id": "q22",
+      "type": "multiple_choice",
+      "bloom_level": "analyse",
+      "category": "integrated",
+      "points": 4,
+      "question_text": "Which command is equivalent to `cat file.txt | grep pattern`?",
+      "options": [
+        {"id": "A", "text": "grep pattern file.txt"},
+        {"id": "B", "text": "grep file.txt pattern"},
+        {"id": "C", "text": "pattern | grep file.txt"},
+        {"id": "D", "text": "file.txt | grep pattern"}
+      ],
+      "correct_answer": "A",
+      "feedback": {
+        "correct": "Correct! grep pattern file.txt is the direct form, without useless cat (UUOC).",
+        "incorrect": {
+          "B": "Order: pattern THEN file.",
+          "C": "You cannot pipe a pattern.",
+          "D": "You cannot pipe a literal file name."
+        }
+      }
+    },
+    {
+      "id": "q23",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "category": "integrated",
+      "points": 4,
+      "question_text": "How do you run a command in background and make it immune to terminal closure?",
+      "options": [
+        {"id": "A", "text": "cmd &"},
+        {"id": "B", "text": "nohup cmd &"},
+        {"id": "C", "text": "bg cmd"},
+        {"id": "D", "text": "daemon cmd"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! nohup makes the command immune to SIGHUP (hangup signal).",
+        "incorrect": {
+          "A": "& alone does not protect from terminal closure.",
+          "C": "bg moves an ALREADY suspended job to background.",
+          "D": "daemon is not a standard command."
+        }
+      }
+    },
+    {
+      "id": "q24",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "category": "integrated",
+      "points": 4,
+      "question_text": "What does the special variable $? contain in Bash?",
+      "options": [
+        {"id": "A", "text": "The PID of the current process"},
+        {"id": "B", "text": "The exit code of the last command executed"},
+        {"id": "C", "text": "The number of arguments received"},
+        {"id": "D", "text": "The script name"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! $? contains the exit code of the last command.",
+        "incorrect": {
+          "A": "$$ is for the PID of the current process.",
+          "C": "$# is for the number of arguments.",
+          "D": "$0 is for the script name."
+        }
+      }
+    },
+    {
+      "id": "q25",
+      "type": "multiple_choice",
+      "bloom_level": "evaluate",
+      "category": "integrated",
+      "points": 4,
+      "question_text": "A colleague wrote:\n```bash\nfor f in $(find . -name \"*.log\"); do\n    rm \"$f\"\ndone\n```\nWhat is the best practice for deleting .log files?",
+      "options": [
+        {"id": "A", "text": "The code is correct and safe"},
+        {"id": "B", "text": "find . -name '*.log' -delete"},
+        {"id": "C", "text": "rm *.log"},
+        {"id": "D", "text": "ls *.log | xargs rm"}
+      ],
+      "correct_answer": "B",
+      "feedback": {
+        "correct": "Correct! find -delete is safe, efficient and correctly handles spaces in names.",
+        "incorrect": {
+          "A": "$(find) causes problems with spaces in file names.",
+          "C": "rm *.log is not recursive and may fail with many files.",
+          "D": "ls | xargs has problems with special characters."
+        }
+      }
+    }
+  ],
+  "scoring": {
+    "points_per_question": 4,
+    "total_maximum": 100,
+    "thresholds": {
+      "excellent": {"min": 90, "label": "Excellent", "grade": "A"},
+      "good": {"min": 75, "label": "Good", "grade": "B"},
+      "satisfactory": {"min": 60, "label": "Satisfactory", "grade": "C"},
+      "insufficient": {"min": 0, "label": "Insufficient", "grade": "F"}
+    },
+    "feedback_messages": {
+      "excellent": "Congratulations! You have excellent mastery of shell scripting concepts.",
+      "good": "Good level! Review pipes and subshells for improvement.",
+      "satisfactory": "Good progress! Practise more with redirection and loops.",
+      "insufficient": "Additional study required. Review the material and practise."
+    }
+  }
+}

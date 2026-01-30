@@ -1,0 +1,133 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GitHub Actions CI Pipeline - Seminar 02
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Operating Systems | ASE Bucharest - CSIE
+# Runs: syntax checks, linting, unit tests
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: SEM02 CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'SEM02/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'SEM02/**'
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyYAML pytest pytest-cov ruff
+      
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      
+      - name: Bash syntax check
+        run: |
+          echo "Checking Bash scripts..."
+          for script in SEM02/scripts/bash/*.sh SEM02/scripts/demo/*.sh; do
+            if [ -f "$script" ]; then
+              echo "Checking: $script"
+              bash -n "$script"
+            fi
+          done
+      
+      - name: ShellCheck
+        run: |
+          echo "Running ShellCheck..."
+          shellcheck --severity=warning SEM02/scripts/bash/*.sh || true
+          shellcheck --severity=warning SEM02/scripts/demo/*.sh || true
+        continue-on-error: true
+      
+      - name: Python syntax check
+        run: |
+          echo "Checking Python scripts..."
+          for script in SEM02/scripts/python/*.py SEM02/formative/*.py; do
+            if [ -f "$script" ]; then
+              echo "Checking: $script"
+              python -m py_compile "$script"
+            fi
+          done
+      
+      - name: Python linting (ruff)
+        run: |
+          echo "Running ruff..."
+          ruff check SEM02/scripts/python/ SEM02/formative/ || true
+        continue-on-error: true
+      
+      - name: Validate YAML
+        run: |
+          echo "Validating quiz.yaml..."
+          python -c "import yaml; yaml.safe_load(open('SEM02/formative/quiz.yaml'))"
+      
+      - name: Validate JSON
+        run: |
+          echo "Validating quiz_lms.json..."
+          python -c "import json; json.load(open('SEM02/formative/quiz_lms.json'))"
+      
+      - name: Run unit tests
+        run: |
+          cd SEM02
+          if [ -f "tests/test_autograder.py" ]; then
+            python -m pytest tests/ -v --tb=short || true
+          else
+            echo "No unit tests found"
+          fi
+        continue-on-error: true
+      
+      - name: Structure validation
+        run: |
+          echo "Checking required files..."
+          REQUIRED_FILES=(
+            "SEM02/README.md"
+            "SEM02/docs/S02_02_MAIN_MATERIAL.md"
+            "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+            "SEM02/docs/S02_04_PARSONS_PROBLEMS.md"
+            "SEM02/docs/lo_traceability.md"
+            "SEM02/formative/quiz.yaml"
+            "SEM02/Makefile"
+          )
+          
+          MISSING=0
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✓ $f"
+            else
+              echo "✗ $f (MISSING)"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          
+          if [ $MISSING -gt 0 ]; then
+            echo "Warning: $MISSING required file(s) missing"
+          fi
+
+  # Optional: Build documentation
+  # docs:
+  #   runs-on: ubuntu-latest
+  #   needs: lint-and-test
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Build docs
+  #       run: echo "Documentation build would go here"

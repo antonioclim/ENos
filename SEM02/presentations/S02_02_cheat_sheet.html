@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐧 Cheat Sheet: Operators, Redirection, Filters & Loops | ASE-CSIE OS</title>
+    <style>
+        /* ============================================
+           PRINT-OPTIMISED A4 CHEAT SHEET
+           Operating Systems | Bucharest University of Economic Studies - CSIE
+           Seminar 2: Operators, Redirection, Filters, Loops
+           ============================================ */
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 9pt;
+            line-height: 1.3;
+            color: var(--dark);
+            background: white;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                font-size: 8pt;
+            }
+            .page {
+                page-break-after: always;
+                height: 297mm;
+                width: 210mm;
+                padding: 8mm;
+            }
+            .page:last-child {
+                page-break-after: avoid;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Screen Styles */
+        @media screen {
+            body {
+                background: #e5e7eb;
+                padding: 20px;
+            }
+            .page {
+                background: white;
+                width: 210mm;
+                min-height: 297mm;
+                margin: 20px auto;
+                padding: 12mm;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                border-radius: 4px;
+            }
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 16pt;
+            color: var(--primary);
+            margin-bottom: 3px;
+        }
+        
+        .header .subtitle {
+            font-size: 9pt;
+            color: #64748b;
+        }
+        
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Section Cards */
+        .section {
+            background: var(--light);
+            border-radius: 6px;
+            padding: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .section.green { border-left-color: var(--success); }
+        .section.purple { border-left-color: var(--secondary); }
+        .section.orange { border-left-color: var(--warning); }
+        .section.red { border-left-color: var(--danger); }
+        
+        .section h2 {
+            font-size: 10pt;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .section.green h2 { color: var(--success); }
+        .section.purple h2 { color: var(--secondary); }
+        .section.orange h2 { color: var(--warning); }
+        .section.red h2 { color: var(--danger); }
+        
+        .section h3 {
+            font-size: 9pt;
+            color: #475569;
+            margin: 6px 0 4px 0;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 2px;
+        }
+        
+        /* Code Blocks */
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8pt;
+        }
+        
+        pre {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 7.5pt;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin: 4px 0;
+        }
+        
+        /* Syntax Highlighting */
+        .cmd { color: #93c5fd; }
+        .opt { color: #fcd34d; }
+        .str { color: #86efac; }
+        .var { color: #c4b5fd; }
+        .cmt { color: #94a3b8; font-style: italic; }
+        .op { color: #fb923c; font-weight: bold; }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin: 4px 0;
+        }
+        
+        th, td {
+            padding: 3px 5px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #e2e8f0;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        /* Warning Boxes */
+        .warn {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 4px;
+            padding: 4px 6px;
+            margin: 4px 0;
+            font-size: 7.5pt;
+        }
+        
+        .warn::before {
+            content: "⚠️ ";
+        }
+        
+        .tip {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 4px;
+            padding: 4px 6px;
+            margin: 4px 0;
+            font-size: 7.5pt;
+        }
+        
+        .tip::before {
+            content: "💡 ";
+        }
+        
+        /* Diagrams */
+        .diagram {
+            font-family: 'Consolas', monospace;
+            font-size: 7pt;
+            line-height: 1.2;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 7pt;
+            color: #94a3b8;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* Quick Reference List */
+        .qr-list {
+            list-style: none;
+            font-size: 7.5pt;
+        }
+        
+        .qr-list li {
+            padding: 2px 0;
+            border-bottom: 1px dotted #e2e8f0;
+        }
+        
+        .qr-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Print Button */
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            z-index: 1000;
+        }
+        
+        .print-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        /* Compact Mode */
+        .compact p, .compact li {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Print A4</button>
+
+    <!-- ========== PAGE 1: OPERATORS AND REDIRECTION ========== -->
+    <div class="page">
+        <div class="header">
+            <h1>Bash Cheat Sheet: Operators, Redirection, Filters & Loops</h1>
+            <div class="subtitle">Operating Systems | Bucharest University of Economic Studies - CSIE | Seminar 2</div>
+        </div>
+        
+        <div class="grid">
+            <!-- CONTROL OPERATORS -->
+            <div class="section">
+                <h2>Control Operators</h2>
+                
+                <h3>Sequential & Conditional</h3>
+                <table>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code class="op">;</code></td>
+                        <td>Sequential (runs all)</td>
+                        <td><code>cmd1<span class="op">;</span> cmd2</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="op">&&</code></td>
+                        <td>AND (runs if success)</td>
+                        <td><code>mkdir d <span class="op">&&</span> cd d</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="op">||</code></td>
+                        <td>OR (runs if fail)</td>
+                        <td><code>cd d <span class="op">||</span> mkdir d</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="op">&</code></td>
+                        <td>Background (async)</td>
+                        <td><code>sleep 10 <span class="op">&</span></code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="op">|</code></td>
+                        <td>Pipe (stdout → stdin)</td>
+                        <td><code>ls <span class="op">|</span> wc -l</code></td>
+                    </tr>
+                </table>
+                
+                <h3>Common Patterns</h3>
+                <pre><span class="cmt"># Safe execution with fallback</span>
+<span class="cmd">cd</span> /dir <span class="op">&&</span> <span class="cmd">rm</span> -rf * <span class="op">||</span> <span class="cmd">echo</span> <span class="str">"Error!"</span>
+
+<span class="cmt"># Test and action</span>
+[ -f file ] <span class="op">&&</span> <span class="cmd">cat</span> file <span class="op">||</span> <span class="cmd">echo</span> <span class="str">"Does not exist"</span>
+
+<span class="cmt"># Background command with notification</span>
+<span class="cmd">long_task</span> <span class="op">&</span> <span class="cmd">echo</span> <span class="str">"Started PID: $!"</span></pre>
+
+                <h3>Command Grouping</h3>
+                <table>
+                    <tr>
+                        <th>Syntax</th>
+                        <th>Behaviour</th>
+                    </tr>
+                    <tr>
+                        <td><code>{ cmd1; cmd2; }</code></td>
+                        <td>In current shell (space + ;)</td>
+                    </tr>
+                    <tr>
+                        <td><code>( cmd1; cmd2 )</code></td>
+                        <td>In subshell (variables don't persist)</td>
+                    </tr>
+                </table>
+                
+                <div class="warn">Grouping with <code>{}</code> requires spaces and final <code>;</code>!</div>
+            </div>
+            
+            <!-- EXIT CODES -->
+            <div class="section green">
+                <h2>Exit Codes & Jobs</h2>
+                
+                <h3>Exit Codes</h3>
+                <table>
+                    <tr>
+                        <th>Code</th>
+                        <th>Meaning</th>
+                    </tr>
+                    <tr>
+                        <td><code>0</code></td>
+                        <td>✅ Success</td>
+                    </tr>
+                    <tr>
+                        <td><code>1</code></td>
+                        <td>❌ General error</td>
+                    </tr>
+                    <tr>
+                        <td><code>2</code></td>
+                        <td>❌ Misuse</td>
+                    </tr>
+                    <tr>
+                        <td><code>126</code></td>
+                        <td>❌ Cannot execute</td>
+                    </tr>
+                    <tr>
+                        <td><code>127</code></td>
+                        <td>❌ Command not found</td>
+                    </tr>
+                    <tr>
+                        <td><code>128+N</code></td>
+                        <td>❌ Terminated by signal N</td>
+                    </tr>
+                </table>
+                
+                <pre><span class="cmt"># Check exit code</span>
+<span class="cmd">ls</span> /tmp
+<span class="cmd">echo</span> <span class="var">$?</span>      <span class="cmt"># 0 = success</span>
+
+<span class="cmt"># PIPESTATUS for pipes</span>
+<span class="cmd">false</span> | <span class="cmd">true</span>
+<span class="cmd">echo</span> <span class="var">${PIPESTATUS[@]}</span>  <span class="cmt"># 1 0</span></pre>
+                
+                <h3>Job Control</h3>
+                <table>
+                    <tr>
+                        <th>Command</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td><code>jobs</code></td>
+                        <td>Lists background jobs</td>
+                    </tr>
+                    <tr>
+                        <td><code>fg %N</code></td>
+                        <td>Brings job N to foreground</td>
+                    </tr>
+                    <tr>
+                        <td><code>bg %N</code></td>
+                        <td>Continues job N in background</td>
+                    </tr>
+                    <tr>
+                        <td><code>wait</code></td>
+                        <td>Waits for all jobs</td>
+                    </tr>
+                    <tr>
+                        <td><code>kill %N</code></td>
+                        <td>Terminates job N</td>
+                    </tr>
+                    <tr>
+                        <td><code>Ctrl+Z</code></td>
+                        <td>Suspends current process</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- I/O REDIRECTION -->
+            <div class="section purple full-width">
+                <h2>I/O Redirection</h2>
+                
+                <div class="grid">
+                    <div>
+                        <h3>File Descriptors</h3>
+                        <div class="diagram">
+┌─────────────┐
+│   PROCESS   │
+├─────────────┤
+│ 0: stdin  ←──── Keyboard/File
+│ 1: stdout ────→ Terminal/File
+│ 2: stderr ────→ Terminal/File
+└─────────────┘
+                        </div>
+                        
+                        <h3>Output Redirection</h3>
+                        <table>
+                            <tr>
+                                <th>Syntax</th>
+                                <th>Effect</th>
+                            </tr>
+                            <tr>
+                                <td><code>></code> / <code>1></code></td>
+                                <td>stdout → file (overwrite)</td>
+                            </tr>
+                            <tr>
+                                <td><code>>></code></td>
+                                <td>stdout → file (append)</td>
+                            </tr>
+                            <tr>
+                                <td><code>2></code></td>
+                                <td>stderr → file</td>
+                            </tr>
+                            <tr>
+                                <td><code>2>></code></td>
+                                <td>stderr → file (append)</td>
+                            </tr>
+                            <tr>
+                                <td><code>&></code> / <code>>&</code></td>
+                                <td>stdout+stderr → file</td>
+                            </tr>
+                            <tr>
+                                <td><code>2>&1</code></td>
+                                <td>stderr → where stdout is</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h3>Input Redirection</h3>
+                        <table>
+                            <tr>
+                                <th>Syntax</th>
+                                <th>Effect</th>
+                            </tr>
+                            <tr>
+                                <td><code><</code></td>
+                                <td>file → stdin</td>
+                            </tr>
+                            <tr>
+                                <td><code><<EOF</code></td>
+                                <td>Here document (multi-line)</td>
+                            </tr>
+                            <tr>
+                                <td><code><<<</code></td>
+                                <td>Here string (single-line)</td>
+                            </tr>
+                        </table>
+                        
+                        <h3>Critical Examples</h3>
+                        <pre><span class="cmt"># stdout and stderr to separate files</span>
+<span class="cmd">cmd</span> <span class="op">></span> out.txt <span class="op">2></span> err.txt
+
+<span class="cmt"># stdout and stderr to SAME file</span>
+<span class="cmd">cmd</span> <span class="op">></span> all.txt <span class="op">2>&1</span>
+<span class="cmt"># OR (Bash 4+)</span>
+<span class="cmd">cmd</span> <span class="op">&></span> all.txt
+
+<span class="cmt"># Suppress output completely</span>
+<span class="cmd">cmd</span> <span class="op">&></span> /dev/null
+
+<span class="cmt"># Here Document</span>
+<span class="cmd">cat</span> <span class="op"><<</span> <span class="str">EOF</span>
+Line 1
+Variable: <span class="var">$HOME</span>
+<span class="str">EOF</span>
+
+<span class="cmt"># Here String</span>
+<span class="cmd">wc</span> -w <span class="op"><<<</span> <span class="str">"three words here"</span></pre>
+                        
+                        <div class="warn">Order matters! <code>2>&1 > file</code> ≠ <code>> file 2>&1</code></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TEE AND COMBINATIONS -->
+            <div class="section orange full-width">
+                <h2>tee & Advanced Combinations</h2>
+                <div class="grid">
+                    <div>
+                        <h3>The tee Command</h3>
+                        <div class="diagram">
+stdin ─→ tee ─┬─→ stdout
+              └─→ file(s)
+                        </div>
+                        <pre><span class="cmt"># Save and display</span>
+<span class="cmd">ls</span> | <span class="cmd">tee</span> list.txt
+
+<span class="cmt"># Append to file</span>
+<span class="cmd">echo</span> <span class="str">"log"</span> | <span class="cmd">tee</span> <span class="opt">-a</span> file.log
+
+<span class="cmt"># Multiple files</span>
+<span class="cmd">cmd</span> | <span class="cmd">tee</span> f1.txt f2.txt f3.txt
+
+<span class="cmt"># Debug pipeline</span>
+<span class="cmd">cat</span> file | <span class="cmd">tee</span> /dev/stderr | <span class="cmd">wc</span></pre>
+                    </div>
+                    <div>
+                        <h3>Useful Patterns</h3>
+                        <pre><span class="cmt"># Log with timestamp</span>
+<span class="cmd">cmd</span> 2>&1 | while <span class="cmd">read</span> line; do
+  <span class="cmd">echo</span> <span class="str">"[$(date)] $line"</span>
+done | <span class="cmd">tee</span> log.txt
+
+<span class="cmt"># Process substitution</span>
+<span class="cmd">diff</span> <(cmd1) <(cmd2)
+
+<span class="cmt"># Pipe to multiple commands</span>
+<span class="cmd">cmd</span> | <span class="cmd">tee</span> >(<span class="cmd">gzip</span> > a.gz) | <span class="cmd">wc</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Page 1/2 | Seminar 2 OS | Bucharest University of Economic Studies - CSIE | 2025
+        </div>
+    </div>
+
+    <!-- ========== PAGE 2: FILTERS AND LOOPS ========== -->
+    <div class="page">
+        <div class="header">
+            <h1>Bash Cheat Sheet: Text Filters & Loops</h1>
+            <div class="subtitle">Operating Systems | Bucharest University of Economic Studies - CSIE | Seminar 2</div>
+        </div>
+        
+        <div class="grid">
+            <!-- TEXT FILTERS -->
+            <div class="section green">
+                <h2>Text Filters</h2>
+                
+                <h3>sort - Sorting</h3>
+                <table>
+                    <tr>
+                        <th>Option</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr><td><code>-n</code></td><td>Numeric (1, 2, 10 not 1, 10, 2)</td></tr>
+                    <tr><td><code>-r</code></td><td>Descending (reverse)</td></tr>
+                    <tr><td><code>-k N</code></td><td>Sort by column N</td></tr>
+                    <tr><td><code>-t ':'</code></td><td>Custom delimiter</td></tr>
+                    <tr><td><code>-u</code></td><td>Remove duplicates</td></tr>
+                    <tr><td><code>-h</code></td><td>Human-readable (1K, 2M)</td></tr>
+                </table>
+                <pre><span class="cmt"># Top 5 processes by memory</span>
+<span class="cmd">ps</span> aux | <span class="cmd">sort</span> <span class="opt">-k4 -rn</span> | <span class="cmd">head</span> -5</pre>
+                
+                <h3>uniq - Duplicates (CONSECUTIVE!)</h3>
+                <table>
+                    <tr>
+                        <th>Option</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr><td><code>-c</code></td><td>Count occurrences</td></tr>
+                    <tr><td><code>-d</code></td><td>Only duplicates</td></tr>
+                    <tr><td><code>-u</code></td><td>Only unique lines</td></tr>
+                    <tr><td><code>-i</code></td><td>Case insensitive</td></tr>
+                </table>
+                <div class="warn"><code>uniq</code> removes only CONSECUTIVE duplicates! Use <code>sort | uniq</code></div>
+                <pre><span class="cmt"># Top 10 commands used</span>
+<span class="cmd">history</span> | <span class="cmd">awk</span> '{print $2}' | <span class="cmd">sort</span> | <span class="cmd">uniq</span> <span class="opt">-c</span> | <span class="cmd">sort</span> <span class="opt">-rn</span> | <span class="cmd">head</span></pre>
+            </div>
+            
+            <!-- CUT, PASTE, TR -->
+            <div class="section purple">
+                <h2>cut, paste, tr</h2>
+                
+                <h3>cut - Column Extraction</h3>
+                <table>
+                    <tr>
+                        <th>Option</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr><td><code>-d ':'</code></td><td>Delimiter</td></tr>
+                    <tr><td><code>-f 1,3</code></td><td>Fields</td></tr>
+                    <tr><td><code>-f 1-3</code></td><td>Field range</td></tr>
+                    <tr><td><code>-c 1-10</code></td><td>Characters</td></tr>
+                    <tr><td><code>-b 1-10</code></td><td>Bytes</td></tr>
+                </table>
+                <pre><span class="cmt"># Users from /etc/passwd</span>
+<span class="cmd">cut</span> <span class="opt">-d':' -f1</span> /etc/passwd
+
+<span class="cmt"># First 20 characters</span>
+<span class="cmd">cut</span> <span class="opt">-c1-20</span> file.txt</pre>
+                
+                <h3>paste - Merging</h3>
+                <pre><span class="cmt"># Join files (columns)</span>
+<span class="cmd">paste</span> file1.txt file2.txt
+
+<span class="cmt"># With delimiter</span>
+<span class="cmd">paste</span> <span class="opt">-d','</span> f1 f2
+
+<span class="cmt"># Serialise (on one line)</span>
+<span class="cmd">paste</span> <span class="opt">-s -d','</span> file.txt</pre>
+                
+                <h3>tr - Translate/Delete</h3>
+                <table>
+                    <tr>
+                        <th>Syntax</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr><td><code>tr 'a-z' 'A-Z'</code></td><td>Lowercase → Uppercase</td></tr>
+                    <tr><td><code>tr -d 'aeiou'</code></td><td>Delete characters</td></tr>
+                    <tr><td><code>tr -s ' '</code></td><td>Squeeze (compress repetitions)</td></tr>
+                    <tr><td><code>tr -c 'a-z' ' '</code></td><td>Complement</td></tr>
+                </table>
+                <div class="warn"><code>tr</code> works with CHARACTERS, not strings!</div>
+                <pre><span class="cmd">echo</span> <span class="str">"Hello World"</span> | <span class="cmd">tr</span> 'a-z' 'A-Z'
+<span class="cmt"># Output: HELLO WORLD</span>
+
+<span class="cmd">echo</span> <span class="str">"a   b   c"</span> | <span class="cmd">tr</span> <span class="opt">-s</span> ' '
+<span class="cmt"># Output: a b c</span></pre>
+            </div>
+            
+            <!-- WC, HEAD, TAIL -->
+            <div class="section orange">
+                <h2>wc, head, tail</h2>
+                
+                <h3>wc - Word Count</h3>
+                <table>
+                    <tr>
+                        <th>Option</th>
+                        <th>Counts</th>
+                    </tr>
+                    <tr><td><code>-l</code></td><td>Lines</td></tr>
+                    <tr><td><code>-w</code></td><td>Words</td></tr>
+                    <tr><td><code>-c</code></td><td>Bytes</td></tr>
+                    <tr><td><code>-m</code></td><td>Characters</td></tr>
+                    <tr><td>(none)</td><td>All (L W B)</td></tr>
+                </table>
+                
+                <h3>head / tail</h3>
+                <table>
+                    <tr>
+                        <th>Command</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr><td><code>head -n 5</code></td><td>First 5 lines</td></tr>
+                    <tr><td><code>head -c 100</code></td><td>First 100 bytes</td></tr>
+                    <tr><td><code>tail -n 5</code></td><td>Last 5 lines</td></tr>
+                    <tr><td><code>tail -n +5</code></td><td>From line 5 to end</td></tr>
+                    <tr><td><code>tail -f</code></td><td>Follow (live monitoring)</td></tr>
+                </table>
+                <pre><span class="cmt"># Real-time log monitoring</span>
+<span class="cmd">tail</span> <span class="opt">-f</span> /var/log/syslog
+
+<span class="cmt"># Lines 10-20</span>
+<span class="cmd">head</span> <span class="opt">-n 20</span> file | <span class="cmd">tail</span> <span class="opt">-n 11</span></pre>
+            </div>
+            
+            <!-- FOR LOOPS -->
+            <div class="section">
+                <h2>The for Loop</h2>
+                
+                <h3>for Syntaxes</h3>
+                <pre><span class="cmt"># Explicit list</span>
+<span class="cmd">for</span> item <span class="cmd">in</span> a b c; <span class="cmd">do</span>
+    <span class="cmd">echo</span> <span class="var">$item</span>
+<span class="cmd">done</span>
+
+<span class="cmt"># Brace expansion</span>
+<span class="cmd">for</span> i <span class="cmd">in</span> {1..10}; <span class="cmd">do</span> <span class="cmd">echo</span> <span class="var">$i</span>; <span class="cmd">done</span>
+
+<span class="cmt"># Globbing (files)</span>
+<span class="cmd">for</span> f <span class="cmd">in</span> *.txt; <span class="cmd">do</span>
+    <span class="cmd">echo</span> <span class="str">"Processing: <span class="var">$f</span>"</span>
+<span class="cmd">done</span>
+
+<span class="cmt"># C-style</span>
+<span class="cmd">for</span> ((i=0; i<10; i++)); <span class="cmd">do</span>
+    <span class="cmd">echo</span> <span class="var">$i</span>
+<span class="cmd">done</span></pre>
+
+                <div class="warn"><code>{1..$N}</code> does NOT work with variables! Use <code>$(seq 1 $N)</code> or <code>for ((i=1; i<=N; i++))</code></div>
+                
+                <pre><span class="cmt"># WRONG (brace expansion at parse time)</span>
+N=5; <span class="cmd">for</span> i <span class="cmd">in</span> {1..<span class="var">$N</span>}; <span class="cmd">do</span> <span class="cmd">echo</span> <span class="var">$i</span>; <span class="cmd">done</span>
+
+<span class="cmt"># CORRECT</span>
+N=5; <span class="cmd">for</span> i <span class="cmd">in</span> $(<span class="cmd">seq</span> 1 <span class="var">$N</span>); <span class="cmd">do</span> <span class="cmd">echo</span> <span class="var">$i</span>; <span class="cmd">done</span></pre>
+            </div>
+            
+            <!-- WHILE/UNTIL LOOPS -->
+            <div class="section red">
+                <h2>while & until</h2>
+                
+                <h3>Syntaxes</h3>
+                <pre><span class="cmt"># while - as long as TRUE</span>
+<span class="cmd">while</span> [ condition ]; <span class="cmd">do</span>
+    commands
+<span class="cmd">done</span>
+
+<span class="cmt"># until - until becomes TRUE</span>
+<span class="cmd">until</span> [ condition ]; <span class="cmd">do</span>
+    commands
+<span class="cmd">done</span></pre>
+                
+                <h3>File Reading</h3>
+                <pre><span class="cmt"># CORRECT - read line by line</span>
+<span class="cmd">while</span> IFS= <span class="cmd">read</span> <span class="opt">-r</span> line; <span class="cmd">do</span>
+    <span class="cmd">echo</span> <span class="str">"Line: <span class="var">$line</span>"</span>
+<span class="cmd">done</span> < file.txt</pre>
+                
+                <div class="warn">Avoid <code>cat file | while read</code> - variables do NOT persist (subshell)!</div>
+                
+                <pre><span class="cmt"># WRONG - subshell problem</span>
+count=0
+<span class="cmd">cat</span> file | <span class="cmd">while</span> <span class="cmd">read</span> line; <span class="cmd">do</span>
+    ((count++))
+<span class="cmd">done</span>
+<span class="cmd">echo</span> <span class="var">$count</span>  <span class="cmt"># 0 (!)</span>
+
+<span class="cmt"># CORRECT - redirect</span>
+count=0
+<span class="cmd">while</span> <span class="cmd">read</span> line; <span class="cmd">do</span>
+    ((count++))
+<span class="cmd">done</span> < file
+<span class="cmd">echo</span> <span class="var">$count</span>  <span class="cmt"># correct</span></pre>
+            </div>
+            
+            <!-- CONTROL FLOW -->
+            <div class="section green full-width">
+                <h2>Control Flow: break & continue</h2>
+                <div class="grid">
+                    <div>
+                        <h3>break</h3>
+                        <pre><span class="cmt"># Exit loop</span>
+<span class="cmd">for</span> i <span class="cmd">in</span> {1..100}; <span class="cmd">do</span>
+    [ <span class="var">$i</span> -eq 5 ] <span class="op">&&</span> <span class="cmd">break</span>
+    <span class="cmd">echo</span> <span class="var">$i</span>
+<span class="cmd">done</span>  <span class="cmt"># 1 2 3 4</span>
+
+<span class="cmt"># break N - exit N loops</span>
+<span class="cmd">for</span> i <span class="cmd">in</span> 1 2; <span class="cmd">do</span>
+    <span class="cmd">for</span> j <span class="cmd">in</span> a b; <span class="cmd">do</span>
+        <span class="cmd">break</span> 2  <span class="cmt"># exits both</span>
+    <span class="cmd">done</span>
+<span class="cmd">done</span></pre>
+                        <div class="tip"><code>break</code> exits the loop, <code>exit</code> exits the script!</div>
+                    </div>
+                    <div>
+                        <h3>continue</h3>
+                        <pre><span class="cmt"># Skip to next iteration</span>
+<span class="cmd">for</span> i <span class="cmd">in</span> {1..5}; <span class="cmd">do</span>
+    [ <span class="var">$i</span> -eq 3 ] <span class="op">&&</span> <span class="cmd">continue</span>
+    <span class="cmd">echo</span> <span class="var">$i</span>
+<span class="cmd">done</span>  <span class="cmt"># 1 2 4 5</span>
+
+<span class="cmt"># Selective processing</span>
+<span class="cmd">for</span> f <span class="cmd">in</span> *; <span class="cmd">do</span>
+    [ -d <span class="str">"<span class="var">$f</span>"</span> ] <span class="op">&&</span> <span class="cmd">continue</span>
+    <span class="cmd">echo</span> <span class="str">"File: <span class="var">$f</span>"</span>
+<span class="cmd">done</span></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- COMPLEX PIPELINE EXAMPLE -->
+            <div class="section purple full-width">
+                <h2>Complex Pipeline - Complete Example</h2>
+                <pre><span class="cmt"># Log analysis: Top 10 IPs with most 404 errors</span>
+<span class="cmd">cat</span> access.log | \                      <span class="cmt"># 1. Read log</span>
+    <span class="cmd">grep</span> <span class="str">" 404 "</span> | \                    <span class="cmt"># 2. Filter 404s</span>
+    <span class="cmd">awk</span> '{print $1}' | \               <span class="cmt"># 3. Extract IP</span>
+    <span class="cmd">sort</span> | \                           <span class="cmt"># 4. Sort</span>
+    <span class="cmd">uniq</span> <span class="opt">-c</span> | \                        <span class="cmt"># 5. Count</span>
+    <span class="cmd">sort</span> <span class="opt">-rn</span> | \                       <span class="cmt"># 6. Sort descending</span>
+    <span class="cmd">head</span> -10                           <span class="cmt"># 7. Top 10</span></pre>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Page 2/2 | 🐧 Cheat Sheet Seminar 2 OS | Bucharest University of Economic Studies - CSIE | 2025 | <strong>Print on A4 for quick reference!</strong>
+        </div>
+    </div>
+
+    <script>
+        // Keyboard shortcut for print
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'p') {
+                // Default print will be used
+            }
+        });
+        
+        // Auto-detect dark mode for screen (but not for print)
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Keep light mode for print-friendliness
+        }
+    </script>
+</body>
+</html>

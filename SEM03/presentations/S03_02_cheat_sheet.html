@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Cheat Sheet | Seminar 3 | Operating Systems</title>
+    <style>
+        :root {
+            --find-color: #0984e3;
+            --xargs-color: #00b894;
+            --params-color: #6c5ce7;
+            --perms-color: #d63031;
+            --cron-color: #fdcb6e;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --code-bg: #1e272e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.8;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 20px auto 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #search {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+        }
+        
+        #search:focus {
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: white;
+            font-size: 0.9em;
+        }
+        
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: white;
+            color: #2d3436;
+        }
+        
+        .filter-tab[data-category="find"] { border-color: var(--find-color); }
+        .filter-tab[data-category="find"].active { background: var(--find-color); color: white; }
+        
+        .filter-tab[data-category="xargs"] { border-color: var(--xargs-color); }
+        .filter-tab[data-category="xargs"].active { background: var(--xargs-color); color: white; }
+        
+        .filter-tab[data-category="params"] { border-color: var(--params-color); }
+        .filter-tab[data-category="params"].active { background: var(--params-color); color: white; }
+        
+        .filter-tab[data-category="perms"] { border-color: var(--perms-color); }
+        .filter-tab[data-category="perms"].active { background: var(--perms-color); color: white; }
+        
+        .filter-tab[data-category="cron"] { border-color: var(--cron-color); }
+        .filter-tab[data-category="cron"].active { background: var(--cron-color); color: #2d3436; }
+        
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card.hidden {
+            display: none;
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card[data-category="find"] .card-header { background: var(--find-color); }
+        .card[data-category="xargs"] .card-header { background: var(--xargs-color); }
+        .card[data-category="params"] .card-header { background: var(--params-color); }
+        .card[data-category="perms"] .card-header { background: var(--perms-color); }
+        .card[data-category="cron"] .card-header { background: var(--cron-color); color: #2d3436; }
+        
+        .card-header h3 {
+            font-size: 1.1em;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .card-body p {
+            margin-bottom: 15px;
+            color: #636e72;
+        }
+        
+        pre {
+            background: var(--code-bg);
+            color: #a4b0be;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f2f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d63031;
+            font-size: 0.85em;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .syntax { color: #ffeaa7; }
+        .comment { color: #636e72; }
+        .flag { color: #74b9ff; }
+        .string { color: #55efc4; }
+        .number { color: #fd79a8; }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 10px 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #dfe6e9;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .perm-visual {
+            display: flex;
+            gap: 3px;
+            font-family: monospace;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .perm-char {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .perm-r { background: #74b9ff; color: white; }
+        .perm-w { background: #ff7675; color: white; }
+        .perm-x { background: #00b894; color: white; }
+        .perm-s { background: #a29bfe; color: white; }
+        .perm-t { background: #fdcb6e; color: #2d3436; }
+        .perm-none { background: #dfe6e9; color: #636e72; }
+        
+        .quick-calc {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-calc input {
+            width: 60px;
+            padding: 8px;
+            border: 2px solid #dfe6e9;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+        
+        .quick-calc .result {
+            font-family: monospace;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--code-bg);
+            color: #55efc4;
+            border-radius: 4px;
+        }
+        
+        .cron-builder {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .cron-field {
+            text-align: center;
+        }
+        
+        .cron-field input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dfe6e9;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+        
+        .cron-field label {
+            display: block;
+            font-size: 0.75em;
+            color: #636e72;
+            margin-top: 5px;
+        }
+        
+        .cron-result {
+            background: var(--code-bg);
+            color: #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #a4b0be;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .stats {
+            text-align: center;
+            padding: 15px;
+            color: #636e72;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #636e72;
+            border-top: 1px solid #dfe6e9;
+            margin-top: 30px;
+        }
+        
+        @media print {
+            .header {
+                position: relative;
+            }
+            .search-container,
+            .filter-tabs,
+            .copy-btn {
+                display: none;
+            }
+            .card {
+                break-inside: avoid;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .cron-builder {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Interactive Cheat Sheet</h1>
+        <p>Seminar 3: find, xargs, parametri, permisiuni, cron</p>
+        
+        <div class="search-container">
+            <input type="text" id="search" placeholder="🔍 Caută comenzi, opțiuni, exemple...">
+        </div>
+        
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-category="all">📋 All</button>
+            <button class="filter-tab" data-category="find">🔍 find</button>
+            <button class="filter-tab" data-category="xargs">🔗 xargs</button>
+            <button class="filter-tab" data-category="params">📜 Parameters</button>
+            <button class="filter-tab" data-category="perms">🔐 Permissions</button>
+            <button class="filter-tab" data-category="cron">⏰ Cron</button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="stats" id="stats">Afișate: <span id="visible-count">0</span> carduri</div>
+        
+        <div class="grid" id="cards-container">
+            
+            <!-- ===== FIND CARDS ===== -->
+            
+            <div class="card" data-category="find" data-keywords="find name search file">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Search după Nume</h3>
+                </div>
+                <div class="card-body">
+                    <p>Caută fișiere după numele lor (cu pattern globbing).</p>
+                    <pre><code><span class="comment"># Case-sensitive</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span>
+
+<span class="comment"># Case-insensitive</span>
+find . <span class="flag">-iname</span> <span class="string">"readme*"</span>
+
+<span class="comment"># Exact match</span>
+find /etc <span class="flag">-name</span> <span class="string">"passwd"</span></code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find type file directoryy link">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Search după Tip</h3>
+                </div>
+                <div class="card-body">
+                    <p>Filtrează rezultatele după tipul fișierului.</p>
+                    <table>
+                        <tr><th>Flag</th><th>Tip</th></tr>
+                        <tr><td><code>-type f</code></td><td>Fișier obișnuit</td></tr>
+                        <tr><td><code>-type d</code></td><td>Director</td></tr>
+                        <tr><td><code>-type l</code></td><td>Link simbolic</td></tr>
+                    </table>
+                    <pre><code><span class="comment"># Doar directoare</span>
+find . <span class="flag">-type d</span>
+
+<span class="comment"># Files .sh</span>
+find . <span class="flag">-type f</span> <span class="flag">-name</span> <span class="string">"*.sh"</span></code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find size bytes megabytes gigabytes big large">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Search după Dimensiune</h3>
+                </div>
+                <div class="card-body">
+                    <p>Găsește fișiere mari sau mici.</p>
+                    <pre><code><span class="comment"># Mai mari de 100MB</span>
+find . <span class="flag">-size</span> <span class="number">+100M</span>
+
+<span class="comment"># Mai mici de 1KB</span>
+find . <span class="flag">-size</span> <span class="number">-1k</span>
+
+<span class="comment"># Files goale</span>
+find . <span class="flag">-size</span> <span class="number">0</span> <span class="flag">-type f</span></code></pre>
+                    <p><strong>Sufixe:</strong> c=bytes, k=KB, M=MB, G=GB</p>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find time mtime atime ctime modified days hours">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Search după Timp</h3>
+                </div>
+                <div class="card-body">
+                    <p>Găsește fișiere modificate recent sau vechi.</p>
+                    <pre><code><span class="comment"># Ultimele 24 ore</span>
+find . <span class="flag">-mtime</span> <span class="number">-1</span>
+
+<span class="comment"># Mai vechi de 30 days</span>
+find . <span class="flag">-mtime</span> <span class="number">+30</span>
+
+<span class="comment"># Ultimele 60 minutes</span>
+find . <span class="flag">-mmin</span> <span class="number">-60</span>
+
+<span class="comment"># Mai noi decât ref.txt</span>
+find . <span class="flag">-newer</span> ref.txt</code></pre>
+                    <div class="tip">
+                        <code>-mtime -N</code> = ultimele N days<br>
+                        <code>-mtime +N</code> = older than N days
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find and or not logic operator">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Logical Operators</h3>
+                </div>
+                <div class="card-body">
+                    <p>Combină multiple condiții în căutări complexe.</p>
+                    <pre><code><span class="comment"># AND (implicit)</span>
+find . <span class="flag">-type f</span> <span class="flag">-name</span> <span class="string">"*.txt"</span>
+
+<span class="comment"># OR</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="syntax">-o</span> <span class="flag">-name</span> <span class="string">"*.md"</span>
+
+<span class="comment"># NOT</span>
+find . <span class="syntax">!</span> <span class="flag">-name</span> <span class="string">"*.git"</span>
+
+<span class="comment"># Grouping</span>
+find . <span class="syntax">\(</span> <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="syntax">-o</span> <span class="flag">-name</span> <span class="string">"*.md"</span> <span class="syntax">\)</span></code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find exec execute action command">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Actions (-exec)</h3>
+                </div>
+                <div class="card-body">
+                    <p>Execută comenzi pentru fiecare fișier găsit.</p>
+                    <pre><code><span class="comment"># Pentru fiecare fișier</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-exec</span> ls -l <span class="syntax">{}</span> <span class="syntax">\;</span>
+
+<span class="comment"># Batch (mai eficient)</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-exec</span> wc -l <span class="syntax">{}</span> <span class="syntax">+</span>
+
+<span class="comment"># Cu confirmare</span>
+find . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-ok</span> rm <span class="syntax">{}</span> <span class="syntax">\;</span></code></pre>
+                    <div class="warning">
+                        <strong>\;</strong> = o comandă per fișier<br>
+                        <strong>+</strong> = all files ca argumente
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find delete remove danger">
+                <div class="card-header">
+                    <span>⚠️</span>
+                    <h3>find -delete - ATENȚIE!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        <strong>PERICOL:</strong> Ordinea contează!
+                    </div>
+                    <pre><code><span class="comment"># ❌ GREȘIT - șterge TOT!</span>
+find . <span class="flag">-delete</span> <span class="flag">-name</span> <span class="string">"*.tmp"</span>
+
+<span class="comment"># ✅ CORECT</span>
+find . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-delete</span></code></pre>
+                    <div class="tip">
+                        <strong>Best practice:</strong> Testează întâi cu <code>-print</code>!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="find" data-keywords="find maxdepth mindepth level">
+                <div class="card-header">
+                    <span>🔍</span>
+                    <h3>find - Limitare Adâncime</h3>
+                </div>
+                <div class="card-body">
+                    <p>Controlează cât de adânc caută find.</p>
+                    <pre><code><span class="comment"># Doar în directoryul curent</span>
+find . <span class="flag">-maxdepth</span> <span class="number">1</span> <span class="flag">-type f</span>
+
+<span class="comment"># Maximum 2 nivele</span>
+find . <span class="flag">-maxdepth</span> <span class="number">2</span> <span class="flag">-name</span> <span class="string">"*.txt"</span>
+
+<span class="comment"># Exclude primul nivel</span>
+find . <span class="flag">-mindepth</span> <span class="number">1</span> <span class="flag">-type d</span></code></pre>
+                </div>
+            </div>
+            
+            <!-- ===== XARGS CARDS ===== -->
+            
+            <div class="card" data-category="xargs" data-keywords="xargs pipe batch process">
+                <div class="card-header">
+                    <span>🔗</span>
+                    <h3>xargs - Batch Processing</h3>
+                </div>
+                <div class="card-body">
+                    <p>Construiește comenzi din input standard.</p>
+                    <pre><code><span class="comment"># Numără linii</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> | xargs wc -l
+
+<span class="comment"># Caută în fișiere</span>
+find . <span class="flag">-name</span> <span class="string">"*.py"</span> | xargs grep <span class="string">"import"</span>
+
+<span class="comment"># Șterge fișiere</span>
+find . <span class="flag">-name</span> <span class="string">"*.tmp"</span> | xargs rm</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="xargs" data-keywords="xargs null space whitespace print0">
+                <div class="card-header">
+                    <span>🔗</span>
+                    <h3>xargs - Handling Spaces</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        Filesle cu spații sparg xargs implicit!
+                    </div>
+                    <pre><code><span class="comment"># ❌ GREȘIT cu spații</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> | xargs rm
+
+<span class="comment"># ✅ CORECT - delimitator NULL</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-print0</span> | xargs <span class="flag">-0</span> rm</code></pre>
+                    <div class="tip">
+                        <code>-print0</code> + <code>-0</code> = combinația sigură!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="xargs" data-keywords="xargs placeholder I substitute">
+                <div class="card-header">
+                    <span>🔗</span>
+                    <h3>xargs - Placeholder (-I)</h3>
+                </div>
+                <div class="card-body">
+                    <p>Controlează unde se inserează argumentele.</p>
+                    <pre><code><span class="comment"># Copiere cu structură</span>
+find . <span class="flag">-name</span> <span class="string">"*.txt"</span> | xargs <span class="flag">-I{}</span> cp <span class="syntax">{}</span> backup/<span class="syntax">{}</span>
+
+<span class="comment"># Comandă complexă</span>
+ls *.log | xargs <span class="flag">-I@</span> echo <span class="string">"Processing: @"</span></code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="xargs" data-keywords="xargs parallel P concurrent jobs">
+                <div class="card-header">
+                    <span>🔗</span>
+                    <h3>xargs - Execuție Paralelă</h3>
+                </div>
+                <div class="card-body">
+                    <p>Rulează comenzi în paralel pentru viteză.</p>
+                    <pre><code><span class="comment"># 4 procese paralele</span>
+find . <span class="flag">-name</span> <span class="string">"*.log"</span> | xargs <span class="flag">-P 4</span> gzip
+
+<span class="comment"># Câte 2 argumente per proces</span>
+find . <span class="flag">-type f</span> | xargs <span class="flag">-n 2</span> <span class="flag">-P 4</span> echo
+
+<span class="comment"># Procesare imagini</span>
+ls *.jpg | xargs <span class="flag">-P 8</span> <span class="flag">-I{}</span> convert <span class="syntax">{}</span> -resize 50% thumb_<span class="syntax">{}</span></code></pre>
+                </div>
+            </div>
+            
+            <!-- ===== PARAMS CARDS ===== -->
+            
+            <div class="card" data-category="params" data-keywords="parameters arguments positional $1 $2 $@">
+                <div class="card-header">
+                    <span>📜</span>
+                    <h3>Parameters Poziționali</h3>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr><th>Variabilă</th><th>Semnificație</th></tr>
+                        <tr><td><code>$0</code></td><td>Numele scriptului</td></tr>
+                        <tr><td><code>$1 - $9</code></td><td>Argumentele 1-9</td></tr>
+                        <tr><td><code>${10}+</code></td><td>Argumente 10+ (cu {}!)</td></tr>
+                        <tr><td><code>$#</code></td><td>Numărul de argumente</td></tr>
+                        <tr><td><code>$@</code></td><td>All (array)</td></tr>
+                        <tr><td><code>$*</code></td><td>All (string)</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card" data-category="params" data-keywords="$@ $* difference array string space">
+                <div class="card-header">
+                    <span>⚠️</span>
+                    <h3>$@ vs $* - Diferența</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        NU sunt identice! Tratează spațiile diferit.
+                    </div>
+                    <pre><code><span class="comment"># Rulare: ./s.sh "a b" c</span>
+
+<span class="comment"># "$@" = 2 elemente</span>
+for arg in <span class="string">"$@"</span>; do echo <span class="string">"[$arg]"</span>; done
+<span class="comment"># [a b] [c]</span>
+
+<span class="comment"># "$*" = 1 string</span>
+for arg in <span class="string">"$*"</span>; do echo <span class="string">"[$arg]"</span>; done
+<span class="comment"># [a b c]</span></code></pre>
+                    <div class="tip">
+                        Folosește <strong>întotdeauna</strong> <code>"$@"</code>!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="params" data-keywords="shift arguments rotate">
+                <div class="card-header">
+                    <span>📜</span>
+                    <h3>shift - Deplasare Argumente</h3>
+                </div>
+                <div class="card-body">
+                    <p>Elimină first argument, deplasează restul.</p>
+                    <pre><code><span class="comment"># ./s.sh a b c d</span>
+echo $1  <span class="comment"># a</span>
+shift
+echo $1  <span class="comment"># b</span>
+shift 2
+echo $1  <span class="comment"># d</span>
+
+<span class="comment"># Procesare toate</span>
+while [[ $# -gt 0 ]]; do
+    echo <span class="string">"Procesez: $1"</span>
+    shift
+done</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="params" data-keywords="getopts options flags parse">
+                <div class="card-header">
+                    <span>📜</span>
+                    <h3>getopts - Option Parsing</h3>
+                </div>
+                <div class="card-body">
+                    <p>Parsează opțiuni -a, -b value profesional.</p>
+                    <pre><code>while getopts <span class="string">"hvo:"</span> opt; do
+    case $opt in
+        h) show_help ;;
+        v) verbose=1 ;;
+        o) output=<span class="string">"$OPTARG"</span> ;;
+        \?) echo <span class="string">"Invalid: -$OPTARG"</span> ;;
+    esac
+done
+shift $((OPTIND - 1))</code></pre>
+                    <div class="warning">
+                        <code>:</code> după literă = necesită argument<br>
+                        <code>OPTARG</code> = valoarea argumentului
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="params" data-keywords="default value expansion ${VAR:-}">
+                <div class="card-header">
+                    <span>📜</span>
+                    <h3>Default Values</h3>
+                </div>
+                <div class="card-body">
+                    <p>Oferă valori când variabila e goală.</p>
+                    <pre><code><span class="comment"># Folosește default (nu modifică VAR)</span>
+echo <span class="string">"${VAR:-default}"</span>
+
+<span class="comment"># Setează și folosește default</span>
+echo <span class="string">"${VAR:=default}"</span>
+
+<span class="comment"># Valoare alternativă dacă e setat</span>
+echo <span class="string">"${VAR:+alternativ}"</span>
+
+<span class="comment"># Eroare dacă nu e setat</span>
+echo <span class="string">"${VAR:?Eroare: VAR lipsă}"</span></code></pre>
+                </div>
+            </div>
+            
+            <!-- ===== PERMISSIONS CARDS ===== -->
+            
+            <div class="card" data-category="perms" data-keywords="permissions rwx read write execute">
+                <div class="card-header">
+                    <span>🔐</span>
+                    <h3>Permissions Fundamentale</h3>
+                </div>
+                <div class="card-body">
+                    <div class="perm-visual">
+                        <span class="perm-char perm-r">r</span>
+                        <span class="perm-char perm-w">w</span>
+                        <span class="perm-char perm-x">x</span>
+                        <span style="margin: 0 5px;">|</span>
+                        <span class="perm-char perm-r">r</span>
+                        <span class="perm-char perm-none">-</span>
+                        <span class="perm-char perm-x">x</span>
+                        <span style="margin: 0 5px;">|</span>
+                        <span class="perm-char perm-r">r</span>
+                        <span class="perm-char perm-none">-</span>
+                        <span class="perm-char perm-none">-</span>
+                    </div>
+                    <table>
+                        <tr><th>Pe Fișier</th><th>Pe Director</th></tr>
+                        <tr><td>r = citește</td><td>r = listează (ls)</td></tr>
+                        <tr><td>w = modifică</td><td>w = creează/șterge</td></tr>
+                        <tr><td>x = execută</td><td><strong>x = accesează (cd)!</strong></td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="chmod octal numeric 755 644 777">
+                <div class="card-header">
+                    <span>🔢</span>
+                    <h3>chmod Octal - Calculator</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>r=4, w=2, x=1</strong></p>
+                    <div class="quick-calc">
+                        <label>Introdu octal: </label>
+                        <input type="text" id="octal-input" maxlength="4" placeholder="755" oninput="calcPerm()">
+                        <div class="result" id="perm-result">rwxr-xr-x</div>
+                    </div>
+                    <table style="font-size: 0.85em;">
+                        <tr><th>Octal</th><th>Permissions</th><th>Utilizare</th></tr>
+                        <tr><td>755</td><td>rwxr-xr-x</td><td>Script/program</td></tr>
+                        <tr><td>644</td><td>rw-r--r--</td><td>Fișier normal</td></tr>
+                        <tr><td>600</td><td>rw-------</td><td>Fișier privat</td></tr>
+                        <tr><td>700</td><td>rwx------</td><td>Director privat</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="chmod symbolic u g o a + - =">
+                <div class="card-header">
+                    <span>🔤</span>
+                    <h3>chmod Simbolic</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>WHO: u/g/o/a</strong> | <strong>OP: +/-/=</strong> | <strong>PERM: r/w/x</strong></p>
+                    <pre><code><span class="comment"># Adaugă execute pentru owner</span>
+chmod <span class="flag">u+x</span> script.sh
+
+<span class="comment"># Elimină write pentru group/others</span>
+chmod <span class="flag">go-w</span> file.txt
+
+<span class="comment"># Setează exact</span>
+chmod <span class="flag">u=rwx,g=rx,o=r</span> file
+
+<span class="comment"># Toți + read</span>
+chmod <span class="flag">a+r</span> file.txt</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="chmod X uppercase directoryy recursivee">
+                <div class="card-header">
+                    <span>⚠️</span>
+                    <h3>chmod X vs x (Recursiv)</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        <code>chmod -R a+x</code> face TOTUL executabil!
+                    </div>
+                    <pre><code><span class="comment"># ❌ GREȘIT</span>
+chmod <span class="flag">-R</span> a+x myproject/
+
+<span class="comment"># ✅ CORECT - X = doar directoare</span>
+chmod <span class="flag">-R</span> a+X myproject/
+
+<span class="comment"># ✅ ALTERNATIV - find</span>
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="umask default mask">
+                <div class="card-header">
+                    <span>🎭</span>
+                    <h3>umask - Permissions Default</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        umask <strong>ELIMINĂ</strong> permisiuni, NU setează!
+                    </div>
+                    <pre><code><span class="comment"># Verifică umask</span>
+umask      <span class="comment"># 0022</span>
+umask -S   <span class="comment"># u=rwx,g=rx,o=rx</span>
+
+<span class="comment"># Setează restrictiv</span>
+umask 077
+touch private.txt
+ls -l private.txt  <span class="comment"># rw-------</span></code></pre>
+                    <table>
+                        <tr><th>umask</th><th>Files</th><th>Directories</th></tr>
+                        <tr><td>022</td><td>644</td><td>755</td></tr>
+                        <tr><td>077</td><td>600</td><td>700</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="chown chgrp owner group">
+                <div class="card-header">
+                    <span>👤</span>
+                    <h3>chown / chgrp</h3>
+                </div>
+                <div class="card-body">
+                    <pre><code><span class="comment"># Schimbă owner</span>
+sudo chown user file.txt
+
+<span class="comment"># Schimbă owner:group</span>
+sudo chown user:group file.txt
+
+<span class="comment"># Doar groupul</span>
+chgrp developers file.txt
+sudo chown :developers file.txt
+
+<span class="comment"># Recursiv</span>
+sudo chown <span class="flag">-R</span> www-data:www-data /var/www/</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="perms" data-keywords="suid sgid sticky special 4000 2000 1000">
+                <div class="card-header">
+                    <span>🔴</span>
+                    <h3>Permissions Speciale</h3>
+                </div>
+                <div class="card-body">
+                    <div class="perm-visual">
+                        <span class="perm-char perm-s">S</span>
+                        <span>UID</span>
+                        <span class="perm-char perm-s">S</span>
+                        <span>GID</span>
+                        <span class="perm-char perm-t">T</span>
+                        <span>Sticky</span>
+                    </div>
+                    <table>
+                        <tr><th>Bit</th><th>Octal</th><th>Efect</th></tr>
+                        <tr><td>SUID</td><td>4xxx</td><td>Rulează ca owner</td></tr>
+                        <tr><td>SGID</td><td>2xxx</td><td>Dir: moștenire group</td></tr>
+                        <tr><td>Sticky</td><td>1xxx</td><td>Doar owner șterge</td></tr>
+                    </table>
+                    <pre><code>chmod <span class="flag">u+s</span> program   <span class="comment"># SUID</span>
+chmod <span class="flag">g+s</span> dir/      <span class="comment"># SGID</span>
+chmod <span class="flag">+t</span> /tmp/      <span class="comment"># Sticky</span>
+chmod <span class="number">4755</span> program  <span class="comment"># SUID octal</span></code></pre>
+                </div>
+            </div>
+            
+            <!-- ===== CRON CARDS ===== -->
+            
+            <div class="card" data-category="cron" data-keywords="crontab edit list remove">
+                <div class="card-header">
+                    <span>⏰</span>
+                    <h3>crontab - Comenzi de Bază</h3>
+                </div>
+                <div class="card-body">
+                    <pre><code><span class="comment"># Editează crontab</span>
+crontab <span class="flag">-e</span>
+
+<span class="comment"># Listează job-uri</span>
+crontab <span class="flag">-l</span>
+
+<span class="comment"># Șterge TOATE job-urile</span>
+crontab <span class="flag">-r</span></code></pre>
+                    <div class="danger">
+                        <code>crontab -r</code> șterge <strong>TOTUL</strong> fără confirmare!<br>
+                        E și vecină de <code>-e</code> pe tastatură!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="cron" data-keywords="cron format syntax minutes hour day month week">
+                <div class="card-header">
+                    <span>⏰</span>
+                    <h3>Crontab Format - Builder</h3>
+                </div>
+                <div class="card-body">
+                    <div class="cron-builder">
+                        <div class="cron-field">
+                            <input type="text" id="cron-min" value="*" oninput="buildCron()">
+                            <label>Minut<br>(0-59)</label>
+                        </div>
+                        <div class="cron-field">
+                            <input type="text" id="cron-hour" value="*" oninput="buildCron()">
+                            <label>Oră<br>(0-23)</label>
+                        </div>
+                        <div class="cron-field">
+                            <input type="text" id="cron-dom" value="*" oninput="buildCron()">
+                            <label>Ziua L.<br>(1-31)</label>
+                        </div>
+                        <div class="cron-field">
+                            <input type="text" id="cron-mon" value="*" oninput="buildCron()">
+                            <label>Luna<br>(1-12)</label>
+                        </div>
+                        <div class="cron-field">
+                            <input type="text" id="cron-dow" value="*" oninput="buildCron()">
+                            <label>Ziua S.<br>(0-7)</label>
+                        </div>
+                    </div>
+                    <div class="cron-result" id="cron-result">* * * * * command</div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="cron" data-keywords="cron special characters * / - ,">
+                <div class="card-header">
+                    <span>⏰</span>
+                    <h3>Cron - Caractere Speciale</h3>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr><th>Caracter</th><th>Semnificație</th><th>Example</th></tr>
+                        <tr><td><code>*</code></td><td>Orice valoare</td><td>* * * * *</td></tr>
+                        <tr><td><code>*/n</code></td><td>La fiecare n</td><td>*/5 = 0,5,10,15...</td></tr>
+                        <tr><td><code>n-m</code></td><td>Interval</td><td>9-17 = orele 9-17</td></tr>
+                        <tr><td><code>n,m</code></td><td>Lista</td><td>1,15 = daysle 1,15</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card" data-category="cron" data-keywords="cron examples daily weekly monthly hourly">
+                <div class="card-header">
+                    <span>⏰</span>
+                    <h3>Cron - Examples Comune</h3>
+                </div>
+                <div class="card-body">
+                    <pre><code><span class="comment"># La fiecare 5 minutes</span>
+*/5 * * * * /path/script.sh
+
+<span class="comment"># Zilnic la 3:00 AM</span>
+0 3 * * * /path/backup.sh
+
+<span class="comment"># Luni-Vineri la 9:00</span>
+0 9 * * 1-5 /path/work.sh
+
+<span class="comment"># Prima zi din lună</span>
+0 0 1 * * /path/monthly.sh
+
+<span class="comment"># @shortcuts</span>
+@reboot    /path/startup.sh
+@daily     /path/daily.sh
+@hourly    /path/hourly.sh</code></pre>
+                </div>
+            </div>
+            
+            <div class="card" data-category="cron" data-keywords="cron pitfalls environment path variables">
+                <div class="card-header">
+                    <span>⚠️</span>
+                    <h3>Cron - Capcane Comune</h3>
+                </div>
+                <div class="card-body">
+                    <div class="danger">
+                        Cron rulează cu mediu <strong>MINIMAL</strong>!
+                    </div>
+                    <pre><code><span class="comment"># ❌ GREȘIT - python nu e în PATH</span>
+* * * * * python script.py
+
+<span class="comment"># ✅ CORECT - cale absolută</span>
+* * * * * /usr/bin/python3 /home/user/script.py
+
+<span class="comment"># ✅ Cu logging</span>
+0 3 * * * /path/backup.sh >> /var/log/backup.log 2>&1</code></pre>
+                    <div class="warning">
+                        DOM + DOW = <strong>OR</strong>, nu AND!<br>
+                        <code>0 9 15 * 1</code> = pe 15 SAU Luni
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" data-category="cron" data-keywords="at one-time schedule">
+                <div class="card-header">
+                    <span>📅</span>
+                    <h3>at - Task-uri One-Time</h3>
+                </div>
+                <div class="card-body">
+                    <pre><code><span class="comment"># Programează comandă</span>
+at 14:30
+at> /path/reminder.sh
+at> <span class="comment">Ctrl+D</span>
+
+<span class="comment"># Variante de timp</span>
+at now + 10 minutess
+at midnight
+at tomorrow
+at 10:00 AM Dec 25
+
+<span class="comment"># Gestionare</span>
+atq          <span class="comment"># listează</span>
+atrm 5       <span class="comment"># șterge job #5</span></code></pre>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <footer>
+        <p>🐧 Seminar 3 Sisteme de Operare | Bucharest UES - CSIE</p>
+        <p>Apasă <kbd>Ctrl+P</kbd> pentru print-friendly version</p>
+    </footer>
+
+    <script>
+        // Filter functionality
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const cards = document.querySelectorAll('.card');
+        const searchInput = document.getElementById('search');
+        
+        let currentFilter = 'all';
+        let currentSearch = '';
+        
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.category;
+                applyFilters();
+            });
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value.toLowerCase();
+            applyFilters();
+        });
+        
+        function applyFilters() {
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const category = card.dataset.category;
+                const keywords = card.dataset.keywords.toLowerCase();
+                const text = card.textContent.toLowerCase();
+                
+                const matchesCategory = currentFilter === 'all' || category === currentFilter;
+                const matchesSearch = currentSearch === '' || 
+                    keywords.includes(currentSearch) || 
+                    text.includes(currentSearch);
+                
+                if (matchesCategory && matchesSearch) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('visible-count').textContent = visibleCount;
+        }
+        
+        // Permission calculator
+        function calcPerm() {
+            const input = document.getElementById('octal-input').value;
+            const result = document.getElementById('perm-result');
+            
+            if (!/^[0-7]{3,4}$/.test(input)) {
+                result.textContent = 'Invalid (use 3-4 octal digits)';
+                return;
+            }
+            
+            const digits = input.length === 4 ? input : '0' + input;
+            const special = parseInt(digits[0]);
+            const user = parseInt(digits[1]);
+            const group = parseInt(digits[2]);
+            const other = parseInt(digits[3]);
+            
+            function toRWX(n, sbit = false, sticky = false) {
+                const r = (n & 4) ? 'r' : '-';
+                const w = (n & 2) ? 'w' : '-';
+                let x = (n & 1) ? 'x' : '-';
+                
+                if (sbit) x = (n & 1) ? 's' : 'S';
+                if (sticky) x = (n & 1) ? 't' : 'T';
+                
+                return r + w + x;
+            }
+            
+            const perm = toRWX(user, special & 4) + 
+                        toRWX(group, special & 2) + 
+                        toRWX(other, false, special & 1);
+            
+            result.textContent = perm;
+        }
+        
+        // Cron builder
+        function buildCron() {
+            const min = document.getElementById('cron-min').value || '*';
+            const hour = document.getElementById('cron-hour').value || '*';
+            const dom = document.getElementById('cron-dom').value || '*';
+            const mon = document.getElementById('cron-mon').value || '*';
+            const dow = document.getElementById('cron-dow').value || '*';
+            
+            const expr = `${min} ${hour} ${dom} ${mon} ${dow} command`;
+            document.getElementById('cron-result').textContent = expr;
+        }
+        
+        // Initialize
+        applyFilters();
+        calcPerm();
+        
+        // Keyboard shortcut for search
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if (e.key === 'Escape') {
+                searchInput.blur();
+                searchInput.value = '';
+                currentSearch = '';
+                applyFilters();
+            }
+        });
+    </script>
+</body>
+</html>

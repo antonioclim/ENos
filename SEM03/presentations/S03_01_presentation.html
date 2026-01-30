@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminar 3: Advanced Utilities, Scripts and Automation | OS UES</title>
+    <style>
+        :root {
+            --primary: #2d3436;
+            --secondary: #0984e3;
+            --accent: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --success: #00b894;
+            --code-bg: #1e272e;
+            --slide-bg: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .slide {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100vh - 120px);
+            background: var(--slide-bg);
+            border-radius: 20px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            padding: 40px 50px;
+            overflow-y: auto;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .slide h1 {
+            color: var(--primary);
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            border-bottom: 4px solid var(--secondary);
+            padding-bottom: 15px;
+        }
+        
+        .slide h2 {
+            color: var(--secondary);
+            font-size: 1.6em;
+            margin: 20px 0 15px 0;
+        }
+        
+        .slide h3 {
+            color: var(--text);
+            font-size: 1.3em;
+            margin: 15px 0 10px 0;
+        }
+        
+        .slide p, .slide li {
+            color: var(--text);
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+        
+        .slide ul, .slide ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .slide li {
+            margin-bottom: 8px;
+        }
+        
+        /* Title slide specific */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+            color: white;
+        }
+        
+        .title-slide h1 {
+            font-size: 2.8em;
+            border: none;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.5em;
+            color: #dfe6e9;
+            margin-bottom: 30px;
+        }
+        
+        .title-slide .meta {
+            font-size: 1.1em;
+            color: #b2bec3;
+        }
+        
+        .title-slide .emoji-big {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            color: #a4b0be;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            position: relative;
+        }
+        
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.75em;
+            color: #636e72;
+            text-transform: uppercase;
+        }
+        
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: #f1f2f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--danger);
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .variable { color: #e5c07b; }
+        .command { color: #61afef; }
+        .flag { color: #56b6c2; }
+        .number { color: #d19a66; }
+        
+        /* Info boxes */
+        .info-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid;
+        }
+        
+        .info-box.tip {
+            background: #e8f8f5;
+            border-color: var(--success);
+        }
+        
+        .info-box.warning {
+            background: #fef9e7;
+            border-color: var(--warning);
+        }
+        
+        .info-box.danger {
+            background: #fdedec;
+            border-color: var(--danger);
+        }
+        
+        .info-box.info {
+            background: #ebf5fb;
+            border-color: var(--secondary);
+        }
+        
+        .info-box .title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #dfe6e9;
+        }
+        
+        th {
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #ebf5fb;
+        }
+        
+        /* Diagram container */
+        .diagram {
+            background: #f8f9fa;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        /* Two column layout */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .column {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .column h4 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        /* Quiz styling */
+        .quiz-question {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .quiz-question h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .quiz-option {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .quiz-option.correct {
+            background: var(--success);
+            border-color: white;
+        }
+        
+        .quiz-option.wrong {
+            background: var(--danger);
+            border-color: white;
+        }
+        
+        /* Navigation */
+        .nav-bar {
+            background: rgba(0,0,0,0.2);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            background: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-info {
+            color: white;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s;
+        }
+        
+        /* Section divider slide */
+        .section-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            color: white;
+        }
+        
+        .section-slide h1 {
+            color: white;
+            border: none;
+            font-size: 3em;
+        }
+        
+        .section-slide .section-number {
+            font-size: 5em;
+            opacity: 0.3;
+            margin-bottom: -20px;
+        }
+        
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        /* Permission visualization */
+        .perm-visual {
+            display: flex;
+            gap: 5px;
+            font-family: monospace;
+            font-size: 1.4em;
+            margin: 20px 0;
+        }
+        
+        .perm-group {
+            display: flex;
+            gap: 2px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .perm-char {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .perm-r { background: #74b9ff; color: white; }
+        .perm-w { background: #ff7675; color: white; }
+        .perm-x { background: #00b894; color: white; }
+        .perm-none { background: #dfe6e9; color: #636e72; }
+        
+        /* Cron field visualization */
+        .cron-visual {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .cron-field {
+            text-align: center;
+        }
+        
+        .cron-value {
+            background: var(--code-bg);
+            color: #ffeaa7;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+        
+        .cron-label {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+        
+        /* Keyboard shortcuts info */
+        .keyboard-info {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .keyboard-info.visible {
+            opacity: 1;
+        }
+        
+        kbd {
+            background: #636e72;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 0 3px;
+        }
+        
+        /* Interactive demo */
+        .interactive-demo {
+            background: #f8f9fa;
+            border: 2px dashed var(--secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .interactive-demo input {
+            font-family: monospace;
+            font-size: 1.1em;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .interactive-demo button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+        
+        .interactive-demo .output {
+            background: var(--code-bg);
+            color: #a4b0be;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            min-height: 60px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .slide {
+                padding: 25px;
+            }
+            
+            .slide h1 {
+                font-size: 1.8em;
+            }
+            
+            .columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <div class="slide-container">
+            <!-- ===== SLIDE 1: Title ===== -->
+            <div class="slide title-slide active" id="slide-1">
+                <div class="emoji-big">🐧</div>
+                <h1>Seminar 3: Operating Systems</h1>
+                <div class="subtitle">Advanced Utilities, Professional Scripts and Automation</div>
+                <div class="meta">
+                    Bucharest University of Economic Studies - CSIE<br>
+                    <br>
+                    <strong>Main topics:</strong> find & xargs | Script Parameters | Unix Permissions | Cron
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 2: Obiective ===== -->
+            <div class="slide" id="slide-2">
+                <h1>Learning Objectives</h1>
+                <p>At the end of this seminar, you will be able to:</p>
+                <ol>
+                    <li><strong>Construct complex searches</strong> cu <code>find</code> and process results with <code>xargs</code></li>
+                    <li><strong>Write professional scripts</strong> that accept arguments and options (<code>$@</code>, <code>getopts</code>)</li>
+                    <li><strong>Understand the Unix permissions system</strong> - rwx for files vs directories</li>
+                    <li><strong>Manage permissions</strong> cu <code>chmod</code> (octal and symbolic), <code>chown</code>, <code>umask</code></li>
+                    <li><strong>Use special permissions</strong>: SUID, SGID, Sticky Bit</li>
+                    <li><strong>Automate tasks</strong> cu <code>cron</code> și <code>at</code></li>
+                </ol>
+                
+                <div class="info-box info">
+                    <div class="title">📚 Prerequisites</div>
+                    This seminar assumes you have completed SEM01-04: navigation, variables, operators, redirection, filters and loops.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 3: Agenda ===== -->
+            <div class="slide" id="slide-3">
+                <h1>Seminar Agenda</h1>
+                
+                <table>
+                    <tr>
+                        <th>Time</th>
+                        <th>Module</th>
+                        <th>Topics</th>
+                    </tr>
+                    <tr>
+                        <td>0:00-0:25</td>
+                        <td>🔍 Module 1</td>
+                        <td>find, xargs, locate</td>
+                    </tr>
+                    <tr>
+                        <td>0:25-0:45</td>
+                        <td>📜 Module 2</td>
+                        <td>Script parameters, getopts</td>
+                    </tr>
+                    <tr>
+                        <td>0:45-0:55</td>
+                        <td>☕ Break</td>
+                        <td>10 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>0:55-1:25</td>
+                        <td>🔐 Module 3</td>
+                        <td>Unix Permissions complete</td>
+                    </tr>
+                    <tr>
+                        <td>1:25-1:40</td>
+                        <td>⏰ Module 4</td>
+                        <td>Cron and automation</td>
+                    </tr>
+                </table>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ Special Attention</div>
+                    This seminar includes <strong>critical security</strong> concepts. Exercises are done in <code>~/sandbox</code>, not in system directories!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 4: Section - FIND ===== -->
+            <div class="slide section-slide" id="slide-4">
+                <div class="section-number">01</div>
+                <h1>Search Utilities</h1>
+                <p style="font-size: 1.3em; opacity: 0.9;">find • xargs • locate</p>
+            </div>
+
+            <!-- ===== SLIDE 5: find intro ===== -->
+            <div class="slide" id="slide-5">
+                <h1>The find Command - Introduction</h1>
+                
+                <p><code>find</code> searches for files in the directory hierarchy based on various criteria.</p>
+                
+                <h2>General Syntax</h2>
+                <pre data-lang="bash"><code><span class="command">find</span> <span class="variable">[cale]</span> <span class="flag">[expresii]</span> <span class="flag">[acțiuni]</span></code></pre>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>Components</h4>
+                        <ul>
+                            <li><strong>path</strong> - where to search (default: .)</li>
+                            <li><strong>expressions</strong> - filtering criteria</li>
+                            <li><strong>actions</strong> - what to do with the results</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h4>Simple Example</h4>
+                        <pre data-lang="bash"><code><span class="comment"># Find all .txt files</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="info-box tip">
+                    <div class="title">💡 Why find and not ls?</div>
+                    <code>find</code> can search recursively, filter by size, date, permissions and can execute commands on the results!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 6: find -name, -type ===== -->
+            <div class="slide" id="slide-6">
+                <h1>find - Basic Tests</h1>
+                
+                <h2>Search by Name</h2>
+                <pre data-lang="bash"><code><span class="comment"># Exact match (case-sensitive)</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"config.txt"</span>
+
+<span class="comment"># With pattern (globbing)</span>
+<span class="command">find</span> /home <span class="flag">-name</span> <span class="string">"*.log"</span>
+
+<span class="comment"># Case-insensitive</span>
+<span class="command">find</span> . <span class="flag">-iname</span> <span class="string">"README*"</span></code></pre>
+                
+                <h2>Search by Type</h2>
+                <table>
+                    <tr>
+                        <th>Flag</th>
+                        <th>Type</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>-type f</code></td>
+                        <td>Regular file</td>
+                        <td><code>find . -type f</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-type d</code></td>
+                        <td>Directory</td>
+                        <td><code>find . -type d</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-type l</code></td>
+                        <td>Symbolic link</td>
+                        <td><code>find /usr -type l</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ===== SLIDE 7: find -size, -mtime ===== -->
+            <div class="slide" id="slide-7">
+                <h1>find - Size and Time</h1>
+                
+                <h2>Search by Size</h2>
+                <pre data-lang="bash"><code><span class="comment"># Files larger than 100MB</span>
+<span class="command">find</span> /var <span class="flag">-size</span> <span class="number">+100M</span>
+
+<span class="comment"># Files smaller than 1KB</span>
+<span class="command">find</span> . <span class="flag">-size</span> <span class="number">-1k</span>
+
+<span class="comment"># Files exactly 0 bytes (empty)</span>
+<span class="command">find</span> . <span class="flag">-size</span> <span class="number">0</span> <span class="flag">-type f</span></code></pre>
+                
+                <p><strong>Suffixes:</strong> <code>c</code>=bytes, <code>k</code>=KB, <code>M</code>=MB, <code>G</code>=GB</p>
+                
+                <h2>Search by Modification Time</h2>
+                <pre data-lang="bash"><code><span class="comment"># Modified in the last 24 hours</span>
+<span class="command">find</span> . <span class="flag">-mtime</span> <span class="number">-1</span>
+
+<span class="comment"># Modified more than 30 days ago</span>
+<span class="command">find</span> /var/log <span class="flag">-mtime</span> <span class="number">+30</span>
+
+<span class="comment"># Modified in the last 60 minutes</span>
+<span class="command">find</span> . <span class="flag">-mmin</span> <span class="number">-60</span></code></pre>
+                
+                <div class="info-box info">
+                    <div class="title">📌 Interpreting -mtime</div>
+                    <code>-mtime -N</code> = last N days | <code>-mtime +N</code> = older than N days | <code>-mtime N</code> = exactly N days
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 8: find operatori logici ===== -->
+            <div class="slide" id="slide-8">
+                <h1>find - Logical Operators</h1>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>AND (implicit)</h4>
+                        <pre data-lang="bash"><code><span class="comment"># .txt files larger than 1MB</span>
+<span class="command">find</span> . <span class="flag">-type f</span> <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-size</span> <span class="number">+1M</span></code></pre>
+                    </div>
+                    <div class="column">
+                        <h4>OR (-o)</h4>
+                        <pre data-lang="bash"><code><span class="comment"># .txt OR .log files</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="keyword">-o</span> <span class="flag">-name</span> <span class="string">"*.log"</span></code></pre>
+                    </div>
+                </div>
+                
+                <h2>NOT and Grouping</h2>
+                <pre data-lang="bash"><code><span class="comment"># Everything EXCEPT .git</span>
+<span class="command">find</span> . <span class="keyword">!</span> <span class="flag">-name</span> <span class="string">".git"</span>
+
+<span class="comment"># Grouping with parentheses (escaped!)</span>
+<span class="command">find</span> . <span class="flag">-type f</span> <span class="keyword">\(</span> <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="keyword">-o</span> <span class="flag">-name</span> <span class="string">"*.md"</span> <span class="keyword">\)</span>
+
+<span class="comment"># Complex: large .log files older than 7 days</span>
+<span class="command">find</span> /var/log <span class="flag">-type f</span> <span class="flag">-name</span> <span class="string">"*.log"</span> <span class="flag">-size</span> <span class="number">+10M</span> <span class="flag">-mtime</span> <span class="number">+7</span></code></pre>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ Watch the parentheses!</div>
+                    Parentheses must be escaped with <code>\(</code> și <code>\)</code> or put in quotes.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 9: find -exec ===== -->
+            <div class="slide" id="slide-9">
+                <h1>find - Actions (-exec)</h1>
+                
+                <h2>Execution for Each File</h2>
+                <pre data-lang="bash"><code><span class="comment"># Displays details for each file found</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-exec</span> <span class="command">ls</span> <span class="flag">-l</span> {} <span class="keyword">\;</span>
+
+<span class="comment"># {} = placeholder for the current file</span>
+<span class="comment"># \; = terminates the command (escaped ;)</span></code></pre>
+                
+                <h2>Batch Execution (more efficient)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Sends ALL files as arguments at once</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-exec</span> <span class="command">wc</span> <span class="flag">-l</span> {} <span class="keyword">+</span></code></pre>
+                
+                <div class="diagram">
+  -exec cmd {} \;    →  cmd file1; cmd file2; cmd file3;  (3 procese)
+  -exec cmd {} +     →  cmd file1 file2 file3;            (1 proces)
+                </div>
+                
+                <h2>With Confirmation (-ok)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Asks for confirmation before each execution</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-ok</span> <span class="command">rm</span> {} <span class="keyword">\;</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 10: find -delete danger ===== -->
+            <div class="slide" id="slide-10">
+                <h1>find -delete - DANGER!</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🚨 CRITICAL WARNING!</div>
+                    The order of options in <code>find</code> matters! <code>-delete</code> placed incorrectly can delete EVERYTHING!
+                </div>
+                
+                <div class="columns">
+                    <div class="column" style="background: #fdedec;">
+                        <h4>WRONG - Deletes EVERYTHING!</h4>
+                        <pre data-lang="bash"><code><span class="comment"># -delete BEFORE -name</span>
+<span class="command">find</span> . <span class="flag">-delete</span> <span class="flag">-name</span> <span class="string">"*.tmp"</span>
+<span class="comment"># Disaster! Deletes everything from .</span></code></pre>
+                    </div>
+                    <div class="column" style="background: #e8f8f5;">
+                        <h4>CORRECT</h4>
+                        <pre data-lang="bash"><code><span class="comment"># -name BEFORE -delete</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-delete</span>
+<span class="comment"># Deletes only .tmp</span></code></pre>
+                    </div>
+                </div>
+                
+                <h2>Best Practice: Test First!</h2>
+                <pre data-lang="bash"><code><span class="comment"># Step 1: See what will be deleted</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-print</span>
+
+<span class="comment"># Step 2: If OK, delete</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> <span class="flag">-delete</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 11: xargs intro ===== -->
+            <div class="slide" id="slide-11">
+                <h1>xargs - Procesare Batch</h1>
+                
+                <p><code>xargs</code> construiește și executes comenzi din input standard.</p>
+                
+                <h2>Why xargs?</h2>
+                <ul>
+                    <li>Shell-ul are o <strong>limită</strong> pentru lungimea unei comenzi (~2MB)</li>
+                    <li><code>xargs</code> împarte automat în bucăți gestionabile</li>
+                    <li>Mai eficient decât <code>-exec {} \;</code></li>
+                </ul>
+                
+                <h2>Utilizare de Bază</h2>
+                <pre data-lang="bash"><code><span class="comment"># Numără linii în toate fișierele .txt</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="command">wc</span> <span class="flag">-l</span>
+
+<span class="comment"># Displays conținut</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.conf"</span> | <span class="command">xargs</span> <span class="command">cat</span>
+
+<span class="comment"># Caută text în fișiere găsite</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.py"</span> | <span class="command">xargs</span> <span class="command">grep</span> <span class="string">"import"</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 12: xargs cu spații ===== -->
+            <div class="slide" id="slide-12">
+                <h1>xargs - Problema Spațiilor</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🐛 Common Problem</div>
+                    Files with spaces in their names "break" xargs by default!
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment"># Crează fișier cu spații</span>
+<span class="command">touch</span> <span class="string">"My Document.txt"</span>
+
+<span class="comment"># ❌ GREȘIT - tratează "My" și "Document.txt" separat</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="command">rm</span>
+<span class="comment"># rm: cannot remove 'My': No such file</span></code></pre>
+                
+                <h2>Soluția: Delimitator NULL</h2>
+                <pre data-lang="bash"><code><span class="comment"># ✅ CORRECT - folosește NULL ca delimitator</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-print0</span> | <span class="command">xargs</span> <span class="flag">-0</span> <span class="command">rm</span>
+
+<span class="comment"># -print0 = output separat cu NULL (\0)</span>
+<span class="comment"># -0 = xargs citește delimitatori NULL</span></code></pre>
+                
+                <div class="info-box tip">
+                    <div class="title">💡 Rule de Aur</div>
+                    Întotdeauna folosește <code>find -print0 | xargs -0</code> pentru robustețe!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 13: xargs avansat ===== -->
+            <div class="slide" id="slide-13">
+                <h1>xargs - Opțiuni Avansate</h1>
+                
+                <h2>Placeholder Personalizat (-I)</h2>
+                <pre data-lang="bash"><code><span class="comment"># {} va fi înlocuit cu fiecare fișier</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="flag">-I{}</span> <span class="command">cp</span> {} backup/{}</code></pre>
+                
+                <h2>Limitare Argumente (-n)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Procesează câte 2 fișiere odată</span>
+<span class="command">find</span> . <span class="flag">-type f</span> | <span class="command">xargs</span> <span class="flag">-n 2</span> <span class="command">echo</span></code></pre>
+                
+                <h2>Execuție Paralelă (-P)</h2>
+                <pre data-lang="bash"><code><span class="comment"># 4 procese paralele pentru compresi</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.log"</span> | <span class="command">xargs</span> <span class="flag">-P 4</span> <span class="command">gzip</span></code></pre>
+                
+                <h2>Confirmare (-p)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Cere confirmare înainte</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> | <span class="command">xargs</span> <span class="flag">-p</span> <span class="command">rm</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 14: locate ===== -->
+            <div class="slide" id="slide-14">
+                <h1>locate - Fast Search</h1>
+                
+                <p><code>locate</code> searches într-o <strong>bază de date pre-indexată</strong>, nu în sistemul de fișiere live.</p>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>find</h4>
+                        <ul>
+                            <li>Caută în timp real</li>
+                            <li>Întotdeauna actual</li>
+                            <li>Mai lent (citește disk)</li>
+                            <li>Filtre complexe</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h4>locate</h4>
+                        <ul>
+                            <li>Caută în database</li>
+                            <li>Poate fi outdated</li>
+                            <li>Foarte rapid</li>
+                            <li>Doar nume fișier</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment"># Quick search</span>
+<span class="command">locate</span> <span class="string">"passwd"</span>
+
+<span class="comment"># Actualizează baza de date (root)</span>
+<span class="command">sudo</span> <span class="command">updatedb</span>
+
+<span class="comment"># Case-insensitive</span>
+<span class="command">locate</span> <span class="flag">-i</span> <span class="string">"readme"</span></code></pre>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ CAPCANĂ!</div>
+                    Recently created files do NOT appear in <code>locate</code> until the next <code>updatedb</code>!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 15: Quiz find ===== -->
+            <div class="slide" id="slide-15">
+                <h1>Peer Instruction: find & xargs</h1>
+                
+                <div class="quiz-question">
+                    <h3>What will the following command display?</h3>
+                    <pre style="background: rgba(0,0,0,0.3);"><code>touch ~/new_file.txt
+locate new_file.txt</code></pre>
+                    
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>A)</strong> /home/user/new_file.txt
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                            <strong>B)</strong> Nothing (database not updated)
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>C)</strong> Error: file not found
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>D)</strong> List of all .txt files
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box tip" id="quiz-explanation" style="display: none;">
+                    <div class="title">💡 Explanation</div>
+                    <code>locate</code> searches in a pre-built database that is updated periodically (usually nightly). New files do not appear until <code>updatedb</code>.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 16: Section - PARAMETERS ===== -->
+            <div class="slide section-slide" id="slide-16">
+                <div class="section-number">02</div>
+                <h1>Script Parameters</h1>
+                <p style="font-size: 1.3em; opacity: 0.9;">$0 • $@ • shift • getopts</p>
+            </div>
+
+            <!-- ===== SLIDE 17: Parameters pozitionali ===== -->
+            <div class="slide" id="slide-17">
+                <h1>Positional Parameters</h1>
+                
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>$0</code></td>
+                        <td>Script name</td>
+                        <td>./script.sh</td>
+                    </tr>
+                    <tr>
+                        <td><code>$1 - $9</code></td>
+                        <td>Arguments 1-9</td>
+                        <td>first, second...</td>
+                    </tr>
+                    <tr>
+                        <td><code>${10}+</code></td>
+                        <td>Arguments 10+</td>
+                        <td>With braces!</td>
+                    </tr>
+                    <tr>
+                        <td><code>$#</code></td>
+                        <td>Number of arguments</td>
+                        <td>3</td>
+                    </tr>
+                    <tr>
+                        <td><code>$@</code></td>
+                        <td>All arguments (array)</td>
+                        <td>"arg1" "arg2" "arg3"</td>
+                    </tr>
+                    <tr>
+                        <td><code>$*</code></td>
+                        <td>All arguments (string)</td>
+                        <td>"arg1 arg2 arg3"</td>
+                    </tr>
+                </table>
+                
+                <pre data-lang="bash"><code><span class="comment">#!/bin/bash</span>
+<span class="command">echo</span> <span class="string">"Script: $0"</span>
+<span class="command">echo</span> <span class="string">"Argumente: $#"</span>
+<span class="command">echo</span> <span class="string">"Primul: $1"</span>
+<span class="command">echo</span> <span class="string">"Al doilea: $2"</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 18: $@ vs $* ===== -->
+            <div class="slide" id="slide-18">
+                <h1>$@ vs $* - The Crucial Difference</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🎯 Common Misconception</div>
+                    Many believe that <code>$@</code> and <code>$*</code> are identical. THEY ARE NOT!
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment">#!/bin/bash</span>
+<span class="comment"># Run: ./test.sh "hello world" test</span>
+
+<span class="command">echo</span> <span class="string">"=== With \$@ ==="</span>
+<span class="keyword">for</span> arg <span class="keyword">in</span> <span class="string">"$@"</span>; <span class="keyword">do</span> <span class="command">echo</span> <span class="string">"[$arg]"</span>; <span class="keyword">done</span>
+<span class="comment"># Output:</span>
+<span class="comment"># [hello world]</span>
+<span class="comment"># [test]</span>
+
+<span class="command">echo</span> <span class="string">"=== With \$* ==="</span>
+<span class="keyword">for</span> arg <span class="keyword">in</span> <span class="string">"$*"</span>; <span class="keyword">do</span> <span class="command">echo</span> <span class="string">"[$arg]"</span>; <span class="keyword">done</span>
+<span class="comment"># Output:</span>
+<span class="comment"># [hello world test]</span></code></pre>
+                
+                <div class="diagram">
+  "$@" = "arg1" "arg2" "arg3"   →  3 elemente separate
+  "$*" = "arg1 arg2 arg3"       →  1 string concatenat
+                </div>
+                
+                <div class="info-box tip">
+                    <div class="title">💡 Rule</div>
+                    Use <strong>always</strong> <code>"$@"</code> (with quotes!) to preserve arguments with spaces.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 19: shift ===== -->
+            <div class="slide" id="slide-19">
+                <h1>shift - Shifting Arguments</h1>
+                
+                <p><code>shift</code> removes the first argument and shifts the rest to the left.</p>
+                
+                <pre data-lang="bash"><code><span class="comment">#!/bin/bash</span>
+<span class="comment"># Run: ./script.sh a b c d</span>
+
+<span class="command">echo</span> <span class="string">"Before: \$1=$1 \$2=$2 \$3=$3"</span>  <span class="comment"># a b c</span>
+<span class="keyword">shift</span>
+<span class="command">echo</span> <span class="string">"After shift: \$1=$1 \$2=$2 \$3=$3"</span>  <span class="comment"># b c d</span>
+<span class="keyword">shift</span> <span class="number">2</span>
+<span class="command">echo</span> <span class="string">"After shift 2: \$1=$1"</span>  <span class="comment"># d</span></code></pre>
+                
+                <h2>Pattern: Processing All Arguments</h2>
+                <pre data-lang="bash"><code><span class="keyword">while</span> [[ <span class="variable">$#</span> <span class="flag">-gt</span> <span class="number">0</span> ]]; <span class="keyword">do</span>
+    <span class="command">echo</span> <span class="string">"Processing: $1"</span>
+    <span class="keyword">shift</span>
+<span class="keyword">done</span></code></pre>
+                
+                <div class="info-box info">
+                    <div class="title">📌 Usage</div>
+                    <code>shift</code> is useful when you have options at the beginning and files at the end - you process the options, then <code>$@</code> contains only the files.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 20: getopts intro ===== -->
+            <div class="slide" id="slide-20">
+                <h1>getopts - Option Parsing</h1>
+                
+                <p><code>getopts</code> parses options like <code>-a</code>, <code>-b value</code> in a standardised way.</p>
+                
+                <h2>Syntax</h2>
+                <pre data-lang="bash"><code><span class="keyword">while</span> <span class="command">getopts</span> <span class="string">"optstring"</span> <span class="variable">opt</span>; <span class="keyword">do</span>
+    <span class="keyword">case</span> <span class="variable">$opt</span> <span class="keyword">in</span>
+        <span class="comment"># handle options</span>
+    <span class="keyword">esac</span>
+<span class="keyword">done</span></code></pre>
+                
+                <h2>Optstring Explained</h2>
+                <table>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><code>a</code></td>
+                        <td>Simple flag (boolean)</td>
+                        <td><code>-a</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>b:</code></td>
+                        <td>Option with mandatory argument</td>
+                        <td><code>-b value</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>:ab:</code></td>
+                        <td>: at beginning = silent errors</td>
+                        <td>manual error handling</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ===== SLIDE 21: getopts exemplu complet ===== -->
+            <div class="slide" id="slide-21">
+                <h1>getopts - Complete Example</h1>
+                
+                <pre data-lang="bash"><code><span class="comment">#!/bin/bash</span>
+<span class="comment"># Script with options: -h (help), -v (verbose), -o FILE (output)</span>
+
+<span class="variable">verbose</span>=<span class="number">0</span>
+<span class="variable">output</span>=<span class="string">""</span>
+
+<span class="keyword">while</span> <span class="command">getopts</span> <span class="string">"hvo:"</span> <span class="variable">opt</span>; <span class="keyword">do</span>
+    <span class="keyword">case</span> <span class="variable">$opt</span> <span class="keyword">in</span>
+        h)
+            <span class="command">echo</span> <span class="string">"Usage: $0 [-h] [-v] [-o file] args..."</span>
+            <span class="keyword">exit</span> <span class="number">0</span>
+            ;;
+        v)
+            <span class="variable">verbose</span>=<span class="number">1</span>
+            ;;
+        o)
+            <span class="variable">output</span>=<span class="string">"$OPTARG"</span>  <span class="comment"># OPTARG = the argument value</span>
+            ;;
+        \?)
+            <span class="command">echo</span> <span class="string">"Invalid option: -$OPTARG"</span> >&2
+            <span class="keyword">exit</span> <span class="number">1</span>
+            ;;
+    <span class="keyword">esac</span>
+<span class="keyword">done</span>
+
+<span class="comment"># Remove processed options, leave only arguments</span>
+<span class="keyword">shift</span> <span class="variable">$((OPTIND - 1))</span>
+
+<span class="comment"># Now $@ contains only non-option arguments</span>
+<span class="command">echo</span> <span class="string">"Files to process: $@"</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 22: getopts OPTIND ===== -->
+            <div class="slide" id="slide-22">
+                <h1>OPTARG and OPTIND</h1>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>OPTARG</h4>
+                        <p>Contains the argument value for options with <code>:</code></p>
+                        <pre data-lang="bash"><code><span class="comment"># -o file.txt</span>
+<span class="variable">$OPTARG</span> = <span class="string">"file.txt"</span></code></pre>
+                    </div>
+                    <div class="column">
+                        <h4>OPTIND</h4>
+                        <p>Index of the next argument to process</p>
+                        <pre data-lang="bash"><code><span class="comment"># After getopts</span>
+<span class="keyword">shift</span> <span class="variable">$((OPTIND - 1))</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="diagram">
+  ./script.sh -v -o out.txt file1.txt file2.txt
+              ↑   ↑   ↑      ↑
+              1   2   3      OPTIND=4 după parsare
+              
+  După shift $((OPTIND-1)):
+  $1 = file1.txt
+  $2 = file2.txt
+                </div>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ getopts Limitation</div>
+                    <code>getopts</code> does NOT support long options (<code>--verbose</code>). For these, use manual parsing with <code>case</code>.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 23: Quiz parameters ===== -->
+            <div class="slide" id="slide-23">
+                <h1>Peer Instruction: Parameters</h1>
+                
+                <div class="quiz-question">
+                    <h3>What does the command display?</h3>
+                    <pre style="background: rgba(0,0,0,0.3);"><code>#!/bin/bash
+echo "Argument 10: $10"
+
+# Run: ./script.sh a b c d e f g h i j k</code></pre>
+                    
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>A)</strong> j
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                            <strong>B)</strong> a0
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>C)</strong> Syntax error
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>D)</strong> k
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box tip" id="quiz-explanation-2" style="display: none;">
+                    <div class="title">💡 Explanation</div>
+                    <code>$10</code> is interpreted as <code>$1</code> followed by the character <code>0</code>. For argument 10, use <code>${10}</code>!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 24: Section - PERMISSIONS ===== -->
+            <div class="slide section-slide" id="slide-24">
+                <div class="section-number">03</div>
+                <h1>Unix Permissions</h1>
+                <p style="font-size: 1.3em; opacity: 0.9;">chmod • chown • umask • SUID/SGID</p>
+            </div>
+
+            <!-- ===== SLIDE 25: Permisiuni intro ===== -->
+            <div class="slide" id="slide-25">
+                <h1>Sistemul de Unix Permissions</h1>
+                
+                <p>Fiecare fișier/director are 3 seturi de permisiuni pentru 3 categorii de utilizatori:</p>
+                
+                <div class="diagram">
+  -rwxr-xr--  1  user  group  4096  Jan 15 10:00  file.txt
+  │└┬┘└┬┘└┬┘
+  │ │  │  └── Others (o) - toți ceilalți
+  │ │  └───── Group (g) - membrii grupului
+  │ └──────── User/Owner (u) - proprietarul
+  └────────── Tip fișier (- = regular, d = dir, l = link)
+                </div>
+                
+                <h2>Semnificația rwx</h2>
+                <table>
+                    <tr>
+                        <th>Permission</th>
+                        <th>On File</th>
+                        <th>On Directoryy</th>
+                    </tr>
+                    <tr>
+                        <td><strong>r</strong> (read)</td>
+                        <td>Read contents</td>
+                        <td>List contents (ls)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>w</strong> (write)</td>
+                        <td>Modify contents</td>
+                        <td>Create/delete files</td>
+                    </tr>
+                    <tr>
+                        <td><strong>x</strong> (execute)</td>
+                        <td>Execute as program</td>
+                        <td><strong>Accesează</strong> (cd)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ===== SLIDE 26: x pe director ===== -->
+            <div class="slide" id="slide-26">
+                <h1>x pe Directory - ATENȚIE!</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🎯 Critical Misconception</div>
+                    <code>x</code> pe director NU înseamnă "pot executa fișierele din el"!
+                </div>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>Fără x pe director</h4>
+                        <pre data-lang="bash"><code><span class="command">chmod</span> <span class="number">640</span> mydir/
+<span class="comment"># rw-r-----</span>
+<span class="command">cd</span> mydir/  <span class="comment"># Permission denied!</span>
+<span class="command">cat</span> mydir/file.txt  <span class="comment"># Permission denied!</span>
+<span class="command">ls</span> mydir/  <span class="comment"># Funcționează (r)</span></code></pre>
+                    </div>
+                    <div class="column">
+                        <h4>Cu x pe director</h4>
+                        <pre data-lang="bash"><code><span class="command">chmod</span> <span class="number">750</span> mydir/
+<span class="comment"># rwxr-x---</span>
+<span class="command">cd</span> mydir/  <span class="comment"># OK</span>
+<span class="command">cat</span> mydir/file.txt  <span class="comment"># OK</span>
+<span class="command">ls</span> mydir/  <span class="comment"># OK</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="diagram">
+  Directory cu r-- (doar read):
+  ✓ ls dir/           (vezi lista de nume)
+  ✗ ls -l dir/        (nu poți accesa metadata)
+  ✗ cd dir/           (nu poți intra)
+  ✗ cat dir/file      (nu poți accesa fișierele)
+  
+  Directory cu --x (doar execute):
+  ✗ ls dir/           (nu poți lista)
+  ✓ cd dir/           (poți intra)
+  ✓ cat dir/file      (dacă știi numele exact)
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 27: chmod octal ===== -->
+            <div class="slide" id="slide-27">
+                <h1>chmod - Octal Mode</h1>
+                
+                <p>Each permission has a numeric value:</p>
+                
+                <div class="perm-visual" style="justify-content: center;">
+                    <div class="perm-group">
+                        <div class="perm-char perm-r">r</div>
+                        <div class="perm-char perm-w">w</div>
+                        <div class="perm-char perm-x">x</div>
+                    </div>
+                    <span style="font-size: 1.5em; padding: 10px;">=</span>
+                    <div class="perm-group">
+                        <div class="perm-char perm-r">4</div>
+                        <div class="perm-char perm-w">2</div>
+                        <div class="perm-char perm-x">1</div>
+                    </div>
+                </div>
+                
+                <table>
+                    <tr>
+                        <th>Octal</th>
+                        <th>Binary</th>
+                        <th>Permisiuni</th>
+                        <th>Meaning</th>
+                    </tr>
+                    <tr><td>7</td><td>111</td><td>rwx</td><td>Full access</td></tr>
+                    <tr><td>6</td><td>110</td><td>rw-</td><td>Read + Write</td></tr>
+                    <tr><td>5</td><td>101</td><td>r-x</td><td>Read + Execute</td></tr>
+                    <tr><td>4</td><td>100</td><td>r--</td><td>Read only</td></tr>
+                    <tr><td>0</td><td>000</td><td>---</td><td>No access</td></tr>
+                </table>
+                
+                <pre data-lang="bash"><code><span class="command">chmod</span> <span class="number">755</span> script.sh   <span class="comment"># rwxr-xr-x</span>
+<span class="command">chmod</span> <span class="number">644</span> file.txt    <span class="comment"># rw-r--r--</span>
+<span class="command">chmod</span> <span class="number">600</span> secret.key  <span class="comment"># rw-------</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 28: chmod simbolic ===== -->
+            <div class="slide" id="slide-28">
+                <h1>chmod - Symbolic Mode</h1>
+                
+                <h2>Syntax: WHO OPERATOR PERMISSION</h2>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>WHO</h4>
+                        <ul>
+                            <li><code>u</code> = user (owner)</li>
+                            <li><code>g</code> = group</li>
+                            <li><code>o</code> = others</li>
+                            <li><code>a</code> = all</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h4>OPERATOR</h4>
+                        <ul>
+                            <li><code>+</code> = add</li>
+                            <li><code>-</code> = remove</li>
+                            <li><code>=</code> = set exactly</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment"># Add execute for owner</span>
+<span class="command">chmod</span> <span class="flag">u+x</span> script.sh
+
+<span class="comment"># Remove write for group and others</span>
+<span class="command">chmod</span> <span class="flag">go-w</span> file.txt
+
+<span class="comment"># Set exactly: owner=rwx, group=rx, others=r</span>
+<span class="command">chmod</span> <span class="flag">u=rwx,g=rx,o=r</span> file.txt
+
+<span class="comment"># Add read for all</span>
+<span class="command">chmod</span> <span class="flag">a+r</span> file.txt</code></pre>
+            </div>
+
+            <!-- ===== SLIDE 29: chmod X vs x ===== -->
+            <div class="slide" id="slide-29">
+                <h1>chmod Recursive: X vs x</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">⚠️ Common Problem</div>
+                    <code>chmod -R a+x</code> makes ALL files executable - including .txt, .jpg, etc.!
+                </div>
+                
+                <h2>The Solution: Capital X</h2>
+                <pre data-lang="bash"><code><span class="comment"># ❌ WRONG: makes everything executable</span>
+<span class="command">chmod</span> <span class="flag">-R</span> <span class="flag">a+x</span> myproject/
+
+<span class="comment"># ✅ CORRECT: X = execute doar pentru directoare</span>
+<span class="comment"># and files that already have x for someone</span>
+<span class="command">chmod</span> <span class="flag">-R</span> <span class="flag">a+X</span> myproject/</code></pre>
+                
+                <h2>Best Practice for Projects</h2>
+                <pre data-lang="bash"><code><span class="comment"># Set correct permissions for everything</span>
+<span class="command">find</span> myproject/ <span class="flag">-type d</span> <span class="flag">-exec</span> <span class="command">chmod</span> <span class="number">755</span> {} \;
+<span class="command">find</span> myproject/ <span class="flag">-type f</span> <span class="flag">-exec</span> <span class="command">chmod</span> <span class="number">644</span> {} \;
+
+<span class="comment"># Then make only scripts executable</span>
+<span class="command">find</span> myproject/ <span class="flag">-name</span> <span class="string">"*.sh"</span> <span class="flag">-exec</span> <span class="command">chmod</span> <span class="number">755</span> {} \;</code></pre>
+            </div>
+
+            <!-- ===== SLIDE 30: umask ===== -->
+            <div class="slide" id="slide-30">
+                <h1>umask - Default Permissions</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🎯 Critical Misconception</div>
+                    <code>umask</code> does NOT set permissions - it REMOVES permissions from default!
+                </div>
+                
+                <div class="diagram">
+  Default permissions (without umask):
+    Files:    666 (rw-rw-rw-)
+    Directories: 777 (rwxrwxrwx)
+  
+  umask 022:
+    Files:    666 - 022 = 644 (rw-r--r--)
+    Directories: 777 - 022 = 755 (rwxr-xr-x)
+    
+  umask 077:
+    Files:    666 - 077 = 600 (rw-------)
+    Directories: 777 - 077 = 700 (rwx------)
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment"># Check current umask</span>
+<span class="command">umask</span>         <span class="comment"># Displays 0022</span>
+<span class="command">umask</span> <span class="flag">-S</span>      <span class="comment"># Displays simbolic: u=rwx,g=rx,o=rx</span>
+
+<span class="comment"># Set umask for session</span>
+<span class="command">umask</span> <span class="number">077</span>     <span class="comment"># Very restrictive</span>
+<span class="command">touch</span> secret.txt
+<span class="command">ls</span> <span class="flag">-l</span> secret.txt  <span class="comment"># -rw------- (600)</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 31: chown ===== -->
+            <div class="slide" id="slide-31">
+                <h1>chown and chgrp</h1>
+                
+                <h2>Change Owner</h2>
+                <pre data-lang="bash"><code><span class="comment"># Change the owner</span>
+<span class="command">sudo</span> <span class="command">chown</span> <span class="variable">newuser</span> file.txt
+
+<span class="comment"># Change the owner și grupul</span>
+<span class="command">sudo</span> <span class="command">chown</span> <span class="variable">newuser:newgroup</span> file.txt
+
+<span class="comment"># Recursive</span>
+<span class="command">sudo</span> <span class="command">chown</span> <span class="flag">-R</span> <span class="variable">www-data:www-data</span> /var/www/</code></pre>
+                
+                <h2>Change Group Only</h2>
+                <pre data-lang="bash"><code><span class="comment"># Group only</span>
+<span class="command">chgrp</span> <span class="variable">developers</span> project/
+
+<span class="comment"># Or with chown (: at the beginning)</span>
+<span class="command">sudo</span> <span class="command">chown</span> <span class="variable">:developers</span> project/</code></pre>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ Requires Privileges</div>
+                    <code>chown</code> usually requires <code>sudo</code>. A normal user can use <code>chgrp</code> only for groups they are a member of.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 32: SUID ===== -->
+            <div class="slide" id="slide-32">
+                <h1>SUID - Set User ID</h1>
+                
+                <p>When SUID is set, the program runs with the permissions of the <strong>owner</strong>, not of the one executing it.</p>
+                
+                <pre data-lang="bash"><code><span class="command">ls</span> <span class="flag">-l</span> /usr/bin/passwd
+<span class="comment"># -rwsr-xr-x 1 root root ... /usr/bin/passwd</span>
+<span class="comment">#    ↑</span>
+<span class="comment">#    s în loc de x = SUID activat</span></code></pre>
+                
+                <h2>Why does it exist?</h2>
+                <p><code>/usr/bin/passwd</code> needs to modify <code>/etc/shadow</code> (owned by root). SUID allows normal users to change their password.</p>
+                
+                <h2>Setting SUID</h2>
+                <pre data-lang="bash"><code><span class="command">chmod</span> <span class="flag">u+s</span> program     <span class="comment"># Symbolic</span>
+<span class="command">chmod</span> <span class="number">4755</span> program    <span class="comment"># Octal (4 = SUID)</span></code></pre>
+                
+                <div class="info-box danger">
+                    <div class="title">🚨 SUID on Scripts</div>
+                    For security reasons, Linux <strong>ignores SUID on bash scripts</strong>! It only works on compiled binaries.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 33: SGID și Sticky ===== -->
+            <div class="slide" id="slide-33">
+                <h1>SGID and Sticky Bit</h1>
+                
+                <h2>SGID on Directories</h2>
+                <p>New files <strong>inherit the directory's group</strong>, not the user's group.</p>
+                
+                <pre data-lang="bash"><code><span class="comment"># Set SGID on shared directory</span>
+<span class="command">chmod</span> <span class="flag">g+s</span> /shared/project/
+<span class="command">chmod</span> <span class="number">2775</span> /shared/project/  <span class="comment"># 2 = SGID</span>
+
+<span class="command">ls</span> <span class="flag">-ld</span> /shared/project/
+<span class="comment"># drwxrwsr-x ... (s în poziția group x)</span></code></pre>
+                
+                <h2>Sticky Bit on Directories</h2>
+                <p>Only the <strong>file owner</strong> can delete the file (e.g.: /tmp).</p>
+                
+                <pre data-lang="bash"><code><span class="command">ls</span> <span class="flag">-ld</span> /tmp
+<span class="comment"># drwxrwxrwt ... (t în poziția others x)</span>
+<span class="comment">#          ↑</span>
+<span class="comment">#          t = Sticky bit</span>
+
+<span class="comment"># Setting</span>
+<span class="command">chmod</span> <span class="flag">+t</span> /shared/temp/
+<span class="command">chmod</span> <span class="number">1777</span> /shared/temp/  <span class="comment"># 1 = Sticky</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 34: Permission summary visual ===== -->
+            <div class="slide" id="slide-34">
+                <h1>Permissions - Visual Summary</h1>
+                
+                <div class="diagram">
+  OCTAL PERMISSIONS WITH SPECIALS:
+  
+       Special  User   Group  Others
+         ↓       ↓       ↓       ↓
+        [X]    [X][X][X] [X][X][X] [X][X][X]
+         │      r  w  x   r  w  x   r  w  x
+         │      4  2  1   4  2  1   4  2  1
+         │
+         ├── 4 = SUID
+         ├── 2 = SGID
+         └── 1 = Sticky
+  
+  EXAMPLES:
+  
+  chmod 755  = rwxr-xr-x          (executable script)
+  chmod 644  = rw-r--r--          (normal file)
+  chmod 600  = rw-------          (private file)
+  chmod 4755 = rwsr-xr-x          (SUID program)
+  chmod 2775 = rwxrwsr-x          (shared dir with SGID)
+  chmod 1777 = rwxrwxrwt          (temp dir with Sticky)
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 35: Quiz permissions ===== -->
+            <div class="slide" id="slide-35">
+                <h1>Peer Instruction: Permissions</h1>
+                
+                <div class="quiz-question">
+                    <h3>A directory has the permissions: drwxr-x---</h3>
+                    <p>What can a user from the group NOT do?</p>
+                    
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>A)</strong> cd into the directory
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>B)</strong> ls the directory
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                            <strong>C)</strong> Create new files in the directory
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>D)</strong> Read the files in the directory
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box tip" id="quiz-explanation-3" style="display: none;">
+                    <div class="title">💡 Explanation</div>
+                    Group has <code>r-x</code> - can read (r) and access (x), but CANNOT write (w). To create/delete files you need <code>w</code> on the directory.
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 36: Section - CRON ===== -->
+            <div class="slide section-slide" id="slide-36">
+                <div class="section-number">04</div>
+                <h1>Automation with Cron</h1>
+                <p style="font-size: 1.3em; opacity: 0.9;">crontab • at • scheduling</p>
+            </div>
+
+            <!-- ===== SLIDE 37: Cron intro ===== -->
+            <div class="slide" id="slide-37">
+                <h1>What is Cron?</h1>
+                
+                <p><code>cron</code> is a daemon that executes scheduled commands automatically.</p>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>Components</h4>
+                        <ul>
+                            <li><strong>crond</strong> - the daemon</li>
+                            <li><strong>crontab</strong> - the job table</li>
+                            <li><strong>/var/spool/cron/</strong> - user crontabs</li>
+                            <li><strong>/etc/crontab</strong> - system crontab</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h4>Commands</h4>
+                        <pre data-lang="bash"><code><span class="comment"># Edit your crontab</span>
+<span class="command">crontab</span> <span class="flag">-e</span>
+
+<span class="comment"># List jobs</span>
+<span class="command">crontab</span> <span class="flag">-l</span>
+
+<span class="comment"># Delete ALL jobs!</span>
+<span class="command">crontab</span> <span class="flag">-r</span></code></pre>
+                    </div>
+                </div>
+                
+                <div class="info-box danger">
+                    <div class="title">🚨 WARNING!</div>
+                    <code>crontab -r</code> deletes <strong>ALL</strong> jobs without confirmation! Easily confused with <code>-e</code> (they are neighbours on the keyboard).
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 38: Cron format ===== -->
+            <div class="slide" id="slide-38">
+                <h1>The Crontab Format</h1>
+                
+                <div class="cron-visual">
+                    <div class="cron-field">
+                        <div class="cron-value">*</div>
+                        <div class="cron-label">Minute<br>(0-59)</div>
+                    </div>
+                    <div class="cron-field">
+                        <div class="cron-value">*</div>
+                        <div class="cron-label">Hour<br>(0-23)</div>
+                    </div>
+                    <div class="cron-field">
+                        <div class="cron-value">*</div>
+                        <div class="cron-label">Day of month<br>(1-31)</div>
+                    </div>
+                    <div class="cron-field">
+                        <div class="cron-value">*</div>
+                        <div class="cron-label">Month<br>(1-12)</div>
+                    </div>
+                    <div class="cron-field">
+                        <div class="cron-value">*</div>
+                        <div class="cron-label">Day of week<br>(0-7)</div>
+                    </div>
+                    <div class="cron-field">
+                        <div class="cron-value" style="background: var(--success);">command</div>
+                        <div class="cron-label">Command</div>
+                    </div>
+                </div>
+                
+                <h2>Special Characters</h2>
+                <table>
+                    <tr>
+                        <th>Character</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr><td><code>*</code></td><td>Any value</td><td>* * * * * (every minute)</td></tr>
+                    <tr><td><code>*/n</code></td><td>Every n</td><td>*/5 * * * * (every 5 min)</td></tr>
+                    <tr><td><code>n-m</code></td><td>Range</td><td>9-17 (hours 9-17)</td></tr>
+                    <tr><td><code>n,m</code></td><td>List</td><td>1,15 (days 1 and 15)</td></tr>
+                </table>
+            </div>
+
+            <!-- ===== SLIDE 39: Cron examples ===== -->
+            <div class="slide" id="slide-39">
+                <h1>Cron Examples</h1>
+                
+                <pre data-lang="crontab"><code><span class="comment"># Every 5 minutes</span>
+*/5 * * * * /home/user/script.sh
+
+<span class="comment"># Every day at 3:00 AM</span>
+0 3 * * * /home/user/backup.sh
+
+<span class="comment"># Monday-Friday at 9:00 AM</span>
+0 9 * * 1-5 /home/user/work_report.sh
+
+<span class="comment"># First day of the month at midnight</span>
+0 0 1 * * /home/user/monthly_cleanup.sh
+
+<span class="comment"># Every hour, on working days</span>
+0 * * * 1-5 /home/user/hourly_check.sh</code></pre>
+                
+                <h2>Special Strings</h2>
+                <pre data-lang="crontab"><code>@reboot     <span class="comment"># At boot</span>
+@daily      <span class="comment"># Once a day (0 0 * * *)</span>
+@weekly     <span class="comment"># Once a week</span>
+@monthly    <span class="comment"># Once a month</span>
+@yearly     <span class="comment"># Once a year</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 40: Cron pitfalls ===== -->
+            <div class="slide" id="slide-40">
+                <h1>Cron - Common Pitfalls</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🎯 Misconception #1: Execution environment</div>
+                    Cron runs with a <strong>minimal</strong> environment - it does NOT have access to your variables (customised PATH, HOME, etc.)!
+                </div>
+                
+                <pre data-lang="crontab"><code><span class="comment"># ❌ WRONG - python may not be in PATH</span>
+* * * * * python script.py
+
+<span class="comment"># ✅ CORRECT - calea completă</span>
+* * * * * /usr/bin/python3 /home/user/script.py</code></pre>
+                
+                <div class="info-box warning">
+                    <div class="title">🎯 Misconception #2: DOM and DOW</div>
+                    If you specify BOTH day of month AND day of week, cron treats them with <strong>OR</strong>, not AND!
+                </div>
+                
+                <pre data-lang="crontab"><code><span class="comment"># Runs on the 15th OR every Monday (not just Monday the 15th!)</span>
+0 9 15 * 1 /script.sh</code></pre>
+                
+                <h2>Best Practice: Logging</h2>
+                <pre data-lang="crontab"><code><span class="comment"># Redirect stdout and stderr to log</span>
+0 3 * * * /home/user/backup.sh >> /var/log/backup.log 2>&1</code></pre>
+            </div>
+
+            <!-- ===== SLIDE 41: at command ===== -->
+            <div class="slide" id="slide-41">
+                <h1>at - One-Time Tasks</h1>
+                
+                <p><code>at</code> schedules a command to run <strong>once</strong> at a specified time.</p>
+                
+                <pre data-lang="bash"><code><span class="comment"># Schedule for a specific time</span>
+<span class="command">at</span> <span class="number">14:30</span>
+<span class="variable">at></span> /home/user/reminder.sh
+<span class="variable">at></span> <span class="comment">Ctrl+D</span>
+
+<span class="comment"># Or from a file</span>
+<span class="command">at</span> <span class="number">14:30</span> <span class="flag">-f</span> commands.txt
+
+<span class="comment"># Time specifications</span>
+<span class="command">at</span> now + 10 minutess
+<span class="command">at</span> midnight
+<span class="command">at</span> tomorrow
+<span class="command">at</span> 10:00 AM Dec 25</code></pre>
+                
+                <h2>Management</h2>
+                <pre data-lang="bash"><code><span class="comment"># List jobs programate</span>
+<span class="command">atq</span>
+
+<span class="comment"># Delete a job</span>
+<span class="command">atrm</span> <span class="number">5</span>  <span class="comment"># job ID 5</span></code></pre>
+            </div>
+
+            <!-- ===== SLIDE 42: Quiz cron ===== -->
+            <div class="slide" id="slide-42">
+                <h1>Peer Instruction: Cron</h1>
+                
+                <div class="quiz-question">
+                    <h3>What does this mean: <code>*/5 * * * *</code>?</h3>
+                    
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                            <strong>A)</strong> Every 5 minutes (0, 5, 10, 15...)
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>B)</strong> 5 minutes after the last execution
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>C)</strong> At minute 5 of every hour
+                        </div>
+                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                            <strong>D)</strong> 5 times per hour, at random intervals
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-box tip" id="quiz-explanation-4" style="display: none;">
+                    <div class="title">💡 Explanation</div>
+                    <code>*/5</code> means "at every multiple of 5" - so minutes 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55. It is NOT relative to the last execution!
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 43: Security best practices ===== -->
+            <div class="slide" id="slide-43">
+                <h1>Security Best Practices</h1>
+                
+                <div class="info-box danger">
+                    <div class="title">🚫 NEVER</div>
+                    <ul>
+                        <li><code>chmod 777</code> as a "solution" to permission problems</li>
+                        <li><code>find -exec rm</code> without prior testing</li>
+                        <li>SUID on bash scripts (ignored anyway)</li>
+                        <li>Cron jobs without absolute paths</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box tip">
+                    <div class="title">✅ ALWAYS</div>
+                    <ul>
+                        <li>The <strong>least privilege</strong> principle - minimum necessary</li>
+                        <li>Test with <code>-print</code> before <code>-delete</code></li>
+                        <li>Use <code>umask 077</code> for sensitive files</li>
+                        <li>Logging for cron jobs (<code>>> log 2>&1</code>)</li>
+                        <li>Check SUID/SGID periodically on the system</li>
+                    </ul>
+                </div>
+                
+                <pre data-lang="bash"><code><span class="comment"># Audit: find SUID/SGID files</span>
+<span class="command">find</span> / <span class="flag">-perm</span> /6000 <span class="flag">-type f</span> 2>/dev/null</code></pre>
+            </div>
+
+            <!-- ===== SLIDE 44: Summary ===== -->
+            <div class="slide" id="slide-44">
+                <h1>Summary - Cheat Sheet</h1>
+                
+                <div class="columns">
+                    <div class="column">
+                        <h4>find & xargs</h4>
+                        <pre><code>find . -name "*.txt" -type f
+find . -size +1M -mtime -7
+find . -print0 | xargs -0 cmd</code></pre>
+                        
+                        <h4>Parameters</h4>
+                        <pre><code>$0 $1-$9 ${10}+ $# "$@"
+while getopts "hvo:" opt
+shift $((OPTIND - 1))</code></pre>
+                    </div>
+                    <div class="column">
+                        <h4>Permisiuni</h4>
+                        <pre><code>chmod 755 (rwxr-xr-x)
+chmod u+x,g-w file
+chown user:group file
+umask 077</code></pre>
+                        
+                        <h4>Cron</h4>
+                        <pre><code>crontab -e/-l/-r
+*/5 * * * * cmd
+0 3 * * * backup.sh >> log 2>&1</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 45: Homework ===== -->
+            <div class="slide" id="slide-45">
+                <h1>Seminar Assignment</h1>
+                
+                <h2>System Administrator Toolkit</h2>
+                
+                <ol>
+                    <li><strong>Find Master (20%)</strong> - 5 find commands for given scenarios</li>
+                    <li><strong>Professional Script (30%)</strong> - Script with getopts, validation, help</li>
+                    <li><strong>Permission Manager (25%)</strong> - Analyse and report permissions</li>
+                    <li><strong>Cron Jobs (15%)</strong> - 3 cron jobs with logging</li>
+                    <li><strong>Integration (10%)</strong> - Script that combines everything</li>
+                </ol>
+                
+                <div class="info-box warning">
+                    <div class="title">⚠️ Attention</div>
+                    <ul>
+                        <li>All scripts must be executable (<code>chmod +x</code>)</li>
+                        <li>Test in <code>~/sandbox</code>, not in system directories</li>
+                        <li>Include validation and clear error messages</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box tip">
+                    <div class="title">🎁 Bonuses</div>
+                    xargs parallelisation (-P), long options (--verbose), lock files
+                </div>
+            </div>
+
+            <!-- ===== SLIDE 46: Final ===== -->
+            <div class="slide title-slide" id="slide-46">
+                <div class="emoji-big">🎉</div>
+                <h1>Questions?</h1>
+                <div class="subtitle">
+                    Seminar 3: Complete!<br><br>
+                    <em>From user to administrator</em>
+                </div>
+                <div class="meta">
+                    <br>
+                    Resources: README.md | Cheat Sheet | Demo Scripts<br>
+                    Contact: [instructor email]
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-bar">
+            <button class="nav-btn" onclick="prevSlide()" id="prev-btn">
+                ← Back
+            </button>
+            
+            <div class="progress-info">
+                <span id="slide-counter">1 / 46</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 2.17%"></div>
+                </div>
+            </div>
+            
+            <button class="nav-btn" onclick="nextSlide()" id="next-btn">
+                Continue →
+            </button>
+        </div>
+    </div>
+    
+    <!-- Keyboard info -->
+    <div class="keyboard-info" id="keyboard-info">
+        <kbd>←</kbd> / <kbd>→</kbd> Navigation &nbsp;&nbsp;
+        <kbd>Home</kbd> First &nbsp;&nbsp;
+        <kbd>End</kbd> Last &nbsp;&nbsp;
+        <kbd>?</kbd> Help
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 46;
+        
+        function showSlide(n) {
+            // Bounds check
+            if (n < 1) n = 1;
+            if (n > totalSlides) n = totalSlides;
+            
+            currentSlide = n;
+            
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Show current slide
+            document.getElementById(`slide-${n}`).classList.add('active');
+            
+            // Update counter and progress
+            document.getElementById('slide-counter').textContent = `${n} / ${totalSlides}`;
+            document.getElementById('progress-fill').style.width = `${(n / totalSlides) * 100}%`;
+            
+            // Update button states
+            document.getElementById('prev-btn').disabled = (n === 1);
+            document.getElementById('next-btn').disabled = (n === totalSlides);
+            
+            // Save position
+            localStorage.setItem('sem03-slide', n);
+        }
+        
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+        
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+        
+        function checkQuiz(element, isCorrect) {
+            // Reset all options in this quiz
+            const quiz = element.closest('.quiz-question');
+            quiz.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+            });
+            
+            // Mark selection
+            if (isCorrect) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+                // Find and highlight correct answer
+                quiz.querySelectorAll('.quiz-option').forEach(opt => {
+                    if (opt.getAttribute('onclick').includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+            
+            // Show explanation
+            const slideNum = currentSlide;
+            const explanations = {
+                15: 'quiz-explanation',
+                23: 'quiz-explanation-2',
+                35: 'quiz-explanation-3',
+                42: 'quiz-explanation-4'
+            };
+            
+            if (explanations[slideNum]) {
+                document.getElementById(explanations[slideNum]).style.display = 'block';
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'PageDown':
+                case ' ':
+                    nextSlide();
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'PageUp':
+                    prevSlide();
+                    e.preventDefault();
+                    break;
+                case 'Home':
+                    showSlide(1);
+                    e.preventDefault();
+                    break;
+                case 'End':
+                    showSlide(totalSlides);
+                    e.preventDefault();
+                    break;
+                case '?':
+                    document.getElementById('keyboard-info').classList.toggle('visible');
+                    break;
+            }
+        });
+        
+        // Restore position on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('sem03-slide');
+            if (saved) {
+                showSlide(parseInt(saved));
+            }
+        });
+        
+        // Touch support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const threshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
