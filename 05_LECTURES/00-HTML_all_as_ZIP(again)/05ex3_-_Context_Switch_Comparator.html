@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05ex3 - Context Switch Comparator | OS Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --process-color: #ef4444;
+            --thread-color: #22c55e;
+            --skip-color: #3b82f6;
+        }
+        
+        * {
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .step-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .step-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: transparent;
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+        
+        .step-item.active::before {
+            background: var(--process-color);
+        }
+        
+        .step-item.completed {
+            opacity: 0.6;
+        }
+        
+        .step-item.completed::before {
+            background: #22c55e;
+        }
+        
+        .step-item.skipped {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+        
+        .step-item.skipped::before {
+            background: var(--skip-color);
+        }
+        
+        .step-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .step-checkbox.pending {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .step-checkbox.active {
+            background: rgba(239, 68, 68, 0.3);
+            border: 2px solid #ef4444;
+            animation: checkbox-pulse 1s ease-in-out infinite;
+        }
+        
+        .step-checkbox.completed {
+            background: #22c55e;
+            border: 2px solid #22c55e;
+        }
+        
+        .step-checkbox.skipped {
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+        }
+        
+        @keyframes checkbox-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .race-track {
+            position: relative;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .race-runner {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: left 0.1s linear;
+        }
+        
+        .finish-line {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #fff 0px,
+                #fff 5px,
+                #000 5px,
+                #000 10px
+            );
+        }
+        
+        .tlb-flash {
+            animation: tlb-flash 0.8s ease-out;
+        }
+        
+        @keyframes tlb-flash {
+            0% { background: rgba(239, 68, 68, 0.8); transform: scale(1.05); }
+            50% { background: rgba(239, 68, 68, 0.4); }
+            100% { background: transparent; transform: scale(1); }
+        }
+        
+        .comparison-bar {
+            transition: width 1s ease-out;
+        }
+        
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-race {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-race::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-race:hover::before {
+            left: 100%;
+        }
+        
+        .winner-badge {
+            animation: winner-bounce 0.5s ease-out;
+        }
+        
+        @keyframes winner-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body class="text-slate-200 p-4 lg:p-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-green-500 flex items-center justify-center">
+                            <i class="fas fa-exchange-other text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-400 to-green-400 bg-clip-text text-transparent">
+                                Context Switch Comparator
+                            </h1>
+                            <p class="text-slate-400 text-sm">course 05 - Cost Comparativ: Process Switch vs Thread Switch</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
+                        <i class="fas fa-cubes mr-1"></i> Process: ~1-10μs
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm">
+                        <i class="fas fa-stream mr-1"></i> Thread: ~100ns-1μs
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto">
+        <!-- Race Section -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fas fa-flag-checkered text-amber-400"></i> Cursa Context Switch
+                </h2>
+                <button id="btn-race" class="btn-race px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-lg font-semibold text-white flex items-center gap-2">
+                    <i class="fas fa-play"></i> Start Race!
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Process Track -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-red-400 font-medium flex items-center gap-2">
+                            <i class="fas fa-cubes"></i> Process Context Switch
+                        </span>
+                        <span id="process-time" class="mono text-sm text-red-300">0 cycles</span>
+                    </div>
+                    <div class="race-track">
+                        <div id="process-runner" class="race-runner bg-gradient-to-r from-red-600 to-red-500 text-white" style="left: 5px;">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <div class="finish-line"></div>
+                    </div>
+                </div>
+                
+                <!-- Thread Track -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-green-400 font-medium flex items-center gap-2">
+                            <i class="fas fa-stream"></i> Thread Context Switch
+                        </span>
+                        <span id="thread-time" class="mono text-sm text-green-300">0 cycles</span>
+                    </div>
+                    <div class="race-track">
+                        <div id="thread-runner" class="race-runner bg-gradient-to-r from-green-600 to-green-500 text-white" style="left: 5px;">
+                            <i class="fas fa-stream"></i>
+                        </div>
+                        <div class="finish-line"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Race Result -->
+            <div id="race-result" class="mt-4 p-4 rounded-lg bg-slate-800/50 hidden">
+                <div class="text-center">
+                    <span id="winner-text" class="text-lg font-bold"></span>
+                    <p id="ratio-text" class="text-sm text-slate-400 mt-1"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dual Visualization -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Process Context Switch Steps -->
+            <section class="glass-card rounded-2xl p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-red-400 flex items-center gap-2">
+                        <i class="fas fa-cubes"></i> Process Context Switch
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Total:</span>
+                        <span id="process-total" class="mono text-lg font-bold text-red-400">0</span>
+                        <span class="text-xs text-slate-500">cycles</span>
+                    </div>
+                </div>
+                
+                <div id="process-steps" class="space-y-2">
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="0" data-cost="100">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Registre CPU (all)</span>
+                                    <span class="mono text-xs text-red-400">+100</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="1" data-cost="50">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Program Counter</span>
+                                    <span class="mono text-xs text-red-400">+50</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="2" data-cost="50">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Stack Pointer</span>
+                                    <span class="mono text-xs text-red-400">+50</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="3" data-cost="30">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">PSW/Flags</span>
+                                    <span class="mono text-xs text-red-400">+30</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="4" data-cost="200">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Memory Management (PTBR)</span>
+                                    <span class="mono text-xs text-red-400">+200</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-red-900/30 border border-red-500/50" data-step="5" data-cost="500">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm text-red-300">
+                                        <i class="fas fa-bolt mr-1"></i> TLB FLUSH!
+                                    </span>
+                                    <span class="mono text-xs text-red-400 font-bold">+500</span>
+                                </div>
+                                <p class="text-xs text-red-400/70 mt-1">Dramatic overhead - invalidare completa!</p>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="6" data-cost="300">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Cache Penalty (partial invalidat)</span>
+                                    <span class="mono text-xs text-red-400">+300</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="7" data-cost="80">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">FPU State</span>
+                                    <span class="mono text-xs text-red-400">+80</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="8" data-cost="90">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Kernel Stack</span>
+                                    <span class="mono text-xs text-red-400">+90</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-500/30">
+                    <p class="text-xs text-red-300">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        <strong>Total tipic: 1,000 - 10,000 cicluri CPU</strong> (~1-10 μs pe procesoare moderne)
+                    </p>
+                </div>
+            </section>
+
+            <!-- Thread Context Switch Steps -->
+            <section class="glass-card rounded-2xl p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-green-400 flex items-center gap-2">
+                        <i class="fas fa-stream"></i> Thread Context Switch
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Total:</span>
+                        <span id="thread-total" class="mono text-lg font-bold text-green-400">0</span>
+                        <span class="text-xs text-slate-500">cycles</span>
+                    </div>
+                </div>
+                
+                <div id="thread-steps" class="space-y-2">
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="0" data-cost="100">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Registre CPU</span>
+                                    <span class="mono text-xs text-green-400">+100</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="1" data-cost="50">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Program Counter</span>
+                                    <span class="mono text-xs text-green-400">+50</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="2" data-cost="50">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Stack Pointer</span>
+                                    <span class="mono text-xs text-green-400">+50</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="3" data-cost="30">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">PSW/Flags</span>
+                                    <span class="mono text-xs text-green-400">+30</span>
+                                </div>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item skipped p-3 rounded-lg bg-blue-900/20 border border-blue-500/30" data-step="4" data-cost="0">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox skipped">
+                                <i class="fas fa-forward text-xs text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm text-blue-300">
+                                        <s>Memory Management</s>
+                                    </span>
+                                    <span class="mono text-xs text-blue-400">SKIP!</span>
+                                </div>
+                                <p class="text-xs text-blue-400/70 mt-1">Same spatiu of adrese!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item skipped p-3 rounded-lg bg-blue-900/20 border border-blue-500/30" data-step="5" data-cost="0">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox skipped">
+                                <i class="fas fa-forward text-xs text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm text-blue-300">
+                                        <s>TLB Flush</s>
+                                    </span>
+                                    <span class="mono text-xs text-blue-400">SKIP!</span>
+                                </div>
+                                <p class="text-xs text-blue-400/70 mt-1">Nu e nevoie of flush!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending p-3 rounded-lg bg-slate-800/50" data-step="6" data-cost="50">
+                        <div class="flex items-center gap-3">
+                            <div class="step-checkbox pending">
+                                <i class="fas fa-check text-xs hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium text-sm">Cache (minimal penalty)</span>
+                                    <span class="mono text-xs text-green-400">+50</span>
+                                </div>
+                                <p class="text-xs text-green-400/70 mt-1">Ramane valid in mare parte!</p>
+                                <div class="progress-bar mt-1">
+                                    <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 rounded-lg bg-green-900/20 border border-green-500/30">
+                    <p class="text-xs text-green-300">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <strong>Total tipic: 100 - 1,000 cicluri CPU</strong> (~100ns - 1μs) - 10x-100x more rapid!
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Chart Comparison -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-purple-400"></i> Comparison Vizuala - Costuri per Operatie
+            </h3>
+            
+            <div class="h-80">
+                <canvas id="comparison-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Metrics Cards -->
+        <section class="grid md:grid-cols-3 gap-4 mb-6">
+            <div class="metric-card glass-card rounded-xl p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                        <i class="fas fa-clock text-red-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-200">Process Switch Time</h4>
+                        <p class="text-xs text-slate-400">Timp tipic pe sistem modern</p>
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-red-400 mono">1-10 μs</div>
+                <div class="text-xs text-slate-500 mt-1">~3,000-30,000 cicluri @ 3GHz</div>
+            </div>
+            
+            <div class="metric-card glass-card rounded-xl p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                        <i class="fas fa-bolt text-green-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-200">Thread Switch Time</h4>
+                        <p class="text-xs text-slate-400">Timp tipic pe sistem modern</p>
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-green-400 mono">100ns - 1μs</div>
+                <div class="text-xs text-slate-500 mt-1">~300-3,000 cicluri @ 3GHz</div>
+            </div>
+            
+            <div class="metric-card glass-card rounded-xl p-5">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                        <i class="fas fa-percentage text-amber-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-200">Raport Tipic</h4>
+                        <p class="text-xs text-slate-400">Process vs Thread switch</p>
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-amber-400 mono">10x - 100x</div>
+                <div class="text-xs text-slate-500 mt-1">Thread switch e semnificativ more rapid</div>
+            </div>
+        </section>
+
+        <!-- Why Section -->
+        <section class="glass-card rounded-2xl p-5 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-question-circle text-blue-400"></i> De Ce Este Thread Switch Mai Fast?
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-red-400 mb-3">Process Switch - De ce e lent?</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-400 mt-1"></i>
+                            <span><strong>TLB Flush mandatory</strong> - schimbarea spatiului of adrese invalideaza all intrarile TLB</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-400 mt-1"></i>
+                            <span><strong>Cache cold</strong> - datele noului process probabil not are in cache</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-400 mt-1"></i>
+                            <span><strong>Page Table Base Register</strong> - must schimbat for noul spatiu of adrese</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-times text-red-400 mt-1"></i>
+                            <span><strong>Kernel structures</strong> - PCB-ul intreg must swap-uit</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-green-400 mb-3">Thread Switch - De ce e rapid?</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span><strong>Same spatiu of adrese</strong> - not e nevoie of TLB flush</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span><strong>Cache warm</strong> - datele partajate are probabil deja in cache</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span><strong>only registre + stack</strong> - minimal of saved/restaurat</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span><strong>TCB mic</strong> - Thread Control Block e mult more mic than PCB</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reset Button -->
+        <div class="text-center mb-6">
+            <button id="btn-reset" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-medium flex items-center gap-2 mx-auto transition-all">
+                <i class="fas fa-redo"></i> Reset Animatia
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto mt-8">
+        <div class="glass-card rounded-xl p-4 text-center">
+            <p class="text-slate-500 text-sm">
+                By <span class="text-red-400 font-semibold">Revolvix</span>, limited licence 2019-2030 | 
+                <span class="text-green-400">ASE-CSIE Bucharest</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            processTotal: 0,
+            threadTotal: 0,
+            isAnimating: false,
+            processSteps: [100, 50, 50, 30, 200, 500, 300, 80, 90], // Total: 1400
+            threadSteps: [100, 50, 50, 30, 0, 0, 50], // Total: 280
+            processMaxCost: 1400,
+            threadMaxCost: 280
+        };
+
+        // DOM Elements
+        const processStepsContainer = document.getElementById('process-steps');
+        const threadStepsContainer = document.getElementById('thread-steps');
+        const processTotalEl = document.getElementById('process-total');
+        const threadTotalEl = document.getElementById('thread-total');
+        const processRunner = document.getElementById('process-runner');
+        const threadRunner = document.getElementById('thread-runner');
+        const processTimeEl = document.getElementById('process-time');
+        const threadTimeEl = document.getElementById('thread-time');
+        const raceResult = document.getElementById('race-result');
+
+        // Initialize Chart
+        const ctx = document.getElementById('comparison-chart').getContext('2d');
+        const comparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Save Regs', 'PC', 'SP', 'PSW', 'Memory Mgmt', 'TLB', 'Cache', 'FPU', 'Kernel Stack'],
+                datasets: [
+                    {
+                        label: 'Process Switch',
+                        data: [100, 50, 50, 30, 200, 500, 300, 80, 90],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Thread Switch',
+                        data: [100, 50, 50, 30, 0, 0, 50, 0, 0],
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cicluri CPU',
+                            color: '#94a3b8'
+                        },
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e2e8f0'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Animation Functions
+        async function animateSteps() {
+            if (state.isAnimating) return;
+            state.isAnimating = true;
+            
+            resetSteps();
+            
+            const processSteps = processStepsContainer.querySelectorAll('.step-item:not(.skipped)');
+            const threadSteps = threadStepsContainer.querySelectorAll('.step-item:not(.skipped)');
+            
+            state.processTotal = 0;
+            state.threadTotal = 0;
+            
+            // Animate process steps
+            for (let i = 0; i < processSteps.length; i++) {
+                const step = processSteps[i];
+                const cost = parseInt(step.dataset.cost) || 0;
+                
+                step.classList.remove('pending');
+                step.classList.add('active');
+                
+                const checkbox = step.querySelector('.step-checkbox');
+                checkbox.classList.remove('pending');
+                checkbox.classList.add('active');
+                
+                // Animate progress bar
+                const progressBar = step.querySelector('.progress-bar-fill');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+                
+                state.processTotal += cost;
+                processTotalEl.textContent = state.processTotal;
+                
+                // Update runner position
+                const progress = state.processTotal / state.processMaxCost;
+                processRunner.style.left = `${5 + progress * 80}%`;
+                processTimeEl.textContent = `${state.processTotal} cycles`;
+                
+                // TLB Flash effect
+                if (i === 5) {
+                    step.classList.add('tlb-flash');
+                }
+                
+                await sleep(200);
+                
+                step.classList.remove('active');
+                step.classList.add('completed');
+                checkbox.classList.remove('active');
+                checkbox.classList.add('completed');
+                checkbox.querySelector('i').classList.remove('hidden');
+            }
+            
+            // Animate thread steps (faster since there are fewer)
+            for (let i = 0; i < threadSteps.length; i++) {
+                const step = threadSteps[i];
+                const cost = parseInt(step.dataset.cost) || 0;
+                
+                if (cost === 0) continue; // Skip already skipped items
+                
+                step.classList.remove('pending');
+                step.classList.add('active');
+                
+                const checkbox = step.querySelector('.step-checkbox');
+                checkbox.classList.remove('pending');
+                checkbox.classList.add('active');
+                
+                const progressBar = step.querySelector('.progress-bar-fill');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+                
+                state.threadTotal += cost;
+                threadTotalEl.textContent = state.threadTotal;
+                
+                // Update runner position
+                const progress = state.threadTotal / state.threadMaxCost;
+                threadRunner.style.left = `${5 + progress * 80}%`;
+                threadTimeEl.textContent = `${state.threadTotal} cycles`;
+                
+                await sleep(150);
+                
+                step.classList.remove('active');
+                step.classList.add('completed');
+                checkbox.classList.remove('active');
+                checkbox.classList.add('completed');
+                checkbox.querySelector('i').classList.remove('hidden');
+            }
+            
+            // Show race result
+            showRaceResult();
+            
+            state.isAnimating = false;
+        }
+
+        function showRaceResult() {
+            const ratio = (state.processTotal / state.threadTotal).toFixed(1);
+            
+            raceResult.classList.remove('hidden');
+            raceResult.innerHTML = `
+                <div class="text-center">
+                    <span class="winner-badge inline-block px-4 py-2 bg-green-500 rounded-lg text-white font-bold text-lg mb-2">
+                        <i class="fas fa-trophy mr-2"></i> Thread Switch Wins!
+                    </span>
+                    <p class="text-slate-300">
+                        Process switch a durat <span class="text-red-400 font-bold">${state.processTotal}</span> cycles, 
+                        Thread switch only <span class="text-green-400 font-bold">${state.threadTotal}</span> cycles.
+                    </p>
+                    <p class="text-amber-400 font-semibold mt-1">
+                        Raport: ${ratio}x more lent for Process Switch!
+                    </p>
+                </div>
+            `;
+        }
+
+        function resetSteps() {
+            // Reset process steps
+            processStepsContainer.querySelectorAll('.step-item').forEach(step => {
+                if (!step.classList.contains('skipped')) {
+                    step.classList.remove('active', 'completed', 'tlb-flash');
+                    step.classList.add('pending');
+                    
+                    const checkbox = step.querySelector('.step-checkbox');
+                    checkbox.classList.remove('active', 'completed');
+                    checkbox.classList.add('pending');
+                    checkbox.querySelector('i')?.classList.add('hidden');
+                    
+                    const progressBar = step.querySelector('.progress-bar-fill');
+                    if (progressBar) progressBar.style.width = '0%';
+                }
+            });
+            
+            // Reset thread steps
+            threadStepsContainer.querySelectorAll('.step-item').forEach(step => {
+                if (!step.classList.contains('skipped')) {
+                    step.classList.remove('active', 'completed');
+                    step.classList.add('pending');
+                    
+                    const checkbox = step.querySelector('.step-checkbox');
+                    checkbox.classList.remove('active', 'completed');
+                    checkbox.classList.add('pending');
+                    checkbox.querySelector('i')?.classList.add('hidden');
+                    
+                    const progressBar = step.querySelector('.progress-bar-fill');
+                    if (progressBar) progressBar.style.width = '0%';
+                }
+            });
+            
+            // Reset totals
+            state.processTotal = 0;
+            state.threadTotal = 0;
+            processTotalEl.textContent = '0';
+            threadTotalEl.textContent = '0';
+            
+            // Reset runners
+            processRunner.style.left = '5px';
+            threadRunner.style.left = '5px';
+            processTimeEl.textContent = '0 cycles';
+            threadTimeEl.textContent = '0 cycles';
+            
+            // Hiof result
+            raceResult.classList.add('hidden');
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Event Listeners
+        document.getElementById('btn-race').addEventListener('click', animateSteps);
+        document.getElementById('btn-reset').addEventListener('click', resetSteps);
+    </script>
+</body>
+</html>

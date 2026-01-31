@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06ex2 - Peterson's Algorithm | OS Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: linear-gradient(135deg, #0a1628 0%, #1a2744 50%, #0a1628 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(26, 39, 68, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .code-line {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .code-line.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-left-color: #3b82f6;
+        }
+        
+        .code-line.highlight-critical {
+            background: rgba(239, 68, 68, 0.2);
+            border-left-color: #ef4444;
+        }
+        
+        .flag-indicator {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .flag-indicator.raised {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+        
+        .turn-arrow {
+            transition: all 0.5s ease;
+        }
+        
+        .turn-arrow.pointing-0 {
+            transform: rotate(-45deg);
+        }
+        
+        .turn-arrow.pointing-1 {
+            transform: rotate(45deg);
+        }
+        
+        @keyframes enter-critical {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(34, 197, 94, 0.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .entering-critical {
+            animation: enter-critical 0.5s ease;
+        }
+        
+        @keyframes waiting-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .waiting {
+            animation: waiting-pulse 1s ease-in-out infinite;
+        }
+        
+        .property-badge {
+            transition: all 0.3s ease;
+        }
+        
+        .property-badge.verified {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .property-badge.checking {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        
+        .trace-entry {
+            animation: slide-in 0.3s ease;
+        }
+        
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .spin-wait {
+            animation: spin-dots 1s linear infinite;
+        }
+        
+        @keyframes spin-dots {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+        
+        .btn-control {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-control:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="text-slate-200 p-4 lg:p-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                            <i class="fas fa-handshake text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                                Peterson's Algorithm
+                            </h1>
+                            <p class="text-slate-400 text-sm">course 06 • Sincronizare Part 1 • Mutual Exclusion Software</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <i class="fas fa-lock mr-1"></i> 2 Processe
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        <i class="fas fa-coof mr-1"></i> Software Solution
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- State Visualization -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2">
+                <i class="fas fa-database"></i> Variable State Partajate
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- flag[0] -->
+                <div class="bg-slate-800/50 rounded-xl p-5 text-center">
+                    <div class="text-sm text-slate-400 mb-3">flag[0]</div>
+                    <div id="flag0" class="flag-indicator w-20 h-20 mx-auto rounded-xl bg-slate-700 border-2 border-slate-600 flex items-center justify-center">
+                        <span class="text-2xl font-bold text-slate-500">false</span>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-500">P0 wants to enter?</div>
+                </div>
+                
+                <!-- turn -->
+                <div class="bg-slate-800/50 rounded-xl p-5 text-center">
+                    <div class="text-sm text-slate-400 mb-3">turn</div>
+                    <div class="relative w-24 h-24 mx-auto">
+                        <div class="absolute inset-0 rounded-full bg-slate-700 border-2 border-slate-600"></div>
+                        <div id="turnArrow" class="turn-arrow absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-arrow-up text-4xl text-amber-400"></i>
+                        </div>
+                        <div id="turnValue" class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-3xl font-bold text-amber-400">0</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-500">A cui e randul to cedeze?</div>
+                </div>
+                
+                <!-- flag[1] -->
+                <div class="bg-slate-800/50 rounded-xl p-5 text-center">
+                    <div class="text-sm text-slate-400 mb-3">flag[1]</div>
+                    <div id="flag1" class="flag-indicator w-20 h-20 mx-auto rounded-xl bg-slate-700 border-2 border-slate-600 flex items-center justify-center">
+                        <span class="text-2xl font-bold text-slate-500">false</span>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-500">P1 wants to enter?</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Processs Visualization -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- Processs 0 -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-blue-400 flex items-center gap-2">
+                        <span class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-lg font-bold">P0</span>
+                        Process 0
+                    </h3>
+                    <div id="p0Status" class="px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-400">
+                        Idle
+                    </div>
+                </div>
+                
+                <div class="bg-slate-900 rounded-xl p-4 mono text-sm space-y-1" id="p0Code">
+                    <div class="code-line px-2 py-1 rounded" data-line="p0-1">
+                        <span class="text-purple-400">while</span> (<span class="text-amber-400">true</span>) {
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-2">
+                        <span class="text-slate-500">// Entry Section</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-3">
+                        flag[<span class="text-cyan-400">0</span>] = <span class="text-amber-400">true</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-4">
+                        turn = <span class="text-cyan-400">1</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-5">
+                        <span class="text-purple-400">while</span> (flag[<span class="text-cyan-400">1</span>] && turn == <span class="text-cyan-400">1</span>) {
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-10" data-line="p0-6">
+                        <span class="text-slate-500">// busy wait</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-7">
+                        }
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6 bg-red-900/30 border-l-2 border-red-500" data-line="p0-8">
+                        <span class="text-red-400">// CRITICAL SECTION</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-9">
+                        <span class="text-slate-500">// Exit Section</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p0-10">
+                        flag[<span class="text-cyan-400">0</span>] = <span class="text-amber-400">false</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded" data-line="p0-11">
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- Processs 1 -->
+            <section class="glass-card rounded-2xl p-5 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-purple-400 flex items-center gap-2">
+                        <span class="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center text-lg font-bold">P1</span>
+                        Process 1
+                    </h3>
+                    <div id="p1Status" class="px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-400">
+                        Idle
+                    </div>
+                </div>
+                
+                <div class="bg-slate-900 rounded-xl p-4 mono text-sm space-y-1" id="p1Code">
+                    <div class="code-line px-2 py-1 rounded" data-line="p1-1">
+                        <span class="text-purple-400">while</span> (<span class="text-amber-400">true</span>) {
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-2">
+                        <span class="text-slate-500">// Entry Section</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-3">
+                        flag[<span class="text-cyan-400">1</span>] = <span class="text-amber-400">true</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-4">
+                        turn = <span class="text-cyan-400">0</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-5">
+                        <span class="text-purple-400">while</span> (flag[<span class="text-cyan-400">0</span>] && turn == <span class="text-cyan-400">0</span>) {
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-10" data-line="p1-6">
+                        <span class="text-slate-500">// busy wait</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-7">
+                        }
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6 bg-red-900/30 border-l-2 border-red-500" data-line="p1-8">
+                        <span class="text-red-400">// CRITICAL SECTION</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-9">
+                        <span class="text-slate-500">// Exit Section</span>
+                    </div>
+                    <div class="code-line px-2 py-1 rounded pl-6" data-line="p1-10">
+                        flag[<span class="text-cyan-400">1</span>] = <span class="text-amber-400">false</span>;
+                    </div>
+                    <div class="code-line px-2 py-1 rounded" data-line="p1-11">
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Controls -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-gamepad text-cyan-400"></i> Controale Simulation
+            </h3>
+            
+            <div class="flex flex-wrap gap-3 mb-4">
+                <button id="btnStepP0" class="btn-control px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-step-forward"></i> Step P0
+                </button>
+                <button id="btnStepP1" class="btn-control px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-step-forward"></i> Step P1
+                </button>
+                <button id="btnAutoRun" class="btn-control px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-play"></i> Auto Run
+                </button>
+                <button id="btnReset" class="btn-control px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <label class="text-sm text-slate-400">Speed:</label>
+                <input type="range" id="speedSlider" min="200" max="2000" value="800" class="w-48 accent-cyan-500">
+                <span id="speedValue" class="mono text-sm text-cyan-400">800ms</span>
+            </div>
+        </section>
+
+        <!-- Properties Verification -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-shield-other text-emerald-400"></i> Property Verification
+            </h3>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div id="propME" class="property-badge p-4 rounded-xl border-2 border-slate-700 bg-slate-800/50">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-lock text-lg"></i>
+                        <span class="font-semibold">Mutual Exclusion</span>
+                    </div>
+                    <p class="text-xs text-slate-400">only un process in sectiunea critical at un moment dat.</p>
+                    <div class="mt-2 text-xs">
+                        <span id="meStatus" class="text-slate-500">In waiting...</span>
+                    </div>
+                </div>
+                
+                <div id="propProgresss" class="property-badge p-4 rounded-xl border-2 border-slate-700 bg-slate-800/50">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-forward text-lg"></i>
+                        <span class="font-semibold">Progresss</span>
+                    </div>
+                    <p class="text-xs text-slate-400">If nimeni not e in CS, unul va intra in timp finit.</p>
+                    <div class="mt-2 text-xs">
+                        <span id="progressStatus" class="text-slate-500">In waiting...</span>
+                    </div>
+                </div>
+                
+                <div id="propBW" class="property-badge p-4 rounded-xl border-2 border-slate-700 bg-slate-800/50">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-clock text-lg"></i>
+                        <span class="font-semibold">Bounded Waiting</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Exists o limita of cate ori altii intra beforea ta.</p>
+                    <div class="mt-2 text-xs">
+                        <span id="bwStatus" class="text-slate-500">In waiting...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trace Log -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-amber-400"></i> Trace Log
+            </h3>
+            
+            <div id="traceLog" class="bg-slate-900 rounded-xl p-4 max-h-64 overflow-y-auto mono text-xs space-y-1">
+                <div class="text-slate-500">// Execute paand for a vedea trace-ul...</div>
+            </div>
+        </section>
+
+        <!-- Theory -->
+        <section class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-amber-400"></i> how Functioneaza?
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-blue-400 mb-3">variables:</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-flag text-emerald-400 mt-1"></i>
+                            <span><coof class="bg-slate-800 px-1 rounded">flag[i]</code> = true inseamna ca procesul i wants to enter in sectiunea critical</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-hand-point-right text-amber-400 mt-1"></i>
+                            <span><coof class="bg-slate-800 px-1 rounded">turn</code> = indicele procesului care must to cedeze when ambele vor to intre</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-purple-400 mb-3">Logica:</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold">1.</span>
+                            <span>Seteaza flag-ul propriu (anunta intentia)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold">2.</span>
+                            <span>Cedeaza politicos (turn = celalalt)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold">3.</span>
+                            <span>Waits only if celalother vrea and e randul lui</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold">4.</span>
+                            <span>La ieandre, reseteaza flag-ul propriu</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto mt-8 text-center text-slate-500 text-sm pb-4">
+        <div class="glass-card rounded-xl py-3 px-6 inline-block">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            flag: [false, false],
+            turn: 0,
+            p0Line: 0,
+            p1Line: 0,
+            p0InCS: false,
+            p1InCS: false,
+            speed: 800,
+            autoRunning: false,
+            autoInterval: null,
+            meViolations: 0,
+            csEntries: [0, 0]
+        };
+
+        // Processs states (line numbers correspond to actions)
+        const processStates = {
+            0: 'idle',      // Not started
+            1: 'starting',  // while(true)
+            2: 'entry',     // Entry section comment
+            3: 'setFlag',   // flag[i] = true
+            4: 'setTurn',   // turn = other
+            5: 'checkWait', // while condition check
+            6: 'waiting',   // busy wait
+            7: 'exitWait',  // } end while
+            8: 'critical',  // CRITICAL SECTION
+            9: 'exit',      // Exit section comment
+            10: 'clearFlag', // flag[i] = false
+            11: 'done'      // } end loop
+        };
+
+        // DOM Elements
+        const flag0El = document.getElementById('flag0');
+        const flag1El = document.getElementById('flag1');
+        const turnValueEl = document.getElementById('turnValue');
+        const turnArrowEl = document.getElementById('turnArrow');
+        const p0StatusEl = document.getElementById('p0Status');
+        const p1StatusEl = document.getElementById('p1Status');
+        const traceLogEl = document.getElementById('traceLog');
+        const speedSliderEl = document.getElementById('speedSlider');
+        const speedValueEl = document.getElementById('speedValue');
+
+        // Functions
+        function updateFlagDisplay(index, value) {
+            const el = index === 0 ? flag0El : flag1El;
+            if (value) {
+                el.innerHTML = '<span class="text-2xl font-bold text-emerald-400">true</span>';
+                el.classList.add('raised');
+                el.style.borderColor = '#22c55e';
+                el.style.background = 'rgba(34, 197, 94, 0.2)';
+            } else {
+                el.innerHTML = '<span class="text-2xl font-bold text-slate-500">false</span>';
+                el.classList.remove('raised');
+                el.style.borderColor = '';
+                el.style.background = '';
+            }
+        }
+
+        function updateTurnDisplay(value) {
+            turnValueEl.textContent = value;
+            turnArrowEl.className = `turn-arrow absolute inset-0 flex items-center justify-center pointing-${value}`;
+        }
+
+        function updateCodeHighlight(process, line) {
+            const codeEl = document.getElementById(`p${process}Code`);
+            codeEl.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            if (line > 0) {
+                const lineEl = codeEl.querySelector(`[data-line="p${process}-${line}"]`);
+                if (lineEl) {
+                    lineEl.classList.add('active');
+                }
+            }
+        }
+
+        function updateStatus(process, status) {
+            const el = process === 0 ? p0StatusEl : p1StatusEl;
+            const colors = {
+                'Idle': 'bg-slate-700 text-slate-400',
+                'Entry': 'bg-blue-700 text-blue-200',
+                'Waiting': 'bg-amber-700 text-amber-200 waiting',
+                'In CS': 'bg-red-600 text-white entering-critical',
+                'Exit': 'bg-emerald-700 text-emerald-200'
+            };
+            
+            el.className = `px-3 py-1 rounded-full text-xs font-medium ${colors[status] || colors['Idle']}`;
+            el.textContent = status;
+        }
+
+        function addTrace(message, type = 'info') {
+            const colors = {
+                p0: 'text-blue-400',
+                p1: 'text-purple-400',
+                critical: 'text-red-400',
+                warning: 'text-amber-400',
+                info: 'text-slate-400'
+            };
+            
+            const entry = document.createdeElement('div');
+            entry.className = `trace-entry ${colors[type]}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            traceLogEl.appendChild(entry);
+            traceLogEl.scrollTop = traceLogEl.scrollHeight;
+        }
+
+        function checkMutualExclusion() {
+            if (state.p0InCS && state.p1InCS) {
+                state.meViolations++;
+                document.getElementById('propME').className = 'property-badge p-4 rounded-xl border-2 border-red-500 bg-red-900/30';
+                document.getElementById('meStatus').textContent = '❌ VIOLAT!';
+                document.getElementById('meStatus').className = 'text-red-400 font-bold';
+                addTrace('⚠️ MUTUAL EXCLUSION VIOLAT! Ambele procese in CS!', 'warning');
+            } else {
+                document.getElementById('propME').className = 'property-badge p-4 rounded-xl border-2 border-emerald-500 bg-emerald-900/30 verified';
+                document.getElementById('meStatus').textContent = '✓ Respectat';
+                document.getElementById('meStatus').className = 'text-emerald-400';
+            }
+        }
+
+        function executeStep(process) {
+            const lineRef = process === 0 ? 'p0Line' : 'p1Line';
+            const other = process === 0 ? 1 : 0;
+            
+            state[lineRef]++;
+            if (state[lineRef] > 11) state[lineRef] = 1;
+            
+            const line = state[lineRef];
+            updateCodeHighlight(process, line);
+            
+            switch (line) {
+                case 1: // while(true)
+                    updateStatus(process, 'Entry');
+                    addTrace(`P${process}: start o new iteratie`, `p${process}`);
+                    break;
+                    
+                case 2: // Entry section comment
+                    break;
+                    
+                case 3: // flag[i] = true
+                    state.flag[process] = true;
+                    updateFlagDisplay(process, true);
+                    addTrace(`P${process}: flag[${process}] = true (anunta intentia)`, `p${process}`);
+                    break;
+                    
+                case 4: // turn = other
+                    state.turn = other;
+                    updateTurnDisplay(other);
+                    addTrace(`P${process}: turn = ${other} (cedeaza politicos)`, `p${process}`);
+                    break;
+                    
+                case 5: // while condition check
+                    const canEnter = !(state.flag[other] && state.turn === other);
+                    if (canEnter) {
+                        addTrace(`P${process}: Conditie falsa, can intra in CS`, `p${process}`);
+                        state[lineRef] = 7; // Skip to exit wait
+                    } else {
+                        addTrace(`P${process}: flag[${other}]=${state.flag[other]} && turn=${state.turn}, must to astepte`, `p${process}`);
+                        updateStatus(process, 'Waiting');
+                    }
+                    break;
+                    
+                case 6: // busy wait
+                    // Re-check condition
+                    const stillWait = state.flag[other] && state.turn === other;
+                    if (stillWait) {
+                        state[lineRef] = 4; // Stay in loop
+                        addTrace(`P${process}: Inca waits...`, `p${process}`);
+                    } else {
+                        addTrace(`P${process}: Conditie devenita falsa, iese from wait`, `p${process}`);
+                    }
+                    break;
+                    
+                case 7: // exit wait
+                    break;
+                    
+                case 8: // CRITICAL SECTION
+                    if (process === 0) {
+                        state.p0InCS = true;
+                    } else {
+                        state.p1InCS = true;
+                    }
+                    state.csEntries[process]++;
+                    updateStatus(process, 'In CS');
+                    addTrace(`P${process}: ✓ INTRA IN SECTIUNEA CRITICA`, 'critical');
+                    checkMutualExclusion();
+                    
+                    // Update progress property
+                    document.getElementById('propProgresss').className = 'property-badge p-4 rounded-xl border-2 border-emerald-500 bg-emerald-900/30 verified';
+                    document.getElementById('progressStatus').textContent = '✓ Demonstrat';
+                    document.getElementById('progressStatus').className = 'text-emerald-400';
+                    break;
+                    
+                case 9: // Exit section comment
+                    break;
+                    
+                case 10: // flag[i] = false
+                    state.flag[process] = false;
+                    updateFlagDisplay(process, false);
+                    if (process === 0) {
+                        state.p0InCS = false;
+                    } else {
+                        state.p1InCS = false;
+                    }
+                    updateStatus(process, 'Exit');
+                    addTrace(`P${process}: flag[${process}] = false (iese from CS)`, `p${process}`);
+                    checkMutualExclusion();
+                    
+                    // Update bounded waiting
+                    document.getElementById('propBW').className = 'property-badge p-4 rounded-xl border-2 border-emerald-500 bg-emerald-900/30 verified';
+                    document.getElementById('bwStatus').textContent = '✓ Max 1 intrare intre cereri';
+                    document.getElementById('bwStatus').className = 'text-emerald-400';
+                    break;
+                    
+                case 11: // end loop
+                    updateStatus(process, 'Idle');
+                    addTrace(`P${process}: Ciclu complet, revine at started`, `p${process}`);
+                    break;
+            }
+        }
+
+        function reset() {
+            state.flag = [false, false];
+            state.turn = 0;
+            state.p0Line = 0;
+            state.p1Line = 0;
+            state.p0InCS = false;
+            state.p1InCS = false;
+            state.meViolations = 0;
+            state.csEntries = [0, 0];
+            
+            if (state.autoInterval) {
+                clearInterval(state.autoInterval);
+                state.autoInterval = null;
+            }
+            state.autoRunning = false;
+            
+            updateFlagDisplay(0, false);
+            updateFlagDisplay(1, false);
+            updateTurnDisplay(0);
+            updateCodeHighlight(0, 0);
+            updateCodeHighlight(1, 0);
+            updateStatus(0, 'Idle');
+            updateStatus(1, 'Idle');
+            
+            traceLogEl.innerHTML = '<div class="text-slate-500">// Execute paand for a vedea trace-ul...</div>';
+            
+            // Reset properties
+            ['propME', 'propProgresss', 'propBW'].forEach(id => {
+                document.getElementById(id).className = 'property-badge p-4 rounded-xl border-2 border-slate-700 bg-slate-800/50';
+            });
+            document.getElementById('meStatus').textContent = 'In waiting...';
+            document.getElementById('meStatus').className = 'text-slate-500';
+            document.getElementById('progressStatus').textContent = 'In waiting...';
+            document.getElementById('progressStatus').className = 'text-slate-500';
+            document.getElementById('bwStatus').textContent = 'In waiting...';
+            document.getElementById('bwStatus').className = 'text-slate-500';
+        }
+
+        function autoRun() {
+            if (state.autoRunning) {
+                clearInterval(state.autoInterval);
+                state.autoRunning = false;
+                document.getElementById('btnAutoRun').innerHTML = '<i class="fas fa-play"></i> Auto Run';
+                return;
+            }
+            
+            state.autoRunning = true;
+            document.getElementById('btnAutoRun').innerHTML = '<i class="fas fa-pause"></i> Stop';
+            
+            state.autoInterval = setInterval(() => {
+                // Randomly pick a process to step
+                const process = Math.random() < 0.5 ? 0 : 1;
+                executeStep(process);
+            }, state.speed);
+        }
+
+        // Event Listeners
+        document.getElementById('btnStepP0').addEventListener('click', () => executeStep(0));
+        document.getElementById('btnStepP1').addEventListener('click', () => executeStep(1));
+        document.getElementById('btnAutoRun').addEventListener('click', autoRun);
+        document.getElementById('btnReset').addEventListener('click', reset);
+        
+        speedSliderEl.addEventListener('input', (e) => {
+            state.speed = parseInt(e.target.value);
+            speedValueEl.textContent = `${state.speed}ms`;
+        });
+    </script>
+</body>
+</html>
