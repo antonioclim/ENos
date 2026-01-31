@@ -1,0 +1,952 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cgroups Resource Limiter | Lecture 16 - Containerisation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #111118;
+            --bg-tertiary: #1a1a24;
+            --accent-cpu: #f59e0b;
+            --accent-memory: #8b5cf6;
+            --accent-io: #06b6d4;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f97316;
+        }
+        
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at 0% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(17, 17, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .resource-bar {
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .resource-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        
+        .resource-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .limit-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-danger);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--accent-danger);
+        }
+        
+        .limit-marker::before {
+            content: 'LIMIT';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--accent-danger);
+            white-space: nowrap;
+        }
+        
+        .container-card {
+            transition: all 0.3s ease;
+        }
+        
+        .container-card.warning {
+            border-color: var(--accent-warning);
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.2);
+        }
+        
+        .container-card.danger {
+            border-color: var(--accent-danger);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+            animation: pulse-danger 1s ease-in-out infinite;
+        }
+        
+        .container-card.killed {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(239, 68, 68, 0.5); }
+        }
+        
+        .slider-control {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #374151;
+            outline: none;
+        }
+        
+        .slider-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-cpu);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        
+        .slider-control.memory::-webkit-slider-thumb {
+            background: var(--accent-memory);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+        
+        .slider-control.io::-webkit-slider-thumb {
+            background: var(--accent-io);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+        
+        .hierarchy-tree {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        
+        .hierarchy-tree .folder {
+            color: #60a5fa;
+        }
+        
+        .hierarchy-tree .file {
+            color: #9ca3af;
+        }
+        
+        .hierarchy-tree .value {
+            color: #34d399;
+        }
+        
+        .scenario-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .scenario-btn.active {
+            transform: scale(1.05);
+        }
+        
+        .oom-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: oomFlash 0.5s ease-out;
+        }
+        
+        @keyframes oomFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- OOM Overlay (hidden by default) -->
+    <div id="oomOverlay" class="oom-overlay hidden">
+        <div class="text-center">
+            <i class="fas fa-skull-crossbones text-8xl mb-4"></i>
+            <h2 class="text-4xl font-bold mb-2">OOM KILLER!</h2>
+            <p class="text-xl">Container terminated due to memory limit exceeded</p>
+            <button id="oomDismiss" class="mt-6 px-6 py-3 bg-white text-red-600 rounded-lg font-bold hover:bg-gray-100 transition">
+                Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 via-purple-500 to-cyan-500 flex items-center justify-center">
+                        <i class="fas fa-tachometer-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Cgroups Resource Limiter</h1>
+                        <p class="text-sm text-gray-400">Lecture 16 • Control Groups for Containere</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="btnReset" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button id="btnStartSimulation" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-purple-500 hover:from-amber-400 hover:to-purple-400 rounded-lg transition flex items-center gap-2 font-semibold">
+                        <i class="fas fa-play"></i> Start Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Overview -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-layer-group text-purple-400 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="font-bold text-lg mb-2">What are Control Groups (cgroups)?</h2>
+                    <p class="text-gray-400 text-sm">
+                        Cgroups limiteaza and contorizeaza resursele (CPU, memorie, I/O) that a group of processes can use.
+                        Sunt mecanismul care prevents a container from monopolising system resources.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cgroup Hierarchy -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-sitemap text-blue-400"></i>
+                Cgroup Hierarchy
+            </h3>
+            <div class="bg-gray-900/50 rounded-xl p-4 hierarchy-tree mono">
+                <div class="folder">/sys/fs/cgroup/</div>
+                <div class="ml-4">
+                    <span class="folder">├── cpu/</span>
+                    <div class="ml-4">
+                        <span class="folder">└── docker/</span>
+                        <div class="ml-4">
+                            <span class="folder">├── container1/</span>
+                            <span class="file ml-2">← cpu.max = "<span class="value" id="hierCpuLimit">50000 100000</span>"</span>
+                        </div>
+                        <div class="ml-4">
+                            <span class="folder">└── container2/</span>
+                            <span class="file ml-2">← cpu.max = "<span class="value">25000 100000</span>"</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <span class="folder">├── memory/</span>
+                    <div class="ml-4">
+                        <span class="folder">└── docker/</span>
+                        <div class="ml-4">
+                            <span class="folder">└── container1/</span>
+                            <span class="file ml-2">← memory.max = "<span class="value" id="hierMemLimit">536870912</span>" (512MB)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <span class="folder">└── io/</span>
+                    <div class="ml-4">
+                        <span class="folder">└── docker/</span>
+                        <div class="ml-4">
+                            <span class="folder">└── container1/</span>
+                            <span class="file ml-2">← io.max = "<span class="value" id="hierIoLimit">10485760</span>" (10MB/s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left: Container Panel -->
+            <div class="col-span-5">
+                <div id="containerCard" class="container-card glass-panel rounded-2xl p-5 border-2 border-transparent">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                <i class="fas fa-cube text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">CONTAINER "app"</h3>
+                                <p class="text-xs text-gray-500">ID: abc123</p>
+                            </div>
+                        </div>
+                        <span id="containerStatus" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold">
+                            RUNNING
+                        </span>
+                    </div>
+
+                    <!-- CPU Usage -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-microchip text-amber-400"></i>
+                                <span class="text-sm font-medium">CPU Usage</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="cpuUsageText" class="text-lg font-bold text-amber-400">0%</span>
+                                <span class="text-xs text-gray-500">/ <span id="cpuLimitText">50%</span></span>
+                            </div>
+                        </div>
+                        <div class="resource-bar">
+                            <div id="cpuFill" class="resource-fill bg-gradient-to-r from-amber-500 to-orange-500" style="width: 0%"></div>
+                            <div id="cpuLimitMarker" class="limit-marker" style="left: 50%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Memory Usage -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-memory text-purple-400"></i>
+                                <span class="text-sm font-medium">Memory Usage</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="memUsageText" class="text-lg font-bold text-purple-400">0 MB</span>
+                                <span class="text-xs text-gray-500">/ <span id="memLimitText">512 MB</span></span>
+                            </div>
+                        </div>
+                        <div class="resource-bar">
+                            <div id="memFill" class="resource-fill bg-gradient-to-r from-purple-500 to-violet-500" style="width: 0%"></div>
+                            <div id="memLimitMarker" class="limit-marker" style="left: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- I/O Usage -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-hdd text-cyan-400"></i>
+                                <span class="text-sm font-medium">I/O Throughput</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="ioUsageText" class="text-lg font-bold text-cyan-400">0 MB/s</span>
+                                <span class="text-xs text-gray-500">/ <span id="ioLimitText">10 MB/s</span></span>
+                            </div>
+                        </div>
+                        <div class="resource-bar">
+                            <div id="ioFill" class="resource-fill bg-gradient-to-r from-cyan-500 to-teal-500" style="width: 0%"></div>
+                            <div id="ioLimitMarker" class="limit-marker" style="left: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Process Count -->
+                    <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                        <span class="text-sm text-gray-400">Processes</span>
+                        <span id="processCount" class="text-lg font-bold text-gray-200">5</span>
+                    </div>
+                </div>
+
+                <!-- Docker Command -->
+                <div class="glass-panel rounded-2xl p-5 mt-6">
+                    <h4 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <i class="fab fa-docker text-blue-400"></i>
+                        Docker Command Equivalent
+                    </h4>
+                    <div class="bg-gray-900 rounded-lg p-3 mono text-xs overflow-x-auto">
+                        <span class="text-gray-500">$</span> docker run \<br>
+                        <span class="text-amber-400 ml-4">--cpus="<span id="dockerCpu">0.5</span>"</span> \<br>
+                        <span class="text-purple-400 ml-4">--memory="<span id="dockerMem">512m</span>"</span> \<br>
+                        <span class="text-cyan-400 ml-4">--device-read-bps=/dev/sda:<span id="dockerIo">10mb</span></span> \<br>
+                        <span class="text-gray-300 ml-4">app:latest</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Controls & Charts -->
+            <div class="col-span-7">
+                <!-- Limit Controls -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-amber-400"></i>
+                        Resource Limits
+                    </h3>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- CPU Limit -->
+                        <div>
+                            <label class="text-sm text-gray-400 mb-2 block">CPU Limit</label>
+                            <input type="range" id="cpuLimitSlider" min="10" max="100" value="50" class="slider-control w-full mb-2">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>10%</span>
+                                <span id="cpuLimitValue" class="text-amber-400 font-bold">50%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Memory Limit -->
+                        <div>
+                            <label class="text-sm text-gray-400 mb-2 block">Memory Limit</label>
+                            <input type="range" id="memLimitSlider" min="64" max="2048" value="512" step="64" class="slider-control memory w-full mb-2">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>64MB</span>
+                                <span id="memLimitValue" class="text-purple-400 font-bold">512 MB</span>
+                                <span>2GB</span>
+                            </div>
+                        </div>
+                        
+                        <!-- I/O Limit -->
+                        <div>
+                            <label class="text-sm text-gray-400 mb-2 block">I/O Limit</label>
+                            <input type="range" id="ioLimitSlider" min="1" max="100" value="10" class="slider-control io w-full mb-2">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>1MB/s</span>
+                                <span id="ioLimitValue" class="text-cyan-400 font-bold">10 MB/s</span>
+                                <span>100MB/s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Charts -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-area text-green-400"></i>
+                        Real-time Resource Usage
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="resourceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-flask text-pink-400"></i>
+                        Interactive Scenarios
+                    </h3>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <button id="scenarioCpuBurst" class="scenario-btn p-4 bg-amber-500/10 hover:bg-amber-500/20 rounded-xl border border-amber-500/30 text-left transition">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-bolt text-amber-400"></i>
+                                <span class="font-semibold text-amber-400">CPU Burst</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Container tries to use 100% CPU</p>
+                        </button>
+                        
+                        <button id="scenarioMemLeak" class="scenario-btn p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl border border-purple-500/30 text-left transition">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-exclamation-triangle text-purple-400"></i>
+                                <span class="font-semibold text-purple-400">Memory Leak</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Allocates memory until OOM Kill</p>
+                        </button>
+                        
+                        <button id="scenarioIoHeavy" class="scenario-btn p-4 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-xl border border-cyan-500/30 text-left transition">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-database text-cyan-400"></i>
+                                <span class="font-semibold text-cyan-400">I/O Heavy</span>
+                            </div>
+                            <p class="text-xs text-gray-400">Disk I/O throttling demo</p>
+                        </button>
+                    </div>
+                    
+                    <div id="scenarioDescription" class="mt-4 p-4 bg-gray-800/50 rounded-xl hidden">
+                        <p id="scenarioText" class="text-sm text-gray-300"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Noisy Neighbor Demo -->
+        <div class="glass-panel rounded-2xl p-5 mt-6">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-users text-indigo-400"></i>
+                Noisy Neighbor Prevention
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Container 1 -->
+                <div class="p-4 bg-gray-800/50 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                <i class="fas fa-cube text-blue-400"></i>
+                            </div>
+                            <span class="font-semibold">Container A</span>
+                            <span class="text-xs text-gray-500">(I/O Intensivee)</span>
+                        </div>
+                        <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">Running</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">I/O Usage</span>
+                            <span id="neighborAIo" class="text-cyan-400">0 MB/s</span>
+                        </div>
+                        <div class="resource-bar h-4">
+                            <div id="neighborAIoFill" class="resource-fill bg-gradient-to-r from-cyan-500 to-blue-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Limit: 10 MB/s (cgroup)</p>
+                </div>
+                
+                <!-- Container 2 -->
+                <div class="p-4 bg-gray-800/50 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                <i class="fas fa-cube text-green-400"></i>
+                            </div>
+                            <span class="font-semibold">Container B</span>
+                            <span class="text-xs text-gray-500">(Normal workload)</span>
+                        </div>
+                        <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">Running</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">I/O Usage</span>
+                            <span id="neighborBIo" class="text-cyan-400">0 MB/s</span>
+                        </div>
+                        <div class="resource-bar h-4">
+                            <div id="neighborBIoFill" class="resource-fill bg-gradient-to-r from-green-500 to-emerald-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Not affected by Container A!</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
+                <p class="text-sm text-indigo-300">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    <strong>Without cgroups:</strong> Container A would monopolise I/O and Container B would suffer.
+                    <strong>With cgroups:</strong> Each container has guaranteed and limited resources.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 p-3 text-xs text-gray-500">
+        By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            isRunning: false,
+            limits: {
+                cpu: 50,
+                memory: 512,
+                io: 10
+            },
+            usage: {
+                cpu: 0,
+                memory: 0,
+                io: 0
+            },
+            target: {
+                cpu: 20,
+                memory: 100,
+                io: 3
+            },
+            containerKilled: false,
+            scenario: null,
+            chartData: {
+                cpu: [],
+                memory: [],
+                io: []
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            containerCard: document.getElementById('containerCard'),
+            containerStatus: document.getElementById('containerStatus'),
+            cpuFill: document.getElementById('cpuFill'),
+            cpuUsageText: document.getElementById('cpuUsageText'),
+            cpuLimitText: document.getElementById('cpuLimitText'),
+            cpuLimitMarker: document.getElementById('cpuLimitMarker'),
+            memFill: document.getElementById('memFill'),
+            memUsageText: document.getElementById('memUsageText'),
+            memLimitText: document.getElementById('memLimitText'),
+            memLimitMarker: document.getElementById('memLimitMarker'),
+            ioFill: document.getElementById('ioFill'),
+            ioUsageText: document.getElementById('ioUsageText'),
+            ioLimitText: document.getElementById('ioLimitText'),
+            ioLimitMarker: document.getElementById('ioLimitMarker'),
+            cpuLimitSlider: document.getElementById('cpuLimitSlider'),
+            cpuLimitValue: document.getElementById('cpuLimitValue'),
+            memLimitSlider: document.getElementById('memLimitSlider'),
+            memLimitValue: document.getElementById('memLimitValue'),
+            ioLimitSlider: document.getElementById('ioLimitSlider'),
+            ioLimitValue: document.getElementById('ioLimitValue'),
+            dockerCpu: document.getElementById('dockerCpu'),
+            dockerMem: document.getElementById('dockerMem'),
+            dockerIo: document.getElementById('dockerIo'),
+            hierCpuLimit: document.getElementById('hierCpuLimit'),
+            hierMemLimit: document.getElementById('hierMemLimit'),
+            hierIoLimit: document.getElementById('hierIoLimit'),
+            btnStartSimulation: document.getElementById('btnStartSimulation'),
+            btnReset: document.getElementById('btnReset'),
+            scenarioCpuBurst: document.getElementById('scenarioCpuBurst'),
+            scenarioMemLeak: document.getElementById('scenarioMemLeak'),
+            scenarioIoHeavy: document.getElementById('scenarioIoHeavy'),
+            scenarioDescription: document.getElementById('scenarioDescription'),
+            scenarioText: document.getElementById('scenarioText'),
+            oomOverlay: document.getElementById('oomOverlay'),
+            oomDismiss: document.getElementById('oomDismiss'),
+            neighborAIo: document.getElementById('neighborAIo'),
+            neighborAIoFill: document.getElementById('neighborAIoFill'),
+            neighborBIo: document.getElementById('neighborBIo'),
+            neighborBIoFill: document.getElementById('neighborBIoFill')
+        };
+
+        // Chart
+        let resourceChart;
+        const maxDataPoints = 30;
+
+        function initChart() {
+            const ctx = document.getElementById('resourceChart').getContext('2d');
+            resourceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(maxDataPoints).fill(''),
+                    datasets: [{
+                        label: 'CPU %',
+                        data: Array(maxDataPoints).fill(0),
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }, {
+                        label: 'Memory %',
+                        data: Array(maxDataPoints).fill(0),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }, {
+                        label: 'I/O %',
+                        data: Array(maxDataPoints).fill(0),
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#9ca3af', font: { size: 11 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            min: 0,
+                            max: 120,
+                            ticks: { color: '#6b7280' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const cpuPercent = (state.usage.cpu / state.limits.cpu) * 100;
+            const memPercent = (state.usage.memory / state.limits.memory) * 100;
+            const ioPercent = (state.usage.io / state.limits.io) * 100;
+            
+            resourceChart.data.datasets[0].data.push(Math.min(cpuPercent, 100));
+            resourceChart.data.datasets[0].data.shift();
+            
+            resourceChart.data.datasets[1].data.push(Math.min(memPercent, 100));
+            resourceChart.data.datasets[1].data.shift();
+            
+            resourceChart.data.datasets[2].data.push(Math.min(ioPercent, 100));
+            resourceChart.data.datasets[2].data.shift();
+            
+            resourceChart.update();
+        }
+
+        // Update limits
+        function updateLimits() {
+            state.limits.cpu = parseInt(elements.cpuLimitSlider.value);
+            state.limits.memory = parseInt(elements.memLimitSlider.value);
+            state.limits.io = parseInt(elements.ioLimitSlider.value);
+            
+            // Update UI
+            elements.cpuLimitValue.textContent = state.limits.cpu + '%';
+            elements.cpuLimitText.textContent = state.limits.cpu + '%';
+            elements.cpuLimitMarker.style.left = state.limits.cpu + '%';
+            
+            elements.memLimitValue.textContent = state.limits.memory + ' MB';
+            elements.memLimitText.textContent = state.limits.memory + ' MB';
+            
+            elements.ioLimitValue.textContent = state.limits.io + ' MB/s';
+            elements.ioLimitText.textContent = state.limits.io + ' MB/s';
+            
+            // Update docker command
+            elements.dockerCpu.textContent = (state.limits.cpu / 100).toFixed(1);
+            elements.dockerMem.textContent = state.limits.memory + 'm';
+            elements.dockerIo.textContent = state.limits.io + 'mb';
+            
+            // Update hierarchy
+            elements.hierCpuLimit.textContent = (state.limits.cpu * 1000) + ' 100000';
+            elements.hierMemLimit.textContent = (state.limits.memory * 1024 * 1024).toLocaleString();
+            elements.hierIoLimit.textContent = (state.limits.io * 1024 * 1024).toLocaleString();
+        }
+
+        // Update usage display
+        function updateUsageDisplay() {
+            // CPU
+            const cpuPercent = Math.min(state.usage.cpu, state.limits.cpu);
+            elements.cpuFill.style.width = cpuPercent + '%';
+            elements.cpuUsageText.textContent = Math.round(state.usage.cpu) + '%';
+            
+            // Memory
+            const memPercent = (state.usage.memory / state.limits.memory) * 100;
+            elements.memFill.style.width = Math.min(memPercent, 100) + '%';
+            elements.memUsageText.textContent = Math.round(state.usage.memory) + ' MB';
+            
+            // I/O
+            const ioPercent = (state.usage.io / state.limits.io) * 100;
+            elements.ioFill.style.width = Math.min(ioPercent, 100) + '%';
+            elements.ioUsageText.textContent = state.usage.io.toFixed(1) + ' MB/s';
+            
+            // Container status
+            updateContainerStatus();
+        }
+
+        function updateContainerStatus() {
+            if (state.containerKilled) {
+                elements.containerCard.className = 'container-card glass-panel rounded-2xl p-5 border-2 killed';
+                elements.containerStatus.className = 'px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-semibold';
+                elements.containerStatus.textContent = 'KILLED (OOM)';
+                return;
+            }
+            
+            const memPercent = (state.usage.memory / state.limits.memory) * 100;
+            
+            if (memPercent > 95) {
+                elements.containerCard.className = 'container-card glass-panel rounded-2xl p-5 border-2 danger';
+                elements.containerStatus.className = 'px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-semibold';
+                elements.containerStatus.textContent = 'CRITICAL';
+            } else if (memPercent > 80 || state.usage.cpu >= state.limits.cpu) {
+                elements.containerCard.className = 'container-card glass-panel rounded-2xl p-5 border-2 warning';
+                elements.containerStatus.className = 'px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-semibold';
+                elements.containerStatus.textContent = 'WARNING';
+            } else {
+                elements.containerCard.className = 'container-card glass-panel rounded-2xl p-5 border-2 border-transparent';
+                elements.containerStatus.className = 'px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold';
+                elements.containerStatus.textContent = 'RUNNING';
+            }
+        }
+
+        // Simulation loop
+        let simulationInterval;
+        
+        function startSimulation() {
+            if (state.isRunning) {
+                stopSimulation();
+                return;
+            }
+            
+            state.isRunning = true;
+            elements.btnStartSimulation.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            
+            simulationInterval = setInterval(() => {
+                if (state.containerKilled) return;
+                
+                // Move towards target with some randomness
+                const noise = () => (Math.random() - 0.5) * 5;
+                
+                // CPU - limited by cgroup
+                let targetCpu = state.target.cpu + noise();
+                state.usage.cpu += (targetCpu - state.usage.cpu) * 0.1;
+                state.usage.cpu = Math.max(0, Math.min(state.usage.cpu, state.limits.cpu)); // Cgroup limit!
+                
+                // Memory - can grow, OOM if exceeds
+                let targetMem = state.target.memory + noise() * 10;
+                state.usage.memory += (targetMem - state.usage.memory) * 0.1;
+                state.usage.memory = Math.max(0, state.usage.memory);
+                
+                if (state.usage.memory >= state.limits.memory) {
+                    triggerOOM();
+                    return;
+                }
+                
+                // I/O - limited by cgroup
+                let targetIo = state.target.io + noise() * 0.5;
+                state.usage.io += (targetIo - state.usage.io) * 0.1;
+                state.usage.io = Math.max(0, Math.min(state.usage.io, state.limits.io)); // Cgroup limit!
+                
+                updateUsageDisplay();
+                updateChart();
+                updateNeighbors();
+            }, 200);
+        }
+
+        function stopSimulation() {
+            state.isRunning = false;
+            clearInterval(simulationInterval);
+            elements.btnStartSimulation.innerHTML = '<i class="fas fa-play"></i> Start Simulation';
+        }
+
+        function triggerOOM() {
+            state.containerKilled = true;
+            stopSimulation();
+            elements.oomOverlay.classList.remove('hidden');
+            updateUsageDisplay();
+        }
+
+        function updateNeighbors() {
+            // Container A - I/O intensive but limited
+            const aIo = Math.min(8 + Math.random() * 4, 10);
+            elements.neighborAIo.textContent = aIo.toFixed(1) + ' MB/s';
+            elements.neighborAIoFill.style.width = (aIo / 10 * 100) + '%';
+            
+            // Container B - normal, unaffected
+            const bIo = 2 + Math.random() * 2;
+            elements.neighborBIo.textContent = bIo.toFixed(1) + ' MB/s';
+            elements.neighborBIoFill.style.width = (bIo / 10 * 100) + '%';
+        }
+
+        // Scenarios
+        function runScenario(scenario) {
+            state.scenario = scenario;
+            state.containerKilled = false;
+            
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            
+            switch(scenario) {
+                case 'cpu':
+                    elements.scenarioCpuBurst.classList.add('active');
+                    state.target.cpu = 100; // Tries to use 100%
+                    state.target.memory = 100;
+                    state.target.io = 3;
+                    elements.scenarioText.textContent = 'Container tries to use 100% CPU, dar e limitat la ' + state.limits.cpu + '% by cgroup. Observe how usage does not exceed the limit!';
+                    break;
+                case 'memory':
+                    elements.scenarioMemLeak.classList.add('active');
+                    state.target.cpu = 30;
+                    state.target.memory = state.limits.memory + 100; // Will trigger OOM
+                    state.target.io = 3;
+                    elements.scenarioText.textContent = 'Memory leak in progress... When memory reaches ' + state.limits.memory + ' MB, OOM Killer will terminate the container!';
+                    break;
+                case 'io':
+                    elements.scenarioIoHeavy.classList.add('active');
+                    state.target.cpu = 30;
+                    state.target.memory = 150;
+                    state.target.io = 50; // Tries 50 MB/s
+                    elements.scenarioText.textContent = 'Container tries 50 MB/s I/O, but is throttled to ' + state.limits.io + ' MB/s. Disk I/O is limited without affecting other containers.';
+                    break;
+            }
+            
+            elements.scenarioDescription.classList.remove('hidden');
+            
+            if (!state.isRunning) {
+                startSimulation();
+            }
+        }
+
+        function reset() {
+            stopSimulation();
+            state.containerKilled = false;
+            state.usage = { cpu: 0, memory: 0, io: 0 };
+            state.target = { cpu: 20, memory: 100, io: 3 };
+            state.scenario = null;
+            
+            // Reset chart
+            resourceChart.data.datasets.forEach(dataset => {
+                dataset.data = Array(maxDataPoints).fill(0);
+            });
+            resourceChart.update();
+            
+            // Reset UI
+            updateUsageDisplay();
+            elements.scenarioDescription.classList.add('hidden');
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            elements.oomOverlay.classList.add('hidden');
+        }
+
+        // Event Listeners
+        elements.cpuLimitSlider.addEventListener('input', updateLimits);
+        elements.memLimitSlider.addEventListener('input', updateLimits);
+        elements.ioLimitSlider.addEventListener('input', updateLimits);
+        
+        elements.btnStartSimulation.addEventListener('click', startSimulation);
+        elements.btnReset.addEventListener('click', reset);
+        
+        elements.scenarioCpuBurst.addEventListener('click', () => runScenario('cpu'));
+        elements.scenarioMemLeak.addEventListener('click', () => runScenario('memory'));
+        elements.scenarioIoHeavy.addEventListener('click', () => runScenario('io'));
+        
+        elements.oomDismiss.addEventListener('click', () => {
+            elements.oomOverlay.classList.add('hidden');
+        });
+
+        // Initialize
+        initChart();
+        updateLimits();
+        updateUsageDisplay();
+    </script>
+</body>
+</html>

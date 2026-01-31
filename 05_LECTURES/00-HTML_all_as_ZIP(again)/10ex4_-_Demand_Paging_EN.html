@@ -1,0 +1,684 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulare Demand Paging | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .page-cell {
+            transition: all 0.3s ease;
+        }
+        .page-cell.loading {
+            animation: loadPulse 0.5s ease;
+        }
+        .page-cell.fault {
+            animation: faultShake 0.5s ease;
+        }
+        .page-cell.hit {
+            animation: hitGlow 0.5s ease;
+        }
+        
+        @keyframes loadPulse {
+            0% { transform: scale(0.8); opacity: 0; background-color: #fef3c7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes faultShake {
+            0%, 100% { transform: translateX(0); background-color: #fecaca; }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes hitGlow {
+            0%, 100% { box-shadow: none; }
+            50% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+        }
+        
+        .disk-read {
+            animation: diskSpin 1s linear;
+        }
+        @keyframes diskSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .flow-arrow {
+            animation: flowMove 0.5s ease;
+        }
+        @keyframes flowMove {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                    <i class="fas fa-download text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Demand Paging</h1>
+                    <p class="text-xs text-stone-500">Demand Paging</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Page Table Visualization -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-table text-blue-500"></i>
+                        Page Table (Page Table)
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-stone-50">
+                                    <th class="p-2 text-left">Page #</th>
+                                    <th class="p-2 text-center">Valid</th>
+                                    <th class="p-2 text-center">Frame #</th>
+                                    <th class="p-2 text-center">Dirty</th>
+                                    <th class="p-2 text-center">Referenced</th>
+                                    <th class="p-2 text-center">Locatie</th>
+                                    <th class="p-2 text-center">Actiune</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pageTable">
+                                <!-- Page table rows will be rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Memory and Disk Visualization -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Physical Memory -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-memory text-green-500"></i>
+                            Physical Memory (RAM)
+                        </h3>
+                        <div id="physicalMemory" class="grid grid-cols-4 gap-2">
+                            <!-- Frame cells will be rendered here -->
+                        </div>
+                        <div class="mt-3 text-xs text-stone-500">
+                            Capacitate: <span id="frameCapacity">8</span> frame-uri
+                        </div>
+                    </div>
+                    
+                    <!-- Disk / Swap Space -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-hdd text-amber-500"></i>
+                            Spatiu Swap (Disk)
+                        </h3>
+                        <div id="swapSpace" class="grid grid-cols-4 gap-2">
+                            <!-- Swap cells will be rendered here -->
+                        </div>
+                        <div class="mt-3 text-xs text-stone-500 flex items-center gap-2">
+                            <i id="diskActivity" class="fas fa-circle text-stone-300"></i>
+                            <span id="diskStatus">Idle</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Fault Handling Flow -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-project-diagram text-purple-500"></i>
+                        Page Fault Flow
+                    </h3>
+                    <div id="faultFlow" class="flex items-center justify-between p-4 bg-stone-50 rounded-lg text-xs">
+                        <div class="text-center p-2">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i class="fas fa-search text-blue-600"></i>
+                            </div>
+                            <div>1. Check PT</div>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-stone-300 mx-2"></div>
+                        <div class="text-center p-2">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i class="fas fa-exclamation text-red-600"></i>
+                            </div>
+                            <div>2. Page Fault</div>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-stone-300 mx-2"></div>
+                        <div class="text-center p-2">
+                            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i class="fas fa-hdd text-amber-600"></i>
+                            </div>
+                            <div>3. Read Disk</div>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-stone-300 mx-2"></div>
+                        <div class="text-center p-2">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i class="fas fa-memory text-green-600"></i>
+                            </div>
+                            <div>4. Incarca Frame</div>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-stone-300 mx-2"></div>
+                        <div class="text-center p-2">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i class="fas fa-sync text-purple-600"></i>
+                            </div>
+                            <div>5. Update PT</div>
+                        </div>
+                    </div>
+                    <div id="currentStep" class="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                        Select o pagina for a accesa
+                    </div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal"></i> Event Log
+                    </h3>
+                    <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
+                        <div class="text-stone-500">// Sistem initializat. Toate paginile sunt invalide (demand paging).</div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Page Faults</div>
+                        <div id="pageFaults" class="text-2xl font-bold text-red-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Page Hits</div>
+                        <div id="pageHits" class="text-2xl font-bold text-green-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Disk Reads</div>
+                        <div id="diskReads" class="text-2xl font-bold text-amber-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Disk Writes</div>
+                        <div id="diskWrites" class="text-2xl font-bold text-blue-600">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Configuration -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cogs text-blue-500 mr-2"></i>configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Number Pagini (Virtual)</label>
+                            <input type="number" id="numPages" value="16" min="8" max="32" 
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Number Frame-uri (Fizic)</label>
+                            <input type="number" id="numFrames" value="8" min="4" max="16" 
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <button onclick="initSystem()" class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Acces Rapid
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Number Page</label>
+                            <input type="number" id="accessPage" value="0" min="0" 
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="accessPage('read')" class="btn-action flex-1 p-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i> Read
+                            </button>
+                            <button onclick="accessPage('write')" class="btn-action flex-1 p-2 bg-amber-500 hover:bg-amber-600 text-white rounded text-sm">
+                                <i class="fas fa-pen mr-1"></i> Write
+                            </button>
+                        </div>
+                        <button onclick="randomAccess()" class="btn-action w-full p-2 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm">
+                            <i class="fas fa-random mr-1"></i> Acces Random
+                        </button>
+                        <button onclick="sequentialAccess()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
+                            <i class="fas fa-arrow-right mr-1"></i> Acces Secvential
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadScenario('coldStart')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-snowflake text-blue-500 mr-2"></i>Cold Start (toate invalide)
+                        </button>
+                        <button onclick="loadScenario('warmStart')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-fire text-orange-500 mr-2"></i>Warm Start (unele in RAM)
+                        </button>
+                        <button onclick="loadScenario('locality')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Spatial Locality
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Demand Paging Info -->
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl shadow-sm border border-emerald-200 p-4">
+                    <h3 class="text-sm font-semibold text-emerald-800 mb-3">
+                        <i class="fas fa-info-circle text-emerald-500 mr-2"></i>Demand Paging
+                    </h3>
+                    <div class="space-y-2 text-xs text-emerald-700">
+                        <p>Paginile sunt incarcate in memorie only when sunt accesate for first data.</p>
+                        <div class="p-2 bg-white/50 rounded">
+                            <strong>Avantaje:</strong> Pornire rapida, memorie economisita
+                        </div>
+                        <div class="p-2 bg-white/50 rounded">
+                            <strong>Dezavantaje:</strong> Latenta la first acces
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Fault Cost -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-clock text-red-500 mr-2"></i>Page Fault Cost
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between p-2 bg-stone-50 rounded">
+                            <span>Memory access:</span>
+                            <span class="mono">~100 ns</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-red-50 rounded">
+                            <span>Page fault (SSD):</span>
+                            <span class="mono">~100 µs</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-red-100 rounded">
+                            <span>Page fault (HDD):</span>
+                            <span class="mono">~10 ms</span>
+                        </div>
+                        <div class="p-2 bg-amber-50 rounded text-center">
+                            <span class="font-bold">Raport: 1 : 1000 : 100000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let numPages = 16;
+        let numFrames = 8;
+        let pageTable = [];
+        let physicalMemory = [];
+        let swapSpace = [];
+        let fifoQueue = [];
+        
+        let stats = {
+            pageFaults: 0,
+            pageHits: 0,
+            diskReads: 0,
+            diskWrites: 0
+        };
+
+        // ==================== Initialization ====================
+        function initSystem() {
+            numPages = parseInt(document.getElementById('numPages').value);
+            numFrames = parseInt(document.getElementById('numFrames').value);
+            
+            // Initialize page table (all invalid - demand paging)
+            pageTable = [];
+            for (let i = 0; i < numPages; i++) {
+                pageTable.push({
+                    pageNum: i,
+                    valid: false,
+                    frameNum: null,
+                    dirty: false,
+                    referenced: false,
+                    inSwap: true // Initially all pages are on "disk"
+                });
+            }
+            
+            // Initialize physical memory (all empty)
+            physicalMemory = Array(numFrames).fill(null);
+            fifoQueue = [];
+            
+            // Initialize swap space
+            swapSpace = Array(numPages).fill(null).map((_, i) => i);
+            
+            // Reset stats
+            stats = { pageFaults: 0, pageHits: 0, diskReads: 0, diskWrites: 0 };
+            
+            renderAll();
+            log('Sistem initializat cu demand paging. Toate paginile sunt invalide.');
+        }
+
+        // ==================== Page Access ====================
+        async function accessPage(mode) {
+            const pageNum = parseInt(document.getElementById('accessPage').value);
+            
+            if (pageNum < 0 || pageNum >= numPages) {
+                log(`error: Pagina ${pageNum} nu exists!`);
+                return;
+            }
+            
+            log(`\nAcces ${mode.toUpperCase()} la pagina ${pageNum}...`);
+            
+            const page = pageTable[pageNum];
+            
+            if (page.valid) {
+                // Page HIT
+                stats.pageHits++;
+                page.referenced = true;
+                if (mode === 'write') {
+                    page.dirty = true;
+                }
+                
+                log(`✓ PAGE HIT! Pagina ${pageNum} este in frame-ul ${page.frameNum}`);
+                highlightFrame(page.frameNum, 'hit');
+                updateStep(`Page Hit: Pagina ${pageNum} gasita in frame-ul ${page.frameNum}`);
+            } else {
+                // Page FAULT
+                stats.pageFaults++;
+                log(`✗ PAGE FAULT! Pagina ${pageNum} nu este in memorie.`);
+                
+                await handlePageFault(pageNum, mode);
+            }
+            
+            renderAll();
+        }
+
+        async function handlePageFault(pageNum, mode) {
+            updateStep('1. Page Fault detectat! search frame liber...');
+            await sleep(300);
+            
+            // Find a free frame
+            let targetFrame = physicalMemory.indexOf(null);
+            
+            if (targetFrame === -1) {
+                // Need to replace a page
+                updateStep('2. Memorie plina! Selectare victima (FIFO)...');
+                await sleep(300);
+                
+                targetFrame = fifoQueue.shift();
+                const victimPageNum = physicalMemory[targetFrame];
+                const victimPage = pageTable[victimPageNum];
+                
+                log(`Victima selectata: Pagina ${victimPageNum} in frame-ul ${targetFrame}`);
+                highlightFrame(targetFrame, 'fault');
+                
+                // Write back if dirty
+                if (victimPage.dirty) {
+                    updateStep('3. Pagina victima este dirty - scriere pe disk...');
+                    stats.diskWrites++;
+                    await animateDiskWrite();
+                    log(`Pagina ${victimPageNum} scrisa pe disk (dirty)`);
+                    victimPage.dirty = false;
+                }
+                
+                // Invalidate victim
+                victimPage.valid = false;
+                victimPage.frameNum = null;
+                victimPage.inSwap = true;
+            } else {
+                updateStep(`2. Frame liber gasit: ${targetFrame}`);
+                await sleep(300);
+            }
+            
+            // Read page from disk
+            updateStep(`3. Read pagina ${pageNum} de pe disk...`);
+            stats.diskReads++;
+            await animateDiskRead();
+            
+            // Load page into frame
+            physicalMemory[targetFrame] = pageNum;
+            fifoQueue.push(targetFrame);
+            
+            const page = pageTable[pageNum];
+            page.valid = true;
+            page.frameNum = targetFrame;
+            page.referenced = true;
+            page.inSwap = false;
+            
+            if (mode === 'write') {
+                page.dirty = true;
+            }
+            
+            updateStep(`4. Pagina ${pageNum} incarcata in frame-ul ${targetFrame}`);
+            highlightFrame(targetFrame, 'loading');
+            log(`✓ Pagina ${pageNum} incarcata in frame-ul ${targetFrame}`);
+        }
+
+        function randomAccess() {
+            const randomPage = Math.floor(Math.random() * numPages);
+            const mode = Math.random() > 0.7 ? 'write' : 'read';
+            document.getElementById('accessPage').value = randomPage;
+            accessPage(mode);
+        }
+
+        async function sequentialAccess() {
+            for (let i = 0; i < Math.min(numFrames + 2, numPages); i++) {
+                document.getElementById('accessPage').value = i;
+                await accessPage('read');
+                await sleep(500);
+            }
+        }
+
+        // ==================== Rendering ====================
+        function renderAll() {
+            renderPageTable();
+            renderPhysicalMemory();
+            renderSwapSpace();
+            renderStats();
+        }
+
+        function renderPageTable() {
+            const tbody = document.getElementById('pageTable');
+            tbody.innerHTML = pageTable.map(page => `
+                <tr class="${page.valid ? 'bg-green-50' : 'bg-red-50'} hover:bg-blue-50 cursor-pointer" onclick="accessPageFromTable(${page.pageNum})">
+                    <td class="p-2 font-mono font-bold">P${page.pageNum}</td>
+                    <td class="p-2 text-center">
+                        <span class="${page.valid ? 'text-green-600' : 'text-red-600'}">${page.valid ? '✓' : '✗'}</span>
+                    </td>
+                    <td class="p-2 text-center mono">${page.frameNum !== null ? page.frameNum : '-'}</td>
+                    <td class="p-2 text-center">${page.dirty ? '<span class="text-amber-600">●</span>' : '-'}</td>
+                    <td class="p-2 text-center">${page.referenced ? '<span class="text-blue-600">●</span>' : '-'}</td>
+                    <td class="p-2 text-center">
+                        <span class="px-2 py-1 rounded text-xs ${page.valid ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                            ${page.valid ? 'RAM' : 'Disk'}
+                        </span>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="event.stopPropagation(); accessPageFromTable(${page.pageNum})" class="text-blue-500 hover:text-blue-700 text-xs">
+                            Access
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function accessPageFromTable(pageNum) {
+            document.getElementById('accessPage').value = pageNum;
+            accessPage('read');
+        }
+
+        function renderPhysicalMemory() {
+            const container = document.getElementById('physicalMemory');
+            container.innerHTML = physicalMemory.map((pageNum, frameIdx) => {
+                const isEmpty = pageNum === null;
+                const page = isEmpty ? null : pageTable[pageNum];
+                
+                return `
+                    <div class="page-cell p-2 rounded-lg text-center text-xs ${isEmpty ? 'bg-stone-100 text-stone-400' : 'bg-green-100 text-green-700 border border-green-300'}"
+                         data-frame="${frameIdx}">
+                        <div class="font-bold">F${frameIdx}</div>
+                        <div class="text-lg font-bold">${isEmpty ? '-' : 'P' + pageNum}</div>
+                        ${page && page.dirty ? '<div class="text-amber-600">D</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('frameCapacity').textContent = numFrames;
+        }
+
+        function renderSwapSpace() {
+            const container = document.getElementById('swapSpace');
+            const pagesInSwap = pageTable.filter(p => p.inSwap);
+            
+            container.innerHTML = pagesInSwap.slice(0, 16).map(page => `
+                <div class="p-2 rounded-lg text-center text-xs bg-amber-100 text-amber-700 border border-amber-300">
+                    <div class="font-bold">P${page.pageNum}</div>
+                </div>
+            `).join('');
+            
+            if (pagesInSwap.length > 16) {
+                container.innerHTML += `<div class="p-2 text-xs text-stone-500">+${pagesInSwap.length - 16} more</div>`;
+            }
+        }
+
+        function renderStats() {
+            document.getElementById('pageFaults').textContent = stats.pageFaults;
+            document.getElementById('pageHits').textContent = stats.pageHits;
+            document.getElementById('diskReads').textContent = stats.diskReads;
+            document.getElementById('diskWrites').textContent = stats.diskWrites;
+        }
+
+        function highlightFrame(frameIdx, type) {
+            const cell = document.querySelector(`.page-cell[data-frame="${frameIdx}"]`);
+            if (cell) {
+                cell.classList.add(type);
+                setTimeout(() => cell.classList.remove(type), 500);
+            }
+        }
+
+        function updateStep(text) {
+            document.getElementById('currentStep').textContent = text;
+        }
+
+        // ==================== Animations ====================
+        async function animateDiskRead() {
+            const icon = document.getElementById('diskActivity');
+            const status = document.getElementById('diskStatus');
+            
+            icon.classList.remove('text-stone-300');
+            icon.classList.add('text-green-500', 'disk-read');
+            status.textContent = 'Reading...';
+            
+            await sleep(500);
+            
+            icon.classList.remove('text-green-500', 'disk-read');
+            icon.classList.add('text-stone-300');
+            status.textContent = 'Idle';
+        }
+
+        async function animateDiskWrite() {
+            const icon = document.getElementById('diskActivity');
+            const status = document.getElementById('diskStatus');
+            
+            icon.classList.remove('text-stone-300');
+            icon.classList.add('text-amber-500', 'disk-read');
+            status.textContent = 'Writing...';
+            
+            await sleep(500);
+            
+            icon.classList.remove('text-amber-500', 'disk-read');
+            icon.classList.add('text-stone-300');
+            status.textContent = 'Idle';
+        }
+
+        // ==================== Scenarios ====================
+        function loadScenario(type) {
+            initSystem();
+            
+            switch(type) {
+                case 'coldStart':
+                    log('Scenariu Cold Start: Toate paginile sunt invalide.');
+                    break;
+                    
+                case 'warmStart':
+                    // Pre-load some pages
+                    for (let i = 0; i < Math.floor(numFrames / 2); i++) {
+                        const pageNum = i;
+                        pageTable[pageNum].valid = true;
+                        pageTable[pageNum].frameNum = i;
+                        pageTable[pageNum].inSwap = false;
+                        physicalMemory[i] = pageNum;
+                        fifoQueue.push(i);
+                    }
+                    renderAll();
+                    log('Scenariu Warm Start: Primele pagini pre-incarcate.');
+                    break;
+                    
+                case 'locality':
+                    log('Scenariu Localitate: Access pagini apropiate.');
+                    setTimeout(() => {
+                        const start = Math.floor(numPages / 4);
+                        for (let i = 0; i < 5; i++) {
+                            setTimeout(() => {
+                                document.getElementById('accessPage').value = start + i;
+                                accessPage('read');
+                            }, i * 800);
+                        }
+                    }, 500);
+                    break;
+            }
+        }
+
+        // ==================== Helpers ====================
+        function log(message) {
+            const container = document.getElementById('eventLog');
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', initSystem);
+    </script>
+</body>
+</html>

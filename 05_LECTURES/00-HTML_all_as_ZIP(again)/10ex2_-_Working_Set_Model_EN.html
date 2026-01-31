@@ -1,0 +1,516 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Set Model | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .page-in-ws {
+            animation: wsPopIn 0.3s ease;
+        }
+        @keyframes wsPopIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .window-marker {
+            transition: all 0.3s ease;
+        }
+        
+        .reference-item.in-window {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .reference-item.current {
+            background-color: #3b82f6;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+                    <i class="fas fa-window-restore text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Working Set Model</h1>
+                    <p class="text-xs text-stone-500">Modelul Setului de Lucru</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Reference String with Window -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-stream text-blue-500"></i>
+                        Sir de Reference cu Window (Δ = <span id="windowDisplay">5</span>)
+                    </h3>
+                    <div class="relative">
+                        <div id="referenceContainer" class="flex flex-wrap gap-1 mb-2">
+                            <!-- Reference items with window highlight -->
+                        </div>
+                        <div id="windowIndicator" class="text-xs text-blue-600 mt-2">
+                            Fereastra curenta: [<span id="windowStart">0</span> - <span id="windowEnd">0</span>]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Working Set Visualization -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                            <i class="fas fa-layer-group text-green-500"></i>
+                            Working Set la Momentul t = <span id="currentTime">0</span>
+                        </h3>
+                        <div class="text-sm">
+                            |WS(t, Δ)| = <span id="wsSize" class="mono font-bold text-green-600">0</span>
+                        </div>
+                    </div>
+                    <div id="workingSet" class="flex flex-wrap gap-2 min-h-[60px] p-4 bg-green-50 rounded-lg border border-green-200">
+                        <span class="text-stone-400 text-sm italic">Working set gol</span>
+                    </div>
+                </div>
+
+                <!-- Working Set History Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-purple-500"></i>
+                        Evolutie |WS(t, Δ)| in Time
+                    </h3>
+                    <div class="h-48">
+                        <canvas id="wsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Timeline Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-table text-indigo-500"></i>
+                        Timeline Detaliat
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="bg-stone-50">
+                                    <th class="p-2 text-left">t</th>
+                                    <th class="p-2 text-left">Reference</th>
+                                    <th class="p-2 text-left">Window [t-Δ+1, t]</th>
+                                    <th class="p-2 text-left">WS(t, Δ)</th>
+                                    <th class="p-2 text-center">|WS|</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timelineTable">
+                                <!-- Timeline rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">WS Minim</div>
+                        <div id="minWS" class="text-2xl font-bold text-green-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">WS Maxim</div>
+                        <div id="maxWS" class="text-2xl font-bold text-red-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">WS Mediu</div>
+                        <div id="avgWS" class="text-2xl font-bold text-blue-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Pagini Unice</div>
+                        <div id="uniquePages" class="text-2xl font-bold text-purple-600">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Configuration -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cogs text-teal-500 mr-2"></i>configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Sir de Reference</label>
+                            <input type="text" id="refStringInput" value="1 2 3 2 1 4 5 2 1 3 4 5 1 2"
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Size Window (Δ)</label>
+                            <input type="range" id="windowSize" min="2" max="10" value="5" class="w-full" oninput="updateWindowSize()">
+                            <div class="flex justify-between text-xs text-stone-400">
+                                <span>2</span>
+                                <span id="windowValue" class="font-bold text-teal-600">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+                        <button onclick="applyConfig()" class="w-full p-2 bg-teal-500 hover:bg-teal-600 text-white rounded text-sm">
+                            <i class="fas fa-check mr-1"></i> Aplica
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Control
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button onclick="runSimulation()" id="btnPlay" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button onclick="pauseSimulation()" id="btnPause" class="btn-action p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg" disabled>
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button onclick="stepForward()" id="btnStep" class="btn-action p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button onclick="resetSimulation()" class="btn-action p-3 bg-stone-500 hover:bg-stone-600 text-white rounded-lg">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 block mb-1">Speed</label>
+                        <input type="range" id="speed" min="200" max="2000" value="800" class="w-full">
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadPreset('locality')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Good Locality
+                        </button>
+                        <button onclick="loadPreset('poor')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-random text-red-500 mr-2"></i>Localitate Slaba
+                        </button>
+                        <button onclick="loadPreset('phases')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-layer-group text-blue-500 mr-2"></i>Execution Phases
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Working Set Definition -->
+                <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl shadow-sm border border-teal-200 p-4">
+                    <h3 class="text-sm font-semibold text-teal-800 mb-3">
+                        <i class="fas fa-book text-teal-500 mr-2"></i>Definitie
+                    </h3>
+                    <div class="space-y-2 text-xs text-teal-700">
+                        <div class="p-2 bg-white/50 rounded mono">
+                            WS(t, Δ) = {pagini referentiate in [t-Δ+1, t]}
+                        </div>
+                        <p>Setul de lucru la momentul <strong>t</strong> cu fereastra <strong>Δ</strong> contains toate paginile distincte accesate in ultimele Δ references.</p>
+                    </div>
+                </div>
+
+                <!-- Key Concepts -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-lightbulb text-amber-500 mr-2"></i>Concepte Cheie
+                    </h3>
+                    <div class="space-y-2 text-xs text-stone-600">
+                        <div class="p-2 bg-green-50 rounded-lg">
+                            <strong>Principiul localitatii:</strong> Programele tind to acceseze un set mic de pagini intr-o perioada scurta.
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <strong>WSS (Working Set Size):</strong> |WS(t, Δ)| - numarul de pagini in setul de lucru.
+                        </div>
+                        <div class="p-2 bg-amber-50 rounded-lg">
+                            <strong>Alegerea Δ:</strong> Prea mic → WS incomplet. Prea mare → include pagini nefolosite.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let referenceString = [];
+        let windowSize = 5;
+        let currentTime = 0;
+        let wsHistory = []; // Array of {t, ws: Set, size}
+        let isRunning = false;
+        let animationInterval = null;
+        let wsChart = null;
+
+        // ==================== Initialization ====================
+        function init() {
+            applyConfig();
+            initChart();
+        }
+
+        function applyConfig() {
+            const input = document.getElementById('refStringInput').value.trim();
+            referenceString = input.split(/[\s,]+/).map(x => parseInt(x)).filter(x => !isNaN(x));
+            windowSize = parseInt(document.getElementById('windowSize').value);
+            
+            document.getElementById('windowDisplay').textContent = windowSize;
+            document.getElementById('windowValue').textContent = windowSize;
+            
+            resetSimulation();
+            computeAllWorkingSets();
+            renderAll();
+        }
+
+        function updateWindowSize() {
+            windowSize = parseInt(document.getElementById('windowSize').value);
+            document.getElementById('windowDisplay').textContent = windowSize;
+            document.getElementById('windowValue').textContent = windowSize;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('wsChart').getContext('2d');
+            wsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '|WS(t, Δ)|',
+                        data: [],
+                        borderColor: '#14b8a6',
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'WS Size' } },
+                        x: { title: { display: true, text: 'Time (t)' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // ==================== Working Set Computation ====================
+        function computeAllWorkingSets() {
+            wsHistory = [];
+            
+            for (let t = 0; t < referenceString.length; t++) {
+                const ws = computeWorkingSet(t);
+                wsHistory.push({
+                    t: t,
+                    ref: referenceString[t],
+                    windowStart: Math.max(0, t - windowSize + 1),
+                    windowEnd: t,
+                    ws: ws,
+                    size: ws.size
+                });
+            }
+            
+            updateChart();
+            updateStats();
+        }
+
+        function computeWorkingSet(t) {
+            const start = Math.max(0, t - windowSize + 1);
+            const window = referenceString.slice(start, t + 1);
+            return new Set(window);
+        }
+
+        function getWorkingSetAtTime(t) {
+            if (t < 0 || t >= wsHistory.length) return new Set();
+            return wsHistory[t].ws;
+        }
+
+        // ==================== Rendering ====================
+        function renderAll() {
+            renderReferenceString();
+            renderCurrentWS();
+            renderTimeline();
+        }
+
+        function renderReferenceString() {
+            const container = document.getElementById('referenceContainer');
+            
+            const windowStart = currentTime >= 0 ? Math.max(0, currentTime - windowSize + 1) : -1;
+            const windowEnd = currentTime;
+            
+            container.innerHTML = referenceString.map((page, idx) => {
+                let classes = 'reference-item w-8 h-8 flex items-center justify-center rounded border text-sm mono font-bold transition-all ';
+                
+                if (idx === currentTime) {
+                    classes += 'current ';
+                } else if (idx >= windowStart && idx <= windowEnd && currentTime >= 0) {
+                    classes += 'in-window border-blue-400 ';
+                } else {
+                    classes += 'border-stone-300 ';
+                }
+                
+                return `<div class="${classes}" data-idx="${idx}">${page}</div>`;
+            }).join('');
+            
+            document.getElementById('windowStart').textContent = windowStart >= 0 ? windowStart : '-';
+            document.getElementById('windowEnd').textContent = windowEnd >= 0 ? windowEnd : '-';
+            document.getElementById('currentTime').textContent = currentTime >= 0 ? currentTime : '-';
+        }
+
+        function renderCurrentWS() {
+            const container = document.getElementById('workingSet');
+            
+            if (currentTime < 0 || currentTime >= wsHistory.length) {
+                container.innerHTML = '<span class="text-stone-400 text-sm italic">Working set gol</span>';
+                document.getElementById('wsSize').textContent = '0';
+                return;
+            }
+            
+            const ws = wsHistory[currentTime].ws;
+            document.getElementById('wsSize').textContent = ws.size;
+            
+            if (ws.size === 0) {
+                container.innerHTML = '<span class="text-stone-400 text-sm italic">Working set gol</span>';
+                return;
+            }
+            
+            container.innerHTML = Array.from(ws).sort((a, b) => a - b).map(page => `
+                <div class="page-in-ws w-12 h-12 flex items-center justify-center rounded-lg bg-green-500 text-white text-lg font-bold mono shadow">
+                    ${page}
+                </div>
+            `).join('');
+        }
+
+        function renderTimeline() {
+            const tbody = document.getElementById('timelineTable');
+            
+            tbody.innerHTML = wsHistory.slice(0, currentTime + 1).map((entry, idx) => `
+                <tr class="${idx === currentTime ? 'bg-blue-50' : 'hover:bg-stone-50'}">
+                    <td class="p-2 mono font-bold">${entry.t}</td>
+                    <td class="p-2 mono">${entry.ref}</td>
+                    <td class="p-2 mono text-xs">[${entry.windowStart}, ${entry.windowEnd}]</td>
+                    <td class="p-2 mono text-xs">{${Array.from(entry.ws).sort((a,b)=>a-b).join(', ')}}</td>
+                    <td class="p-2 text-center font-bold ${entry.size > windowSize ? 'text-red-600' : 'text-green-600'}">${entry.size}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateChart() {
+            wsChart.data.labels = wsHistory.map(h => h.t);
+            wsChart.data.datasets[0].data = wsHistory.map(h => h.size);
+            wsChart.update();
+        }
+
+        function updateStats() {
+            if (wsHistory.length === 0) return;
+            
+            const sizes = wsHistory.map(h => h.size);
+            const min = Math.min(...sizes);
+            const max = Math.max(...sizes);
+            const avg = (sizes.reduce((a, b) => a + b, 0) / sizes.length).toFixed(1);
+            const unique = new Set(referenceString).size;
+            
+            document.getElementById('minWS').textContent = min;
+            document.getElementById('maxWS').textContent = max;
+            document.getElementById('avgWS').textContent = avg;
+            document.getElementById('uniquePages').textContent = unique;
+        }
+
+        // ==================== Simulation Control ====================
+        function runSimulation() {
+            if (currentTime >= referenceString.length - 1) {
+                resetSimulation();
+            }
+            
+            isRunning = true;
+            document.getElementById('btnPlay').disabled = true;
+            document.getElementById('btnPause').disabled = false;
+            
+            const speed = parseInt(document.getElementById('speed').value);
+            animationInterval = setInterval(() => {
+                if (!stepForward()) {
+                    pauseSimulation();
+                }
+            }, speed);
+        }
+
+        function pauseSimulation() {
+            isRunning = false;
+            clearInterval(animationInterval);
+            document.getElementById('btnPlay').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+        }
+
+        function stepForward() {
+            if (currentTime >= referenceString.length - 1) return false;
+            currentTime++;
+            renderAll();
+            return true;
+        }
+
+        function resetSimulation() {
+            pauseSimulation();
+            currentTime = -1;
+            renderAll();
+        }
+
+        // ==================== Presets ====================
+        function loadPreset(type) {
+            switch(type) {
+                case 'locality':
+                    document.getElementById('refStringInput').value = '1 2 1 2 1 2 3 3 3 2 1 2 1';
+                    document.getElementById('windowSize').value = 4;
+                    break;
+                case 'poor':
+                    document.getElementById('refStringInput').value = '1 2 3 4 5 6 7 8 9 10 1 2 3';
+                    document.getElementById('windowSize').value = 5;
+                    break;
+                case 'phases':
+                    document.getElementById('refStringInput').value = '1 1 1 2 2 2 3 3 3 4 4 4 5 5 5';
+                    document.getElementById('windowSize').value = 4;
+                    break;
+            }
+            applyConfig();
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

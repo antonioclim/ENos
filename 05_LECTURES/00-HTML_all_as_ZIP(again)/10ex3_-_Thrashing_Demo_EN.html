@@ -1,0 +1,707 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrashing Demonstration | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .process-bar {
+            transition: all 0.3s ease;
+        }
+        .process-bar.thrashing {
+            animation: thrashingPulse 0.5s ease infinite;
+        }
+        @keyframes thrashingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .cpu-meter, .memory-meter {
+            transition: all 0.5s ease;
+        }
+        
+        .warning-banner {
+            animation: warningPulse 1s ease-in-out infinite;
+        }
+        @keyframes warningPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 20px 5px rgba(239, 68, 68, 0.3); }
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Thrashing Demonstration</h1>
+                    <p class="text-xs text-stone-500">Colaps prin Paginare Excesiva</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Thrashing Warning Banner -->
+        <div id="thrashingBanner" class="hidden mb-6 warning-banner bg-red-100 border-2 border-red-400 rounded-xl p-4 flex items-center gap-4">
+            <div class="text-4xl animate-pulse">⚠️</div>
+            <div>
+                <h3 class="font-bold text-red-800 text-lg">THRASHING DETECTAT!</h3>
+                <p class="text-sm text-red-700">Sistemul petrece mai mult timp facand paginare than executand processes.</p>
+            </div>
+            <button onclick="hideThrashingBanner()" class="ml-auto text-red-500 hover:text-red-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- CPU Utilization vs Multiprogramming Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-area text-blue-500"></i>
+                        CPU Utilization vs Grad de Multiprogramare
+                    </h2>
+                    <div class="h-72">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    <div class="mt-4 flex justify-center gap-4 text-xs">
+                        <div class="flex items-center gap-1">
+                            <div class="w-4 h-2 bg-blue-500 rounded"></div>
+                            <span>CPU Utilisation</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-4 h-2 bg-red-500 rounded"></div>
+                            <span>Page Faults/sec</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-4 h-0.5 bg-amber-500 border-t-2 border-dashed"></div>
+                            <span>Punct Optim</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live System State -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- CPU Utilization Gauge -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-microchip text-blue-500"></i>
+                            CPU Utilisation
+                        </h3>
+                        <div class="relative w-32 h-32 mx-auto">
+                            <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+                                <circle id="cpuCircle" cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="12"
+                                        stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="cpuValue" class="text-2xl font-bold">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Memory Usage -->
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-memory text-green-500"></i>
+                            Memorie Fizica
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Folosita</span>
+                                    <span id="memUsed">0 MB</span>
+                                </div>
+                                <div class="h-4 bg-stone-200 rounded-full overflow-hidden">
+                                    <div id="memBar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs text-center">
+                                <div class="p-2 bg-stone-50 rounded">
+                                    <div class="text-stone-500">Frame-uri</div>
+                                    <div id="frameCount" class="font-bold">0</div>
+                                </div>
+                                <div class="p-2 bg-stone-50 rounded">
+                                    <div class="text-stone-500">Total</div>
+                                    <div id="totalMem" class="font-bold">256 MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process List -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                            <i class="fas fa-tasks text-purple-500"></i>
+                            Procese Active (<span id="processCount">0</span>)
+                        </h3>
+                        <div class="text-xs text-stone-500">
+                            Page Faults/sec: <span id="faultRate" class="font-bold text-red-600">0</span>
+                        </div>
+                    </div>
+                    <div id="processList" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- Process bars will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Page Faults Total</div>
+                        <div id="totalFaults" class="text-2xl font-bold text-red-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Timp in Paginare</div>
+                        <div id="pagingTime" class="text-2xl font-bold text-amber-600">0%</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Throughput</div>
+                        <div id="throughput" class="text-2xl font-bold text-blue-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">System State</div>
+                        <div id="systemState" class="text-xl font-bold text-green-600">Normal</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Simulation Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-sliders-h text-blue-500 mr-2"></i>Control Simulare
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Procese in Sistem</label>
+                            <input type="range" id="processSlider" min="1" max="20" value="5" class="w-full" oninput="updateProcessCount()">
+                            <div class="flex justify-between text-xs text-stone-400">
+                                <span>1</span>
+                                <span id="processSliderValue" class="font-bold text-blue-600">5</span>
+                                <span>20</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Memorie Totala (MB)</label>
+                            <input type="number" id="totalMemory" value="256" min="64" max="1024" step="64" 
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Dimensiune Medie Proces (MB)</label>
+                            <input type="number" id="processSize" value="40" min="10" max="100" 
+                                   class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Buttons -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Actions
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="startSimulation()" id="btnStart" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
+                            <i class="fas fa-play mr-1"></i> Start Simulare
+                        </button>
+                        <button onclick="stopSimulation()" id="btnStop" class="btn-action w-full p-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium" disabled>
+                            <i class="fas fa-stop mr-1"></i> Stop
+                        </button>
+                        <button onclick="addProcess()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
+                            <i class="fas fa-plus mr-1"></i> Add Process
+                        </button>
+                        <button onclick="removeProcess()" class="btn-action w-full p-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded text-sm">
+                            <i class="fas fa-minus mr-1"></i> Remove Process
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadScenario('normal')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>Functionare Normala
+                        </button>
+                        <button onclick="loadScenario('nearThrashing')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-exclamation-circle text-amber-500 mr-2"></i>Near Thrashing
+                        </button>
+                        <button onclick="loadScenario('thrashing')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-times-circle text-red-500 mr-2"></i>Complete Thrashing
+                        </button>
+                        <button onclick="loadScenario('gradual')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-chart-line text-blue-500 mr-2"></i>Gradual Increase
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-sm border border-red-200 p-4">
+                    <h3 class="text-sm font-semibold text-red-800 mb-3">
+                        <i class="fas fa-info-circle text-red-500 mr-2"></i>Ce este Thrashing?
+                    </h3>
+                    <div class="space-y-2 text-xs text-red-700">
+                        <p>Thrashing apare when sistemul petrece mai mult timp facand swap de pagini than executand processes utile.</p>
+                        <div class="p-2 bg-white/50 rounded">
+                            <strong>Cauze:</strong> Prea multe processes, memorie insuficienta, localitate slaba
+                        </div>
+                        <div class="p-2 bg-white/50 rounded">
+                            <strong>solutions:</strong> Reduce gradul de multiprogramare, add memorie, foloseste Working Set
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prevention Info -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>Prevenire Thrashing
+                    </h3>
+                    <div class="space-y-2 text-xs text-stone-600">
+                        <div class="p-2 bg-green-50 rounded-lg">
+                            <strong>Working Set Model:</strong> Aloca fiecarui proces paginile din WS
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <strong>Page Fault Frequency:</strong> Monitorizeaza rata de fault per proces
+                        </div>
+                        <div class="p-2 bg-amber-50 rounded-lg">
+                            <strong>Load Control:</strong> Suspenda processes when sistemul este supraincarcat
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let processes = [];
+        let totalMemory = 256;
+        let processSize = 40;
+        let isRunning = false;
+        let simulationInterval = null;
+        let mainChart = null;
+        
+        let stats = {
+            totalFaults: 0,
+            faultRate: 0,
+            cpuUtilization: 0,
+            pagingTime: 0,
+            throughput: 0
+        };
+        
+        let chartData = {
+            labels: [],
+            cpuData: [],
+            faultData: []
+        };
+
+        // ==================== Initialization ====================
+        function init() {
+            initChart();
+            updateProcessCount();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+                    datasets: [{
+                        label: 'CPU Utilization',
+                        data: generateCPUCurve(),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Page Faults/sec',
+                        data: generateFaultCurve(),
+                        borderColor: '#ef4444',
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    xMin: 6,
+                                    xMax: 6,
+                                    borderColor: '#f59e0b',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'Optim',
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Grad de Multiprogramare' }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'CPU %' },
+                            max: 100,
+                            min: 0
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Page Faults/sec' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateCPUCurve() {
+            // Classic thrashing curve: rises then drops sharply
+            return [10, 30, 50, 65, 78, 85, 88, 82, 65, 40, 25, 15, 10, 8, 5];
+        }
+
+        function generateFaultCurve() {
+            // Page faults increase exponentially
+            return [5, 10, 20, 35, 55, 80, 120, 200, 350, 600, 900, 1200, 1500, 1800, 2000];
+        }
+
+        // ==================== Process Management ====================
+        function updateProcessCount() {
+            const count = parseInt(document.getElementById('processSlider').value);
+            document.getElementById('processSliderValue').textContent = count;
+            
+            // Adjust processes array
+            while (processes.length < count) {
+                addProcessInternal();
+            }
+            while (processes.length > count) {
+                processes.pop();
+            }
+            
+            renderProcesses();
+            updateSystemState();
+        }
+
+        function addProcess() {
+            if (processes.length >= 20) return;
+            document.getElementById('processSlider').value = processes.length + 1;
+            addProcessInternal();
+            renderProcesses();
+            updateSystemState();
+            document.getElementById('processSliderValue').textContent = processes.length;
+        }
+
+        function addProcessInternal() {
+            const id = processes.length + 1;
+            const size = processSize + Math.floor((Math.random() - 0.5) * 20);
+            const wsSize = Math.floor(size * (0.3 + Math.random() * 0.4)); // 30-70% of size
+            
+            processes.push({
+                id,
+                name: `P${id}`,
+                size,
+                workingSet: wsSize,
+                allocated: 0,
+                faults: 0,
+                cpuTime: Math.random() * 100
+            });
+        }
+
+        function removeProcess() {
+            if (processes.length <= 1) return;
+            processes.pop();
+            document.getElementById('processSlider').value = processes.length;
+            document.getElementById('processSliderValue').textContent = processes.length;
+            renderProcesses();
+            updateSystemState();
+        }
+
+        function renderProcesses() {
+            const container = document.getElementById('processList');
+            document.getElementById('processCount').textContent = processes.length;
+            
+            if (processes.length === 0) {
+                container.innerHTML = '<div class="text-stone-400 text-sm text-center py-4">Niciun proces activ</div>';
+                return;
+            }
+            
+            const totalWS = processes.reduce((sum, p) => sum + p.workingSet, 0);
+            const isThrashing = totalWS > totalMemory * 0.9;
+            
+            container.innerHTML = processes.map(p => {
+                const memPercent = (p.allocated / p.workingSet) * 100;
+                const barColor = memPercent >= 80 ? 'bg-green-500' : memPercent >= 50 ? 'bg-amber-500' : 'bg-red-500';
+                const thrashingClass = isThrashing && memPercent < 60 ? 'thrashing' : '';
+                
+                return `
+                    <div class="process-bar ${thrashingClass} p-2 bg-stone-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-sm">${p.name}</span>
+                            <span class="text-xs text-stone-500">WS: ${p.workingSet}MB / Alloc: ${p.allocated}MB</span>
+                        </div>
+                        <div class="h-2 bg-stone-200 rounded-full overflow-hidden">
+                            <div class="${barColor} h-full transition-all duration-300" style="width: ${memPercent}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-stone-400 mt-1">
+                            <span>Faults: ${p.faults}</span>
+                            <span>CPU: ${p.cpuTime.toFixed(0)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== Simulation ====================
+        function startSimulation() {
+            isRunning = true;
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnStop').disabled = false;
+            
+            simulationInterval = setInterval(simulationStep, 500);
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            clearInterval(simulationInterval);
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnStop').disabled = true;
+        }
+
+        function simulationStep() {
+            totalMemory = parseInt(document.getElementById('totalMemory').value);
+            processSize = parseInt(document.getElementById('processSize').value);
+            
+            // Calculate total working set demand
+            const totalWSDemand = processes.reduce((sum, p) => sum + p.workingSet, 0);
+            const overcommit = totalWSDemand / totalMemory;
+            
+            // Allocate memory proportionally
+            let availableMem = totalMemory;
+            processes.forEach(p => {
+                if (overcommit <= 1) {
+                    p.allocated = p.workingSet;
+                } else {
+                    p.allocated = Math.floor(p.workingSet / overcommit);
+                }
+                availableMem -= p.allocated;
+            });
+            
+            // Calculate page faults based on allocation
+            let totalFaultsThisStep = 0;
+            processes.forEach(p => {
+                const deficitRatio = 1 - (p.allocated / p.workingSet);
+                const baseFaults = deficitRatio > 0.3 ? Math.floor(deficitRatio * 50 * Math.random()) : Math.floor(Math.random() * 3);
+                p.faults += baseFaults;
+                totalFaultsThisStep += baseFaults;
+            });
+            
+            stats.totalFaults += totalFaultsThisStep;
+            stats.faultRate = totalFaultsThisStep;
+            
+            // Calculate CPU utilization (inverse relationship with page faults at high load)
+            if (overcommit < 1) {
+                stats.cpuUtilization = Math.min(95, processes.length * 15 + Math.random() * 10);
+            } else if (overcommit < 1.3) {
+                stats.cpuUtilization = Math.max(40, 95 - (overcommit - 1) * 150);
+            } else {
+                stats.cpuUtilization = Math.max(5, 40 - (overcommit - 1.3) * 80);
+            }
+            
+            stats.pagingTime = Math.min(95, totalFaultsThisStep * 2);
+            stats.throughput = Math.floor(stats.cpuUtilization / 10);
+            
+            // Update process CPU times
+            processes.forEach(p => {
+                const allocationRatio = p.allocated / p.workingSet;
+                p.cpuTime = allocationRatio * 80 + Math.random() * 20;
+            });
+            
+            updateSystemState();
+            updateUI();
+            renderProcesses();
+        }
+
+        function updateSystemState() {
+            totalMemory = parseInt(document.getElementById('totalMemory').value);
+            const totalWSDemand = processes.reduce((sum, p) => sum + p.workingSet, 0);
+            const overcommit = totalWSDemand / totalMemory;
+            
+            const stateEl = document.getElementById('systemState');
+            const banner = document.getElementById('thrashingBanner');
+            
+            if (overcommit > 1.5) {
+                stateEl.textContent = 'THRASHING!';
+                stateEl.className = 'text-xl font-bold text-red-600';
+                banner.classList.remove('hidden');
+            } else if (overcommit > 1.2) {
+                stateEl.textContent = 'Critic';
+                stateEl.className = 'text-xl font-bold text-amber-600';
+                banner.classList.add('hidden');
+            } else if (overcommit > 1) {
+                stateEl.textContent = 'Supraincarcat';
+                stateEl.className = 'text-xl font-bold text-amber-500';
+                banner.classList.add('hidden');
+            } else {
+                stateEl.textContent = 'Normal';
+                stateEl.className = 'text-xl font-bold text-green-600';
+                banner.classList.add('hidden');
+            }
+        }
+
+        function updateUI() {
+            // CPU gauge
+            const cpuCircle = document.getElementById('cpuCircle');
+            const circumference = 2 * Math.PI * 40;
+            const offset = circumference - (stats.cpuUtilization / 100) * circumference;
+            cpuCircle.style.strokeDashoffset = offset;
+            
+            // Change color based on utilization
+            if (stats.cpuUtilization > 80) {
+                cpuCircle.style.stroke = '#22c55e';
+            } else if (stats.cpuUtilization > 50) {
+                cpuCircle.style.stroke = '#3b82f6';
+            } else if (stats.cpuUtilization > 20) {
+                cpuCircle.style.stroke = '#f59e0b';
+            } else {
+                cpuCircle.style.stroke = '#ef4444';
+            }
+            
+            document.getElementById('cpuValue').textContent = stats.cpuUtilization.toFixed(0) + '%';
+            
+            // Memory bar
+            const usedMem = processes.reduce((sum, p) => sum + p.allocated, 0);
+            document.getElementById('memUsed').textContent = usedMem + ' MB';
+            document.getElementById('memBar').style.width = (usedMem / totalMemory * 100) + '%';
+            document.getElementById('frameCount').textContent = Math.floor(usedMem / 4); // Assuming 4MB frames
+            document.getElementById('totalMem').textContent = totalMemory + ' MB';
+            
+            // Stats
+            document.getElementById('totalFaults').textContent = stats.totalFaults;
+            document.getElementById('faultRate').textContent = stats.faultRate;
+            document.getElementById('pagingTime').textContent = stats.pagingTime.toFixed(0) + '%';
+            document.getElementById('throughput').textContent = stats.throughput;
+            
+            // Highlight current position on chart
+            const processCount = processes.length;
+            updateChartMarker(processCount);
+        }
+
+        function updateChartMarker(processCount) {
+            // This would update a vertical line on the chart if we had annotation plugin
+            // For now, we'll just update the chart datasets to show current position
+        }
+
+        function hideThrashingBanner() {
+            document.getElementById('thrashingBanner').classList.add('hidden');
+        }
+
+        // ==================== Scenarios ====================
+        function loadScenario(type) {
+            stopSimulation();
+            stats = { totalFaults: 0, faultRate: 0, cpuUtilization: 0, pagingTime: 0, throughput: 0 };
+            
+            switch(type) {
+                case 'normal':
+                    document.getElementById('processSlider').value = 4;
+                    document.getElementById('totalMemory').value = 256;
+                    document.getElementById('processSize').value = 40;
+                    break;
+                case 'nearThrashing':
+                    document.getElementById('processSlider').value = 8;
+                    document.getElementById('totalMemory').value = 256;
+                    document.getElementById('processSize').value = 35;
+                    break;
+                case 'thrashing':
+                    document.getElementById('processSlider').value = 15;
+                    document.getElementById('totalMemory').value = 256;
+                    document.getElementById('processSize').value = 40;
+                    break;
+                case 'gradual':
+                    document.getElementById('processSlider').value = 1;
+                    document.getElementById('totalMemory').value = 256;
+                    document.getElementById('processSize').value = 30;
+                    // Start simulation and gradually add processes
+                    updateProcessCount();
+                    startSimulation();
+                    gradualIncrease();
+                    return;
+            }
+            
+            updateProcessCount();
+            startSimulation();
+        }
+
+        async function gradualIncrease() {
+            while (isRunning && processes.length < 20) {
+                await sleep(2000);
+                if (isRunning) {
+                    addProcess();
+                }
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

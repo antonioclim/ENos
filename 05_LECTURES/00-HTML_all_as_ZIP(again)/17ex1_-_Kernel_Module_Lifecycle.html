@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kernel Module Lifecycle | Lecture 17 - Kernel Programming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #05080f;
+            --bg-secondary: #0a1018;
+            --bg-tertiary: #101820;
+            --user-space: #3b82f6;
+            --kernel-space: #ef4444;
+            --module-color: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #8b5cf6;
+        }
+        
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                linear-gradient(to bottom, rgba(239, 68, 68, 0.03) 0%, transparent 30%),
+                linear-gradient(to top, rgba(59, 130, 246, 0.03) 0%, transparent 30%);
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(10, 16, 24, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .user-space-box {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .kernel-space-box {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.02) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .syscall-barrier {
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(245, 158, 11, 0.5) 0px,
+                rgba(245, 158, 11, 0.5) 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            position: relative;
+        }
+        
+        .syscall-barrier::before {
+            content: 'SYSTEM CALL INTERFACE';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-primary);
+            padding: 4px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent-yellow);
+            letter-spacing: 2px;
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            border-radius: 4px;
+        }
+        
+        .module-card {
+            transition: all 0.3s ease;
+        }
+        
+        .module-card.loading {
+            animation: moduleLoad 0.5s ease-out;
+        }
+        
+        .module-card.active {
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            border-color: var(--module-color);
+        }
+        
+        .module-card.removing {
+            animation: moduleRemove 0.5s ease-in forwards;
+        }
+        
+        @keyframes moduleLoad {
+            0% { 
+                opacity: 0;
+                transform: translateY(-20px) scale(0.9);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes moduleRemove {
+            0% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+        }
+        
+        .step-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+        }
+        
+        .step-btn:hover::before {
+            animation: shimmer 0.6s ease;
+        }
+        
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        
+        .step-btn.completed {
+            background: rgba(16, 185, 129, 0.2) !important;
+            border-color: var(--module-color) !important;
+        }
+        
+        .step-btn.current {
+            animation: pulse-current 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-current {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        }
+        
+        .code-editor {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: #161b22;
+            padding: 8px 16px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .code-content {
+            padding: 16px;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            display: block;
+            padding: 2px 0;
+            transition: background 0.2s ease;
+        }
+        
+        .code-line.highlight {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid var(--user-space);
+            padding-left: 8px;
+            margin-left: -8px;
+        }
+        
+        .dmesg-viewer {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .dmesg-line {
+            padding: 2px 8px;
+            border-bottom: 1px solid #111;
+        }
+        
+        .dmesg-line:hover {
+            background: #111;
+        }
+        
+        .flow-arrow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: arrowPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .proc-entry {
+            transition: all 0.3s ease;
+        }
+        
+        .proc-entry.visible {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--module-color);
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                        <i class="fas fa-microchip text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Kernel Module Lifecycle</h1>
+                        <p class="text-sm text-gray-400">Lecture 17 • OS Kernel-level Programming</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="btnReset" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button id="btnAutoDemo" class="px-5 py-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-400 hover:to-amber-400 rounded-lg transition flex items-center gap-2 font-semibold">
+                        <i class="fas fa-play"></i> Auto Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Main Visualization -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left: Space Diagram -->
+            <div class="col-span-7">
+                <!-- Utilizator Space -->
+                <div class="user-space-box rounded-t-2xl p-5">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-user text-blue-400"></i>
+                        <span class="font-bold text-blue-400 uppercase tracking-wider text-sm">Utilizator Space</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <!-- Terminal -->
+                        <div class="glass-panel rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-terminal text-gray-400"></i>
+                                <span class="text-sm font-medium">Terminal</span>
+                            </div>
+                            <div class="bg-black rounded-lg p-2 mono text-xs">
+                                <div id="terminalOutput" class="text-green-400">
+                                    <span class="text-gray-500">$</span> _
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- insmod/rmmod -->
+                        <div class="glass-panel rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-cogs text-amber-400"></i>
+                                <span class="text-sm font-medium">Module Tools</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div id="toolInsmod" class="p-2 bg-gray-800 rounded-lg text-xs flex items-center gap-2 opacity-50">
+                                    <i class="fas fa-download text-green-400"></i>
+                                    <span class="mono">insmod</span>
+                                </div>
+                                <div id="toolRmmod" class="p-2 bg-gray-800 rounded-lg text-xs flex items-center gap-2 opacity-50">
+                                    <i class="fas fa-upload text-red-400"></i>
+                                    <span class="mono">rmmod</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Application -->
+                        <div class="glass-panel rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-window-maximize text-purple-400"></i>
+                                <span class="text-sm font-medium">Application</span>
+                            </div>
+                            <div id="appStatus" class="p-2 bg-gray-800 rounded-lg text-xs text-gray-500">
+                                <i class="fas fa-circle text-gray-600 mr-1"></i>
+                                Waiting for /dev/mydev
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Call Barrier -->
+                <div class="syscall-barrier my-0"></div>
+                
+                <!-- Kernel Space -->
+                <div class="kernel-space-box rounded-b-2xl p-5">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-shield-alt text-red-400"></i>
+                        <span class="font-bold text-red-400 uppercase tracking-wider text-sm">Kernel Space</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Kernel Core -->
+                        <div class="glass-panel rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-cube text-red-400"></i>
+                                <span class="text-sm font-medium">Kernel Core</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="p-2 bg-red-500/10 rounded-lg text-center border border-red-500/30">
+                                    <i class="fas fa-folder text-red-400 text-xs"></i>
+                                    <p class="text-xs mt-1">VFS</p>
+                                </div>
+                                <div class="p-2 bg-red-500/10 rounded-lg text-center border border-red-500/30">
+                                    <i class="fas fa-clock text-red-400 text-xs"></i>
+                                    <p class="text-xs mt-1">Sched</p>
+                                </div>
+                                <div class="p-2 bg-red-500/10 rounded-lg text-center border border-red-500/30">
+                                    <i class="fas fa-memory text-red-400 text-xs"></i>
+                                    <p class="text-xs mt-1">MM</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loadable Modules -->
+                        <div class="glass-panel rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-puzzle-piece text-emerald-400"></i>
+                                <span class="text-sm font-medium">Loadable Modules</span>
+                            </div>
+                            <div id="modulesContainer" class="space-y-2">
+                                <div class="p-2 bg-gray-700/50 rounded-lg text-xs flex items-center justify-between">
+                                    <span><i class="fas fa-hdd text-gray-400 mr-2"></i>ext4</span>
+                                    <span class="text-gray-500">built-in</span>
+                                </div>
+                                <div class="p-2 bg-gray-700/50 rounded-lg text-xs flex items-center justify-between">
+                                    <span><i class="fas fa-video text-gray-400 mr-2"></i>nvidia</span>
+                                    <span class="text-gray-500">loaded</span>
+                                </div>
+                                <div id="myModuleSlot" class="p-2 bg-gray-800/50 rounded-lg text-xs border border-dashed border-gray-600 text-gray-500 text-center">
+                                    <i class="fas fa-plus mr-1"></i> mymodule slot
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- /proc and /sys entries -->
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div class="proc-entry glass-panel rounded-xl p-3 border border-transparent" id="procModules">
+                            <p class="text-xs text-gray-400 mb-2">/proc/modules</p>
+                            <div id="procModulesContent" class="mono text-xs text-gray-500">
+                                ext4 4096 0<br>
+                                nvidia 12288 2
+                            </div>
+                        </div>
+                        <div class="proc-entry glass-panel rounded-xl p-3 border border-transparent" id="sysModule">
+                            <p class="text-xs text-gray-400 mb-2">/sys/module/</p>
+                            <div id="sysModuleContent" class="mono text-xs text-gray-500">
+                                ext4/<br>
+                                nvidia/
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Controls & Code -->
+            <div class="col-span-5">
+                <!-- Lifecycle Steps -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-list-ol text-amber-400"></i>
+                        Module Lifecycle Steps
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <button id="stepWrite" class="step-btn w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-left transition border border-gray-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">1</div>
+                                <div>
+                                    <p class="font-medium">Write Module Code</p>
+                                    <p class="text-xs text-gray-500">Create mymodule.c with init/exit</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button id="stepCompile" class="step-btn w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-left transition border border-gray-700 opacity-50" disabled>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">2</div>
+                                <div>
+                                    <p class="font-medium">Compile (make)</p>
+                                    <p class="text-xs text-gray-500">.c → .ko (Kernel Object)</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button id="stepInsmod" class="step-btn w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-left transition border border-gray-700 opacity-50" disabled>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 font-bold">3</div>
+                                <div>
+                                    <p class="font-medium">insmod (Insert Module)</p>
+                                    <p class="text-xs text-gray-500">Load into kernel, call init()</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button id="stepUse" class="step-btn w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-left transition border border-gray-700 opacity-50" disabled>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">4</div>
+                                <div>
+                                    <p class="font-medium">Module in Operation</p>
+                                    <p class="text-xs text-gray-500">Visible in lsmod, /proc/modules</p>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <button id="stepRmmod" class="step-btn w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-left transition border border-gray-700 opacity-50" disabled>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-400 font-bold">5</div>
+                                <div>
+                                    <p class="font-medium">rmmod (Remove Module)</p>
+                                    <p class="text-xs text-gray-500">Call exit(), free resources</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Code Editor -->
+                <div class="code-editor mb-6">
+                    <div class="code-header">
+                        <div class="code-dot bg-red-500"></div>
+                        <div class="code-dot bg-yellow-500"></div>
+                        <div class="code-dot bg-green-500"></div>
+                        <span class="text-xs text-gray-400 ml-2">mymodule.c</span>
+                    </div>
+                    <div class="code-content mono text-gray-300 scroll-area" id="codeContent">
+                        <span class="code-line text-gray-500">#include &lt;linux/module.h&gt;</span>
+                        <span class="code-line text-gray-500">#include &lt;linux/kernel.h&gt;</span>
+                        <span class="code-line"></span>
+                        <span class="code-line" id="codeLine1"><span class="text-purple-400">static int</span> <span class="text-blue-400">__init</span> my_init(<span class="text-purple-400">void</span>) {</span>
+                        <span class="code-line" id="codeLine2">    printk(KERN_INFO <span class="text-green-400">"Module loaded!\n"</span>);</span>
+                        <span class="code-line" id="codeLine3">    <span class="text-purple-400">return</span> <span class="text-amber-400">0</span>;  <span class="text-gray-500">// 0 = success</span></span>
+                        <span class="code-line" id="codeLine4">}</span>
+                        <span class="code-line"></span>
+                        <span class="code-line" id="codeLine5"><span class="text-purple-400">static void</span> <span class="text-blue-400">__exit</span> my_exit(<span class="text-purple-400">void</span>) {</span>
+                        <span class="code-line" id="codeLine6">    printk(KERN_INFO <span class="text-green-400">"Module unloaded!\n"</span>);</span>
+                        <span class="code-line" id="codeLine7">}</span>
+                        <span class="code-line"></span>
+                        <span class="code-line"><span class="text-blue-400">module_init</span>(my_init);</span>
+                        <span class="code-line"><span class="text-blue-400">module_exit</span>(my_exit);</span>
+                        <span class="code-line"></span>
+                        <span class="code-line">MODULE_LICENSE(<span class="text-green-400">"GPL"</span>);</span>
+                        <span class="code-line">MODULE_AUTHOR(<span class="text-green-400">"student"</span>);</span>
+                    </div>
+                </div>
+                
+                <!-- dmesg Viewer -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-scroll text-green-400"></i>
+                        dmesg (Kernel Log)
+                    </h3>
+                    <div class="dmesg-viewer scroll-area" id="dmesgViewer">
+                        <div class="dmesg-line text-gray-500">
+                            <span class="text-gray-600">[    0.000000]</span> Linux version 5.15.0...
+                        </div>
+                        <div class="dmesg-line text-gray-500">
+                            <span class="text-gray-600">[    1.234567]</span> systemd[1]: Started...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Eroare Scenarios -->
+        <div class="glass-panel rounded-2xl p-5 mt-6">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-amber-400"></i>
+                Eroare Scenarios
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <button id="errorInitFail" class="p-4 bg-red-500/10 hover:bg-red-500/20 rounded-xl border border-red-500/30 text-left transition">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-times-circle text-red-400"></i>
+                        <span class="font-semibold text-red-400">Init Failure</span>
+                    </div>
+                    <p class="text-xs text-gray-400">init() returns -EINVAL, module NOT loaded</p>
+                </button>
+                
+                <button id="errorInUse" class="p-4 bg-amber-500/10 hover:bg-amber-500/20 rounded-xl border border-amber-500/30 text-left transition">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-lock text-amber-400"></i>
+                        <span class="font-semibold text-amber-400">Module in Use</span>
+                    </div>
+                    <p class="text-xs text-gray-400">rmmod esueaza when modulul e folosit</p>
+                </button>
+                
+                <button id="errorDeps" class="p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl border border-purple-500/30 text-left transition">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-project-diagram text-purple-400"></i>
+                        <span class="font-semibold text-purple-400">Missing Dependency</span>
+                    </div>
+                    <p class="text-xs text-gray-400">insmod esueaza, foloseste modprobe</p>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 p-3 text-xs text-gray-500">
+        By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            currentStep: 0,
+            moduleLoaded: false,
+            moduleInUse: false,
+            isAutoDemo: false
+        };
+
+        // DOM Elements
+        const elements = {
+            terminalOutput: document.getElementById('terminalOutput'),
+            toolInsmod: document.getElementById('toolInsmod'),
+            toolRmmod: document.getElementById('toolRmmod'),
+            appStatus: document.getElementById('appStatus'),
+            myModuleSlot: document.getElementById('myModuleSlot'),
+            procModules: document.getElementById('procModules'),
+            procModulesContent: document.getElementById('procModulesContent'),
+            sysModule: document.getElementById('sysModule'),
+            sysModuleContent: document.getElementById('sysModuleContent'),
+            dmesgViewer: document.getElementById('dmesgViewer'),
+            steps: {
+                write: document.getElementById('stepWrite'),
+                compile: document.getElementById('stepCompile'),
+                insmod: document.getElementById('stepInsmod'),
+                use: document.getElementById('stepUse'),
+                rmmod: document.getElementById('stepRmmod')
+            },
+            codeLines: {
+                1: document.getElementById('codeLine1'),
+                2: document.getElementById('codeLine2'),
+                3: document.getElementById('codeLine3'),
+                4: document.getElementById('codeLine4'),
+                5: document.getElementById('codeLine5'),
+                6: document.getElementById('codeLine6'),
+                7: document.getElementById('codeLine7')
+            },
+            btnReset: document.getElementById('btnReset'),
+            btnAutoDemo: document.getElementById('btnAutoDemo'),
+            errorInitFail: document.getElementById('errorInitFail'),
+            errorInUse: document.getElementById('errorInUse'),
+            errorDeps: document.getElementById('errorDeps')
+        };
+
+        let dmesgCounter = 12345;
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function addDmesg(message, type = 'info') {
+            dmesgCounter += Math.random() * 0.01;
+            const colors = {
+                info: 'text-gray-300',
+                success: 'text-green-400',
+                error: 'text-red-400',
+                warning: 'text-amber-400'
+            };
+            
+            const div = document.createElement('div');
+            div.className = `dmesg-line ${colors[type]}`;
+            div.innerHTML = `<span class="text-gray-600">[${dmesgCounter.toFixed(6)}]</span> ${message}`;
+            elements.dmesgViewer.appendChild(div);
+            elements.dmesgViewer.scrollTop = elements.dmesgViewer.scrollHeight;
+        }
+
+        function setTerminal(text) {
+            elements.terminalOutput.innerHTML = `<span class="text-gray-500">$</span> ${text}`;
+        }
+
+        function highlightCode(lines) {
+            Object.values(elements.codeLines).forEach(line => {
+                if (line) line.classList.remove('highlight');
+            });
+            lines.forEach(num => {
+                if (elements.codeLines[num]) {
+                    elements.codeLines[num].classList.add('highlight');
+                }
+            });
+        }
+
+        function updateStepUI(step, status) {
+            const btn = elements.steps[step];
+            if (!btn) return;
+            
+            btn.classList.remove('completed', 'current', 'opacity-50');
+            btn.disabled = false;
+            
+            if (status === 'completed') {
+                btn.classList.add('completed');
+            } else if (status === 'current') {
+                btn.classList.add('current');
+            } else if (status === 'disabled') {
+                btn.classList.add('opacity-50');
+                btn.disabled = true;
+            }
+        }
+
+        // Step 1: Write Module Code
+        async function stepWrite() {
+            if (state.currentStep !== 0) return;
+            
+            setTerminal('vim mymodule.c');
+            highlightCode([1, 2, 3, 4, 5, 6, 7]);
+            
+            await sleep(500);
+            
+            addDmesg('mymodule: source file created', 'info');
+            
+            state.currentStep = 1;
+            updateStepUI('write', 'completed');
+            updateStepUI('compile', 'current');
+        }
+
+        // Step 2: Compile
+        async function stepCompile() {
+            if (state.currentStep !== 1) return;
+            
+            setTerminal('make');
+            highlightCode([]);
+            
+            await sleep(300);
+            addDmesg('Building modules, stage 2...', 'info');
+            await sleep(300);
+            addDmesg('CC [M] mymodule.o', 'info');
+            await sleep(300);
+            addDmesg('LD [M] mymodule.ko', 'success');
+            
+            setTerminal('ls mymodule.ko<br><span class="text-green-400">mymodule.ko</span>');
+            
+            state.currentStep = 2;
+            updateStepUI('compile', 'completed');
+            updateStepUI('insmod', 'current');
+        }
+
+        // Step 3: insmod
+        async function stepInsmod() {
+            if (state.currentStep !== 2) return;
+            
+            setTerminal('sudo insmod mymodule.ko');
+            elements.toolInsmod.classList.remove('opacity-50');
+            elements.toolInsmod.classList.add('bg-green-500/20');
+            
+            highlightCode([1, 2, 3, 4]);
+            
+            await sleep(300);
+            addDmesg('mymodule: loading module', 'info');
+            await sleep(200);
+            addDmesg('mymodule: allocating memory...', 'info');
+            await sleep(200);
+            addDmesg('mymodule: calling my_init()', 'info');
+            await sleep(300);
+            addDmesg('mymodule: Module loaded!', 'success');
+            
+            // Show module in kernel space
+            elements.myModuleSlot.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span><i class="fas fa-puzzle-piece text-emerald-400 mr-2"></i>mymodule</span>
+                    <span class="text-emerald-400">active</span>
+                </div>
+            `;
+            elements.myModuleSlot.className = 'module-card p-2 bg-emerald-500/10 rounded-lg text-xs border border-emerald-500/50 loading';
+            
+            // Update /proc/modules
+            elements.procModulesContent.innerHTML += '<br><span class="text-emerald-400">mymodule 4096 0</span>';
+            elements.procModules.classList.add('visible');
+            
+            // Update /sys/module
+            elements.sysModuleContent.innerHTML += '<br><span class="text-emerald-400">mymodule/</span>';
+            elements.sysModule.classList.add('visible');
+            
+            elements.toolInsmod.classList.remove('bg-green-500/20');
+            
+            state.moduleLoaded = true;
+            state.currentStep = 3;
+            updateStepUI('insmod', 'completed');
+            updateStepUI('use', 'current');
+        }
+
+        // Step 4: Module in Use
+        async function stepUse() {
+            if (state.currentStep !== 3) return;
+            
+            setTerminal('lsmod | grep mymodule<br><span class="text-cyan-400">mymodule    4096  0</span>');
+            
+            await sleep(300);
+            addDmesg('mymodule: device registered at /dev/mydev', 'info');
+            
+            elements.appStatus.innerHTML = `
+                <i class="fas fa-circle text-green-400 mr-1"></i>
+                Connected to /dev/mydev
+            `;
+            elements.appStatus.className = 'p-2 bg-green-500/10 rounded-lg text-xs text-green-400 border border-green-500/30';
+            
+            elements.myModuleSlot.classList.remove('loading');
+            elements.myModuleSlot.classList.add('active');
+            
+            state.currentStep = 4;
+            updateStepUI('use', 'completed');
+            updateStepUI('rmmod', 'current');
+        }
+
+        // Step 5: rmmod
+        async function stepRmmod() {
+            if (state.currentStep !== 4) return;
+            
+            setTerminal('sudo rmmod mymodule');
+            elements.toolRmmod.classList.remove('opacity-50');
+            elements.toolRmmod.classList.add('bg-red-500/20');
+            
+            highlightCode([5, 6, 7]);
+            
+            await sleep(300);
+            addDmesg('mymodule: checking usage count...', 'info');
+            await sleep(200);
+            addDmesg('mymodule: calling my_exit()', 'info');
+            await sleep(300);
+            addDmesg('mymodule: Module unloaded!', 'success');
+            await sleep(200);
+            addDmesg('mymodule: releasing memory...', 'info');
+            
+            // Remove module visualization
+            elements.myModuleSlot.classList.add('removing');
+            await sleep(500);
+            elements.myModuleSlot.innerHTML = '<i class="fas fa-plus mr-1"></i> mymodule slot';
+            elements.myModuleSlot.className = 'p-2 bg-gray-800/50 rounded-lg text-xs border border-dashed border-gray-600 text-gray-500 text-center';
+            
+            // Update /proc and /sys
+            elements.procModulesContent.innerHTML = 'ext4 4096 0<br>nvidia 12288 2';
+            elements.procModules.classList.remove('visible');
+            
+            elements.sysModuleContent.innerHTML = 'ext4/<br>nvidia/';
+            elements.sysModule.classList.remove('visible');
+            
+            // Update app status
+            elements.appStatus.innerHTML = `
+                <i class="fas fa-circle text-gray-600 mr-1"></i>
+                Waiting for /dev/mydev
+            `;
+            elements.appStatus.className = 'p-2 bg-gray-800 rounded-lg text-xs text-gray-500';
+            
+            elements.toolRmmod.classList.remove('bg-red-500/20');
+            highlightCode([]);
+            
+            state.moduleLoaded = false;
+            state.currentStep = 5;
+            updateStepUI('rmmod', 'completed');
+            
+            setTerminal('Module lifecycle complete! ✓');
+        }
+
+        // Eroare Scenarios
+        async function errorInitFail() {
+            resetAll();
+            await sleep(300);
+            
+            setTerminal('sudo insmod broken_module.ko');
+            addDmesg('broken_module: loading module', 'info');
+            await sleep(300);
+            addDmesg('broken_module: calling init()', 'info');
+            await sleep(300);
+            addDmesg('broken_module: init() returned -EINVAL', 'error');
+            addDmesg('broken_module: insmod failed, module NOT loaded', 'error');
+            
+            setTerminal('insmod: ERROR: could not insert module: Invalid argument');
+        }
+
+        async function errorInUse() {
+            if (!state.moduleLoaded) {
+                addDmesg('Demo requires module to be loaded first', 'warning');
+                return;
+            }
+            
+            state.moduleInUse = true;
+            elements.myModuleSlot.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span><i class="fas fa-puzzle-piece text-emerald-400 mr-2"></i>mymodule</span>
+                    <span class="text-amber-400">in use (2)</span>
+                </div>
+            `;
+            
+            setTerminal('sudo rmmod mymodule');
+            await sleep(300);
+            addDmesg('mymodule: checking usage count...', 'info');
+            await sleep(300);
+            addDmesg('mymodule: ERROR: Module is in use (refcount=2)', 'error');
+            
+            setTerminal('rmmod: ERROR: Module mymodule is in use');
+        }
+
+        async function errorDeps() {
+            resetAll();
+            await sleep(300);
+            
+            setTerminal('sudo insmod dependent_module.ko');
+            addDmesg('dependent_module: loading module', 'info');
+            await sleep(300);
+            addDmesg('dependent_module: ERROR: Unknown symbol some_function', 'error');
+            addDmesg('dependent_module: depends on: base_module', 'warning');
+            
+            setTerminal('insmod: ERROR: could not insert module: Unknown symbol');
+            await sleep(500);
+            
+            addDmesg('Hint: Use "modprobe" instead - it resolves dependencies automatically', 'info');
+            setTerminal('sudo modprobe dependent_module<br><span class="text-green-400">✓ Module and dependencies loaded</span>');
+        }
+
+        async function autoDemo() {
+            if (state.isAutoDemo) return;
+            state.isAutoDemo = true;
+            
+            elements.btnAutoDemo.disabled = true;
+            elements.btnAutoDemo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            
+            resetAll();
+            await sleep(500);
+            
+            await stepWrite();
+            await sleep(800);
+            await stepCompile();
+            await sleep(800);
+            await stepInsmod();
+            await sleep(1000);
+            await stepUse();
+            await sleep(1000);
+            await stepRmmod();
+            
+            state.isAutoDemo = false;
+            elements.btnAutoDemo.disabled = false;
+            elements.btnAutoDemo.innerHTML = '<i class="fas fa-play"></i> Auto Demo';
+        }
+
+        function resetAll() {
+            state.currentStep = 0;
+            state.moduleLoaded = false;
+            state.moduleInUse = false;
+            
+            // Reset terminal
+            setTerminal('_');
+            
+            // Reset tools
+            elements.toolInsmod.className = 'p-2 bg-gray-800 rounded-lg text-xs flex items-center gap-2 opacity-50';
+            elements.toolRmmod.className = 'p-2 bg-gray-800 rounded-lg text-xs flex items-center gap-2 opacity-50';
+            
+            // Reset app status
+            elements.appStatus.innerHTML = '<i class="fas fa-circle text-gray-600 mr-1"></i> Waiting for /dev/mydev';
+            elements.appStatus.className = 'p-2 bg-gray-800 rounded-lg text-xs text-gray-500';
+            
+            // Reset module slot
+            elements.myModuleSlot.innerHTML = '<i class="fas fa-plus mr-1"></i> mymodule slot';
+            elements.myModuleSlot.className = 'p-2 bg-gray-800/50 rounded-lg text-xs border border-dashed border-gray-600 text-gray-500 text-center';
+            
+            // Reset /proc and /sys
+            elements.procModulesContent.innerHTML = 'ext4 4096 0<br>nvidia 12288 2';
+            elements.procModules.classList.remove('visible');
+            elements.sysModuleContent.innerHTML = 'ext4/<br>nvidia/';
+            elements.sysModule.classList.remove('visible');
+            
+            // Reset steps
+            updateStepUI('write', 'current');
+            updateStepUI('compile', 'disabled');
+            updateStepUI('insmod', 'disabled');
+            updateStepUI('use', 'disabled');
+            updateStepUI('rmmod', 'disabled');
+            
+            // Reset code highlight
+            highlightCode([]);
+            
+            // Clear custom dmesg
+            elements.dmesgViewer.innerHTML = `
+                <div class="dmesg-line text-gray-500">
+                    <span class="text-gray-600">[    0.000000]</span> Linux version 5.15.0...
+                </div>
+                <div class="dmesg-line text-gray-500">
+                    <span class="text-gray-600">[    1.234567]</span> systemd[1]: Started...
+                </div>
+            `;
+            dmesgCounter = 12345;
+        }
+
+        // Event Listeners
+        elements.steps.write.addEventListener('click', stepWrite);
+        elements.steps.compile.addEventListener('click', stepCompile);
+        elements.steps.insmod.addEventListener('click', stepInsmod);
+        elements.steps.use.addEventListener('click', stepUse);
+        elements.steps.rmmod.addEventListener('click', stepRmmod);
+        
+        elements.btnReset.addEventListener('click', resetAll);
+        elements.btnAutoDemo.addEventListener('click', autoDemo);
+        
+        elements.errorInitFail.addEventListener('click', errorInitFail);
+        elements.errorInUse.addEventListener('click', errorInUse);
+        elements.errorDeps.addEventListener('click', errorDeps);
+
+        // Initialize
+        updateStepUI('write', 'current');
+    </script>
+</body>
+</html>

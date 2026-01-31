@@ -1,0 +1,856 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator Memory Partitioning | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .memory-block {
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .memory-block.allocating {
+            animation: allocatePulse 0.5s ease;
+        }
+        .memory-block.deallocating {
+            animation: deallocateFade 0.5s ease;
+        }
+        .memory-block.compacting {
+            animation: compactSlide 0.8s ease;
+        }
+        
+        @keyframes allocatePulse {
+            0% { transform: scaleX(0); opacity: 0; }
+            50% { transform: scaleX(1.05); }
+            100% { transform: scaleX(1); opacity: 1; }
+        }
+        @keyframes deallocateFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes compactSlide {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .fragmentation-indicator {
+            animation: fragPulse 2s ease-in-out infinite;
+        }
+        @keyframes fragPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .hole-pattern {
+            background: repeating-linear-gradient(
+                45deg,
+                #e5e7eb,
+                #e5e7eb 5px,
+                #f3f4f6 5px,
+                #f3f4f6 10px
+            );
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: #1c1917;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            z-index: 100;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .memory-block:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <i class="fas fa-memory text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Simulator Memory Partitioning</h1>
+                    <p class="text-xs text-stone-500">Alocare Contigua</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel: Memory Visualization -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Memory Map -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-microchip text-blue-500"></i>
+                            Harta Memoriei
+                        </h2>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span>Total: <strong id="totalMemory">1024</strong> KB</span>
+                            <span>Folosit: <strong id="usedMemory">0</strong> KB</span>
+                            <span>Free: <strong id="freeMemory">1024</strong> KB</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <!-- Address ruler -->
+                        <div class="w-16 flex flex-col text-xs mono text-stone-500">
+                            <div id="addressRuler" class="flex-1 flex flex-col justify-between">
+                                <!-- Addresses will be rendered here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Memory visualization -->
+                        <div class="flex-1">
+                            <div id="memoryMap" class="relative border-2 border-stone-300 rounded-lg overflow-hidden" style="height: 400px;">
+                                <!-- Memory blocks will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="mt-4 flex flex-wrap gap-4 text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-4 bg-stone-800 rounded"></div>
+                            <span>OS Kernel</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-4 bg-blue-500 rounded"></div>
+                            <span>Proces Alocat</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-4 hole-pattern rounded border border-stone-300"></div>
+                            <span>Hole (Hole)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-4 bg-amber-200 rounded border border-amber-400"></div>
+                            <span>Fragmentare Interna</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fragmentation Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-stone-500">Fragmentare Externa</span>
+                            <i class="fas fa-puzzle-piece text-red-500"></i>
+                        </div>
+                        <div id="externalFrag" class="text-2xl font-bold text-red-600">0%</div>
+                        <div class="text-xs text-stone-500 mt-1">
+                            <span id="holeCount">0</span> gauri, <span id="totalHoleSize">0</span> KB total
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-stone-500">Fragmentare Interna</span>
+                            <i class="fas fa-expand text-amber-500"></i>
+                        </div>
+                        <div id="internalFrag" class="text-2xl font-bold text-amber-600">0 KB</div>
+                        <div class="text-xs text-stone-500 mt-1">Spatiu neutilizat in partitii</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-stone-500">Utilizare Memorie</span>
+                            <i class="fas fa-chart-pie text-green-500"></i>
+                        </div>
+                        <div id="memoryUtilization" class="text-2xl font-bold text-green-600">0%</div>
+                        <div class="mt-2 h-2 bg-stone-200 rounded-full overflow-hidden">
+                            <div id="utilizationBar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Queue -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-list text-purple-500"></i>
+                        Procese in Memorie
+                    </h3>
+                    <div id="processList" class="space-y-2">
+                        <div class="text-sm text-stone-400 italic">Niciun proces loaded</div>
+                    </div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
+                    <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal"></i> Event Log
+                    </h3>
+                    <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
+                        <div class="text-stone-500">// Simulator gata. Alege un algoritm and add procese.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Partitioning Mode -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-th-large text-blue-500 mr-2"></i>Mod Partitionare
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 p-2 rounded border border-stone-200 cursor-pointer hover:bg-stone-50">
+                            <input type="radio" name="partitionMode" value="dynamic" checked onchange="setPartitionMode('dynamic')" class="text-blue-500">
+                            <div>
+                                <span class="font-medium text-sm">Dinamica (Variable)</span>
+                                <p class="text-xs text-stone-500">Partitii create la cerere</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded border border-stone-200 cursor-pointer hover:bg-stone-50">
+                            <input type="radio" name="partitionMode" value="fixed" onchange="setPartitionMode('fixed')" class="text-blue-500">
+                            <div>
+                                <span class="font-medium text-sm">Fixa</span>
+                                <p class="text-xs text-stone-500">Partitii predefinite</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Algorithm Selection -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cogs text-green-500 mr-2"></i>Algoritm Plasare
+                    </h3>
+                    <select id="placementAlgorithm" class="w-full p-3 border border-stone-300 rounded-lg text-sm">
+                        <option value="first-fit">First Fit</option>
+                        <option value="best-fit">Best Fit</option>
+                        <option value="worst-fit">Worst Fit</option>
+                        <option value="next-fit">Next Fit</option>
+                    </select>
+                    <div id="algorithmDesc" class="mt-2 text-xs text-stone-500 p-2 bg-stone-50 rounded">
+                        <strong>First Fit:</strong> Aloca in first hole suficient de mare.
+                    </div>
+                </div>
+
+                <!-- Memory Configuration -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-sliders-h text-amber-500 mr-2"></i>configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Memorie Totala (KB)</label>
+                            <input type="number" id="totalMemoryInput" value="1024" min="256" max="4096" step="128" class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">OS Kernel (KB)</label>
+                            <input type="number" id="osSize" value="128" min="64" max="512" step="64" class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <button onclick="initializeMemory()" class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition-colors">
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Process -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Proces
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Nume Proces</label>
+                            <input type="text" id="processName" placeholder="P1" class="w-full p-2 border border-stone-300 rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">Size (KB)</label>
+                            <input type="number" id="processSize" value="100" min="10" max="512" class="w-full p-2 border border-stone-300 rounded text-sm mono">
+                        </div>
+                        <button onclick="allocateProcess()" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
+                            <i class="fas fa-plus mr-1"></i> Aloca Proces
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-tools text-purple-500 mr-2"></i>Actions
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="compactMemory()" class="btn-action w-full p-2 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm transition-colors">
+                            <i class="fas fa-compress-alt mr-1"></i> Memory Compaction
+                        </button>
+                        <button onclick="randomAllocations()" class="btn-action w-full p-2 bg-amber-500 hover:bg-amber-600 text-white rounded text-sm transition-colors">
+                            <i class="fas fa-random mr-1"></i> Alocari Random
+                        </button>
+                        <button onclick="deallocateRandom()" class="btn-action w-full p-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm transition-colors">
+                            <i class="fas fa-trash mr-1"></i> Dealoca Random
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scenarios -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-flask text-pink-500 mr-2"></i>Scenarii
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadScenario('fragmented')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-puzzle-piece text-red-500 mr-2"></i>Memorie Fragmentata
+                        </button>
+                        <button onclick="loadScenario('full')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-box text-blue-500 mr-2"></i>Memorie Plina
+                        </button>
+                        <button onclick="loadScenario('fixed')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
+                            <i class="fas fa-th text-green-500 mr-2"></i>Partitii Fixe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Section -->
+        <div class="mt-6 bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <i class="fas fa-book-open text-indigo-500"></i>
+                Algoritmi de Plasare
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <h4 class="font-semibold text-blue-800 mb-2">First Fit</h4>
+                    <p class="text-blue-700 text-xs">Aloca in first hole suficient de mare. Rapid, dar may fragmenta inceputul memoriei.</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <h4 class="font-semibold text-green-800 mb-2">Best Fit</h4>
+                    <p class="text-green-700 text-xs">Aloca in cea mai mica hole potrivita. Minimizeaza fragmentarea, dar lent and create gauri small.</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                    <h4 class="font-semibold text-amber-800 mb-2">Worst Fit</h4>
+                    <p class="text-amber-700 text-xs">Aloca in cea mai mare hole. Lasa gauri mari, dar ele pot fi inutile if sunt prea mari.</p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <h4 class="font-semibold text-purple-800 mb-2">Next Fit</h4>
+                    <p class="text-purple-700 text-xs">Like First Fit but continues from where it left off. Distribuie alocarile uniform in memorie.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        const PROCESS_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+        
+        let totalMemory = 1024;
+        let osSize = 128;
+        let memoryBlocks = [];
+        let processes = [];
+        let processCounter = 0;
+        let partitionMode = 'dynamic';
+        let nextFitPointer = 0;
+        let fixedPartitions = [];
+
+        // ==================== Memory Block Class ====================
+        class MemoryBlock {
+            constructor(start, size, type = 'hole', process = null) {
+                this.start = start;
+                this.size = size;
+                this.type = type; // 'os', 'process', 'hole'
+                this.process = process;
+                this.internalFragmentation = 0;
+            }
+            
+            get end() {
+                return this.start + this.size;
+            }
+        }
+
+        // ==================== Initialization ====================
+        function initializeMemory() {
+            totalMemory = parseInt(document.getElementById('totalMemoryInput').value);
+            osSize = parseInt(document.getElementById('osSize').value);
+            
+            memoryBlocks = [
+                new MemoryBlock(0, osSize, 'os'),
+                new MemoryBlock(osSize, totalMemory - osSize, 'hole')
+            ];
+            
+            processes = [];
+            processCounter = 0;
+            nextFitPointer = 1;
+            
+            if (partitionMode === 'fixed') {
+                createFixedPartitions();
+            }
+            
+            render();
+            log('Memorie initializata: ' + totalMemory + ' KB total, ' + osSize + ' KB OS');
+        }
+
+        function createFixedPartitions() {
+            const userMemory = totalMemory - osSize;
+            const partitionSizes = [64, 128, 128, 256, userMemory - 576];
+            
+            memoryBlocks = [new MemoryBlock(0, osSize, 'os')];
+            let currentAddr = osSize;
+            
+            partitionSizes.forEach((size, idx) => {
+                memoryBlocks.push(new MemoryBlock(currentAddr, size, 'hole'));
+                currentAddr += size;
+            });
+            
+            fixedPartitions = partitionSizes;
+        }
+
+        function setPartitionMode(mode) {
+            partitionMode = mode;
+            initializeMemory();
+        }
+
+        // ==================== Allocation Algorithms ====================
+        function findHole(size) {
+            const algorithm = document.getElementById('placementAlgorithm').value;
+            const holes = memoryBlocks.filter(b => b.type === 'hole' && b.size >= size);
+            
+            if (holes.length === 0) return null;
+            
+            switch (algorithm) {
+                case 'first-fit':
+                    return holes[0];
+                    
+                case 'best-fit':
+                    return holes.reduce((best, h) => h.size < best.size ? h : best);
+                    
+                case 'worst-fit':
+                    return holes.reduce((worst, h) => h.size > worst.size ? h : worst);
+                    
+                case 'next-fit':
+                    const allBlocks = memoryBlocks.filter(b => b.type === 'hole' && b.size >= size);
+                    for (let i = 0; i < allBlocks.length; i++) {
+                        const idx = memoryBlocks.indexOf(allBlocks[i]);
+                        if (idx >= nextFitPointer) {
+                            nextFitPointer = idx;
+                            return allBlocks[i];
+                        }
+                    }
+                    // Wrap around
+                    nextFitPointer = memoryBlocks.indexOf(allBlocks[0]);
+                    return allBlocks[0];
+                    
+                default:
+                    return holes[0];
+            }
+        }
+
+        function allocateProcess() {
+            const name = document.getElementById('processName').value || `P${processCounter + 1}`;
+            const size = parseInt(document.getElementById('processSize').value);
+            
+            if (size <= 0) {
+                alert('Size invalida!');
+                return;
+            }
+            
+            const hole = findHole(size);
+            
+            if (!hole) {
+                log(`❌ Nu exists hole suficienta for ${name} (${size} KB)`);
+                alert('Nu exists spatiu suficient! Incearca compactarea.');
+                return;
+            }
+            
+            processCounter++;
+            const color = PROCESS_COLORS[(processCounter - 1) % PROCESS_COLORS.length];
+            const process = { id: processCounter, name, size, color };
+            processes.push(process);
+            
+            // Allocate
+            const holeIdx = memoryBlocks.indexOf(hole);
+            const newBlock = new MemoryBlock(hole.start, size, 'process', process);
+            
+            if (partitionMode === 'fixed') {
+                // Fixed partitioning: internal fragmentation
+                newBlock.size = hole.size;
+                newBlock.internalFragmentation = hole.size - size;
+                memoryBlocks[holeIdx] = newBlock;
+            } else {
+                // Dynamic partitioning
+                if (hole.size > size) {
+                    // Split the hole
+                    const remainingHole = new MemoryBlock(hole.start + size, hole.size - size, 'hole');
+                    memoryBlocks.splice(holeIdx, 1, newBlock, remainingHole);
+                } else {
+                    memoryBlocks[holeIdx] = newBlock;
+                }
+            }
+            
+            const algo = document.getElementById('placementAlgorithm').value;
+            log(`✓ ${name} (${size} KB) alocat la adresa ${hole.start} folosind ${algo}`);
+            
+            // Clear inputs
+            document.getElementById('processName').value = '';
+            
+            render();
+        }
+
+        function deallocateProcess(processId) {
+            const blockIdx = memoryBlocks.findIndex(b => b.process && b.process.id === processId);
+            if (blockIdx === -1) return;
+            
+            const block = memoryBlocks[blockIdx];
+            const processName = block.process.name;
+            
+            // Convert to hole
+            block.type = 'hole';
+            block.process = null;
+            block.internalFragmentation = 0;
+            
+            // Remove from processes list
+            processes = processes.filter(p => p.id !== processId);
+            
+            // Merge adjacent holes (only in dynamic mode)
+            if (partitionMode === 'dynamic') {
+                mergeAdjacentHoles();
+            }
+            
+            log(`🗑️ ${processName} dealocat de la adresa ${block.start}`);
+            render();
+        }
+
+        function mergeAdjacentHoles() {
+            let i = 0;
+            while (i < memoryBlocks.length - 1) {
+                if (memoryBlocks[i].type === 'hole' && memoryBlocks[i + 1].type === 'hole') {
+                    memoryBlocks[i].size += memoryBlocks[i + 1].size;
+                    memoryBlocks.splice(i + 1, 1);
+                } else {
+                    i++;
+                }
+            }
+        }
+
+        function compactMemory() {
+            if (partitionMode === 'fixed') {
+                log('⚠️ Compactarea nu este disponibila in modul partitii fixe');
+                return;
+            }
+            
+            // Collect all processes
+            const allocatedProcesses = memoryBlocks.filter(b => b.type === 'process');
+            const totalHoleSize = memoryBlocks.filter(b => b.type === 'hole').reduce((sum, b) => sum + b.size, 0);
+            
+            if (totalHoleSize === 0) {
+                log('ℹ️ Nu exists gauri de compactat');
+                return;
+            }
+            
+            // Rebuild memory: OS + all processes + one big hole
+            memoryBlocks = [new MemoryBlock(0, osSize, 'os')];
+            let currentAddr = osSize;
+            
+            allocatedProcesses.forEach(block => {
+                const newBlock = new MemoryBlock(currentAddr, block.size, 'process', block.process);
+                memoryBlocks.push(newBlock);
+                currentAddr += block.size;
+            });
+            
+            // Add remaining space as single hole
+            if (currentAddr < totalMemory) {
+                memoryBlocks.push(new MemoryBlock(currentAddr, totalMemory - currentAddr, 'hole'));
+            }
+            
+            log(`🔄 Memorie compactata. ${totalHoleSize} KB eliberati intr-o singura hole`);
+            render();
+        }
+
+        function randomAllocations() {
+            const count = 3 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < count; i++) {
+                const size = 50 + Math.floor(Math.random() * 150);
+                document.getElementById('processSize').value = size;
+                document.getElementById('processName').value = '';
+                allocateProcess();
+            }
+        }
+
+        function deallocateRandom() {
+            const allocated = memoryBlocks.filter(b => b.type === 'process');
+            if (allocated.length === 0) {
+                log('ℹ️ Nu exists procese de dealocat');
+                return;
+            }
+            const random = allocated[Math.floor(Math.random() * allocated.length)];
+            deallocateProcess(random.process.id);
+        }
+
+        // ==================== Rendering ====================
+        function render() {
+            renderMemoryMap();
+            renderAddressRuler();
+            renderProcessList();
+            updateStatistics();
+        }
+
+        function renderMemoryMap() {
+            const container = document.getElementById('memoryMap');
+            container.innerHTML = '';
+            
+            const mapHeight = 400;
+            
+            memoryBlocks.forEach((block, idx) => {
+                const heightPercent = (block.size / totalMemory) * 100;
+                const topPercent = (block.start / totalMemory) * 100;
+                
+                const div = document.createElement('div');
+                div.className = 'memory-block absolute left-0 right-0';
+                div.style.height = `${heightPercent}%`;
+                div.style.top = `${topPercent}%`;
+                
+                if (block.type === 'os') {
+                    div.classList.add('bg-stone-800');
+                    div.innerHTML = `
+                        <div class="h-full flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fas fa-microchip mr-2"></i>OS Kernel (${block.size} KB)
+                        </div>
+                    `;
+                } else if (block.type === 'process') {
+                    div.style.backgroundColor = block.process.color;
+                    
+                    let content = `
+                        <div class="h-full flex items-center justify-center text-white text-sm font-bold relative">
+                            ${block.process.name} (${block.process.size} KB)
+                    `;
+                    
+                    // Show internal fragmentation
+                    if (block.internalFragmentation > 0) {
+                        const fragPercent = (block.internalFragmentation / block.size) * 100;
+                        content += `
+                            <div class="absolute bottom-0 left-0 right-0 bg-amber-200 border-t-2 border-amber-400" 
+                                 style="height: ${fragPercent}%;">
+                                <span class="text-amber-800 text-xs absolute bottom-1 left-1">${block.internalFragmentation} KB frag</span>
+                            </div>
+                        `;
+                    }
+                    
+                    content += `
+                        </div>
+                        <div class="tooltip -top-10 left-1/2 transform -translate-x-1/2">
+                            ${block.process.name}: ${block.start}-${block.end} (${block.size} KB)
+                            ${block.internalFragmentation > 0 ? '<br>Frag intern: ' + block.internalFragmentation + ' KB' : ''}
+                        </div>
+                    `;
+                    
+                    div.innerHTML = content;
+                } else {
+                    div.classList.add('hole-pattern', 'border-y', 'border-stone-300');
+                    if (block.size >= 30) {
+                        div.innerHTML = `
+                            <div class="h-full flex items-center justify-center text-stone-500 text-xs">
+                                Hole (${block.size} KB)
+                            </div>
+                        `;
+                    }
+                }
+                
+                container.appendChild(div);
+            });
+        }
+
+        function renderAddressRuler() {
+            const ruler = document.getElementById('addressRuler');
+            ruler.innerHTML = '';
+            
+            const step = totalMemory >= 2048 ? 256 : totalMemory >= 1024 ? 128 : 64;
+            
+            for (let addr = 0; addr <= totalMemory; addr += step) {
+                const div = document.createElement('div');
+                div.textContent = addr;
+                div.style.position = 'absolute';
+                div.style.top = `${(addr / totalMemory) * 100}%`;
+                div.style.transform = 'translateY(-50%)';
+                ruler.appendChild(div);
+            }
+        }
+
+        function renderProcessList() {
+            const container = document.getElementById('processList');
+            
+            if (processes.length === 0) {
+                container.innerHTML = '<div class="text-sm text-stone-400 italic">Niciun proces loaded</div>';
+                return;
+            }
+            
+            container.innerHTML = processes.map(p => {
+                const block = memoryBlocks.find(b => b.process && b.process.id === p.id);
+                return `
+                    <div class="flex items-center justify-between p-2 rounded border" style="border-color: ${p.color}; background: ${p.color}10;">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded" style="background: ${p.color}"></div>
+                            <span class="font-medium text-sm">${p.name}</span>
+                            <span class="text-xs text-stone-500">${p.size} KB @ ${block ? block.start : '?'}</span>
+                        </div>
+                        <button onclick="deallocateProcess(${p.id})" class="text-red-500 hover:text-red-700 text-xs px-2 py-1">
+                            <i class="fas fa-times"></i> Dealoca
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStatistics() {
+            const holes = memoryBlocks.filter(b => b.type === 'hole');
+            const totalHoleSize = holes.reduce((sum, h) => sum + h.size, 0);
+            const usedMemory = totalMemory - totalHoleSize;
+            const userMemory = totalMemory - osSize;
+            
+            // External fragmentation
+            const largestHole = holes.length > 0 ? Math.max(...holes.map(h => h.size)) : 0;
+            const extFrag = totalHoleSize > 0 ? ((totalHoleSize - largestHole) / totalHoleSize * 100).toFixed(1) : 0;
+            
+            // Internal fragmentation
+            const intFrag = memoryBlocks.filter(b => b.type === 'process').reduce((sum, b) => sum + b.internalFragmentation, 0);
+            
+            // Utilization
+            const utilization = ((usedMemory - osSize) / userMemory * 100).toFixed(1);
+            
+            document.getElementById('totalMemory').textContent = totalMemory;
+            document.getElementById('usedMemory').textContent = usedMemory;
+            document.getElementById('freeMemory').textContent = totalHoleSize;
+            
+            document.getElementById('externalFrag').textContent = extFrag + '%';
+            document.getElementById('holeCount').textContent = holes.length;
+            document.getElementById('totalHoleSize').textContent = totalHoleSize;
+            
+            document.getElementById('internalFrag').textContent = intFrag + ' KB';
+            
+            document.getElementById('memoryUtilization').textContent = Math.max(0, utilization) + '%';
+            document.getElementById('utilizationBar').style.width = Math.max(0, utilization) + '%';
+        }
+
+        // ==================== Scenarios ====================
+        function loadScenario(type) {
+            switch (type) {
+                case 'fragmented':
+                    partitionMode = 'dynamic';
+                    document.querySelector('input[value="dynamic"]').checked = true;
+                    initializeMemory();
+                    
+                    // Create fragmented state
+                    const sizes = [100, 150, 80, 200, 120, 90];
+                    sizes.forEach((size, i) => {
+                        document.getElementById('processSize').value = size;
+                        document.getElementById('processName').value = `P${i + 1}`;
+                        allocateProcess();
+                    });
+                    
+                    // Deallocate some to create holes
+                    setTimeout(() => {
+                        deallocateProcess(2);
+                        deallocateProcess(4);
+                        deallocateProcess(6);
+                    }, 100);
+                    break;
+                    
+                case 'full':
+                    partitionMode = 'dynamic';
+                    document.querySelector('input[value="dynamic"]').checked = true;
+                    initializeMemory();
+                    
+                    let remaining = totalMemory - osSize;
+                    let idx = 1;
+                    while (remaining > 50) {
+                        const size = Math.min(remaining, 100 + Math.floor(Math.random() * 100));
+                        document.getElementById('processSize').value = size;
+                        document.getElementById('processName').value = `P${idx++}`;
+                        allocateProcess();
+                        remaining -= size;
+                    }
+                    break;
+                    
+                case 'fixed':
+                    partitionMode = 'fixed';
+                    document.querySelector('input[value="fixed"]').checked = true;
+                    initializeMemory();
+                    
+                    // Allocate processes smaller than partitions to show internal fragmentation
+                    setTimeout(() => {
+                        document.getElementById('processSize').value = 50;
+                        document.getElementById('processName').value = 'A';
+                        allocateProcess();
+                        
+                        document.getElementById('processSize').value = 100;
+                        document.getElementById('processName').value = 'B';
+                        allocateProcess();
+                        
+                        document.getElementById('processSize').value = 200;
+                        document.getElementById('processName').value = 'C';
+                        allocateProcess();
+                    }, 100);
+                    break;
+            }
+        }
+
+        // ==================== Logging ====================
+        function log(message) {
+            const container = document.getElementById('eventLog');
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            
+            while (container.children.length > 100) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
+        // ==================== Algorithm Description ====================
+        document.getElementById('placementAlgorithm').addEventListener('change', function() {
+            const descriptions = {
+                'first-fit': '<strong>First Fit:</strong> Aloca in first hole suficient de mare. Rapid, dar may fragmenta inceputul memoriei.',
+                'best-fit': '<strong>Best Fit:</strong> Aloca in cea mai mica hole potrivita. Minimizeaza risipa, dar lent and create gauri small.',
+                'worst-fit': '<strong>Worst Fit:</strong> Aloca in cea mai mare hole. Lasa gauri mari care pot fi utile ulterior.',
+                'next-fit': '<strong>Next Fit:</strong> Ca First Fit, dar continue cautarea de where a ramas. Distribuie alocarile uniform.'
+            };
+            document.getElementById('algorithmDesc').innerHTML = descriptions[this.value];
+        });
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', initializeMemory);
+    </script>
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pointer Indirection Visualizer - Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 50%, #0f0f1a 100%);
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .inode-node {
+            background: linear-gradient(145deg, #1e3a5f 0%, #0f2744 100%);
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+        
+        .index-block {
+            background: linear-gradient(145deg, #4a3f1f 0%, #2d260f 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+        
+        .data-block {
+            background: linear-gradient(145deg, #1a3d1a 0%, #0f2a0f 100%);
+            border: 2px solid #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        
+        .tree-line {
+            stroke: #6b7280;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .tree-line.activee {
+            stroke: #fbbf24;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5));
+        }
+        
+        .node-highlight {
+            animation: nodeGlow 0.5s ease-out;
+        }
+        
+        @keyframes nodeGlow {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            100% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
+        }
+        
+        .fetch-animation {
+            animation: fetchMove 0.5s ease-in-out;
+        }
+        
+        @keyframes fetchMove {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background: #fbbf24; }
+            100% { transform: scale(1); }
+        }
+        
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #374151;
+        }
+        
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .level-indicator {
+            transition: all 0.3s ease;
+        }
+
+        .level-indicator.activee {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px currentColor;
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-amber-400 to-green-400 bg-clip-text text-transparent">
+                <i class="fas fa-project-diagram mr-3"></i>Pointer Indirection Visualizer
+            </h1>
+            <p class="text-gray-400 text-lg">Visualisationa the systemui de pointeri din inodes</p>
+        </header>
+
+        <!-- Configuration -->
+        <div class="glass-card rounded-2xl p-4 mb-6">
+            <div class="grid md:grid-cols-4 gap-4 items-end">
+                <div class="slider-container">
+                    <label class="text-sm text-gray-400 mb-2 block">Blockk Size</label>
+                    <select id="block-size" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2" onchange="updateCalculations()">
+                        <option value="1024">1 KB</option>
+                        <option value="2048">2 KB</option>
+                        <option value="4096" selected>4 KB</option>
+                        <option value="8192">8 KB</option>
+                    </select>
+                </div>
+                
+                <div class="slider-container">
+                    <label class="text-sm text-gray-400 mb-2 block">Pointer Size</label>
+                    <select id="pointer-size" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2" onchange="updateCalculations()">
+                        <option value="4" selected>4 bytes (32-bit)</option>
+                        <option value="8">8 bytes (64-bit)</option>
+                    </select>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                    <div class="text-xs text-gray-400">Pointeri per Blockk</div>
+                    <div class="text-2xl font-bold text-purple-400 mono" id="pointers-per-block">1024</div>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                    <div class="text-xs text-gray-400">Max File Size</div>
+                    <div class="text-2xl font-bold text-green-400" id="max-file-size">~4 TB</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left: Tree Visualization -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-sitemap mr-2 text-blue-400"></i>Tree Structure of Pointers
+                    </h3>
+                    
+                    <!-- Tree Diagram -->
+                    <div class="relative overflow-x-auto">
+                        <svg id="tree-svg" width="100%" height="400" class="min-w-[700px]">
+                            <!-- Lines will be drawn by JS -->
+                        </svg>
+                        
+                        <!-- Nodes overlay -->
+                        <div id="tree-nodes" class="absolute inset-0 min-w-[700px]">
+                            <!-- Inode -->
+                            <div class="inode-node absolute rounded-xl p-3 text-center" style="left: 50%; top: 10px; transform: translateX(-50%); width: 120px;">
+                                <div class="text-xs text-blue-300">INODE</div>
+                                <div class="text-sm font-bold">Blockk Pointers</div>
+                            </div>
+                            
+                            <!-- Direct -->
+                            <div id="node-direct" class="data-block absolute rounded-lg p-2 text-center cursor-pointer" style="left: 10%; top: 120px; width: 100px;" onclick="highlightPath('direct')">
+                                <div class="text-xs text-green-300">Direct [0-11]</div>
+                                <div class="text-xs mono">12 blocks</div>
+                            </div>
+                            
+                            <!-- Single Indirect -->
+                            <div id="node-single" class="index-block absolute rounded-lg p-2 text-center cursor-pointer" style="left: 30%; top: 120px; width: 100px;" onclick="highlightPath('single')">
+                                <div class="text-xs text-amber-300">Single Indirect</div>
+                                <div class="text-xs mono">1 ptr</div>
+                            </div>
+                            
+                            <!-- Double Indirect -->
+                            <div id="node-double" class="index-block absolute rounded-lg p-2 text-center cursor-pointer" style="left: 55%; top: 120px; width: 100px;" onclick="highlightPath('double')">
+                                <div class="text-xs text-orange-300">Double Indirect</div>
+                                <div class="text-xs mono">1 ptr</div>
+                            </div>
+                            
+                            <!-- Triple Indirect -->
+                            <div id="node-triple" class="index-block absolute rounded-lg p-2 text-center cursor-pointer" style="left: 80%; top: 120px; width: 100px;" onclick="highlightPath('triple')">
+                                <div class="text-xs text-red-300">Triple Indirect</div>
+                                <div class="text-xs mono">1 ptr</div>
+                            </div>
+                            
+                            <!-- Single -> Data -->
+                            <div id="node-single-data" class="data-block absolute rounded-lg p-2 text-center" style="left: 30%; top: 220px; width: 100px;">
+                                <div class="text-xs text-green-300">Data Blockks</div>
+                                <div class="text-xs mono" id="single-count">1024</div>
+                            </div>
+                            
+                            <!-- Double -> Index -->
+                            <div id="node-double-idx" class="index-block absolute rounded-lg p-2 text-center" style="left: 50%; top: 220px; width: 100px;">
+                                <div class="text-xs text-amber-300">Index Blockks</div>
+                                <div class="text-xs mono" id="double-idx-count">1024</div>
+                            </div>
+                            
+                            <!-- Double -> Data -->
+                            <div id="node-double-data" class="data-block absolute rounded-lg p-2 text-center" style="left: 50%; top: 310px; width: 100px;">
+                                <div class="text-xs text-green-300">Data Blockks</div>
+                                <div class="text-xs mono" id="double-data-count">1M</div>
+                            </div>
+                            
+                            <!-- Triple -> Index 1 -->
+                            <div id="node-triple-idx1" class="index-block absolute rounded-lg p-2 text-center" style="left: 75%; top: 220px; width: 80px;">
+                                <div class="text-xs text-amber-300">Idx L1</div>
+                                <div class="text-xs mono" id="triple-idx1-count">1024</div>
+                            </div>
+                            
+                            <!-- Triple -> Index 2 -->
+                            <div id="node-triple-idx2" class="index-block absolute rounded-lg p-2 text-center" style="left: 75%; top: 290px; width: 80px;">
+                                <div class="text-xs text-orange-300">Idx L2</div>
+                                <div class="text-xs mono" id="triple-idx2-count">1M</div>
+                            </div>
+                            
+                            <!-- Triple -> Data -->
+                            <div id="node-triple-data" class="data-block absolute rounded-lg p-2 text-center" style="left: 75%; top: 360px; width: 80px;">
+                                <div class="text-xs text-green-300">Data</div>
+                                <div class="text-xs mono" id="triple-data-count">1G</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="flex flex-wrap gap-4 mt-4 justify-center text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-blue-600 border border-blue-400"></div>
+                            <span class="text-gray-400">Inode</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-amber-700 border border-amber-500"></div>
+                            <span class="text-gray-400">Index Blockk</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded bg-green-700 border border-green-500"></div>
+                            <span class="text-gray-400">Data Blockk</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fetch Simulation -->
+                <div class="glass-card rounded-2xl p-5 mt-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-search mr-2 text-amber-400"></i>Simulare: Fetch Byte din Fiander
+                    </h3>
+                    
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div class="slider-container">
+                            <label class="text-sm text-gray-400 mb-2 block">Offset in file (bytes)</label>
+                            <input type="range" id="fetch-offset" min="0" max="5000000000" value="50000" class="w-full" oninput="updateFetchPreview()">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0</span>
+                                <span id="fetch-offset-value" class="text-purple-400">50 KB</span>
+                                <span>5 GB</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <button onclick="simulateFetch()" class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-xl font-semibold transition">
+                                <i class="fas fa-play mr-2"></i>Fetch Blockk
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Fetch Results -->
+                    <div class="grid md:grid-cols-4 gap-3">
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-xs text-gray-400">Blockk Number</div>
+                            <div class="text-xl font-bold text-cyan-400 mono" id="fetch-block">#12</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-xs text-gray-400">Pointer Type</div>
+                            <div class="text-xl font-bold" id="fetch-type">Direct</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-xs text-gray-400">Disk Reads</div>
+                            <div class="text-xl font-bold text-amber-400" id="fetch-reads">1</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                            <div class="text-xs text-gray-400">Latency</div>
+                            <div class="text-xl font-bold text-green-400" id="fetch-latency">~10ms</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Path visualization -->
+                    <div id="fetch-path" class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Calculator -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Size Calculator -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-calculator mr-2 text-green-400"></i>Calculator Size Max
+                    </h3>
+                    
+                    <!-- Formula -->
+                    <div class="formula-box rounded-xl p-4 mb-4">
+                        <div class="text-xs text-purple-300 mb-2">Formula:</div>
+                        <div class="mono text-sm space-y-1">
+                            <div><span class="text-green-400">Direct:</span> 12 × B</div>
+                            <div><span class="text-amber-400">Single:</span> (B/P) × B</div>
+                            <div><span class="text-orange-400">Double:</span> (B/P)² × B</div>
+                            <div><span class="text-red-400">Triple:</span> (B/P)³ × B</div>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-2">
+                            B = Blockk Size, P = Pointer Size
+                        </div>
+                    </div>
+                    
+                    <!-- Breakdown -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-2 rounded bg-green-900/20 border border-green-500/30">
+                            <span class="text-green-400 text-sm">Direct</span>
+                            <span class="mono text-sm" id="calc-direct">48 KB</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-amber-900/20 border border-amber-500/30">
+                            <span class="text-amber-400 text-sm">Single Indirect</span>
+                            <span class="mono text-sm" id="calc-single">4 MB</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-orange-900/20 border border-orange-500/30">
+                            <span class="text-orange-400 text-sm">Double Indirect</span>
+                            <span class="mono text-sm" id="calc-double">4 GB</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-red-900/20 border border-red-500/30">
+                            <span class="text-red-400 text-sm">Triple Indirect</span>
+                            <span class="mono text-sm" id="calc-triple">4 TB</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 rounded bg-purple-900/30 border border-purple-500/50 mt-3">
+                            <span class="text-purple-400 font-bold">TOTAL MAX</span>
+                            <span class="mono font-bold text-lg" id="calc-total">~4 TB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- File Size Slider -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-sliders-h mr-2 text-cyan-400"></i>Visualisation Utilizare
+                    </h3>
+                    
+                    <div class="slider-container mb-4">
+                        <label class="text-sm text-gray-400 mb-2 block">File Size</label>
+                        <input type="range" id="file-size-slider" min="0" max="100" value="1" class="w-full" oninput="updateUsageVisualization()">
+                        <div class="text-center text-lg font-bold text-cyan-400 mt-2" id="file-size-display">40 KB</div>
+                    </div>
+                    
+                    <!-- Usage Indicators -->
+                    <div class="space-y-2" id="usage-indicators">
+                        <div class="level-indicator flex items-center gap-3 p-2 rounded-lg bg-green-900/20 border border-green-500/30">
+                            <div class="w-3 h-3 rounded-full bg-green-500" id="ind-direct"></div>
+                            <span class="text-sm">Direct</span>
+                            <span class="ml-auto text-xs text-gray-400">< 48 KB</span>
+                        </div>
+                        <div class="level-indicator flex items-center gap-3 p-2 rounded-lg bg-gray-800/30 border border-gray-700">
+                            <div class="w-3 h-3 rounded-full bg-gray-600" id="ind-single"></div>
+                            <span class="text-sm text-gray-500">+ Single Indirect</span>
+                            <span class="ml-auto text-xs text-gray-500">48 KB - 4 MB</span>
+                        </div>
+                        <div class="level-indicator flex items-center gap-3 p-2 rounded-lg bg-gray-800/30 border border-gray-700">
+                            <div class="w-3 h-3 rounded-full bg-gray-600" id="ind-double"></div>
+                            <span class="text-sm text-gray-500">+ Double Indirect</span>
+                            <span class="ml-auto text-xs text-gray-500">4 MB - 4 GB</span>
+                        </div>
+                        <div class="level-indicator flex items-center gap-3 p-2 rounded-lg bg-gray-800/30 border border-gray-700">
+                            <div class="w-3 h-3 rounded-full bg-gray-600" id="ind-triple"></div>
+                            <span class="text-sm text-gray-500">+ Triple Indirect</span>
+                            <span class="ml-auto text-xs text-gray-500">> 4 GB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Disk Reads Chart -->
+                <div class="glass-card rounded-2xl p-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-hdd mr-2 text-red-400"></i>Disk Reads per Access
+                    </h3>
+                    <div class="h-48">
+                        <canvas id="readsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-500 text-sm py-4 border-t border-gray-700">
+            <p>By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration state
+        let config = {
+            blockSize: 4096,
+            pointerSize: 4,
+            pointersPerBlockk: 1024
+        };
+
+        // Calculated sizes
+        let sizes = {
+            direct: 0,
+            single: 0,
+            double: 0,
+            triple: 0,
+            total: 0
+        };
+
+        // Chart
+        let readsChart = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateCalculations();
+            updateFetchPreview();
+        });
+
+        // Update all calculations
+        function updateCalculations() {
+            config.blockSize = parseInt(document.getElementById('block-size').value);
+            config.pointerSize = parseInt(document.getElementById('pointer-size').value);
+            config.pointersPerBlockk = Math.floor(config.blockSize / config.pointerSize);
+            
+            // Update display
+            document.getElementById('pointers-per-block').textContent = config.pointersPerBlockk.toLocaleString();
+            
+            // Calculate sizes
+            sizes.direct = 12 * config.blockSize;
+            sizes.single = config.pointersPerBlockk * config.blockSize;
+            sizes.double = Math.pow(config.pointersPerBlockk, 2) * config.blockSize;
+            sizes.triple = Math.pow(config.pointersPerBlockk, 3) * config.blockSize;
+            sizes.total = sizes.direct + sizes.single + sizes.double + sizes.triple;
+            
+            // Update calculator display
+            document.getElementById('calc-direct').textContent = formatSize(sizes.direct);
+            document.getElementById('calc-single').textContent = formatSize(sizes.single);
+            document.getElementById('calc-double').textContent = formatSize(sizes.double);
+            document.getElementById('calc-triple').textContent = formatSize(sizes.triple);
+            document.getElementById('calc-total').textContent = '~' + formatSize(sizes.total);
+            document.getElementById('max-file-size').textContent = '~' + formatSize(sizes.total);
+            
+            // Update tree node counts
+            document.getElementById('single-count').textContent = config.pointersPerBlockk.toLocaleString();
+            document.getElementById('double-idx-count').textContent = config.pointersPerBlockk.toLocaleString();
+            document.getElementById('double-data-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 2));
+            document.getElementById('triple-idx1-count').textContent = config.pointersPerBlockk.toLocaleString();
+            document.getElementById('triple-idx2-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 2));
+            document.getElementById('triple-data-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 3));
+            
+            // Update slider max
+            document.getElementById('fetch-offset').max = sizes.total;
+            
+            updateUsageVisualization();
+            updateFetchPreview();
+        }
+
+        // Update fetch preview
+        function updateFetchPreview() {
+            const offset = parseInt(document.getElementById('fetch-offset').value);
+            document.getElementById('fetch-offset-value').textContent = formatSize(offset);
+        }
+
+        // Simulate fetch operation
+        function simulateFetch() {
+            const offset = parseInt(document.getElementById('fetch-offset').value);
+            const blockNum = Math.floor(offset / config.blockSize);
+            
+            let type, reads, color;
+            
+            if (blockNum < 12) {
+                type = 'Direct';
+                reads = 1;
+                color = 'text-green-400';
+                highlightPath('direct');
+            } else if (blockNum < 12 + config.pointersPerBlockk) {
+                type = 'Single Indirect';
+                reads = 2;
+                color = 'text-amber-400';
+                highlightPath('single');
+            } else if (blockNum < 12 + config.pointersPerBlockk + Math.pow(config.pointersPerBlockk, 2)) {
+                type = 'Double Indirect';
+                reads = 3;
+                color = 'text-orange-400';
+                highlightPath('double');
+            } else {
+                type = 'Triple Indirect';
+                reads = 4;
+                color = 'text-red-400';
+                highlightPath('triple');
+            }
+            
+            // Update display
+            document.getElementById('fetch-block').textContent = '#' + blockNum.toLocaleString();
+            document.getElementById('fetch-type').textContent = type;
+            document.getElementById('fetch-type').className = `text-xl font-bold ${color}`;
+            document.getElementById('fetch-reads').textContent = reads;
+            document.getElementById('fetch-latency').textContent = `~${reads * 10}ms`;
+            
+            // Update path visualization
+            const pathContainer = document.getElementById('fetch-path');
+            const pathElements = [];
+            
+            pathElements.push(`<div class="px-3 py-1 rounded bg-blue-600 text-sm">Inode</div>`);
+            pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+            
+            if (type === 'Direct') {
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk #${blockNum}</div>`);
+            } else if (type === 'Single Indirect') {
+                pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Index Blockk</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk</div>`);
+            } else if (type === 'Double Indirect') {
+                pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Index L1</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-orange-600 text-sm">Index L2</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk</div>`);
+            } else {
+                pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Idx L1</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-orange-600 text-sm">Idx L2</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-red-600 text-sm">Idx L3</div>`);
+                pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data</div>`);
+            }
+            
+            pathContainer.innerHTML = pathElements.join('');
+        }
+
+        // Highlight path in tree
+        function highlightPath(type) {
+            // Reset all nodes
+            document.querySelectorAll('#tree-nodes > div').forEach(node => {
+                node.classList.remove('node-highlight');
+            });
+            
+            // Highlight based on type
+            const nodesToHighlight = {
+                'direct': ['node-direct'],
+                'single': ['node-single', 'node-single-data'],
+                'double': ['node-double', 'node-double-idx', 'node-double-data'],
+                'triple': ['node-triple', 'node-triple-idx1', 'node-triple-idx2', 'node-triple-data']
+            };
+            
+            const nodes = nodesToHighlight[type] || [];
+            nodes.forEach((id, i) => {
+                setTimeout(() => {
+                    const node = document.getElementById(id);
+                    if (node) {
+                        node.classList.add('node-highlight');
+                    }
+                }, i * 200);
+            });
+        }
+
+        // Update usage visualization
+        function updateUsageVisualization() {
+            const sliderValue = parseInt(document.getElementById('file-size-slider').value);
+            
+            // Map slider to file size (logarithmic scale)
+            let fileSize;
+            if (sliderValue <= 25) {
+                fileSize = (sliderValue / 25) * sizes.direct;
+            } else if (sliderValue <= 50) {
+                fileSize = sizes.direct + ((sliderValue - 25) / 25) * sizes.single;
+            } else if (sliderValue <= 75) {
+                fileSize = sizes.direct + sizes.single + ((sliderValue - 50) / 25) * sizes.double;
+            } else {
+                fileSize = sizes.direct + sizes.single + sizes.double + ((sliderValue - 75) / 25) * sizes.triple;
+            }
+            
+            document.getElementById('file-size-display').textContent = formatSize(fileSize);
+            
+            // Update indicators
+            const indicators = document.querySelectorAll('.level-indicator');
+            
+            // Direct
+            const directInd = indicators[0];
+            const singleInd = indicators[1];
+            const doubleInd = indicators[2];
+            const tripleInd = indicators[3];
+            
+            // Reset all
+            [directInd, singleInd, doubleInd, tripleInd].forEach(ind => {
+                ind.classList.remove('activee');
+                ind.querySelector('div').classList.remove('bg-green-500', 'bg-amber-500', 'bg-orange-500', 'bg-red-500');
+                ind.querySelector('div').classList.add('bg-gray-600');
+                ind.querySelector('span').classList.remove('text-white');
+                ind.querySelector('span').classList.add('text-gray-500');
+            });
+            
+            // Activate based on size
+            if (fileSize > 0) {
+                directInd.classList.add('activee');
+                directInd.querySelector('div').classList.remove('bg-gray-600');
+                directInd.querySelector('div').classList.add('bg-green-500');
+                directInd.querySelector('span').classList.remove('text-gray-500');
+                directInd.querySelector('span').classList.add('text-white');
+            }
+            
+            if (fileSize > sizes.direct) {
+                singleInd.classList.add('activee');
+                singleInd.querySelector('div').classList.remove('bg-gray-600');
+                singleInd.querySelector('div').classList.add('bg-amber-500');
+                singleInd.querySelector('span').classList.remove('text-gray-500');
+                singleInd.querySelector('span').classList.add('text-white');
+            }
+            
+            if (fileSize > sizes.direct + sizes.single) {
+                doubleInd.classList.add('activee');
+                doubleInd.querySelector('div').classList.remove('bg-gray-600');
+                doubleInd.querySelector('div').classList.add('bg-orange-500');
+                doubleInd.querySelector('span').classList.remove('text-gray-500');
+                doubleInd.querySelector('span').classList.add('text-white');
+            }
+            
+            if (fileSize > sizes.direct + sizes.single + sizes.double) {
+                tripleInd.classList.add('activee');
+                tripleInd.querySelector('div').classList.remove('bg-gray-600');
+                tripleInd.querySelector('div').classList.add('bg-red-500');
+                tripleInd.querySelector('span').classList.remove('text-gray-500');
+                tripleInd.querySelector('span').classList.add('text-white');
+            }
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('readsChart').getContext('2d');
+            readsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Direct', 'Single', 'Double', 'Triple'],
+                    datasets: [{
+                        label: 'Disk Reads',
+                        data: [1, 2, 3, 4],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            '#22c55e',
+                            '#f59e0b',
+                            '#f97316',
+                            '#ef4444'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: { color: '#9ca3af', stepSize: 1 },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Helper functions
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            if (bytes < 1024 * 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+            return (bytes / (1024 * 1024 * 1024 * 1024)).toFixed(1) + ' TB';
+        }
+
+        function formatCount(num) {
+            if (num < 1000) return num.toString();
+            if (num < 1000000) return (num / 1000).toFixed(0) + 'K';
+            if (num < 1000000000) return (num / 1000000).toFixed(0) + 'M';
+            return (num / 1000000000).toFixed(0) + 'G';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Replacement Algorithms | Operating Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .frame-cell {
+            transition: all 0.3s ease;
+        }
+        .frame-cell.page-fault {
+            animation: faultFlash 0.5s ease;
+            background-color: #fecaca !important;
+        }
+        .frame-cell.hit {
+            animation: hitFlash 0.5s ease;
+            background-color: #bbf7d0 !important;
+        }
+        .frame-cell.victim {
+            animation: victimPulse 0.5s ease;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+        }
+        
+        @keyframes faultFlash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes hitFlash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        @keyframes victimPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .reference-item {
+            transition: all 0.2s ease;
+        }
+        .reference-item.current {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .reference-item.processed {
+            opacity: 0.5;
+        }
+        
+        .timeline-cell {
+            min-width: 40px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                    <i class="fas fa-exchange-alt text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800">Page Replacement Algorithms</h1>
+                    <p class="text-xs text-stone-500">FIFO, LRU, Optimal, Clock</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Panel -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Reference String Input -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-list-ol text-blue-500"></i>
+                        Sir de references
+                    </h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="referenceString" value="7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1" 
+                               class="flex-1 p-2 border border-stone-300 rounded text-sm mono" 
+                               placeholder="ex: 1,2,3,4,1,2,5,1,2,3,4,5">
+                        <button onclick="parseReferenceString()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">
+                            <i class="fas fa-check mr-1"></i> Aplica
+                        </button>
+                    </div>
+                    <div id="referenceDisplay" class="flex flex-wrap gap-1">
+                        <!-- Reference items will be rendered here -->
+                    </div>
+                    <div class="mt-2 flex gap-2">
+                        <button onclick="loadPreset('standard')" class="text-xs px-2 py-1 bg-stone-100 hover:bg-stone-200 rounded">Standard</button>
+                        <button onclick="loadPreset('belady')" class="text-xs px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded">Bélády Anomaly</button>
+                        <button onclick="loadPreset('locality')" class="text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded">Locality</button>
+                        <button onclick="generateRandom()" class="text-xs px-2 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded">Random</button>
+                    </div>
+                </div>
+
+                <!-- Current Frames State -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                            <i class="fas fa-th text-green-500"></i>
+                            Frame State (Live)
+                        </h3>
+                        <div class="text-sm">
+                            <span class="text-stone-500">Pas:</span>
+                            <span id="currentStep" class="mono font-bold">0</span>/<span id="totalSteps" class="mono">0</span>
+                        </div>
+                    </div>
+                    <div id="framesDisplay" class="flex gap-2 justify-center">
+                        <!-- Frame cells will be rendered here -->
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span id="stepResult" class="text-sm font-medium"></span>
+                    </div>
+                </div>
+
+                <!-- Execution Timeline -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-history text-purple-500"></i>
+                        Execution Timeline
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table id="timelineTable" class="text-xs">
+                            <thead id="timelineHeader">
+                                <!-- Header will be generated -->
+                            </thead>
+                            <tbody id="timelineBody">
+                                <!-- Timeline rows will be generated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statistics Comparison -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Page Faults</div>
+                        <div id="pageFaults" class="text-3xl font-bold text-red-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Page Hits</div>
+                        <div id="pageHits" class="text-3xl font-bold text-green-600">0</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Hit Rate</div>
+                        <div id="hitRate" class="text-3xl font-bold text-blue-600">0%</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
+                        <div class="text-xs text-stone-500 mb-1">Fault Rate</div>
+                        <div id="faultRate" class="text-3xl font-bold text-amber-600">0%</div>
+                    </div>
+                </div>
+
+                <!-- Comparison Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-indigo-500"></i>
+                        Comparison Algorithmi
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Algorithm Selection -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-cogs text-rose-500 mr-2"></i>Algorithm
+                    </h3>
+                    <select id="algorithm" class="w-full p-3 border border-stone-300 rounded-lg text-sm" onchange="onAlgorithmChange()">
+                        <option value="fifo">FIFO (First In First Out)</option>
+                        <option value="lru">LRU (Least Recently Used)</option>
+                        <option value="optimal">Optimal (Bélády)</option>
+                        <option value="clock">Clock (Second Chance)</option>
+                    </select>
+                    <p id="algorithmDesc" class="mt-2 text-xs text-stone-500">
+                        replace pagina care a fost incarcata first (cea mai veche).
+                    </p>
+                </div>
+
+                <!-- Frame Count -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-memory text-blue-500 mr-2"></i>Number Frame-uri
+                    </h3>
+                    <input type="range" id="frameCount" min="2" max="7" value="3" class="w-full" oninput="updateFrameCount()">
+                    <div class="flex justify-between text-xs text-stone-500 mt-1">
+                        <span>2</span>
+                        <span id="frameCountDisplay" class="font-bold text-blue-600">3</span>
+                        <span>7</span>
+                    </div>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Controale
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button onclick="runSimulation()" id="btnRun" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button onclick="pauseSimulation()" id="btnPause" class="btn-action p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg" disabled>
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button onclick="stepSimulation()" id="btnStep" class="btn-action p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button onclick="resetSimulation()" id="btnReset" class="btn-action p-3 bg-stone-500 hover:bg-stone-600 text-white rounded-lg">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="text-xs text-stone-500 block mb-1">Speed</label>
+                        <input type="range" id="speed" min="100" max="1500" value="500" class="w-full">
+                    </div>
+                </div>
+
+                <!-- Run All Algorithms -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3">
+                        <i class="fas fa-layer-group text-purple-500 mr-2"></i>Comparison
+                    </h3>
+                    <button onclick="compareAllAlgorithms()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
+                        <i class="fas fa-balance-scale mr-1"></i> Run all Algorithmii
+                    </button>
+                    <div id="comparisonResults" class="mt-3 space-y-2 text-xs">
+                        <!-- Comparison results will appear here -->
+                    </div>
+                </div>
+
+                <!-- Algorithm Info Cards -->
+                <div class="space-y-3">
+                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl shadow-sm border border-blue-200 p-3">
+                        <h4 class="text-xs font-semibold text-blue-800 mb-1">FIFO</h4>
+                        <p class="text-xs text-blue-700">Simplu dar may suferi de Bélády's Anomaly (mai multe frame-uri = mai multe fault-uri)</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-sm border border-green-200 p-3">
+                        <h4 class="text-xs font-semibold text-green-800 mb-1">LRU</h4>
+                        <p class="text-xs text-green-700">Aproximeaza Optimal. Nu sufera de anomalie. Costisitor de implementat.</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl shadow-sm border border-amber-200 p-3">
+                        <h4 class="text-xs font-semibold text-amber-800 mb-1">Optimal</h4>
+                        <p class="text-xs text-amber-700">Teoretic cel mai good. Requires knowledge of the future - imposibil in practica.</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-sm border border-purple-200 p-3">
+                        <h4 class="text-xs font-semibold text-purple-800 mb-1">Clock</h4>
+                        <p class="text-xs text-purple-700">Aproximeaza LRU eficient. Foloseste bit de referinta. Implementare practica.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bélády Anomaly Section -->
+        <div id="beladySection" class="mt-6 bg-amber-50 rounded-xl shadow-sm border border-amber-200 p-6 hidden">
+            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-amber-800">
+                <i class="fas fa-exclamation-triangle text-amber-500"></i>
+                Bélády's Anomaly Detectata!
+            </h2>
+            <p class="text-sm text-amber-700 mb-4">
+                Cu FIFO, cresterea numarului de frame-uri may duce paradoxal la mai multe page faults.
+                Acest fenomen nu apare la algoritmii stack-based (LRU, Optimal).
+            </p>
+            <div id="beladyComparison" class="grid grid-cols-3 gap-4 text-center">
+                <!-- Bélády comparison will be shown here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-4 border-t border-stone-200 bg-white/50">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-400">
+            By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+        </div>
+    </footer>
+
+    <script>
+        // ==================== State ====================
+        let referenceString = [];
+        let frameCount = 3;
+        let currentAlgorithm = 'fifo';
+        let simulationState = null;
+        let isRunning = false;
+        let isPaused = false;
+        let comparisonChart = null;
+
+        // ==================== Initialization ====================
+        function init() {
+            parseReferenceString();
+            initChart();
+            onAlgorithmChange();
+        }
+
+        function parseReferenceString() {
+            const input = document.getElementById('referenceString').value;
+            referenceString = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+            renderReferenceDisplay();
+            resetSimulation();
+        }
+
+        function renderReferenceDisplay() {
+            const container = document.getElementById('referenceDisplay');
+            container.innerHTML = referenceString.map((page, idx) => `
+                <div class="reference-item w-8 h-8 flex items-center justify-center rounded bg-blue-100 text-blue-700 text-sm font-bold mono" data-idx="${idx}">
+                    ${page}
+                </div>
+            `).join('');
+            document.getElementById('totalSteps').textContent = referenceString.length;
+        }
+
+        function updateFrameCount() {
+            frameCount = parseInt(document.getElementById('frameCount').value);
+            document.getElementById('frameCountDisplay').textContent = frameCount;
+            resetSimulation();
+        }
+
+        // ==================== Algorithms ====================
+        function createSimulationState() {
+            return {
+                frames: Array(frameCount).fill(null),
+                fifoQueue: [],
+                lruStack: [],
+                clockHand: 0,
+                referenceBits: Array(frameCount).fill(0),
+                step: 0,
+                faults: 0,
+                hits: 0,
+                history: []
+            };
+        }
+
+        function simulateStep(state, page) {
+            const result = { page, frames: [...state.frames], fault: false, victim: null, hit: false };
+            
+            // Check if page is already in frames (hit)
+            const existingIdx = state.frames.indexOf(page);
+            if (existingIdx !== -1) {
+                result.hit = true;
+                state.hits++;
+                
+                // Update for LRU
+                if (currentAlgorithm === 'lru') {
+                    state.lruStack = state.lruStack.filter(p => p !== page);
+                    state.lruStack.push(page);
+                }
+                // Update reference bit for Clock
+                if (currentAlgorithm === 'clock') {
+                    state.referenceBits[existingIdx] = 1;
+                }
+                
+                result.frames = [...state.frames];
+                state.history.push(result);
+                return result;
+            }
+            
+            // Page fault
+            result.fault = true;
+            state.faults++;
+            
+            // Find empty frame
+            const emptyIdx = state.frames.indexOf(null);
+            if (emptyIdx !== -1) {
+                state.frames[emptyIdx] = page;
+                state.fifoQueue.push(page);
+                state.lruStack.push(page);
+                state.referenceBits[emptyIdx] = 1;
+            } else {
+                // Need to replace
+                let victimIdx;
+                
+                switch(currentAlgorithm) {
+                    case 'fifo':
+                        const victimPage = state.fifoQueue.shift();
+                        victimIdx = state.frames.indexOf(victimPage);
+                        state.fifoQueue.push(page);
+                        break;
+                        
+                    case 'lru':
+                        const lruPage = state.lruStack.shift();
+                        victimIdx = state.frames.indexOf(lruPage);
+                        state.lruStack.push(page);
+                        break;
+                        
+                    case 'optimal':
+                        victimIdx = findOptimalVictim(state, page);
+                        break;
+                        
+                    case 'clock':
+                        victimIdx = findClockVictim(state);
+                        state.referenceBits[victimIdx] = 1;
+                        break;
+                }
+                
+                result.victim = state.frames[victimIdx];
+                state.frames[victimIdx] = page;
+                
+                // Update LRU stack for replaced page
+                if (currentAlgorithm !== 'lru') {
+                    state.lruStack = state.lruStack.filter(p => p !== result.victim);
+                    state.lruStack.push(page);
+                }
+            }
+            
+            result.frames = [...state.frames];
+            state.history.push(result);
+            return result;
+        }
+
+        function findOptimalVictim(state, currentPage) {
+            const futureRefs = referenceString.slice(state.step + 1);
+            let maxDist = -1;
+            let victimIdx = 0;
+            
+            for (let i = 0; i < state.frames.length; i++) {
+                const page = state.frames[i];
+                const nextUse = futureRefs.indexOf(page);
+                
+                if (nextUse === -1) {
+                    // Page not used in future - best victim
+                    return i;
+                }
+                
+                if (nextUse > maxDist) {
+                    maxDist = nextUse;
+                    victimIdx = i;
+                }
+            }
+            
+            return victimIdx;
+        }
+
+        function findClockVictim(state) {
+            while (true) {
+                if (state.referenceBits[state.clockHand] === 0) {
+                    const victim = state.clockHand;
+                    state.clockHand = (state.clockHand + 1) % frameCount;
+                    return victim;
+                }
+                state.referenceBits[state.clockHand] = 0;
+                state.clockHand = (state.clockHand + 1) % frameCount;
+            }
+        }
+
+        // ==================== Simulation Control ====================
+        function runSimulation() {
+            if (!simulationState) {
+                simulationState = createSimulationState();
+            }
+            
+            isRunning = true;
+            isPaused = false;
+            updateButtons();
+            runStep();
+        }
+
+        function runStep() {
+            if (!isRunning || isPaused) return;
+            if (simulationState.step >= referenceString.length) {
+                isRunning = false;
+                updateButtons();
+                return;
+            }
+            
+            const page = referenceString[simulationState.step];
+            const result = simulateStep(simulationState, page);
+            simulationState.step++;
+            
+            renderCurrentState(result);
+            renderTimeline();
+            updateStats();
+            
+            const speed = parseInt(document.getElementById('speed').value);
+            setTimeout(runStep, speed);
+        }
+
+        function pauseSimulation() {
+            isPaused = true;
+            isRunning = false;
+            updateButtons();
+        }
+
+        function stepSimulation() {
+            if (!simulationState) {
+                simulationState = createSimulationState();
+            }
+            
+            if (simulationState.step >= referenceString.length) return;
+            
+            const page = referenceString[simulationState.step];
+            const result = simulateStep(simulationState, page);
+            simulationState.step++;
+            
+            renderCurrentState(result);
+            renderTimeline();
+            updateStats();
+        }
+
+        function resetSimulation() {
+            isRunning = false;
+            isPaused = false;
+            simulationState = createSimulationState();
+            
+            renderFramesDisplay();
+            document.getElementById('currentStep').textContent = '0';
+            document.getElementById('stepResult').textContent = '';
+            document.getElementById('timelineHeader').innerHTML = '';
+            document.getElementById('timelineBody').innerHTML = '';
+            
+            updateStats();
+            updateButtons();
+            
+            // Reset reference display
+            document.querySelectorAll('.reference-item').forEach(el => {
+                el.classList.remove('current', 'processed');
+            });
+        }
+
+        function updateButtons() {
+            document.getElementById('btnRun').disabled = isRunning;
+            document.getElementById('btnPause').disabled = !isRunning;
+            document.getElementById('btnStep').disabled = isRunning;
+        }
+
+        // ==================== Rendering ====================
+        function renderFramesDisplay() {
+            const container = document.getElementById('framesDisplay');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < frameCount; i++) {
+                const div = document.createElement('div');
+                div.className = 'frame-cell w-16 h-16 flex items-center justify-center rounded-lg border-2 border-stone-300 bg-stone-100 text-2xl font-bold mono';
+                div.id = `frame-${i}`;
+                div.innerHTML = '<span class="text-stone-300">-</span>';
+                container.appendChild(div);
+            }
+        }
+
+        function renderCurrentState(result) {
+            // Update frames
+            result.frames.forEach((page, idx) => {
+                const cell = document.getElementById(`frame-${idx}`);
+                if (page !== null) {
+                    cell.innerHTML = `<span class="text-stone-800">${page}</span>`;
+                    cell.classList.remove('page-fault', 'hit', 'victim');
+                    
+                    if (result.fault && result.frames[idx] === result.page) {
+                        cell.classList.add('page-fault');
+                    }
+                    if (result.victim !== null && simulationState.history[simulationState.history.length - 2]?.frames[idx] === result.victim) {
+                        cell.classList.add('victim');
+                    }
+                } else {
+                    cell.innerHTML = '<span class="text-stone-300">-</span>';
+                }
+            });
+            
+            // Update current step
+            document.getElementById('currentStep').textContent = simulationState.step;
+            
+            // Update step result
+            const resultEl = document.getElementById('stepResult');
+            if (result.fault) {
+                resultEl.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Page Fault${result.victim !== null ? ` (victima: ${result.victim})` : ''}</span>`;
+            } else {
+                resultEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Hit</span>`;
+            }
+            
+            // Highlight current reference
+            document.querySelectorAll('.reference-item').forEach((el, idx) => {
+                el.classList.remove('current');
+                if (idx < simulationState.step) {
+                    el.classList.add('processed');
+                }
+                if (idx === simulationState.step - 1) {
+                    el.classList.add('current');
+                }
+            });
+        }
+
+        function renderTimeline() {
+            if (!simulationState || simulationState.history.length === 0) return;
+            
+            const header = document.getElementById('timelineHeader');
+            const body = document.getElementById('timelineBody');
+            
+            // Header with reference string
+            header.innerHTML = `
+                <tr class="bg-stone-50">
+                    <th class="p-1 text-left text-xs">Ref</th>
+                    ${simulationState.history.map((h, idx) => `
+                        <th class="timeline-cell p-1 text-center text-xs ${h.fault ? 'bg-red-50' : 'bg-green-50'}">${h.page}</th>
+                    `).join('')}
+                </tr>
+            `;
+            
+            // Frame rows
+            let rows = '';
+            for (let f = 0; f < frameCount; f++) {
+                rows += `<tr>
+                    <td class="p-1 text-xs font-semibold">F${f}</td>
+                    ${simulationState.history.map(h => `
+                        <td class="timeline-cell p-1 text-center text-xs mono border ${h.frames[f] !== null ? 'bg-blue-50' : 'bg-stone-50'}">
+                            ${h.frames[f] !== null ? h.frames[f] : '-'}
+                        </td>
+                    `).join('')}
+                </tr>`;
+            }
+            
+            // Fault/Hit row
+            rows += `<tr class="border-t-2">
+                <td class="p-1 text-xs font-semibold">Status</td>
+                ${simulationState.history.map(h => `
+                    <td class="timeline-cell p-1 text-center text-xs ${h.fault ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                        ${h.fault ? 'F' : 'H'}
+                    </td>
+                `).join('')}
+            </tr>`;
+            
+            body.innerHTML = rows;
+        }
+
+        function updateStats() {
+            if (!simulationState) return;
+            
+            const total = simulationState.faults + simulationState.hits;
+            const hitRate = total > 0 ? ((simulationState.hits / total) * 100).toFixed(1) : 0;
+            const faultRate = total > 0 ? ((simulationState.faults / total) * 100).toFixed(1) : 0;
+            
+            document.getElementById('pageFaults').textContent = simulationState.faults;
+            document.getElementById('pageHits').textContent = simulationState.hits;
+            document.getElementById('hitRate').textContent = hitRate + '%';
+            document.getElementById('faultRate').textContent = faultRate + '%';
+        }
+
+        // ==================== Algorithm Comparison ====================
+        function compareAllAlgorithms() {
+            const algorithms = ['fifo', 'lru', 'optimal', 'clock'];
+            const results = {};
+            
+            const savedAlgo = currentAlgorithm;
+            
+            algorithms.forEach(algo => {
+                currentAlgorithm = algo;
+                const state = createSimulationState();
+                
+                for (let i = 0; i < referenceString.length; i++) {
+                    state.step = i;
+                    simulateStep(state, referenceString[i]);
+                }
+                
+                results[algo] = {
+                    faults: state.faults,
+                    hits: state.hits,
+                    hitRate: ((state.hits / referenceString.length) * 100).toFixed(1)
+                };
+            });
+            
+            currentAlgorithm = savedAlgo;
+            
+            // Display results
+            const container = document.getElementById('comparisonResults');
+            const sorted = Object.entries(results).sort((a, b) => a[1].faults - b[1].faults);
+            
+            container.innerHTML = sorted.map(([algo, data], idx) => `
+                <div class="flex items-center justify-between p-2 rounded ${idx === 0 ? 'bg-green-100 border border-green-300' : 'bg-stone-50'}">
+                    <span class="font-medium">${algo.toUpperCase()}</span>
+                    <span class="mono">${data.faults} faults (${data.hitRate}% hit)</span>
+                    ${idx === 0 ? '<span class="text-green-600">🏆</span>' : ''}
+                </div>
+            `).join('');
+            
+            // Update chart
+            updateComparisonChart(results);
+            
+            // Check for Bélády's anomaly
+            checkBeladyAnomaly();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['FIFO', 'LRU', 'Optimal', 'Clock'],
+                    datasets: [{
+                        label: 'Page Faults',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#f87171', '#4ade80', '#fbbf24', '#a78bfa']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function updateComparisonChart(results) {
+            comparisonChart.data.datasets[0].data = [
+                results.fifo.faults,
+                results.lru.faults,
+                results.optimal.faults,
+                results.clock.faults
+            ];
+            comparisonChart.update();
+        }
+
+        function checkBeladyAnomaly() {
+            if (currentAlgorithm !== 'fifo') return;
+            
+            const savedFrameCount = frameCount;
+            const results = [];
+            
+            for (let f = 2; f <= 5; f++) {
+                frameCount = f;
+                currentAlgorithm = 'fifo';
+                const state = createSimulationState();
+                
+                for (let i = 0; i < referenceString.length; i++) {
+                    state.step = i;
+                    simulateStep(state, referenceString[i]);
+                }
+                
+                results.push({ frames: f, faults: state.faults });
+            }
+            
+            frameCount = savedFrameCount;
+            
+            // Check if anomaly exists
+            let hasAnomaly = false;
+            for (let i = 1; i < results.length; i++) {
+                if (results[i].faults > results[i-1].faults) {
+                    hasAnomaly = true;
+                    break;
+                }
+            }
+            
+            if (hasAnomaly) {
+                document.getElementById('beladySection').classList.remove('hidden');
+                document.getElementById('beladyComparison').innerHTML = results.map(r => `
+                    <div class="p-3 ${r.frames === frameCount ? 'bg-amber-200' : 'bg-white'} rounded-lg">
+                        <div class="text-2xl font-bold">${r.frames}</div>
+                        <div class="text-xs text-stone-500">frame-uri</div>
+                        <div class="text-lg font-bold ${r.faults > results[0].faults && r.frames > results[0].frames ? 'text-red-600' : 'text-stone-700'}">${r.faults} faults</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('beladySection').classList.add('hidden');
+            }
+        }
+
+        // ==================== Presets ====================
+        function loadPreset(type) {
+            const presets = {
+                standard: '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1',
+                belady: '1,2,3,4,1,2,5,1,2,3,4,5',
+                locality: '1,2,1,2,1,3,2,1,4,1,2,1'
+            };
+            document.getElementById('referenceString').value = presets[type];
+            parseReferenceString();
+        }
+
+        function generateRandom() {
+            const length = 15 + Math.floor(Math.random() * 10);
+            const maxPage = 5 + Math.floor(Math.random() * 4);
+            const refs = Array.from({length}, () => Math.floor(Math.random() * maxPage));
+            document.getElementById('referenceString').value = refs.join(',');
+            parseReferenceString();
+        }
+
+        // ==================== Algorithm Change ====================
+        function onAlgorithmChange() {
+            currentAlgorithm = document.getElementById('algorithm').value;
+            
+            const descriptions = {
+                fifo: 'replace pagina care a fost incarcata first (cea mai veche in memorie).',
+                lru: 'replace pagina care nu a fost folosita de cel mai mult timp.',
+                optimal: 'replace pagina care nu va fi folosita for cel mai mult timp in viitor.',
+                clock: 'Foloseste un pointer circular and biti de referinta for a aproxima LRU eficient.'
+            };
+            
+            document.getElementById('algorithmDesc').textContent = descriptions[currentAlgorithm];
+            resetSimulation();
+        }
+
+        // ==================== Initialize ====================
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
