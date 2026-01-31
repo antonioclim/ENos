@@ -7,20 +7,20 @@
 
 ### Interactive HTML Simulators
 
-| File | Description |
+| Fișier | Description |
 |------|-------------|
 | `17ex1_-_Kernel_Module_Lifecycle.html` | insmod/rmmod and module_init/exit |
 | `17ex2_-_Character_Device_Flow.html` | Device file I/O operations |
 
 ### Formative Assessment (YAML)
 
-| File | Description |
+| Fișier | Description |
 |------|-------------|
 | `C17_05_FORMATIVE_ASSESSMENT.yaml` | Formative assessment quiz (Bloom-distributed) |
 
 ### Pedagogical Documentation
 
-| File | Purpose |
+| Fișier | Purpose |
 |------|---------|
 | `C17_01_COURSE_PLAN.md` | Learning objectives and session timing |
 | `C17_02_CONCEPT_MAP.md` | Visual topic relationships |

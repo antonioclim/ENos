@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Study Guide — Containerisation
 
 ## Linux Namespaces

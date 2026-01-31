@@ -43,7 +43,7 @@ def download_model() -> str:
         urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
         print(f"  Downloaded: {MODEL_PATH}")
     except Exception as e:
-        print(f"  Error downloading: {e}")
+        print(f"  Eroare downloading: {e}")
         print("  Please download manually from ONNX Model Zoo")
         sys.exit(1)
 
@@ -196,7 +196,7 @@ def run_onnx_benchmarks(model_path: str, iterations: int) -> list[dict]:
             print("  Testing DirectML...")
             results.append(benchmark_onnxruntime(model_path, 'DmlExecutionProvider', iterations))
 
-    except ImportError:
+    except ImportEroare:
         print("  ONNX Runtime not installed")
 
     return results
@@ -217,7 +217,7 @@ def run_openvino_benchmarks(model_path: str, iterations: int) -> list[dict]:
             print(f"  Testing {device}...")
             results.append(benchmark_openvino(model_path, device, iterations))
 
-    except ImportError:
+    except ImportEroare:
         print("  OpenVINO not installed (pip install openvino)")
 
     return results

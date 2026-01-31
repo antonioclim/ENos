@@ -7,20 +7,20 @@
 
 ### Interactive HTML Simulators
 
-| File | Description |
+| Fișier | Description |
 |------|-------------|
 | `18ex1_-_Heterogeneous_Computing.html` | CPU+GPU+NPU task distribution |
 | `18ex2_-_CPU_GPU_NPU_Comparator.html` | Architecture and performance comparison |
 
 ### Formative Assessment (YAML)
 
-| File | Description |
+| Fișier | Description |
 |------|-------------|
 | `C18_05_FORMATIVE_ASSESSMENT.yaml` | Formative assessment quiz (Bloom-distributed) |
 
 ### Pedagogical Documentation
 
-| File | Purpose |
+| Fișier | Purpose |
 |------|---------|
 | `C18_01_LECTURE_PLAN.md` | Learning objectives and session timing |
 | `C18_02_CONCEPT_MAP.md` | Visual topic relationships |

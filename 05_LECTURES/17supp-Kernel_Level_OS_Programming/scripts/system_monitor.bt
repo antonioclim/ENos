@@ -32,7 +32,7 @@ BEGIN {
     printf("║                                                                          ║\n");
     printf("║  This script monitors:                                                   ║\n");
     printf("║    • New processes (fork/exec)                                           ║\n");
-    printf("║    • File operations (open/read/write)                                   ║\n");
+    printf("║    • Fișier operations (open/read/write)                                   ║\n");
     printf("║    • Network activity (TCP connections)                                  ║\n");
     printf("║    • Block I/O latency                                                   ║\n");
     printf("║    • Scheduler activity                                                  ║\n");

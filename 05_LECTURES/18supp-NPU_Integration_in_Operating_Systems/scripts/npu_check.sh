@@ -67,7 +67,7 @@ check_intel_firmware() {
     echo "[4] Intel NPU Firmware:"
     if [[ -d "$fw_path" ]]; then
         echo "    ✓ Firmware directory exists: $fw_path"
-        echo "    Files:"
+        echo "    Fișiers:"
         ls -lh "$fw_path"/*.bin 2>/dev/null | awk '{print "      "$NF" ("$5")"}' || echo "      (no .bin files found)"
     else
         echo "    ✗ Firmware not found at $fw_path"

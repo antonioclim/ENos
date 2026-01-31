@@ -30,7 +30,7 @@ check:
 	@test -f README.md || (echo "$(RED)✗ README.md is missing$(NC)" && exit 1)
 	@echo "$(GREEN)✓ README.md exists$(NC)"
 	@test -d docs || mkdir -p docs
-	@echo "$(GREEN)✓ Directory docs/ verified$(NC)"
+	@echo "$(GREEN)✓ Director docs/ verified$(NC)"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Generate PlantUML diagrams

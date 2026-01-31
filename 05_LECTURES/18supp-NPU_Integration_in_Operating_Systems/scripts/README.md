@@ -40,7 +40,7 @@ pip install openvino onnxruntime numpy
 python3 npu_benchmark.py
 ```
 
-## Example Output
+## Exemplu Output
 
 ```
 ╔═══════════════════════════════════════════════════════════════════╗

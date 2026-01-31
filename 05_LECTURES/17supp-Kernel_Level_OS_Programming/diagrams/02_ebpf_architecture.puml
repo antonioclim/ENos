@@ -1,6 +1,6 @@
 @startuml
 title eBPF Architecture
-rectangle "User Space" {
+rectangle "Utilizator Space" {
   rectangle "Program"
   rectangle "libbpf"
 }

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Demo Scripts — Lecture 16 Supplementary: Advanced Containerisation
 
 > Operating Systems | ASE Bucharest - CSIE | 2025-2026  

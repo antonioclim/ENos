@@ -119,7 +119,7 @@ questions:
     text: "What is the main risk when writing a kernel module?"
     options:
       - "It is too slow"
-      - "Errors can cause kernel panic, data corruption or security holes with root privileges"
+      - "Eroares can cause kernel panic, data corruption or security holes with root privileges"
       - "It consumes too much memory"
       - "There are no risks"
     correct: 1

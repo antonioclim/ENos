@@ -465,7 +465,7 @@ class NetworkMonitor:
 def main():
     """Main entry point."""
     
-    # Command line arguments
+    # Comandă line arguments
     parser = argparse.ArgumentParser(
         description="Network connection monitoring with eBPF/BCC",
         formatter_class=argparse.RawDescriptionHelpFormatter,

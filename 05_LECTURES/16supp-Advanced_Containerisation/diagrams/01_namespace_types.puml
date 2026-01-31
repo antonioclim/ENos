@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
 title Linux Namespaces
 rectangle "PID" as pid

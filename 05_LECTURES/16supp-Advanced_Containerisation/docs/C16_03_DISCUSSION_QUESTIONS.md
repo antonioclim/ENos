@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Containerisation
 
 1. **Why is the fact that containers share the kernel both a pro and a con?**

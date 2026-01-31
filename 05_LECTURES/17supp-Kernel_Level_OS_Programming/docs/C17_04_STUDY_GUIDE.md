@@ -1,6 +1,6 @@
 # Study Guide — Kernel Programming
 
-## Module Commands
+## Module Comandăs
 ```bash
 insmod module.ko     # Load
 rmmod module         # Unload
@@ -23,8 +23,8 @@ static struct file_operations fops = {
 register_chrdev(MAJOR, "mydev", &fops);
 ```
 
-## Differences: Kernel vs Userspace
-| Kernel | Userspace |
+## Differences: Kernel vs Utilizatorspace
+| Kernel | Utilizatorspace |
 |--------|-----------:|
 | printk() | printf() |
 | kmalloc() | malloc() |

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Lecture Plan — Advanced Containerisation
 > Week 16 (Supplementary) | by Revolvix
 

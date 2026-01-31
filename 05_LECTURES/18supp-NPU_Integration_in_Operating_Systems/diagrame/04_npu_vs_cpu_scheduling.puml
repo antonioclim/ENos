@@ -30,9 +30,9 @@ rectangle "NPU SCHEDULING\n(Queue-based)" as npu_sched #F3E5F5 {
         rectangle "App B" as a2 #C8E6C9
     }
     
-    rectangle "User-space Runtime\n(OpenVINO, CoreML)" as runtime #FFF9C4
+    rectangle "Utilizator-space Runtime\n(OpenVINO, CoreML)" as runtime #FFF9C4
     
-    rectangle "Kernel Driver\n(Command Queue)" as driver #FFECB3
+    rectangle "Kernel Driver\n(Comandă Queue)" as driver #FFECB3
     
     rectangle "NPU Hardware\n(Non-preemptive)" as npu_hw #D1C4E9
     

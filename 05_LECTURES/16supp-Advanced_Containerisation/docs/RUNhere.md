@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 16 Documentation — Advanced Containerisation (Supplementary)
 
 > **Location:** `05_LECTURES/16supp-Advanced_Containerisation/docs/`  

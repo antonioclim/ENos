@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
 #
 # mini_container.sh - Minimal container using only Linux primitives
