@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Demo (Week 7): Producer–Consumer with `queue.Queue` (monitor-like) and semaphores.

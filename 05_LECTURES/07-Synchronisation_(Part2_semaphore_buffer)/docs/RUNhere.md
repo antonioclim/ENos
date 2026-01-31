@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 07 Documentation — Synchronisation Part 2
 
 > **Location:** `05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/docs/`  

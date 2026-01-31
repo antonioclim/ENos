@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Deadlock
 
 1. **How do you prevent circular wait in practice?**

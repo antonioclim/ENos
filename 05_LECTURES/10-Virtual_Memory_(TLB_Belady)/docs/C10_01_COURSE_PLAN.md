@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Course Plan — Virtual Memory
 > Week 10 | by Revolvix
 

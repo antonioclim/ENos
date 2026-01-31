@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Study Guide — Virtual Memory
 
 ## TLB (Translation Lookaside Buffer)

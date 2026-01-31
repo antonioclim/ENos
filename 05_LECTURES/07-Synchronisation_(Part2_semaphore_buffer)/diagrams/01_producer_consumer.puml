@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml producer_consumer
 !include ../../diagrams_common/skin.puml
 title Producer-Consumer with Semaphores

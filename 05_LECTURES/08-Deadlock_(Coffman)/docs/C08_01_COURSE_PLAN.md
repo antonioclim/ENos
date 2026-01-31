@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Course Plan — Deadlock
 > Week 8 | by Revolvix
 

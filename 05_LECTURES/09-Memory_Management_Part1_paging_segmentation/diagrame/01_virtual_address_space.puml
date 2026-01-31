@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml virtual_address_space
 !include ../../diagrame_common/skin.puml
 title Virtual Address Space (64-bit Linux)

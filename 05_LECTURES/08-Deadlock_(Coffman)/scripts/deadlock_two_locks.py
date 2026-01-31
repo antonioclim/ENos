@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Demo (Week 8): deadlock with two locks and two threads (classic scenario).

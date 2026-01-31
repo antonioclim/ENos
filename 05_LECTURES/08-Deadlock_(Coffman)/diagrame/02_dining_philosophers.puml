@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml dining_philosophers
 !include ../../diagrame_common/skin.puml
 title Dining Philosophers Problem - Deadlock

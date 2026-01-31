@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Course Plan — Synchronisation Part 2
 > Week 7 | by Revolvix
 

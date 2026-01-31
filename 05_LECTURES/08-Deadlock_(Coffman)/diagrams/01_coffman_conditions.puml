@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml conditiile_coffman
 !include ../../diagrams_common/skin.puml
 title The 4 Coffman Conditions for Deadlock

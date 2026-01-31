@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml paging_mechanism
 !include ../../diagrame_common/skin.puml
 title Address Translation with Paging

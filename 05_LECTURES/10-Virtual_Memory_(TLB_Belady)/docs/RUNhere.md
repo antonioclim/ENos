@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 10 Documentation — Virtual Memory
 
 > **Location:** `05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/`  

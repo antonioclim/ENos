@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 09 Documentation — Memory Management Part 1
 
 > **Location:** `05_LECTURES/09-Memory_Management_Part1_paging_segmentation/docs/`  

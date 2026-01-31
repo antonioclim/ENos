@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Virtual Memory
 
 1. **Why is TLB crucial for performance?**

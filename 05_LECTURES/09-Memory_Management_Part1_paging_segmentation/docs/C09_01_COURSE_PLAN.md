@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Course Plan — Memory Management Part 1
 > Week 9 | by Revolvix
 

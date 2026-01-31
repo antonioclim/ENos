@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Demo (Week 9/10): observing RSS growth and page faults (min/maj) for the current process.

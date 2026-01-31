@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Memory Management P1
 
 1. **Why is the page size a power of 2?**

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Synchronisation P2
 
 1. **Why is the wait() order critical for avoiding deadlock?**

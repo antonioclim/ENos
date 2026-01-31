@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 08 Documentation — Deadlock
 
 > **Location:** `05_LECTURES/08-Deadlock_(Coffman)/docs/`  

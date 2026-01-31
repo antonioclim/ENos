@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml tlb_memory_access
 !include ../../diagrame_common/skin.puml
 title TLB (Translation Lookaside Buffer)
