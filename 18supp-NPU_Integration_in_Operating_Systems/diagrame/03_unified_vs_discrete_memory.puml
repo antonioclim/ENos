@@ -1,0 +1,48 @@
+@startuml 03_unified_vs_discrete_memory
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title Unified Memory vs Discrete Memory
+
+rectangle "UNIFIED MEMORY\n(Apple, Qualcomm)" as unified #E8F5E9 {
+    rectangle "CPU" as cpu1 #BBDEFB
+    rectangle "GPU" as gpu1 #FFCDD2
+    rectangle "NPU" as npu1 #D1C4E9
+    
+    rectangle "Memory\nController" as mc1 #FFECB3
+    
+    database "LPDDR5X\n(Shared)" as mem1 #FFF3E0
+    
+    cpu1 --> mc1
+    gpu1 --> mc1
+    npu1 --> mc1
+    mc1 --> mem1
+}
+
+rectangle "DISCRETE MEMORY\n(NVIDIA Datacenter)" as discrete #FFEBEE {
+    rectangle "CPU" as cpu2 #BBDEFB
+    rectangle "GPU + HBM" as gpu2 #FFCDD2 {
+        rectangle "GPU\nCores" as cores
+        database "HBM3\n3+ TB/s" as hbm
+        cores --> hbm
+    }
+    
+    database "System\nDRAM" as mem2 #FFF3E0
+    
+    cpu2 --> mem2
+    cpu2 <--> gpu2 : PCIe 5.0\n64 GB/s
+}
+
+note bottom of unified
+  ✓ Zero-copy
+  ✓ Energy efficiency
+  ✗ Limited bandwidth
+end note
+
+note bottom of discrete
+  ✓ Enormous bandwidth
+  ✓ Scalability
+  ✗ Transfer overhead
+end note
+
+@enduml

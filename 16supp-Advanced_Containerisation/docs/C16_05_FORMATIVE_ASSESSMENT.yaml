@@ -1,0 +1,139 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
+# C16_05_FORMATIVE_ASSESSMENT.yaml
+# Lecture 16 Supplementary: Advanced Containerisation
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  course: 16
+  subiect: "Advanced Containerisation"
+  versiune: "2.0"
+  data_creare: "2026-01-28"
+  autor: "by Revolvix"
+  numar_intrebari: 10
+  timp_estimat_minute: 12
+  distributie_bloom:
+    remember: 2
+    understand: 4
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    dificultate: usor
+    text: "What is a Linux namespace?"
+    optiuni:
+      - "A type of file"
+      - "A kernel mechanism for isolating and virtualising system resources for process groups"
+      - "A network protocol"
+      - "A type of memory"
+    corect: 1
+    explicatie: "Namespace: isolates PID, network, mount, user, IPC, cgroup, UTS for containers."
+
+  - id: q02
+    bloom: remember
+    dificultate: usor
+    text: "What is cgroups (control groups)?"
+    optiuni:
+      - "A type of container"
+      - "A kernel mechanism for limiting and monitoring resources (CPU, memory, I/O) per process group"
+      - "A communication protocol"
+      - "A type of filesystem"
+    corect: 1
+    explicatie: "Cgroups: limits and accounts for resources. Containers: namespace + cgroups."
+
+  - id: q03
+    bloom: understand
+    dificultate: mediu
+    text: "What does PID namespace isolate?"
+    optiuni:
+      - "The network"
+      - "The PID space: processes in the container see only container processes, with their own PID 1"
+      - "Memory"
+      - "Files"
+    corect: 1
+    explicatie: "PID namespace: init process (PID 1) in container. The container cannot see host processes."
+
+  - id: q04
+    bloom: understand
+    dificultate: mediu
+    text: "Why is network namespace important for container isolation?"
+    optiuni:
+      - "It is not important"
+      - "Each container has its own network stack: isolated interfaces, IPs, routing tables"
+      - "For speed"
+      - "For storage"
+    corect: 1
+    explicatie: "Network NS: container with its own eth0, own IP, own iptables. Complete isolation."
+
+  - id: q05
+    bloom: understand
+    dificultate: mediu
+    text: "What does the unshare command do in Linux?"
+    optiuni:
+      - "Deletes files"
+      - "Creates new namespaces and executes a program within them"
+      - "Shares memory"
+      - "Configures the network"
+    corect: 1
+    explicatie: "unshare: creates new namespace(s) and runs a command. The basis for simple containers."
+
+  - id: q06
+    bloom: understand
+    dificultate: mediu
+    text: "What is overlay filesystem and why does Docker use it?"
+    optiuni:
+      - "A type of RAID"
+      - "A filesystem that layers multiple directories: read-only layers with a writable layer on top"
+      - "An encrypted filesystem"
+      - "A network filesystem"
+    corect: 1
+    explicatie: "Overlay: image layers (ro) + container layer (rw). Efficient for shared images."
+
+  - id: q07
+    bloom: analyse
+    dificultate: greu
+    text: "Why do containers need user namespace for rootless containers?"
+    optiuni:
+      - "They do not need it"
+      - "User NS maps UID 0 in container to non-root UID on host, allowing safe 'root' operations"
+      - "For speed"
+      - "For networking"
+    corect: 1
+    explicatie: "User NS: root in container = normal user on host. Security: escape from container does not give root."
+
+  - id: q08
+    bloom: analyse
+    dificultate: greu
+    text: "What is the security difference between container escape and VM escape?"
+    optiuni:
+      - "There is no difference"
+      - "Container: shared kernel, escape = direct host access. VM: must break through the hypervisor"
+      - "VM escape is easier"
+      - "Container is more secure"
+    corect: 1
+    explicatie: "Container: kernel vulnerability = host access. VM: hardware isolation, escape much harder."
+
+  - id: q09
+    bloom: analyse
+    dificultate: greu
+    text: "What limitations does cgroups v2 impose compared to v1?"
+    optiuni:
+      - "v2 is slower"
+      - "v2: unified hierarchy (one process in exactly one cgroup), controller per subtree. v1: separate hierarchies"
+      - "v2 does not support memory"
+      - "There are no differences"
+    corect: 1
+    explicatie: "Cgroups v2: clearer organisation, single tree, controllers activated per subtree."
+
+  - id: q10
+    bloom: apply
+    dificultate: greu
+    text: "You want to limit a container to 512MB RAM and 0.5 CPU cores. What cgroup controllers do you use?"
+    optiuni:
+      - "Only memory"
+      - "memory controller for RAM, cpu controller for CPU shares/quota"
+      - "Only cpu"
+      - "You cannot limit"
+    corect: 1
+    explicatie: "memory.max=512M, cpu.max=50000 100000 (50% of one core). Cgroups v2 syntax."

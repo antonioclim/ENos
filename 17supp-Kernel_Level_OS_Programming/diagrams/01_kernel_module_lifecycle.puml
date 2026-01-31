@@ -1,0 +1,8 @@
+@startuml
+title Kernel Module Lifecycle
+[*] --> Compiled : make
+Compiled --> Loading : insmod
+Loading --> Loaded : success
+Loaded --> Unloading : rmmod
+Unloading --> [*]
+@enduml

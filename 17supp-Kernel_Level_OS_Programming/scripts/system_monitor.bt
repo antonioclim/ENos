@@ -1,0 +1,416 @@
+#!/usr/bin/env bpftrace
+/*
+ * system_monitor.bt - Comprehensive system monitoring with bpftrace
+ * 
+ * Description:
+ *   A diagnostic script that simultaneously monitors multiple aspects
+ *   of the system: processes, I/O, network, memory, scheduler.
+ *
+ * Usage:
+ *   sudo bpftrace system_monitor.bt
+ *   sudo bpftrace system_monitor.bt -p PID    # Filter on specific process
+ *
+ * Requirements:
+ *   - Linux kernel 4.9+ (recommended 5.x+)
+ *   - bpftrace installed
+ *   - Root/CAP_BPF privileges
+ *
+ * Author: OS Course - ASE Bucharest CSIE
+ * Version: 1.0
+ */
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CONFIGURATION AND INITIALISATION
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+BEGIN {
+    printf("\n");
+    printf("╔══════════════════════════════════════════════════════════════════════════╗\n");
+    printf("║           LINUX SYSTEM MONITORING WITH eBPF/bpftrace                     ║\n");
+    printf("║                                                                          ║\n");
+    printf("║  This script monitors:                                                   ║\n");
+    printf("║    • New processes (fork/exec)                                           ║\n");
+    printf("║    • Fișier operations (open/read/write)                                   ║\n");
+    printf("║    • Network activity (TCP connections)                                  ║\n");
+    printf("║    • Block I/O latency                                                   ║\n");
+    printf("║    • Scheduler activity                                                  ║\n");
+    printf("║                                                                          ║\n");
+    printf("║  Press Ctrl+C to stop and view final statistics.                         ║\n");
+    printf("╚══════════════════════════════════════════════════════════════════════════╝\n");
+    printf("\n");
+    
+    // Header for real-time events
+    printf("%-12s %-8s %-16s %-8s %s\n", 
+           "TIMESTAMP", "TYPE", "PROCESS", "PID", "DETAILS");
+    printf("─────────────────────────────────────────────────────────────────────────────\n");
+    
+    // Initialise counters
+    @start_time = nsecs;
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PROCESS MONITORING
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// Trace new processes (execve)
+tracepoint:syscalls:sys_enter_execve {
+    $filename = str(args->filename);
+    
+    // Display event
+    printf("%-12s %-8s %-16s %-8d %s\n",
+           strftime("%H:%M:%S", nsecs),
+           "EXEC",
+           comm,
+           pid,
+           $filename);
+    
+    // Aggregated statistics
+    @exec_count[comm] = count();
+    @exec_total = count();
+}
+
+// Trace fork
+tracepoint:syscalls:sys_exit_clone /args->ret > 0/ {
+    printf("%-12s %-8s %-16s %-8d child_pid=%d\n",
+           strftime("%H:%M:%S", nsecs),
+           "FORK",
+           comm,
+           pid,
+           args->ret);
+    
+    @fork_count[comm] = count();
+    @fork_total = count();
+}
+
+// Trace process exit
+tracepoint:syscalls:sys_enter_exit_group {
+    printf("%-12s %-8s %-16s %-8d exit_code=%d\n",
+           strftime("%H:%M:%S", nsecs),
+           "EXIT",
+           comm,
+           pid,
+           args->error_code);
+    
+    @exit_count = count();
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE OPERATIONS MONITORING
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// Trace file opens
+tracepoint:syscalls:sys_enter_openat {
+    $filename = str(args->filename);
+    
+    // Filter common system files to reduce noise
+    if (strncmp($filename, "/proc/", 6) != 0 && 
+        strncmp($filename, "/sys/", 5) != 0) {
+        
+        printf("%-12s %-8s %-16s %-8d %s\n",
+               strftime("%H:%M:%S", nsecs),
+               "OPEN",
+               comm,
+               pid,
+               $filename);
+        
+        @open_count[comm] = count();
+        @open_files[$filename] = count();
+    }
+}
+
+// Read/write statistics
+tracepoint:syscalls:sys_exit_read /args->ret > 0/ {
+    @read_bytes[comm] = sum(args->ret);
+    @read_count[comm] = count();
+}
+
+tracepoint:syscalls:sys_exit_write /args->ret > 0/ {
+    @write_bytes[comm] = sum(args->ret);
+    @write_count[comm] = count();
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * NETWORK MONITORING
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// TCP outbound connections
+kprobe:tcp_v4_connect {
+    printf("%-12s %-8s %-16s %-8d TCP connect initiated\n",
+           strftime("%H:%M:%S", nsecs),
+           "NET_OUT",
+           comm,
+           pid);
+    
+    @tcp_connect[comm] = count();
+}
+
+// TCP inbound connections (accept)
+kretprobe:inet_csk_accept /retval != 0/ {
+    printf("%-12s %-8s %-16s %-8d TCP connection accepted\n",
+           strftime("%H:%M:%S", nsecs),
+           "NET_IN",
+           comm,
+           pid);
+    
+    @tcp_accept[comm] = count();
+}
+
+// Trace packets sent
+kprobe:tcp_sendmsg {
+    @tcp_send_bytes[comm] = sum(arg2);
+    @tcp_send_count[comm] = count();
+}
+
+// Trace packets received
+kprobe:tcp_recvmsg {
+    @tcp_recv_count[comm] = count();
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * BLOCK I/O MONITORING (DISK)
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// Start of I/O operation
+tracepoint:block:block_rq_issue {
+    @io_start[args->dev, args->sector] = nsecs;
+}
+
+// End of I/O operation
+tracepoint:block:block_rq_complete /@io_start[args->dev, args->sector]/ {
+    $latency_us = (nsecs - @io_start[args->dev, args->sector]) / 1000;
+    
+    // Latency histogram
+    @io_latency_hist = hist($latency_us);
+    
+    // Statistics per operation type
+    @io_latency_by_type[args->rwbs] = avg($latency_us);
+    @io_count_by_type[args->rwbs] = count();
+    
+    // Alert for slow I/O (>10ms)
+    if ($latency_us > 10000) {
+        printf("%-12s %-8s %-16s %-8s latency=%dμs sector=%d\n",
+               strftime("%H:%M:%S", nsecs),
+               "IO_SLOW",
+               "-",
+               args->rwbs,
+               $latency_us,
+               args->sector);
+        
+        @io_slow_count = count();
+    }
+    
+    delete(@io_start[args->dev, args->sector]);
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * SCHEDULER MONITORING
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// Context switch
+tracepoint:sched:sched_switch {
+    @context_switches = count();
+    @ctx_switch_by_prev[args->prev_comm] = count();
+    
+    // Save timestamp for run queue latency calculation
+    if (args->prev_state == 0) {  // TASK_RUNNING
+        @runq_start[args->next_pid] = nsecs;
+    }
+}
+
+// Measure run queue latency
+tracepoint:sched:sched_wakeup {
+    @wakeup_start[args->pid] = nsecs;
+}
+
+tracepoint:sched:sched_switch /@wakeup_start[args->next_pid]/ {
+    $latency_us = (nsecs - @wakeup_start[args->next_pid]) / 1000;
+    @runq_latency = hist($latency_us);
+    delete(@wakeup_start[args->next_pid]);
+}
+
+// CPU migrations
+tracepoint:sched:sched_migrate_task {
+    printf("%-12s %-8s %-16s %-8d CPU %d -> %d\n",
+           strftime("%H:%M:%S", nsecs),
+           "MIGRATE",
+           args->comm,
+           args->pid,
+           args->orig_cpu,
+           args->dest_cpu);
+    
+    @migrations[args->comm] = count();
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * MEMORY MONITORING
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// Page faults
+software:page-faults:100 {
+    @page_faults[comm] = count();
+}
+
+// Heap expansion (brk)
+tracepoint:syscalls:sys_enter_brk /args->brk > 0/ {
+    @brk_calls[comm] = count();
+}
+
+// mmap for large allocations
+tracepoint:syscalls:sys_enter_mmap /args->len > 1048576/ {
+    printf("%-12s %-8s %-16s %-8d large_mmap size=%dMB\n",
+           strftime("%H:%M:%S", nsecs),
+           "MMAP_LG",
+           comm,
+           pid,
+           args->len / 1048576);
+    
+    @large_mmap[comm] = sum(args->len);
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PERIODIC REPORTING (EVERY 30 SECONDS)
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+interval:s:30 {
+    printf("\n");
+    printf("═══════════════════════════════════════════════════════════════════════════\n");
+    printf("                    PERIODIC SUMMARY (30 seconds)                          \n");
+    printf("═══════════════════════════════════════════════════════════════════════════\n");
+    
+    printf("\n--- Context Switches: %d ---\n", @context_switches);
+    printf("--- I/O Slow Count: %d ---\n", @io_slow_count);
+    printf("--- Exec Total: %d ---\n", @exec_total);
+    printf("--- Fork Total: %d ---\n", @fork_total);
+    
+    printf("\n--- Top 5 processes by bytes read ---\n");
+    print(@read_bytes, 5);
+    
+    printf("\n--- Top 5 processes by bytes written ---\n");
+    print(@write_bytes, 5);
+    
+    printf("═══════════════════════════════════════════════════════════════════════════\n");
+    printf("\n");
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FINAL REPORT ON CTRL+C
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+END {
+    $duration_sec = (nsecs - @start_time) / 1000000000;
+    
+    printf("\n\n");
+    printf("╔══════════════════════════════════════════════════════════════════════════╗\n");
+    printf("║                         FINAL REPORT                                     ║\n");
+    printf("╠══════════════════════════════════════════════════════════════════════════╣\n");
+    printf("║  Monitoring duration: %d seconds                                          \n", $duration_sec);
+    printf("╚══════════════════════════════════════════════════════════════════════════╝\n");
+    
+    // ═══ PROCESSES ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                              PROCESSES                                   │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[Executed processes (exec)]:\n");
+    print(@exec_count);
+    
+    printf("\n[Forks per parent process]:\n");
+    print(@fork_count);
+    
+    // ═══ FILES ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                         FILE OPERATIONS                                  │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[Opens per process]:\n");
+    print(@open_count, 10);
+    
+    printf("\n[Top 10 opened files]:\n");
+    print(@open_files, 10);
+    
+    printf("\n[Bytes read per process]:\n");
+    print(@read_bytes, 10);
+    
+    printf("\n[Bytes written per process]:\n");
+    print(@write_bytes, 10);
+    
+    // ═══ NETWORK ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                              TCP NETWORK                                 │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[TCP connections initiated]:\n");
+    print(@tcp_connect);
+    
+    printf("\n[TCP connections accepted]:\n");
+    print(@tcp_accept);
+    
+    printf("\n[TCP bytes sent]:\n");
+    print(@tcp_send_bytes, 10);
+    
+    // ═══ BLOCK I/O ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                           BLOCK I/O (DISK)                               │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[I/O latency histogram (μs)]:\n");
+    print(@io_latency_hist);
+    
+    printf("\n[Average latency per operation type (μs)]:\n");
+    print(@io_latency_by_type);
+    
+    printf("\n[Operation count per type]:\n");
+    print(@io_count_by_type);
+    
+    // ═══ SCHEDULER ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                            SCHEDULER                                     │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[Run queue latency histogram (μs)]:\n");
+    print(@runq_latency);
+    
+    printf("\n[Total context switches]: %d\n", @context_switches);
+    
+    printf("\n[CPU migrations]:\n");
+    print(@migrations, 10);
+    
+    // ═══ MEMORY ═══
+    printf("\n┌──────────────────────────────────────────────────────────────────────────┐\n");
+    printf("│                              MEMORY                                      │\n");
+    printf("└──────────────────────────────────────────────────────────────────────────┘\n");
+    
+    printf("\n[Page faults per process]:\n");
+    print(@page_faults, 10);
+    
+    printf("\n[Large allocations (mmap >1MB)]:\n");
+    print(@large_mmap);
+    
+    // Cleanup
+    clear(@io_start);
+    clear(@wakeup_start);
+    clear(@runq_start);
+    clear(@start_time);
+    
+    printf("\n═══════════════════════════════════════════════════════════════════════════\n");
+    printf("                      Monitoring completed.                                \n");
+    printf("═══════════════════════════════════════════════════════════════════════════\n");
+}

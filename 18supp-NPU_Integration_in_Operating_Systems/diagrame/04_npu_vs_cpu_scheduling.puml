@@ -1,0 +1,54 @@
+@startuml 04_npu_vs_cpu_scheduling
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title CPU Scheduling vs NPU Scheduling
+
+rectangle "CPU SCHEDULING\n(Preemptive)" as cpu_sched #E3F2FD {
+    
+    rectangle "Threads" as threads {
+        rectangle "T1" as t1 #BBDEFB
+        rectangle "T2" as t2 #C8E6C9
+        rectangle "T3" as t3 #FFCDD2
+    }
+    
+    rectangle "OS Scheduler\n(context switch ~1-10μs)" as os #FFF9C4
+    
+    rectangle "CPU Cores" as cores {
+        rectangle "Core 0" as c0
+        rectangle "Core 1" as c1
+    }
+    
+    threads --> os
+    os --> cores
+}
+
+rectangle "NPU SCHEDULING\n(Queue-based)" as npu_sched #F3E5F5 {
+    
+    rectangle "Applications" as apps {
+        rectangle "App A" as a1 #BBDEFB
+        rectangle "App B" as a2 #C8E6C9
+    }
+    
+    rectangle "Utilizator-space Runtime\n(OpenVINO, CoreML)" as runtime #FFF9C4
+    
+    rectangle "Kernel Driver\n(Comandă Queue)" as driver #FFECB3
+    
+    rectangle "NPU Hardware\n(Non-preemptive)" as npu_hw #D1C4E9
+    
+    apps --> runtime
+    runtime --> driver
+    driver --> npu_hw
+}
+
+note bottom of cpu_sched
+  Preemption at any moment
+  Rapid context switch
+end note
+
+note bottom of npu_sched
+  Job complete or checkpoint
+  Costly interruption
+end note
+
+@enduml

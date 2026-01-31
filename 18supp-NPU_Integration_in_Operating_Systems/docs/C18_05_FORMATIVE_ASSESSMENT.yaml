@@ -1,0 +1,138 @@
+# C18_05_FORMATIVE_ASSESSMENT.yaml
+# Lecture 18 Supplementary: NPU Integration in Operating Systems
+# Formative Assessment — Conceptual Quiz
+
+metadata:
+  lecture: 18
+  subject: "NPU Integration in Operating Systems"
+  version: "2.0"
+  creation_date: "2026-01-28"
+  author: "by Revolvix"
+  number_of_questions: 10
+  estimated_time_minutes: 12
+  bloom_distribution:
+    remember: 2
+    understand: 4
+    analyse: 3
+    apply: 1
+
+questions:
+  - id: q01
+    bloom: remember
+    difficulty: easy
+    text: "What is an NPU (Neural Processing Unit)?"
+    options:
+      - "A type of RAM"
+      - "A specialised processor for machine learning/AI operations (matrix multiplications, convolutions)"
+      - "A network protocol"
+      - "A type of storage"
+    correct: 1
+    explanation: "NPU: hardware optimised for AI inference, energy-efficient for ML workloads."
+
+  - id: q02
+    bloom: remember
+    difficulty: easy
+    text: "Which Linux kernel subsystem exposes modern NPUs?"
+    options:
+      - "/dev/gpu"
+      - "Accel subsystem (/dev/accel/*) introduced in Linux 6.2+"
+      - "/dev/cpu"
+      - "/dev/mem"
+    correct: 1
+    explanation: "Accel subsystem: unified API for AI accelerators (Intel VPU, AMD XDNA, etc.)."
+
+  - id: q03
+    bloom: understand
+    difficulty: medium
+    text: "Why are NPUs more energy-efficient than CPUs for AI inference?"
+    options:
+      - "They are not more efficient"
+      - "Specialised architecture: many parallel MAC units without general-purpose instruction overhead"
+      - "They use less memory"
+      - "They are newer"
+    correct: 1
+    explanation: "NPU: thousands of MAC units (Multiply-Accumulate) optimised for tensor ops. CPU: general-purpose overhead."
+
+  - id: q04
+    bloom: understand
+    difficulty: medium
+    text: "What is OpenVINO in the context of Intel NPUs?"
+    options:
+      - "An operating system"
+      - "Runtime and toolkit for optimising and running AI models on Intel hardware (CPU, GPU, NPU)"
+      - "A programming language"
+      - "A video driver"
+    correct: 1
+    explanation: "OpenVINO: converts models, optimises for Intel hardware, unified API for inference."
+
+  - id: q05
+    bloom: understand
+    difficulty: medium
+    text: "What does the ivpu driver do in Linux?"
+    options:
+      - "Manages audio"
+      - "Driver for Intel NPU (Vision Processing Unit), exposes device through accel subsystem"
+      - "Manages networking"
+      - "Manages memory"
+    correct: 1
+    explanation: "ivpu: kernel driver for Intel Meteor Lake NPU. Exposes /dev/accel/accel0."
+
+  - id: q06
+    bloom: understand
+    difficulty: medium
+    text: "Why must NPU firmware be loaded by the OS?"
+    options:
+      - "No firmware is needed"
+      - "The NPU has no non-volatile memory; firmware defines behaviour and must be loaded at boot"
+      - "For security only"
+      - "For speed"
+    correct: 1
+    explanation: "NPU firmware (/lib/firmware): microcode for NPU. Driver loads it during initialisation."
+
+  - id: q07
+    bloom: analyse
+    difficulty: hard
+    text: "When is it preferable to use CPU vs NPU for AI inference?"
+    options:
+      - "Always NPU"
+      - "NPU: large models, batch processing, energy efficiency. CPU: small models, minimal latency, flexibility"
+      - "Always CPU"
+      - "It does not matter"
+    correct: 1
+    explanation: "NPU: throughput, efficiency. CPU: transfer overhead can exceed benefit for small models."
+
+  - id: q08
+    bloom: analyse
+    difficulty: hard
+    text: "What is the main overhead when using NPU from userspace?"
+    options:
+      - "There is no overhead"
+      - "Data transfer between RAM and NPU memory plus job dispatch latency"
+      - "Code compilation"
+      - "Energy consumption"
+    correct: 1
+    explanation: "Data movement: PCIe/memory bandwidth bottleneck. For small models, transfer > compute."
+
+  - id: q09
+    bloom: analyse
+    difficulty: hard
+    text: "Why must AI models be 'compiled' for NPU?"
+    options:
+      - "They do not need compilation"
+      - "The NPU has a specific instruction set and memory layout; the model must be optimised for the hardware"
+      - "For security"
+      - "For debugging"
+    correct: 1
+    explanation: "Compilation: graph optimisation, quantisation, memory planning for specific NPU architecture."
+
+  - id: q10
+    bloom: apply
+    difficulty: hard
+    text: "You have an application performing continuous AI inference on a laptop. Why prefer NPU over GPU?"
+    options:
+      - "GPU is always better"
+      - "NPU: much lower power consumption (1-5W vs 15-50W GPU), longer battery life, no thermal throttling"
+      - "NPU is faster"
+      - "GPU cannot do AI"
+    correct: 1
+    explanation: "Laptop: thermal and battery constraints limit GPU. NPU: energy efficiency for sustained inference."

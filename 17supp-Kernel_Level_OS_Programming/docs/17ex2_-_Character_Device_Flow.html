@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Device Flow | Lecture 17 - Kernel Programming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #070810;
+            --bg-secondary: #0c0e18;
+            --bg-tertiary: #141622;
+            --user-space: #3b82f6;
+            --kernel-space: #dc2626;
+            --driver-color: #10b981;
+            --hardware-color: #f59e0b;
+            --data-read: #06b6d4;
+            --data-write: #f97316;
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(220, 38, 38, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(12, 14, 24, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .layer-user {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.4);
+        }
+        
+        .layer-kernel {
+            background: linear-gradient(180deg, rgba(220, 38, 38, 0.02) 0%, rgba(220, 38, 38, 0.15) 100%);
+            border: 2px solid rgba(220, 38, 38, 0.4);
+        }
+        
+        .layer-hardware {
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%);
+            border: 2px solid rgba(245, 158, 11, 0.5);
+        }
+        
+        .syscall-line {
+            height: 3px;
+            background: repeating-linear-gradient(90deg, 
+                rgba(139, 92, 246, 0.6) 0px, 
+                rgba(139, 92, 246, 0.6) 10px, 
+                transparent 10px, 
+                transparent 20px);
+            position: relative;
+        }
+        
+        .syscall-line::after {
+            content: 'SYSTEM CALLS';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-primary);
+            padding: 2px 12px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #8b5cf6;
+            letter-spacing: 1px;
+            border-radius: 4px;
+        }
+        
+        .data-packet {
+            position: absolute;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .data-packet.read {
+            background: var(--data-read);
+            color: white;
+        }
+        
+        .data-packet.write {
+            background: var(--data-write);
+            color: white;
+        }
+        
+        @keyframes dataFlowDown {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: calc(100% - 30px); opacity: 0; }
+        }
+        
+        @keyframes dataFlowUp {
+            0% { bottom: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { bottom: calc(100% - 30px); opacity: 0; }
+        }
+        
+        .op-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .op-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+        }
+        
+        .op-btn:hover::before {
+            animation: btnShimmer 0.6s ease;
+        }
+        
+        .op-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .op-btn.active {
+            transform: scale(1.05);
+        }
+        
+        @keyframes btnShimmer {
+            100% { transform: translateX(100%); }
+        }
+        
+        .fops-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .fops-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .fops-item.active {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--driver-color);
+        }
+        
+        .fd-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .fd-indicator.closed {
+            background: rgba(75, 85, 99, 0.3);
+            border: 2px dashed #4b5563;
+        }
+        
+        .fd-indicator.open {
+            background: rgba(16, 185, 129, 0.3);
+            border: 2px solid var(--driver-color);
+            animation: fdOpen 0.5s ease-out;
+        }
+        
+        @keyframes fdOpen {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .buffer-visual {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+        
+        .buffer-byte {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .buffer-byte.empty {
+            background: rgba(75, 85, 99, 0.2);
+            border: 1px dashed #4b5563;
+        }
+        
+        .buffer-byte.filled {
+            background: rgba(6, 182, 212, 0.3);
+            border: 1px solid var(--data-read);
+            color: var(--data-read);
+        }
+        
+        .buffer-byte.writing {
+            animation: byteWrite 0.3s ease-out;
+        }
+        
+        @keyframes byteWrite {
+            0% { transform: scale(1.5); background: rgba(249, 115, 22, 0.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .flow-path {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(180deg, var(--user-space), var(--kernel-space));
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+        
+        .code-highlight {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 3px solid var(--driver-color);
+            margin-left: -8px;
+            padding-left: 5px;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 via-emerald-500 to-amber-500 flex items-center justify-center">
+                        <i class="fas fa-exchange-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Character Device Flow</h1>
+                        <p class="text-sm text-gray-400">Lecture 17 • Utilizator Space ↔ Kernel Space Communication</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="btnReset" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button id="btnAutoDemo" class="px-5 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 rounded-lg transition flex items-center gap-2 font-semibold">
+                        <i class="fas fa-play"></i> Auto Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Overview -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-info-circle text-emerald-400 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="font-bold text-lg mb-2">Character Device = Fișier Special</h2>
+                    <p class="text-gray-400 text-sm mb-3">
+                        Aplicatiile din user space comunica cu driver-ele kernel folosind <code class="bg-gray-800 px-2 py-0.5 rounded">/dev/</code> entries.
+                        Device files are "gates" to driver functions: <code>open()</code>, <code>read()</code>, <code>write()</code>, <code>close()</code>.
+                    </p>
+                    <div class="flex gap-3 text-xs">
+                        <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">Utilizator Space</span>
+                        <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full">Kernel Space</span>
+                        <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full">Hardware</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left: Layer Visualization -->
+            <div class="col-span-7">
+                <div class="relative" id="flowContainer">
+                    <!-- Utilizator Space Layer -->
+                    <div class="layer-user rounded-t-2xl p-5 relative">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-user text-blue-400"></i>
+                            <h3 class="font-bold text-blue-400">USER SPACE</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Application -->
+                            <div class="bg-gray-900/60 rounded-xl p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-terminal text-purple-400"></i>
+                                    <span class="font-semibold text-sm">Application</span>
+                                </div>
+                                
+                                <div class="space-y-2 text-xs mono">
+                                    <div id="appLine1" class="p-2 rounded bg-gray-800/50">
+                                        <span class="text-blue-400">int</span> fd = <span class="text-amber-400">open</span>(<span class="text-green-400">"/dev/mychar"</span>, O_RDWR);
+                                    </div>
+                                    <div id="appLine2" class="p-2 rounded bg-gray-800/50">
+                                        <span class="text-amber-400">read</span>(fd, buffer, count);
+                                    </div>
+                                    <div id="appLine3" class="p-2 rounded bg-gray-800/50">
+                                        <span class="text-amber-400">write</span>(fd, data, len);
+                                    </div>
+                                    <div id="appLine4" class="p-2 rounded bg-gray-800/50">
+                                        <span class="text-amber-400">close</span>(fd);
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Fișier Descriptor Table -->
+                            <div class="bg-gray-900/60 rounded-xl p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-table text-cyan-400"></i>
+                                    <span class="font-semibold text-sm">Fișier Descriptor Table</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="text-center">
+                                        <div class="fd-indicator closed mx-auto">
+                                            <span class="text-xs text-gray-500">0</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">stdin</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fd-indicator closed mx-auto">
+                                            <span class="text-xs text-gray-500">1</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">stdout</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="fd-indicator closed mx-auto">
+                                            <span class="text-xs text-gray-500">2</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">stderr</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div id="fd3" class="fd-indicator closed mx-auto">
+                                            <span class="text-xs text-gray-500">3</span>
+                                        </div>
+                                        <span id="fd3Label" class="text-xs text-gray-500">-</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Utilizator Buffer -->
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-400 mb-2">Utilizator Buffer:</p>
+                                    <div id="userBuffer" class="buffer-visual">
+                                        <!-- Generated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Call Interface -->
+                    <div class="syscall-line"></div>
+                    
+                    <!-- Kernel Space Layer -->
+                    <div class="layer-kernel p-5 relative">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-shield-alt text-red-400"></i>
+                            <h3 class="font-bold text-red-400">KERNEL SPACE</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- VFS -->
+                            <div class="bg-gray-900/60 rounded-xl p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-folder-tree text-red-400"></i>
+                                    <span class="font-semibold text-sm">VFS (Virtual Fișier System)</span>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <div class="p-2 rounded bg-red-500/10 border border-red-500/30">
+                                        <p class="text-xs text-gray-400">Device Node:</p>
+                                        <p class="mono text-sm text-red-300">/dev/mychar</p>
+                                        <p class="text-xs text-gray-500">major: 240, minor: 0</p>
+                                    </div>
+                                    <div id="vfsStatus" class="p-2 rounded bg-gray-800/50 text-xs text-gray-500">
+                                        <i class="fas fa-circle text-gray-600 mr-1"></i> Idle
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Character Driver -->
+                            <div class="bg-gray-900/60 rounded-xl p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-microchip text-emerald-400"></i>
+                                    <span class="font-semibold text-sm">Character Driver</span>
+                                </div>
+                                
+                                <div id="driverFops" class="space-y-1">
+                                    <div class="fops-item p-2 rounded border border-transparent" data-op="open">
+                                        <span class="text-emerald-400 mono text-xs">.open</span>
+                                        <span class="text-gray-500 text-xs ml-2">= my_open</span>
+                                    </div>
+                                    <div class="fops-item p-2 rounded border border-transparent" data-op="read">
+                                        <span class="text-cyan-400 mono text-xs">.read</span>
+                                        <span class="text-gray-500 text-xs ml-2">= my_read</span>
+                                    </div>
+                                    <div class="fops-item p-2 rounded border border-transparent" data-op="write">
+                                        <span class="text-orange-400 mono text-xs">.write</span>
+                                        <span class="text-gray-500 text-xs ml-2">= my_write</span>
+                                    </div>
+                                    <div class="fops-item p-2 rounded border border-transparent" data-op="release">
+                                        <span class="text-red-400 mono text-xs">.release</span>
+                                        <span class="text-gray-500 text-xs ml-2">= my_release</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kernel Buffer -->
+                                <div class="mt-3">
+                                    <p class="text-xs text-gray-400 mb-2">Kernel Buffer:</p>
+                                    <div id="kernelBuffer" class="buffer-visual">
+                                        <!-- Generated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hardware Layer -->
+                    <div class="layer-hardware rounded-b-2xl p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fas fa-hdd text-amber-400"></i>
+                            <h3 class="font-bold text-amber-400">HARDWARE</h3>
+                        </div>
+                        
+                        <div class="flex items-center justify-center gap-8">
+                            <div class="text-center">
+                                <div id="hwDevice" class="w-20 h-20 rounded-xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center">
+                                    <i class="fas fa-microchip text-3xl text-amber-400"></i>
+                                </div>
+                                <p class="text-xs text-amber-300 mt-2">Device Registers</p>
+                            </div>
+                            <div class="text-center">
+                                <div id="hwMemory" class="w-20 h-20 rounded-xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center">
+                                    <i class="fas fa-memory text-3xl text-amber-400"></i>
+                                </div>
+                                <p class="text-xs text-amber-300 mt-2">Memory-Mapped I/O</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Controls & Code -->
+            <div class="col-span-5">
+                <!-- Operation Buttons -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-play-circle text-cyan-400"></i>
+                        Operations
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="btnOpen" class="op-btn p-4 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-xl border border-emerald-500/30 transition">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-door-open text-emerald-400"></i>
+                                <span class="font-semibold text-emerald-400">open()</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Opens the device</p>
+                        </button>
+                        
+                        <button id="btnRead" class="op-btn p-4 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-xl border border-cyan-500/30 transition" disabled>
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-download text-cyan-400"></i>
+                                <span class="font-semibold text-cyan-400">read()</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Reads data</p>
+                        </button>
+                        
+                        <button id="btnWrite" class="op-btn p-4 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl border border-orange-500/30 transition" disabled>
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-upload text-orange-400"></i>
+                                <span class="font-semibold text-orange-400">write()</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Writes data</p>
+                        </button>
+                        
+                        <button id="btnClose" class="op-btn p-4 bg-red-500/10 hover:bg-red-500/20 rounded-xl border border-red-500/30 transition" disabled>
+                            <div class="flex items-center gap-2 mb-1">
+                                <i class="fas fa-door-closed text-red-400"></i>
+                                <span class="font-semibold text-red-400">close()</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Closes the device</p>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- file_operations Structure -->
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-code text-purple-400"></i>
+                        struct file_operations
+                    </h3>
+                    
+                    <div class="bg-black rounded-xl p-4 mono text-xs overflow-x-auto scroll-area">
+                        <pre class="text-gray-300"><span class="text-purple-400">static struct</span> file_operations fops = {
+    .owner   = THIS_MODULE,
+    <span id="fopsOpen" class="transition-all duration-300">.open    = my_open,</span>
+    <span id="fopsRead" class="transition-all duration-300">.read    = my_read,</span>
+    <span id="fopsWrite" class="transition-all duration-300">.write   = my_write,</span>
+    <span id="fopsRelease" class="transition-all duration-300">.release = my_release,</span>
+};</pre>
+                    </div>
+                </div>
+                
+                <!-- Data Flow Log -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-stream text-amber-400"></i>
+                        Data Flow Log
+                    </h3>
+                    
+                    <div id="flowLog" class="bg-black rounded-xl p-4 h-48 overflow-y-auto scroll-area mono text-xs">
+                        <div class="text-gray-500">[system] Character device ready at /dev/mychar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copy Functions Explanation -->
+        <div class="glass-panel rounded-2xl p-5 mt-6">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fas fa-exchange-alt text-indigo-400"></i>
+                Utilizator ↔ Kernel Data Transfer
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div class="p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-arrow-down text-cyan-400"></i>
+                        <span class="font-semibold text-cyan-400 mono">copy_to_user()</span>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-2">Kernel → Utilizator Space</p>
+                    <p class="text-xs text-gray-500">Used in <code class="bg-gray-800 px-1 rounded">read()</code> to send data from kernel buffer to application.</p>
+                    <div class="mt-3 p-2 bg-black/50 rounded mono text-xs">
+                        copy_to_user(user_buf, kernel_buf, count);
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-orange-500/10 rounded-xl border border-orange-500/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-arrow-up text-orange-400"></i>
+                        <span class="font-semibold text-orange-400 mono">copy_from_user()</span>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-2">Utilizator Space → Kernel</p>
+                    <p class="text-xs text-gray-500">Used in <code class="bg-gray-800 px-1 rounded">write()</code> to receive data from application in kernel buffer.</p>
+                    <div class="mt-3 p-2 bg-black/50 rounded mono text-xs">
+                        copy_from_user(kernel_buf, user_buf, count);
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/30">
+                <p class="text-sm text-red-300">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>IMPORTANT:</strong> You cannot directly access user space memory from kernel! 
+                    Always use <code class="bg-gray-800 px-1 rounded">copy_to_user()</code> / <code class="bg-gray-800 px-1 rounded">copy_from_user()</code>
+                    for a evita kernel panic and security vulnerabilities.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 p-3 text-xs text-gray-500">
+        By Revolvix, limited licence 2019-2030 | ASE-CSIE Bucharest
+    </footer>
+
+    <script>
+        // State
+        const state = {
+            isOpen: false,
+            userBuffer: Array(16).fill(null),
+            kernelBuffer: Array(16).fill(null),
+            isAutoDemo: false
+        };
+
+        // Sample data
+        const sampleData = ['H', 'e', 'l', 'l', 'o', ' ', 'K', 'e', 'r', 'n', 'e', 'l', '!', 0, 0, 0];
+
+        // DOM Elements
+        const elements = {
+            btnOpen: document.getElementById('btnOpen'),
+            btnRead: document.getElementById('btnRead'),
+            btnWrite: document.getElementById('btnWrite'),
+            btnClose: document.getElementById('btnClose'),
+            btnReset: document.getElementById('btnReset'),
+            btnAutoDemo: document.getElementById('btnAutoDemo'),
+            fd3: document.getElementById('fd3'),
+            fd3Label: document.getElementById('fd3Label'),
+            userBuffer: document.getElementById('userBuffer'),
+            kernelBuffer: document.getElementById('kernelBuffer'),
+            vfsStatus: document.getElementById('vfsStatus'),
+            flowLog: document.getElementById('flowLog'),
+            appLine1: document.getElementById('appLine1'),
+            appLine2: document.getElementById('appLine2'),
+            appLine3: document.getElementById('appLine3'),
+            appLine4: document.getElementById('appLine4'),
+            fopsOpen: document.getElementById('fopsOpen'),
+            fopsRead: document.getElementById('fopsRead'),
+            fopsWrite: document.getElementById('fopsWrite'),
+            fopsRelease: document.getElementById('fopsRelease'),
+            hwDevice: document.getElementById('hwDevice'),
+            hwMemory: document.getElementById('hwMemory'),
+            driverFops: document.getElementById('driverFops')
+        };
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function log(message, type = 'info') {
+            const colors = {
+                info: 'text-gray-400',
+                user: 'text-blue-400',
+                kernel: 'text-red-400',
+                driver: 'text-emerald-400',
+                data: 'text-cyan-400',
+                success: 'text-green-400',
+                error: 'text-red-400'
+            };
+            
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const div = document.createElement('div');
+            div.className = colors[type] || colors.info;
+            div.innerHTML = `<span class="text-gray-600">[${time}]</span> ${message}`;
+            elements.flowLog.appendChild(div);
+            elements.flowLog.scrollTop = elements.flowLog.scrollHeight;
+        }
+
+        function initBuffers() {
+            // Utilizator buffer
+            elements.userBuffer.innerHTML = '';
+            state.userBuffer = Array(16).fill(null);
+            for (let i = 0; i < 16; i++) {
+                const byte = document.createElement('div');
+                byte.className = 'buffer-byte empty';
+                byte.id = `ubyte${i}`;
+                elements.userBuffer.appendChild(byte);
+            }
+            
+            // Kernel buffer - pre-filled with sample data
+            elements.kernelBuffer.innerHTML = '';
+            state.kernelBuffer = [...sampleData];
+            for (let i = 0; i < 16; i++) {
+                const byte = document.createElement('div');
+                byte.className = state.kernelBuffer[i] ? 'buffer-byte filled' : 'buffer-byte empty';
+                byte.textContent = state.kernelBuffer[i] || '';
+                byte.id = `kbyte${i}`;
+                elements.kernelBuffer.appendChild(byte);
+            }
+        }
+
+        function highlightAppLine(lineEl) {
+            [elements.appLine1, elements.appLine2, elements.appLine3, elements.appLine4].forEach(el => {
+                el.classList.remove('code-highlight');
+            });
+            if (lineEl) {
+                lineEl.classList.add('code-highlight');
+            }
+        }
+
+        function highlightFops(op) {
+            document.querySelectorAll('.fops-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            const item = document.querySelector(`.fops-item[data-op="${op}"]`);
+            if (item) {
+                item.classList.add('active');
+            }
+            
+            // Highlight in code
+            [elements.fopsOpen, elements.fopsRead, elements.fopsWrite, elements.fopsRelease].forEach(el => {
+                el.classList.remove('code-highlight');
+            });
+            
+            const fopsMap = {
+                'open': elements.fopsOpen,
+                'read': elements.fopsRead,
+                'write': elements.fopsWrite,
+                'release': elements.fopsRelease
+            };
+            if (fopsMap[op]) {
+                fopsMap[op].classList.add('code-highlight');
+            }
+        }
+
+        // Open operation
+        async function doOpen() {
+            if (state.isOpen) return;
+            
+            elements.btnOpen.classList.add('active');
+            highlightAppLine(elements.appLine1);
+            
+            log('Utilizator: open("/dev/mychar", O_RDWR)', 'user');
+            await sleep(300);
+            
+            log('VFS: Looking up /dev/mychar...', 'kernel');
+            elements.vfsStatus.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400 mr-1"></i> Looking up...';
+            await sleep(400);
+            
+            log('VFS: Found char device (major=240, minor=0)', 'kernel');
+            await sleep(300);
+            
+            highlightFops('open');
+            log('Driver: my_open() called', 'driver');
+            await sleep(300);
+            
+            // Open fd
+            elements.fd3.classList.remove('closed');
+            elements.fd3.classList.add('open');
+            elements.fd3.innerHTML = '<span class="text-xs text-emerald-400 font-bold">3</span>';
+            elements.fd3Label.textContent = '/dev/mychar';
+            elements.fd3Label.className = 'text-xs text-emerald-400';
+            
+            elements.vfsStatus.innerHTML = '<i class="fas fa-check-circle text-emerald-400 mr-1"></i> Device open (fd=3)';
+            
+            log('Return: fd = 3', 'success');
+            
+            state.isOpen = true;
+            elements.btnOpen.disabled = true;
+            elements.btnRead.disabled = false;
+            elements.btnWrite.disabled = false;
+            elements.btnClose.disabled = false;
+            
+            elements.btnOpen.classList.remove('active');
+            highlightAppLine(null);
+            highlightFops(null);
+        }
+
+        // Read operation
+        async function doRead() {
+            if (!state.isOpen) return;
+            
+            elements.btnRead.classList.add('active');
+            highlightAppLine(elements.appLine2);
+            
+            log('Utilizator: read(fd=3, buffer, 13)', 'user');
+            await sleep(300);
+            
+            log('VFS: Routing to character driver...', 'kernel');
+            await sleep(200);
+            
+            highlightFops('read');
+            log('Driver: my_read() called', 'driver');
+            await sleep(300);
+            
+            log('Driver: copy_to_user() - Kernel → Utilizator', 'data');
+            
+            // Animate data transfer
+            for (let i = 0; i < 13; i++) {
+                const kbyte = document.getElementById(`kbyte${i}`);
+                const ubyte = document.getElementById(`ubyte${i}`);
+                
+                if (kbyte && ubyte && state.kernelBuffer[i]) {
+                    kbyte.classList.add('writing');
+                    await sleep(50);
+                    
+                    ubyte.classList.remove('empty');
+                    ubyte.classList.add('filled', 'writing');
+                    ubyte.textContent = state.kernelBuffer[i];
+                    state.userBuffer[i] = state.kernelBuffer[i];
+                    
+                    kbyte.classList.remove('writing');
+                }
+            }
+            
+            await sleep(300);
+            log('Return: bytes_read = 13', 'success');
+            
+            elements.btnRead.classList.remove('active');
+            highlightAppLine(null);
+            highlightFops(null);
+        }
+
+        // Write operation
+        async function doWrite() {
+            if (!state.isOpen) return;
+            
+            elements.btnWrite.classList.add('active');
+            highlightAppLine(elements.appLine3);
+            
+            const writeData = ['W', 'r', 'i', 't', 'e', ' ', 'O', 'K'];
+            
+            log(`Utilizator: write(fd=3, "Write OK", 8)`, 'user');
+            await sleep(300);
+            
+            log('VFS: Routing to character driver...', 'kernel');
+            await sleep(200);
+            
+            highlightFops('write');
+            log('Driver: my_write() called', 'driver');
+            await sleep(300);
+            
+            log('Driver: copy_from_user() - Utilizator → Kernel', 'data');
+            
+            // Animate data transfer (write to kernel buffer from position 0)
+            for (let i = 0; i < writeData.length; i++) {
+                const kbyte = document.getElementById(`kbyte${i}`);
+                
+                if (kbyte) {
+                    kbyte.classList.add('writing');
+                    await sleep(50);
+                    
+                    kbyte.classList.remove('empty');
+                    kbyte.classList.add('filled');
+                    kbyte.textContent = writeData[i];
+                    kbyte.style.background = 'rgba(249, 115, 22, 0.3)';
+                    kbyte.style.borderColor = '#f97316';
+                    state.kernelBuffer[i] = writeData[i];
+                    
+                    kbyte.classList.remove('writing');
+                }
+            }
+            
+            // Flash hardware to show it received data
+            elements.hwDevice.style.boxShadow = '0 0 30px rgba(245, 158, 11, 0.5)';
+            elements.hwMemory.style.boxShadow = '0 0 30px rgba(245, 158, 11, 0.5)';
+            await sleep(300);
+            elements.hwDevice.style.boxShadow = '';
+            elements.hwMemory.style.boxShadow = '';
+            
+            log('Return: bytes_written = 8', 'success');
+            
+            elements.btnWrite.classList.remove('active');
+            highlightAppLine(null);
+            highlightFops(null);
+        }
+
+        // Close operation
+        async function doClose() {
+            if (!state.isOpen) return;
+            
+            elements.btnClose.classList.add('active');
+            highlightAppLine(elements.appLine4);
+            
+            log('Utilizator: close(fd=3)', 'user');
+            await sleep(300);
+            
+            log('VFS: Closing file descriptor...', 'kernel');
+            await sleep(200);
+            
+            highlightFops('release');
+            log('Driver: my_release() called', 'driver');
+            await sleep(300);
+            
+            // Close fd
+            elements.fd3.classList.remove('open');
+            elements.fd3.classList.add('closed');
+            elements.fd3.innerHTML = '<span class="text-xs text-gray-500">3</span>';
+            elements.fd3Label.textContent = '-';
+            elements.fd3Label.className = 'text-xs text-gray-500';
+            
+            elements.vfsStatus.innerHTML = '<i class="fas fa-circle text-gray-600 mr-1"></i> Idle';
+            
+            log('Return: 0 (success)', 'success');
+            
+            state.isOpen = false;
+            elements.btnOpen.disabled = false;
+            elements.btnRead.disabled = true;
+            elements.btnWrite.disabled = true;
+            elements.btnClose.disabled = true;
+            
+            elements.btnClose.classList.remove('active');
+            highlightAppLine(null);
+            highlightFops(null);
+        }
+
+        // Auto Demo
+        async function autoDemo() {
+            if (state.isAutoDemo) return;
+            state.isAutoDemo = true;
+            
+            elements.btnAutoDemo.disabled = true;
+            elements.btnAutoDemo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            
+            reset();
+            await sleep(500);
+            
+            await doOpen();
+            await sleep(800);
+            
+            await doRead();
+            await sleep(800);
+            
+            await doWrite();
+            await sleep(800);
+            
+            await doClose();
+            
+            state.isAutoDemo = false;
+            elements.btnAutoDemo.disabled = false;
+            elements.btnAutoDemo.innerHTML = '<i class="fas fa-play"></i> Auto Demo';
+        }
+
+        function reset() {
+            state.isOpen = false;
+            
+            // Reset FD
+            elements.fd3.classList.remove('open');
+            elements.fd3.classList.add('closed');
+            elements.fd3.innerHTML = '<span class="text-xs text-gray-500">3</span>';
+            elements.fd3Label.textContent = '-';
+            elements.fd3Label.className = 'text-xs text-gray-500';
+            
+            // Reset VFS status
+            elements.vfsStatus.innerHTML = '<i class="fas fa-circle text-gray-600 mr-1"></i> Idle';
+            
+            // Reset buttons
+            elements.btnOpen.disabled = false;
+            elements.btnRead.disabled = true;
+            elements.btnWrite.disabled = true;
+            elements.btnClose.disabled = true;
+            
+            // Reset buffers
+            initBuffers();
+            
+            // Reset highlights
+            highlightAppLine(null);
+            highlightFops(null);
+            
+            // Clear log
+            elements.flowLog.innerHTML = '<div class="text-gray-500">[system] Character device ready at /dev/mychar</div>';
+        }
+
+        // Event Listeners
+        elements.btnOpen.addEventListener('click', doOpen);
+        elements.btnRead.addEventListener('click', doRead);
+        elements.btnWrite.addEventListener('click', doWrite);
+        elements.btnClose.addEventListener('click', doClose);
+        elements.btnReset.addEventListener('click', reset);
+        elements.btnAutoDemo.addEventListener('click', autoDemo);
+
+        // Initialize
+        initBuffers();
+    </script>
+</body>
+</html>
