@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # C02_01_COURSE_PLAN.md
 # Course Plan — Basic OS Concepts
 

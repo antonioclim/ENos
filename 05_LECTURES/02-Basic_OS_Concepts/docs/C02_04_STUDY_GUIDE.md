@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # C02_04_STUDY_GUIDE.md
 # Study Guide — Basic OS Concepts
 

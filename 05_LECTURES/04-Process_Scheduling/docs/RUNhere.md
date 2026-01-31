@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 04 Documentation — Process Scheduling
 
 > **Location:** `05_LECTURES/04-Process_Scheduling/docs/`  

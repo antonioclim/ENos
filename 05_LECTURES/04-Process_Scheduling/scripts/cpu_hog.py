@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Controlled CPU hog (used in scheduling demos).

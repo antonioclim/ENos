@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Scheduling
 
 1. **Why is SJF optimal but not practical?**

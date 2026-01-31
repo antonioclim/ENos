@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml scheduling_algorithms_gantt_comparison
 !include ../../diagrams_common/skin.puml
 title Scheduling Algorithms Comparison - Gantt Charts

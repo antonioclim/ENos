@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # Course Plan — Introduction to Operating Systems
 
 > Course 01 | Operating Systems | ASE Bucharest - CSIE

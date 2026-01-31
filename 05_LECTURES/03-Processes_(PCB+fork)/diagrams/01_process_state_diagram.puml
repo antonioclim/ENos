@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml process_state_diagram
 !include ../../diagrams_common/skin.puml
 title Process State Diagram

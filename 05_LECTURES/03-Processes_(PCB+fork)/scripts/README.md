@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 03
 
 This directory contains short scripts (Bash/Python) used for demonstrations in the laboratory. They are designed to be **reproducible** and to highlight a concrete OS concept.

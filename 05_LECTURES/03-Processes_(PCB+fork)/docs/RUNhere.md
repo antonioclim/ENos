@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 03 Documentation — Processes (PCB + fork)
 
 > **Location:** `05_LECTURES/03-Processes_(PCB+fork)/docs/`  

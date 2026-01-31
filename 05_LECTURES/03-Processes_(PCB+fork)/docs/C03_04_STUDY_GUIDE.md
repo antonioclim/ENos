@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # C03_04_STUDY_GUIDE.md
 # Study Guide — Processes
 

@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # Concept Map — Introduction to Operating Systems
 
 > Course 01 | Visual representation of key concepts and relationships

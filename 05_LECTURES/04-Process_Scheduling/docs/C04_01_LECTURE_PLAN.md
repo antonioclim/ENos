@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Lecture Plan — Process Scheduling
 > Week 4 | by Revolvix
 

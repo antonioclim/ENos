@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # 📁 Lecture 01 Documentation — Introduction to Operating Systems
 
 > **Location:** `05_LECTURES/01-Introduction_to_Operating_Systems/docs/`  

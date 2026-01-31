@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 #!/usr/bin/env python3
 """
 Simplified simulation of "Batch Processing" (introductory level).

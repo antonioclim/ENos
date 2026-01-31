@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Demo (Week 3): `fork()` / PID / PPID / `wait()`.

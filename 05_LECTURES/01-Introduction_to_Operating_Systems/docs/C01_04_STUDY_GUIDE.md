@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # Study Guide — Introduction to Operating Systems
 
 > Course 01 | Self-study resource and exam preparation

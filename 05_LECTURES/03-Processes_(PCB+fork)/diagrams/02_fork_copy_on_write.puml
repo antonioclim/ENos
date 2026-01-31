@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml fork_copy_on_write
 !include ../../diagrams_common/skin.puml
 title fork() and Copy-on-Write (CoW)

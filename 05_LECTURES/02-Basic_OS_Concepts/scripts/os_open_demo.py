@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 #!/usr/bin/env python3
 """
 Demo: file I/O via POSIX APIs exposed in Python (os.open / os.read / os.write).

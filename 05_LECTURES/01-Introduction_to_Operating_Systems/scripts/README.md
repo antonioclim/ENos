@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # Demonstration Scripts — Week 01
 
 > Introduction to Operating Systems | ASE Bucharest - CSIE

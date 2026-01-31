@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # C02_03_DISCUSSION_QUESTIONS.md
 # Discussion Questions — Basic OS Concepts
 

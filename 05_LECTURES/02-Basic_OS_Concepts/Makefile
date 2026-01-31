@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Makefile — Course 02: Basic OS Concepts
 # Operating Systems | ASE Bucharest - CSIE | 2025-2026

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # C03_01_COURSE_PLAN.md
 # Course Plan — Processes (PCB + fork)
 

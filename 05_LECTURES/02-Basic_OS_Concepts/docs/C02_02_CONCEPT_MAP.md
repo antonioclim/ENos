@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # C02_02_CONCEPT_MAP.md
 # Concept Map — Basic OS Concepts
 

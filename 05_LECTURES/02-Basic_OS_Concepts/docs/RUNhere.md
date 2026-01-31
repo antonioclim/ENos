@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # 📁 Lecture 02 Documentation — Basic OS Concepts
 
 > **Location:** `05_LECTURES/02-Basic_OS_Concepts/docs/`  

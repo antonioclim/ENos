@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 # Discussion Questions — Introduction to Operating Systems
 
 > Course 01 | Socratic questions for deeper engagement

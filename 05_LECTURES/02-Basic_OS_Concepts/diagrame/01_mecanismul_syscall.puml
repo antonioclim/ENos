@@ -1,3 +1,5 @@
+/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+
 @startuml mecanismul_syscall
 !include ../../diagrame_common/skin.puml
 title System Call Mechanism - open()

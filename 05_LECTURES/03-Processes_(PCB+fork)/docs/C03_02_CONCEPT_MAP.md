@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # C03_02_CONCEPT_MAP.md
 # Concept Map — Processes
 

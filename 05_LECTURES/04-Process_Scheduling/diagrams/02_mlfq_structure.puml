@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml mlfq_structure
 !include ../../diagrams_common/skin.puml
 title Multi-Level Feedback Queue (MLFQ)
