@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
 #
 # firewall_basic.sh - Basic firewall configuration with iptables

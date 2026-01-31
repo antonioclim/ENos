@@ -1,4 +1,4 @@
-# Concept Map — OS Security
+# Hartă conceptuală — OS Security
 
 ```
               ┌──────────────────┐

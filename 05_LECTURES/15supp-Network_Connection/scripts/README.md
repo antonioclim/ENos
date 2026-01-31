@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Demo Scripts — Lesson 15 Supplementary: Network Connection
 
 > Operating Systems | ASE Bucharest - CSIE | 2025-2026  

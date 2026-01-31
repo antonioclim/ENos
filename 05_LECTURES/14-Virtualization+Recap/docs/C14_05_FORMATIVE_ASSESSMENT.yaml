@@ -25,7 +25,7 @@ questions:
       - "A type of processor"
       - "Software that creates and manages virtual machines, providing hardware abstraction"
       - "A network protocol"
-      - "A type of memory"
+      - "A type of memorie"
     correct: 1
     explanation: "Hypervisor = layer that allows running multiple OSes on the same physical hardware."
 
@@ -61,14 +61,14 @@ questions:
       - "They increase CPU speed"
       - "They add a new ring (ring -1) for the hypervisor, enabling efficient traps"
       - "They encrypt data"
-      - "They manage memory"
+      - "They manage memorie"
     correct: 1
     explanation: "Hardware virtualisation: hypervisor in VMX root mode, guest in VMX non-root. Efficient VM exits."
 
   - id: q05
     bloom: understand
     difficulty: medium
-    text: "What is a shadow page table and why is it necessary?"
+    text: "What is a shadow tabel de pagini and why is it necessary?"
     options:
       - "A backup copy"
       - "The hypervisor maintains guest-virtual → host-physical translation for performance"
@@ -82,7 +82,7 @@ questions:
     difficulty: medium
     text: "What advantage does EPT/NPT (Extended Page Tables) offer?"
     options:
-      - "More memory"
+      - "More memorie"
       - "Hardware manages guest→host address translation, eliminating shadow PT"
       - "Improved security"
       - "It offers no advantages"
@@ -99,7 +99,7 @@ questions:
       - "Containers have no isolation"
       - "VMs are older"
     correct: 1
-    explanation: "Container: isolated processes (namespaces, cgroups), without full OS overhead."
+    explanation: "Container: isolated procese (namespaces, cgroups), without full OS overhead."
 
   - id: q08
     bloom: understand
@@ -111,7 +111,7 @@ questions:
       - "Shadow page tables"
       - "Type 2 hypervisor"
     correct: 1
-    explanation: "Namespaces: isolate PID, network, mount, etc. Cgroups: limit CPU, memory, I/O."
+    explanation: "Namespaces: isolate PID, network, mount, etc. Cgroups: limit CPU, memorie, I/O."
 
   - id: q09
     bloom: analyse
@@ -156,7 +156,7 @@ questions:
     options:
       - "100 full VMs"
       - "Containers: share kernel and libraries, overhead ~MB per instance vs ~GB per VM"
-      - "100 processes without isolation"
+      - "100 procese without isolation"
       - "It is not possible"
     correct: 1
     explanation: "Container: ~10-50MB overhead vs VM ~1GB. 100 containers in 64GB possible; 100 VMs - impossible."

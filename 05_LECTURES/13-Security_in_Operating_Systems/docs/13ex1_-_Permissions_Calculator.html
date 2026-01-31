@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIX Permissions Calculator - Operating Systems</title>
+    <title>UNIX Permissions Calculator - Sisteme de Operare</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -106,7 +106,7 @@
                         <!-- Owner -->
                         <div class="p-4 rounded-xl border-2 category-owner bg-blue-900/10">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="font-semibold text-blue-400"><i class="fas fa-user mr-2"></i>Owner (u)</span>
+                                <span class="font-semibold text-blue-400"><i class="fas fa-utilizator mr-2"></i>Owner (u)</span>
                                 <span class="mono text-sm text-gray-400" id="owner-symbolic">rwx</span>
                             </div>
                             <div class="flex justify-center gap-4">
@@ -377,8 +377,8 @@
             
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4">
-                    <div class="text-red-400 font-bold mb-2"><i class="fas fa-user-shield mr-2"></i>SUID (4000)</div>
-                    <p class="text-sm text-gray-400 mb-2">On execution, the process runs with the <strong>owner's</strong> UID, not the executor's.</p>
+                    <div class="text-red-400 font-bold mb-2"><i class="fas fa-utilizator-shield mr-2"></i>SUID (4000)</div>
+                    <p class="text-sm text-gray-400 mb-2">On execution, the proces runs with the <strong>owner's</strong> UID, not the executor's.</p>
                     <div class="mono text-xs bg-gray-800/50 rounded p-2">
                         -rw<span class="text-red-400 font-bold">s</span>r-xr-x (x set)<br>
                         -rw<span class="text-red-400 font-bold">S</span>r-xr-x (x not set)
@@ -388,7 +388,7 @@
                 
                 <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-4">
                     <div class="text-green-400 font-bold mb-2"><i class="fas fa-users-cog mr-2"></i>SGID (2000)</div>
-                    <p class="text-sm text-gray-400 mb-2">On execution, the process runs with the file's <strong>group</strong> GID.</p>
+                    <p class="text-sm text-gray-400 mb-2">On execution, the proces runs with the file's <strong>group</strong> GID.</p>
                     <div class="mono text-xs bg-gray-800/50 rounded p-2">
                         -rwxr-<span class="text-green-400 font-bold">s</span>r-x (x set)<br>
                         -rwxr-<span class="text-green-400 font-bold">S</span>r-x (x not set)
@@ -416,7 +416,7 @@
 
     <script>
         // Permission state
-        let permissions = {
+        let permisiuni = {
             owner: { r: true, w: true, x: true },
             group: { r: true, w: false, x: true },
             other: { r: true, w: false, x: true },
@@ -425,23 +425,23 @@
         
         // Toggle permission bit
         function toggleBit(category, bit) {
-            permissions[category][bit] = !permissions[category][bit];
+            permisiuni[category][bit] = !permisiuni[category][bit];
             updateFromPermissions();
         }
         
         // Toggle special bit
         function toggleSpecial(bit) {
-            permissions.special[bit] = !permissions.special[bit];
+            permisiuni.special[bit] = !permisiuni.special[bit];
             updateFromPermissions();
         }
         
-        // Update everything from permissions state
+        // Update everything from permisiuni state
         function updateFromPermissions() {
             // Update bit displays
             ['owner', 'group', 'other'].forEach(cat => {
                 ['r', 'w', 'x'].forEach(bit => {
                     const el = document.getElementById(`${cat}-${bit}`);
-                    if (permissions[cat][bit]) {
+                    if (permisiuni[cat][bit]) {
                         el.classList.remove('unset');
                         el.classList.add('set');
                     } else {
@@ -456,7 +456,7 @@
             // Update special bits
             ['suid', 'sgid', 'sticky'].forEach(bit => {
                 const el = document.getElementById(`${bit}-bit`);
-                if (permissions.special[bit]) {
+                if (permisiuni.special[bit]) {
                     el.classList.remove('unset');
                     el.classList.add('set');
                 } else {
@@ -466,10 +466,10 @@
             });
             
             // Calculate octal
-            const ownerOctal = (permissions.owner.r ? 4 : 0) + (permissions.owner.w ? 2 : 0) + (permissions.owner.x ? 1 : 0);
-            const groupOctal = (permissions.group.r ? 4 : 0) + (permissions.group.w ? 2 : 0) + (permissions.group.x ? 1 : 0);
-            const otherOctal = (permissions.other.r ? 4 : 0) + (permissions.other.w ? 2 : 0) + (permissions.other.x ? 1 : 0);
-            const specialOctal = (permissions.special.suid ? 4 : 0) + (permissions.special.sgid ? 2 : 0) + (permissions.special.sticky ? 1 : 0);
+            const ownerOctal = (permisiuni.owner.r ? 4 : 0) + (permisiuni.owner.w ? 2 : 0) + (permisiuni.owner.x ? 1 : 0);
+            const groupOctal = (permisiuni.group.r ? 4 : 0) + (permisiuni.group.w ? 2 : 0) + (permisiuni.group.x ? 1 : 0);
+            const otherOctal = (permisiuni.other.r ? 4 : 0) + (permisiuni.other.w ? 2 : 0) + (permisiuni.other.x ? 1 : 0);
+            const specialOctal = (permisiuni.special.suid ? 4 : 0) + (permisiuni.special.sgid ? 2 : 0) + (permisiuni.special.sticky ? 1 : 0);
             
             // Update octal inputs
             document.getElementById('octal-special').value = specialOctal;
@@ -479,40 +479,40 @@
             
             // Update symbolic displays
             document.getElementById('owner-symbolic').textContent = 
-                (permissions.owner.r ? 'r' : '-') + (permissions.owner.w ? 'w' : '-') + (permissions.owner.x ? 'x' : '-');
+                (permisiuni.owner.r ? 'r' : '-') + (permisiuni.owner.w ? 'w' : '-') + (permisiuni.owner.x ? 'x' : '-');
             document.getElementById('group-symbolic').textContent = 
-                (permissions.group.r ? 'r' : '-') + (permissions.group.w ? 'w' : '-') + (permissions.group.x ? 'x' : '-');
+                (permisiuni.group.r ? 'r' : '-') + (permisiuni.group.w ? 'w' : '-') + (permisiuni.group.x ? 'x' : '-');
             document.getElementById('other-symbolic').textContent = 
-                (permissions.other.r ? 'r' : '-') + (permissions.other.w ? 'w' : '-') + (permissions.other.x ? 'x' : '-');
+                (permisiuni.other.r ? 'r' : '-') + (permisiuni.other.w ? 'w' : '-') + (permisiuni.other.x ? 'x' : '-');
             
             // Build full symbolic string
             let symbolic = '-'; // file type
             
             // Owner
-            symbolic += permissions.owner.r ? 'r' : '-';
-            symbolic += permissions.owner.w ? 'w' : '-';
-            if (permissions.special.suid) {
-                symbolic += permissions.owner.x ? 's' : 'S';
+            symbolic += permisiuni.owner.r ? 'r' : '-';
+            symbolic += permisiuni.owner.w ? 'w' : '-';
+            if (permisiuni.special.suid) {
+                symbolic += permisiuni.owner.x ? 's' : 'S';
             } else {
-                symbolic += permissions.owner.x ? 'x' : '-';
+                symbolic += permisiuni.owner.x ? 'x' : '-';
             }
             
             // Group
-            symbolic += permissions.group.r ? 'r' : '-';
-            symbolic += permissions.group.w ? 'w' : '-';
-            if (permissions.special.sgid) {
-                symbolic += permissions.group.x ? 's' : 'S';
+            symbolic += permisiuni.group.r ? 'r' : '-';
+            symbolic += permisiuni.group.w ? 'w' : '-';
+            if (permisiuni.special.sgid) {
+                symbolic += permisiuni.group.x ? 's' : 'S';
             } else {
-                symbolic += permissions.group.x ? 'x' : '-';
+                symbolic += permisiuni.group.x ? 'x' : '-';
             }
             
             // Other
-            symbolic += permissions.other.r ? 'r' : '-';
-            symbolic += permissions.other.w ? 'w' : '-';
-            if (permissions.special.sticky) {
-                symbolic += permissions.other.x ? 't' : 'T';
+            symbolic += permisiuni.other.r ? 'r' : '-';
+            symbolic += permisiuni.other.w ? 'w' : '-';
+            if (permisiuni.special.sticky) {
+                symbolic += permisiuni.other.x ? 't' : 'T';
             } else {
-                symbolic += permissions.other.x ? 'x' : '-';
+                symbolic += permisiuni.other.x ? 'x' : '-';
             }
             
             // Update results
@@ -526,21 +526,21 @@
             document.getElementById('chmod-octal').textContent = chmodOctal;
             
             // Build symbolic chmod
-            const ownerSymbolic = (permissions.owner.r ? 'r' : '') + (permissions.owner.w ? 'w' : '') + (permissions.owner.x ? 'x' : '');
-            const groupSymbolic = (permissions.group.r ? 'r' : '') + (permissions.group.w ? 'w' : '') + (permissions.group.x ? 'x' : '');
-            const otherSymbolic = (permissions.other.r ? 'r' : '') + (permissions.other.w ? 'w' : '') + (permissions.other.x ? 'x' : '');
+            const ownerSymbolic = (permisiuni.owner.r ? 'r' : '') + (permisiuni.owner.w ? 'w' : '') + (permisiuni.owner.x ? 'x' : '');
+            const groupSymbolic = (permisiuni.group.r ? 'r' : '') + (permisiuni.group.w ? 'w' : '') + (permisiuni.group.x ? 'x' : '');
+            const otherSymbolic = (permisiuni.other.r ? 'r' : '') + (permisiuni.other.w ? 'w' : '') + (permisiuni.other.x ? 'x' : '');
             document.getElementById('chmod-symbolic').textContent = `u=${ownerSymbolic || '-'},g=${groupSymbolic || '-'},o=${otherSymbolic || '-'}`;
             
             // Update binary breakdown
             ['owner', 'group', 'other'].forEach(cat => {
-                document.getElementById(`bin-${cat}-r`).textContent = permissions[cat].r ? '1' : '0';
-                document.getElementById(`bin-${cat}-w`).textContent = permissions[cat].w ? '1' : '0';
-                document.getElementById(`bin-${cat}-x`).textContent = permissions[cat].x ? '1' : '0';
+                document.getElementById(`bin-${cat}-r`).textContent = permisiuni[cat].r ? '1' : '0';
+                document.getElementById(`bin-${cat}-w`).textContent = permisiuni[cat].w ? '1' : '0';
+                document.getElementById(`bin-${cat}-x`).textContent = permisiuni[cat].x ? '1' : '0';
                 
-                const binary = (permissions[cat].r ? '1' : '0') + (permissions[cat].w ? '1' : '0') + (permissions[cat].x ? '1' : '0');
+                const binary = (permisiuni[cat].r ? '1' : '0') + (permisiuni[cat].w ? '1' : '0') + (permisiuni[cat].x ? '1' : '0');
                 document.getElementById(`bin-${cat}`).textContent = binary;
                 
-                const octal = (permissions[cat].r ? 4 : 0) + (permissions[cat].w ? 2 : 0) + (permissions[cat].x ? 1 : 0);
+                const octal = (permisiuni[cat].r ? 4 : 0) + (permisiuni[cat].w ? 2 : 0) + (permisiuni[cat].x ? 1 : 0);
                 document.getElementById(`oct-${cat}`).textContent = octal;
             });
         }
@@ -557,22 +557,22 @@
                 return;
             }
             
-            // Convert to permissions
-            permissions.owner.r = (owner & 4) !== 0;
-            permissions.owner.w = (owner & 2) !== 0;
-            permissions.owner.x = (owner & 1) !== 0;
+            // Convert to permisiuni
+            permisiuni.owner.r = (owner & 4) !== 0;
+            permisiuni.owner.w = (owner & 2) !== 0;
+            permisiuni.owner.x = (owner & 1) !== 0;
             
-            permissions.group.r = (group & 4) !== 0;
-            permissions.group.w = (group & 2) !== 0;
-            permissions.group.x = (group & 1) !== 0;
+            permisiuni.group.r = (group & 4) !== 0;
+            permisiuni.group.w = (group & 2) !== 0;
+            permisiuni.group.x = (group & 1) !== 0;
             
-            permissions.other.r = (other & 4) !== 0;
-            permissions.other.w = (other & 2) !== 0;
-            permissions.other.x = (other & 1) !== 0;
+            permisiuni.other.r = (other & 4) !== 0;
+            permisiuni.other.w = (other & 2) !== 0;
+            permisiuni.other.x = (other & 1) !== 0;
             
-            permissions.special.suid = (special & 4) !== 0;
-            permissions.special.sgid = (special & 2) !== 0;
-            permissions.special.sticky = (special & 1) !== 0;
+            permisiuni.special.suid = (special & 4) !== 0;
+            permisiuni.special.sgid = (special & 2) !== 0;
+            permisiuni.special.sticky = (special & 1) !== 0;
             
             updateFromPermissions();
         }

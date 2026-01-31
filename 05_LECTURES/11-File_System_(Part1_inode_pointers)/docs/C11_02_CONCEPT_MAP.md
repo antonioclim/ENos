@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Concept Map — Filesystem P1
 
 ```

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
 title Client-Server Model: TCP Socket Flow
 participant "Client" as C

@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 11 Documentation — File System Part 1
 
 > **Location:** `05_LECTURES/11-File_System_(Part1_inode_pointers)/docs/`  

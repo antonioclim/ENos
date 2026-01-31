@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 12 Documentation — File System Part 2
 
 > **Location:** `05_LECTURES/12-File_System_Part2_alloc_extent_struct/docs/`  

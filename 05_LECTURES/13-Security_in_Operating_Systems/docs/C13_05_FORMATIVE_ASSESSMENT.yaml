@@ -1,10 +1,10 @@
 # C13_05_FORMATIVE_ASSESSMENT.yaml
-# Course 13: Security in Operating Systems
+# Course 13: Security in Sisteme de Operare
 # Formative Assessment — Conceptual Quiz
 
 metadata:
   course: 13
-  subject: "Security in Operating Systems"
+  subject: "Security in Sisteme de Operare"
   version: "2.0"
   creation_date: "2026-01-28"
   author: "by Revolvix"
@@ -32,7 +32,7 @@ questions:
   - id: q02
     bloom: remember
     difficulty: easy
-    text: "What do the permissions rwxr-xr-- represent in Linux?"
+    text: "What do the permisiuni rwxr-xr-- represent in Linux?"
     options:
       - "Everyone has full access"
       - "Owner: read+write+execute, Group: read+execute, Others: read only"
@@ -47,9 +47,9 @@ questions:
     text: "What is the SUID bit?"
     options:
       - "A virus"
-      - "When set on an executable, it runs with the owner's permissions, not those of the user executing it"
+      - "When set on an executable, it runs with the owner's permisiuni, not those of the utilizator executing it"
       - "A type of encryption"
-      - "A network command"
+      - "A network comandă"
     correct: 1
     explanation: "SUID: allows normal users to execute programs with elevated privileges (e.g. passwd)."
 
@@ -63,7 +63,7 @@ questions:
       - "Authorisation comes first"
       - "Authentication is not necessary"
     correct: 1
-    explanation: "Authentication = identity verification (login). Authorisation = access control (permissions)."
+    explanation: "Authentication = identity verification (login). Authorisation = access control (permisiuni)."
 
   - id: q05
     bloom: understand
@@ -71,11 +71,11 @@ questions:
     text: "What is the 'least privilege' principle?"
     options:
       - "All users have root access"
-      - "Processes and users receive only the minimum permissions necessary for their task"
+      - "Processes and users receive only the minimum permisiuni necessary for their task"
       - "Privileges increase automatically"
       - "It does not apply in practice"
     correct: 1
-    explanation: "Least privilege: minimises the attack surface. If a process is compromised, the damage is limited."
+    explanation: "Least privilege: minimises the attack surface. If a proces is compromised, the damage is limited."
 
   - id: q06
     bloom: understand
@@ -83,7 +83,7 @@ questions:
     text: "What is a buffer overflow?"
     options:
       - "RAM is full"
-      - "Data written to a buffer exceeds its boundary, overwriting adjacent memory"
+      - "Data written to a buffer exceeds its boundary, overwriting adjacent memorie"
       - "A type of compression"
       - "A network error"
     correct: 1
@@ -95,11 +95,11 @@ questions:
     text: "What is ASLR (Address Space Layout Randomisation)?"
     options:
       - "An encryption algorithm"
-      - "Randomises memory positions (stack, heap, libraries) to make exploitation harder"
+      - "Randomises memorie positions (stack, heap, libraries) to make exploitation harder"
       - "A firewall"
       - "A type of permission"
     correct: 1
-    explanation: "ASLR: the attacker does not know where data is in memory → overflow does not know where to jump."
+    explanation: "ASLR: the attacker does not know where data is in memorie → overflow does not know where to jump."
 
   - id: q08
     bloom: understand
@@ -107,7 +107,7 @@ questions:
     text: "Why does the sticky bit on /tmp prevent deletion of other users' files?"
     options:
       - "It encrypts the files"
-      - "With sticky bit, only the file owner or root can delete files from the directory"
+      - "With sticky bit, only the file owner or root can delete files from the director"
       - "It compresses the files"
       - "It hides the files"
     correct: 1
@@ -118,8 +118,8 @@ questions:
     difficulty: hard
     text: "Why does DEP/NX bit help prevent buffer overflow exploits?"
     options:
-      - "It encrypts memory"
-      - "Marks memory regions as non-executable: injected data cannot be executed as code"
+      - "It encrypts memorie"
+      - "Marks memorie regions as non-executable: injected data cannot be executed as code"
       - "It increases speed"
       - "It does not help"
     correct: 1
@@ -132,7 +132,7 @@ questions:
     options:
       - "It increases speed"
       - "Limits syscalls and available resources, reducing the impact of a compromise"
-      - "It saves memory"
+      - "It saves memorie"
       - "It offers no advantages"
     correct: 1
     explanation: "Sandbox: a compromised application cannot access the entire system, only permitted resources."
@@ -144,7 +144,7 @@ questions:
     options:
       - "They are too slow"
       - "Any vulnerability in the program gives the attacker full root access"
-      - "They consume too much memory"
+      - "They consume too much memorie"
       - "There is no risk"
     correct: 1
     explanation: "Bug in SUID root = privilege escalation. The attacker gains root by exploiting the program."
@@ -152,11 +152,11 @@ questions:
   - id: q12
     bloom: apply
     difficulty: hard
-    text: "You find a file with permissions -rwsr-xr-x owned by root. What security risk might exist?"
+    text: "You find a file with permisiuni -rwsr-xr-x owned by root. What security risk might exist?"
     options:
       - "None"
       - "It is SUID root: any vulnerability allows privilege escalation to root"
       - "The file is corrupted"
-      - "The permissions are normal"
+      - "The permisiuni are normal"
     correct: 1
     explanation: "SUID (s in owner execute) + owner=root = execution as root. Careful auditing required."

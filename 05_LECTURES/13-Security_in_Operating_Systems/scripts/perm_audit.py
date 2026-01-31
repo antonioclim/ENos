@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Minimal permissions audit (Week 13), Python version.
+Minimal permisiuni audit (Week 13), Python version.
 
 Didactic advantage:
 - demonstrates how to interpret permission bits via `stat`;
@@ -29,9 +29,9 @@ DEFAULT_MAX_DISPLAY = 30
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def parse_args() -> argparse.Namespace:
-    """Parse command-line arguments."""
+    """Parse comandă-line arguments."""
     p = argparse.ArgumentParser(description="Permission Audit Tool")
-    p.add_argument("--root", type=Path, default=Path("."), help="Root directory")
+    p.add_argument("--root", type=Path, default=Path("."), help="Root director")
     p.add_argument("--max", type=int, default=DEFAULT_MAX_DISPLAY, help="Max items")
     return p.parse_args()
 
@@ -54,7 +54,7 @@ class AuditResults:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def check_file_permissions(path: Path, mode: int, results: AuditResults) -> None:
-    """Check permissions of a regular file."""
+    """Check permisiuni of a regular file."""
     if mode & stat.S_IWOTH:
         results.ww_files.append(path)
     if mode & stat.S_ISUID:
@@ -64,13 +64,13 @@ def check_file_permissions(path: Path, mode: int, results: AuditResults) -> None
 
 
 def check_dir_permissions(path: Path, mode: int, results: AuditResults) -> None:
-    """Check permissions of a directory."""
+    """Check permisiuni of a director."""
     if (mode & stat.S_IWOTH) and not (mode & stat.S_ISVTX):
         results.ww_dirs_no_sticky.append(path)
 
 
 def scan_directory(root: Path) -> AuditResults:
-    """Scan the directory and collect permission issues."""
+    """Scan the director and collect permission issues."""
     results = AuditResults()
 
     for path in root.rglob("*"):

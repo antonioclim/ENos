@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # 📁 Lecture 15 Documentation — Network Connection (Supplementary)
 
 > **Location:** `05_LECTURES/15supp-Network_Connection/docs/`  

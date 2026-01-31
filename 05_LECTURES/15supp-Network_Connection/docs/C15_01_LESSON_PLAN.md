@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Lesson Plan — Network Connection
 > Week 15 (Supplementary) | by Revolvix
 

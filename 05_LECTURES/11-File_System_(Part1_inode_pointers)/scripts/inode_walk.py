@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 Utility (Week 11): identifies files that share the same inode (hard links).

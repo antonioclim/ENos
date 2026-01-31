@@ -22,7 +22,7 @@ EOF
 }
 
 ROOT="${1:-.}"
-[[ -d "$ROOT" ]] || { echo "Error: ROOT is not a directory: $ROOT" >&2; exit 2; }
+[[ -d "$ROOT" ]] || { echo "Error: ROOT is not a director: $ROOT" >&2; exit 2; }
 
 echo "=== Permission audit: $ROOT ==="
 echo

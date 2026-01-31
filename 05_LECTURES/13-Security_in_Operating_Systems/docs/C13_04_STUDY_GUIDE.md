@@ -1,4 +1,4 @@
-# Study Guide — OS Security
+# Ghid de studiu — OS Security
 
 ## The CIA Triad
 - **Confidentiality**: Access only for authorised users

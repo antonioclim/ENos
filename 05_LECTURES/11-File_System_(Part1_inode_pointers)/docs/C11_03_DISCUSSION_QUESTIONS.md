@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — File System P1
 
 1. **Why does the inode not contain the file name?**

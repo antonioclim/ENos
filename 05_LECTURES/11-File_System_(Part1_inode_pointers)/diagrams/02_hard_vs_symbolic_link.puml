@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml hard_vs_symbolic_link
 !include ../../diagrams_common/skin.puml
 title Hard Link vs Symbolic Link

@@ -5,12 +5,12 @@ skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 10
 
 title Capabilities Model vs. Traditional SUID
-caption Course 13: Security in Operating Systems — Principle of Least Privilege
+caption Course 13: Security in Sisteme de Operare — Principle of Least Privilege
 
 left to right direction
 
 package "**Traditional Model (SUID root)**" as TRAD #MistyRose {
-  actor "Normal user\n(uid=1000)" as U1
+  actor "Normal utilizator\n(uid=1000)" as U1
   
   rectangle "ping\n-rwsr-xr-x\nowner: root" as PING1 #LightCoral
   
@@ -27,7 +27,7 @@ package "**Traditional Model (SUID root)**" as TRAD #MistyRose {
 }
 
 package "**Capabilities Model (modern)**" as CAP #Honeydew {
-  actor "Normal user\n(uid=1000)" as U2
+  actor "Normal utilizator\n(uid=1000)" as U2
   
   rectangle "ping\n-rwxr-xr-x\n+cap_net_raw" as PING2 #LightGreen
   
@@ -67,7 +67,7 @@ end note
 rectangle "**Privilege Hierarchy**" as HIER #LightBlue {
   rectangle "root (UID 0)\nAll capabilities" as R #Red
   rectangle "Specific capabilities\n(granular)" as C #Yellow
-  rectangle "Normal user\n(no extra privileges)" as N #Green
+  rectangle "Normal utilizator\n(no extra privileges)" as N #Green
   
   R -down-> C : "Principle of\nleast\nprivilege"
   C -down-> N

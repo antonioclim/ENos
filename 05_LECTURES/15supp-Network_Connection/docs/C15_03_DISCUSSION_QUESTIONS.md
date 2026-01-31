@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Networking
 
 1. **TCP vs UDP**: When do you choose each protocol?

@@ -1,4 +1,4 @@
-# Discussion Questions — Virtualisation
+# Întrebări de discuție — Virtualisation
 
 1. **Type 1 vs Type 2**: When do you use each?
 2. **Why is paravirtualisation faster?**

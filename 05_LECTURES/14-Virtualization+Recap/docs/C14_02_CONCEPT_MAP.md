@@ -1,4 +1,4 @@
-# Concept Map — Virtualisation
+# Hartă conceptuală — Virtualisation
 
 ```
               ┌──────────────────┐

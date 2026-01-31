@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml inode_structure
 !include ../../diagrams_common/skin.puml
 title Inode Structure (ext4)

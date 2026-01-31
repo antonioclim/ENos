@@ -21,7 +21,7 @@
 
 | File | Purpose |
 |------|---------|
-| `C14_01_COURSE_PLAN.md` | Learning objectives and session timing |
+| `C14_01_COURSE_PLAN.md` | Obiective de învățare and session timing |
 | `C14_02_CONCEPT_MAP.md` | Visual topic relationships |
 | `C14_03_DISCUSSION_QUESTIONS.md` | Peer instruction discussion questions |
 | `C14_04_STUDY_GUIDE.md` | Self-study guide and key concepts |
@@ -49,7 +49,7 @@ xdg-open 14ex1_-_VM_vs_Container.html
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the quiz using the quiz runner from any SEM director:
 
 ```bash
 cd ../../SEM01/formative/

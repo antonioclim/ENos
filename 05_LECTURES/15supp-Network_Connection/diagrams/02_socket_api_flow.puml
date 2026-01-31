@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
 title Socket API Flow
 state "Server" {

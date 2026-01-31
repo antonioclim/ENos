@@ -1,4 +1,4 @@
-# Study Guide — Virtualisation
+# Ghid de studiu — Virtualisation
 
 ## Hypervisor Types
 | Type 1 (Bare-metal) | Type 2 (Hosted) |

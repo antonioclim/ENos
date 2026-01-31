@@ -1,4 +1,4 @@
-# Discussion Questions — OS Security
+# Întrebări de discuție — OS Security
 
 1. **Why are SUID root programs dangerous?**
 2. **ASLR**: Which attacks does it prevent and which bypass it?

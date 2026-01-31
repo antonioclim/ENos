@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Study Guide — File System P1
 
 ## Inode Contains

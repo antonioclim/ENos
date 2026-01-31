@@ -1,4 +1,4 @@
-# Course Plan — Virtualisation + Recap
+# Plan de curs — Virtualisation + Recap
 > Week 14 | by Revolvix
 
 ## Objectives

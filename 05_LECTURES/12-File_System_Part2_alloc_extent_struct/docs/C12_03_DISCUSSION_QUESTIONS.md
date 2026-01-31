@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 # Discussion Questions — Filesystem P2
 
 1. **FAT vs inode-based**: Trade-offs?

@@ -1,7 +1,7 @@
-# 📁 Lecture 13 Documentation — Security in Operating Systems
+# 📁 Lecture 13 Documentation — Security in Sisteme de Operare
 
 > **Location:** `05_LECTURES/13-Security_in_Operating_Systems/docs/`  
-> **Topic:** AAA, permissions, capabilities, vulnerabilities
+> **Topic:** AAA, permisiuni, capabilities, vulnerabilities
 
 ## Contents
 
@@ -22,7 +22,7 @@
 
 | File | Purpose |
 |------|---------|
-| `C13_01_COURSE_PLAN.md` | Learning objectives and session timing |
+| `C13_01_COURSE_PLAN.md` | Obiective de învățare and session timing |
 | `C13_02_CONCEPT_MAP.md` | Visual topic relationships |
 | `C13_03_DISCUSSION_QUESTIONS.md` | Peer instruction discussion questions |
 | `C13_04_STUDY_GUIDE.md` | Self-study guide and key concepts |
@@ -50,7 +50,7 @@ xdg-open 13ex1_-_Permissions_Calculator.html
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the quiz using the quiz runner from any SEM director:
 
 ```bash
 cd ../../SEM01/formative/

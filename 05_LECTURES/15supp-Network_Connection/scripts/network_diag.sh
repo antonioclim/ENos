@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
 #
 # network_diag.sh - Comprehensive network diagnostic script

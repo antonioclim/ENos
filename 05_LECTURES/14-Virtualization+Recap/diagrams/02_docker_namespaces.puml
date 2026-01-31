@@ -33,7 +33,7 @@ rectangle "**LINUX NAMESPACES** (Isolation)" as namespaces #FFF9C4 {
     
     rectangle "**mnt**\nFilesystem\nmounts" as mnt #FCE4EC
     
-    rectangle "**user**\nUser/Group\nIDs" as user #E1BEE7
+    rectangle "**utilizator**\nUser/Group\nIDs" as utilizator #E1BEE7
     
     rectangle "**uts**\nHostname\nseparate" as uts #FFCDD2
     
@@ -43,15 +43,15 @@ rectangle "**LINUX NAMESPACES** (Isolation)" as namespaces #FFF9C4 {
 rectangle "**CGROUPS** (Resource limiting)" as cgroups #C8E6C9 {
     note as cg_note
     • **cpu**: Limits CPU time
-    • **memory**: Limits RAM
+    • **memorie**: Limits RAM
     • **blkio**: Limits disk I/O
     • **devices**: Device control
     end note
 }
 
 note bottom
-**Container = Isolated process through:**
-1. **Namespaces**: Isolation (what the process sees)
+**Container = Isolated proces through:**
+1. **Namespaces**: Isolation (what the proces sees)
 2. **cgroups**: Limiting (how much it can use)
 3. **Union FS**: Layered images (efficiency)
 

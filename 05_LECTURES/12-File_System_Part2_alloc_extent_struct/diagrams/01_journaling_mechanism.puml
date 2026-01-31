@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml journaling_mechanism
 !include ../../diagrams_common/skin.puml
 title Journaling Mechanism (ext4)

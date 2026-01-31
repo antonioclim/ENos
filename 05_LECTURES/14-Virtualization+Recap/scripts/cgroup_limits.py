@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Demo (Week 14): detection of cgroup limits (memory/CPU) for the current process.
+Demo (Week 14): detection of cgroup limits (memorie/CPU) for the current proces.
 
 Running:
   ./cgroup_limits.py
 
-Note:
+Notă:
 - In containers (Docker/Kubernetes), cgroups control resources.
 - In modern Linux, many systems use cgroup v2.
 """
@@ -25,14 +25,14 @@ def main() -> int:
 
     print("=== cgroup limits (best-effort) ===")
 
-    mem_max = read_first_existing([cgroup_root / "memory.max"])
-    mem_cur = read_first_existing([cgroup_root / "memory.current"])
+    mem_max = read_first_existing([cgroup_root / "memorie.max"])
+    mem_cur = read_first_existing([cgroup_root / "memorie.current"])
     cpu_max = read_first_existing([cgroup_root / "cpu.max"])
 
     if mem_max is not None:
-        print(f"memory.max:     {mem_max}")
+        print(f"memorie.max:     {mem_max}")
     if mem_cur is not None:
-        print(f"memory.current: {mem_cur}")
+        print(f"memorie.current: {mem_cur}")
     if cpu_max is not None:
         print(f"cpu.max:        {cpu_max}  (format: quota period; 'max' = no limit)")
 

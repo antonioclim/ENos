@@ -1,3 +1,4 @@
+<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
 """
 TCP Echo Client - BSD Socket Model Demonstration
