@@ -23,7 +23,7 @@ A complete Ubuntu Linux server running in a window on your computer.
 
 **HOW LONG DOES IT TAKE?**
 
-Approximately 60-90 minutes. Use the time checkpoints below to track progress.
+Approximately 70-100 minutes. Use the time checkpoints below to track progress.
 
 ---
 
@@ -40,7 +40,8 @@ Use these to track your progress. Taking longer than expected is normal for firs
 | ✓ Hostname configured | Section 10 | 55 min | ⬜ |
 | ✓ All software installed | Section 11 | 70 min | ⬜ |
 | ✓ SSH working, can connect remotely | Section 13/15 | 80 min | ⬜ |
-| 🎉 Verification passed | Section 17 | 90 min | ⬜ |
+| ✓ Bash verified, transfer tested | Section 17 | 90 min | ⬜ |
+| 🎉 Verification passed | Section 19 | 100 min | ⬜ |
 
 ---
 
@@ -132,12 +133,14 @@ sudo apt update
 14. [Connect with WinSCP (Windows)](#14-connect-with-winscp-windows)
 15. [Connect from macOS or Linux](#15-connect-from-macos-or-linux)
 
-**PART 6: FINALISATION**
-16. [Create working folders](#16-create-working-folders)
-17. [Verify the installation](#17-verify-the-installation)
-18. [Common problems and solutions](#18-common-problems-and-solutions)
-19. [Common mistakes I see every year](#19-common-mistakes-i-see-every-year)
-20. [How to use AI assistants](#20-how-to-use-ai-assistants)
+**PART 6: VERIFICATION & FINALISATION**
+16. [Verify Bash default shell](#16-verify-bash-default-shell)
+17. [Practical bidirectional file transfer test](#17-practical-bidirectional-file-transfer-test)
+18. [Create working folders](#18-create-working-folders)
+19. [Verify the installation](#19-verify-the-installation)
+20. [Common problems and solutions](#20-common-problems-and-solutions)
+21. [Common mistakes I see every year](#21-common-mistakes-i-see-every-year)
+22. [How to use AI assistants](#22-how-to-use-ai-assistants)
 
 ---
 
@@ -897,7 +900,162 @@ In SFTP mode:
 
 ---
 
-# 16. Create working folders
+# 16. Verify Bash default shell
+
+> **Why this matters:** We use **Bash** (Bourne Again Shell) — the industry standard on production servers. If your VM's default shell is set to something else, our scripts may not work correctly.
+
+## Check the default shell in your VM
+
+```bash
+# BASH (Ubuntu VM) - Check the default shell
+echo $SHELL
+```
+
+**Expected result:** `/bin/bash`
+
+Also verify:
+
+```bash
+# BASH (Ubuntu VM) - Check what is actually running
+echo $0
+```
+
+**Expected result:** `-bash` or `bash`
+
+## Change to Bash if needed
+
+If `$SHELL` showed something other than `/bin/bash`:
+
+```bash
+# BASH (Ubuntu VM) - Change default shell to Bash
+chsh -s /bin/bash
+```
+
+Then log out and back in for the change to take effect.
+
+## Note for macOS and Linux users
+
+Your **host** machine (the physical computer) might use Zsh as default (this is normal on macOS since Catalina). **That is perfectly fine** — it is only the **VM** that must use Bash for this course.
+
+If you need to temporarily use Bash on your host for some commands, just type `bash` in your terminal — you will return to your default shell when you type `exit`.
+
+## Quick verification
+
+```bash
+# BASH (Ubuntu VM) - Complete shell check
+echo "Default: $SHELL | Running: $0 | Version: $BASH_VERSION"
+```
+
+> ✅ **Checkpoint:** Default shell is `/bin/bash` and version starts with `5.x`.
+
+# 17. Practical bidirectional file transfer test
+
+> **Why this matters:** At seminars you will constantly transfer scripts to the VM and retrieve results back. This test verifies that file transfer works **in both directions** before you need it under pressure.
+
+## Preparation (in VM)
+
+Make sure SSH is running and create a test file:
+
+```bash
+# BASH (Ubuntu VM) - Prepare for transfer test
+mkdir -p ~/test
+echo "This file was created in the VM on $(date)" > ~/test/transfer_test_from_vm.txt
+cat ~/test/transfer_test_from_vm.txt
+hostname -I
+```
+
+Note the VM's IP address.
+
+## FOR WINDOWS USERS: WinSCP test
+
+### Upload (Windows → VM)
+
+1. On your Desktop, create `transfer_test_from_windows.txt` with content: `Hello from Windows!`
+2. Open WinSCP, connect to your VM using its IP
+3. Left panel → Desktop, Right panel → `~/test/`
+4. Drag the file from left to right
+5. Verify in the VM:
+
+```bash
+# BASH (Ubuntu VM) - Verify upload
+cat ~/test/transfer_test_from_windows.txt
+```
+
+### Download (VM → Windows)
+
+1. In WinSCP, drag `transfer_test_from_vm.txt` from right to left (to Desktop)
+2. Open on Desktop — verify the date message
+
+## FOR macOS/Linux USERS: scp test
+
+### Upload (Host → VM)
+
+```bash
+# HOST TERMINAL (macOS/Linux) - Upload test file to VM
+echo "Hello from host $(hostname)!" > /tmp/test_from_host.txt
+scp /tmp/test_from_host.txt yourname@VM_IP:~/test/
+```
+
+Replace `yourname` with your Ubuntu username and `VM_IP` with the VM's IP address.
+
+Verify in the VM:
+
+```bash
+# BASH (Ubuntu VM) - Verify upload
+cat ~/test/test_from_host.txt
+```
+
+### Download (VM → Host)
+
+```bash
+# HOST TERMINAL (macOS/Linux) - Download test file from VM
+scp yourname@VM_IP:~/test/transfer_test_from_vm.txt /tmp/
+cat /tmp/transfer_test_from_vm.txt
+```
+
+### Alternative: sftp interactive mode
+
+```bash
+# HOST TERMINAL (macOS/Linux) - Interactive SFTP session
+sftp yourname@VM_IP
+# Once connected:
+#   cd test
+#   ls
+#   get transfer_test_from_vm.txt /tmp/
+#   put /tmp/test_from_host.txt
+#   bye
+```
+
+## Verify with checksums (optional)
+
+```bash
+# BASH (Ubuntu VM) - Generate checksum
+sha256sum ~/test/transfer_test_from_windows.txt    # Windows users
+sha256sum ~/test/test_from_host.txt                 # macOS/Linux users
+```
+
+**Windows (compare in PowerShell):**
+```powershell
+# POWERSHELL (Windows) - Compare checksum
+Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorithm SHA256
+```
+
+**macOS/Linux (compare on host):**
+```bash
+# HOST TERMINAL - Compare checksum
+sha256sum /tmp/test_from_host.txt
+```
+
+## Cleanup
+
+```bash
+# BASH (Ubuntu VM) - Remove test files
+rm -f ~/test/transfer_test_from_vm.txt ~/test/transfer_test_from_windows.txt ~/test/test_from_host.txt
+```
+
+> ✅ **Checkpoint:** Files travel in both directions between host and VM. You are ready for seminars.
+
+# 18. Create working folders
 
 In Ubuntu (via SSH or directly in VM), run:
 
@@ -922,7 +1080,7 @@ ls -la ~
 
 ---
 
-# 17. Verify the installation
+# 19. Verify the installation
 
 ## Run the verification script
 
@@ -952,7 +1110,7 @@ hostname && whoami && lsb_release -d && hostname -I && echo "---" && ls ~/Books 
 
 ---
 
-# 18. Common problems and solutions
+# 20. Common problems and solutions
 
 ## VirtualBox does not start — virtualisation error
 
@@ -1028,7 +1186,7 @@ Stop the VM. In VirtualBox, start the VM in recovery mode:
 
 ---
 
-# 19. Common mistakes I see every year
+# 21. Common mistakes I see every year
 
 These are the mistakes I see students make most often. Learn from their experience.
 
@@ -1074,7 +1232,7 @@ sudo systemctl start ssh
 
 ---
 
-# 20. How to use AI assistants
+# 22. How to use AI assistants
 
 ## Recommended assistants
 
@@ -1164,7 +1322,9 @@ Answer honestly to the following questions. If you cannot tick all of them, revi
 
 - [ ] I ran the verification script successfully (all with [OK])
 - [ ] I connected via SSH from PuTTY/Terminal without help
-- [ ] I transferred a test file with WinSCP/scp (from host to VM)
+- [ ] I transferred a test file with WinSCP (or scp on macOS/Linux)
+- [ ] I transferred a file from the VM back to my host (bidirectional test)
+- [ ] I verified that the VM default shell is Bash (`echo $SHELL` → `/bin/bash`)/scp (from host to VM)
 - [ ] I know what to do if the VM does not receive IP (Bridge network)
 - [ ] I can start/stop the VM headless from the command line
 
@@ -1209,7 +1369,7 @@ Document for:
 Bucharest University of Economic Studies - CSIE
 Operating Systems - Academic Year 2024-2025
 
-**Version:** 2.1 | **Last updated:** January 2025
+**Version:** 3.0 | **Last updated:** February 2025
 
 ---
 

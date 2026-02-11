@@ -690,18 +690,26 @@
             </button>
             <button class="tab-btn" data-tab="tab11">
                 <span class="step-num">11</span>
-                <span class="tab-text">Folders</span>
+                <span class="tab-text">Bash</span>
             </button>
             <button class="tab-btn" data-tab="tab12">
                 <span class="step-num">12</span>
-                <span class="tab-text">Verify</span>
+                <span class="tab-text">Transfer Test</span>
             </button>
             <button class="tab-btn" data-tab="tab13">
                 <span class="step-num">13</span>
-                <span class="tab-text">Problems</span>
+                <span class="tab-text">Folders</span>
             </button>
             <button class="tab-btn" data-tab="tab14">
                 <span class="step-num">14</span>
+                <span class="tab-text">Verify</span>
+            </button>
+            <button class="tab-btn" data-tab="tab15">
+                <span class="step-num">15</span>
+                <span class="tab-text">Problems</span>
+            </button>
+            <button class="tab-btn" data-tab="tab16">
+                <span class="step-num">16</span>
                 <span class="tab-text">AI</span>
             </button>
         </nav>
@@ -1793,9 +1801,80 @@ EOF</pre>
         </div>
 
         <!-- Tab 11: Create folders -->
+        <!-- Tab 11: Verify Bash Shell -->
         <div class="tab-content" id="tab11">
             <div class="card">
-                <h2 class="card-title">11. Create working folders</h2>
+                <h2 class="card-title">11. Verify your default shell is Bash</h2>
+                <p>In this course we use <strong>Bash</strong> (Bourne Again Shell) — the industry standard on servers. If your default shell is not Bash, our scripts may not work correctly.</p>
+            </div>
+            <div class="card">
+                <h3>Check your current default shell</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo $SHELL</pre></div>
+                <p>You should see: <code>/bin/bash</code></p>
+                <p>Also check what is actually running:</p>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo $0</pre></div>
+                <p>You should see: <code>-bash</code> or <code>bash</code></p>
+            </div>
+            <div class="card">
+                <h3>Change to Bash if needed</h3>
+                <p>If <code>$SHELL</code> showed something other than <code>/bin/bash</code>:</p>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>chsh -s /bin/bash</pre></div>
+                <div class="warning-box"><strong>⚠️ After changing:</strong> Close Ubuntu, run <code>wsl --shutdown</code> in PowerShell, then reopen Ubuntu. Verify again.</div>
+            </div>
+            <div class="card">
+                <h3>Quick verification</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo "Shell: $SHELL | Running: $0 | Bash version: $BASH_VERSION"</pre></div>
+                <p>Expected: <code>/bin/bash</code> for Shell, <code>bash</code> for Running, version like <code>5.2.x</code></p>
+            </div>
+            <button class="mark-done" onclick="markDone(this, 'tab11')">✓ Bash is my default shell</button>
+            <div class="nav-buttons"><button class="nav-btn prev" onclick="prevTab()">← Back</button><button class="nav-btn next" onclick="nextTab()">Continue →</button></div>
+        </div>
+
+        <!-- Tab 12: Bidirectional File Transfer Test -->
+        <div class="tab-content" id="tab12">
+            <div class="card">
+                <h2 class="card-title">12. Practical test: Bidirectional file transfer</h2>
+                <p>Verify that WinSCP works <strong>in both directions</strong>. At seminars you will send scripts to Ubuntu and retrieve results back.</p>
+            </div>
+            <div class="card">
+                <h3>Preparation</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>sudo service ssh start
+echo "Created in Ubuntu on $(date)" > ~/test/transfer_test_from_ubuntu.txt
+hostname -I</pre></div>
+            </div>
+            <div class="card">
+                <h3>Test 1: Windows → Ubuntu (upload)</h3>
+                <ol>
+                    <li>On Desktop, create <code>transfer_test_from_windows.txt</code> with: <code>Hello from Windows!</code></li>
+                    <li>In WinSCP: Left panel → Desktop, Right panel → <code>~/test/</code></li>
+                    <li>Drag file from left to right</li>
+                    <li>Verify: <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>cat ~/test/transfer_test_from_windows.txt</pre></div></li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Test 2: Ubuntu → Windows (download)</h3>
+                <ol>
+                    <li>In WinSCP, drag <code>transfer_test_from_ubuntu.txt</code> from right to left</li>
+                    <li>Open on Windows Desktop — verify the date message</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Verify with checksums (optional)</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>sha256sum ~/test/transfer_test_from_windows.txt</pre></div>
+                <div class="cmd-block powershell"><div class="cmd-header">POWERSHELL (Windows)</div><pre>Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorithm SHA256</pre></div>
+                <p>If both match → perfect transfer!</p>
+            </div>
+            <div class="card">
+                <h3>Cleanup</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>rm ~/test/transfer_test_from_windows.txt ~/test/transfer_test_from_ubuntu.txt</pre></div>
+            </div>
+            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Bidirectional transfer works</button>
+            <div class="nav-buttons"><button class="nav-btn prev" onclick="prevTab()">← Back</button><button class="nav-btn next" onclick="nextTab()">Continue →</button></div>
+        </div>
+
+        <div class="tab-content" id="tab13">
+            <div class="card">
+                <h2 class="card-title">13. Create working folders</h2>
                 
                 <p>At seminars you will create many files. It is important to organise them in a clear structure.</p>
             </div>
@@ -1847,7 +1926,7 @@ EOF</pre>
                 <p style="margin-top: 0.5rem;">You should see all folders listed.</p>
             </div>
 
-            <button class="mark-done" onclick="markDone(this, 'tab11')">✓ I have created the folders</button>
+            <button class="mark-done" onclick="markDone(this, 'tab13')">✓ I have created the folders</button>
 
             <div class="nav-buttons">
                 <button class="nav-btn prev" onclick="prevTab()">← Back</button>
@@ -1856,9 +1935,9 @@ EOF</pre>
         </div>
 
         <!-- Tab 12: Verify installation -->
-        <div class="tab-content" id="tab12">
+        <div class="tab-content" id="tab14">
             <div class="card">
-                <h2 class="card-title">12. Verify the installation</h2>
+                <h2 class="card-title">14. Verify the installation</h2>
                 
                 <p>Run this command that checks if everything is installed correctly.</p>
             </div>
@@ -1898,7 +1977,7 @@ EOF</pre>
                 </div>
             </div>
 
-            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Verification showed everything OK</button>
+            <button class="mark-done" onclick="markDone(this, 'tab14')">✓ Verification showed everything OK</button>
 
             <div class="nav-buttons">
                 <button class="nav-btn prev" onclick="prevTab()">← Back</button>
@@ -1907,9 +1986,9 @@ EOF</pre>
         </div>
 
         <!-- Tab 13: Common problems -->
-        <div class="tab-content" id="tab13">
+        <div class="tab-content" id="tab15">
             <div class="card">
-                <h2 class="card-title">13. Common problems and solutions</h2>
+                <h2 class="card-title">15. Common problems and solutions</h2>
             </div>
 
             <div class="accordion">
@@ -2048,9 +2127,9 @@ EOF</pre>
         </div>
 
         <!-- Tab 14: AI -->
-        <div class="tab-content" id="tab14">
+        <div class="tab-content" id="tab16">
             <div class="card">
-                <h2 class="card-title">14. How to use AI assistants</h2>
+                <h2 class="card-title">16. How to use AI assistants</h2>
             </div>
 
             <div class="card">
@@ -2124,7 +2203,7 @@ EOF</pre>
 
     <footer class="footer">
         <p>Operating Systems 2024-2025 | ASE Bucharest - CSIE</p>
-        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 2.1 | January 2025</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 3.0 | February 2025</p>
     </footer>
 
     <script>

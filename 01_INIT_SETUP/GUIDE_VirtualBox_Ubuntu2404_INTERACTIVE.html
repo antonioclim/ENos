@@ -701,9 +701,11 @@
             <button class="tab-btn" data-tab="tab9"><span class="step-num">9</span><span>Packages</span></button>
             <button class="tab-btn" data-tab="tab10"><span class="step-num">10</span><span>SSH</span></button>
             <button class="tab-btn" data-tab="tab11"><span class="step-num">11</span><span>Connect</span></button>
-            <button class="tab-btn" data-tab="tab12"><span class="step-num">12</span><span>Folders</span></button>
-            <button class="tab-btn" data-tab="tab13"><span class="step-num">13</span><span>Verify</span></button>
-            <button class="tab-btn" data-tab="tab14"><span class="step-num">14</span><span>Problems</span></button>
+            <button class="tab-btn" data-tab="tab12"><span class="step-num">12</span><span>Bash</span></button>
+            <button class="tab-btn" data-tab="tab13"><span class="step-num">13</span><span>Transfer Test</span></button>
+            <button class="tab-btn" data-tab="tab14"><span class="step-num">14</span><span>Folders</span></button>
+            <button class="tab-btn" data-tab="tab15"><span class="step-num">15</span><span>Verify</span></button>
+            <button class="tab-btn" data-tab="tab16"><span class="step-num">16</span><span>Problems</span></button>
         </nav>
 
         <!-- Tab: Intro -->
@@ -1481,9 +1483,62 @@
         </div>
 
         <!-- Tab 12: Folders -->
+        <!-- Tab 12: Verify Bash Shell -->
         <div class="tab-content" id="tab12">
             <div class="card">
-                <h2 class="card-title">12. Create working folders</h2>
+                <h2 class="card-title">12. Verify your default shell is Bash</h2>
+                <p>We use <strong>Bash</strong> — the industry standard on servers.</p>
+            </div>
+            <div class="card">
+                <h3>Check your default shell</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu VM)</div><pre>echo $SHELL</pre></div>
+                <p>Should show: <code>/bin/bash</code>. Also: <code>echo $0</code> → should show <code>bash</code></p>
+                <p>If not Bash: <code>chsh -s /bin/bash</code> then log out and back in.</p>
+                <p><strong>macOS/Linux hosts:</strong> Your host may use Zsh — that is fine. The VM must use Bash. Type <code>bash</code> on your host for temporary Bash mode.</p>
+            </div>
+            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Bash is my default shell</button>
+            <div class="nav-buttons"><button class="nav-btn prev" onclick="prevTab()">← Back</button><button class="nav-btn next" onclick="nextTab()">Continue →</button></div>
+        </div>
+
+        <!-- Tab 13: Bidirectional File Transfer Test -->
+        <div class="tab-content" id="tab13">
+            <div class="card">
+                <h2 class="card-title">13. Practical test: Bidirectional file transfer</h2>
+                <p>Verify transfer works <strong>both ways</strong> between host and VM.</p>
+            </div>
+            <div class="card">
+                <h3>Preparation (in VM)</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu VM)</div><pre>echo "Created in VM on $(date)" > ~/test/transfer_test_from_vm.txt
+hostname -I</pre></div>
+            </div>
+            <div class="card">
+                <h3>FOR WINDOWS: WinSCP test</h3>
+                <ol>
+                    <li><strong>Upload:</strong> Create file on Desktop → drag to Ubuntu in WinSCP</li>
+                    <li><strong>Download:</strong> Drag VM file from right panel to Desktop</li>
+                    <li>Verify contents on both sides</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>FOR macOS/Linux: scp test</h3>
+                <p><strong>Upload:</strong></p>
+                <div class="cmd-block bash"><div class="cmd-header">HOST TERMINAL</div><pre>echo "Hello from host!" > /tmp/test_from_host.txt
+scp /tmp/test_from_host.txt yourname@VM_IP:~/test/</pre></div>
+                <p><strong>Download:</strong></p>
+                <div class="cmd-block bash"><div class="cmd-header">HOST TERMINAL</div><pre>scp yourname@VM_IP:~/test/transfer_test_from_vm.txt /tmp/
+cat /tmp/transfer_test_from_vm.txt</pre></div>
+            </div>
+            <div class="card">
+                <h3>Cleanup</h3>
+                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu VM)</div><pre>rm ~/test/test_from_host.txt ~/test/transfer_test_from_vm.txt</pre></div>
+            </div>
+            <button class="mark-done" onclick="markDone(this, 'tab13')">✓ Bidirectional transfer works</button>
+            <div class="nav-buttons"><button class="nav-btn prev" onclick="prevTab()">← Back</button><button class="nav-btn next" onclick="nextTab()">Continue →</button></div>
+        </div>
+
+        <div class="tab-content" id="tab14">
+            <div class="card">
+                <h2 class="card-title">14. Create working folders</h2>
             </div>
 
             <div class="card">
@@ -1504,7 +1559,7 @@
                 </div>
             </div>
 
-            <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Folders created</button>
+            <button class="mark-done" onclick="markDone(this, 'tab14')">✓ Folders created</button>
 
             <div class="nav-buttons">
                 <button class="nav-btn prev" onclick="prevTab()">← Back</button>
@@ -1513,9 +1568,9 @@
         </div>
 
         <!-- Tab 13: Verify -->
-        <div class="tab-content" id="tab13">
+        <div class="tab-content" id="tab15">
             <div class="card">
-                <h2 class="card-title">13. Verify the installation</h2>
+                <h2 class="card-title">15. Verify the installation</h2>
             </div>
 
             <div class="card">
@@ -1526,7 +1581,7 @@
                 </div>
             </div>
 
-            <button class="mark-done" onclick="markDone(this, 'tab13')">✓ Verification OK</button>
+            <button class="mark-done" onclick="markDone(this, 'tab15')">✓ Verification OK</button>
 
             <div class="nav-buttons">
                 <button class="nav-btn prev" onclick="prevTab()">← Back</button>
@@ -1535,9 +1590,9 @@
         </div>
 
         <!-- Tab 14: Problems -->
-        <div class="tab-content" id="tab14">
+        <div class="tab-content" id="tab16">
             <div class="card">
-                <h2 class="card-title">14. Common problems</h2>
+                <h2 class="card-title">16. Common problems</h2>
             </div>
 
             <div class="accordion">
@@ -1646,7 +1701,7 @@
 
     <footer class="footer">
         <p>Operating Systems 2024-2025 | ASE Bucharest - CSIE</p>
-        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 2.1 | January 2025</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7;">Version 3.0 | February 2025</p>
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // OS Selection

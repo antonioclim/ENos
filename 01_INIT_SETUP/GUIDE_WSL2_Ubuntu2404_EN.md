@@ -22,7 +22,7 @@ A Linux system (Ubuntu) that runs directly in Windows, which you will use at sem
 
 **HOW LONG DOES IT TAKE?**
 
-Approximately 45-70 minutes, depending on internet speed. Use the time checkpoints below to track your progress.
+Approximately 55-80 minutes, depending on internet speed. Use the time checkpoints below to track your progress.
 
 **WHAT DO YOU NEED?**
 
@@ -46,7 +46,8 @@ Use these to track your progress. Taking longer than expected is normal for firs
 | ✓ Hostname configured | Section 6 | 45 min | ⬜ |
 | ✓ All software installed | Section 7 | 55 min | ⬜ |
 | ✓ SSH + PuTTY working | Section 9 | 65 min | ⬜ |
-| 🎉 Verification passed | Section 12 | 70 min | ⬜ |
+| ✓ Bash verified, transfer tested | Section 12 | 75 min | ⬜ |
+| 🎉 Verification passed | Section 14 | 80 min | ⬜ |
 
 ---
 
@@ -75,11 +76,13 @@ At the end of this guide, you will be able to:
 8. [Configure SSH access](#8-configure-ssh-access)
 9. [Install and configure PuTTY](#9-install-and-configure-putty)
 10. [Install and configure WinSCP](#10-install-and-configure-winscp)
-11. [Create working folders](#11-create-working-folders)
-12. [Verify the installation](#12-verify-the-installation)
-13. [Common problems and solutions](#13-common-problems-and-solutions)
-14. [Common mistakes I see every year](#14-common-mistakes-i-see-every-year)
-15. [How to use AI assistants](#15-how-to-use-ai-assistants)
+11. [Verify Bash default shell](#11-verify-bash-default-shell)
+12. [Practical bidirectional file transfer test](#12-practical-bidirectional-file-transfer-test)
+13. [Create working folders](#13-create-working-folders)
+14. [Verify the installation](#14-verify-the-installation)
+15. [Common problems and solutions](#15-common-problems-and-solutions)
+16. [Common mistakes I see every year](#16-common-mistakes-i-see-every-year)
+17. [How to use AI assistants](#17-how-to-use-ai-assistants)
 
 ---
 
@@ -656,7 +659,120 @@ WinSCP is a program that allows you to transfer files between Windows and Linux.
 
 ---
 
-# 11. Create working folders
+# 11. Verify Bash default shell
+
+> **Why this matters:** In this course we use **Bash** (Bourne Again Shell) — the industry standard on production servers worldwide. If your default shell is set to something else (e.g., Zsh, Fish, Dash), our scripts and exercises may not work correctly. This 2-minute check can save you hours of debugging later.
+
+## Check your current default shell
+
+```bash
+# BASH (Ubuntu) - Check the default shell
+echo $SHELL
+```
+
+**Expected result:** `/bin/bash`
+
+Also verify what is actually running right now:
+
+```bash
+# BASH (Ubuntu) - Check the currently running shell
+echo $0
+```
+
+**Expected result:** `-bash` or `bash`
+
+## Change to Bash if needed
+
+If `$SHELL` showed something other than `/bin/bash` (for example `/bin/zsh` or `/bin/sh`):
+
+```bash
+# BASH (Ubuntu) - Change default shell to Bash
+chsh -s /bin/bash
+```
+
+> ⚠️ **After changing the shell:** Close the Ubuntu window completely, then open PowerShell and run `wsl --shutdown`. Reopen Ubuntu and verify again with `echo $SHELL`.
+
+## Quick combined verification
+
+Run this single command to see everything at once:
+
+```bash
+# BASH (Ubuntu) - Complete shell verification
+echo "Default shell: $SHELL | Running: $0 | Bash version: $BASH_VERSION"
+```
+
+**Expected output:** Default shell: `/bin/bash` | Running: `bash` | Bash version: something like `5.2.21(1)-release`
+
+> ✅ **Checkpoint:** If you see `/bin/bash` for the default shell and a version starting with `5.x`, you are good to go.
+
+# 12. Practical bidirectional file transfer test
+
+> **Why this matters:** At seminars you will constantly send scripts TO Ubuntu and retrieve results BACK to Windows. If transfer works only one way, you will lose time. This test verifies that WinSCP works **in both directions** before you need it under pressure.
+
+## Preparation
+
+Make sure SSH is running and create a test file in Ubuntu:
+
+```bash
+# BASH (Ubuntu) - Prepare for transfer test
+sudo service ssh start
+mkdir -p ~/test
+echo "This file was created in Ubuntu on $(date)" > ~/test/transfer_test_from_ubuntu.txt
+cat ~/test/transfer_test_from_ubuntu.txt
+hostname -I
+```
+
+Note the IP address shown — you will need it in WinSCP.
+
+## Test 1: Windows → Ubuntu (upload)
+
+1. On your Windows Desktop, create a text file named `transfer_test_from_windows.txt`
+2. Write inside it: `Hello from Windows! Created on [today's date]`
+3. Open WinSCP and connect to your Ubuntu (use the IP from above)
+4. In WinSCP: navigate the **left panel** (Windows) to Desktop, and the **right panel** (Ubuntu) to `~/test/`
+5. **Drag** the file from left to right
+6. Verify in Ubuntu:
+
+```bash
+# BASH (Ubuntu) - Verify the uploaded file
+cat ~/test/transfer_test_from_windows.txt
+```
+
+You should see the message you wrote on Windows.
+
+## Test 2: Ubuntu → Windows (download)
+
+1. In WinSCP, **drag** `transfer_test_from_ubuntu.txt` from the **right panel** (Ubuntu) to the **left panel** (Windows Desktop)
+2. Open the file on your Windows Desktop — you should see the date message created in Ubuntu
+
+## Test 3: Verify with checksums (optional but recommended)
+
+This verifies the file was transferred without corruption:
+
+```bash
+# BASH (Ubuntu) - Generate checksum
+sha256sum ~/test/transfer_test_from_windows.txt
+```
+
+```powershell
+# POWERSHELL (Windows) - Compare checksum
+Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorithm SHA256
+```
+
+If both hashes match → the file was transferred perfectly, bit for bit.
+
+## Cleanup
+
+```bash
+# BASH (Ubuntu) - Remove test files
+rm ~/test/transfer_test_from_windows.txt ~/test/transfer_test_from_ubuntu.txt
+```
+
+Also delete `transfer_test_from_ubuntu.txt` from your Windows Desktop.
+
+> ✅ **Checkpoint:** You have confirmed that files can travel in both directions between Windows and Ubuntu via WinSCP. You are ready for seminars.
+
+# 13. Create working folders
 
 ## Why do you need a folder structure?
 
@@ -691,7 +807,7 @@ You should see all the folders listed.
 
 ---
 
-# 12. Verify the installation
+# 14. Verify the installation
 
 ## Run the verification script
 
@@ -726,7 +842,7 @@ If you see errors or [MISSING] items, check the previous steps.
 
 ---
 
-# 13. Common problems and solutions
+# 15. Common problems and solutions
 
 ## Problem: "WSL 2 requires an update to its kernel component"
 
@@ -800,7 +916,7 @@ Check:
 
 ---
 
-# 14. Common mistakes I see every year
+# 16. Common mistakes I see every year
 
 These are the mistakes I see students make most often. Learn from their experience.
 
@@ -842,7 +958,7 @@ These are the mistakes I see students make most often. Learn from their experien
 
 ---
 
-# 15. How to use AI assistants
+# 17. How to use AI assistants
 
 ## Recommended assistants
 
@@ -943,6 +1059,8 @@ Before the first seminar, check that you have:
 - [ ] SSH working
 - [ ] PuTTY installed and configured
 - [ ] WinSCP installed and configured
+- [ ] Bash is the default shell
+- [ ] Bidirectional file transfer tested with WinSCP
 - [ ] Folders created (Books, Projects, etc.)
 - [ ] Verification showed everything OK
 
@@ -957,6 +1075,8 @@ Answer honestly to the following questions. If you cannot tick all of them, revi
 - [ ] I ran the verification script successfully (all with [OK])
 - [ ] I connected via SSH from PuTTY without help
 - [ ] I transferred a test file with WinSCP (from Windows to Ubuntu)
+- [ ] I transferred a file from Ubuntu back to Windows (bidirectional test)
+- [ ] I verified that my default shell is Bash (`echo $SHELL` → `/bin/bash`)
 - [ ] I know what to do if SSH does not start (the exact command)
 - [ ] I can explain to a colleague what `wsl --shutdown` does vs closing the Ubuntu window
 
@@ -1001,7 +1121,7 @@ Document for:
 Bucharest University of Economic Studies - CSIE
 Operating Systems - Academic Year 2024-2025
 
-**Version:** 2.1 | **Last updated:** January 2025
+**Version:** 3.0 | **Last updated:** February 2025
 
 ---
 
