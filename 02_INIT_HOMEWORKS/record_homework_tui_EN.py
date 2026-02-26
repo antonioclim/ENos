@@ -52,15 +52,14 @@ HAsViFvWuv8rlbxvHwIDAQAB
 -----END PUBLIC KEY-----"""
 
 SCP_SERVER: str = "sop.ase.ro"
-SCP_PORT: str = "1001"
+SCP_PORT: str = "1002"
 SCP_PASSWORD: str = "stud"
 SCP_BASE_PATH: str = "/home/HOMEWORKS"
 MAX_RETRIES: int = 3
 
 SPECIALIZATIONS: Dict[str, Tuple[str, str]] = {
     "1": ("eninfo", "Economic Informatics (English)"),
-    "2": ("grupeid", "ID Group"),
-    "3": ("roinfo", "Economic Informatics (Romanian)")
+    "2": ("grupeid", "ID Group")
 }
 
 # Type variable for generic functions
@@ -841,16 +840,21 @@ def generate_signature(filepath: str, data: Dict[str, str]) -> str:
         # Build data for signature
         data_to_sign: str = f"{data['surname']}+{data['firstname']} {data['group']} {file_size} {current_date} {current_time} {system_user} {absolute_path}"
         
+        # Hash with SHA-256 to guarantee data fits in RSA 1024-bit block
+        # (RSA 1024 + PKCS1 allows max 117 bytes; SHA-256 hex = 64 bytes, always OK)
+        import hashlib
+        data_hash: str = hashlib.sha256(data_to_sign.encode()).hexdigest()
+        
         # Save public key temporarily
         temp_key = tempfile.NamedTemporaryFile(mode='w', suffix='.pem', delete=False)
         temp_key.write(PUBLIC_KEY)
         temp_key.close()
         
         try:
-            # Encrypt with RSA
+            # Encrypt SHA-256 hash with RSA
             process = subprocess.run(
                 ['openssl', 'pkeyutl', '-encrypt', '-pubin', '-inkey', temp_key.name, '-pkeyopt', 'rsa_padding_mode:pkcs1'],
-                input=data_to_sign.encode(),
+                input=data_hash.encode(),
                 capture_output=True,
                 check=True
             )
@@ -858,9 +862,11 @@ def generate_signature(filepath: str, data: Dict[str, str]) -> str:
             # Convert to base64
             encrypted_b64: str = base64.b64encode(process.stdout).decode()
             
-            # Append to file
+            # Append signature AND metadata to file
+            # SIG = SHA-256 hash encrypted with RSA; META = plaintext data
             with open(filepath, 'a') as f:
-                f.write(f"\n## {encrypted_b64}\n")
+                f.write(f"\n## SIG:{encrypted_b64}\n")
+                f.write(f"## META:{data_to_sign}\n")
             
             return data_to_sign
         finally:
@@ -901,6 +907,19 @@ def upload_homework(filepath: str, data: Dict[str, str]) -> bool:
     table.add_row("Destination", scp_dest)
     table.add_row("File", filename)
     console.print(table)
+    console.print()
+    
+    # Pre-check connectivity before upload
+    import socket
+    show_info(f"Checking connectivity to {SCP_SERVER}:{SCP_PORT}...")
+    try:
+        sock = socket.create_connection((SCP_SERVER, int(SCP_PORT)), timeout=5)
+        sock.close()
+        show_success(f"Connection verified - port {SCP_PORT} is open.")
+    except (socket.timeout, socket.error, OSError):
+        show_warning(f"Port {SCP_PORT} on {SCP_SERVER} is not reachable.")
+        show_warning("Possible causes: SSH server is down, firewall, active VPN.")
+        show_info("Continuing with SCP attempts (may fail)...")
     console.print()
     
     for attempt in range(1, MAX_RETRIES + 1):

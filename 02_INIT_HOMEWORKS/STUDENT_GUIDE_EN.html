@@ -784,7 +784,7 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
                     <tr>
                         <td><strong>Specialisation</strong></td>
                         <td>Select with arrow keys</td>
-                        <td>Economic Informatics (RO/EN), ID Group</td>
+                        <td>Economic Informatics (English), ID Group</td>
                     </tr>
                     <tr>
                         <td><strong>Homework number</strong></td>
@@ -856,7 +856,7 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
                 </div>
                 <div class="collapsible-content">
                     <p>The file is <strong>saved locally</strong> and you will see the command for manual submission:</p>
-                    <pre><code>scp -P 1001 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home/HOMEWORKS/...</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
+                    <pre><code>scp -P 1002 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home/HOMEWORKS/eninfo/</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
                     
                     <div class="alert alert-danger">
                         <span class="alert-icon">⚠️</span>
@@ -1014,11 +1014,4 @@ python3 --version
         const navLinks = document.querySelectorAll('nav a');
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').slice(1);
-                document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
-            });
-        });
-    </script>
-</body>
-</html>
+                e.prevent

@@ -321,7 +321,6 @@ Subsequent runs will be instant - nothing more needs to be installed.
 - Options:
   - Economic Informatics (English)
   - ID Group
-  - Economic Informatics (Romanian)
 
 ### Homework number
 - Format: 01-07 followed by a letter
@@ -418,7 +417,7 @@ The file is saved locally and you will see a message with the command for manual
 ║                                                                         ║
 ║   Try later (when you restore connection) using:                        ║
 ║                                                                         ║
-║   scp -P 1001 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
+║   scp -P 1002 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
 ║                                                                         ║
 ║   ⚠️  DO NOT modify the .cast file before submission!                   ║
 ║                                                                         ║
@@ -723,17 +722,17 @@ cat ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast | head -20
 
 #### 15. "Connection timed out"
 
-**Cause:** The sop.ase.ro server uses port 1001 (not standard 22). 
+**Cause:** The sop.ase.ro server uses port 1002 (not standard 22). 
 
 Possible causes:
-1. Firewall blocks port 1001 (common in corporate networks)
+1. Firewall blocks port 1002 (common in corporate networks)
 2. Active VPN that does not route correctly
 3. Server temporarily unavailable
 
 **Solution:**
 ```bash
 # Test connectivity:
-nc -zv sop.ase.ro 1001
+nc -zv sop.ase.ro 1002
 
 # If you are on VPN, disconnect temporarily
 # If you are on a restricted network, use mobile hotspot
@@ -759,9 +758,9 @@ ssh-keygen -R sop.ase.ro
 **Cause:** The destination directory does not exist or you do not have permissions.
 
 **Solution:** This is a server problem. Contact the instructor with:
-- Selected specialisation: [eninfo/grupeid/roinfo]
+- Selected specialisation: [eninfo/grupeid]
 - The exact error message
-- Output of the command: `sshpass -p stud ssh -p 1001 stud-id@sop.ase.ro "ls -la /home/HOMEWORKS/"`
+- Output of the command: `sshpass -p stud ssh -p 1002 stud-id@sop.ase.ro "ls -la /home/HOMEWORKS/"`
 
 ---
 

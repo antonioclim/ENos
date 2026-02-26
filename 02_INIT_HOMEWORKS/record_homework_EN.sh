@@ -32,7 +32,7 @@ HAsViFvWuv8rlbxvHwIDAQAB
 # SERVER CONFIGURATION
 #===============================================================================
 SCP_SERVER="sop.ase.ro"
-SCP_PORT="1001"
+SCP_PORT="1002"
 SCP_PASSWORD="stud"
 SCP_BASE_PATH="/home/HOMEWORKS"
 MAX_RETRIES=3
@@ -262,11 +262,10 @@ collect_student_data() {
     echo -e "${BOLD}   Select specialisation:${NC}"
     echo "   1) eninfo  - Economic Informatics (English)"
     echo "   2) grupeid - ID Group"
-    echo "   3) roinfo  - Economic Informatics (Romanian)"
     echo ""
     
     while true; do
-        read -p "   Choose option (1/2/3): " SPEC_CHOICE
+        read -p "   Choose option (1/2): " SPEC_CHOICE
         case $SPEC_CHOICE in
             1)
                 SPECIALIZATION="eninfo"
@@ -278,13 +277,8 @@ collect_student_data() {
                 print_success "Specialisation: $SPECIALIZATION"
                 break
                 ;;
-            3)
-                SPECIALIZATION="roinfo"
-                print_success "Specialisation: $SPECIALIZATION"
-                break
-                ;;
             *)
-                print_error "Invalid! Choose 1, 2 or 3."
+                print_error "Invalid! Choose 1 or 2."
                 ;;
         esac
     done
@@ -414,8 +408,14 @@ generate_signature() {
     local TEMP_PUBKEY=$(mktemp)
     echo "$PUBLIC_KEY" > "$TEMP_PUBKEY"
     
-    # Encrypt with RSA and convert to Base64
-    local ENCRYPTED_B64=$(echo -n "$DATA_TO_SIGN" | openssl pkeyutl -encrypt -pubin -inkey "$TEMP_PUBKEY" -pkeyopt rsa_padding_mode:pkcs1 2>/dev/null | base64 -w 0)
+    # Hash with SHA-256 to guarantee data fits in RSA 1024-bit block
+    # (RSA 1024 + PKCS1 allows max 117 bytes; SHA-256 hex = 64 bytes, always OK)
+    local DATA_HASH=$(echo -n "$DATA_TO_SIGN" | sha256sum | cut -d' ' -f1)
+    
+    print_info "SHA-256: ${DATA_HASH}"
+    
+    # Encrypt hash with RSA and convert to Base64
+    local ENCRYPTED_B64=$(echo -n "$DATA_HASH" | openssl pkeyutl -encrypt -pubin -inkey "$TEMP_PUBKEY" -pkeyopt rsa_padding_mode:pkcs1 2>/dev/null | base64 -w 0)
     
     # Cleanup temporary key
     rm -f "$TEMP_PUBKEY"
@@ -425,9 +425,12 @@ generate_signature() {
         exit 1
     fi
     
-    # Append signature to .cast file
+    # Append signature AND metadata to .cast file
+    # SIG line contains the SHA-256 hash encrypted with RSA (verifiable with private key)
+    # META line contains plaintext data (verifiable by recomputing the hash)
     echo "" >> "$FILEPATH"
-    echo "## ${ENCRYPTED_B64}" >> "$FILEPATH"
+    echo "## SIG:${ENCRYPTED_B64}" >> "$FILEPATH"
+    echo "## META:${DATA_TO_SIGN}" >> "$FILEPATH"
     
     print_success "Cryptographic signature added!"
     echo ""
@@ -449,6 +452,18 @@ upload_homework() {
     print_info "User: ${SCP_USER}"
     print_info "Destination: ${SCP_DEST}"
     echo ""
+    
+    # Pre-check connectivity before upload
+    print_info "Checking connectivity to ${SCP_SERVER}:${SCP_PORT}..."
+    if ! timeout 5 bash -c "echo >/dev/tcp/${SCP_SERVER}/${SCP_PORT}" 2>/dev/null; then
+        print_warning "Port ${SCP_PORT} on ${SCP_SERVER} is not reachable."
+        print_warning "Possible causes: SSH server is down, firewall, active VPN."
+        print_info "Continuing with SCP attempts (may fail)..."
+        echo ""
+    else
+        print_success "Connection verified - port ${SCP_PORT} is open."
+        echo ""
+    fi
     
     local attempt=1
     local upload_success=false
