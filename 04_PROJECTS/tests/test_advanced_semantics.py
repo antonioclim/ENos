@@ -2,6 +2,7 @@
 These tests do not run the missing schedulers, network protocols or live readline bridge.
 """
 import os
+import hashlib
 import re
 import shutil
 import subprocess
@@ -101,7 +102,7 @@ int main(void) {
  unsigned char bytes[2000];for(size_t i=0;i<sizeof bytes;++i)bytes[i]=(unsigned char)(i*37+11);
  for(size_t i=0;i<sizeof bytes;++i){assert(rolling_hash_update(&r,i>=300?bytes[i-300]:0,bytes[i])==0);if(i>=299){RollingHash fresh={0};assert(rolling_hash_init(&fresh,300)==0);for(size_t j=i-299;j<=i;++j)assert(rolling_hash_update(&fresh,0,bytes[j])==0);assert(rolling_hash_digest(&r)==rolling_hash_digest(&fresh));rolling_hash_free(&fresh);}}
  rolling_hash_free(&r);
- FileChecksum abc={0};assert(hash_file("abc",&abc)==0 && abc.file_size==3); const unsigned char expected[16]={0x90,0x01,0x50,0x98,0x3c,0xd2,0x4f,0xb0,0xd6,0x96,0x3f,0x7d,0x28,0xe1,0x7f,0x72};assert(memcmp(abc.hash,expected,16)==0);
+ FileChecksum abc={0};assert(hash_file("abc",&abc)==0 && abc.file_size==3); const unsigned char expected[32]={0xba,0x78,0x16,0xbf,0x8f,0x01,0xcf,0xea,0x41,0x41,0x40,0xde,0x5d,0xae,0x22,0x23,0xb0,0x03,0x61,0xa3,0x96,0x17,0x7a,0x9c,0xb4,0x10,0xff,0x61,0xf2,0x00,0x15,0xad};assert(HASH_SIZE==32 && memcmp(abc.hash,expected,HASH_SIZE)==0);
  assert(hash_file(".",&abc)<0); assert(!signature_generate("old",0));
  SignatureTable *sig=signature_generate("old",4096);assert(sig && sig->block_count==3);
  Delta*d=delta_generate(sig,"new");assert(d);assert(delta_apply("old",d,"result")==0);assert(same("new","result"));
@@ -113,4 +114,39 @@ int main(void) {
  sig=signature_generate("empty",4096);assert(sig && sig->block_count==0);d=delta_generate(sig,"empty");assert(d && d->instruction_count==0);assert(delta_apply("old",d,"empty-result")==0);assert(same("empty","empty-result"));delta_free(d);signature_free(sig);
  return 0;
 }''',['hash.c','rolling_hash.c','signature.c','diff.c'],['-lcrypto'],asan=True)
+    def test_a03_sha256_known_vectors_binary_and_failure_nonpublication(self):
+        self.extract('A03',['syncutil.h','hash.c','rolling_hash.c','signature.c','diff.c'])
+        vectors=[('empty',b''),('abc',b'abc'),('binary',bytes(range(256))*19+b'\x00\xff')]
+        checks=[]
+        for name,data in vectors:
+            (self.path/name).write_bytes(data)
+            digest=hashlib.sha256(data).digest()
+            if shutil.which('sha256sum'):
+                independent=subprocess.run(['sha256sum',str(self.path/name)],capture_output=True,text=True,check=True)
+                self.assertEqual(independent.stdout.split()[0],digest.hex())
+            values=','.join('0x%02x'%x for x in digest)
+            checks.append(f'''{{ const unsigned char expected[32]={{{values}}}; FileChecksum out={{0}};
+ assert(hash_file("{name}",&out)==0 && out.file_size=={len(data)});
+ assert(memcmp(out.hash,expected,HASH_SIZE)==0);
+ FILE *f=fopen("{name}","rb");assert(f); unsigned char input[5000];
+ size_t n=fread(input,1,sizeof input,f);assert(n=={len(data)} && !ferror(f));assert(fclose(f)==0);
+ unsigned char block[HASH_SIZE]; assert(hash_block(input,n,block)==0 && memcmp(block,expected,HASH_SIZE)==0);
+ }}''')
+        source=r'''#include "syncutil.h"
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+int main(void) {
+ _Static_assert(HASH_SIZE==32,"SHA-256 width");
+ assert(DIGEST_RECORD_VERSION==2 && strcmp(DIGEST_ALGORITHM,"sha256")==0);
+ unsigned char before[HASH_SIZE],out[HASH_SIZE];memset(before,0xa5,sizeof before);memcpy(out,before,sizeof out);
+ assert(hash_block(NULL,1,out)<0 && memcmp(out,before,sizeof out)==0);
+ assert(hash_block((const unsigned char*)"abc",3,NULL)<0);
+ FileChecksum sentinel;memset(&sentinel,0x5a,sizeof sentinel);FileChecksum saved=sentinel;
+ assert(hash_file("missing",&sentinel)<0 && memcmp(&sentinel,&saved,sizeof sentinel)==0);
+ assert(hash_file(".",&sentinel)<0 && memcmp(&sentinel,&saved,sizeof sentinel)==0);
+ assert(hash_file(NULL,&sentinel)<0 && memcmp(&sentinel,&saved,sizeof sentinel)==0);
+ assert(hash_file("abc",NULL)<0);
+'''+ '\n'.join(checks)+'\nreturn 0;}'
+        self.compile_run(source,['hash.c'],['-lcrypto'])
 if __name__=='__main__':unittest.main()

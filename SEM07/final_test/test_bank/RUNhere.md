@@ -1,7 +1,7 @@
 # Final-test question pool and local draft generator
 
 **Source author:** ing. dr. Antonio Clim.  
-**Scope:** publicly distributed teaching questions and review drafts. The author has not yet selected whether future assessment should use a public practice bank, a separately maintained confidential bank, or another approved arrangement. This directory does not make that choice.
+**Adopted scope:** public formative teaching questions and local practice/review drafts. A future summative examination, controlled bank, blueprint or distribution process requires separate approval. The existing public history is not confidential.
 
 The pool contains **296 questions in 13 categories**, with **178 authored points** in total: 262 multiple-choice questions, 26 short-answer questions and 8 practical questions. IDs, point weights, Bloom labels and difficulty labels are preserved. Corrected wording makes the intended shell, operating-system or performance assumptions explicit. These totals describe the pool; they do not define an examination length, a pass threshold or an institutional grading policy.
 
@@ -108,4 +108,4 @@ python3 -m pytest SEM07/tests/test_final_bank_generator.py
 
 These tests cover schema rejection, immutable inputs, reproducible selection, option/key agreement, all three output formats, byte manifests, preservation of existing output and the full current pool. Native CLI execution here means a local Python process. It does not establish LMS import, browser presentation, psychometric quality, student performance, invigilation or institutional acceptance.
 
-The assessment and publication decision remains `PENDING_POLICY`. The separate [grade aggregation contract](../../grade_aggregation/GRADING_POLICY.md) also requires explicit policy values; generating a draft does not approve or fill them in.
+The summative assessment decision remains `PENDING_POLICY`; public formative use has been adopted. The separate [grade aggregation contract](../../grade_aggregation/GRADING_POLICY.md) also requires explicit policy values; generating a draft does not approve or fill them in.

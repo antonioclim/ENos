@@ -353,20 +353,20 @@ Important data
 
 ---
 
-## 4. Historical Misconception Estimates — Provenance Unresolved
+## 4. Misconceptions Targeted by the Practice Activities
 
-| Parsons | Targeted Misconception | Estimated Frequency |
-|---------|------------------------|---------------------|
-| TP1 | Variables are local by default | 80% |
-| TP1 | Spaces around = are permitted | 70% |
-| TP2 | return returns values as in other languages | 75% |
-| TP2 | $() is optional for command substitution | 60% |
-| TP3 | Quotes in iteration are optional | 65% |
-| TP3 | Comma is a separator in arrays | 40% |
-| TP4 | declare -A is optional for hash | 70% |
-| TP4 | Python/JS syntax works in Bash | 45% |
-| TP5 | trap does not require specifying the signal | 45% |
-| TP5 | Function definition order doesn't matter | 50% |
+| Parsons | Targeted Misconception |
+|---------|------------------------|
+| TP1 | Variables are local by default |
+| TP1 | Spaces around = are permitted |
+| TP2 | return returns values as in other languages |
+| TP2 | $() is optional for command substitution |
+| TP3 | Quotes in iteration are optional |
+| TP3 | Comma is a separator in arrays |
+| TP4 | declare -A is optional for hash |
+| TP4 | Python/JS syntax works in Bash |
+| TP5 | trap does not require specifying the signal |
+| TP5 | Function definition order doesn't matter |
 
 ---
 
@@ -426,17 +426,9 @@ Important data
 
 ## 7. Activity Type Distribution
 
-### Historical Local Activity Distribution Proposal
+### Varied activity types
 
-Brown and Wilson (2018), Tip 10, supports varied learning tasks; it does not prescribe these percentages or establish the local “Actual” column. The ranges and values below need an author-supplied calculation/measurement basis. See [the evidence contract](TEACHING_CONTRACT.md).
-
-| Activity Type | Target | Actual | Status |
-|---------------|--------|--------|--------|
-| Writing Code | 45-55% | 48% | ✓ |
-| Parsons/Reorder | 15-20% | 18% | ✓ |
-| Trace/Predict | 15-20% | 17% | ✓ |
-| Debug/Fix | 10-15% | 12% | ✓ |
-| Explain/Review | 5-10% | 5% | ✓ |
+Brown and Wilson (2018), Tip 10, supports varied learning tasks. Use writing, Parsons/reordering, trace/predict, debug/fix and explain/review activities. The unsupported historical target/actual percentages are retained in the [provenance record](../../DECISION_PROVENANCE.json); no observed local distribution is asserted here.
 
 ### Retained 100-minute Allocation Proposal (Includes Break)
 

@@ -1,18 +1,56 @@
-# Author decisions awaiting confirmation
+# Adopted local teaching profile and deferred decisions
 
-This is the unpublished ENos 6.0.0-dev correction candidate, based exclusively on `antonioclim/ENos` v5.5.0, commit `d8fdd0507fe26e6bc1438a692da14afc2112464c`. Technical corrections do not adopt an institutional or author policy. A request to continue work does not itself authorise a GitHub push, release, institutional service operation or a policy choice.
+The author approved D1–D7 for local implementation on 18 November 2026, using the recommended proposals in `ENos_Decisions_and_Acceptance_v1`. This revision starts from the verified review snapshot `d7aead32517115f2ca5e2f425f692b3f569d33a5`, whose source tree is `dc63b602831c0a383d92f01ef02931ee6ce23c08`, continuing the published v5.5.0 baseline.
+
+The initial approval adopted the bounded local teaching profile. On 18 November 2026 the author subsequently authorised the necessary GitHub changes, integration into `main` and publication of v6.0.0 as the latest stable release, preserving v5.5.0 and the other existing releases. This records authorisation; the GitHub references and release page establish which publication operations have completed. Institutional online submission, official grading policy and M14 use with real secrets remain deferred. Approval of a policy is distinct from successful execution of its acceptance checks.
 
 ## Decisions with a material effect
 
-| Decision | Concrete alternatives and consequences | Recommendation for consideration | Current behaviour |
-|---|---|---|---|
-| Own-project licence | Adopt MIT for identified original code/materials with the necessary rights; retain a restrictive educational licence and align metadata; or define a component-by-component licence. These choices grant different permissions and cannot be inferred from conflicting historical files. | Confirm the intended grant and its exact scope, then reconcile `LICENSE`, `LICENCE.md`, package metadata and notices together. | The MIT `LICENSE` and restrictive `LICENCE.md` are both preserved. The MIT package declaration has been withheld pending reconciliation with the restrictive document. No new grant has been adopted. Third-party assets retain their own upstream licences. |
-| Submission service and recording protocol | Confirm SSH port 1001 or 1002 and an authorised destination; specify identity, receipt, key custody and legacy handling. A versioned authenticated upload with a content-hash receipt can confirm what the service received. A separately specified signature can add a verifiable receipt. Neither proves who wrote the commands. | Use a versioned content-bound protocol with an institutional receipt and explicit trust/key ownership. Decide whether legacy files receive manual review or a documented adapter. | Offline mode is implemented without contacting a service; a supported recorder and terminal remain runtime prerequisites. Online operation requires an explicit port. Historical encrypted metadata is labelled as such, not as a content signature. Unsupported verification remains `MANUAL_REVIEW_REQUIRED`; no institutional endpoint was exercised in Phase 5. |
-| Assessment policy | Confirm seminar/project/exam weights, eligibility, oral assessment, bonuses, caps, lateness and resubmission rules; or keep reports descriptive until those rules are settled. Different historical weights are not interchangeable. | Approve one explicit versioned policy with worked examples before calculating a consequential aggregate. Preserve the underlying component evidence and reasons for missing data. | Unspecified policy returns `PENDING_POLICY` and a null aggregate. Missing evidence or a failed evaluation is not converted into a fabricated zero or penalty. A reviewed zero remains distinguishable from absent evidence. |
-| Public question banks | Keep published questions as formative practice; or develop a distinct controlled assessment bank with its own distribution and access rules. Material already in public history cannot be made confidential by a notice or by removing the current file. | Treat the existing public banks as formative, and decide separately whether a distinct assessment bank is needed. | Public-bank availability and confidentiality limits are stated. The candidate does not claim that public questions are secret or establish a new summative assessment policy. |
-| Empirical and teaching claims | Supply verifiable provenance and a reproducible configuration for exact percentages, anecdotes, timing and performance figures; or explicitly approve their use as hypothetical illustrations with defined assumptions. | Retain the original figures in the decision history; use them as measured results only when supporting evidence is available. | Unsupported historical figures are qualified, not presented as new measurements. Demonstrated algorithmic results are separated from illustrative workloads and untested platform claims. |
+| Decision | Adopted scope | Deferred or retained boundary |
+| --- | --- | --- |
+| D1 — Licensing | MIT original code/examples and CC BY 4.0 original prose/figures, within confirmed rights; explicit component scope | Existing attribution, specific retained grants and third-party terms. SEM02 package notice preserved; uncertain rights excluded |
+| D2 — Recording | Explicit offline practice and structural validation | Online endpoint, port, trust/keys, identity, receipt, legacy compatibility and native institutional acceptance |
+| D3 — Assessment | Descriptive component evidence, missing-versus-zero distinction, no authoritative default aggregate | Official weights, thresholds, penalties, eligibility, rounding, oral assessment and resubmission rules |
+| D4 — Public banks | Existing banks are public formative resources | Controlled examination source, blueprint, grade conversion and access/distribution rules |
+| D5 — Teaching claims | Evidence-backed assertions; exact provenance retained for removed unsupported claims | Unsupported claims are not converted into hypothetical results without explicit assumptions and derivation |
+| D6 — A03 | Coordinated SHA-256 reference, representations, known-answer tests and assessment expectations | Omitted student CLI/network work, peer authentication and conflict resolution |
+| D7 — M14 | Synthetic local exercise, redacted previews, explicit private output and bounded cleanup | Authenticated storage, real secrets/services, secure-erasure claims and Windows ACL acceptance |
+
+## Adopted decision texts
+
+The texts below define the approved scope. Implementation details and current acceptance results are documented in the affected component contracts and [VERIFICATION.md](VERIFICATION.md).
+
+### D1 — Licensing scope and retained attribution
+
+For the forthcoming ENos revision, I authorise MIT licensing of the original software and code examples that I own or am entitled to license, and CC BY 4.0 licensing of the original teaching prose and original figures that I own or am entitled to license. Third-party components, quotations, institutional material and any item with unresolved ownership remain subject to their existing terms and are excluded from this new grant. Existing attribution, including the Revolvix notice, must be retained unless I separately confirm a justified correction. A reviewed component-scope record must identify the applicable terms, including mixed HTML or Markdown files. This decision does not claim to revoke permissions already granted for earlier versions.
+
+### D2 — Recording and institutional submission
+
+For the ENos local teaching profile, terminal recording is a local practice workflow. The supported practice instructions use explicit --offline mode and the documented asciicast v2 format. Local validation establishes only the supported recording structure and reports self-declared identity separately from authentication and submission readiness. Institutional submission is deferred until the authorised service owner confirms the endpoint, port, trust material, identity mapping, receipt contract and treatment of legacy files, and the agreed workflow passes native acceptance. Neither an encrypted legacy token nor an SCP exit status is treated as proof of authorship, a grading decision or an institutional receipt. This decision does not authorise a connection or upload to an institutional service.
+
+### D3 — Assessment and grade aggregation
+
+Until a complete versioned assessment policy is explicitly approved, ENos reports reviewed component evidence descriptively and leaves authoritative final grades and eligibility decisions unset. Missing evidence remains distinct from a reviewed zero. The default status remains PENDING_POLICY. Calculations under an explicitly supplied policy are scenario outputs labelled SUPPLIED_POLICY_UNVERIFIED and must not be represented as approved institutional grades merely because a policy file was provided. No historical weights, participation thresholds, penalties, rounding rules, oral-assessment rules or resubmission conditions are adopted by this decision.
+
+### D4 — Public question banks
+
+The question banks already distributed in ENos are public formative learning resources. Their questions, reference answers and explanations may be used for practice and local review. Separating a generated question paper from its answer key does not make the public source confidential. This decision does not establish a summative examination blueprint, grade conversion, eligibility rule or confidential assessment bank. Any future controlled assessment will use a separately approved source, access and distribution protocol, item-selection blueprint and review process.
+
+### D5 — Empirical and teaching claims
+
+ENos teaching claims will state no stronger conclusion than the available evidence supports. Measured results require an identifiable source, population or workload, method and reproducible configuration where applicable. Unsupported historical numerical claims, anecdotes and service-response promises will be removed from active instructional assertions while their exact wording, original source and unresolved provenance are retained in the decision record. A hypothetical example may be introduced only with explicit assumptions and a reproducible derivation; relabelling an unsupported empirical claim is insufficient. Verified results, unfavourable observations, author attributions and scientific limitations are preserved.
+
+### D6 — Adopt SHA-256 as the versioned A03 digest contract
+
+For the next ENos A03 candidate, I adopt SHA-256 for whole-file and block digests. The local C digest representation is exactly 32 bytes. The proposed student CLI command synctool hash PATH shall write exactly 64 lower-case hexadecimal characters followed by one newline to standard output on success; diagnostics shall use standard error and failures shall return a non-zero status without a success digest. Serialised digest records shall identify version 2 and the sha256 algorithm explicitly. Legacy MD5 records shall be rejected by this contract; any migration shall recompute SHA-256 from the original bytes and shall not reinterpret a 16-byte value as a SHA-256 value. Update the reference code, its mirrored document blocks, known-answer tests and assessment expectations together. This decision does not provide or approve the omitted student CLI, a complete network protocol, peer authentication or conflict resolution. A checksum is not evidence of peer identity or authorship.
+
+### D7 — Select an explicit M14 teaching lifecycle and keep operational secret handling separate
+
+For the ENos M14 teaching profile, I adopt a local exercise using synthetic secrets only. Previews shall remain redacted. A secret-bearing configuration file may be produced only by an explicit output request into a fresh directory owned by the exercising user; on POSIX systems the directory shall have mode 0700 and the file mode 0600. The exercise shall use a local dummy receiver, retain the file only until its declared verification step completes and remove the exercise output on completion or handled failure. Unexpected existing targets, links or ownership shall be rejected. Secret values shall not be copied into logs, terminal previews, command-line arguments, version control or synchronised folders. The kit shall claim no secure erasure guarantee, no general absence of plaintext from the operating system and no acceptance of a real service. The current CBC fragment may remain only as an explicitly non-authenticated teaching example with synthetic values. Authenticated storage, real credentials, receiving-service identity, reload/retention behaviour, key custody and Windows ACL acceptance remain outside this approved teaching profile until separately specified, implemented and tested.
 
 ## Exact historical declarations and affected files
+
+The following entries describe the declarations preceding adoption. They preserve the conflict and provenance; they do not reinstate the restrictive permissions table, historical grading weights or deferred service configuration as current rules.
 
 The examples below are retained for comparison with the immutable v5.5.0 baseline. They explain why a single consequential policy cannot be inferred from the existing texts.
 
@@ -28,12 +66,7 @@ The recommendation is to choose one complete, versioned contract per affected ar
 
 ## Additional project contracts already left open
 
-The five categories above do not close narrower author choices recorded inside individual projects.
-
-- **A03 digest contract (`P3-PA-010`).** `04_PROJECTS/c)ADVANCED/A03_Distributed_File_Sync.md` retains the historical 16-byte MD5 teaching reference, while the assessment specification expects 64 hexadecimal SHA-256 characters. The source already recommends a coordinated migration of the API, wire format and known-answer tests to SHA-256 for a new version, or an explicitly named legacy teaching format with a matching oracle and limitations. That recommendation has not been adopted. The assessment oracle remains pending until the algorithm, serialisation and compatibility decision agree.
-- **M14 secret lifecycle (`P3-PM-027`).** `04_PROJECTS/a)MEDIUM/M14_Environment_Config_Manager.md` requires a decision between a narrowly defined plaintext service-configuration output and a workflow without a persistent plaintext file. Ownership, permissions, retention and the receiving service must be defined. Separately, authenticated storage must be selected and specified if tamper detection is required; the existing CBC example does not provide it. Redacted previews and an explicit technical output switch do not constitute author approval of a lifecycle policy.
-
-These choices are carried forward from the existing project texts, not introduced as new assessment or institutional policy. The Phase 6 decision dossier records their exact source passages and consequences alongside the five main categories.
+D6 and the bounded D7 teaching profile are now adopted as specified above. The complete A03 student application, authenticated M14 storage and real-service deployment remain separate work. Component tests establish only the paths they execute; they do not close the institutional or target-platform acceptances in [VERIFICATION.md](VERIFICATION.md).
 
 ## Interpretation of status values
 
@@ -42,4 +75,4 @@ These choices are carried forward from the existing project texts, not introduce
 - `UNVERIFIED` / `NOT_RUN`: the identified evidence or execution has not been obtained. A parser pass or model trace does not replace it.
 - A format-valid recording is not, solely for that reason, authenticated, submitted, accepted or eligible.
 
-No real student grade, submission, credential, institutional service setting, GitHub release or publication was changed as part of this correction candidate.
+`PENDING_POLICY` still applies to the deferred official assessment policy even though the descriptive teaching profile is adopted. A supplied policy remains `SUPPLIED_POLICY_UNVERIFIED` until the required approval is independently established.

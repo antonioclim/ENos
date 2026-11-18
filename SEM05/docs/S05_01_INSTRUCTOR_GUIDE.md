@@ -54,32 +54,21 @@ In live coding, INTENTIONALLY introduce these errors and fix them:
 
 ---
 
-## WAR STORIES FROM THE TRENCHES
+## Demonstration notes
 
-> *Historical author-supplied anecdotes. Their provenance has not been established by this repository review; do not cite them as verified incidents or evidence of learning effects.*
+Use filenames containing spaces when demonstrating array iteration. Quote array expansion to preserve the intended elements; inspect the result under both quoted and unquoted expansion.
 
-### The Midnight Debugging Session (December 2023)
-
-During the makeup exam session, a student spent 3 hours debugging a script that "mysteriously failed." The symptoms: script worked fine when run manually, failed in cron. The culprit? A single missing quote around `${array[@]}` combined with filenames containing spaces (which only existed in the production dataset, not their test data).
-
-**Lesson I now emphasise:** "Your test data is always cleaner than reality. Quote everything, even when it 'works' without quotes."
-
-### The declare -A Disaster (Semester 2, 2023-2024)
-
-I watched a student debug for 45 minutes why their "associative array" was producing numeric keys. They had written:
+### Declare associative arrays explicitly
 
 ```bash
 config[name]="test"    # Missing declare -A above!
 echo "${!config[@]}"   # Output: 0 (not "name"!)
 ```
 
-Without `declare -A`, Bash treats it as an indexed array and interprets `name` as arithmetic expression (evaluates to 0).
+Without `declare -A`, Bash treats the array as indexed and interprets `name` as an arithmetic expression. The example assumes that `name` is unset or has value zero. Compare it with an explicitly declared associative array.
 
-**Now I always:** Draw this on the board in red marker. Three times. Different contexts.
+### Check the context in which `set -e` applies
 
-### The set -e False Confidence (Ongoing)
-
-Every semester, at least one student submits code like:
 ```bash
 set -e
 if grep -q "pattern" file.txt; then
@@ -88,19 +77,11 @@ fi
 echo "Script continues"  # They expect this to NOT run if grep fails
 ```
 
-They're shocked when the script continues. The `set -e` in `if` context gotcha claims victims every year.
+Explain why a failing condition of `if` does not stop the script here. Use `S05_04_demo_robust.sh` for the other documented contexts.
 
-**My response:** I created the `S05_04_demo_robust.sh` specifically to demonstrate all the cases where `set -e` does NOT work. It takes 15 minutes but saves hours of confusion.
+### Language and authorship
 
-### Romanian Student Patterns I've Noticed
-
-After teaching this course for several years, I've observed:
-
-1. **Variable naming:** Students instinctively use `numar`, `lista`, `rezultat` — which is a language preference, not evidence of authorship or a valid AI-detection rule
-
-2. **Error messages:** They write `"Eroare: fisierul nu exista"` then remember to translate — sometimes leaving mixed language comments
-
-3. **Coffee correlation:** The 8:00 AM section makes 15% more errors on array exercises than the 14:00 section. I now schedule the spectacular hook demo first to wake them up.
+Variable names such as `numar`, `lista` and `rezultat` express a language preference; they do not establish authorship. Check that user-facing messages and documentation follow the language required for the assignment.
 
 ---
 

@@ -462,7 +462,7 @@ Create a simple web dashboard for status visualisation.
 
 ### Historical live demonstration proposal (20% of final grade; conflicts with rubric 40%)
 
-The draft proposes a live demonstration. Its 20% weighting conflicts with the rubric's 40%; the author must select one allocation and align all documents. The historical anecdote about unexplained “perfect” submissions has no supplied empirical record and establishes no detection rule.
+The draft proposes a live demonstration. Its 20% weighting conflicts with the rubric's 40%; the author must select one allocation and align all documents. The adopted descriptive profile does not approve either allocation or infer authorship from presentation quality.
 
 #### 1. Code Walkthrough (5 minutes)
 

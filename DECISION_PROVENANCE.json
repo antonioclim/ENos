@@ -1,0 +1,1388 @@
+{
+  "status": "APPROVED_D3_D5_IMPLEMENTATION_RECORD",
+  "approved_package": "ENos_Decisions_and_Acceptance_v1",
+  "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+  "scope": "Exact prior wording and attribution retained for traceability. These records are historical evidence, not active empirical claims or adopted institutional policy.",
+  "records": [
+    {
+      "id": "D5-001",
+      "source_path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "87fc03511a7a1ebbc837c34b6b9ba3b648eb6f47f33f347606368d1094a960e9",
+      "source_start_line": 28,
+      "original_text": "- A typo in `STOP_homework` can be corrected; Ctrl+D also closes the recorded shell. The historical “most common / 2 seconds” claim is unverified",
+      "replacement": "- If `STOP_homework` is mistyped, correct the command or press Ctrl+D to close the recorded shell.",
+      "disposition": "Unsupported repair-time/frequency claim removed from active instructions; practical instruction retained.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-002",
+      "source_path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "87fc03511a7a1ebbc837c34b6b9ba3b648eb6f47f33f347606368d1094a960e9",
+      "source_start_line": 31,
+      "original_text": "💪 **85% of students from previous years succeeded on their first attempt.**\n\n> **Provenance pending author review:** The percentage is retained from the source; no denominator, cohort or measurement record is established here.",
+      "replacement": "Start with the offline practice session and check the resulting recording before considering an online submission.",
+      "disposition": "No cohort, denominator or measurement method supplied; exact claim retained here rather than in active instruction.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-003",
+      "source_path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "87fc03511a7a1ebbc837c34b6b9ba3b648eb6f47f33f347606368d1094a960e9",
+      "source_start_line": 56,
+      "original_text": "*(Historical author statement, retained for review: WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*",
+      "replacement": "",
+      "disposition": "Unconfirmed anecdote/author statement removed from active instruction; no invented hypothetical event substituted.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-004",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 28,
+      "original_text": "- A typo in `STOP_homework` can be corrected; Ctrl+D also closes the recorded shell. The historical “most common / 2 seconds” claim is unverified",
+      "replacement": "- If `STOP_homework` is mistyped, correct the command or press Ctrl+D to close the recorded shell.",
+      "disposition": "Unsupported repair-time/frequency claim removed from active instructions; practical instruction retained.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-005",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 31,
+      "original_text": "💪 **85% of students from previous years succeeded on their first attempt.**\n\n> **Provenance pending author review:** The percentage is retained from the source; no denominator, cohort or measurement record is established here.",
+      "replacement": "Start with the offline practice session and check the resulting recording before considering an online submission.",
+      "disposition": "No cohort, denominator or measurement method supplied; exact claim retained here rather than in active instruction.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-006",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 48,
+      "original_text": "> **Historical anecdote — provenance pending author review.**\n> 💡 **From the trenches:** In 2023, a student accidentally typed `STOP-homework` (with hyphen instead of underscore) and spent 20 minutes wondering why the recording wouldn't stop. The solution? Read the screen carefully — it says `STOP_homework` with an **underscore**! Since then, I've made the text larger and added Ctrl+D as a backup. Learn from others' mistakes.",
+      "replacement": "",
+      "disposition": "Unconfirmed anecdote/author statement removed from active instruction; no invented hypothetical event substituted.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-007",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 59,
+      "original_text": "*(Historical author statement, retained for review: WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*",
+      "replacement": "",
+      "disposition": "Unconfirmed anecdote/author statement removed from active instruction; no invented hypothetical event substituted.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-008",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 464,
+      "original_text": "> **Historical anecdote — capture context and provenance unconfirmed. Standard asciicast does not record audio or unrelated sessions.**\n> *A former student once ran the script on the shared server. The resulting 47-minute recording included three other students' work, a coffee break conversation and someone's Spotify playlist playing in the background. Don't be that student.*",
+      "replacement": "",
+      "disposition": "Unconfirmed anecdote/author statement removed from active instruction; no invented hypothetical event substituted.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-009",
+      "source_path": "03_GUIDES/STUDENT_GUIDE_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275",
+      "source_start_line": 848,
+      "original_text": "**Unconfirmed historical response-time claim (author review required):** Lab instructors typically respond within 24-48 hours during term time. For urgent issues before deadlines, use office hours.",
+      "replacement": "Use the support channel and office-hour arrangements confirmed for your class. Do not assume a response deadline that has not been announced.",
+      "disposition": "No current service commitment supplied; historical response-time promise retained in provenance only.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/STUDENT_GUIDE_EN.md"
+    },
+    {
+      "id": "D5-010",
+      "source_path": "03_GUIDES/FAQ_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "b147f6c7603978b8934e33459357c1cdd2d1393bd1528dc9be36e45855cbfa19",
+      "source_start_line": 30,
+      "original_text": "> **Historical anecdote — capture context and provenance unconfirmed. Standard asciicast does not record audio or unrelated sessions.**\n> *A former student once ran the script on the shared server. The resulting 47-minute recording included three other students' work, a coffee break conversation and someone's Spotify playlist playing in the background. Don't be that student.*",
+      "replacement": "Use a terminal in your own practice environment and keep unrelated activity out of the recorded session. Standard asciicast records terminal events; it does not capture audio.",
+      "disposition": "Unconfirmed capture anecdote removed; independently correct recording-scope instruction retained.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/FAQ_EN.md"
+    },
+    {
+      "id": "D3-HISTORY-011",
+      "source_path": "SEM07/README.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "ef5351769d1e1211f24c48fb1e08aee950c1735159d8e69fa43a9d6a3837871e",
+      "retained_exactly_in": "SEM07/POLICY_HISTORY.md",
+      "disposition": "Former active formulas, thresholds, sanctions and historical attribution retained verbatim as a labelled record; not adopted by the descriptive profile.",
+      "claim_type": "historical policy text",
+      "available_evidence": "Exact original repository policy/proposal text is retained, without institutional adoption.",
+      "missing_provenance": "Institutionally adopted policy and authority for official assessment.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      }
+    },
+    {
+      "id": "D3-HISTORY-012",
+      "source_path": "SEM07/grade_aggregation/GRADING_POLICY.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "4a6db4a98d229b4d30c516358e2228f0508b3d1f2e919db098a484b3262ed492",
+      "retained_exactly_in": "SEM07/grade_aggregation/GRADING_POLICY_HISTORY.md",
+      "disposition": "Former active formulas, thresholds, sanctions and historical attribution retained verbatim as a labelled record; not adopted by the descriptive profile.",
+      "claim_type": "historical policy text",
+      "available_evidence": "Exact original repository policy/proposal text is retained, without institutional adoption.",
+      "missing_provenance": "Institutionally adopted policy and authority for official assessment.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      }
+    },
+    {
+      "id": "D3-GUIDE-ELIGIBILITY",
+      "source_path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "f29f797fad7ae740ec0884d5ef89c8de5995faa544afee5181c56f3e0911519c",
+      "source_start_line": 724,
+      "original_text": "⚠️ Errors caused by not following this instruction are your responsibility, and homework that is not posted and generated from your personal server will NOT be considered!",
+      "replacement": "Use your own local practice environment. Submission eligibility is governed by the separately approved course policy, which is not selected by this guide.",
+      "disposition": "Unapproved eligibility consequence removed from active local practice instructions; no penalty adopted.",
+      "claim_type": "historical policy text",
+      "available_evidence": "Exact original repository policy/proposal text is retained, without institutional adoption.",
+      "missing_provenance": "Institutionally adopted policy and authority for official assessment.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      }
+    },
+    {
+      "id": "D5-014",
+      "source_path": "SEM05/presentations/S05_01_presentation.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095",
+      "source_start_line": 160,
+      "original_text": "<p class=\"small\">Historical misconception percentages are retained as unverified author claims: no cohort, denominator or measurement method is established. They are not course statistics.</p>",
+      "replacement": "",
+      "disposition": "Unsupported empirical frequency removed from active presentation; technical misconception/correction retained without an invented prevalence.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/presentations/S05_01_presentation.html"
+    },
+    {
+      "id": "D5-015",
+      "source_path": "SEM05/presentations/S05_01_presentation.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095",
+      "source_start_line": 228,
+      "original_text": "<p><strong>80% of students believe that variables in functions are local by default.</strong></p>",
+      "replacement": "<p><strong>Misconception: variables in functions are local by default.</strong></p>",
+      "disposition": "Unsupported empirical frequency removed from active presentation; technical misconception/correction retained without an invented prevalence.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/presentations/S05_01_presentation.html"
+    },
+    {
+      "id": "D5-016",
+      "source_path": "SEM05/presentations/S05_01_presentation.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095",
+      "source_start_line": 316,
+      "original_text": "<p><strong>55% of students</strong> believe arrays start at 1.</p>",
+      "replacement": "<p><strong>Misconception:</strong> arrays start at 1.</p>",
+      "disposition": "Unsupported empirical frequency removed from active presentation; technical misconception/correction retained without an invented prevalence.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/presentations/S05_01_presentation.html"
+    },
+    {
+      "id": "D5-017",
+      "source_path": "SEM05/presentations/S05_01_presentation.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095",
+      "source_start_line": 363,
+      "original_text": "<p class=\"fragment bad\">70% forget <code>declare -A</code>!</p>",
+      "replacement": "<p class=\"fragment bad\">Declare an associative array with <code>declare -A</code>.</p>",
+      "disposition": "Unsupported empirical frequency removed from active presentation; technical misconception/correction retained without an invented prevalence.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/presentations/S05_01_presentation.html"
+    },
+    {
+      "id": "D5-018",
+      "source_path": "SEM05/presentations/S05_01_presentation.html",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095",
+      "source_start_line": 416,
+      "original_text": "<p><strong>75%</strong> believe set -e catches ANY error.</p>",
+      "replacement": "<p><strong>Misconception:</strong> <code>set -e</code> catches every error.</p>",
+      "disposition": "Unsupported empirical frequency removed from active presentation; technical misconception/correction retained without an invented prevalence.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/presentations/S05_01_presentation.html"
+    },
+    {
+      "id": "D5-019",
+      "source_path": "SEM05/docs/S05_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "a67ab97c3d65cbaec8c62ec1ff1d5a4b2e60b3968f32fe340118045e6c7426d3",
+      "source_start_line": 90,
+      "original_text": "## 2. TYPICAL MISCONCEPTIONS (for Peer Instruction)\n\n### 2.1 Misconceptions about Functions\n\n| ID | Misconception | Estimated Frequency | Practical Consequence |\n|----|---------------|---------------------|----------------------|\n| M1.1 | \"`return` returns strings\" | 75% | `return \"hello\"` does not work; return is only 0-255 |\n| M1.2 | \"Variables are local by default\" | 80% | They are GLOBAL! Namespace pollution |\n| M1.3 | \"`$1` in function is the script argument\" | 65% | `$1` in function is the FUNCTION argument |\n| M1.4 | \"`echo` in function is like `return`\" | 50% | echo writes to stdout, return sets $? |\n| M1.5 | \"Functions can be called before definition\" | 60% | Error: function not found |\n| M1.6 | \"Recursion is efficient in Bash\" | 35% | It is very slow - subshell overhead |\n| M1.7 | \"`local` can be used anywhere\" | 45% | Only inside functions |\n| M1.8 | \"Functions automatically return the last value\" | 40% | They return the exit status of the last command |\n\n### 2.2 Misconceptions about Arrays\n\n| ID | Misconception | Estimated Frequency | Practical Consequence |\n|----|---------------|---------------------|----------------------|\n| M2.1 | \"Arrays start from 1\" | 55% | They start from 0! `${arr[0]}` is the first |\n| M2.2 | \"`declare -A` is optional for hash\" | 70% | It is MANDATORY! Otherwise treated as indexed |\n| M2.3 | \"`${arr[*]}` and `${arr[@]}` are identical\" | 60% | They differ in quoting: `@` preserves elements |\n| M2.4 | \"`unset arr` deletes an element\" | 45% | It deletes the ENTIRE array! `unset arr[i]` for element |\n| M2.5 | \"Arrays can contain other arrays\" | 40% | Not in Bash! They are unidimensional |\n| M2.6 | \"Elements are continuously re-indexed after unset\" | 50% | No! The array becomes sparse |\n| M2.7 | \"`arr=($(cmd))` is safe\" | 55% | Word splitting! Use `mapfile` |\n| M2.8 | \"`for i in ${arr[@]}` is correct\" | 65% | Quotes are needed: `\"${arr[@]}\"` |\n\n### 2.3 Misconceptions about Error Handling\n\n| ID | Misconception | Estimated Frequency | Practical Consequence |\n|----|---------------|---------------------|----------------------|\n| M3.1 | \"`set -e` stops on ANY error\" | 75% | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |\n| M3.2 | \"`pipefail` is activated by default\" | 50% | Must be explicitly activated with `set -o pipefail` |\n| M3.3 | \"trap is inherited in subshells\" | 45% | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |\n| M3.4 | \"`$?` contains the last error from pipe\" | 60% | Only from the last command (without pipefail) |\n| M3.5 | \"`|| true` is equivalent to `set +e`\" | 35% | Only for that specific command |\n| M3.6 | \"`mktemp` never fails\" | 40% | It can fail: full disk, permissions |\n| M3.7 | \"trap EXIT executes only on success\" | 55% | Runs on shell exit; not SIGKILL or machine failure |\n| M3.8 | \"The order of traps does not matter\" | 30% | It matters! The last one set wins |\n\n### 2.4 Misconceptions about Logging/Debug\n\n| ID | Misconception | Estimated Frequency | Practical Consequence |\n|----|---------------|---------------------|----------------------|\n| M4.1 | \"`echo` is sufficient for logging\" | 70% | Without timestamp, level, destination |\n| M4.2 | \"`set -x` is only for development\" | 45% | Can be useful in prod too (with condition) |\n| M4.3 | \"`>&2` is only for errors\" | 55% | For any diagnostic/logging |\n| M4.4 | \"`tee` slows things down a lot\" | 30% | Minimal overhead for logging |\n| M4.5 | \"Debug info must be deleted before commit\" | 50% | No! Keep with control variable |\n\n---\n\n",
+      "replacement": "## 2. TYPICAL MISCONCEPTIONS (for Peer Instruction)\n\n### 2.1 Misconceptions about Functions\n\n| ID | Misconception | Practical Consequence |\n|----|---------------|----------------------|\n| M1.1 | \"`return` returns strings\" | `return \"hello\"` does not work; return is only 0-255 |\n| M1.2 | \"Variables are local by default\" | They are GLOBAL! Namespace pollution |\n| M1.3 | \"`$1` in function is the script argument\" | `$1` in function is the FUNCTION argument |\n| M1.4 | \"`echo` in function is like `return`\" | echo writes to stdout, return sets $? |\n| M1.5 | \"Functions can be called before definition\" | Error: function not found |\n| M1.6 | \"Recursion is efficient in Bash\" | It is very slow - subshell overhead |\n| M1.7 | \"`local` can be used anywhere\" | Only inside functions |\n| M1.8 | \"Functions automatically return the last value\" | They return the exit status of the last command |\n\n### 2.2 Misconceptions about Arrays\n\n| ID | Misconception | Practical Consequence |\n|----|---------------|----------------------|\n| M2.1 | \"Arrays start from 1\" | They start from 0! `${arr[0]}` is the first |\n| M2.2 | \"`declare -A` is optional for hash\" | It is MANDATORY! Otherwise treated as indexed |\n| M2.3 | \"`${arr[*]}` and `${arr[@]}` are identical\" | They differ in quoting: `@` preserves elements |\n| M2.4 | \"`unset arr` deletes an element\" | It deletes the ENTIRE array! `unset arr[i]` for element |\n| M2.5 | \"Arrays can contain other arrays\" | Not in Bash! They are unidimensional |\n| M2.6 | \"Elements are continuously re-indexed after unset\" | No! The array becomes sparse |\n| M2.7 | \"`arr=($(cmd))` is safe\" | Word splitting! Use `mapfile` |\n| M2.8 | \"`for i in ${arr[@]}` is correct\" | Quotes are needed: `\"${arr[@]}\"` |\n\n### 2.3 Misconceptions about Error Handling\n\n| ID | Misconception | Practical Consequence |\n|----|---------------|----------------------|\n| M3.1 | \"`set -e` stops on ANY error\" | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |\n| M3.2 | \"`pipefail` is activated by default\" | Must be explicitly activated with `set -o pipefail` |\n| M3.3 | \"trap is inherited in subshells\" | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |\n| M3.4 | \"`$?` contains the last error from pipe\" | Only from the last command (without pipefail) |\n| M3.5 | \"`|| true` is equivalent to `set +e`\" | Only for that specific command |\n| M3.6 | \"`mktemp` never fails\" | It can fail: full disk, permissions |\n| M3.7 | \"trap EXIT executes only on success\" | Runs on shell exit; not SIGKILL or machine failure |\n| M3.8 | \"The order of traps does not matter\" | It matters! The last one set wins |\n\n### 2.4 Misconceptions about Logging/Debug\n\n| ID | Misconception | Practical Consequence |\n|----|---------------|----------------------|\n| M4.1 | \"`echo` is sufficient for logging\" | Without timestamp, level, destination |\n| M4.2 | \"`set -x` is only for development\" | Can be useful in prod too (with condition) |\n| M4.3 | \"`>&2` is only for errors\" | For any diagnostic/logging |\n| M4.4 | \"`tee` slows things down a lot\" | Minimal overhead for logging |\n| M4.5 | \"Debug info must be deleted before commit\" | No! Keep with control variable |\n\n---\n\n",
+      "disposition": "Unsubstantiated misconception-frequency columns removed; IDs, misconception wording, examples and practical consequences retained.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-020",
+      "source_path": "SEM05/docs/lo_traceability.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "f8fff6262f742ff321e01651a9d824993ea94d8dd1ed419fde2b000981df70b8",
+      "source_start_line": 356,
+      "original_text": "## 4. Historical Misconception Estimates — Provenance Unresolved\n\n| Parsons | Targeted Misconception | Estimated Frequency |\n|---------|------------------------|---------------------|\n| TP1 | Variables are local by default | 80% |\n| TP1 | Spaces around = are permitted | 70% |\n| TP2 | return returns values as in other languages | 75% |\n| TP2 | $() is optional for command substitution | 60% |\n| TP3 | Quotes in iteration are optional | 65% |\n| TP3 | Comma is a separator in arrays | 40% |\n| TP4 | declare -A is optional for hash | 70% |\n| TP4 | Python/JS syntax works in Bash | 45% |\n| TP5 | trap does not require specifying the signal | 45% |\n| TP5 | Function definition order doesn't matter | 50% |\n\n---\n\n",
+      "replacement": "## 4. Misconceptions Targeted by the Practice Activities\n\n| Parsons | Targeted Misconception |\n|---------|------------------------|\n| TP1 | Variables are local by default |\n| TP1 | Spaces around = are permitted |\n| TP2 | return returns values as in other languages |\n| TP2 | $() is optional for command substitution |\n| TP3 | Quotes in iteration are optional |\n| TP3 | Comma is a separator in arrays |\n| TP4 | declare -A is optional for hash |\n| TP4 | Python/JS syntax works in Bash |\n| TP5 | trap does not require specifying the signal |\n| TP5 | Function definition order doesn't matter |\n\n---\n\n",
+      "disposition": "Unsubstantiated empirical-frequency column removed; existing Parsons IDs and targeted misconceptions preserved.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/lo_traceability.md"
+    },
+    {
+      "id": "D5-021",
+      "source_path": "SEM05/docs/lo_traceability.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "f8fff6262f742ff321e01651a9d824993ea94d8dd1ed419fde2b000981df70b8",
+      "source_start_line": 429,
+      "original_text": "### Historical Local Activity Distribution Proposal\n\nBrown and Wilson (2018), Tip 10, supports varied learning tasks; it does not prescribe these percentages or establish the local “Actual” column. The ranges and values below need an author-supplied calculation/measurement basis. See [the evidence contract](TEACHING_CONTRACT.md).\n\n| Activity Type | Target | Actual | Status |\n|---------------|--------|--------|--------|\n| Writing Code | 45-55% | 48% | ✓ |\n| Parsons/Reorder | 15-20% | 18% | ✓ |\n| Trace/Predict | 15-20% | 17% | ✓ |\n| Debug/Fix | 10-15% | 12% | ✓ |\n| Explain/Review | 5-10% | 5% | ✓ |\n\n",
+      "replacement": "### Varied activity types\n\nBrown and Wilson (2018), Tip 10, supports varied learning tasks. Use writing, Parsons/reordering, trace/predict, debug/fix and explain/review activities. The unsupported historical target/actual percentages are retained in the [provenance record](../../DECISION_PROVENANCE.json); no observed local distribution is asserted here.\n\n",
+      "disposition": "Unsupported target/actual allocation claims moved to provenance; no new planning percentages or empirical observations substituted. The separate explicit timing proposal and computed quiz counts remain unchanged.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/lo_traceability.md"
+    },
+    {
+      "id": "D5-022",
+      "source_path": "SEM05/docs/TEACHING_CONTRACT.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "2923d3e287fa365133e85ea28de5bc6f484056ec7b2afa7a80c133f3e159a5ad",
+      "source_start_line": 30,
+      "original_text": "Historical misconception percentages, claimed classroom incidents, success rates and activity distributions have no established underlying dataset in the transferred materials. They remain visibly labelled as historical/unverified. To retain them as empirical claims, supply collection dates, cohort/denominator, instruments, coding, exclusions and calculations. Alternatively, relabel them as planning estimates. The latter is suitable for lesson planning but not a retrospective study result.",
+      "replacement": "The author has adopted an evidence rule for teaching claims. Unsupported historical misconception percentages, classroom incidents, success rates and activity distributions are retained exactly in the [provenance record](../../DECISION_PROVENANCE.json) and removed from active empirical assertions. A measured result requires collection dates, a cohort or workload, instruments, coding, exclusions and calculations. A new hypothetical example requires explicit assumptions and a reproducible derivation; relabelling an unsupported result as an estimate is insufficient. Verified examples, unfavourable observations and computed source counts are preserved.",
+      "disposition": "Evidence contract aligned with adopted D5; automatic relabelling of unsupported measured claims is not permitted.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/TEACHING_CONTRACT.md"
+    },
+    {
+      "id": "D5-023",
+      "source_path": "SEM06/homework/S06_01_HOMEWORK_CAPSTONE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "0b60a0dd85b4bcfed2975267f6b35d5fa1dee7d1476376073ae8706e98aab77f",
+      "source_start_line": 465,
+      "original_text": "The draft proposes a live demonstration. Its 20% weighting conflicts with the rubric's 40%; the author must select one allocation and align all documents. The historical anecdote about unexplained “perfect” submissions has no supplied empirical record and establishes no detection rule.",
+      "replacement": "The draft proposes a live demonstration. Its 20% weighting conflicts with the rubric's 40%; the author must select one allocation and align all documents. The adopted descriptive profile does not approve either allocation or infer authorship from presentation quality.",
+      "disposition": "Unsupported anecdote removed from active assessment guidance; competing historical weights and the need for an explicit institutional decision remain.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM06/homework/S06_01_HOMEWORK_CAPSTONE.md"
+    },
+    {
+      "id": "D5-024",
+      "source_path": "02_INIT_HOMEWORKS/FAQ_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "446824d1703b1339de8c280e5ba9f4c526072d71ece9175d0bde25f6fc14a3de",
+      "source_start_line": 198,
+      "original_text": "- The instructor will not watch hours of recording",
+      "replacement": "- Keep the recording focused so the relevant work is easy to review",
+      "disposition": "Unconfirmed instructor-service assertion replaced with a practical recording instruction.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "02_INIT_HOMEWORKS/FAQ_EN.md"
+    },
+    {
+      "id": "D5-025",
+      "source_path": "03_GUIDES/FAQ_EN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "b147f6c7603978b8934e33459357c1cdd2d1393bd1528dc9be36e45855cbfa19",
+      "source_start_line": 221,
+      "original_text": "- The instructor will not watch hours of recording",
+      "replacement": "- Keep the recording focused so the relevant work is easy to review",
+      "disposition": "Unconfirmed instructor-service assertion replaced with a practical recording instruction.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "03_GUIDES/FAQ_EN.md"
+    },
+    {
+      "id": "D5-026",
+      "source_path": "SEM01/README.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "a3ea38368913ac09f43b36d3564ddf3591de6071fcb7f0b0aaac07974fdd1e3a",
+      "source_start_line": 27,
+      "original_text": "> I developed these materials over 5+ years of teaching at ASE. The structure reflects exactly the mistakes I've seen from students and the solutions that actually work. If you find errors or have suggestions, they are welcome!",
+      "replacement": "> If you find errors or have suggestions, they are welcome!",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM01/README.md"
+    },
+    {
+      "id": "D5-027",
+      "source_path": "SEM01/docs/S01_06_SPRINT_EXERCISES.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "727323aca22879a9838c26d032c08f2e7dd42df936cc0d7057b56b6a325cf5b6",
+      "source_start_line": 7,
+      "original_text": "> One student last year tried to `cd` into a file — the error message confused them for 10 minutes until we drew the tree structure on the whiteboard. That's when I realised how important it is to visualise the file system before typing commands.",
+      "replacement": "> Visualise the file system before typing commands. `cd` changes to a directory; inspect a path before trying to enter it.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM01/docs/S01_06_SPRINT_EXERCISES.md"
+    },
+    {
+      "id": "D5-028",
+      "source_path": "SEM01/docs/S01_08_SPECTACULAR_DEMOS.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "c8eac87e74df69ba112ec01fa950be959824c320a715b7566964141631755067",
+      "source_start_line": 41,
+      "original_text": "> 💡 A student once asked me why we can't just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.",
+      "replacement": "> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM01/docs/S01_08_SPECTACULAR_DEMOS.md"
+    },
+    {
+      "id": "D5-029",
+      "source_path": "SEM02/docs/S02_02_MAIN_MATERIAL.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e2df9dc8dd89ea3cf54a050567be79a9b0527eda40f3017430fde664236a1431",
+      "source_start_line": 627,
+      "original_text": "> 💡 A student once asked me why we can't just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.",
+      "replacement": "> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_02_MAIN_MATERIAL.md"
+    },
+    {
+      "id": "D5-030",
+      "source_path": "SEM04/docs/S04_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "24905ffec4ddadc1c8f4c50b0e71ffc62323000c8eab517a4d5ee7e1e2822340",
+      "source_start_line": 69,
+      "original_text": "> 💡 A student once asked me why we cannot just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.",
+      "replacement": "> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM04/docs/S04_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-031",
+      "source_path": "SEM01/docs/S01_02_MAIN_MATERIAL.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "cbd63fa124ea8bc521f242204a3dbb830e28d4c8d8ec2fb432b1fe2190c24769",
+      "source_start_line": 130,
+      "original_text": "> In my experience at ASE, students frequently confuse `/` with `~`. Last year, a student ran `rm -rf /*` instead of `rm -rf ~/*` — fortunately it was on a virtual machine and they didn't have root permissions. But the sweat was real! Since then, I insist on checking with `pwd` before any destructive operation.",
+      "replacement": "> Distinguish `/` from `~`. Inspect the intended target and expansion before a destructive operation; checking `pwd` alone does not validate an absolute path or a wildcard.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM01/docs/S01_02_MAIN_MATERIAL.md"
+    },
+    {
+      "id": "D5-032",
+      "source_path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff",
+      "source_start_line": 35,
+      "original_text": "### A confession from the early years\n\nI'll be honest: in my first iteration of this seminar, I rushed through loops to \"cover everything\". It was a disaster — half the class submitted scripts with `{1..$n}` bugs because I'd glossed over why it doesn't work. Now I deliberately build in a 5-minute buffer for loops and tell students upfront: \"This is where most assignments fail. Pay attention.\"\n\nThe other lesson learned: never demo `cat | while read` without immediately showing why variables disappear. I've seen students lose hours debugging this.",
+      "replacement": "### Demonstrations to prepare\n\nExplain why `{1..$n}` does not expand a variable endpoint, then compare a C-style loop. When demonstrating `cat | while read`, show the subshell behaviour and compare input redirection.",
+      "disposition": "Unsupported empirical narrative retained exactly in this record. Existing technical content and exercises are preserved in the active document.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-033",
+      "source_path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff",
+      "source_start_line": 45,
+      "original_text": "### Typical Profile (Year 1, Semester 2, CSIE)\n\nThese observations derive from start-of-semester questionnaires and informal discussions:\n\n| Characteristic | Practical Observation |\n|----------------|----------------------|\n| Linux experience | Minimal to none; 90% have used Windows exclusively, a few macOS |\n| Programming background | C algorithms from semester 1; some have Python from secondary school |\n| Initial motivation | Variable; increases visibly when they see immediate practical applicability |\n| Time availability | Limited (many have 6+ courses); assignments must be feasible in 2-3 hours |\n| Learning style | Prefer hands-on; pure theory loses them after approximately 15 minutes |\n\n### Frequent Misconceptions (collected from quizzes and examinations)\n\nThese are the perennial \"hits\" appearing year after year:",
+      "replacement": "### Prerequisites and preparation\n\nCheck Linux familiarity and programming prerequisites before teaching. Confirm the available contact time and assignment workload for the class; this document supplies no verified cohort profile.\n\n### Misconceptions to address\n\nUse the following statements to prompt explanation and executable checks.",
+      "disposition": "Unsupported empirical narrative retained exactly in this record. Existing technical content and exercises are preserved in the active document.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-034",
+      "source_path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff",
+      "source_start_line": 65,
+      "original_text": "   Partially correct, but order matters enormously - roughly 60% of students get this wrong.",
+      "replacement": "   Descriptor duplication is order-sensitive. Compare the results of the redirection sequences.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-035",
+      "source_path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff",
+      "source_start_line": 71,
+      "original_text": "   It is not. The former creates a subshell; variables do not persist. I have witnessed hours lost debugging this.",
+      "replacement": "   It is not equivalent under the default Bash pipeline behaviour. Demonstrate which shell retains each variable assignment.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-036",
+      "source_path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff",
+      "source_start_line": 119,
+      "original_text": "I have experimented with various structures over the years. The following works best for our target cohort:",
+      "replacement": "The following sequence is a teaching plan; its effectiveness has not been established by a cohort comparison.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md"
+    },
+    {
+      "id": "D5-037",
+      "source_path": "SEM02/docs/S02_02_MAIN_MATERIAL.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "e2df9dc8dd89ea3cf54a050567be79a9b0527eda40f3017430fde664236a1431",
+      "source_start_line": 274,
+      "original_text": "> 💡 I've observed that students who draw the diagram on paper before writing code have much better results.",
+      "replacement": "> 💡 Draw the diagram on paper before writing code, then check it against the executed pipeline.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_02_MAIN_MATERIAL.md"
+    },
+    {
+      "id": "D5-038",
+      "source_path": "SEM02/docs/S02_05_LIVE_CODING_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "0631b077e51736a67326fc7cee34a56c07d4ae650e7cde08a9f895b33a5c65d3",
+      "source_start_line": 33,
+      "original_text": "> 💡 I've observed that students who draw the diagram on paper before writing code achieve much better results.",
+      "replacement": "> 💡 Draw the diagram on paper before writing code, then check it against the executed pipeline.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_05_LIVE_CODING_GUIDE.md"
+    },
+    {
+      "id": "D5-039",
+      "source_path": "SEM02/docs/S02_05_LIVE_CODING_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "0631b077e51736a67326fc7cee34a56c07d4ae650e7cde08a9f895b33a5c65d3",
+      "source_start_line": 214,
+      "original_text": "> 💡 *I've observed that students who draw the diagram on paper before writing code achieve much better results.*",
+      "replacement": "> 💡 *Draw the diagram on paper before writing code, then check it against the executed pipeline.*",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_05_LIVE_CODING_GUIDE.md"
+    },
+    {
+      "id": "D5-040",
+      "source_path": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9242ba459188347230101d77c15608bc7a0ef0e0850cd6134221930f6906fa83",
+      "source_start_line": 62,
+      "original_text": "## Things That Go Wrong (Every. Single. Year.)\n\nLook, I've taught this seminar many times now. Here's what WILL happen, so you can be ready:\n\n### The `>` vs `>>` Massacre\nDemo both side by side. Twice. Three times if necessary. Then demo what happens when you accidentally use `>` on an important file. Students still ask about this during the assignment, but at least they'll remember you warned them.\n\n### The Subshell Variable Trap\nSomeone will write `cat file | while read line; do ((count++)); done` and wonder why `$count` is 0 afterwards. I now demo the bug FIRST, let them feel the confusion, then show the fix. The \"aha moment\" is more memorable than just showing the correct way.\n\n### \"But it works on my machine\"\nUsually a hidden Windows line ending (`\\r\\n` vs `\\n`). Keep `dos2unix` ready. Since 2023, also check for students accidentally using PowerShell syntax in Bash.\n\n### The AI Dump (new problem since 2023)\nPolished comments and elaborate variable names do not establish authorship. Check whether the script works and ask the student to explain its behaviour and sources. The tool exposes lexical observations for manual review; it does not authenticate origin or apply a sanction. See the pending assessment contract.\n\n### The `{1..$n}` Bug\nDespite explicit warnings, ~20% still try this. I now write on the whiteboard in red: **BRACE EXPANSION BEFORE VARIABLE EXPANSION**. Then immediately show `seq` and C-style alternatives.",
+      "replacement": "## Demonstrations of mistakes and their effects\n\n### `>` versus `>>`\n\nDemonstrate replacement and append operations side by side using disposable fixtures.\n\n### The subshell variable trap\n\nCompare `cat file | while read line; do ((count++)); done` with input redirection. Inspect `$count` afterwards and explain the shell context.\n\n### Environment differences\n\nCheck Windows line endings (`\\r\\n` versus `\\n`) and whether commands use Bash or PowerShell syntax.\n\n### Authorship and observed behaviour\n\nPolished comments and elaborate variable names do not establish authorship. Check whether the script works and ask the student to explain its behaviour and sources. The tool exposes lexical observations for manual review; it does not authenticate origin or apply a sanction. See the pending assessment contract.\n\n### The `{1..$n}` bug\n\nExplain **BRACE EXPANSION BEFORE VARIABLE EXPANSION**, then show `seq` and C-style alternatives.",
+      "disposition": "Unsupported empirical narrative retained exactly in this record. Existing technical content and exercises are preserved in the active document.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-041",
+      "source_path": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9242ba459188347230101d77c15608bc7a0ef0e0850cd6134221930f6906fa83",
+      "source_start_line": 85,
+      "original_text": " Historical percentages and personal observations below are unverified author annotations, with no cohort evidence supplied.",
+      "replacement": " Unsupported historical assertions are retained in [the provenance record](../../DECISION_PROVENANCE.json).",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-042",
+      "source_path": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9242ba459188347230101d77c15608bc7a0ef0e0850cd6134221930f6906fa83",
+      "source_start_line": 152,
+      "original_text": "   - Mentally note the distribution. Typically: 40% \"only B\", 30% \"B and C\", remainder other answers.",
+      "replacement": "   - Record the observed response distribution for this activity; do not assume a historical cohort distribution.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-043",
+      "source_path": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9242ba459188347230101d77c15608bc7a0ef0e0850cd6134221930f6906fa83",
+      "source_start_line": 221,
+      "original_text": "This is where 60% of students get confused in examinations:",
+      "replacement": "Check understanding of the following distinction:",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-044",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 438,
+      "original_text": "| A | 80% believe this! - Don't know uniq removes only CONSECUTIVE |",
+      "replacement": "| A | Overlooks that uniq removes only CONSECUTIVE duplicates |",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-045",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 582,
+      "original_text": "| A | 70% believe this! - Don't know brace expansion is at parse time |",
+      "replacement": "| A | Overlooks that brace expansion precedes variable expansion |",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-046",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 632,
+      "original_text": "| A | 65% believe this! - Don't know subshell problem |",
+      "replacement": "| A | Overlooks the subshell context |",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-047",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 412,
+      "original_text": "Target: ~20-30% correct (very frequent misconception)",
+      "replacement": "Target: ~20-30% correct",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-048",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 28,
+      "original_text": "- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)",
+      "replacement": "- **Planning target for first-vote accuracy:** 40-60%; this is an instructional target, not a measured or guaranteed learning effect.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-049",
+      "source_path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434",
+      "source_start_line": 30,
+      "original_text": "- **Re-vote improvement:** Expect 20-30% increase after discussion",
+      "replacement": "- **Re-vote observation:** Record both votes and calculate any change from the observed responses; no improvement is guaranteed.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM02/docs/S02_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-050",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 26,
+      "original_text": "- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)",
+      "replacement": "- **Planning target for first-vote accuracy:** 40-60%; this is an instructional target, not a measured or guaranteed learning effect.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-051",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 28,
+      "original_text": "- **Re-vote improvement:** Expect 20-30% increase after discussion",
+      "replacement": "- **Re-vote observation:** Record both votes and calculate any change from the observed responses; no improvement is guaranteed.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-052",
+      "source_path": "SEM04/docs/S04_11_LIVE_VERIFICATION_EXERCISES.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "452f75385eac1d59f6dddb37e86558502761b2044f975bbee3c644d45d4e707c",
+      "source_start_line": 14,
+      "original_text": "establish misconduct. The retained author anecdotes below have no accompanying\ncohort dataset and are not a validated detector.",
+      "replacement": "establish misconduct. Unsupported historical anecdotes are preserved in\n[the provenance record](../../DECISION_PROVENANCE.json).",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM04/docs/S04_11_LIVE_VERIFICATION_EXERCISES.md"
+    },
+    {
+      "id": "D5-053",
+      "source_path": "SEM04/docs/S04_11_LIVE_VERIFICATION_EXERCISES.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "452f75385eac1d59f6dddb37e86558502761b2044f975bbee3c644d45d4e707c",
+      "source_start_line": 23,
+      "original_text": "> *Real talk: I saw a student last year who submitted perfect homework \n> but could not run `grep -c` during lab. The conversation was... awkward.*",
+      "replacement": "",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM04/docs/S04_11_LIVE_VERIFICATION_EXERCISES.md"
+    },
+    {
+      "id": "D5-054",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 63,
+      "original_text": "### Q1: Variables in Functions (Misconception 80%)",
+      "replacement": "### Q1: Variables in Functions",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-055",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 104,
+      "original_text": "### Q2: Return vs Echo (Misconception 75%)",
+      "replacement": "### Q2: Return vs Echo",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-056",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 155,
+      "original_text": "### Q3: Function Arguments vs Script (Misconception 65%)",
+      "replacement": "### Q3: Function Arguments vs Script",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-057",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 206,
+      "original_text": "### Q4: Array Indexing (Misconception 55%)",
+      "replacement": "### Q4: Array Indexing",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-058",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 240,
+      "original_text": "### Q5: declare -A (Misconception 70%)",
+      "replacement": "### Q5: declare -A",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-059",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 290,
+      "original_text": "### Q6: Iteration with Quotes (Misconception 65%)",
+      "replacement": "### Q6: Iteration with Quotes",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-060",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 419,
+      "original_text": "### Q9: set -e in if (Misconception 75%)",
+      "replacement": "### Q9: set -e in if",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-061",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 459,
+      "original_text": "### Q10: set -e with || (Misconception 60%)",
+      "replacement": "### Q10: set -e with ||",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-062",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 95,
+      "original_text": "Targeted misconception: 80% believe variables are local by default",
+      "replacement": "Targeted misconception: assuming variables are local by default",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-063",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 149,
+      "original_text": "Targeted misconception: 75% believe return works as in other languages",
+      "replacement": "Targeted misconception: assuming return communicates arbitrary values as in other languages",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-064",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 198,
+      "original_text": "Targeted misconception: 65% confuse $1 in function with $1 in script",
+      "replacement": "Targeted misconception: confusing $1 in a function with $1 in the script",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-065",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 234,
+      "original_text": "Targeted misconception: 55% believe arrays start from 1",
+      "replacement": "Targeted misconception: assuming indexed arrays start from 1",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-066",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 284,
+      "original_text": "Targeted misconception: 70% believe declare -A is optional",
+      "replacement": "Targeted misconception: assuming declare -A is optional for an associative array",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-067",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 331,
+      "original_text": "Targeted misconception: 65% forget quotes when iterating",
+      "replacement": "Targeted misconception: omitting quotes when iterating",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-068",
+      "source_path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086",
+      "source_start_line": 453,
+      "original_text": "Targeted misconception: 75% believe set -e stops on ANY error",
+      "replacement": "Targeted misconception: assuming set -e stops on ANY error",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_03_PEER_INSTRUCTION.md"
+    },
+    {
+      "id": "D5-069",
+      "source_path": "SEM05/docs/S05_08_SPECTACULAR_DEMOS.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "4707baa7ec7a316b32548b2a06cbbab01e83cfa3c587aea554de8b716e7e9a7a",
+      "source_start_line": 181,
+      "original_text": "> 💡 From experience with groups from previous years, I've observed that students who practise daily progress significantly faster.",
+      "replacement": "> 💡 Practise the commands, explain each result and compare it with your prediction.",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_08_SPECTACULAR_DEMOS.md"
+    },
+    {
+      "id": "D5-070",
+      "source_path": "SEM05/docs/S05_08_SPECTACULAR_DEMOS.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "4707baa7ec7a316b32548b2a06cbbab01e83cfa3c587aea554de8b716e7e9a7a",
+      "source_start_line": 10,
+      "original_text": " Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.",
+      "replacement": " Removed historical empirical assertions are preserved in [the provenance record](../../DECISION_PROVENANCE.json).",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_08_SPECTACULAR_DEMOS.md"
+    },
+    {
+      "id": "D5-071",
+      "source_path": "SEM05/docs/S05_01_INSTRUCTOR_GUIDE.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "5df08ab8d840e34afca1c44adf3c9a15513883504693af373e9b98024c3945fd",
+      "source_start_line": 57,
+      "original_text": "## WAR STORIES FROM THE TRENCHES\n\n> *Historical author-supplied anecdotes. Their provenance has not been established by this repository review; do not cite them as verified incidents or evidence of learning effects.*\n\n### The Midnight Debugging Session (December 2023)\n\nDuring the makeup exam session, a student spent 3 hours debugging a script that \"mysteriously failed.\" The symptoms: script worked fine when run manually, failed in cron. The culprit? A single missing quote around `${array[@]}` combined with filenames containing spaces (which only existed in the production dataset, not their test data).\n\n**Lesson I now emphasise:** \"Your test data is always cleaner than reality. Quote everything, even when it 'works' without quotes.\"\n\n### The declare -A Disaster (Semester 2, 2023-2024)\n\nI watched a student debug for 45 minutes why their \"associative array\" was producing numeric keys. They had written:\n\n```bash\nconfig[name]=\"test\"    # Missing declare -A above!\necho \"${!config[@]}\"   # Output: 0 (not \"name\"!)\n```\n\nWithout `declare -A`, Bash treats it as an indexed array and interprets `name` as arithmetic expression (evaluates to 0).\n\n**Now I always:** Draw this on the board in red marker. Three times. Different contexts.\n\n### The set -e False Confidence (Ongoing)\n\nEvery semester, at least one student submits code like:\n```bash\nset -e\nif grep -q \"pattern\" file.txt; then\n    echo \"Found\"\nfi\necho \"Script continues\"  # They expect this to NOT run if grep fails\n```\n\nThey're shocked when the script continues. The `set -e` in `if` context gotcha claims victims every year.\n\n**My response:** I created the `S05_04_demo_robust.sh` specifically to demonstrate all the cases where `set -e` does NOT work. It takes 15 minutes but saves hours of confusion.\n\n### Romanian Student Patterns I've Noticed\n\nAfter teaching this course for several years, I've observed:\n\n1. **Variable naming:** Students instinctively use `numar`, `lista`, `rezultat` — which is a language preference, not evidence of authorship or a valid AI-detection rule\n\n2. **Error messages:** They write `\"Eroare: fisierul nu exista\"` then remember to translate — sometimes leaving mixed language comments\n\n3. **Coffee correlation:** The 8:00 AM section makes 15% more errors on array exercises than the 14:00 section. I now schedule the spectacular hook demo first to wake them up.",
+      "replacement": "## Demonstration notes\n\nUse filenames containing spaces when demonstrating array iteration. Quote array expansion to preserve the intended elements; inspect the result under both quoted and unquoted expansion.\n\n### Declare associative arrays explicitly\n\n```bash\nconfig[name]=\"test\"    # Missing declare -A above!\necho \"${!config[@]}\"   # Output: 0 (not \"name\"!)\n```\n\nWithout `declare -A`, Bash treats the array as indexed and interprets `name` as an arithmetic expression. The example assumes that `name` is unset or has value zero. Compare it with an explicitly declared associative array.\n\n### Check the context in which `set -e` applies\n\n```bash\nset -e\nif grep -q \"pattern\" file.txt; then\n    echo \"Found\"\nfi\necho \"Script continues\"  # They expect this to NOT run if grep fails\n```\n\nExplain why a failing condition of `if` does not stop the script here. Use `S05_04_demo_robust.sh` for the other documented contexts.\n\n### Language and authorship\n\nVariable names such as `numar`, `lista` and `rezultat` express a language preference; they do not establish authorship. Check that user-facing messages and documentation follow the language required for the assignment.",
+      "disposition": "Unsupported empirical narrative retained exactly in this record. Existing technical content and exercises are preserved in the active document.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/docs/S05_01_INSTRUCTOR_GUIDE.md"
+    },
+    {
+      "id": "D5-072",
+      "source_path": "SEM05/homework/S05_01_HOMEWORK.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9b4b0a18306d2d51ab6a3fff57d5e7225c7fd01e7ead68b339217a376be44d8f",
+      "source_start_line": 282,
+      "original_text": "## 🚫 Common Mistakes from Previous Years\n\n*These are real mistakes from 2023-2024 submissions — learn from them!*\n\n| Mistake | Frequency | How to Avoid |\n|---------|-----------|--------------|\n| Missing `declare -A` for hash | 67% | **Always** declare before using `arr[string_key]` |\n| Unquoted `${arr[@]}` in loops | 58% | Muscle memory: always type the quotes |\n| Global variables in functions | 52% | Start every function with `local` declarations |\n| No argument validation | 45% | First thing in `main()`: check `$#` |\n| `cat file \\| grep` pattern | 41% | Use `grep pattern file` or `grep pattern < file` |\n| Missing cleanup trap | 38% | Add `trap cleanup EXIT` right after `set -euo` |\n| `$*` instead of `\"$@\"` | 31% | Only use `$*` if you specifically want joined string |\n| Hardcoded paths | 28% | Use variables: `CONFIG_FILE=\"${1:-default.conf}\"` |\n| No `--help` option | 25% | Every script should have `-h\\|--help` |\n| Romanian variable names | 23% | Keep it professional: English only |\n\n> *The `declare -A` one still haunts me. Every year, at least half the class forgets it, and their \"associative array\" silently becomes an indexed array with weird numeric keys.*",
+      "replacement": "## 🚫 Mistakes to check before submission\n\nUse this checklist to review the implementation.\n\n| Mistake | How to Avoid |\n|---------|--------------|\n| Missing `declare -A` for hash | **Always** declare before using `arr[string_key]` |\n| Unquoted `${arr[@]}` in loops | Muscle memory: always type the quotes |\n| Global variables in functions | Start every function with `local` declarations |\n| No argument validation | First thing in `main()`: check `$#` |\n| `cat file \\| grep` pattern | Use `grep pattern file` or `grep pattern < file` |\n| Missing cleanup trap | Add `trap cleanup EXIT` right after `set -euo` |\n| `$*` instead of `\"$@\"` | Only use `$*` if you specifically want joined string |\n| Hardcoded paths | Use variables: `CONFIG_FILE=\"${1:-default.conf}\"` |\n| No `--help` option | Every script should have `-h\\|--help` |\n| Romanian variable names | Keep it professional: English only |",
+      "disposition": "Unsupported historical submission provenance and ten frequency percentages removed; checklist entries, exercises and proposed grading weights remain intact.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/homework/S05_01_HOMEWORK.md"
+    },
+    {
+      "id": "D5-073",
+      "source_path": "SEM05/homework/S05_01_HOMEWORK.md",
+      "source_commit": "d7aead32517115f2ca5e2f425f692b3f569d33a5",
+      "source_file_sha256": "9b4b0a18306d2d51ab6a3fff57d5e7225c7fd01e7ead68b339217a376be44d8f",
+      "source_start_line": 3,
+      "original_text": " Historical success rates and classroom claims are not independently verified.",
+      "replacement": " Removed historical success rates and classroom claims are retained in [the provenance record](../../DECISION_PROVENANCE.json).",
+      "disposition": "Unsupported historical empirical assertion removed; independently useful practical instruction retained without inventing an event or cohort.",
+      "claim_type": "unsupported empirical or experiential assertion",
+      "available_evidence": "Exact repository source text and commit are retained; no underlying measurement record or independently verified incident is supplied here.",
+      "missing_provenance": "Identifiable cohort or workload, denominator, method, source data or confirmation of the attributed incident/service commitment, as applicable.",
+      "reviewer_decision_and_date": {
+        "date": "2026-11-18",
+        "authority": "User approval of the recommended D1–D7 variants for local implementation",
+        "decision": "Apply the approved D3/D5 disposition locally; no institutional, external-service or publication acceptance is inferred."
+      },
+      "active_replacement_location": "SEM05/homework/S05_01_HOMEWORK.md"
+    }
+  ]
+}

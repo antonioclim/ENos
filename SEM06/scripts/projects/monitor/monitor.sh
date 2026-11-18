@@ -25,7 +25,7 @@
 #
 # AUTHOR: ASE Bucharest - CSIE | Operating Systems
 # VERSION: 1.0.0
-# LICENCE: Educational Use
+# LICENCE: MIT for eligible original ENos code; see repository LICENCE.md
 #==============================================================================
 
 set -euo pipefail

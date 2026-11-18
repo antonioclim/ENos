@@ -1,12 +1,13 @@
 [project]
 name = "enos-educational-kit"
-version = "6.0.0.dev0"
+version = "6.0.0"
 description = "Operating Systems Educational Kit for ASE Bucharest"
 authors = [{name = "ing. dr. Antonio Clim", email = "antonio.clim@csie.ase.ro"}]
 readme = "README.md"
 requires-python = ">=3.10"
-# Baseline LICENSE and package metadata state MIT; LICENCE.md states restrictive terms.
-# No replacement licence is selected; resolve AUTHOR_DECISIONS.md before publication.
+license = {text = "MIT AND CC-BY-4.0"}
+# MIT applies to original Python code; CC BY 4.0 to original documentation.
+# Retained third-party/package notices and component boundaries: LICENCE.md.
 
 keywords = [
     "education",
@@ -18,7 +19,7 @@ keywords = [
 ]
 
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Education",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.10",
@@ -47,6 +48,7 @@ build-backend = "setuptools.build_meta"
 # standalone seminar applications remain in the repository/release archive.
 [tool.setuptools]
 packages = ["lib"]
+license-files = ["LICENSE", "LICENCE.md"]
 
 # =============================================================================
 # PYTEST CONFIGURATION
@@ -63,6 +65,7 @@ testpaths = [
     "SEM05/tests",
     "SEM06/tests",
     "SEM07/tests",
+    "04_PROJECTS/tests",
 ]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

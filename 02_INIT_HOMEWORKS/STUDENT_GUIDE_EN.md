@@ -2,18 +2,17 @@
 
 This recording workflow requires **asciinema CLI 2.x**, which writes asciicast v2. The recorder checks `asciinema --version` before starting. CLI 3.x writes an incompatible v3 format and is rejected with an explanation; the scripts do not install or downgrade packages. See the [official v2](https://docs.asciinema.org/manual/asciicast/v2/) and [v3](https://docs.asciinema.org/manual/asciicast/v3/) specifications. Version detection has local regression coverage; native terminal recording remains a separate acceptance check.
 
-> **v6 candidate correction:** Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+## Adopted local practice profile
 
-For an authorised online run, first obtain the host, account, port and host-key fingerprint from the service owner through a trusted channel. The supplied clients target `sop.ase.ro`; if the confirmed destination differs, the client configuration must be reconciled before use. Install only the verified host-key entry in `known_hosts`. The clients use `StrictHostKeyChecking=yes`.
-
-After the configuration and use of the existing workflow have been confirmed, use the current client interface:
+Use `--offline` for the supported ENos practice workflow:
 
 ```bash
-read -r -p 'SSH port confirmed by the service owner: ' ENOS_CONFIRMED_PORT
-python record_homework_tui_EN.py --port "$ENOS_CONFIRMED_PORT"
+python record_homework_tui_EN.py --offline
+# Bash alternative:
+bash record_homework_EN.sh --offline
 ```
 
-The Bash alternative is `bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"`. Both clients validate the supplied port; neither historical port is selected by this guide. For local practice, continue to use `--offline`.
+Keep the local recording and check its structure using the [recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Offline mode makes no SSH/SCP connection, upload or legacy-token operation. Institutional submission is deferred until the service owner confirms the complete contract and the workflow passes native acceptance. Historical version labels below identify the source edition.
 
 ## Operating Systems 2023-2027
 
@@ -25,12 +24,10 @@ The Bash alternative is `bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT
 
 **Don't panic!** This process looks complicated at first glance, but:
 - The script records the session and reports the outcome; install dependencies and choose the mode explicitly
-- A typo in `STOP_homework` can be corrected; Ctrl+D also closes the recorded shell. The historical “most common / 2 seconds” claim is unverified
+- If `STOP_homework` is mistyped, correct the command or press Ctrl+D to close the recorded shell.
 - Local practice can be repeated after preserving the existing file; institutional resubmission rules remain pending
 
-💪 **85% of students from previous years succeeded on their first attempt.**
-
-> **Provenance pending author review:** The percentage is retained from the source; no denominator, cohort or measurement record is established here.
+Start with the offline practice session and check the resulting recording before considering an online submission.
 
 ---
 
@@ -52,8 +49,6 @@ The Bash alternative is `bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT
 ### Step 1: Open the terminal
 
 On Ubuntu/WSL, open a terminal.
-
-*(Historical author statement, retained for review: WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*
 
 
 > 🚨 **WARNING!** Use YOUR OWN terminal, installed and configured as your instructor has directed!

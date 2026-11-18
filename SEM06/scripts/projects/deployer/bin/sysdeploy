@@ -17,6 +17,9 @@
 #   sudo chmod +x /usr/local/bin/sysdeploy
 #
 # Copyright (c) 2024 - Educational Use Only
+# Historical attribution retained. Eligible original ENos code is now MIT;
+# the former use-only qualification is superseded for that original code.
+# Other attributed portions retain their terms; see repository LICENCE.md.
 #===============================================================================
 
 set -euo pipefail

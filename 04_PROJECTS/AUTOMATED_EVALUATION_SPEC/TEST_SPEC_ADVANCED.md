@@ -14,7 +14,8 @@ operators, malformed values and duplicate JSON/YAML keys are errors. `all`, `any
 and `not` are explicit; string lists do not have an implicit OR meaning. A `pending`
 predicate is a concrete unresolved adapter/author requirement: it reports NOT_RUN,
 never PASS, and prevents a purported complete percentage. Existing project CLI
-alternatives remain proposed interfaces until the author resolves their contract.
+alternatives remain proposed unless a specific technical contract is explicitly
+adopted below. Adoption does not supply an omitted implementation.
 
 Each explicitly authorised trusted local case uses a fresh owned project copy and
 `FIXTURE_ROOT`; inherited setup runs again before every case. Setup and cleanup
@@ -47,13 +48,17 @@ choices. See [the assessment/evidence contract](../ASSESSMENT_AND_EVIDENCE_CONTR
 ## General Note
 
 **Draft acceptance contracts — author approval required.** The snippets below
-are specification candidates, not an executable grading engine. Their interfaces,
-weights and automatic/manual proportions are not adopted by these repairs. A01's
+are specification candidates, not an executable grading engine. D6 adopts the
+A03 digest/CLI contract stated below; weights and automatic/manual proportions
+remain unadopted planning material. A01's
 queue lifecycle now distinguishes explicit creation and attachment; repeated
 `init` must not erase work. A02's live Bash/readline bridge is student-supplied and
-cannot be proved by a non-interactive `--rcfile` invocation. A03's MD5 teaching
-format and SHA-256 oracle conflict; `hash_01` is **PENDING_DIGEST_CONTRACT**, not a
-valid grading rule until a versioned algorithm/format decision is made. See the
+cannot be proved by a non-interactive `--rcfile` invocation. A03's adopted D6 contract uses SHA-256 (32 bytes), 64 lower-case hexadecimal
+characters plus one newline for the student hash CLI, and version 2 / sha256
+digest records. The local hashing reference is updated; the omitted student CLI
+and record/transport adapters remain **PENDING_CLI_ADAPTER** /
+**PENDING_TRANSPORT_ADAPTER** until supplied and validated. The following
+`pending` predicates therefore remain NOT_RUN rather than awarding points. See the
 project documents and [the assessment/evidence contract](../ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for alternatives and consequences.
 All temporary paths in runnable harnesses must be created with `mktemp -d`; no
 shared `/tmp/a03_test` or broad shared-memory deletion is authorised by this draft.
@@ -809,20 +814,20 @@ a03_distributed_file_sync:
     category: build_tests
   hashing:
   - id: hash_01
-    name: 'PENDING_DIGEST_CONTRACT: hash file format'
+    name: 'PENDING_CLI_ADAPTER: adopted SHA-256 file format'
     command: ./bin/synctool hash "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
     expect:
-      pending: Author must select MD5 (16 bytes/32 hex) or SHA-256 (32 bytes/64 hex) and CLI framing; then compare the exact abc known vector, not only length, repetition or inequality.
+      pending: D6 fixes SHA-256 and stdout as the exact 64-character lower-case digest plus one newline. Validate the student CLI adapter and owned fixtures before replacing this pending predicate; no complete CLI is supplied by the local reference.
     points: 5
     category: hashing
     setup: printf abc > "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
     historical_command: ./bin/synctool hash /tmp/a03_test/source/text.txt
-    notes: 'Known vectors for abc: MD5 900150983cd24fb0d6963f7d28e17f72; SHA-256 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad.'
+    notes: 'Adopted abc stdout is ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad followed by exactly one newline; status 0, no diagnostics. Error paths require non-zero status and no success digest. The local C tests do not validate the omitted CLI.'
   - id: hash_02
     name: Hash consistent
     command: ./bin/synctool hash "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
     expect:
-      pending: Author must select MD5 (16 bytes/32 hex) or SHA-256 (32 bytes/64 hex) and CLI framing; then compare the exact abc known vector, not only length, repetition or inequality.
+      pending: D6 fixes SHA-256 and stdout as the exact 64-character lower-case digest plus one newline. Validate the student CLI adapter and owned fixtures before replacing this pending predicate; no complete CLI is supplied by the local reference.
     points: 5
     category: hashing
     setup: printf abc > "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
@@ -830,12 +835,12 @@ a03_distributed_file_sync:
       h1=$(./bin/synctool hash /tmp/a03_test/source/text.txt)
       h2=$(./bin/synctool hash /tmp/a03_test/source/text.txt)
       [ "$h1" = "$h2" ] && echo "consistent"
-    notes: 'Known vectors for abc: MD5 900150983cd24fb0d6963f7d28e17f72; SHA-256 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad.'
+    notes: 'Adopted abc stdout is ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad followed by exactly one newline; status 0, no diagnostics. Error paths require non-zero status and no success digest. The local C tests do not validate the omitted CLI.'
   - id: hash_03
     name: Hash different for different files
     command: ./bin/synctool hash "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
     expect:
-      pending: Author must select MD5 (16 bytes/32 hex) or SHA-256 (32 bytes/64 hex) and CLI framing; then compare the exact abc known vector, not only length, repetition or inequality.
+      pending: D6 fixes SHA-256 and stdout as the exact 64-character lower-case digest plus one newline. Validate the student CLI adapter and owned fixtures before replacing this pending predicate; no complete CLI is supplied by the local reference.
     points: 5
     category: hashing
     setup: printf abc > "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
@@ -843,7 +848,7 @@ a03_distributed_file_sync:
       h1=$(./bin/synctool hash /tmp/a03_test/source/file1.bin)
       h2=$(./bin/synctool hash /tmp/a03_test/source/file2.bin)
       [ "$h1" != "$h2" ] && echo "different"
-    notes: 'Known vectors for abc: MD5 900150983cd24fb0d6963f7d28e17f72; SHA-256 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad.'
+    notes: 'Adopted abc stdout is ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad followed by exactly one newline; status 0, no diagnostics. Error paths require non-zero status and no success digest. The local C tests do not validate the omitted CLI.'
   signatures:
   - id: sig_01
     name: Generate signature

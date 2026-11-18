@@ -271,7 +271,7 @@ mkdir test && { echo "Success"; ls test; } || { echo "Error"; exit 1; }
 
 ```
 
-> 💡 I've observed that students who draw the diagram on paper before writing code have much better results.
+> 💡 Draw the diagram on paper before writing code, then check it against the executed pipeline.
 
 
 `cmd && success || error` also runs `error` if `success` fails; braces do not remove that behaviour. For a true two-way branch use `if cmd; then success; else error; fi`. The short chain above assumes its reporting commands succeed.
@@ -624,7 +624,7 @@ EOF
 
 `<<-` allows tabs at the beginning (for indented scripts):
 
-> 💡 A student once asked me why we can't just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.
+> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.
 
 ```bash
 if true; then

@@ -66,7 +66,7 @@ nano: save, exit, search        advanced .nanorc configuration
 
 ```
 
-> 💡 A student once asked me why we cannot just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.
+> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.
 
 
 ### Recommended Order (Priority)

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ENos — Homework Recording: Student Guide</title>
 <meta name="generator" content="pandoc 3.1.11.1">
-<meta name="source-sha256" content="739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275">
+<meta name="source-sha256" content="94ffad5331a8f1bdf86b4eaa02d22855e8c85a0b047335435178a2a4be5e3668">
 <style>
 /* Original student-guide visual theme, preserved for reproducible HTML export. */
 :root {
@@ -251,30 +251,20 @@ href="https://docs.asciinema.org/manual/asciicast/v2/">official v2</a>
 and <a href="https://docs.asciinema.org/manual/asciicast/v3/">v3</a>
 specifications. Version detection has local regression coverage; native
 terminal recording remains a separate acceptance check.</p>
-<blockquote>
-<p><strong>v6 candidate correction:</strong> Follow the <a
-href="RECORDING_CONTRACT.md">current recording contract</a>. Practice
-requires <code>--offline</code>; online configuration and the
-replacement verification protocol remain unresolved. Historical version
-labels below identify the source edition, not a new release.</p>
-</blockquote>
-<p>For an authorised online run, first obtain the host, account, port
-and host-key fingerprint from the service owner through a trusted
-channel. The supplied clients target <code>sop.ase.ro</code>; if the
-confirmed destination differs, the client configuration must be
-reconciled before use. Install only the verified host-key entry in
-<code>known_hosts</code>. The clients use
-<code>StrictHostKeyChecking=yes</code>.</p>
-<p>After the configuration and use of the existing workflow have been
-confirmed, use the current client interface:</p>
+<h2 id="adopted-local-practice-profile">Adopted local practice
+profile</h2>
+<p>Use <code>--offline</code> for the supported ENos practice
+workflow:</p>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">read</span> <span class="at">-r</span> <span class="at">-p</span> <span class="st">&#39;SSH port confirmed by the service owner: &#39;</span> <span class="va">ENOS_CONFIRMED_PORT</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--port</span> <span class="st">&quot;</span><span class="va">$ENOS_CONFIRMED_PORT</span><span class="st">&quot;</span></span></code></pre></div>
-<p>The Bash alternative is
-<code>bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"</code>.
-Both clients validate the supplied port; neither historical port is
-selected by this guide. For local practice, continue to use
-<code>--offline</code>.</p>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--offline</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Bash alternative:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> record_homework_EN.sh <span class="at">--offline</span></span></code></pre></div>
+<p>Keep the local recording and check its structure using the <a
+href="RECORDING_CONTRACT.md">recording contract</a>. Offline mode makes
+no SSH/SCP connection, upload or legacy-token operation. Institutional
+submission is deferred until the service owner confirms the complete
+contract and the workflow passes native acceptance. Historical version
+labels below identify the source edition.</p>
 <h2 id="operating-systems-2023-2027">Operating Systems 2023-2027</h2>
 <p><strong>Version:</strong> 1.1.1 | <strong>Last updated:</strong>
 January 2025</p>
@@ -285,19 +275,13 @@ glance, but:</p>
 <ul>
 <li>The script records the session and reports the outcome; install
 dependencies and choose the mode explicitly</li>
-<li>A typo in <code>STOP_homework</code> can be corrected; Ctrl+D also
-closes the recorded shell. The historical “most common / 2 seconds”
-claim is unverified</li>
+<li>If <code>STOP_homework</code> is mistyped, correct the command or
+press Ctrl+D to close the recorded shell.</li>
 <li>Local practice can be repeated after preserving the existing file;
 institutional resubmission rules remain pending</li>
 </ul>
-<p>💪 <strong>85% of students from previous years succeeded on their
-first attempt.</strong></p>
-<blockquote>
-<p><strong>Provenance pending author review:</strong> The percentage is
-retained from the source; no denominator, cohort or measurement record
-is established here.</p>
-</blockquote>
+<p>Start with the offline practice session and check the resulting
+recording before considering an online submission.</p>
 <hr />
 <h2 id="arrows_counterclockwise-recording-process-diagram">🔄 Recording
 Process Diagram</h2>
@@ -316,24 +300,11 @@ metadata token; retain the file on failure.</li>
 <li>Attempt upload up to three times. Report transfer success or failure
 separately from institutional acceptance.</li>
 </ol>
-<blockquote>
-<p><strong>Historical anecdote — provenance pending author
-review.</strong> 💡 <strong>From the trenches:</strong> In 2023, a
-student accidentally typed <code>STOP-homework</code> (with hyphen
-instead of underscore) and spent 20 minutes wondering why the recording
-wouldn't stop. The solution? Read the screen carefully — it says
-<code>STOP_homework</code> with an <strong>underscore</strong>! Since
-then, I've made the text larger and added Ctrl+D as a backup. Learn from
-others' mistakes.</p>
-</blockquote>
 <hr />
 <h2 id="initial-configuration-one-time-only">Initial Configuration (one
 time only)</h2>
 <h3 id="step-1-open-the-terminal">Step 1: Open the terminal</h3>
 <p>On Ubuntu/WSL, open a terminal.</p>
-<p><em>(Historical author statement, retained for review: WSL2 has
-completely changed the way I teach — now students can practise Linux
-without dual boot.)</em></p>
 <blockquote>
 <p>🚨 <strong>WARNING!</strong> Use YOUR OWN terminal, installed and
 configured as your instructor has directed!</p>
@@ -680,14 +651,6 @@ timing. Ordinary text recording does not capture unrelated sessions or
 ambient audio. Use your own configured lab environment so that commands
 and files belong to the intended exercise; the metadata labels do not
 authenticate the user.</p>
-<blockquote>
-<p><strong>Historical anecdote — capture context and provenance
-unconfirmed. Standard asciicast does not record audio or unrelated
-sessions.</strong> <em>A former student once ran the script on the
-shared server. The resulting 47-minute recording included three other
-students' work, a coffee break conversation and someone's Spotify
-playlist playing in the background. Don't be that student.</em></p>
-</blockquote>
 <hr />
 <p><strong>Q: Can I use a different terminal than the default (Windows
 Terminal, iTerm2)?</strong></p>
@@ -1060,10 +1023,9 @@ inspect the local format</li>
 <li>Include: your group, the exact error message, what you tried</li>
 </ul></li>
 </ol>
-<p><strong>Unconfirmed historical response-time claim (author review
-required):</strong> Lab instructors typically respond within 24-48 hours
-during term time. For urgent issues before deadlines, use office
-hours.</p>
+<p>Use the support channel and office-hour arrangements confirmed for
+your class. Do not assume a response deadline that has not been
+announced.</p>
 <hr />
 <p><em>Operating Systems 2023-2027 - ASE Bucharest</em>
 <em>Documentation version: 1.1.1</em></p>

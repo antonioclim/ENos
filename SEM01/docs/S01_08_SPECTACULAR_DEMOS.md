@@ -38,7 +38,7 @@ done
 **Moment**: First 3 minutes of the seminar  
 **Purpose**: Capture attention, establish interactive tone
 
-> 💡 A student once asked me why we can't just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.
+> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.
 
 
 ### Complete Script:

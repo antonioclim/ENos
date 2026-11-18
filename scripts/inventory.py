@@ -36,7 +36,7 @@ def main():
     rows=[]
     for p in files:
         rows.append({'path':p.relative_to(root).as_posix(),'size':None if p.resolve()==out else p.stat().st_size,'sha256':None if p.resolve()==out else hashlib.sha256(p.read_bytes()).hexdigest()})
-    report={'baseline':'d8fdd0507fe26e6bc1438a692da14afc2112464c','candidate':'6.0.0-dev','scope':'Tracked plus untracked non-ignored files when .git is present; otherwise archive physical files. Generated caches/build environments are excluded. The inventory includes itself in counts but omits its own hash/size to avoid self-reference. Counts do not establish coverage or execution.','counts':counts,'extensions':dict(sorted(ext.items())),'quiz_paths':[str(p.relative_to(root)) for p in bank],'files':rows}
+    report={'baseline':'d8fdd0507fe26e6bc1438a692da14afc2112464c','version':'6.0.0','scope':'Tracked plus untracked non-ignored files when .git is present; otherwise archive physical files. Generated caches/build environments are excluded. The inventory includes itself in counts but omits its own hash/size to avoid self-reference. Counts do not establish coverage or execution.','counts':counts,'extensions':dict(sorted(ext.items())),'quiz_paths':[str(p.relative_to(root)) for p in bank],'files':rows}
     out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');print(json.dumps(counts,sort_keys=True))
 
 if __name__=='__main__':main()

@@ -1,6 +1,6 @@
-# Recording and local preflight contract — v6 candidate
+# Recording and local preflight contract — v6.0.0
 
-This document describes the maintained source. It does not establish an institutional submission or assessment policy.
+The author has adopted the local practice profile for ENos v6.0.0. The supported workflow uses explicit `--offline` mode and asciicast v2. Institutional submission and official assessment remain deferred; this local adoption does not select an endpoint, port, identity scheme, receipt or grading rule.
 
 ## Run a local practice session
 

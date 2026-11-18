@@ -180,7 +180,7 @@ Seminar 6 Operating Systems
 Faculty of Cybernetics, Statistics and Economic Informatics  
 Bucharest University of Economic Studies
 
-This project is intended exclusively for educational purposes.
+This project is a teaching example. Eligible original ENos code is MIT and original documentation is CC BY 4.0 under [the component policy](../../../../LICENCE.md). The attribution above and the author line below are retained. Student, institutional or other third-party contributions whose rights are not confirmed remain outside the new grant. The educational context is not an additional restriction on eligible original code licensed under MIT.
 
 ---
 

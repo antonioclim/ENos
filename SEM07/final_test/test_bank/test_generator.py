@@ -23,7 +23,7 @@ VERSION = '1.0'
 BLOOM = {'remember', 'understand', 'apply', 'analyse', 'evaluate', 'create'}
 TYPES = {'multiple_choice', 'short_answer', 'practical'}
 DIFFICULTIES = {'easy', 'medium', 'hard'}
-SCOPE = 'Local study/review draft from a public pool; assessment and publication policy remain PENDING_POLICY.'
+SCOPE = 'Public formative practice/review draft from a public pool; summative assessment policy remains PENDING_POLICY.'
 
 
 class UniqueKeyLoader(yaml.SafeLoader):

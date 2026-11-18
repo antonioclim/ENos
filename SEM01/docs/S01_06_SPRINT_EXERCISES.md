@@ -4,7 +4,7 @@
 **Format**: 10-15 minute sprints with verifiable micro-milestones  
 **Working style**: Pair Programming (switch roles at halfway)
 
-> One student last year tried to `cd` into a file — the error message confused them for 10 minutes until we drew the tree structure on the whiteboard. That's when I realised how important it is to visualise the file system before typing commands.
+> Visualise the file system before typing commands. `cd` changes to a directory; inspect a path before trying to enter it.
 
 ---
 

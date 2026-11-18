@@ -9,7 +9,9 @@
 
 /* Block size for rolling hash */
 #define BLOCK_SIZE 4096
-#define HASH_SIZE 16  /* MD5 */
+#define HASH_SIZE 32  /* SHA-256 */
+#define DIGEST_RECORD_VERSION 2
+#define DIGEST_ALGORITHM "sha256"
 
 /* File hash structure */
 typedef struct {
@@ -21,7 +23,7 @@ typedef struct {
 /* Block signature for delta sync */
 typedef struct {
     uint32_t weak_hash;           /* Rolling (Adler-32 style) */
-    unsigned char strong_hash[HASH_SIZE]; /* MD5 */
+    unsigned char strong_hash[HASH_SIZE]; /* SHA-256 */
     off_t offset;
     size_t length;               /* Short final block length is explicit. */
 } BlockSignature;
@@ -61,10 +63,10 @@ typedef struct {
 
 /* ===== Hashing Functions ===== */
 
-/* Compute MD5 hash of file */
+/* Compute SHA-256 hash of file */
 int hash_file(const char *path, FileChecksum *checksum);
 
-/* Compute MD5 of data block */
+/* Compute SHA-256 of data block */
 int hash_block(const unsigned char *data, size_t len, 
                 unsigned char *hash);
 

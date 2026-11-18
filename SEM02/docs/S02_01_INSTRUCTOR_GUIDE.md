@@ -59,30 +59,33 @@ echo -e "name,age,city\nAna,22,Bucharest\nIon,25,Cluj\nMaria,22,Iasi" > data.csv
 
 ---
 
-## Things That Go Wrong (Every. Single. Year.)
+## Demonstrations of mistakes and their effects
 
-Look, I've taught this seminar many times now. Here's what WILL happen, so you can be ready:
+### `>` versus `>>`
 
-### The `>` vs `>>` Massacre
-Demo both side by side. Twice. Three times if necessary. Then demo what happens when you accidentally use `>` on an important file. Students still ask about this during the assignment, but at least they'll remember you warned them.
+Demonstrate replacement and append operations side by side using disposable fixtures.
 
-### The Subshell Variable Trap
-Someone will write `cat file | while read line; do ((count++)); done` and wonder why `$count` is 0 afterwards. I now demo the bug FIRST, let them feel the confusion, then show the fix. The "aha moment" is more memorable than just showing the correct way.
+### The subshell variable trap
 
-### "But it works on my machine"
-Usually a hidden Windows line ending (`\r\n` vs `\n`). Keep `dos2unix` ready. Since 2023, also check for students accidentally using PowerShell syntax in Bash.
+Compare `cat file | while read line; do ((count++)); done` with input redirection. Inspect `$count` afterwards and explain the shell context.
 
-### The AI Dump (new problem since 2023)
+### Environment differences
+
+Check Windows line endings (`\r\n` versus `\n`) and whether commands use Bash or PowerShell syntax.
+
+### Authorship and observed behaviour
+
 Polished comments and elaborate variable names do not establish authorship. Check whether the script works and ask the student to explain its behaviour and sources. The tool exposes lexical observations for manual review; it does not authenticate origin or apply a sanction. See the pending assessment contract.
 
-### The `{1..$n}` Bug
-Despite explicit warnings, ~20% still try this. I now write on the whiteboard in red: **BRACE EXPANSION BEFORE VARIABLE EXPANSION**. Then immediately show `seq` and C-style alternatives.
+### The `{1..$n}` bug
+
+Explain **BRACE EXPANSION BEFORE VARIABLE EXPANSION**, then show `seq` and C-style alternatives.
 
 ---
 
 ## Recommended Session Flow
 
-The full sequence is 10 + 15 + 20 + 30 + 15 + 5 = **95 contact minutes**, excluding any break. The former 45–70 filter window could not contain three 10-minute components. The author must select the timetable across the 95-minute route here and the other 100/110-minute routes; retaining every activity needs the full duration. A shorter session requires an explicit choice of optional practice, not an invisible five-minute overlap. Historical percentages and personal observations below are unverified author annotations, with no cohort evidence supplied.
+The full sequence is 10 + 15 + 20 + 30 + 15 + 5 = **95 contact minutes**, excluding any break. The former 45–70 filter window could not contain three 10-minute components. The author must select the timetable across the 95-minute route here and the other 100/110-minute routes; retaining every activity needs the full duration. A shorter session requires an explicit choice of optional practice, not an invisible five-minute overlap. Unsupported historical assertions are retained in [the provenance record](../../DECISION_PROVENANCE.json).
 
 ### Minutes 0-10: HOOK (Attention Capture)
 
@@ -149,7 +152,7 @@ false && echo "A" || echo "B" && echo "C"
 **Procedure**:
 
 1. **Initial vote** (1 min): "Raise hands - who says only A is displayed? Only B? Only C? B and C? Something else?"
-   - Mentally note the distribution. Typically: 40% "only B", 30% "B and C", remainder other answers.
+   - Record the observed response distribution for this activity; do not assume a historical cohort distribution.
 
 2. **Paired discussion** (3 min): "Turn to your neighbour and convince them of your answer."
    - Circulate around the room, listen to arguments, do not correct yet.
@@ -218,7 +221,7 @@ cat err.txt
 
 #### THE CLASSIC TRAP (dedicate 5 minutes)
 
-This is where 60% of students get confused in examinations:
+Check understanding of the following distinction:
 
 ```bash
 # CORRECT: stdout to file, THEN stderr to where stdout is now (i.e. the file)

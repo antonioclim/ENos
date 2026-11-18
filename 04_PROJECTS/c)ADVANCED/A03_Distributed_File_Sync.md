@@ -13,7 +13,7 @@ File synchronisation system between multiple machines (similar to rsync/Dropbox)
 ## Why C?
 
 The C component provides:
-- **Fast hashing** (MD5/SHA for large files)
+- **Fast hashing** (SHA-256 for large files)
 - **Rolling hash** for rsync-style delta sync
 - **Binary diff** for efficient transfer
 - **inotify wrapper** for change detection
@@ -128,15 +128,23 @@ sum of one and modulo 65521; it is not a claim of binary compatibility with rsyn
 rolling checksum. The in-memory delta representation can grow with input size;
 allocation failures are reported and streaming bounded storage is further work.
 
-**Open author decision — digest contract:** the historical teaching header uses
-16-byte MD5 while the assessment specification expects 64 hexadecimal SHA-256
-characters. This revision retains the historical digest for local algorithm
-regressions and marks that assessment oracle pending. Option A: migrate the API,
-wire format and known-answer tests together to SHA-256 (recommended for a new
-version; changes interoperability). Option B: retain a named legacy MD5 teaching
-format and adapt the oracle, with an explicit non-adversarial limitation. Neither
-option is adopted as an assessment policy here. A checksum does not authenticate a
-peer; transport authentication and conflict handling remain separate requirements.
+**Adopted D6 digest contract:** file and block digests use SHA-256 with an
+exact 32-byte C representation. A student-supplied `synctool hash PATH` command
+must emit exactly 64 lower-case hexadecimal characters followed by one newline
+on success, use standard error for diagnostics and return a non-zero status
+without a success digest on failure. Serialised digest records must identify
+`version: 2` and `algorithm: sha256` explicitly, reject duplicate fields and
+malformed values and carry a digest of exactly 64 lower-case hexadecimal
+characters. Records using a legacy version or the historical MD5 algorithm are
+rejected; migration recomputes SHA-256 from the original bytes rather than
+reinterpreting a 16-byte digest.
+
+The local reference and its known-answer tests implement the digest change.
+The CLI, digest-record parser, network serialisers, watcher and conflict policy
+remain student implementation tasks. Their assessment adapters remain
+`PENDING_CLI_ADAPTER` or `PENDING_TRANSPORT_ADAPTER` until supplied and validated.
+This algorithm decision does not adopt examination points or an institutional
+grading policy. A checksum does not authenticate a peer or establish authorship.
 
 Delta application rejects source/destination identity and validates all
 instructions before creating a same-directory owned stage. It publishes with a
@@ -160,7 +168,9 @@ must verify the expected result digest and base version before accepting a patch
 
 /* Block size for rolling hash */
 #define BLOCK_SIZE 4096
-#define HASH_SIZE 16  /* MD5 */
+#define HASH_SIZE 32  /* SHA-256 */
+#define DIGEST_RECORD_VERSION 2
+#define DIGEST_ALGORITHM "sha256"
 
 /* File hash structure */
 typedef struct {
@@ -172,7 +182,7 @@ typedef struct {
 /* Block signature for delta sync */
 typedef struct {
     uint32_t weak_hash;           /* Rolling (Adler-32 style) */
-    unsigned char strong_hash[HASH_SIZE]; /* MD5 */
+    unsigned char strong_hash[HASH_SIZE]; /* SHA-256 */
     off_t offset;
     size_t length;               /* Short final block length is explicit. */
 } BlockSignature;
@@ -212,10 +222,10 @@ typedef struct {
 
 /* ===== Hashing Functions ===== */
 
-/* Compute MD5 hash of file */
+/* Compute SHA-256 hash of file */
 int hash_file(const char *path, FileChecksum *checksum);
 
-/* Compute MD5 of data block */
+/* Compute SHA-256 of data block */
 int hash_block(const unsigned char *data, size_t len, 
                 unsigned char *hash);
 
@@ -294,12 +304,14 @@ void watcher_destroy(InotifyWatcher *w);
 #include <unistd.h>
 #include <errno.h>
 
-/* MD5 is retained solely as the existing teaching-format digest. It is not
- * authentication. The SHA-256 assessment mismatch awaits an author decision. */
+/* Version 2 uses SHA-256 for file and block digests. A digest does not
+ * authenticate a peer or establish authorship. */
 int hash_block(const unsigned char *data, size_t len, unsigned char *hash) {
     unsigned int written = 0;
+    unsigned char result[HASH_SIZE];
     if ((!data && len) || !hash) { errno = EINVAL; return -1; }
-    if (EVP_Digest(data, len, hash, &written, EVP_md5(), NULL) != 1 || written != HASH_SIZE) return -1;
+    if (EVP_Digest(data, len, result, &written, EVP_sha256(), NULL) != 1 || written != HASH_SIZE) return -1;
+    memcpy(hash, result, HASH_SIZE); /* Publish only a complete digest. */
     return 0;
 }
 
@@ -311,7 +323,7 @@ int hash_file(const char *path, FileChecksum *checksum) {
     struct stat before, after;
     FileChecksum result = {0};
     int rc = -1;
-    if (!ctx || fstat(fileno(f), &before) < 0 || !S_ISREG(before.st_mode) || EVP_DigestInit_ex(ctx, EVP_md5(), NULL) != 1) goto done;
+    if (!ctx || fstat(fileno(f), &before) < 0 || !S_ISREG(before.st_mode) || EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) != 1) goto done;
     unsigned char buffer[BLOCK_SIZE];
     size_t count;
     while ((count = fread(buffer, 1, sizeof buffer, f)) > 0) {
@@ -739,7 +751,8 @@ schematic does not claim interoperable or secure network execution.
 
 - rsync algorithm paper (Andrew Tridgell)
 - `man inotify` - Linux file monitoring
-- OpenSSL documentation (hashing)
+- National Institute of Standards and Technology. (2015). *Secure Hash Standard (SHS)* (FIPS PUB 180-4). https://doi.org/10.6028/NIST.FIPS.180-4
+- [OpenSSL digest documentation](https://docs.openssl.org/master/man3/EVP_DigestInit/)
 - Seminar 2-3 - IPC, network basics
 
 ---

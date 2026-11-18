@@ -127,7 +127,7 @@ cd ~username    # another user's home
 
 ### COMMON ERROR: Confusion between "/" and "~"
 
-> In my experience at ASE, students frequently confuse `/` with `~`. Last year, a student ran `rm -rf /*` instead of `rm -rf ~/*` — fortunately it was on a virtual machine and they didn't have root permissions. But the sweat was real! Since then, I insist on checking with `pwd` before any destructive operation.
+> Distinguish `/` from `~`. Inspect the intended target and expansion before a destructive operation; checking `pwd` alone does not validate an absolute path or a wildcard.
 
 ```bash
 # WRONG (conceptually for beginners):

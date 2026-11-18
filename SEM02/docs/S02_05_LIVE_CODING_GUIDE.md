@@ -30,7 +30,7 @@ Style: Incremental, with predictions and deliberate errors
 └─────────────────────────────────────────────────────────────┘
 ```
 
-> 💡 I've observed that students who draw the diagram on paper before writing code achieve much better results.
+> 💡 Draw the diagram on paper before writing code, then check it against the executed pipeline.
 
 
 ---
@@ -211,7 +211,7 @@ mkdir project && echo "✓ Created!" || echo "✗ Error!"
 
 EXPLANATION: "This is the pattern you'll use most often in scripts - do something and report whether it succeeded or not."
 
-> 💡 *I've observed that students who draw the diagram on paper before writing code achieve much better results.*
+> 💡 *Draw the diagram on paper before writing code, then check it against the executed pipeline.*
 
 
 ### Step 6: DELIBERATE ERROR - Order Matters! (3 min)

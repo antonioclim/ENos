@@ -7,7 +7,7 @@
 
 ---
 
-> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Removed historical empirical assertions are preserved in [the provenance record](../../DECISION_PROVENANCE.json).
 
 
 ## Philosophy of Spectacular Demos
@@ -178,7 +178,7 @@ Final total: 0          # ???
 └─────────────────────────────────────────────────────────┘
 ```
 
-> 💡 From experience with groups from previous years, I've observed that students who practise daily progress significantly faster.
+> 💡 Practise the commands, explain each result and compare it with your prediction.
 
 ### Solution: Process Substitution
 

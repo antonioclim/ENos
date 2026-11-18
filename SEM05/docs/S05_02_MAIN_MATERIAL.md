@@ -1413,7 +1413,7 @@ This template incorporates all best practices discussed:
 # Author: [Name]
 # Version: 1.0.0
 # Date: 2025-01
-# Licence: [author decision required before distribution]
+# Licence: MIT for this original ENos template; record terms for your own additions
 #
 # USAGE:
 # ./template.sh [options] <input_file>

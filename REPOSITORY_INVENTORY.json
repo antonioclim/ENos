@@ -1,12 +1,12 @@
 {
   "baseline": "d8fdd0507fe26e6bc1438a692da14afc2112464c",
-  "candidate": "6.0.0-dev",
+  "version": "6.0.0",
   "scope": "Tracked plus untracked non-ignored files when .git is present; otherwise archive physical files. Generated caches/build environments are excluded. The inventory includes itself in counts but omits its own hash/size to avoid self-reference. Counts do not establish coverage or execution.",
   "counts": {
-    "files": 1552,
-    "markdown": 458,
+    "files": 1560,
+    "markdown": 461,
     "html": 72,
-    "python": 110,
+    "python": 113,
     "bash": 133,
     "png": 39,
     "lecture_png": 39,
@@ -28,13 +28,13 @@
     ".html": 72,
     ".ini": 1,
     ".js": 8,
-    ".json": 14,
+    ".json": 16,
     ".log": 1,
-    ".md": 458,
+    ".md": 461,
     ".pdf": 1,
     ".png": 39,
     ".puml": 40,
-    ".py": 110,
+    ".py": 113,
     ".service": 2,
     ".sh": 133,
     ".svg": 26,
@@ -86,8 +86,8 @@
     },
     {
       "path": "00_SUPPLEMENTARY/README.md",
-      "size": 4553,
-      "sha256": "264fd9b462c14c03b1fa738da6450284ec7606477df5a95f3b32d1755690778e"
+      "size": 4514,
+      "sha256": "3be4bec8ccceb1e4bf895356bc63fb71bb77a376cb2a7bb41cc6aa3550f1b546"
     },
     {
       "path": "00_SUPPLEMENTARY/REFERENCES.md",
@@ -346,8 +346,8 @@
     },
     {
       "path": "01_INIT_SETUP/README.md",
-      "size": 5601,
-      "sha256": "539d2c2200b2ddf1abb187c99e937f32253082ea6a94115482880c8864f86bdd"
+      "size": 5704,
+      "sha256": "5b4eeab1f9f2156b463d1a5afb15ce71030a66696003fe544be7c5055cc0e997"
     },
     {
       "path": "01_INIT_SETUP/TC0_Lab0C_Virtualisation_ENv2.md",
@@ -381,28 +381,28 @@
     },
     {
       "path": "02_INIT_HOMEWORKS/CONTRIBUTING_EN.md",
-      "size": 7839,
-      "sha256": "c3374626241497369dc1df054a0cfc4ecbae24b162b1a6400ccedb7392b91ea2"
+      "size": 8110,
+      "sha256": "89460104adb8d73f32992a935e49be921c381ad5577d938d0d98871ecb607bd7"
     },
     {
       "path": "02_INIT_HOMEWORKS/FAQ_EN.md",
-      "size": 8910,
-      "sha256": "446824d1703b1339de8c280e5ba9f4c526072d71ece9175d0bde25f6fc14a3de"
+      "size": 9214,
+      "sha256": "0d66f9a23f7866375f6762005ae11afec4f7842dcb5cab2194141b1aaf14b24f"
     },
     {
       "path": "02_INIT_HOMEWORKS/README_EN.md",
-      "size": 5590,
-      "sha256": "a7bbfe30a126689ac2ba057ebd97fac0ff14aad922a21f57d645ca5eb21f43fc"
+      "size": 5835,
+      "sha256": "a20adc42fad4937ce80de723306c4050cf2a11e15f310e8e73bb095e8d42edf6"
     },
     {
       "path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.html",
-      "size": 45359,
-      "sha256": "f29f797fad7ae740ec0884d5ef89c8de5995faa544afee5181c56f3e0911519c"
+      "size": 44656,
+      "sha256": "2f6c023acde1fbba52fba6c0702b8962dad22921f5c1dfe627c37210b0e47bd6"
     },
     {
       "path": "02_INIT_HOMEWORKS/STUDENT_GUIDE_EN.md",
-      "size": 26094,
-      "sha256": "87fc03511a7a1ebbc837c34b6b9ba3b648eb6f47f33f347606368d1094a960e9"
+      "size": 25196,
+      "sha256": "fe82518dc76ebfcc6228153f9298c51807d79e99aa0791d7d5d8ed12f4c381c3"
     },
     {
       "path": "02_INIT_HOMEWORKS/record_homework_EN.sh",
@@ -421,33 +421,33 @@
     },
     {
       "path": "03_GUIDES/CONTRIBUTING_EN.md",
-      "size": 7890,
-      "sha256": "4c879b7a0a1e07f2bdaf8a32d65c72c590978f8f8e7849e25a1d73edfe1c4587"
+      "size": 8161,
+      "sha256": "1f015e4b9f3df107f7eaaa809eaaa5f4cd44a0a0b78697460982e3b41255ad64"
     },
     {
       "path": "03_GUIDES/FAQ_EN.md",
-      "size": 11542,
-      "sha256": "b147f6c7603978b8934e33459357c1cdd2d1393bd1528dc9be36e45855cbfa19"
+      "size": 11641,
+      "sha256": "d6764df3269addaf5d391cc00f25d08e15c1b783062efb8ac93e9c25cc0d9e31"
     },
     {
       "path": "03_GUIDES/README_EN.md",
-      "size": 7149,
-      "sha256": "5c9c7fb29d838fedba82953aa9bdf70411950b92eb343040f14b41ce2e0f3d23"
+      "size": 7586,
+      "sha256": "80599a7a8bf415f0a2dfa19a0e53fdbe5aa8be9c5e371ca895863c6bcb05ecb4"
     },
     {
       "path": "03_GUIDES/RECORDING_CONTRACT.md",
-      "size": 5108,
-      "sha256": "e969c48ab1a97ba451eb6b2366890c9338ea6ab9af0599e3b350768455cadfd4"
+      "size": 5285,
+      "sha256": "736525ffe3e3afd66c57a72f2d4522488ae39e41256e9abb6af4528873ec825a"
     },
     {
       "path": "03_GUIDES/STUDENT_GUIDE_EN.html",
-      "size": 57968,
-      "sha256": "99f1c80db5fa4a6ed8127c35da0a07b07bea309918c9aebbacd7f868e79fae1f"
+      "size": 55848,
+      "sha256": "ecf4d00d7005c9fcf672dd2f391ec610aacea75d1cf651e0c5930cfae461eb01"
     },
     {
       "path": "03_GUIDES/STUDENT_GUIDE_EN.md",
-      "size": 29300,
-      "sha256": "739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275"
+      "size": 27528,
+      "sha256": "94ffad5331a8f1bdf86b4eaa02d22855e8c85a0b047335435178a2a4be5e3668"
     },
     {
       "path": "03_GUIDES/build_student_guide.py",
@@ -491,8 +491,8 @@
     },
     {
       "path": "04_PROJECTS/ASSESSMENT_AND_EVIDENCE_CONTRACT.md",
-      "size": 3926,
-      "sha256": "8662dfb01779eb9ce060196ff132bc46a04a03051e43114e77943fa3efc3edbb"
+      "size": 4266,
+      "sha256": "88c83eba9bba5b3ccb6f6fb363e78b79005119004f2cf19e5f8c1db54555375b"
     },
     {
       "path": "04_PROJECTS/AUTOMATED_EVALUATION_SPEC/AUTOMATED_EVALUATION_SPEC.md",
@@ -506,8 +506,8 @@
     },
     {
       "path": "04_PROJECTS/AUTOMATED_EVALUATION_SPEC/TEST_SPEC_ADVANCED.md",
-      "size": 34847,
-      "sha256": "af3fe4e87a5de108da415415aecadd1865c8d8a01979fb08cdaef5c699af4009"
+      "size": 35781,
+      "sha256": "a1f5f24fc83362e306b6fac2bfd5588d67eb556d8a5de8cc7358a96dafe001a0"
     },
     {
       "path": "04_PROJECTS/AUTOMATED_EVALUATION_SPEC/TEST_SPEC_EASY.md",
@@ -516,8 +516,8 @@
     },
     {
       "path": "04_PROJECTS/AUTOMATED_EVALUATION_SPEC/TEST_SPEC_MEDIUM.md",
-      "size": 29947,
-      "sha256": "d8a0ff85ec103ae5071bc3320976e4f978ae07ed921e26c7589ea14a4595074e"
+      "size": 32196,
+      "sha256": "438862a231a1b5713cb24274b09175762124d7f4f9c1a9937636370efbec4116"
     },
     {
       "path": "04_PROJECTS/GENERAL_EVALUATION.md",
@@ -546,8 +546,8 @@
     },
     {
       "path": "04_PROJECTS/TECHNICAL_GUIDE.md",
-      "size": 20959,
-      "sha256": "3357a7a70101a26ba48e85158955f0f8998328d54602f929a6e7098e18fd0252"
+      "size": 21002,
+      "sha256": "9a8ab1c2da4136462cd5465f6e5b504a84206788e56b3916390b350ee7afeb90"
     },
     {
       "path": "04_PROJECTS/UNIVERSAL_RUBRIC.md",
@@ -621,8 +621,8 @@
     },
     {
       "path": "04_PROJECTS/a)MEDIUM/M14_Environment_Config_Manager.md",
-      "size": 19749,
-      "sha256": "db0e82589ea310ffb8adf830ee8b3a23a2cece1c19a9838fc9b598fa83fddbdf"
+      "size": 22943,
+      "sha256": "7a816585979a3c8824b9932cc2aa4cf49f40985db5240632d7948e779941527b"
     },
     {
       "path": "04_PROJECTS/a)MEDIUM/M15_Parallel_Execution_Engine.md",
@@ -676,8 +676,8 @@
     },
     {
       "path": "04_PROJECTS/c)ADVANCED/A03_Distributed_File_Sync.md",
-      "size": 28343,
-      "sha256": "8252ea498a834581a2cd43db404f321b0177179968843d1aad10d8fe3f4ea012"
+      "size": 29178,
+      "sha256": "a04c7f39ba3c01ddaf48a994068356129847eac53799cc05ff17731395c7ded3"
     },
     {
       "path": "04_PROJECTS/c)ADVANCED/README.md",
@@ -741,8 +741,8 @@
     },
     {
       "path": "04_PROJECTS/reference/a03/hash.c",
-      "size": 2105,
-      "sha256": "0393851116b02ae41da02defd9df7f7377bfe08549c478f732b1ae3300e73037"
+      "size": 2191,
+      "sha256": "52ee415b78bd97efec7b519d9127385e2a9f33858501ff5560d3e71576606d29"
     },
     {
       "path": "04_PROJECTS/reference/a03/rolling_hash.c",
@@ -756,8 +756,8 @@
     },
     {
       "path": "04_PROJECTS/reference/a03/syncutil.h",
-      "size": 3737,
-      "sha256": "af5a5a3a65ad5d164bd937340d623f76801a3a564e42e2b055e05e213b7e96d7"
+      "size": 3819,
+      "sha256": "aad766d1a6983792fb9c9c14c0b86e7df1eeef220f25f5108e390c2d95dcbec4"
     },
     {
       "path": "04_PROJECTS/reference/backup_manifest.py",
@@ -768,6 +768,11 @@
       "path": "04_PROJECTS/reference/fim_reference.py",
       "size": 7367,
       "sha256": "c042d6821baedab1f67d52b6a7e3c1b44a09058ad95b8bcd140f79ff09e14b19"
+    },
+    {
+      "path": "04_PROJECTS/reference/m14/render_local.py",
+      "size": 9738,
+      "sha256": "a62bb89be36be68c466e709d874af45785931c1e8bc3be3e34ecd7b63f13ea20"
     },
     {
       "path": "04_PROJECTS/reference/parallel_reference.sh",
@@ -806,13 +811,18 @@
     },
     {
       "path": "04_PROJECTS/tests/test_advanced_semantics.py",
-      "size": 8163,
-      "sha256": "72a680d20bb8b8eddd43c78a48ca1197f669c03328bac8cd10213145942b848f"
+      "size": 10454,
+      "sha256": "7b88bf38aefe7c1779dc0457ff4769d353993ff888ace57fbfdb99244a70910e"
     },
     {
       "path": "04_PROJECTS/tests/test_evaluation_spec.py",
       "size": 19423,
       "sha256": "cd5b858a73754fadbf0f3044bfdf957fbe73c348bf459e2be280b3ab95e762c3"
+    },
+    {
+      "path": "04_PROJECTS/tests/test_m14_lifecycle.py",
+      "size": 11239,
+      "sha256": "c37edf3ce3eb6140ab8b60630d075604df8ae0077a2286be3614330c25e1740f"
     },
     {
       "path": "04_PROJECTS/tests/test_reference_semantics.py",
@@ -821,8 +831,8 @@
     },
     {
       "path": "05_LECTURES/00-HTML_all_as_ZIP(again)/ALL_51_INTERACTIVE_PRESENTATIONS.zip",
-      "size": 8073250,
-      "sha256": "dcc71aba7bc86d79327c857188ca023db1d067176ae6c6df643f3397826e3517"
+      "size": 8094267,
+      "sha256": "3235b75bf058f64cecfa7ee2ec8856ab131d6038cae93e9d882beb91d7905668"
     },
     {
       "path": "05_LECTURES/01-Introduction_to_Operating_Systems/README.md",
@@ -2311,8 +2321,8 @@
     },
     {
       "path": "05_LECTURES/build_lecture_archive.py",
-      "size": 5423,
-      "sha256": "b7b1bdde8b75d3de704862d2a06c4d306aec1578530c2d703ff1997eff9f9a60"
+      "size": 6116,
+      "sha256": "e025cdc62b9e1dc4fd1fa3b33e08c2e68ba68ca7b9a597d50456bb8509e49f31"
     },
     {
       "path": "05_LECTURES/quiz_runner.py",
@@ -2321,18 +2331,28 @@
     },
     {
       "path": "AUTHOR_DECISIONS.md",
-      "size": 9973,
-      "sha256": "ff3bc029e55a4e6995e36ef7b70a0b5ef452f5332eecb851ab1f57c4cf7a86e5"
+      "size": 14106,
+      "sha256": "2ba2da319add2dadb3ecef28ae1a27bd9bdcc0562992d3f0ef068a21ce112bdf"
     },
     {
       "path": "CITATION.cff",
-      "size": 413,
-      "sha256": "cc4b9e940c871b1e58e3496920e45ea739c8281387f56461905b9101806a4cf2"
+      "size": 362,
+      "sha256": "6dedb1c6bfe1745ca5f00b5453f25c377d965bd72119f9cf790243730582c99a"
+    },
+    {
+      "path": "DECISION_PROVENANCE.json",
+      "size": 129128,
+      "sha256": "fce169c3c4819187a018b0270b3d77775f8cfd6005fec961bd6e892e566f520d"
     },
     {
       "path": "LICENCE.md",
-      "size": 12373,
-      "sha256": "29700f601193541e35d423047cc2adcddb01fec9718ea1388749827862797f50"
+      "size": 5336,
+      "sha256": "4bc6ba6a74f366f3975963733325c278be034ee92e1a14abbe9ac817f6b92790"
+    },
+    {
+      "path": "LICENCE_SCOPE.json",
+      "size": 211466,
+      "sha256": "1edeb2127268b39725b3724e856413074ffe6e5dadf3e421dd7c56ea7117b9ca"
     },
     {
       "path": "LICENSE",
@@ -2341,18 +2361,23 @@
     },
     {
       "path": "NAVIGATION.md",
-      "size": 9980,
-      "sha256": "e5e64f19d66d3f719c7bf87dcaf35d33c3e60fe37c04cb6f6e86a2f1dca43cdf"
+      "size": 10114,
+      "sha256": "0e8e50e8ab048414ceb381bc5405b1cd469e15734593c62a94d2c9b6487d1eb8"
     },
     {
       "path": "README.md",
-      "size": 51053,
-      "sha256": "fd9df7a81500c13cf0ad046a533ba32103a26377ea8fe08bc0977a27abc018fa"
+      "size": 51830,
+      "sha256": "2e0ebfe0bae9e41cae3b74ae6384fce02bf713ff20de41e3ffb9d1ea99877822"
     },
     {
       "path": "README_ADDITIONS.md",
-      "size": 620,
-      "sha256": "ae28eab37d9569bdd18c4fd58c679b29995296f8d13b7096c50811426dcddfa7"
+      "size": 613,
+      "sha256": "9cf22987900ec7496301dee79c4e8160c1b6d48d98de1f2e8835aa741b644108"
+    },
+    {
+      "path": "RELEASE_NOTES_v6.0.0.md",
+      "size": 2942,
+      "sha256": "22b6a5826e56d952a1a981c4bf7028949529a5624339862a014b70e5056732e9"
     },
     {
       "path": "REPOSITORY_INVENTORY.json",
@@ -2371,8 +2396,8 @@
     },
     {
       "path": "SEM01/README.md",
-      "size": 9787,
-      "sha256": "a3ea38368913ac09f43b36d3564ddf3591de6071fcb7f0b0aaac07974fdd1e3a"
+      "size": 9619,
+      "sha256": "2f8f0a222f5d9fa086ed1e234a50ebbb5b6b59970beeefbb61d9312ff76ec5fe"
     },
     {
       "path": "SEM01/ci/RUNhere.md",
@@ -2406,8 +2431,8 @@
     },
     {
       "path": "SEM01/docs/S01_02_MAIN_MATERIAL.md",
-      "size": 23016,
-      "sha256": "cbd63fa124ea8bc521f242204a3dbb830e28d4c8d8ec2fb432b1fe2190c24769"
+      "size": 22874,
+      "sha256": "2699b38e8505e13f018ce35ffa88dbe56822ca464a30e859840578d87fa6d1a1"
     },
     {
       "path": "SEM01/docs/S01_03_PEER_INSTRUCTION.md",
@@ -2426,8 +2451,8 @@
     },
     {
       "path": "SEM01/docs/S01_06_SPRINT_EXERCISES.md",
-      "size": 31364,
-      "sha256": "727323aca22879a9838c26d032c08f2e7dd42df936cc0d7057b56b6a325cf5b6"
+      "size": 31238,
+      "sha256": "51b08b53d30567a9589913220c876f01f0b89fe4985ab086fff6ed1388c6c00b"
     },
     {
       "path": "SEM01/docs/S01_07_LLM_AWARE_EXERCISES.md",
@@ -2436,8 +2461,8 @@
     },
     {
       "path": "SEM01/docs/S01_08_SPECTACULAR_DEMOS.md",
-      "size": 14163,
-      "sha256": "c8eac87e74df69ba112ec01fa950be959824c320a715b7566964141631755067"
+      "size": 14121,
+      "sha256": "a92cac7059fb40d3b242ba83563a01d4cbb6c980d82c7685e726ece545bf91df"
     },
     {
       "path": "SEM01/docs/S01_09_VISUAL_CHEAT_SHEET.md",
@@ -2746,23 +2771,23 @@
     },
     {
       "path": "SEM02/docs/S02_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
-      "size": 13389,
-      "sha256": "107ee73c67abf543601957c37c19195e017c5c40a33dac4925f8d03adc4748ff"
+      "size": 12574,
+      "sha256": "0324aa1a6cc20d9eba2f712855c062bfc2f6930675ef7873afad19880a0f2430"
     },
     {
       "path": "SEM02/docs/S02_01_INSTRUCTOR_GUIDE.md",
-      "size": 16741,
-      "sha256": "9242ba459188347230101d77c15608bc7a0ef0e0850cd6134221930f6906fa83"
+      "size": 16212,
+      "sha256": "73b5ceafb262f4925b909a7213097816ef7daad597d8fa897d88aa8a4b2e1961"
     },
     {
       "path": "SEM02/docs/S02_02_MAIN_MATERIAL.md",
-      "size": 33137,
-      "sha256": "e2df9dc8dd89ea3cf54a050567be79a9b0527eda40f3017430fde664236a1431"
+      "size": 33083,
+      "sha256": "796ba31f0ae6175f5f8c4c7ff4119e968f9697751828c8f3c2a02b5c3f914ad0"
     },
     {
       "path": "SEM02/docs/S02_03_PEER_INSTRUCTION.md",
-      "size": 20827,
-      "sha256": "1e241e6f62a1cc5e81080cfd0b139d3176b0f8c85e9b83c314710cafbf4b7434"
+      "size": 20888,
+      "sha256": "c576a4812021043a169897ccd2d4bda16b2087333df52a666fe5b4cf522953d5"
     },
     {
       "path": "SEM02/docs/S02_04_PARSONS_PROBLEMS.md",
@@ -2771,8 +2796,8 @@
     },
     {
       "path": "SEM02/docs/S02_05_LIVE_CODING_GUIDE.md",
-      "size": 17270,
-      "sha256": "0631b077e51736a67326fc7cee34a56c07d4ae650e7cde08a9f895b33a5c65d3"
+      "size": 17240,
+      "sha256": "e6107002890b462ae46421f1b15b6ccfa78f350cdd74367d41a54a684224fbe0"
     },
     {
       "path": "SEM02/docs/S02_06_SPRINT_EXERCISES.md",
@@ -3411,8 +3436,8 @@
     },
     {
       "path": "SEM04/docs/S04_01_INSTRUCTOR_GUIDE.md",
-      "size": 36395,
-      "sha256": "24905ffec4ddadc1c8f4c50b0e71ffc62323000c8eab517a4d5ee7e1e2822340"
+      "size": 36352,
+      "sha256": "7557e8beb7b6349b58bd17b69dda77dd55d5f30b419d25ad68d5f47dab23cadc"
     },
     {
       "path": "SEM04/docs/S04_02_MAIN_MATERIAL.md",
@@ -3461,8 +3486,8 @@
     },
     {
       "path": "SEM04/docs/S04_11_LIVE_VERIFICATION_EXERCISES.md",
-      "size": 9682,
-      "sha256": "452f75385eac1d59f6dddb37e86558502761b2044f975bbee3c644d45d4e707c"
+      "size": 9536,
+      "sha256": "44465f13a1ab725e2892abdcf7639442a9a5b2161ebf8e57189b118f90d5015e"
     },
     {
       "path": "SEM04/docs/images/README.md",
@@ -3816,23 +3841,23 @@
     },
     {
       "path": "SEM05/docs/S05_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
-      "size": 25581,
-      "sha256": "a67ab97c3d65cbaec8c62ec1ff1d5a4b2e60b3968f32fe340118045e6c7426d3"
+      "size": 25231,
+      "sha256": "4ad9ec5a4dcf1bfb7aafa59de48e3495f48b37a2f3e3471dc8308b9f8c35aa32"
     },
     {
       "path": "SEM05/docs/S05_01_INSTRUCTOR_GUIDE.md",
-      "size": 39048,
-      "sha256": "5df08ab8d840e34afca1c44adf3c9a15513883504693af373e9b98024c3945fd"
+      "size": 37854,
+      "sha256": "42c27160a707e745e401776192fc1efb2b1b2675718f6e256395b84577f576bd"
     },
     {
       "path": "SEM05/docs/S05_02_MAIN_MATERIAL.md",
-      "size": 38313,
-      "sha256": "d536ac6090bc4a05ce068c8d2878ff5428af9d2ecae840b8eb41a9c69be6f66b"
+      "size": 38339,
+      "sha256": "338bca2ec31e8115b78ec843c54b414462da68e96e449128b5713c531192178c"
     },
     {
       "path": "SEM05/docs/S05_03_PEER_INSTRUCTION.md",
-      "size": 19222,
-      "sha256": "db9ae648880aebce78b57d72828509f5004780c38ae002e294b402a89020b086"
+      "size": 19224,
+      "sha256": "14c45c48b27bd4de74b21ca48387be0455ffc60c45250be7a6cafab2ed211990"
     },
     {
       "path": "SEM05/docs/S05_04_PARSONS_PROBLEMS.md",
@@ -3856,8 +3881,8 @@
     },
     {
       "path": "SEM05/docs/S05_08_SPECTACULAR_DEMOS.md",
-      "size": 13398,
-      "sha256": "4707baa7ec7a316b32548b2a06cbbab01e83cfa3c587aea554de8b716e7e9a7a"
+      "size": 13335,
+      "sha256": "ed3f48de709a72451bf73cd56db2dd1752b873ec24ef582efacc2acefdde3a3d"
     },
     {
       "path": "SEM05/docs/S05_09_VISUAL_CHEAT_SHEET.md",
@@ -3871,8 +3896,8 @@
     },
     {
       "path": "SEM05/docs/TEACHING_CONTRACT.md",
-      "size": 5709,
-      "sha256": "2923d3e287fa365133e85ea28de5bc6f484056ec7b2afa7a80c133f3e159a5ad"
+      "size": 6034,
+      "sha256": "345eccca8668a805f6b98a535346a46220a28e1ff3bef4d2bedb0dc8bc6170b4"
     },
     {
       "path": "SEM05/docs/images/array_types.svg",
@@ -3896,8 +3921,8 @@
     },
     {
       "path": "SEM05/docs/lo_traceability.md",
-      "size": 15112,
-      "sha256": "f8fff6262f742ff321e01651a9d824993ea94d8dd1ed419fde2b000981df70b8"
+      "size": 14736,
+      "sha256": "bdbefb587a2effa9c1a7a1de47eaaabb4db2d9f5d0ff31f9b73ed717491ed3e6"
     },
     {
       "path": "SEM05/formative/RUNhere.md",
@@ -3961,8 +3986,8 @@
     },
     {
       "path": "SEM05/homework/S05_01_HOMEWORK.md",
-      "size": 13868,
-      "sha256": "9b4b0a18306d2d51ab6a3fff57d5e7225c7fd01e7ead68b339217a376be44d8f"
+      "size": 13628,
+      "sha256": "589b01a2e3d5ad5325f0137c5f6e9c4434f7bde6d1641999eb1ad76d7217c873"
     },
     {
       "path": "SEM05/homework/S05_02_create_homework.sh",
@@ -4006,8 +4031,8 @@
     },
     {
       "path": "SEM05/presentations/S05_01_presentation.html",
-      "size": 27353,
-      "sha256": "e873c8d49d5cba42d154bb9ee15164d3d0601ea21a378e23a729adb253bf2095"
+      "size": 27179,
+      "sha256": "071980460f5d81a362bb3d7821f5a8f3d89aaaa32ca98659418065997bc6e37c"
     },
     {
       "path": "SEM05/presentations/S05_02_cheat_sheet.html",
@@ -4221,8 +4246,8 @@
     },
     {
       "path": "SEM06/docs/TEACHING_CONTRACT.md",
-      "size": 7858,
-      "sha256": "61d0e0587c1f6f699da6c6b16b7224e186d98963de76f20061d9511ff7e05bfa"
+      "size": 7934,
+      "sha256": "e9c469c5ba986028a608ff109da7d858f17520525f6016483931c6be232d3253"
     },
     {
       "path": "SEM06/docs/images/architecture_overview.svg",
@@ -4351,8 +4376,8 @@
     },
     {
       "path": "SEM06/homework/S06_01_HOMEWORK_CAPSTONE.md",
-      "size": 15155,
-      "sha256": "0b60a0dd85b4bcfed2975267f6b35d5fa1dee7d1476376073ae8706e98aab77f"
+      "size": 15133,
+      "sha256": "a56303d3fa70a4f0bd72cad3b69106e091619f762ea192a95cead70fd5cb3d32"
     },
     {
       "path": "SEM06/homework/S06_02_EVALUATION_RUBRIC.md",
@@ -4561,13 +4586,13 @@
     },
     {
       "path": "SEM06/scripts/projects/deployer/README.md",
-      "size": 14482,
-      "sha256": "0371768f50273d4f5c49a4f8ebe5aac69378f4510aa899906cb2920b3d3c8fcc"
+      "size": 14868,
+      "sha256": "cba275557a7972c56628f1ce0e69f6983120010d7108415046158573e0317abc"
     },
     {
       "path": "SEM06/scripts/projects/deployer/bin/sysdeploy",
-      "size": 2627,
-      "sha256": "c56696c7f516e75bb6664a59de863174dc5d213edbec658b7006bc5eac0ed94e"
+      "size": 2851,
+      "sha256": "9e5217fe4123ae5c6cb820ae2769d88410e2f6ad554604c4a3262084826f6aa6"
     },
     {
       "path": "SEM06/scripts/projects/deployer/deployer.sh",
@@ -4646,8 +4671,8 @@
     },
     {
       "path": "SEM06/scripts/projects/monitor/monitor.sh",
-      "size": 15425,
-      "sha256": "6b2ecb6abb7a9ec2439bf953f112ce156352c19d5ac73b79a602a6a475aa1a60"
+      "size": 15472,
+      "sha256": "cbd8f51d88f4ee5fddf53aa8b2c07aa680ff8db75c97be21d74267643543dd9a"
     },
     {
       "path": "SEM06/scripts/projects/monitor/tests/RUNhere.md",
@@ -4695,9 +4720,14 @@
       "sha256": "7f119c2006ed1884f2d03332830fa93a2f92cbc1645392127687638d1c4f5e87"
     },
     {
+      "path": "SEM07/POLICY_HISTORY.md",
+      "size": 6678,
+      "sha256": "6b442687f25c3074ff8b6cb72726b941098f3b89bf3792c28e5eeec63e9143b1"
+    },
+    {
       "path": "SEM07/README.md",
-      "size": 6093,
-      "sha256": "ef5351769d1e1211f24c48fb1e08aee950c1735159d8e69fa43a9d6a3837871e"
+      "size": 3284,
+      "sha256": "bf87e11d8ec0e9891a7c428a46ce620a891644c9cb9bd795578bf9eb7220670e"
     },
     {
       "path": "SEM07/docs/S07_00_PEDAGOGICAL_ANALYSIS_PLAN.md",
@@ -4736,28 +4766,33 @@
     },
     {
       "path": "SEM07/final_test/test_bank/RUNhere.md",
-      "size": 7830,
-      "sha256": "c6f5e099a243560a8e708e50fa79ff0aa9817980760136d30ac024b6ccf09a49"
+      "size": 7831,
+      "sha256": "8ad337b9b76a115ee716e2fd640177049af49bf970f489b2c14adaaba21a9e3d"
     },
     {
       "path": "SEM07/final_test/test_bank/questions_pool.yaml",
-      "size": 200374,
-      "sha256": "8af3f200838a779269560207d46e16e96fdf649f1b58ac7655e3fc558552d2a2"
+      "size": 200379,
+      "sha256": "4dbdd8f5e1c83d93a445c5241f46b97fb620c4af1313cb8affae9f58c29578b5"
     },
     {
       "path": "SEM07/final_test/test_bank/test_generator.py",
-      "size": 18306,
-      "sha256": "66ebdbea577f45363b8862151161034027d165f3513cae060b17587dfc452b85"
+      "size": 18315,
+      "sha256": "e247e091985370c43978b668f0960eaf98164fcc61d02c5a1e3fba0b84e1edea"
     },
     {
       "path": "SEM07/grade_aggregation/GRADING_POLICY.md",
-      "size": 10233,
-      "sha256": "4a6db4a98d229b4d30c516358e2228f0508b3d1f2e919db098a484b3262ed492"
+      "size": 2611,
+      "sha256": "251d2c13362bd47b330189cd84429643e68414545b53e51d37cfcf38605ebe4a"
+    },
+    {
+      "path": "SEM07/grade_aggregation/GRADING_POLICY_HISTORY.md",
+      "size": 10847,
+      "sha256": "d84f81f4bb2095eaf0930648df081e74c7767049a258a8ca209cbdad05b8d891"
     },
     {
       "path": "SEM07/grade_aggregation/RUNhere.md",
-      "size": 4618,
-      "sha256": "55e24cf7f779aac513ca5d054931de2faf61749bfbd4ad996358628949d2b911"
+      "size": 4909,
+      "sha256": "0d22d1bd6fa9c00c91401bc3a5ae80dfbd95d41aa836ccb6b0f6976c386d471c"
     },
     {
       "path": "SEM07/grade_aggregation/final_grade_calculator_EN.py",
@@ -4791,8 +4826,8 @@
     },
     {
       "path": "SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md",
-      "size": 9158,
-      "sha256": "ad9fef13b52cdfe376380c8d569588c0fadc729a1918e38e993727c202db1e1a"
+      "size": 9469,
+      "sha256": "57796c06cdd88fa951b6100cedd2edbe92fb394a0fcc2cb47ed468357d9e86cf"
     },
     {
       "path": "SEM07/homework_evaluation/grade_homework_EN.py",
@@ -4881,8 +4916,8 @@
     },
     {
       "path": "VERIFICATION.md",
-      "size": 10691,
-      "sha256": "73e12c03649588f1ac3f192abe2b28d45d95abe167c25c2f1d71e93af0cd1280"
+      "size": 13775,
+      "sha256": "b1b1b2cb4b6dbeb6747343595ced82958644cd35bc20890ccc46a589224d994d"
     },
     {
       "path": "assets/css/lecture_utilities.css",
@@ -4971,8 +5006,8 @@
     },
     {
       "path": "assets/vendor/README.md",
-      "size": 3757,
-      "sha256": "757901e492c5ce0f8b58a422a70fbe131d19e84d4b0b0325feca7cf90e783892"
+      "size": 3891,
+      "sha256": "c18df030cb03f1bbc1f280d90aa742650e400e5988c792fe5e64c7fa0f722b52"
     },
     {
       "path": "assets/vendor/chart.js/4.4.1/LICENSE.md",
@@ -7741,13 +7776,13 @@
     },
     {
       "path": "pyproject.toml",
-      "size": 4900,
-      "sha256": "5b9d07d5d6454d1e5aba827cf35ed15db3876dd06d5c156ac0bf1ab0a828082c"
+      "size": 4993,
+      "sha256": "539ee12e79355815eafe3fbff6aad66ec43ddbd164e4cd6c7bd85ac0055551e7"
     },
     {
       "path": "scripts/RUNhere.md",
-      "size": 3736,
-      "sha256": "f408191160045a8fd78f86be8b434438dc1b1e90abc9c7bc5594e9eae279a3db"
+      "size": 3745,
+      "sha256": "6a53f3231aee9a95b0af2d0444236c7860c8d52ec6eb9252998db61c95334c2c"
     },
     {
       "path": "scripts/add_print_styles.py",
@@ -7770,14 +7805,19 @@
       "sha256": "314686feebeb0420458a86db7327c834dcf68499d801dc2bbc078ad4dd0c7a81"
     },
     {
+      "path": "scripts/check_licence_scope.py",
+      "size": 9829,
+      "sha256": "8edd6661a9dc45b509a725fd39da236e5e0947b8f3fe45db306a893089ab63f1"
+    },
+    {
       "path": "scripts/check_links.sh",
       "size": 382,
       "sha256": "048713537639c57e2606d6c19ca486731b5298c74f49772389e638619d50ff0e"
     },
     {
       "path": "scripts/inventory.py",
-      "size": 3827,
-      "sha256": "684d0378926dbda78865a590d95c7e09d784b00b827bd56b4227efcb90e17ea2"
+      "size": 3821,
+      "sha256": "21f40227293217f4444aeed69162b7142e9e82faea6d42315187de26e81b2f36"
     },
     {
       "path": "scripts/link_check.py",

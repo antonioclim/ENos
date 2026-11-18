@@ -157,7 +157,7 @@
     <h3>Functions • Arrays • Robustness</h3>
     <p>Operating Systems | ASE Bucharest - CSIE</p>
     <p class="small">Seminar 5 • Bash 4.4+; commands are for an owned disposable workspace.</p>
-<p class="small">Historical misconception percentages are retained as unverified author claims: no cohort, denominator or measurement method is established. They are not course statistics.</p>
+
 </section>
 
 <!-- ============================================================ -->
@@ -225,7 +225,7 @@ printf 'Fixture archive verified\n'
     <section>
         <h3>Misconception #1: Scope</h3>
         <div class="highlight-box">
-            <p><strong>80% of students believe that variables in functions are local by default.</strong></p>
+            <p><strong>Misconception: variables in functions are local by default.</strong></p>
             <p>In reality, they are <span class="bad">GLOBAL</span>!</p>
         </div>
     </section>
@@ -313,7 +313,7 @@ echo ${#arr[@]}   # 3</code></pre>
     <section>
         <h3>Misconception #3: Indexing</h3>
         <div class="highlight-box">
-            <p><strong>55% of students</strong> believe arrays start at 1.</p>
+            <p><strong>Misconception:</strong> arrays start at 1.</p>
             <p>In Bash, they start at <span class="good">0</span>!</p>
         </div>
         <pre><code class="bash">arr=("first" "second" "third")
@@ -360,7 +360,7 @@ printf '%s\n' "${!config[@]}"  # 0; unset arithmetic indices evaluate as 0
 unset config
 declare -A config=([host]=localhost [port]=8080)
 printf '%s\n' "${!config[@]}"  # host and port; order is unspecified</code></pre>
-        <p class="fragment bad">70% forget <code>declare -A</code>!</p>
+        <p class="fragment bad">Declare an associative array with <code>declare -A</code>.</p>
     </section>
     
     <section>
@@ -413,7 +413,7 @@ echo "Never reaches"
     <section>
         <h3>Misconception #6: Limitations of set -e</h3>
         <div class="highlight-box">
-            <p><strong>75%</strong> believe set -e catches ANY error.</p>
+            <p><strong>Misconception:</strong> <code>set -e</code> catches every error.</p>
             <p>Its exceptions include:</p>
         </div>
         <ul>

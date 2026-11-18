@@ -44,8 +44,8 @@ metadata:
     classification_status: Authored difficulty and Bloom labels retained; no empirical calibration claimed.
     assessment_policy: 'PENDING_POLICY: weights retained; no institutional pass, bonus, eligibility or confidentiality
       rule selected.'
-    publication_status: Publicly distributed study/review pool; formal assessment and answer-publication decisions
-      remain with the author.
+    publication_status: Adopted public formative study/review pool; summative assessment and any future controlled
+      distribution remain pending.
     option_order: Canonical order is not balanced. test_generator.py shuffles MC options and remaps the key; use
       the generated key for each form.
     reference_answers: Short-answer and practical references require human review; examples are not instructions

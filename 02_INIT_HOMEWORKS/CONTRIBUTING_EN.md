@@ -1,6 +1,6 @@
 # 🤝 Contribution Guide
 
-> **v6 candidate correction:** Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+> **v6.0.0 recording scope:** Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
 
 ## For Instructors Who Wish to Adapt the System
 
@@ -220,9 +220,7 @@ For bugs or suggestions:
 
 ## Licence
 
-The historical text describes proprietary course use. It conflicts with the former MIT package declaration; the canonical grant remains an [author decision](../AUTHOR_DECISIONS.md). This candidate does not resolve that conflict.
-
-Modifications for personal use are permitted. Public redistribution requires approval.
+Original ENos software and code examples are licensed under MIT. Original teaching prose and figures are licensed under CC BY 4.0, within the rights confirmed by the author. Component-specific notices, third-party terms, quotations and unresolved ownership are governed by the [component scope](../LICENCE_SCOPE.json) and [licensing policy](../LICENCE.md). Existing attribution and earlier grants are retained. New contributions must identify their author and source, their applicable terms and any third-party material; do not submit material whose redistribution rights are unconfirmed.
 
 ---
 

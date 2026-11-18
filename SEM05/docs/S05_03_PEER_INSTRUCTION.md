@@ -23,9 +23,9 @@ For each question in this document, follow this protocol:
 
 ### Optimal Conditions
 
-- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
+- **Planning target for first-vote accuracy:** 40-60%; this is an instructional target, not a measured or guaranteed learning effect.
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote observation:** Record both votes and calculate any change from the observed responses; no improvement is guaranteed.
 
 ### Question Notation
 
@@ -60,7 +60,7 @@ Peer Instruction is a pedagogical method developed by Eric Mazur (Harvard) that:
 
 ## Section 1: FUNCTIONS
 
-### Q1: Variables in Functions (Misconception 80%)
+### Q1: Variables in Functions
 
 ```bash
 #!/bin/bash
@@ -92,7 +92,7 @@ Explanation:
 Key aspects: in bash, variables in functions are global by default, `count` in the function modifies the global variable and this is the opposite of behaviour in python/java/c.
 
 
-Targeted misconception: 80% believe variables are local by default
+Targeted misconception: assuming variables are local by default
 
 Follow-up question: "How do we make the variable stay local?"
 → Answer: `local count=$((count + 1))`
@@ -101,7 +101,7 @@ Follow-up question: "How do we make the variable stay local?"
 
 ---
 
-### Q2: Return vs Echo (Misconception 75%)
+### Q2: Return vs Echo
 
 ```bash
 #!/bin/bash
@@ -146,13 +146,13 @@ get_value() {
 result=$(get_value)    # result="42"
 ```
 
-Targeted misconception: 75% believe return works as in other languages
+Targeted misconception: assuming return communicates arbitrary values as in other languages
 
 </details>
 
 ---
 
-### Q3: Function Arguments vs Script (Misconception 65%)
+### Q3: Function Arguments vs Script
 
 ```bash
 #!/bin/bash
@@ -195,7 +195,7 @@ show_arg "A" "B" "C"
 # All function args: A B C
 ```
 
-Targeted misconception: 65% confuse $1 in function with $1 in script
+Targeted misconception: confusing $1 in a function with $1 in the script
 
 </details>
 
@@ -203,7 +203,7 @@ Targeted misconception: 65% confuse $1 in function with $1 in script
 
 ## Section 2: ARRAYS
 
-### Q4: Array Indexing (Misconception 55%)
+### Q4: Array Indexing
 
 ```bash
 #!/bin/bash
@@ -231,13 +231,13 @@ Explanation:
 
 **Attention for students familiar with Lua, R or other 1-indexed languages!**
 
-Targeted misconception: 55% believe arrays start from 1
+Targeted misconception: assuming indexed arrays start from 1
 
 </details>
 
 ---
 
-### Q5: declare -A (Misconception 70%)
+### Q5: declare -A
 
 ```bash
 #!/bin/bash
@@ -281,13 +281,13 @@ config[port]="8080"
 echo "${!config[@]}"        # host port (correct!)
 ```
 
-Targeted misconception: 70% believe declare -A is optional
+Targeted misconception: assuming declare -A is optional for an associative array
 
 </details>
 
 ---
 
-### Q6: Iteration with Quotes (Misconception 65%)
+### Q6: Iteration with Quotes
 
 ```bash
 #!/bin/bash
@@ -328,7 +328,7 @@ done
 
 Golden rule: ALWAYS use `"${arr[@]}"` with quotes!
 
-Targeted misconception: 65% forget quotes when iterating
+Targeted misconception: omitting quotes when iterating
 
 </details>
 
@@ -416,7 +416,7 @@ fi
 
 ---
 
-### Q9: set -e in if (Misconception 75%)
+### Q9: set -e in if
 
 ```bash
 #!/bin/bash
@@ -450,13 +450,13 @@ Other cases where set -e does NOT work:
 - Commands negated with `!`
 - Functions called in test context
 
-Targeted misconception: 75% believe set -e stops on ANY error
+Targeted misconception: assuming set -e stops on ANY error
 
 </details>
 
 ---
 
-### Q10: set -e with || (Misconception 60%)
+### Q10: set -e with ||
 
 ```bash
 #!/bin/bash

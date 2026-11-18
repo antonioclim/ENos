@@ -25,9 +25,9 @@ For each question in this document, follow this protocol:
 
 ### Optimal Conditions
 
-- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
+- **Planning target for first-vote accuracy:** 40-60%; this is an instructional target, not a measured or guaranteed learning effect.
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote observation:** Record both votes and calculate any change from the observed responses; no improvement is guaranteed.
 
 ### Question Notation
 
@@ -409,7 +409,7 @@ echo "Exit code: $?"  # 0
 
 ### PI-08: uniq without sort (CRITICAL! )
 
-Level: Fundamental | Duration: 4 min | Target: ~20-30% correct (very frequent misconception)
+Level: Fundamental | Duration: 4 min | Target: ~20-30% correct
 
 ```bash
 echo -e "a\nb\na\nb" | uniq
@@ -435,7 +435,7 @@ Correct answer: B
 
 | Distractor | Targeted misconception |
 |------------|------------------------|
-| A | 80% believe this! - Don't know uniq removes only CONSECUTIVE |
+| A | Overlooks that uniq removes only CONSECUTIVE duplicates |
 | C | Believes uniq sorts |
 | D | Doesn't know pipes |
 
@@ -579,7 +579,7 @@ Correct answer: B
 
 | Distractor | Targeted misconception |
 |------------|------------------------|
-| A | 70% believe this! - Don't know brace expansion is at parse time |
+| A | Overlooks that brace expansion precedes variable expansion |
 | C | Believes it's wrong syntax |
 | D | Believes loop doesn't execute |
 
@@ -629,7 +629,7 @@ Correct answer: B
 
 | Distractor | Targeted misconception |
 |------------|------------------------|
-| A | 65% believe this! - Don't know subshell problem |
+| A | Overlooks the subshell context |
 | C | Partially understands |
 | D | Variable confusion |
 

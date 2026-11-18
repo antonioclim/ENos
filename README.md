@@ -5,12 +5,12 @@
 | Item | Current status |
 | --- | --- |
 | Repository | antonioclim/ENos |
-| Published baseline | v5.5.0 · d8fdd0507fe26e6bc1438a692da14afc2112464c |
-| Working candidate | 6.0.0-dev; unpublished |
+| Preserved baseline | v5.5.0 · d8fdd0507fe26e6bc1438a692da14afc2112464c |
+| Source version | v6.0.0 · [release notes](RELEASE_NOTES_v6.0.0.md) |
 | Materials | 14 core lectures, 4 supplementary lectures, 7 seminars, 23 projects |
 | Inventory | See the generated repository inventory below |
 | Verification | Bounded local regressions; no claim of complete host/browser acceptance |
-| Licence | Conflicting baseline declarations; author decision pending |
+| Licence | MIT original code; CC BY 4.0 original prose/figures; retained exceptions and third-party terms |
 
 [![GitHub](https://img.shields.io/badge/GitHub-ENos-blue?logo=github)](https://github.com/antonioclim/ENos)
 [![Romanian Version](https://img.shields.io/badge/🇷🇴_ROso-Romanian-red)](https://github.com/antonioclim/ROso)
@@ -29,7 +29,7 @@ Year I, Semester 2 | 2017–2030
 <details open>
 <summary><strong>Click to expand/collapse</strong></summary>
 
-- [v6 candidate status](#-v6-candidate-status)
+- [v6.0.0 release scope](#-v600-release-scope)
 - [Quick Navigation](#-quick-navigation)
 - [Kit Overview](#-kit-overview)
 - [Repository Structure](#-repository-structure)
@@ -48,18 +48,21 @@ Year I, Semester 2 | 2017–2030
 
 ---
 
-## 🆕 v6 Candidate Status
+## 🆕 v6.0.0 Release Scope
 
-This source candidate continues the audited v5.5.0 baseline. Phase 5 repaired source behaviour, explanations and derived materials. Phase 6 checked the delivered snapshot in a fresh workspace and corrected remaining recording-guide and grade-report regressions. It remains an unpublished 6.0.0-dev candidate. See [AUTHOR_DECISIONS.md](AUTHOR_DECISIONS.md) for unresolved choices and [VERIFICATION.md](VERIFICATION.md) for reproducible checks and their limits.
+ENos v6.0.0 consolidates the audited v5.5.0 baseline, the verified review snapshot at `d7aead32517115f2ca5e2f425f692b3f569d33a5` and the D1–D7 teaching profile adopted on 18 November 2026. The author has authorised its integration and stable publication. The [release page](https://github.com/antonioclim/ENos/releases/tag/v6.0.0) records the publication state and release commit. [AUTHOR_DECISIONS.md](AUTHOR_DECISIONS.md) records the adopted scope and deferred institutional decisions. [VERIFICATION.md](VERIFICATION.md) separates executed checks from historical evidence and target-environment acceptance.
 
-| Area | Candidate behaviour |
+| Area | v6.0.0 behaviour |
 | --- | --- |
-| HTML and teaching models | Corrected source logic with bounded synthetic regressions; native browser acceptance remains separate |
-| Recording | Explicit offline mode; format, authentication and institutional acceptance are separate statuses |
-| Evaluation | Missing or unadopted policy remains `PENDING_POLICY` / `MANUAL_REVIEW_REQUIRED`, with a null aggregate |
+| HTML and teaching models | Corrected source logic with bounded regressions; native browser acceptance remains separate |
+| Recording | Adopted local practice with explicit `--offline`; institutional submission remains deferred |
+| Evaluation | Descriptive component reports; `PENDING_POLICY` and a null final grade by default; supplied-policy calculations are unverified scenarios |
+| Question banks | Existing public banks are formative learning resources; no confidential examination bank or summative blueprint is implied |
 | Review heuristics | Style/similarity observations for human review; no authorship probability or automatic sanction |
-| Common utilities | Reconfigurable logging, replayable random seeds, actual link/anchor checks and scoped print injection |
-| Derived material | PNG, PDF and course ZIP generated from the corrected sources with hashes |
+| A03 digests | Coordinated SHA-256 reference and assessment contract; omitted CLI/network implementation remains student work |
+| M14 exercise | Synthetic local values, redacted previews and explicit private output with bounded cleanup; real-secret use and authenticated storage remain deferred |
+| Common utilities | Reconfigurable logging, replayable random seeds, scoped resource/link checks and print maintenance |
+| Derived material | Source-linked exports and generated assets are checked against their manifests; counts are not coverage percentages |
 
 ---
 
@@ -106,10 +109,10 @@ flowchart LR
 <!-- inventory:start -->
 | File category | Count |
 | --- | ---: |
-| Selected physical repository files | 1552 |
-| Markdown | 458 |
+| Selected physical repository files | 1560 |
+| Markdown | 461 |
 | HTML files, including exports and vendored support pages | 72 |
-| Python source files, including tests | 110 |
+| Python source files, including tests | 113 |
 | Shell files | 133 |
 | Generated lecture PNG diagrams | 39 |
 | SVG files | 26 |
@@ -133,8 +136,8 @@ ENos/
 ├── 📄 README.md                    # This comprehensive guide
 ├── 📄 README_ADDITIONS.md          # Historical draft pointer; not current instructions
 ├── 📄 NAVIGATION.md                # Quick navigation index
-├── 📄 LICENCE.md                   # Restrictive baseline terms; decision pending
-├── 📄 LICENSE                      # MIT baseline terms; decision pending
+├── 📄 LICENCE.md                   # Component licensing and retained notices
+├── 📄 LICENSE                      # MIT terms for eligible original code
 ├── 📄 pyproject.toml               # Python project configuration
 │
 ├── 📂 00_SUPPLEMENTARY/            # Exam prep, diagrams, references
@@ -982,7 +985,7 @@ The historic filename is retained for compatibility:
 python3 SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py --help
 ```
 
-It reports style features such as comments, vocabulary and formatting. Those features have multiple possible causes; the candidate does not turn them into a sanction.
+It reports style features such as comments, vocabulary and formatting. Those features have multiple possible causes; these tools do not turn them into a sanction.
 
 ---
 
@@ -1234,26 +1237,18 @@ The following baseline changelog claims are retained as history. They are not ne
 
 ### Summary
 
-**Pending author reconciliation.** The baseline `LICENSE` contains the MIT grant (copyright Revolvix), while `LICENCE.md` and the historical README state restrictive educational terms (Antonio Clim). The former Python metadata also declared MIT. These declarations do not identify one consistent grant. This candidate does not select a new licence. The table below reproduces the restrictive text for review; do not treat the conflict as resolved. See [the decision register](AUTHOR_DECISIONS.md).
+The author-approved scope is **MIT for identified original software and code examples**, and **CC BY 4.0 for identified original teaching prose and figures**, within the rights the author can grant. [LICENCE.md](LICENCE.md) explains the scope and [LICENCE_SCOPE.json](LICENCE_SCOPE.json) records component assignments and retained exceptions. Mixed HTML and Markdown distinguish their prose/figures from software examples and embedded code.
 
-| Permission | Status |
-|:-----------|:------:|
-| ✅ Personal study | Allowed |
-| ✅ Code execution for learning | Allowed |
-| ✅ Local modification for experimentation | Allowed |
-| ✅ Academic citation with attribution | Allowed |
-| ❌ Redistribution | **Prohibited** |
-| ❌ Derivative works for public use | **Prohibited** |
-| ❌ Commercial use | **Prohibited** |
+Existing attribution and third-party terms are retained. In particular, the existing CC BY-SA 4.0 package notice and SO ASE-CSIE Team attribution in `SEM02` are preserved; `SEM02/**` is excluded from the new grant pending a more precise rights boundary. Vendored and derived assets retain their applicable upstream terms. This revision does not claim to retract permissions previously granted.
 
 ### Attribution
 
-When citing these materials in academic works:
+To cite v6.0.0, use the following reference. When using another revision, identify its exact version, commit or source archive:
 
 ```
-Clim, A. (2026). ENos — Educational Kit for Operating Systems (v5.5.0; baseline commit d8fdd0507fe26e6bc1438a692da14afc2112464c).
+Clim, A. (2026). ENos — Educational Kit for Operating Systems (Version 6.0.0) [Computer software].
 Bucharest University of Economic Studies — CSIE.
-https://github.com/antonioclim/ENos
+https://github.com/antonioclim/ENos/releases/tag/v6.0.0
 ```
 
 ### BibTeX
@@ -1263,9 +1258,9 @@ https://github.com/antonioclim/ENos
   author       = {Clim, Antonio},
   title        = {{ENos}: Operating Systems — Complete Educational Kit},
   year         = {2026},
-  version      = {5.5.0},
+  version      = {6.0.0},
   institution  = {Bucharest University of Economic Studies},
-  howpublished = {\url{https://github.com/antonioclim/ENos}},
+  howpublished = {\url{https://github.com/antonioclim/ENos/releases/tag/v6.0.0}},
   note         = {English language version. Romanian version: ROso}
 }
 ```
@@ -1276,8 +1271,8 @@ See [LICENCE.md](./LICENCE.md) for complete terms.
 
 <div align="center">
 
-**Candidate updated:** 17 November 2026  
-**Version:** 6.0.0-dev (unpublished; baseline v5.5.0)  
+**Release source updated:** 18 November 2026\
+**Version:** 6.0.0 (adopted D1–D7 profile; preserved baseline v5.5.0)\
 **Target environments:** Ubuntu 24.04 LTS and the documented WSL2/VirtualBox routes. Full acceptance on those hosts remains to be recorded  
 **Feedback:** [GitHub Issues](https://github.com/antonioclim/ENos/issues)
 

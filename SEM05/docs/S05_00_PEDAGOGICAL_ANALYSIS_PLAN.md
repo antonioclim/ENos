@@ -91,52 +91,52 @@
 
 ### 2.1 Misconceptions about Functions
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M1.1 | "`return` returns strings" | 75% | `return "hello"` does not work; return is only 0-255 |
-| M1.2 | "Variables are local by default" | 80% | They are GLOBAL! Namespace pollution |
-| M1.3 | "`$1` in function is the script argument" | 65% | `$1` in function is the FUNCTION argument |
-| M1.4 | "`echo` in function is like `return`" | 50% | echo writes to stdout, return sets $? |
-| M1.5 | "Functions can be called before definition" | 60% | Error: function not found |
-| M1.6 | "Recursion is efficient in Bash" | 35% | It is very slow - subshell overhead |
-| M1.7 | "`local` can be used anywhere" | 45% | Only inside functions |
-| M1.8 | "Functions automatically return the last value" | 40% | They return the exit status of the last command |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M1.1 | "`return` returns strings" | `return "hello"` does not work; return is only 0-255 |
+| M1.2 | "Variables are local by default" | They are GLOBAL! Namespace pollution |
+| M1.3 | "`$1` in function is the script argument" | `$1` in function is the FUNCTION argument |
+| M1.4 | "`echo` in function is like `return`" | echo writes to stdout, return sets $? |
+| M1.5 | "Functions can be called before definition" | Error: function not found |
+| M1.6 | "Recursion is efficient in Bash" | It is very slow - subshell overhead |
+| M1.7 | "`local` can be used anywhere" | Only inside functions |
+| M1.8 | "Functions automatically return the last value" | They return the exit status of the last command |
 
 ### 2.2 Misconceptions about Arrays
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M2.1 | "Arrays start from 1" | 55% | They start from 0! `${arr[0]}` is the first |
-| M2.2 | "`declare -A` is optional for hash" | 70% | It is MANDATORY! Otherwise treated as indexed |
-| M2.3 | "`${arr[*]}` and `${arr[@]}` are identical" | 60% | They differ in quoting: `@` preserves elements |
-| M2.4 | "`unset arr` deletes an element" | 45% | It deletes the ENTIRE array! `unset arr[i]` for element |
-| M2.5 | "Arrays can contain other arrays" | 40% | Not in Bash! They are unidimensional |
-| M2.6 | "Elements are continuously re-indexed after unset" | 50% | No! The array becomes sparse |
-| M2.7 | "`arr=($(cmd))` is safe" | 55% | Word splitting! Use `mapfile` |
-| M2.8 | "`for i in ${arr[@]}` is correct" | 65% | Quotes are needed: `"${arr[@]}"` |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M2.1 | "Arrays start from 1" | They start from 0! `${arr[0]}` is the first |
+| M2.2 | "`declare -A` is optional for hash" | It is MANDATORY! Otherwise treated as indexed |
+| M2.3 | "`${arr[*]}` and `${arr[@]}` are identical" | They differ in quoting: `@` preserves elements |
+| M2.4 | "`unset arr` deletes an element" | It deletes the ENTIRE array! `unset arr[i]` for element |
+| M2.5 | "Arrays can contain other arrays" | Not in Bash! They are unidimensional |
+| M2.6 | "Elements are continuously re-indexed after unset" | No! The array becomes sparse |
+| M2.7 | "`arr=($(cmd))` is safe" | Word splitting! Use `mapfile` |
+| M2.8 | "`for i in ${arr[@]}` is correct" | Quotes are needed: `"${arr[@]}"` |
 
 ### 2.3 Misconceptions about Error Handling
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M3.1 | "`set -e` stops on ANY error" | 75% | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |
-| M3.2 | "`pipefail` is activated by default" | 50% | Must be explicitly activated with `set -o pipefail` |
-| M3.3 | "trap is inherited in subshells" | 45% | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |
-| M3.4 | "`$?` contains the last error from pipe" | 60% | Only from the last command (without pipefail) |
-| M3.5 | "`|| true` is equivalent to `set +e`" | 35% | Only for that specific command |
-| M3.6 | "`mktemp` never fails" | 40% | It can fail: full disk, permissions |
-| M3.7 | "trap EXIT executes only on success" | 55% | Runs on shell exit; not SIGKILL or machine failure |
-| M3.8 | "The order of traps does not matter" | 30% | It matters! The last one set wins |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M3.1 | "`set -e` stops on ANY error" | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |
+| M3.2 | "`pipefail` is activated by default" | Must be explicitly activated with `set -o pipefail` |
+| M3.3 | "trap is inherited in subshells" | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |
+| M3.4 | "`$?` contains the last error from pipe" | Only from the last command (without pipefail) |
+| M3.5 | "`|| true` is equivalent to `set +e`" | Only for that specific command |
+| M3.6 | "`mktemp` never fails" | It can fail: full disk, permissions |
+| M3.7 | "trap EXIT executes only on success" | Runs on shell exit; not SIGKILL or machine failure |
+| M3.8 | "The order of traps does not matter" | It matters! The last one set wins |
 
 ### 2.4 Misconceptions about Logging/Debug
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M4.1 | "`echo` is sufficient for logging" | 70% | Without timestamp, level, destination |
-| M4.2 | "`set -x` is only for development" | 45% | Can be useful in prod too (with condition) |
-| M4.3 | "`>&2` is only for errors" | 55% | For any diagnostic/logging |
-| M4.4 | "`tee` slows things down a lot" | 30% | Minimal overhead for logging |
-| M4.5 | "Debug info must be deleted before commit" | 50% | No! Keep with control variable |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M4.1 | "`echo` is sufficient for logging" | Without timestamp, level, destination |
+| M4.2 | "`set -x` is only for development" | Can be useful in prod too (with condition) |
+| M4.3 | "`>&2` is only for errors" | For any diagnostic/logging |
+| M4.4 | "`tee` slows things down a lot" | Minimal overhead for logging |
+| M4.5 | "Debug info must be deleted before commit" | No! Keep with control variable |
 
 ---
 

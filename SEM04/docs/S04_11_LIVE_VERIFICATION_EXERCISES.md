@@ -11,8 +11,8 @@
 Use a clear, bounded task and record the observed command, result and explanation.
 A model/tool may generate or execute code on new data; time pressure is not an
 authorship test. Nervousness, typing speed and a single failed response do not
-establish misconduct. The retained author anecdotes below have no accompanying
-cohort dataset and are not a validated detector.
+establish misconduct. Unsupported historical anecdotes are preserved in
+[the provenance record](../../DECISION_PROVENANCE.json).
 
 Every setup creates an independent owned attempt directory. Instructor answer
 files belong in a separate private directory and must not be projected or copied
@@ -20,8 +20,7 @@ with student fixtures. The public document itself offers no confidentiality; any
 private release strategy and grading/accommodation policy remain open author
 decisions, as recorded in [assessment status](../homework/ASSESSMENT_STATUS.md).
 
-> *Real talk: I saw a student last year who submitted perfect homework 
-> but could not run `grep -c` during lab. The conversation was... awkward.*
+
 
 ---
 

@@ -6,9 +6,40 @@
 
 ## Description
 
-Manager for configurations and environment variables: support for multiple environments (dev/staging/prod), secrets management, template rendering and configuration synchronisation between machines.
+Develop a configuration and environment-variable manager using synthetic local environments (dev/staging/prod). The supplied reference supports redacted previews and a disposable local configuration exercise. Real credentials, receiving services, remote synchronisation and an authenticated secret store are deferred extensions.
 
 ---
+
+## Adopted local teaching profile (D7)
+
+Use fictitious values only. Mark synthetic secret values with `DEMO_ONLY_`; this
+is an exercise convention, not a detector proving that arbitrary input is safe.
+Previews always redact values marked as secrets, even if
+`ALLOW_SECRET_OUTPUT=true` is inherited. Non-secret values must not contain
+credentials. Real deployment, authenticated storage and Windows ACL acceptance
+are outside this adopted profile.
+
+A plaintext exercise output requires an explicit `--workspace`, new
+`--output-dir` name and `--synthetic-demo` request. On POSIX, the workspace must
+already be owned by the exercising user with mode `0700`; the reference creates
+a fresh child directory `0700` and `service.conf` with mode `0600`. A local dummy
+receiver checks the exact bytes, after which the file and child directory are
+removed. Existing targets, links, unexpected ownership and non-private workspaces
+are refused. A handled error triggers cleanup; failure to confirm cleanup is
+reported as residual output for inspection, never as success.
+
+Keep the workspace outside version control and synchronised folders. The helper
+rejects version-control markers and common synchronisation locations; it cannot
+discover every background synchronisation configuration. The user must select
+local scratch storage. No secret value is passed in a child process argument or
+printed by output-mode reporting. The reference makes no secure-erasure, crash
+recovery or general absence-of-plaintext-from-memory guarantee. An unhandled
+process termination can leave output: inspect the named workspace before reuse.
+
+The [renderer reference](../reference/m14/render_local.py) implements this bounded
+exercise, not the complete student CLI or configuration manager. The grading
+percentages later in this document remain planning material under the
+[assessment contract](../ASSESSMENT_AND_EVIDENCE_CONTRACT.md).
 
 ## Learning Objectives
 
@@ -16,7 +47,7 @@ Manager for configurations and environment variables: support for multiple envir
 - Template rendering in Bash
 - Secrets management (encryption/decryption)
 - Configuration versioning and diff
-- Configuration deployment across multiple machines
+- Configuration deployment design and trust boundaries (deferred operational extension)
 
 ---
 
@@ -35,14 +66,15 @@ Manager for configurations and environment variables: support for multiple envir
    - Template validation
 
 3. **Secrets handling**
-   - Secrets encryption (GPG or openssl)
-   - Decryption at deploy time
-   - No plain text secrets storage
+   - A clearly labelled CBC round-trip using synthetic values only
+   - Redacted previews; explicit disposable plaintext for the local dummy receiver
+   - Fresh private output, exact-byte verification and cleanup
+   - Authenticated storage and real-service decryption remain deferred
 
 4. **Apply/Sync**
-   - Apply config on current machine
-   - Backup before modification
-   - Rollback on problems
+   - Apply only to the local dummy receiver in private scratch storage
+   - Refuse an existing output target; do not modify system configuration
+   - Clean up created output on success and handled failure
 
 5. **Diff and validation**
    - Comparison between environments
@@ -51,8 +83,8 @@ Manager for configurations and environment variables: support for multiple envir
 
 ### Optional (for full marks)
 
-6. **Remote sync** - Synchronisation on remote machines via SSH
-7. **Version control** - Git integration for history
+6. **Remote sync** - Deferred design extension requiring separately approved endpoints and trust
+7. **Version control** - Non-secret templates and source history only; exclude rendered outputs and secret stores
 8. **Hooks** - Pre/post apply hooks
 9. **Schema validation** - Type and value validation
 10. **UI** - Dashboard for configuration visualisation
@@ -60,6 +92,10 @@ Manager for configurations and environment variables: support for multiple envir
 ---
 
 ## CLI Interface
+
+This is the student CLI contract. The supplied renderer is invoked separately as
+shown below; it does not implement all these commands. Secret input must use a
+protected prompt or descriptor, never a command-line value.
 
 ```text
 ./envman.sh <command> [options]
@@ -69,31 +105,34 @@ Commands:
   env list              List available environments
   env create <n>     Create new environment
   env show <n>       Display environment variables
-  set <key> <value>     Set variable
+  set <key> <value>     Set a non-secret variable
   get <key>             Display variable value
   render <template>     Render template
-  apply [env]           Apply configurations
+  apply [env]           Exercise the local dummy receiver only
   diff <env1> <env2>    Compare two environments
   export <env>          Export as .env file
   secret encrypt <key>  Encrypt value
   secret decrypt <key>  Decrypt value
-  sync <target>         Synchronise to remote
+  sync <target>         Deferred real-service extension
 
 Options:
   -e, --env ENV         Target environment (default: development)
   -f, --file FILE       Configuration file
-  -o, --output FILE     Output file
+  --workspace DIR      Existing private local scratch directory (mode 0700)
+  --output-dir NAME    New disposable child directory for the dummy receiver
+  --synthetic-demo     Explicit acknowledgement of fictitious values only
   -d, --dry-run         Simulation without modifications
   -v, --verbose         Detailed output
   --no-backup           Don't create backup
-  --force               Force operation
+  --force               Never bypass secret-output or existing-target checks
 
 Examples:
   ./envman.sh env create production
-  ./envman.sh set -e production DATABASE_URL "postgres://..."
+  ./envman.sh set -e production DATABASE_HOST "db.example.invalid"
   ./envman.sh secret encrypt -e production API_KEY
-  ./envman.sh render nginx.conf.tmpl -o /etc/nginx/nginx.conf
-  ./envman.sh apply production
+  ./envman.sh render nginx.conf.tmpl                 # Redacted preview
+  ./envman.sh render app.env.tmpl --workspace "$M14_WORKSPACE" --output-dir run1 --synthetic-demo
+  ./envman.sh apply production                     # Local dummy receiver only
   ./envman.sh diff staging production
 ```
 
@@ -143,9 +182,9 @@ INHERITANCE
 
 FILES TO RENDER
 ───────────────────────────────────────────────────────────────────────────────
-  templates/nginx.conf.tmpl      → /etc/nginx/sites-available/myapp
-  templates/app.env.tmpl         → /opt/myapp/.env
-  templates/systemd.service.tmpl → /etc/systemd/system/myapp.service
+  templates/nginx.conf.tmpl      → private scratch / run1 / service.conf
+  templates/app.env.tmpl         → private scratch / run2 / service.conf
+  templates/systemd.service.tmpl → private scratch / run3 / service.conf
 ```
 
 ### Diff Between Environments
@@ -189,48 +228,29 @@ SUMMARY
 
 ### Template Rendering
 
+For a template containing `app=${APP}` and `secret=${TOKEN}`, the default preview
+with `APP=demo` and a marked synthetic token is:
+
+```text
+app=demo
+secret=<redacted>
 ```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                    TEMPLATE RENDERING                                        ║
-║                    Environment: production                                   ║
-╚══════════════════════════════════════════════════════════════════════════════╝
 
-Template: templates/nginx.conf.tmpl
-───────────────────────────────────────────────────────────────────────────────
-
-Variables used:
-  ✓ APP_URL              → https://myapp.example.com
-  ✓ APP_PORT             → 3000
-  ✓ SSL_CERT_PATH        → /etc/ssl/certs/myapp.crt
-  ✓ SSL_KEY_PATH         → /etc/ssl/private/myapp.key
-  ✓ UPSTREAM_SERVERS     → 10.0.0.1:3000,10.0.0.2:3000
-
-Preview (first 20 lines):
-───────────────────────────────────────────────────────────────────────────────
-  upstream myapp {
-      server 10.0.0.1:3000;
-      server 10.0.0.2:3000;
-  }
-  
-  server {
-      listen 443 ssl http2;
-      server_name myapp.example.com;
-      
-      ssl_certificate /etc/ssl/certs/myapp.crt;
-      ssl_certificate_key /etc/ssl/private/myapp.key;
-      
-      location / {
-          proxy_pass http://myapp;
-      }
-  }
-
-Output: /etc/nginx/sites-available/myapp
-Action: Write file? [y/N]
-```
+An explicit local output request creates `service.conf` in a fresh private
+exercise directory. The dummy receiver compares its exact bytes and the helper
+then removes that file and directory. The JSON report contains
+`status: VERIFIED_LOCAL_SYNTHETIC`, the byte count and `output_removed: true`.
+It never prints the unredacted configuration. No `/etc` or service path is a
+valid deployment target under this profile.
 
 ---
 
 ## Configuration File Structure
+
+The following is a logical layout for fictitious exercise data. Keep runtime
+`CONFIG_DIR` and rendered outputs in private local scratch storage, outside the
+source repository and synchronised folders. Environment names such as
+`production` are labels in this exercise, not connections to real services.
 
 ```
 config/
@@ -361,56 +381,59 @@ load_env_file() {
 
 ### Template rendering
 
+Set `M14_RENDERER` to the supplied `04_PROJECTS/reference/m14/render_local.py`.
+The NUL-delimited input protocol carries keys, values and secret markers through
+standard input. Only single-line UTF-8 values are supported; duplicate keys and
+malformed input are rejected. Substitution is one pass: substituted values are
+not evaluated as shell code or expanded again.
+
 ```bash
 render_template() {
-    local template="$1" output="${2:-}" key
-    # NUL transport to the renderer keeps secrets out of process argv and temp map files.
-    for key in "${!ENV_VARS[@]}"; do printf '%s\0%s\0%s\0' "$key" "${ENV_VARS[$key]}" "${SECRET_KEYS[$key]:-0}"; done |
-    python3 -c '
-import os,re,sys,tempfile
-from pathlib import Path
-raw=sys.stdin.buffer.read().split(b"\0"); raw.pop()
-if len(raw)%3: raise SystemExit("Invalid variable transport")
-values={raw[i].decode():raw[i+1].decode() for i in range(0,len(raw),3)}
-secrets={raw[i].decode() for i in range(0,len(raw),3) if raw[i+2]==b"1"}
-text=Path(sys.argv[1]).read_text(); output=sys.argv[2]; allow=sys.argv[3]=="true"
-pattern=re.compile(r"\$\$|\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)")
-missing=set(); used_secrets=set()
-def replace(match):
-    if match[0]=="$$": return "$"
-    key=match[1] or match[2]
-    if key not in values: missing.add(key); return match[0]
-    if key in secrets:
-        used_secrets.add(key)
-        if not allow: return "<redacted>"
-    return values[key]
-rendered=pattern.sub(replace,text)  # Single pass; values are never re-interpreted.
-if missing: raise SystemExit("Unresolved variables: "+", ".join(sorted(missing)))
-if output and used_secrets and not allow: raise SystemExit("Secret-bearing output requires an explicit plaintext-output policy")
-if not output: print(rendered,end=""); raise SystemExit(0)
-target=Path(output)
-if target.is_symlink(): raise SystemExit("Refusing a symlink output")
-fd,name=tempfile.mkstemp(prefix=target.name+".partial.",dir=target.parent)
-try:
-    with os.fdopen(fd,"w") as stream: stream.write(rendered); stream.flush(); os.fsync(stream.fileno())
-    os.replace(name,target)
-finally:
-    if os.path.exists(name): os.unlink(name)
-' "$template" "$output" "${ALLOW_SECRET_OUTPUT:-false}"
+    local template="$1" key
+    shift
+    [[ -n ${M14_RENDERER:-} && -f $M14_RENDERER && ! -L $M14_RENDERER ]] || {
+        printf 'Set M14_RENDERER to the supplied renderer reference\n' >&2
+        return 2
+    }
+    for key in "${!ENV_VARS[@]}"; do
+        printf '%s\0%s\0%s\0' "$key" "${ENV_VARS[$key]}" "${SECRET_KEYS[$key]:-0}"
+    done | python3 "$M14_RENDERER" "$template" "$@"
 }
 ```
+
+From the repository root, a local exercise uses:
+
+```bash
+M14_RENDERER="$PWD/04_PROJECTS/reference/m14/render_local.py"
+M14_WORKSPACE=$(mktemp -d "${TMPDIR:-/tmp}/enos-m14.XXXXXXXX") || exit 1
+chmod 700 "$M14_WORKSPACE" || exit 1
+# Load only the fictitious exercise variables into ENV_VARS and SECRET_KEYS.
+render_template app.env.tmpl                              # Always redacted
+render_template app.env.tmpl --workspace "$M14_WORKSPACE" \
+    --output-dir run1 --synthetic-demo
+# A successful report confirms dummy-receiver bytes and output removal.
+# Stop and inspect any failure; do not recursively delete unexpected contents.
+rmdir -- "$M14_WORKSPACE"
+```
+
+`ALLOW_SECRET_OUTPUT` has no effect on this reference. An output request cannot
+turn a later preview into an unredacted view. Reports contain status and byte
+count, not the secret values. Output mode is refused on systems without the
+required POSIX directory operations; Windows ACL behaviour is not inferred.
 
 ### Secrets encryption with OpenSSL
 
 ```bash
 encrypt_value() {
     local value="$1"
+    [[ ${ENVMAN_SYNTHETIC_DEMO:-false} == true && $value == DEMO_ONLY_* ]] || return 2
     [[ "$value" != *$'\n'* && "$ENVMAN_PASSWORD" != *$'\n'* ]] || return 2
     printf '%s' "$value" | openssl enc -aes-256-cbc -pbkdf2 -base64 -A \
         -pass fd:3 3<<< "$ENVMAN_PASSWORD"
 }
 
 decrypt_value() {
+    [[ ${ENVMAN_SYNTHETIC_DEMO:-false} == true ]] || return 2
     printf '%s' "$1" | openssl enc -aes-256-cbc -pbkdf2 -d -base64 -A \
         -pass fd:3 3<<< "$ENVMAN_PASSWORD"
 }
@@ -450,15 +473,22 @@ load_secrets() {
 }
 ```
 
-This CBC example provides confidentiality, not authenticated tamper detection.
-It accepts single-line text secrets; NUL/multiline values require a structured
-binary-safe format. Use a protected prompt/descriptor for the password, do not
-export it or enable shell tracing. The project must choose authenticated storage
-if tamper detection is required. Rendering secrets into service configuration
-creates plaintext output: the tension with “no plain text secrets storage” remains
-an explicit author decision. Default previews redact; `ALLOW_SECRET_OUTPUT=true`
-is an explicit caller choice, not a policy selected by the kit. Such output needs
-permissions/lifecycle/backup rules before operational use.
+This explicitly non-authenticated CBC example is limited to synthetic values.
+Set `ENVMAN_SYNTHETIC_DEMO=true` only for this exercise and obtain a fictitious
+password through a protected prompt or descriptor. Do not export the password,
+pass it in process arguments or enable shell tracing. The example accepts
+single-line values; NUL/multiline support requires a separately specified format.
+Place `CONFIG_DIR` and any encrypted exercise store in private, local scratch
+storage outside version control and synchronised folders. These storage snippets
+are teaching fragments, not an accepted authenticated storage backend.
+
+CBC does not authenticate changes to stored data. `openssl enc` does not support
+GCM/CCM modes; an authenticated backend cannot be obtained merely by replacing
+its CBC option. Real credentials, authenticated envelopes, key custody and
+service reload/retention require a separate design, implementation and tests.
+The local renderer's disposable plaintext lifecycle above is the adopted D7
+exercise; the former blanket promise of no plaintext storage is replaced by
+that concrete, testable contract.
 
 ### Diff between environments
 
@@ -514,7 +544,7 @@ diff_environments() {
 |-----------|--------|-------------|
 | Environment management | 20% | Multi-env, inheritance |
 | Template rendering | 20% | Variables, validation |
-| Secrets management | 20% | Encrypt/decrypt, secure |
+| Secrets management | 20% | Synthetic round-trip, redacted previews and the adopted local output lifecycle |
 | Apply/sync | 15% | Local apply, backup |
 | Diff & validation | 10% | Compare, detect missing |
 | Remote sync | 5% | SSH sync |
@@ -533,3 +563,11 @@ diff_environments() {
 ---
 
 *MEDIUM Project | Operating Systems | ASE-CSIE*
+
+### Primary sources for the adopted boundary
+
+- OpenSSL Project. (n.d.). *openssl-enc*. https://docs.openssl.org/master/man1/openssl-enc/
+- Dworkin, M. (2007). *Recommendation for block cipher modes of operation: Galois/Counter Mode (GCM) and GMAC* (NIST SP 800-38D). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-38D
+
+These sources distinguish confidentiality from authenticated encryption. They do
+not certify this exercise or prescribe an institutional deployment policy.

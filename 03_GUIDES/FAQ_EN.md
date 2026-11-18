@@ -1,6 +1,9 @@
 # ❓ FAQ - Frequently Asked Questions
 
-> **v6 candidate correction:** Follow the [current recording contract](RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+**Adopted local profile:** use `--offline` for practice. Online/network instructions in this document are conditional technical reference; institutional submission remains deferred until its service contract and native acceptance are complete.
+
+
+> **v6.0.0 recording scope:** Follow the [current recording contract](RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
 
 ## Homework Recording System - Operating Systems 2023-2027
 
@@ -27,8 +30,7 @@
 
 **A:** Asciicast v2 records its associated pseudoterminal stream and timing. Ordinary text recording does not capture unrelated sessions or ambient audio. Use your own configured lab environment so that commands and files belong to the intended exercise; the metadata labels do not authenticate the user.
 
-> **Historical anecdote — capture context and provenance unconfirmed. Standard asciicast does not record audio or unrelated sessions.**
-> *A former student once ran the script on the shared server. The resulting 47-minute recording included three other students' work, a coffee break conversation and someone's Spotify playlist playing in the background. Don't be that student.*
+Use a terminal in your own practice environment and keep unrelated activity out of the recorded session. Standard asciicast records terminal events; it does not capture audio.
 
 ---
 
@@ -218,7 +220,7 @@ If it is too short, delete it and start again.
 **A:** Technically unlimited, but:
 - Recommendation: 5-30 minutes
 - Very large files (>100MB) may be difficult to upload
-- The instructor will not watch hours of recording
+- Keep the recording focused so the relevant work is easy to review
 
 Keep it focused on the homework tasks.
 
@@ -226,7 +228,7 @@ Keep it focused on the homework tasks.
 
 ## Upload and Network
 
-### Q: Why does it use port 1001 and not 22?
+### Q: Which port would an authorised online service use?
 
 **A:** The historical copies disagree on 1001/1002; no current service configuration or reason for the port choice is verified. Obtain the confirmed port from the instructor.
 
@@ -248,7 +250,7 @@ If nothing works, send manually later with the displayed command.
 
 **A:** Yes:
 ```bash
-scp -P "$ENOS_CONFIRMED_PORT" FILENAME.cast stud-id@sop.ase.ro:/home/HOMEWORKS/SPECIALISATION/
+scp -o StrictHostKeyChecking=yes -P "$ENOS_CONFIRMED_PORT" FILENAME.cast stud-id@sop.ase.ro:/home/HOMEWORKS/SPECIALISATION/
 ```
 Replace FILENAME and SPECIALISATION with your values.
 

@@ -6,12 +6,14 @@
 #include <unistd.h>
 #include <errno.h>
 
-/* MD5 is retained solely as the existing teaching-format digest. It is not
- * authentication. The SHA-256 assessment mismatch awaits an author decision. */
+/* Version 2 uses SHA-256 for file and block digests. A digest does not
+ * authenticate a peer or establish authorship. */
 int hash_block(const unsigned char *data, size_t len, unsigned char *hash) {
     unsigned int written = 0;
+    unsigned char result[HASH_SIZE];
     if ((!data && len) || !hash) { errno = EINVAL; return -1; }
-    if (EVP_Digest(data, len, hash, &written, EVP_md5(), NULL) != 1 || written != HASH_SIZE) return -1;
+    if (EVP_Digest(data, len, result, &written, EVP_sha256(), NULL) != 1 || written != HASH_SIZE) return -1;
+    memcpy(hash, result, HASH_SIZE); /* Publish only a complete digest. */
     return 0;
 }
 
@@ -23,7 +25,7 @@ int hash_file(const char *path, FileChecksum *checksum) {
     struct stat before, after;
     FileChecksum result = {0};
     int rc = -1;
-    if (!ctx || fstat(fileno(f), &before) < 0 || !S_ISREG(before.st_mode) || EVP_DigestInit_ex(ctx, EVP_md5(), NULL) != 1) goto done;
+    if (!ctx || fstat(fileno(f), &before) < 0 || !S_ISREG(before.st_mode) || EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) != 1) goto done;
     unsigned char buffer[BLOCK_SIZE];
     size_t count;
     while ((count = fread(buffer, 1, sizeof buffer, f)) > 0) {

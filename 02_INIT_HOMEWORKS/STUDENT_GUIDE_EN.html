@@ -681,15 +681,10 @@ python -m pip install rich questionary
 python record_homework_tui_EN.py --offline</code></pre>
 <p>Keep that environment active for the run. System commands such as asciinema are separate prerequisites. Online mode additionally requires the confirmed port and the unresolved institutional contract; a practice group number does not disable networking.</p>
 </section>
-<div class="alert alert-warning"><p><strong>v6 candidate:</strong> Use <code>--offline</code> for practice. See the <a href="../03_GUIDES/RECORDING_CONTRACT.md">current recording contract</a>. The service port, replacement protocol and assessment policy remain unresolved.</p></div>
-<section aria-labelledby="enos-online-confirmation-title">
-<h2 id="enos-online-confirmation-title">Before an authorised online run</h2>
-<p>Obtain the host, account, port and host-key fingerprint from the service owner through a trusted channel. The supplied clients target <code>sop.ase.ro</code>; a different confirmed destination requires the client configuration to be reconciled first. Install only the verified <code>known_hosts</code> entry. The clients use <code>StrictHostKeyChecking=yes</code>.</p>
-<p>After the configuration and use of the existing workflow have been confirmed, use the current client interface:</p>
-<pre><code>read -r -p 'SSH port confirmed by the service owner: ' ENOS_CONFIRMED_PORT
-python record_homework_tui_EN.py --port "$ENOS_CONFIRMED_PORT"</code></pre>
-<p>The Bash alternative is <code>bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"</code>. Neither historical port is selected here. If host-key verification fails, retain the local recording, confirm the fingerprint independently with the service owner and correct only the specifically verified entry. Do not disable checking or delete entries merely to suppress a warning. Use <code>--offline</code> for local practice while configuration remains unresolved.</p>
-</section>
+<div class="alert alert-warning"><p><strong>Adopted local practice:</strong> Use <code>--offline</code> for practice. See the <a href="../03_GUIDES/RECORDING_CONTRACT.md">current recording contract</a>. Institutional submission and official assessment remain deferred. Online material is conditional technical reference until its service contract and native acceptance are completed.</p></div>
+<section aria-labelledby="enos-local-practice-title"><h2 id="enos-local-practice-title">Local recording practice</h2><pre><code>python record_homework_tui_EN.py --offline
+# Bash alternative:
+bash record_homework_EN.sh --offline</code></pre><p>Retain the recording and check its structure. The <a href="../03_GUIDES/RECORDING_CONTRACT.md">recording contract</a> separates local structure, identity and submission readiness. Institutional submission remains deferred.</p></section>
         <!-- Section position, not completion evidence -->
 <p>The navigation below shows your reading position. Scrolling does not mark work complete.</p>
         <div class="progress-tracker">
@@ -721,7 +716,7 @@ python record_homework_tui_EN.py --port "$ENOS_CONFIRMED_PORT"</code></pre>
                     <div>
                         <strong>WARNING!</strong> Use YOUR OWN terminal, installed and configured as your instructor has directed!<br><br>
                         <strong>DO NOT connect to sop.ase.ro!</strong><br><br>
-                        ⚠️ Errors caused by not following this instruction are your responsibility, and homework that is not posted and generated from your personal server will NOT be considered!
+                        Use your own local practice environment. Submission eligibility is governed by the separately approved course policy, which is not selected by this guide.
                     </div>
                 </div>
             </div>

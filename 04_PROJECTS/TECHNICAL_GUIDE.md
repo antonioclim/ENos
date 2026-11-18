@@ -274,7 +274,7 @@ debug: ## Run main script with debug
 # AUTHOR: Name Surname
 # VERSION: 1.0.0
 # DATE: 2025-01-20
-# LICENCE: Educational use - ASE CSIE OS
+# LICENCE: MIT for this original ENos template; record terms for your own additions
 #===============================================================================
 
 set -euo pipefail

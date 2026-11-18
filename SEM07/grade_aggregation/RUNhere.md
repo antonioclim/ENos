@@ -1,5 +1,8 @@
 # Component aggregation and explicit policy
 
+The author has adopted descriptive component review. Official grading remains deferred. An explicitly supplied policy is an unverified scenario, not an institutional approval. Historical numerical policies are retained separately in [GRADING_POLICY_HISTORY.md](GRADING_POLICY_HISTORY.md).
+
+
 `final_grade_calculator_EN.py` validates three CSV inputs and writes CSV, JSON and Markdown using an output **prefix**. Without `--policy`, final grades remain blank/null and reports say `PENDING_POLICY`. A reviewed zero remains zero; missing evidence is not silently replaced by zero.
 
 ```bash

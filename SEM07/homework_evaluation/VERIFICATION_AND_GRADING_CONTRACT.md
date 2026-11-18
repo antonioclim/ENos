@@ -1,5 +1,8 @@
 # Local verification and assessment review contract
 
+The author has adopted local recording practice and descriptive component review. Institutional submission and official assessment remain deferred. Unsupported authentication or a missing/incompatible legacy token remains an explicit review state; it does not adopt a zero score, penalty or eligibility rule.
+
+
 ## What the corrected tools establish
 
 `bash verify_homework_EN.sh [options] submissions/` preserves `-o`, `-k`, `-q`,

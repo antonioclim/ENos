@@ -1,6 +1,6 @@
 # S05_01 — Homework: Advanced Bash Scripting
 
-> **Author decision pending:** The assessment rules below are retained proposals. They conflict across the brief, rubric and oral guide, so no combined final-grade formula, penalty order, remote-proctoring rule or integrity inference is enacted. See [the exact alternatives, consequences and recommendation](../docs/TEACHING_CONTRACT.md). Technical exercises remain usable. Historical success rates and classroom claims are not independently verified.
+> **Author decision pending:** The assessment rules below are retained proposals. They conflict across the brief, rubric and oral guide, so no combined final-grade formula, penalty order, remote-proctoring rule or integrity inference is enacted. See [the exact alternatives, consequences and recommendation](../docs/TEACHING_CONTRACT.md). Technical exercises remain usable. Removed historical success rates and classroom claims are retained in [the provenance record](../../DECISION_PROVENANCE.json).
 
 
 > **Operating Systems** | ASE Bucharest — CSIE  
@@ -279,24 +279,22 @@ for f in "${files[@]}"; do
 
 ---
 
-## 🚫 Common Mistakes from Previous Years
+## 🚫 Mistakes to check before submission
 
-*These are real mistakes from 2023-2024 submissions — learn from them!*
+Use this checklist to review the implementation.
 
-| Mistake | Frequency | How to Avoid |
-|---------|-----------|--------------|
-| Missing `declare -A` for hash | 67% | **Always** declare before using `arr[string_key]` |
-| Unquoted `${arr[@]}` in loops | 58% | Muscle memory: always type the quotes |
-| Global variables in functions | 52% | Start every function with `local` declarations |
-| No argument validation | 45% | First thing in `main()`: check `$#` |
-| `cat file \| grep` pattern | 41% | Use `grep pattern file` or `grep pattern < file` |
-| Missing cleanup trap | 38% | Add `trap cleanup EXIT` right after `set -euo` |
-| `$*` instead of `"$@"` | 31% | Only use `$*` if you specifically want joined string |
-| Hardcoded paths | 28% | Use variables: `CONFIG_FILE="${1:-default.conf}"` |
-| No `--help` option | 25% | Every script should have `-h\|--help` |
-| Romanian variable names | 23% | Keep it professional: English only |
-
-> *The `declare -A` one still haunts me. Every year, at least half the class forgets it, and their "associative array" silently becomes an indexed array with weird numeric keys.*
+| Mistake | How to Avoid |
+|---------|--------------|
+| Missing `declare -A` for hash | **Always** declare before using `arr[string_key]` |
+| Unquoted `${arr[@]}` in loops | Muscle memory: always type the quotes |
+| Global variables in functions | Start every function with `local` declarations |
+| No argument validation | First thing in `main()`: check `$#` |
+| `cat file \| grep` pattern | Use `grep pattern file` or `grep pattern < file` |
+| Missing cleanup trap | Add `trap cleanup EXIT` right after `set -euo` |
+| `$*` instead of `"$@"` | Only use `$*` if you specifically want joined string |
+| Hardcoded paths | Use variables: `CONFIG_FILE="${1:-default.conf}"` |
+| No `--help` option | Every script should have `-h\|--help` |
+| Romanian variable names | Keep it professional: English only |
 
 ---
 

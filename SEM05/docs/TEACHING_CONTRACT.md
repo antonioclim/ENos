@@ -27,7 +27,7 @@ The exact wording and placement of any institutional integrity/AI declaration al
 
 The instructor guide describes 100 teaching minutes plus a 10-minute break. The historical plan extends to 120 elapsed minutes; the traceability table retains a separate 100-minute proposal including a break. Select the real session duration and activity subset before teaching. These alternatives are not merged by shortening activities silently.
 
-Historical misconception percentages, claimed classroom incidents, success rates and activity distributions have no established underlying dataset in the transferred materials. They remain visibly labelled as historical/unverified. To retain them as empirical claims, supply collection dates, cohort/denominator, instruments, coding, exclusions and calculations. Alternatively, relabel them as planning estimates. The latter is suitable for lesson planning but not a retrospective study result.
+The author has adopted an evidence rule for teaching claims. Unsupported historical misconception percentages, classroom incidents, success rates and activity distributions are retained exactly in the [provenance record](../../DECISION_PROVENANCE.json) and removed from active empirical assertions. A measured result requires collection dates, a cohort or workload, instruments, coding, exclusions and calculations. A new hypothetical example requires explicit assumptions and a reproducible derivation; relabelling an unsupported result as an estimate is insufficient. Verified examples, unfavourable observations and computed source counts are preserved.
 
 The LO matrix is a topic-to-activity map, not measured attainment. Parsons problems embedded in that matrix use `TP1`–`TP5`; the canonical problem set uses `P1`–`P14`. Reference counts and labels should be derived from the current files.
 
@@ -37,4 +37,4 @@ Brown and Wilson's Tip 10 supports using varied, smaller learning tasks, includi
 
 SVG diagrams have intrinsic English titles/descriptions and labelled image roles. Hosts still need appropriate alternative text and readable surrounding explanations. Native SVG export and text contrast checks do not establish keyboard, screen-reader or browser acceptance of a host page. Local shell/Python regressions use synthetic fixtures; they do not certify production operation or institutional acceptance.
 
-Licence and authorship statements are preserved pending the repository-level author decision. No licence, signing protocol, privacy policy or final grading scheme is selected by this document.
+Existing attribution is preserved. Approved D1 grants cover eligible original code (MIT) and original teaching prose/figures (CC BY 4.0), subject to [the component policy](../../LICENCE.md). Retained package and third-party terms remain applicable. This document does not adopt an institutional signing protocol, privacy policy or official grading scheme.

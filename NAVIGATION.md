@@ -3,7 +3,7 @@
 > **Quick reference for finding materials in this kit**  
 > **Course:** Operating Systems | ASE Bucharest — CSIE  
 > **Author:** ing. dr. Antonio Clim  
-> **Candidate updated:** 17 November 2026 — baseline v5.5.0; target v6.0.0 unpublished
+> **Source version:** v6.0.0 · 18 November 2026 · preserved baseline v5.5.0; [release scope](RELEASE_NOTES_v6.0.0.md)
 
 ---
 
@@ -221,7 +221,7 @@ grep -rn "find.*-exec" --include="*.md" .
 - **Author:** ing. dr. Antonio Clim
 - **Institution:** ASE Bucharest — Faculty of Cybernetics, Statistics and Economic Informatics
 - **Course:** Operating Systems (Sisteme de Operare)
-- **Licence:** baseline declarations conflict; author reconciliation remains pending
+- **Licence:** original code MIT and original teaching prose/figures CC BY 4.0, within the approved [component scope](LICENCE.md); retained SEM02 and third-party notices remain applicable
 
 ---
 

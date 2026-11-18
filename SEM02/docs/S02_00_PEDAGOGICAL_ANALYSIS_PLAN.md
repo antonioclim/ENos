@@ -32,43 +32,33 @@ S01 (Shell Basics) ──────► S02 (Pipes & Loops) ──────�
 
 This seminar bridges "I can navigate" and "I can automate". It represents a cognitive leap that some students make naturally whilst others require explicit scaffolding - hence the variety of pedagogical methods we employ.
 
-### A confession from the early years
+### Demonstrations to prepare
 
-I'll be honest: in my first iteration of this seminar, I rushed through loops to "cover everything". It was a disaster — half the class submitted scripts with `{1..$n}` bugs because I'd glossed over why it doesn't work. Now I deliberately build in a 5-minute buffer for loops and tell students upfront: "This is where most assignments fail. Pay attention."
-
-The other lesson learned: never demo `cat | while read` without immediately showing why variables disappear. I've seen students lose hours debugging this.
+Explain why `{1..$n}` does not expand a variable endpoint, then compare a C-style loop. When demonstrating `cat | while read`, show the subshell behaviour and compare input redirection.
 
 ---
 
 ## 2. Target Audience Analysis
 
-### Typical Profile (Year 1, Semester 2, CSIE)
+### Prerequisites and preparation
 
-These observations derive from start-of-semester questionnaires and informal discussions:
+Check Linux familiarity and programming prerequisites before teaching. Confirm the available contact time and assignment workload for the class; this document supplies no verified cohort profile.
 
-| Characteristic | Practical Observation |
-|----------------|----------------------|
-| Linux experience | Minimal to none; 90% have used Windows exclusively, a few macOS |
-| Programming background | C algorithms from semester 1; some have Python from secondary school |
-| Initial motivation | Variable; increases visibly when they see immediate practical applicability |
-| Time availability | Limited (many have 6+ courses); assignments must be feasible in 2-3 hours |
-| Learning style | Prefer hands-on; pure theory loses them after approximately 15 minutes |
+### Misconceptions to address
 
-### Frequent Misconceptions (collected from quizzes and examinations)
-
-These are the perennial "hits" appearing year after year:
+Use the following statements to prompt explanation and executable checks.
 
 1. **"The pipe transmits files between commands"**  
    No, it transmits a byte stream. The file itself does not "travel" anywhere.
 
 2. **"2>&1 means stderr becomes stdout"**  
-   Partially correct, but order matters enormously - roughly 60% of students get this wrong.
+   Descriptor duplication is order-sensitive. Compare the results of the redirection sequences.
 
 3. **"for i in {1..$n} works"**  
    It does not, because brace expansion occurs BEFORE variable expansion. Classic trap.
 
 4. **"cat file | while read line" is equivalent to "while read line < file"**  
-   It is not. The former creates a subshell; variables do not persist. I have witnessed hours lost debugging this.
+   It is not equivalent under the default Bash pipeline behaviour. Demonstrate which shell retains each variable assignment.
 
 5. **"exit 0 means error"**  
    The opposite. Unix convention is counterintuitive for those coming from other paradigms.
@@ -116,7 +106,7 @@ For advanced students and the final project:
 
 ### The "Sandwich" Approach (theory-practice-theory)
 
-I have experimented with various structures over the years. The following works best for our target cohort:
+The following sequence is a teaching plan; its effectiveness has not been established by a cohort comparison.
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════════╗

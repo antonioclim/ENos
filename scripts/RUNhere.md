@@ -1,6 +1,6 @@
 # ENos repository utilities
 
-Author: ing. dr. Antonio Clim · ENos v6 candidate, based on v5.5.0.
+Author: ing. dr. Antonio Clim · ENos v6.0.0, preserving the v5.5.0 baseline.
 
 Run these examples from the repository root. Python tools use the selected Python environment. The link checker requires `markdown-it-py` (also listed in the development dependencies); the print synchroniser and inventory use only the Python standard library.
 

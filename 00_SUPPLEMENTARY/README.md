@@ -1,7 +1,7 @@
 # Supplementary Materials — Exam Preparation
 
 > Operating Systems | ASE Bucharest — CSIE  
-> ENos 6.0.0-dev correction candidate | 17 November 2026  
+> ENos 6.0.0 | 18 November 2026\
 > Author: ing. dr. Antonio Clim
 
 ## Purpose
@@ -58,4 +58,4 @@ The Coffman conditions are mutual exclusion, hold and wait, no pre-emption and c
 
 ## Support
 
-Use the current course Moodle announcements and published office hours. No new schedule, eligibility condition or institutional policy is established by this correction candidate.
+Use the current course Moodle announcements and published office hours. No new schedule, eligibility condition or institutional policy is established by this release.

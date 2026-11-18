@@ -1,5 +1,9 @@
 # Detailed Test Specifications - MEDIUM Projects (M01-M15)
 
+The D7 local synthetic M14 profile is now adopted and implemented by its bounded
+renderer reference. Its acceptance fixtures are listed below. This does not
+adopt the historical grading weights or an operational secret-storage backend.
+
 ## Status and executable boundary (Phase 5 correction)
 
 These are **author proposals**, not an adopted grading system or a measured
@@ -774,17 +778,31 @@ m13_log_aggregator:
   - Parsing non-standard log formats
   - Quality of correlations
 m14_environment_config_manager:
+  adopted_profile: local_synthetic_exercise_D7
+  local_reference: 04_PROJECTS/reference/m14/render_local.py
+  regression_module: 04_PROJECTS/tests/test_m14_lifecycle.py
   key_tests:
   - load_environment_with_inheritance
   - template_variable_substitution
-  - encrypt_secret
-  - decrypt_secret
+  - redacted_preview_even_with_inherited_ALLOW_SECRET_OUTPUT
+  - explicit_synthetic_output_in_fresh_owned_POSIX_0700_directory_and_0600_file
+  - exact_dummy_receiver_bytes_and_cleanup_after_success_or_handled_failure
+  - reject_existing_targets_symlinks_wrong_ownership_and_nonprivate_workspace
+  - synthetic_CBC_round_trip_without_authentication_claim
   - diff_environments
   - validate_required_vars
-  docker_requirements:
-  - OpenSSL
+  local_requirements:
+  - Python 3.10 or later
+  - POSIX descriptor-relative file operations for output lifecycle
+  - Bash and OpenSSL for the separate illustrative CBC fragment
+  explicitly_deferred:
+  - Real credentials and real service acceptance
+  - Authenticated secret storage and migration
+  - Windows ACL acceptance
+  - Binary or multiline secret transport
+  - Secure erasure and crash recovery guarantees
   hard_to_automate:
-  - Security of encryption implementation
+  - Independent security review of any future operational backend
   - Business logic validation in config
 m15_parallel_execution_engine:
   key_tests:
@@ -827,3 +845,26 @@ m15_parallel_execution_engine:
 | **M15** | Race conditions | 5% | Non-deterministic |
 
 **Total not automatically evaluable for MEDIUM: ~10-20% per project**
+
+
+## M14 adopted local lifecycle: exact fixture boundary
+
+The D7 local reference accepts NUL-delimited UTF-8 key/value/secret-marker triples
+on standard input. Tests use a unique `DEMO_ONLY_` canary and assert that previews,
+stdout/stderr reports and child process arguments never contain that canary.
+Output requires explicit synthetic-demo mode and a new simple directory name
+under an existing private owned workspace. The local dummy receiver checks exact
+bytes while POSIX ownership and `0700`/`0600` modes are inspected; cleanup is then
+verified. Existing names, links, incorrect ownership/modes, missing variables,
+malformed transport, write/fsync failures and receiver failure are separate cases.
+A cleanup failure must report residual output rather than success.
+
+Run the owned fixtures with:
+
+```bash
+python3 -m unittest discover -s 04_PROJECTS/tests -p test_m14_lifecycle.py -v
+```
+
+These tests do not establish Windows ACL behaviour, real service operation,
+authenticated encryption or a formal grading policy. The documented CBC fragment
+is a separate synthetic teaching example, not a tamper-detecting backend.

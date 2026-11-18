@@ -5,7 +5,7 @@
 Use a unique local password that you can retain securely. Never configure the shared historical example password `stud` on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.
 
 > **Operating Systems** | ASE Bucharest - CSIE | Course schedule: use the current institutional announcement  
-> **Version:** ENos 6.0.0-dev candidate | **Last corrected:** 17 November 2026  
+> **Version:** ENos 6.0.0 | **Release metadata updated:** 18 November 2026\
 > **Author:** ing. dr. Antonio Clim
 
 ---
@@ -80,7 +80,7 @@ If the guides do not solve your problem:
 
 ## Virtualisation PDF source and build
 
-[TC0_Lab0C_Virtualisation_ENv2.md](TC0_Lab0C_Virtualisation_ENv2.md) is the editable source for [TC0_Lab0C_Virtualisation_ENv2.pdf](TC0_Lab0C_Virtualisation_ENv2.pdf). The historical filename is retained for continuity; the document states its correction-candidate status. Rebuild from the repository root:
+[TC0_Lab0C_Virtualisation_ENv2.md](TC0_Lab0C_Virtualisation_ENv2.md) is the editable source for [TC0_Lab0C_Virtualisation_ENv2.pdf](TC0_Lab0C_Virtualisation_ENv2.pdf). The historical filename and v2.1 source edition are retained for continuity. Its candidate label records preparation during the v6 correction work; current release identity is recorded in the repository metadata. Rebuild from the repository root:
 
 ```bash
 # In a Python virtual environment with reportlab, pypdf and markdown-it-py installed:
