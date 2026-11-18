@@ -1,7 +1,7 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml journaling_mechanism
-!include ../../diagrams_common/skin.puml
-title Journaling Mechanism (ext4)
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Redo Journalling — Data and Metadata Journal Path
 
 skinparam activity {
     DiamondBackgroundColor #FFF9C4
@@ -13,19 +13,19 @@ start
 
 |Kernel / FS|
 :1. **TXB** (Transaction Begin)
-Write to journal;
+Write transaction descriptor to journal;
 
 :2. Write **metadata + data**
 to journal;
 
 :3. **TXE** (Transaction End)
-Mark transaction as complete;
+Persist commit after prior journal writes are durable;
 
 :4. **Checkpoint**
-Write data to final location;
+Write data + metadata to their home locations;
 
-:5. Delete transaction
-from journal;
+:5. Reclaim journal space
+only after the checkpoint is durable;
 
 |Disk|
 :Data saved!;
@@ -42,11 +42,15 @@ legend right
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**ext4 Modes:**
-|= Mode |= What is journaled |= Speed |
-| journal | Metadata + Data | Slow |
-| **ordered** | Metadata (default) | Medium |
-| writeback | Metadata only | Fast |
+**ext4 Modes (different data-ordering contracts):**
+|= Mode |= What is journalled |= Data ordering |
+| journal | Metadata + Data | Data in the journal before commit |
+| **ordered** | Metadata | Home data before metadata commit |
+| writeback | Metadata only | No same data-before-commit ordering |
+
+The flow above models the journal-data path.
+Correct recovery assumes enforced write order and durable flushes.
+Performance depends on workload and storage; no ranking is measured here.
 endlegend
 
 @enduml

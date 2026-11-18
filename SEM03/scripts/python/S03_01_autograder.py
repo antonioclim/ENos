@@ -37,6 +37,7 @@ import logging
 import os
 import sys
 import re
+import shlex
 import json
 import subprocess
 import tempfile
@@ -50,7 +51,7 @@ from enum import Enum
 import traceback
 
 # Logging setup — import shared utilities from kit lib
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / 'lib'))
 from logging_utils import setup_logging
 
 logger = setup_logging(__name__)
@@ -110,7 +111,7 @@ class TestResult:
     @property
     def percentage(self) -> float:
         if self.points_max == 0:
-            return 100.0
+            return 0.0
         return (self.points_earned / self.points_max) * 100
 
 @dataclass
@@ -130,7 +131,7 @@ class CategoryResult:
     @property
     def percentage(self) -> float:
         if self.total_max == 0:
-            return 100.0
+            return 0.0
         return (self.total_earned / self.total_max) * 100
     
     @property
@@ -146,6 +147,9 @@ class GradingResult:
     categories: List[CategoryResult] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     security_issues: List[str] = field(default_factory=list)
+    assessment_complete: bool = False
+    assessment_note: str = ("Diagnostic checks only: the public task and grading rubric require "
+                            "an author-approved common assessment contract before a final grade.")
     
     @property
     def total_earned(self) -> float:
@@ -158,12 +162,14 @@ class GradingResult:
     @property
     def percentage(self) -> float:
         if self.total_max == 0:
-            return 100.0
+            return 0.0
         return (self.total_earned / self.total_max) * 100
     
     @property
     def grade(self) -> str:
         """Calculate final grade"""
+        if not self.assessment_complete:
+            return "PENDING"
         p = self.percentage
         if p >= 90:
             return "10"
@@ -287,118 +293,96 @@ class FindValidator:
     
     @staticmethod
     def parse_find_command(command: str) -> Dict[str, Any]:
-        """Parse a find command and extract components"""
-        result = {
-            'valid': True,
-            'path': None,
-            'tests': [],
-            'actions': [],
-            'operators': [],
-            'errors': []
-        }
-        
-        # Check if it starts with find
-        if not command.strip().startswith('find'):
+        """Validate the supported find grammar without executing student actions.
+
+        This is a structural diagnostic, not proof that a task was solved. Shell
+        pipelines and action commands need a separate functional assessment.
+        """
+        result = {'valid': True, 'path': '.', 'tests': [], 'actions': [],
+                  'operators': [], 'errors': []}
+        try:
+            lexer = shlex.shlex(command, posix=True, punctuation_chars='|;&')
+            lexer.whitespace_split = True
+            parts = list(lexer)
+        except ValueError as exc:
             result['valid'] = False
-            result['errors'].append("Command does not start with 'find'")
+            result['errors'].append(str(exc))
             return result
-        
-        # Extract command parts
-        parts = command.split()
-        if len(parts) < 2:
+        if not parts or parts[0] != 'find':
             result['valid'] = False
-            result['errors'].append("Find command is incomplete")
+            result['errors'].append("Command must begin with find")
             return result
-        
-        # Detect path
-        if len(parts) > 1 and not parts[1].startswith('-'):
-            result['path'] = parts[1]
-        
-        # Detect common tests
-        tests_patterns = {
-            '-name': 'search by name',
-            '-iname': 'search by name (case insensitive)',
-            '-type': 'search by type',
-            '-size': 'search by size',
-            '-mtime': 'search by modification time (days)',
-            '-mmin': 'search by modification time (minutes)',
-            '-atime': 'search by access time',
-            '-ctime': 'search by creation time',
-            '-perm': 'search by permissions',
-            '-user': 'search by owner',
-            '-group': 'search by group',
-            '-newer': 'search for files newer than',
-            '-maxdepth': 'depth limit',
-            '-mindepth': 'minimum depth',
-        }
-        
-        for test, desc in tests_patterns.items():
-            if test in command:
-                result['tests'].append((test, desc))
-        
-        # Detect actions
-        actions_patterns = {
-            '-print': 'display (implicit)',
-            '-print0': 'display with null delimiter',
-            '-printf': 'formatted display',
-            '-exec': 'command execution',
-            '-ok': 'execution with confirmation',
-            '-delete': 'deletion',
-            '-ls': 'detailed display',
-        }
-        
-        for action, desc in actions_patterns.items():
-            if action in command:
-                result['actions'].append((action, desc))
-        
-        # Detect operators
-        if ' -o ' in command or ' -or ' in command:
-            result['operators'].append('OR')
-        if ' -a ' in command or ' -and ' in command:
-            result['operators'].append('explicit AND')
-        if ' ! ' in command or ' -not ' in command:
-            result['operators'].append('NOT')
-        if '\\(' in command or '( ' in command:
-            result['operators'].append('grouping')
-        
+        # Only the find stage is parsed here; pipes never become shell execution.
+        if '|' in parts:
+            parts = parts[:parts.index('|')]
+        operands = {'-name', '-iname', '-path', '-ipath', '-regex', '-iregex',
+                    '-type', '-size', '-mtime', '-mmin', '-atime', '-amin', '-ctime',
+                    '-cmin', '-perm', '-user', '-group', '-newer', '-maxdepth', '-mindepth'}
+        actions = {'-print', '-print0', '-ls', '-delete', '-prune', '-quit'}
+        flags = {'-depth', '-xdev', '-mount', '-empty', '-readable', '-writable', '-executable'}
+        operators = {'!', '-not', '-a', '-and', '-o', '-or', '(', ')'}
+        i = 1
+        if i < len(parts) and not parts[i].startswith('-') and parts[i] not in operators:
+            result['path'] = parts[i]
+            i += 1
+        while i < len(parts):
+            token = parts[i]
+            if token in operands or token in {'-printf', '-fprint', '-fprint0', '-fprintf'}:
+                if i + 1 >= len(parts) or parts[i + 1] in operands | actions | flags | operators:
+                    result['errors'].append(f"Missing operand for {token}")
+                    break
+                value = parts[i + 1]
+                if token == '-type' and not re.fullmatch(r'[bcdflpsD]', value):
+                    result['errors'].append('Invalid -type operand')
+                if token == '-size' and not re.fullmatch(r'[+-]?[0-9]+[bcwkMG]?', value):
+                    result['errors'].append('Invalid -size operand')
+                if token in {'-mtime', '-mmin', '-atime', '-amin', '-ctime', '-cmin'} and not re.fullmatch(r'[+-]?[0-9]+', value):
+                    result['errors'].append(f'Invalid {token} operand')
+                if token in {'-maxdepth', '-mindepth'} and not value.isdigit():
+                    result['errors'].append(f'Invalid {token} operand')
+                result['tests' if token in operands else 'actions'].append((token, value))
+                i += 2
+            elif token in {'-exec', '-execdir', '-ok', '-okdir'}:
+                end = next((j for j in range(i + 1, len(parts)) if parts[j] in {';', '+'}), None)
+                if end is None or end == i + 1:
+                    result['errors'].append(f'Incomplete {token} action')
+                    break
+                result['actions'].append((token, 'requires manual review; not executed'))
+                i = end + 1
+            elif token in actions | flags:
+                result['actions' if token in actions else 'tests'].append((token, token))
+                i += 1
+            elif token in operators:
+                result['operators'].append(token)
+                i += 1
+            else:
+                result['errors'].append(f'Unsupported find token: {token}')
+                i += 1
+        result['valid'] = not result['errors']
         return result
-    
+
     @staticmethod
     def test_find_command(command: str, test_dir: str) -> Tuple[bool, str, str]:
-        """Test a find command in a test directory"""
+        """Execute only a read-only find stage with argument boundaries preserved."""
+        parsed = FindValidator.parse_find_command(command)
+        if not parsed['valid']:
+            return False, '', '; '.join(parsed['errors'])
         try:
-            # Replace path with test directory
-            # Detect and replace first argument that isn't an option
-            parts = command.split()
-            if len(parts) > 1:
-                if not parts[1].startswith('-'):
-                    parts[1] = test_dir
-                else:
-                    parts.insert(1, test_dir)
-                command = ' '.join(parts)
-            
-            result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=30,
-                cwd=test_dir
-            )
-            
-            stdout = result.stdout.strip()
-            stderr = result.stderr.strip()
-            
-            if result.returncode == 0:
-                return True, stdout, stderr
+            parts = shlex.split(command, comments=True)
+            forbidden = {'|', ';', '&', '&&', '||', '-delete', '-exec', '-execdir',
+                         '-ok', '-okdir', '-fprint', '-fprint0', '-fprintf'}
+            if any(part in forbidden or '$(' in part or '`' in part for part in parts):
+                return False, '', 'Only read-only find predicates are executed by this helper'
+            if len(parts) > 1 and not parts[1].startswith('-') and parts[1] not in {'!', '('}:
+                parts[1] = str(Path(test_dir).resolve())
             else:
-                return False, stdout, stderr
-                
-        except subprocess.TimeoutExpired:
-            return False, "", "Execution timeout"
-        except Exception as e:
-            return False, "", f"Error: {str(e)}"
-    
+                parts.insert(1, str(Path(test_dir).resolve()))
+            result = subprocess.run(parts, capture_output=True, text=True,
+                                    timeout=30, cwd=test_dir)
+            return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
+        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+            return False, '', str(exc)
+
     @staticmethod
     def check_dangerous_patterns(command: str) -> List[str]:
         """Check for dangerous patterns in find commands"""
@@ -507,7 +491,7 @@ class PermissionsValidator:
             warnings.append("☠️ 777 - Fully open permissions! Major security risk.")
         elif octal in ['666', '0666']:
             warnings.append("⚠️ 666 - Anyone can read/write. Unsafe for most cases.")
-        elif octal.endswith('7'):
+        elif PermissionsValidator.OCTAL_PATTERN.fullmatch(octal) and int(octal[-1]) & 2:
             warnings.append("⚠️ World-writable - anyone can modify.")
         elif octal.endswith('6'):
             warnings.append("⚠️ World-readable and writable.")
@@ -555,7 +539,7 @@ class CronValidator:
     }
     
     SPECIAL_STRINGS = {
-        '@reboot': 'At system startup',
+        '@reboot': 'At cron startup; restart behaviour depends on the daemon/distribution',
         '@yearly': 'Yearly (0 0 1 1 *)',
         '@annually': 'Yearly (0 0 1 1 *)',
         '@monthly': 'Monthly (0 0 1 * *)',
@@ -620,92 +604,52 @@ class CronValidator:
     
     @staticmethod
     def validate_field(value: str, field_name: str) -> Dict[str, Any]:
-        """Validate an individual field"""
-        result = {
-            'valid': True,
-            'meaning': '',
-            'errors': []
-        }
-        
-        min_val, max_val = CronValidator.FIELD_RANGES[field_name]
-        
-        # Wildcard
+        """Validate the numeric/name, list, ascending-range and positive-step grammar."""
+        result = {'valid': True, 'meaning': value, 'errors': []}
+        lower, upper = CronValidator.FIELD_RANGES[field_name]
+        names = ({name: i for i, name in enumerate(('sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'))}
+                 if field_name == 'dow' else
+                 {name: i + 1 for i, name in enumerate(('jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'))}
+                 if field_name == 'month' else {})
+        def number(token):
+            if token.lower() in names:
+                return names[token.lower()]
+            if not re.fullmatch(r'[0-9]+', token):
+                raise ValueError(f'Invalid value {token!r}')
+            n = int(token)
+            if not lower <= n <= upper:
+                raise ValueError(f'Value {n} outside {lower}–{upper}')
+            return n
+        try:
+            if not value:
+                raise ValueError('Empty field')
+            for term in value.split(','):
+                pieces = term.split('/')
+                if len(pieces) > 2:
+                    raise ValueError('Multiple step separators')
+                base = pieces[0]
+                if len(pieces) == 2 and (not re.fullmatch(r'[0-9]+', pieces[1]) or int(pieces[1]) <= 0):
+                    raise ValueError('Step must be a positive integer')
+                if base == '*':
+                    continue
+                limits = base.split('-')
+                if len(limits) == 2:
+                    start, end = map(number, limits)
+                    if start > end:
+                        raise ValueError('Descending ranges are not supported')
+                elif len(limits) == 1:
+                    number(base)
+                    if len(pieces) == 2:
+                        raise ValueError('Use */step or start-end/step in this declared dialect')
+                else:
+                    raise ValueError('Invalid range')
+        except ValueError as exc:
+            result['valid'] = False
+            result['errors'].append(f'{field_name}: {exc}')
         if value == '*':
             result['meaning'] = 'any value'
-            return result
-        
-        # Step (*/n or range/n)
-        if '/' in value:
-            base, step = value.split('/', 1)
-            if not step.isdigit():
-                result['valid'] = False
-                result['errors'].append(f"Invalid step in {field_name}: {step}")
-                return result
-            step_val = int(step)
-            if base == '*':
-                result['meaning'] = f'every {step_val}'
-            else:
-                result['meaning'] = f'every {step_val} in {base}'
-            return result
-        
-        # Range (n-m)
-        if '-' in value and not value.startswith('-'):
-            parts = value.split('-')
-            if len(parts) == 2:
-                try:
-                    start = int(parts[0])
-                    end = int(parts[1])
-                    if start < min_val or end > max_val:
-                        result['valid'] = False
-                        result['errors'].append(f"Range out of bounds for {field_name}")
-                    else:
-                        result['meaning'] = f'from {start} to {end}'
-                    return result
-                except ValueError:
-                    pass
-        
-        # List (n,m,o)
-        if ',' in value:
-            values = value.split(',')
-            try:
-                nums = [int(v) for v in values]
-                for n in nums:
-                    if n < min_val or n > max_val:
-                        result['valid'] = False
-                        result['errors'].append(f"Value {n} out of bounds for {field_name}")
-                result['meaning'] = f'values {", ".join(values)}'
-                return result
-            except ValueError:
-                result['valid'] = False
-                result['errors'].append(f"Invalid values in {field_name}: {value}")
-                return result
-        
-        # Simple value
-        try:
-            num = int(value)
-            if num < min_val or num > max_val:
-                result['valid'] = False
-                result['errors'].append(f"Value {num} out of bounds for {field_name} ({min_val}-{max_val})")
-            else:
-                result['meaning'] = str(num)
-            return result
-        except ValueError:
-            # May be a day or month name
-            day_names = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6}
-            month_names = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-                          'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
-            
-            if field_name == 'dow' and value.lower() in day_names:
-                result['meaning'] = value.capitalize()
-                return result
-            if field_name == 'month' and value.lower() in month_names:
-                result['meaning'] = value.capitalize()
-                return result
-            
-            result['valid'] = False
-            result['errors'].append(f"Invalid value for {field_name}: {value}")
-            return result
-    
+        return result
+
     @staticmethod
     def generate_description(fields: Dict) -> str:
         """Generate a natural language description"""
@@ -715,63 +659,25 @@ class CronValidator:
         month = fields.get('month', {}).get('value', '*')
         dow = fields.get('dow', {}).get('value', '*')
         
-        # Common patterns
-        if minute == '*' and hour == '*' and dom == '*' and month == '*' and dow == '*':
-            return "Every minute"
-        if minute == '0' and hour == '*' and dom == '*' and month == '*' and dow == '*':
-            return "Every hour (minute 0)"
-        if minute == '0' and hour == '0' and dom == '*' and month == '*' and dow == '*':
-            return "Daily at midnight"
-        
-        parts = []
-        
-        # Time
-        if minute != '*' or hour != '*':
-            if minute.isdigit() and hour.isdigit():
-                parts.append(f"at {hour}:{minute.zfill(2)}")
-            elif minute.startswith('*/'):
-                parts.append(f"every {minute[2:]} minutes")
-            elif hour.startswith('*/'):
-                parts.append(f"every {hour[2:]} hours")
-        
-        # Day
-        if dow != '*' and dow != '0-7':
-            if dow == '1-5':
-                parts.append("Monday-Friday")
-            elif dow in ['0', '7']:
-                parts.append("Sunday")
-            elif dow == '6':
-                parts.append("Saturday")
-            else:
-                parts.append(f"days {dow}")
-        
-        if dom != '*':
-            parts.append(f"on days {dom} of the month")
-        
-        if month != '*':
-            parts.append(f"in month {month}")
-        
-        return ', '.join(parts) if parts else "Custom schedule"
-    
+        # Debian/Vixie day matching depends on a leading wildcard, including */step.
+        day_rule = ('AND' if dom.startswith('*') or dow.startswith('*') else 'OR')
+        return (f"minute={minute}; hour={hour}; month={month}; "
+                f"(day-of-month={dom} {day_rule} day-of-week={dow}). "
+                "Steps reset within their field; this is not an elapsed-time interval.")
+
     @staticmethod
     def check_problematic_patterns(fields: Dict) -> List[str]:
-        """Check for problematic patterns"""
+        """State the declared day-field rule without claiming calendar execution."""
         warnings = []
-        
         minute = fields.get('minute', {}).get('value', '')
-        
-        # Job running too frequently
         if minute == '*':
-            warnings.append("⚠️ Runs every minute - ensure this is necessary")
-        
-        # dom and dow both specified
-        dom = fields.get('dom', {}).get('value', '')
-        dow = fields.get('dow', {}).get('value', '')
-        if dom != '*' and dow != '*':
-            warnings.append("ℹ️ Both dom and dow are specified - it's an OR relationship, not AND!")
-        
+            warnings.append("Minute wildcard: may run every minute within the selected hours/dates.")
+        dom = fields.get('dom', {}).get('value', '*')
+        dow = fields.get('dow', {}).get('value', '*')
+        if not dom.startswith('*') and not dow.startswith('*'):
+            warnings.append("Restricted DOM and DOW are combined with OR in this Debian/Vixie dialect.")
         return warnings
-    
+
     @staticmethod
     def check_cron_best_practices(cron_line: str) -> List[str]:
         """Check best practices for a crontab line"""
@@ -813,17 +719,8 @@ class Autograder:
     
     def _extract_student_id(self) -> str:
         """Extract student ID from submission path"""
-        # Try to find a student ID pattern
-        path_str = str(self.submission_path)
-        
-        # Pattern: surname_firstname or similar
-        match = re.search(r'([a-zA-Z]+_[a-zA-Z]+)', path_str)
-        if match:
-            return match.group(1)
-        
-        # Use directory name
         return self.submission_path.name
-    
+
     def _log(self, message: str, level: str = "info"):
         """Logging with levels"""
         if not self.verbose and level == "debug":
@@ -935,8 +832,8 @@ class Autograder:
                 content = f.read()
             
             # Extract find commands
-            commands = [line.strip() for line in content.split('\n') 
-                       if line.strip().startswith('find')]
+            commands = [line.strip() for line in content.split('\n')
+                        if line.strip().startswith('find ') and FindValidator.parse_find_command(line.strip())['valid']]
             
             if commands:
                 # Test 1: Number of commands
@@ -967,7 +864,7 @@ class Autograder:
                 ))
                 
                 # Test 3: xargs usage
-                xargs_commands = [c for c in content.split('\n') if 'xargs' in c]
+                xargs_commands = [c for c in commands if re.search(r'\|\s*xargs(?:\s|$)', c)]
                 category.tests.append(TestResult(
                     name="xargs usage",
                     status=TestStatus.PASSED if xargs_commands else TestStatus.FAILED,
@@ -999,7 +896,7 @@ class Autograder:
                         status=TestStatus.PASSED,
                         points_earned=10,
                         points_max=10,
-                        message="No security issues detected"
+                        message="No listed static warning found; functional/security acceptance is not established"
                     ))
         
         self.result.categories.append(category)
@@ -1125,7 +1022,7 @@ class Autograder:
                 with open(pf, 'r') as f:
                     content = f.read()
                     # Extract chmod commands
-                    chmod_matches = re.findall(r'chmod\s+[^\n]+', content)
+                    chmod_matches = re.findall(r'^\s*chmod\s+[^\n]+', content, re.MULTILINE)
                     all_chmod_commands.extend(chmod_matches)
             
             if all_chmod_commands:
@@ -1241,7 +1138,7 @@ class Autograder:
             category.tests.append(TestResult(
                 name="Cron best practices",
                 status=TestStatus.PASSED if not cron_warnings else TestStatus.PARTIAL,
-                points_earned=6 if not cron_warnings else 3,
+                points_earned=(6 if not cron_warnings else 3) if valid_expressions else 0,
                 points_max=6,
                 message="Follows best practices" if not cron_warnings else f"{len(cron_warnings)} suggestions",
                 details=cron_warnings
@@ -1284,7 +1181,7 @@ class ReportGenerator:
     @staticmethod
     def print_console_report(result: GradingResult):
         """Display report in console"""
-        c = Colors
+        c = Colours
         
         print()
         print(f"{c.CYAN}{'═' * 80}{c.RESET}")
@@ -1295,6 +1192,7 @@ class ReportGenerator:
         print(f"  {c.WHITE}Student:{c.RESET} {result.student_id}")
         print(f"  {c.WHITE}Date:{c.RESET} {result.timestamp}")
         print(f"  {c.WHITE}Submission:{c.RESET} {result.submission_path}")
+        print(f"  {result.assessment_note}")
         print()
         
         # Results by category
@@ -1364,7 +1262,9 @@ class ReportGenerator:
             'grade': result.grade,
             'categories': [],
             'security_issues': result.security_issues,
-            'warnings': result.warnings
+            'warnings': result.warnings,
+            'assessment_complete': result.assessment_complete,
+            'assessment_note': result.assessment_note
         }
         
         for cat in result.categories:
@@ -1602,7 +1502,7 @@ Usage examples:
             print(f"Errors: {', '.join(result['errors'])}")
         if result['warnings']:
             print(f"Warnings: {', '.join(result['warnings'])}")
-        return 0
+        return 0 if result['valid'] else 1
     
     # Test find command
     if args.test_find:
@@ -1650,7 +1550,7 @@ Usage examples:
             print(f"Report saved to: {args.output}")
         
         logger.info(f"Final result: {result.percentage:.1f}% (Grade: {result.grade})")
-        return 0 if result.percentage >= 50 else 1
+        return 2 if not result.assessment_complete else (0 if result.percentage >= 50 else 1)
     
     # Batch grading
     if args.batch:
@@ -1679,7 +1579,7 @@ Usage examples:
         print(f"Total graded: {len(results)}")
         avg = sum(r.percentage for r in results) / len(results) if results else 0
         print(f"Average: {avg:.1f}%")
-        passed = sum(1 for r in results if float(r.grade) >= 5)
+        passed = sum(1 for r in results if r.assessment_complete and float(r.grade) >= 5)
         print(f"Passed: {passed}/{len(results)}")
         
         return 0

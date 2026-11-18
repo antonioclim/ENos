@@ -23,7 +23,7 @@ set -euo pipefail
 #-------------------------------------------------------------------------------
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly DATA_DIR="$HOME/demo_sem4/data"
+readonly DATA_DIR="${ENOS_SEM04_DATA_DIR:-$HOME/demo_sem4/data}"
 
 # Colours
 readonly RED='\033[0;31m'
@@ -39,26 +39,52 @@ readonly NC='\033[0m'
 
 # Format: id|description|expected_output_generator|hints
 
-declare -A EXERCISES
+declare -A EXERCISES EXERCISE_COMMANDS EXERCISE_HINTS
 
 # GREP exercises
-EXERCISES[G1]="Find lines with status code 404 in access.log|grep ' 404 ' \"\$DATA_DIR/access.log\"|Use pattern ' 404 ' with surrounding spaces"
-EXERCISES[G2]="Count POST requests in access.log|grep -c 'POST' \"\$DATA_DIR/access.log\"|Use grep -c for line counting"
-EXERCISES[G3]="Extract unique IP addresses from access.log|grep -oE '^[0-9.]+' \"\$DATA_DIR/access.log\" | sort -u|Combine grep -o with sort -u"
-EXERCISES[G4]="Find lines accessing /admin in access.log|grep '/admin' \"\$DATA_DIR/access.log\"|Simple pattern: /admin"
-EXERCISES[G5]="Extract valid emails from emails.txt|grep -E '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \"\$DATA_DIR/emails.txt\"|Regex for email with anchors"
+EXERCISES[G1]="Find lines with status code 404 in access.log"
+EXERCISE_COMMANDS[G1]="grep ' 404 ' \"\$DATA_DIR/access.log\""
+EXERCISE_HINTS[G1]="Use pattern ' 404 ' with surrounding spaces"
+EXERCISES[G2]="Count POST requests in access.log"
+EXERCISE_COMMANDS[G2]="grep -c 'POST' \"\$DATA_DIR/access.log\""
+EXERCISE_HINTS[G2]="Use grep -c for line counting"
+EXERCISES[G3]="Extract unique IP addresses from access.log"
+EXERCISE_COMMANDS[G3]="grep -oE '^[0-9.]+' \"\$DATA_DIR/access.log\" | sort -u"
+EXERCISE_HINTS[G3]="Combine grep -o with sort -u"
+EXERCISES[G4]="Find lines accessing /admin in access.log"
+EXERCISE_COMMANDS[G4]="grep '/admin' \"\$DATA_DIR/access.log\""
+EXERCISE_HINTS[G4]="Simple pattern: /admin"
+EXERCISES[G5]="Extract valid emails from emails.txt"
+EXERCISE_COMMANDS[G5]="grep -E '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \"\$DATA_DIR/emails.txt\""
+EXERCISE_HINTS[G5]="Regex for email with anchors"
 
 # SED exercises
-EXERCISES[S1]="Replace localhost with 127.0.0.1 in config.txt|sed 's/localhost/127.0.0.1/g' \"\$DATA_DIR/config.txt\"|s/old/new/g for all occurrences"
-EXERCISES[S2]="Delete comments from config.txt|sed '/^#/d' \"\$DATA_DIR/config.txt\"|Pattern /^#/d"
-EXERCISES[S3]="Delete empty lines from config.txt|sed '/^$/d' \"\$DATA_DIR/config.txt\"|Pattern /^$/d"
-EXERCISES[S4]="Delete comments AND empty lines|sed '/^#/d; /^$/d' \"\$DATA_DIR/config.txt\"|Combine: /^#/d; /^$/d"
+EXERCISES[S1]="Replace localhost with 127.0.0.1 in config.txt"
+EXERCISE_COMMANDS[S1]="sed 's/localhost/127.0.0.1/g' \"\$DATA_DIR/config.txt\""
+EXERCISE_HINTS[S1]="s/old/new/g for all occurrences"
+EXERCISES[S2]="Delete comments from config.txt"
+EXERCISE_COMMANDS[S2]="sed '/^#/d' \"\$DATA_DIR/config.txt\""
+EXERCISE_HINTS[S2]="Pattern /^#/d"
+EXERCISES[S3]="Delete empty lines from config.txt"
+EXERCISE_COMMANDS[S3]="sed '/^$/d' \"\$DATA_DIR/config.txt\""
+EXERCISE_HINTS[S3]="Pattern /^$/d"
+EXERCISES[S4]="Delete comments AND empty lines"
+EXERCISE_COMMANDS[S4]="sed '/^#/d; /^$/d' \"\$DATA_DIR/config.txt\""
+EXERCISE_HINTS[S4]="Combine: /^#/d; /^$/d"
 
 # AWK exercises
-EXERCISES[A1]="Display the Name column from employees.csv|awk -F',' '{print \$2}' \"\$DATA_DIR/employees.csv\"|awk -F',' for CSV"
-EXERCISES[A2]="Display employees from IT department|awk -F',' '\$3 == \"IT\"' \"\$DATA_DIR/employees.csv\"|Condition on field"
-EXERCISES[A3]="Calculate salary sum (skip header)|awk -F',' 'NR > 1 {sum += \$4} END {print sum}' \"\$DATA_DIR/employees.csv\"|NR > 1 to skip header"
-EXERCISES[A4]="Count employees per department|awk -F',' 'NR > 1 {count[\$3]++} END {for (d in count) print d, count[d]}' \"\$DATA_DIR/employees.csv\"|Associative array for counting"
+EXERCISES[A1]="Display the Name column from employees.csv"
+EXERCISE_COMMANDS[A1]="awk -F',' '{print \$2}' \"\$DATA_DIR/employees.csv\""
+EXERCISE_HINTS[A1]="awk -F',' for CSV"
+EXERCISES[A2]="Display employees from IT department"
+EXERCISE_COMMANDS[A2]="awk -F',' '\$3 == \"IT\"' \"\$DATA_DIR/employees.csv\""
+EXERCISE_HINTS[A2]="Condition on field"
+EXERCISES[A3]="Calculate salary sum (skip header)"
+EXERCISE_COMMANDS[A3]="awk -F',' 'NR > 1 {sum += \$4} END {print sum}' \"\$DATA_DIR/employees.csv\""
+EXERCISE_HINTS[A3]="NR > 1 to skip header"
+EXERCISES[A4]="Count employees per department"
+EXERCISE_COMMANDS[A4]="awk -F',' 'NR > 1 {count[\$3]++} END {for (d in count) print d, count[d]}' \"\$DATA_DIR/employees.csv\""
+EXERCISE_HINTS[A4]="Associative array for counting"
 
 #-------------------------------------------------------------------------------
 # FUNCTIONS
@@ -102,7 +128,7 @@ list_exercises() {
     for id in G1 G2 G3 G4 G5; do
         if [[ -n "${EXERCISES[$id]:-}" ]]; then
             local desc
-            desc=$(echo "${EXERCISES[$id]}" | cut -d'|' -f1)
+            desc="${EXERCISES[$id]}"
             echo -e "  ${YELLOW}$id${NC}: $desc"
         fi
     done
@@ -112,7 +138,7 @@ list_exercises() {
     for id in S1 S2 S3 S4; do
         if [[ -n "${EXERCISES[$id]:-}" ]]; then
             local desc
-            desc=$(echo "${EXERCISES[$id]}" | cut -d'|' -f1)
+            desc="${EXERCISES[$id]}"
             echo -e "  ${YELLOW}$id${NC}: $desc"
         fi
     done
@@ -122,7 +148,7 @@ list_exercises() {
     for id in A1 A2 A3 A4; do
         if [[ -n "${EXERCISES[$id]:-}" ]]; then
             local desc
-            desc=$(echo "${EXERCISES[$id]}" | cut -d'|' -f1)
+            desc="${EXERCISES[$id]}"
             echo -e "  ${YELLOW}$id${NC}: $desc"
         fi
     done
@@ -141,14 +167,10 @@ validate_exercise() {
         exit 1
     fi
     
-    # Parse exercise data
-    local ex_data="${EXERCISES[$ex_id]}"
-    local description hint
-    description=$(echo "$ex_data" | cut -d'|' -f1)
-    local expected_cmd
-    expected_cmd=$(echo "$ex_data" | cut -d'|' -f2)
-    hint=$(echo "$ex_data" | cut -d'|' -f3)
-    
+    local description="${EXERCISES[$ex_id]}"
+    local expected_cmd="${EXERCISE_COMMANDS[$ex_id]}"
+    local hint="${EXERCISE_HINTS[$ex_id]}"
+
     echo ""
     echo "╔══════════════════════════════════════════════════════════════════════════╗"
     echo "║                         EXERCISE VALIDATION                              ║"
@@ -166,12 +188,23 @@ validate_exercise() {
         exit 1
     fi
     
+    local fixture
+    case "$ex_id" in G5) fixture=emails.txt ;; G*) fixture=access.log ;; S*) fixture=config.txt ;; A*) fixture=employees.csv ;; esac
+    if [[ ! -f "$DATA_DIR/$fixture" ]]; then
+        echo "ASSESSMENT ERROR: missing reference fixture $fixture" >&2
+        return 2
+    fi
     # Generate expected output
     local expected_output student_output
     cd "$DATA_DIR" || exit 1
     
     # Evaluate expected command
-    expected_output=$(eval "$expected_cmd" 2>/dev/null || echo "[COMMAND_ERROR]")
+    local reference_status=0
+    expected_output=$(set -o pipefail; eval "$expected_cmd") || reference_status=$?
+    if [[ $reference_status -gt 1 || ( $reference_status -eq 1 && "$ex_id" != G* ) ]]; then
+        echo "ASSESSMENT ERROR: reference command failed ($reference_status)" >&2
+        return 2
+    fi
     
     # Evaluate student command (with timeout for safety)
     student_output=$(timeout 10 bash -c "$student_cmd" 2>/dev/null || echo "[COMMAND_ERROR]")

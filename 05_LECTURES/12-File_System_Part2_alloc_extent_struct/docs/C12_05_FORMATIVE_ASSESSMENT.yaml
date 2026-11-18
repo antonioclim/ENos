@@ -1,4 +1,4 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 # C12_05_FORMATIVE_ASSESSMENT.yaml
 # Course 12: File System (Part 2 - Allocation, Structures)
 # Formative Assessment — Conceptual Quiz
@@ -9,7 +9,7 @@ metadata:
   version: "2.0"
   creation_date: "2026-01-28"
   author: "by Revolvix"
-  question_count: 12
+  number_of_questions: 12
   estimated_time_minutes: 15
   bloom_distribution:
     remember: 3

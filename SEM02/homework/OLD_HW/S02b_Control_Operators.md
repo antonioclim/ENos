@@ -150,8 +150,12 @@ mkdir test && echo "Created" || echo "Creation error"
 [ -f file.txt ] && cat file.txt || echo "File does not exist"
 
 # Pitfall: if cat fails, "does not exist" also displays
-# Safer:
-[ -f file.txt ] && { cat file.txt; true; } || echo "Does not exist"
+# Explicit branches preserve the distinction instead of forcing success:
+if [ -f file.txt ]; then
+    cat -- file.txt || { printf 'Cannot read file\n' >&2; exit 1; }
+else
+    printf 'Does not exist\n' >&2; exit 1
+fi
 ```
 
 ---
@@ -443,14 +447,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

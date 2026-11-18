@@ -17,11 +17,11 @@ I know this seems like a lot, but trust me - better to verify now than lose 10 m
 ```
 □ Projector functional, terminal visible from the back row
 □ Enlarged terminal font (CTRL++ until at least 18pt)
-□ Demo files prepared in /tmp/sem02_demo/
+□ Demo files prepared in the fresh owned DEMO_DIR below
 □ Quiz runner quickly tested: cd SEM02 && make quiz (CTRL+C after first question)
 □ PDF slides as backup on USB stick
 □ Functional whiteboard marker (for ad-hoc diagrams)
-□ Coffee/water for yourself (90 minutes is a long stretch)
+□ Check the selected contact duration; the complete sequence below totals 95 minutes
 ```
 
 ### Quick Demo Setup
@@ -29,18 +29,17 @@ I know this seems like a lot, but trust me - better to verify now than lose 10 m
 Run this BEFORE students arrive:
 
 ```bash
-cd /path/to/SEM02
-./scripts/bash/S02_01_setup_seminar.sh
-
-# Verify everything was created
-ls -la /tmp/sem02_demo/
-# You should see: sample.txt, access.log, data.csv, users.txt, etc.
+# Run from the repository root: prerequisite diagnostics do not create demo data.
+bash SEM02/scripts/bash/S02_01_setup_seminar.sh --check-only
+# The deterministic lesson fixture is created by the next block.
 ```
 
-If the script produces errors, create the essential files manually:
+Create the essential lesson files in a fresh owned workspace (the setup script uses a different workspace contract):
 
 ```bash
-mkdir -p /tmp/sem02_demo && cd /tmp/sem02_demo
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-instructor.XXXXXX") || exit 1
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 # Simple text file
 echo -e "line one\nline two\nline three" > sample.txt
@@ -74,7 +73,7 @@ Someone will write `cat file | while read line; do ((count++)); done` and wonder
 Usually a hidden Windows line ending (`\r\n` vs `\n`). Keep `dos2unix` ready. Since 2023, also check for students accidentally using PowerShell syntax in Bash.
 
 ### The AI Dump (new problem since 2023)
-Students submit scripts with perfect comments, elaborate variable names and broken logic. The autograder now includes AI pattern detection. If you see suspiciously polished code, ask the student to explain a random line. Usually reveals the gap quickly.
+Polished comments and elaborate variable names do not establish authorship. Check whether the script works and ask the student to explain its behaviour and sources. The tool exposes lexical observations for manual review; it does not authenticate origin or apply a sanction. See the pending assessment contract.
 
 ### The `{1..$n}` Bug
 Despite explicit warnings, ~20% still try this. I now write on the whiteboard in red: **BRACE EXPANSION BEFORE VARIABLE EXPANSION**. Then immediately show `seq` and C-style alternatives.
@@ -82,6 +81,8 @@ Despite explicit warnings, ~20% still try this. I now write on the whiteboard in
 ---
 
 ## Recommended Session Flow
+
+The full sequence is 10 + 15 + 20 + 30 + 15 + 5 = **95 contact minutes**, excluding any break. The former 45–70 filter window could not contain three 10-minute components. The author must select the timetable across the 95-minute route here and the other 100/110-minute routes; retaining every activity needs the full duration. A shorter session requires an explicit choice of optional practice, not an invisible five-minute overlap. Historical percentages and personal observations below are unverified author annotations, with no cohort evidence supplied.
 
 ### Minutes 0-10: HOOK (Attention Capture)
 
@@ -139,7 +140,7 @@ sleep 3 && echo "Appears after 3s"      # echo appears AFTER sleep
 
 #### Peer Instruction (8 minutes)
 
-Use question PI-03 (or similar):
+Use this additional operator-chain example (not PI-03 in the canonical peer bank):
 
 ```bash
 false && echo "A" || echo "B" && echo "C"
@@ -246,14 +247,14 @@ WRONG: 2>&1 > all.txt
 
 ---
 
-### Minutes 45-70: Filters and Pipelines
+### Filters and Pipelines: 30 minutes (three 10-minute components)
 
 #### Visual Demo - Incremental Construction (10 minutes)
 
 Show output at EACH step:
 
 ```bash
-cd /tmp/sem02_demo
+cd -- "${DEMO_DIR:?Run the preparation block first}" || exit 1
 
 # Step 1: what have we got?
 cat access.log
@@ -294,7 +295,7 @@ Let the student explain, supplement where necessary.
 
 #### Sprint Exercises (10 minutes)
 
-> "Now individually. You have 10 minutes for exercises S-F1 and S-F2. The validator runs locally."
+> "Now individually. You have 10 minutes for one selected sprint, F1 (5 minutes) or F2 (10 minutes), from the sprint bank. The Bash validator checks homework structure/diagnostics, not every sprint answer."
 
 ```bash
 # Students run on their workstation
@@ -305,7 +306,7 @@ You: circulate, help where there is blockage, but do not give solutions - ask gu
 
 ---
 
-### Minutes 70-85: Loops
+### Loops: 15 minutes
 
 #### Essential Patterns (whiteboard)
 
@@ -326,8 +327,9 @@ while IFS= read -r line; do
 done < file.txt
 
 # UNTIL - inverse of while (less commonly used)
+count=0
 until [[ $count -ge 10 ]]; do
-    ((count++))
+    count=$((count + 1))
 done
 ```
 
@@ -343,8 +345,8 @@ echo "Counted: $count"   # Displays 0! Why?!
 
 # SOLUTION: redirect instead of pipe
 count=0
-while read line; do
-    ((count++))
+while IFS= read -r line; do
+    count=$((count + 1))
 done < file.txt
 echo "Counted: $count"   # Displays correct value!
 ```
@@ -370,7 +372,7 @@ CORRECT (redirect):
 
 ---
 
-### Minutes 85-90: Wrap-up
+### Wrap-up: 5 minutes
 
 1. **Visual summary** (2 min):
    - Show the cheat sheet (S02_02_cheat_sheet.html or printout)
@@ -406,7 +408,7 @@ bash --version  # Bash version (some features require 4.0+)
 
 **Prevention**: ALWAYS demonstrate the danger of `>` before exercises.
 
-**If it happened**: "Unfortunately, if it was in /tmp, it is lost. Let us recreate it. Next time, use `>|` only when certain, or make a backup first."
+**If it happened**: "Stop writing to the affected data. Recovery depends on backups/filesystem state; /tmp does not determine recoverability. Recreate this owned teaching fixture if needed. `>|` forces an overwrite even under noclobber, so it is not protection; preview destinations and keep backups."
 
 ### "Why is the output different from what I expected?"
 
@@ -443,7 +445,7 @@ Options:
 
 ```
 □ Save notes: what went well, what needs adjustment
-□ Verify the cleanup script ran (rm -rf /tmp/sem02_demo)
+□ Preserve needed outputs, then remove only the DEMO_DIR created for this attempt; the EXIT trap is confined to that path
 □ Respond to forum questions within 24 hours maximum
 □ If you found errors in materials, note them for correction
 ```
@@ -479,11 +481,11 @@ To modify for next time:
 
 | ID | Correct Answer | Common Trap |
 |----|---------------|-------------|
-| PI-01 | Exit code 0 | Think it is 1 (success/failure confusion) |
-| PI-02 | "B" and "C" | Only "B" |
-| PI-03 | "B" and "C" | Only "B" or think they appear on same line |
-| PI-04 | Variable is empty | Think it persists from subshell |
-| PI-05 | File is overwritten | Think it appends |
+| PI-01 | B: Error on stdout (plus mkdir diagnostic on stderr) | An existing directory makes mkdir without -p fail |
+| PI-02 | B: wc status 0, with pipefail disabled | Pipeline status is not automatically ls status |
+| PI-03 | B: PID and Finished? immediately | Background launch does not wait |
+| PI-04 | B: x=2, y=1 | Parenthesised changes do not reach the parent |
+| PI-05 | A: variant A sends both streams to out.txt | Redirections are processed left to right |
 
 ## Appendix B: Exit Codes to Memorise
 

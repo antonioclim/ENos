@@ -59,7 +59,7 @@ ${BOLD}USAGE:${NC}
 
 ${BOLD}OPTIONS:${NC}
     -h              Display this help
-    -n NUM          Number of questions (default: 10, max: 25)
+    -n NUM          Number of questions (default: 10, max request: 30; capped by available bank)
     -c CATEGORY     Category:
                       find   - Questions about find and xargs
                       script - Questions about parameters and getopts
@@ -108,11 +108,11 @@ print_question() {
 }
 
 print_options() {
-    local -n opts=$1
+    local -n option_values=$1
     echo ""
-    for i in "${!opts[@]}"; do
+    for i in "${!option_values[@]}"; do
         local letter=$(echo "$i" | tr '0123' 'ABCD')
-        echo -e "  ${YELLOW}$letter)${NC} ${opts[$i]}"
+        echo -e "  ${YELLOW}$letter)${NC} ${option_values[$i]}"
     done
     echo ""
 }
@@ -122,15 +122,15 @@ get_answer() {
     local answer
     
     while true; do
-        echo -n -e "${CYAN}Your answer [${valid_answers}]: ${NC}"
-        read -r answer
+        echo -n -e "${CYAN}Your answer [${valid_answers}]: ${NC}" >&2
+        read -r answer || return 1
         answer=$(echo "$answer" | tr '[:lower:]' '[:upper:]')
         
-        if [[ "$valid_answers" == *"$answer"* ]] && [ -n "$answer" ]; then
+        if [[ ${#answer} -eq 1 && "$valid_answers" == *"$answer"* ]]; then
             echo "$answer"
             return
         else
-            echo -e "${RED}Invalid answer. Choose from: $valid_answers${NC}"
+            echo -e "${RED}Invalid answer. Choose from: $valid_answers${NC}" >&2
         fi
     done
 }
@@ -143,10 +143,10 @@ show_result() {
     echo ""
     if [ "$is_correct" = true ]; then
         echo -e "${GREEN}✓ CORRECT!${NC}"
-        ((CORRECT++))
+        CORRECT=$((CORRECT + 1))
     else
         echo -e "${RED}✗ WRONG!${NC} The correct answer was: ${YELLOW}$correct_answer${NC}"
-        ((WRONG++))
+        WRONG=$((WRONG + 1))
     fi
     
     if [ "$PRACTICE_MODE" = true ] && [ -n "$explanation" ]; then
@@ -484,7 +484,7 @@ run_quiz() {
     # Display header
     clear_screen
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}       ${BOLD}🎓 INTERACTIVE QUIZ - SEMINAR 5-6${NC}                       ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}       ${BOLD}🎓 INTERACTIVE QUIZ - SEMINAR 3${NC}                       ${CYAN}║${NC}"
     echo -e "${CYAN}║${NC}       Operating Systems | Bucharest UES                       ${CYAN}║${NC}"
     echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════╣${NC}"
     echo -e "${CYAN}║${NC}  Questions: $NUM_QUESTIONS    Category: $CATEGORY"
@@ -520,7 +520,7 @@ run_quiz() {
         user_answer=$(get_answer "ABCD")
         
         # Check answer
-        ((TOTAL++))
+        TOTAL=$((TOTAL + 1))
         if [ "$user_answer" = "$correct" ]; then
             show_result true "$correct" "$explanation"
         else

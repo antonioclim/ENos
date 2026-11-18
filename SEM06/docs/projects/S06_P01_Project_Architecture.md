@@ -6,6 +6,8 @@
 
 ## 1. Introduction to Bash Software Architecture
 
+Required environment for the complete examples: Bash 4.4+, GNU utilities and Python 3 for JSON serialisation. Source paths are direct paths unless final-symlink resolution is explicitly shown.
+
 Developing Bash scripts of significant size requires a rigorous architectural 
 approach, similar to that applied in traditional programming languages. The 
 lack of a formal module or class system in Bash does not constitute an 
@@ -129,21 +131,21 @@ Systematic prefixing prevents collisions in the global namespace:
 
 # logging.sh
 LOG_LEVEL=""                    # Module variable
-log_info() { ... }              # Public function
-log_debug() { ... }
-_log_format_message() { ... }   # Private function (_ prefix)
+log_info() { :; }              # TODO: Public function body; naming-only example
+log_debug() { :; }
+_log_format_message() { :; }   # TODO: Private function (_ prefix)
 
 # config.sh
 CONFIG_FILE=""
-config_load() { ... }
-config_get() { ... }
-_config_parse_line() { ... }
+config_load() { :; }
+config_get() { :; }
+_config_parse_line() { :; }
 
 # monitor engine
 MONITOR_INTERVAL=""
-monitor_start() { ... }
-monitor_collect_cpu() { ... }
-_monitor_calculate_percentage() { ... }
+monitor_start() { :; }
+monitor_collect_cpu() { :; }
+_monitor_calculate_percentage() { :; }
 ```
 
 **The `_` convention** - Functions prefixed with `_` are considered private, 
@@ -197,18 +199,19 @@ _log_format_timestamp() {
 
 _log_write() {
     local level="$1"
-    local message="$2"
+    shift
+    local message="$*"
     local timestamp
     timestamp=$(_log_format_timestamp)
     
     local formatted="[${timestamp}] [${level}] ${message}"
     
     if [[ -n "${LOG_FILE}" ]]; then
-        echo "${formatted}" >> "${LOG_FILE}"
+        printf '%s\n' "${formatted}" >> "${LOG_FILE}" || return 1
     fi
     
     if [[ "${LOG_TO_STDERR}" -eq 1 ]]; then
-        echo "${formatted}" >&2
+        printf '%s\n' "${formatted}" >&2 || return 1
     fi
 }
 
@@ -224,7 +227,7 @@ log_init() {
         LOG_FILE="${file}"
         local log_dir
         log_dir=$(dirname "${LOG_FILE}")
-        mkdir -p "${log_dir}"
+        mkdir -p "${log_dir}" || return 1
     fi
     
     case "${level,,}" in
@@ -232,27 +235,28 @@ log_init() {
         info)  LOG_CURRENT_LEVEL=${LOG_LEVEL_INFO}  ;;
         warn)  LOG_CURRENT_LEVEL=${LOG_LEVEL_WARN}  ;;
         error) LOG_CURRENT_LEVEL=${LOG_LEVEL_ERROR} ;;
+        *) return 2 ;;
     esac
 }
 
 log_debug() {
-    [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_DEBUG} ]] && \
-        _log_write "DEBUG" "$*"
+    if [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_DEBUG} ]]; then _log_write "DEBUG" "$@" || return 1; fi
+    return 0
 }
 
 log_info() {
-    [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_INFO} ]] && \
-        _log_write "INFO" "$*"
+    if [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_INFO} ]]; then _log_write "INFO" "$@" || return 1; fi
+    return 0
 }
 
 log_warn() {
-    [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_WARN} ]] && \
-        _log_write "WARN" "$*"
+    if [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_WARN} ]]; then _log_write "WARN" "$@" || return 1; fi
+    return 0
 }
 
 log_error() {
-    [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_ERROR} ]] && \
-        _log_write "ERROR" "$*"
+    if [[ ${LOG_CURRENT_LEVEL} -le ${LOG_LEVEL_ERROR} ]]; then _log_write "ERROR" "$@" || return 1; fi
+    return 0
 }
 ```
 
@@ -340,9 +344,9 @@ process_file() {
     local -a lines=()
     local line
     
-    while IFS= read -r line; do
+    while IFS= read -r line || [[ -n $line ]]; do
         lines+=("$line")
-        ((line_count++))
+        line_count=$((line_count + 1))
     done < "$file"
     
     # line_count and lines do not affect the exterior
@@ -424,11 +428,12 @@ main() {
     setup_traps
     init_logging
     
-    # Phase 4: Parse input
-    parse_arguments "$@"
-    
-    # Phase 5: Load configuration
+    # Phase 4: Locate the requested config file without applying CLI values
+    locate_config_argument "$@"
     load_configuration
+    
+    # Phase 5: Apply explicit CLI overrides last
+    parse_arguments "$@"
     
     # Phase 6: Validate environment
     check_dependencies
@@ -457,70 +462,57 @@ init_paths() {
 Configuration management follows clear principles:
 
 ```bash
-# etc/project.conf.example
-#
-# Project Configuration
-# Copy to project.conf and customize
-#
+# etc/project.conf.example: data, not executable shell.
+# Full-line comments only; surrounding whitespace is trimmed. Interior spaces,
+# equals signs and shell metacharacters are literal. Matching outer quotes are
+# optional and are removed without evaluating escapes or substitutions.
+# LOG_LEVEL=info
+# LOG_FILE=/owned/log/project.log
+# INTERVAL=60
+# THRESHOLD=80
 
-# Logging
-LOG_LEVEL=info          # debug|info|warn|error
-LOG_FILE=/var/log/project/project.log
-
-# Operation
-INTERVAL=60             # seconds
-THRESHOLD=80            # percent
-
-# lib/core/config.sh
 declare -gA CONFIG=()
-declare -gA CONFIG_DEFAULTS=(
-    [LOG_LEVEL]="info"
-    [LOG_FILE]=""
-    [INTERVAL]="60"
-    [THRESHOLD]="80"
-)
-
+declare -gA CONFIG_DEFAULTS=([LOG_LEVEL]=info [LOG_FILE]='' [INTERVAL]=60 [THRESHOLD]=80)
+config_parse_line() {
+    local input=$1
+    local -n key_out=$2 value_out=$3
+    input=${input#"${input%%[![:space:]]*}"}
+    input=${input%"${input##*[![:space:]]}"}
+    [[ -n $input && $input != \#* ]] || return 1
+    [[ $input == *=* ]] || return 2
+    key_out=${input%%=*}; value_out=${input#*=}
+    key_out=${key_out%"${key_out##*[![:space:]]}"}
+    value_out=${value_out#"${value_out%%[![:space:]]*}"}
+    value_out=${value_out%"${value_out##*[![:space:]]}"}
+    [[ $key_out =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+    case ${value_out:0:1} in
+        '"'|"'") [[ ${#value_out} -ge 2 && ${value_out: -1} == "${value_out:0:1}" ]] || return 2
+                  value_out=${value_out:1:${#value_out}-2} ;;
+    esac
+    return 0
+}
 config_load() {
-    local config_file="$1"
-    
-    # Start with defaults
-    local key
-    for key in "${!CONFIG_DEFAULTS[@]}"; do
-        CONFIG[$key]="${CONFIG_DEFAULTS[$key]}"
-    done
-    
-    # Override with file values
-    if [[ -f "$config_file" ]]; then
-        local line key value
-        while IFS= read -r line; do
-            # Skip comments and empty lines
-            [[ "$line" =~ ^[[:space:]]*# ]] && continue
-            [[ -z "${line// }" ]] && continue
-            
-            key="${line%%=*}"
-            value="${line#*=}"
-            
-            # Remove quotes
-            value="${value%\"}"
-            value="${value#\"}"
-            
-            CONFIG[$key]="$value"
+    local config_file=${1:-} line key value rc env_var
+    CONFIG=()
+    for key in "${!CONFIG_DEFAULTS[@]}"; do CONFIG[$key]=${CONFIG_DEFAULTS[$key]}; done
+    if [[ -n $config_file ]]; then
+        [[ -r $config_file ]] || return 2
+        while IFS= read -r line || [[ -n $line ]]; do
+            if config_parse_line "$line" key value; then
+                [[ -v CONFIG_DEFAULTS[$key] ]] || { printf 'Unknown key: %s\n' "$key" >&2; return 2; }
+                CONFIG[$key]=$value
+            else rc=$?; ((rc == 1)) || return "$rc"; fi
         done < "$config_file"
     fi
-    
-    # Override with environment variables
     for key in "${!CONFIG_DEFAULTS[@]}"; do
-        local env_var="PROJECT_${key}"
-        if [[ -n "${!env_var:-}" ]]; then
-            CONFIG[$key]="${!env_var}"
-        fi
+        env_var=PROJECT_$key
+        if [[ -v $env_var ]]; then CONFIG[$key]=${!env_var}; fi
     done
+    return 0
 }
-
 config_get() {
-    local key="$1"
-    local default="${2:-}"
-    echo "${CONFIG[$key]:-$default}"
+    local key=$1 default=${2:-}
+    if [[ -v CONFIG[$key] ]]; then printf '%s\n' "${CONFIG[$key]}"; else printf '%s\n' "$default"; fi
 }
 ```
 
@@ -554,7 +546,7 @@ cmd_stop() {
 }
 
 cmd_status() {
-    # Implementation
+    : # TODO: Implement the status query; this is a dispatch-pattern sketch.
 }
 
 cmd_help() {
@@ -643,47 +635,37 @@ readonly EXIT_VERIFY_FAILED=72
 
 ### 6.2 Trap-based Cleanup
 
-Guaranteed cleanup through traps:
+Owned-resource cleanup on ordinary exits and explicitly handled signals; SIGKILL or machine failure cannot run traps:
 
 ```bash
-declare -ga CLEANUP_TASKS=()
+declare -ga CLEANUP_START=() CLEANUP_LENGTH=() CLEANUP_ARGV=()
 declare -g CLEANUP_DONE=0
-
 register_cleanup() {
-    CLEANUP_TASKS+=("$1")
+    (($# > 0)) || return 2
+    CLEANUP_START+=("${#CLEANUP_ARGV[@]}")
+    CLEANUP_LENGTH+=("$#"); CLEANUP_ARGV+=("$@")
 }
-
 cleanup() {
-    # Prevent multiple executions
-    [[ $CLEANUP_DONE -eq 1 ]] && return
+    local rc=$? i start length
+    ((CLEANUP_DONE == 0)) || return 0
     CLEANUP_DONE=1
-    
-    log_debug "Running cleanup tasks..."
-    
-    local task
-    # Execute in reverse order (LIFO)
-    for ((i=${#CLEANUP_TASKS[@]}-1; i>=0; i--)); do
-        task="${CLEANUP_TASKS[i]}"
-        log_debug "Cleanup: $task"
-        eval "$task" 2>/dev/null || true
+    for ((i=${#CLEANUP_START[@]}-1; i>=0; i--)); do
+        start=${CLEANUP_START[i]}; length=${CLEANUP_LENGTH[i]}
+        "${CLEANUP_ARGV[@]:start:length}" || printf 'Cleanup action failed\n' >&2
     done
+    return "$rc"
 }
-
-setup_traps() {
-    trap cleanup EXIT
-    trap 'exit 130' INT
-    trap 'exit 143' TERM
-}
-
-# Usage
+setup_traps() { trap cleanup EXIT; trap 'exit 130' INT; trap 'exit 143' TERM; }
 setup_traps
-
-TEMP_DIR=$(mktemp -d)
-register_cleanup "rm -rf '$TEMP_DIR'"
-
-LOCK_FILE="/var/run/project.lock"
-touch "$LOCK_FILE"
-register_cleanup "rm -f '$LOCK_FILE'"
+TEMP_DIR=$(mktemp -d) || exit 1
+register_cleanup rm -rf -- "$TEMP_DIR"
+# Shared lock directory is an existing, caller-owned directory. Never unlink
+# a flock pathname: contenders must continue opening the same inode.
+: "${LOCK_DIR:?Set an owned writable lock directory}"
+exec {LOCK_FD}>>"$LOCK_DIR/project.lock" || exit 1
+flock -n "$LOCK_FD" || { exec {LOCK_FD}>&-; exit 1; }
+release_owned_lock() { exec {LOCK_FD}>&-; }
+register_cleanup release_owned_lock
 ```
 
 ### 6.3 Error Propagation
@@ -706,15 +688,17 @@ die_if_error() {
     local message="$1"
     local code="${2:-$rc}"
     
-    [[ $rc -ne 0 ]] && die "$message" "$code"
+    if ((rc != 0)); then die "$message" "$code"; fi
+    return 0
 }
 
 # Usage
 tar czf "$archive" "$source_dir" || \
     die "Failed to create archive" $EXIT_BACKUP_FAILED
 
-cd "$target_dir"
-die_if_error "Cannot access directory: $target_dir"
+if cd -- "$target_dir"; then :; else
+    rc=$?; die "Cannot access directory: $target_dir" "$rc"
+fi
 ```
 
 ---
@@ -781,30 +765,34 @@ check_thresholds() {
 For persistence or inter-process communication:
 
 ```bash
-# Status file for daemon communication
-STATUS_FILE="${VAR_DIR}/run/status"
-
+# JSON data contract. STATUS_FILE is inside an owned existing directory.
+STATUS_FILE="${VAR_DIR}/run/status.json"
 write_status() {
-    local status="$1"
-    local message="${2:-}"
-    
-    {
-        echo "STATUS=$status"
-        echo "TIMESTAMP=$(date +%s)"
-        echo "PID=$$"
-        [[ -n "$message" ]] && echo "MESSAGE=$message"
-    } > "${STATUS_FILE}.tmp"
-    
-    mv "${STATUS_FILE}.tmp" "$STATUS_FILE"
+    python3 - "$STATUS_FILE" "$1" "${2:-}" "$$" <<'PY'
+import json,os,pathlib,sys,tempfile,time
+path,status,message,pid=sys.argv[1:]; destination=pathlib.Path(path)
+fd,temporary=tempfile.mkstemp(prefix='.status.',dir=destination.parent)
+try:
+    with os.fdopen(fd,'w') as stream:
+        json.dump(dict(status=status,message=message,pid=int(pid),timestamp=time.time()),stream)
+        stream.write('\n');stream.flush();os.fsync(stream.fileno())
+    os.replace(temporary,destination)
+finally:
+    if os.path.exists(temporary):os.unlink(temporary)
+PY
 }
-
 read_status() {
-    if [[ -f "$STATUS_FILE" ]]; then
-        source "$STATUS_FILE"
-        echo "$STATUS"
-    else
-        echo "unknown"
-    fi
+    python3 - "$STATUS_FILE" "${1:-status}" <<'PY'
+import json,pathlib,sys
+path=pathlib.Path(sys.argv[1]);key=sys.argv[2]
+if not path.exists():print('unknown');raise SystemExit(0)
+try:
+    value=json.loads(path.read_text())
+    if key not in ('status','message','pid','timestamp'):raise ValueError('unknown field')
+    print(value[key])
+except (OSError,ValueError,KeyError) as error:
+    print(error,file=sys.stderr);raise SystemExit(1)
+PY
 }
 ```
 
@@ -902,128 +890,79 @@ tests/
 ## 9. Complete Example: CPU Monitor Module
 
 ```bash
-#!/bin/bash
-# lib/core/cpu_monitor.sh
-# CPU monitoring functionality
-
-[[ -n "${_CPU_MONITOR_SH_LOADED:-}" ]] && return 0
+#!/usr/bin/env bash
+# lib/core/cpu_monitor.sh — Bash 4.4+, awk; logging module already sourced.
+if [[ -n ${_CPU_MONITOR_SH_LOADED:-} ]]; then return 0; fi
 readonly _CPU_MONITOR_SH_LOADED=1
-
-#
-# DEPENDENCIES
-#
-
-# Assumes logging.sh and common.sh are sourced
-
-#
-# MODULE STATE
-#
-
 declare -ga _CPU_PREV_VALUES=()
 declare -g CPU_THRESHOLD=80
-
-#
-# PRIVATE FUNCTIONS
-#
-
-_cpu_read_proc_stat() {
-    # Returns: user nice system idle iowait irq softirq steal
-    local cpu_line
-    cpu_line=$(head -1 /proc/stat)
-    echo "${cpu_line#cpu }"
-}
-
+CPU_STAT_PATH=${CPU_STAT_PATH:-/proc/stat}
 _cpu_parse_values() {
-    local -n values="$1"
-    local raw_values
-    
-    read -ra raw_values <<< "$(_cpu_read_proc_stat)"
-    values=("${raw_values[@]}")
+    local -n output=$1
+    local label item;local -a fields=()
+    read -r -a fields < "$CPU_STAT_PATH" || return 2
+    label=${fields[0]:-}; fields=("${fields[@]:1}")
+    [[ $label == cpu && ${#fields[@]} -ge 8 ]] || return 2
+    output=("${fields[@]:0:8}") # guest counters already occur in user/nice
+    for item in "${output[@]}"; do [[ $item =~ ^[0-9]+$ ]] || return 2; done
 }
-
 _cpu_calculate_usage() {
-    local -n prev="$1"
-    local -n curr="$2"
-    
-    local -i prev_idle=$((prev[3] + prev[4]))
-    local -i curr_idle=$((curr[3] + curr[4]))
-    
-    local -i prev_total=0 curr_total=0
-    local val
-    for val in "${prev[@]}"; do prev_total+=$val; done
-    for val in "${curr[@]}"; do curr_total+=$val; done
-    
-    local -i total_diff=$((curr_total - prev_total))
-    local -i idle_diff=$((curr_idle - prev_idle))
-    
-    if [[ $total_diff -eq 0 ]]; then
-        echo "0.0"
-    else
-        echo "scale=1; (1 - $idle_diff / $total_diff) * 100" | bc
-    fi
+    local -n previous=$1 current=$2
+    local total_before=0 total_after=0 i total_delta idle_delta
+    for ((i=0;i<8;i++)); do
+        total_before=$((total_before + previous[i]));total_after=$((total_after + current[i]))
+    done
+    total_delta=$((total_after-total_before))
+    idle_delta=$((current[3]+current[4]-previous[3]-previous[4]))
+    ((total_delta>0 && idle_delta>=0 && idle_delta<=total_delta)) || return 2
+    LC_ALL=C awk -v t="$total_delta" -v i="$idle_delta" 'BEGIN{printf "%.1f\n",100*(t-i)/t}'
 }
-
-#
-# PUBLIC FUNCTIONS
-#
-
 cpu_monitor_init() {
-    local threshold="${1:-80}"
-    CPU_THRESHOLD="$threshold"
-    
-    # Initial reading
-    _cpu_parse_values _CPU_PREV_VALUES
-    
-    log_debug "CPU monitor initialised, threshold: ${CPU_THRESHOLD}%"
+    CPU_THRESHOLD=${1:-80}
+    [[ $CPU_THRESHOLD =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    awk -v x="$CPU_THRESHOLD" 'BEGIN{exit !(x>=0&&x<=100)}' || return 2
+    _cpu_parse_values _CPU_PREV_VALUES || return 2
+    log_debug "CPU interval sampler initialised" || return 1
 }
-
 cpu_get_usage() {
+    # Call in the parent shell: cpu_get_usage usage. Do not use $(cpu_get_usage).
+    local -n usage_out=$1
     local -a current_values=()
-    _cpu_parse_values current_values
-    
-    local usage
-    usage=$(_cpu_calculate_usage _CPU_PREV_VALUES current_values)
-    
-    # Update previous for next call
-    _CPU_PREV_VALUES=("${current_values[@]}")
-    
-    echo "$usage"
+    local computed
+    _cpu_parse_values current_values || return 2
+    if computed=$(_cpu_calculate_usage _CPU_PREV_VALUES current_values); then
+        _CPU_PREV_VALUES=("${current_values[@]}"); usage_out=$computed
+    else _CPU_PREV_VALUES=("${current_values[@]}"); return 2; fi
 }
-
 cpu_check_threshold() {
     local usage
-    usage=$(cpu_get_usage)
-    
-    local exceeded=0
-    if (( $(echo "$usage > $CPU_THRESHOLD" | bc -l) )); then
-        exceeded=1
-        log_warn "CPU usage ${usage}% exceeds threshold ${CPU_THRESHOLD}%"
+    cpu_get_usage usage || return 2
+    printf '%s\n' "$usage"
+    if awk -v x="$usage" -v t="$CPU_THRESHOLD" 'BEGIN{exit !(x>t)}'; then
+        log_warn "CPU usage ${usage}% exceeds ${CPU_THRESHOLD}%" || return 2
+        return 1 # alert, distinct from unavailable measurement (2)
     fi
-    
-    echo "$usage"
-    return $exceeded
+    return 0
 }
-
 cpu_get_per_core() {
-    local -a result=()
-    local line core_num
-    
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^cpu[0-9]+ ]]; then
-            core_num="${line%%[[:space:]]*}"
-            core_num="${core_num#cpu}"
-            # Simplified - just idle percentage
-            local values
-            read -ra values <<< "${line#cpu* }"
-            local total=0 idle=${values[3]}
-            for v in "${values[@]}"; do total=$((total + v)); done
-            local pct
-            pct=$(echo "scale=1; (1 - $idle / $total) * 100" | bc)
-            result+=("core${core_num}:${pct}%")
-        fi
-    done < /proc/stat
-    
-    echo "${result[*]}"
+    local before after
+    before=$(cat -- "$CPU_STAT_PATH") || return 2
+    sleep "${CPU_SAMPLE_INTERVAL:-1}" || return 2
+    after=$(cat -- "$CPU_STAT_PATH") || return 2
+    python3 - "$before" "$after" <<'PY'
+import re,sys
+def parse(text):
+    return {p[0]:list(map(int,p[1:9])) for line in text.splitlines()
+            if (p:=line.split()) and re.fullmatch(r'cpu\d+',p[0]) and len(p)>=9}
+try:
+    old,new=map(parse,sys.argv[1:]);results=[]
+    for core,now in new.items():
+        if core not in old:results.append(core+':N/A');continue
+        then=old[core];total=sum(now)-sum(then);idle=now[3]+now[4]-then[3]-then[4]
+        results.append(core+(':'+format(100*(total-idle)/total,'.1f')+'%' if total>0 and 0<=idle<=total else ':N/A'))
+    print(' '.join(results))
+except ValueError:raise SystemExit(2)
+PY
 }
 ```
 
@@ -1047,7 +986,7 @@ cpu_get_per_core() {
 - Constants `readonly` after initialisation
 
 ### Communication
-- Prefer stdout for return values
+- Use stdout for pure return values; stateful functions must run in the parent shell and use output variables
 - Nameref for multiple output
 - Files for persistence
 
@@ -1063,4 +1002,4 @@ Key aspects: standardised exit codes, cleanup via trap exit and errors propagate
 
 ---
 
-*Next document: S06_02_Monitor_Implementation.md - System Monitor Implementation Details*
+*Next document: S06_P02_Monitor_Implementation.md - System Monitor Implementation Details*

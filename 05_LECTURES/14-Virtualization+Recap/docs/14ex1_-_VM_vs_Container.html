@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VM vs Container Architecture - Sisteme de Operare</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>VM vs Container Architecture - Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Sora', sans-serif;
@@ -116,7 +116,84 @@
             visibility: visible;
             opacity: 1;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -126,7 +203,7 @@
                 <i class="fas fa-server mr-3"></i>Virtual Machines vs Containers
             </h1>
             <p class="text-gray-400 text-lg">Architectural comparison and use cases</p>
-        </header>
+        </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Configuration and measurement limits</h2><p>The displayed times, memory and throughput are fixed instructional inputs with no established measured provenance. A VM exposes virtual hardware under a particular hypervisor and supported guest architecture; a container shares its host kernel. Neither has an unconditional security guarantee. User namespaces, capabilities, mounts, devices and runtime policy determine container privileges; root in a container is not automatically unprivileged on the host. Whether to retain fully specified hypothetical numbers or replace them with a reproducible benchmark remains an author decision.</p></section>
 
         <!-- Architecture Stacks Side by Side -->
         <div class="grid md:grid-cols-2 gap-6 mb-6">
@@ -143,7 +220,7 @@
                         <div class="layer layer-app rounded-lg p-3 text-center">
                             <i class="fas fa-cube text-lg mb-1"></i>
                             <div class="text-xs">App 1</div>
-                            <div class="tooltip-content absolute -top-8 left-0 right-0 bg-gray-900 text-xs p-1 rounded">Completely isolated application</div>
+                            <div class="tooltip-content absolute -top-8 left-0 right-0 bg-gray-900 text-xs p-1 rounded">Application within the guest boundary</div>
                         </div>
                         <div class="layer layer-app rounded-lg p-3 text-center">
                             <i class="fas fa-cube text-lg mb-1"></i>
@@ -214,8 +291,8 @@
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div><span class="text-gray-400">Boot time:</span> <span class="text-blue-300">~minutes</span></div>
                         <div><span class="text-gray-400">Memory:</span> <span class="text-blue-300">GB per VM</span></div>
-                        <div><span class="text-gray-400">Isolation:</span> <span class="text-green-400">Complete</span></div>
-                        <div><span class="text-gray-400">OS:</span> <span class="text-blue-300">Any</span></div>
+                        <div><span class="text-gray-400">Isolation:</span> <span class="text-green-400">Separate guest kernel; configuration-dependent</span></div>
+                        <div><span class="text-gray-400">OS:</span> <span class="text-blue-300">Supported guest ISA and hypervisor</span></div>
                     </div>
                 </div>
             </div>
@@ -317,7 +394,7 @@
             <!-- Performance Chart -->
             <div class="glass-card rounded-2xl p-5">
                 <h3 class="text-lg font-bold mb-4 flex items-center">
-                    <i class="fas fa-chart-bar mr-2 text-purple-400"></i>Comparison Performance
+                    <i class="fas fa-chart-bar mr-2 text-purple-400"></i>Performance Comparison
                 </h3>
                 <div class="h-64">
                     <canvas id="performanceChart"></canvas>
@@ -327,7 +404,7 @@
             <!-- Resource Usage Chart -->
             <div class="glass-card rounded-2xl p-5">
                 <h3 class="text-lg font-bold mb-4 flex items-center">
-                    <i class="fas fa-memorie mr-2 text-cyan-400"></i>Resource Usage
+                    <i class="fas fa-memory mr-2 text-cyan-400"></i>Resource Usage
                 </h3>
                 <div class="h-64">
                     <canvas id="resourceChart"></canvas>
@@ -338,7 +415,7 @@
         <!-- Use Case Scenarios -->
         <div class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-lightbulb mr-2 text-amber-400"></i>When to use ce?
+                <i class="fas fa-lightbulb mr-2 text-amber-400"></i>When Should Each Be Considered?
             </h3>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -346,8 +423,8 @@
                 <div class="scenario-card bg-blue-900/20 border-2 border-blue-500/30 rounded-xl p-4" onclick="selectScenario(this, 'vm')">
                     <div class="text-blue-400 font-bold mb-2"><i class="fas fa-server mr-2"></i>VM Ideal</div>
                     <ul class="text-sm text-gray-400 space-y-1">
-                        <li>• OS diferite (Linux + Windows)</li>
-                        <li>• Complete isolation required</li>
+                        <li>• Different guest operating systems, where supported</li>
+                        <li>• Separate guest kernel required; isolation depends on configuration</li>
                         <li>• Legacy applications</li>
                         <li>• Full system testing</li>
                         <li>• Security-critical workloads</li>
@@ -358,7 +435,7 @@
                     <div class="text-blue-400 font-bold mb-2"><i class="fas fa-shield-alt mr-2"></i>VM Security</div>
                     <ul class="text-sm text-gray-400 space-y-1">
                         <li>• Multi-tenant hosting</li>
-                        <li>• Atrusted code execution</li>
+                        <li>• Untrusted code: requires a specified threat model and hardened boundary</li>
                         <li>• Kernel-level isolation</li>
                         <li>• Compliance requirements</li>
                         <li>• Hardware-level separation</li>
@@ -369,7 +446,7 @@
                 <div class="scenario-card bg-green-900/20 border-2 border-green-500/30 rounded-xl p-4" onclick="selectScenario(this, 'container')">
                     <div class="text-green-400 font-bold mb-2"><i class="fab fa-docker mr-2"></i>Container Ideal</div>
                     <ul class="text-sm text-gray-400 space-y-1">
-                        <li>• Smallroservices architecture</li>
+                        <li>• Microservice architectures</li>
                         <li>• CI/CD pipelines</li>
                         <li>• Fast scaling</li>
                         <li>• Development environments</li>
@@ -432,12 +509,12 @@
                         </tr>
                         <tr class="border-b border-gray-800">
                             <td class="py-3 px-4 font-medium">Isolation</td>
-                            <td class="text-center py-3 px-4"><span class="text-green-400">Strong (hardware)</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Separate guest kernel; hypervisor boundary</span></td>
                             <td class="text-center py-3 px-4"><span class="text-amber-400">Process-level</span></td>
                         </tr>
                         <tr class="border-b border-gray-800">
                             <td class="py-3 px-4 font-medium">OS Flexibility</td>
-                            <td class="text-center py-3 px-4"><span class="text-green-400">Any OS</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Guest OS supported by the hypervisor and architecture</span></td>
                             <td class="text-center py-3 px-4"><span class="text-amber-400">Same kernel family</span></td>
                         </tr>
                         <tr class="border-b border-gray-800">
@@ -502,10 +579,10 @@
                     </div>
                     <div class="bg-gray-800/50 rounded-xl p-3">
                         <div class="font-semibold text-green-400 mb-1">cgroups (Control Groups)</div>
-                        <p class="text-xs text-gray-400">Limits: CPU, Memory, I/O, Network bandwidth</p>
+                        <p class="text-xs text-gray-400">Controllers cover CPU, memory and I/O; network policy may require additional mechanisms</p>
                     </div>
                     <div class="bg-gray-800/50 rounded-xl p-3">
-                        <div class="font-semibold text-cyan-400 mb-1">Aion File Systems</div>
+                        <div class="font-semibold text-cyan-400 mb-1">Union Filesystems</div>
                         <p class="text-xs text-gray-400">Overlay layers for efficient images (OverlayFS, AUFS)</p>
                     </div>
                 </div>
@@ -525,11 +602,11 @@
                 </div>
                 <div class="bg-gradient-to-br from-blue-900/30 to-green-900/30 border border-purple-500/30 rounded-xl p-4">
                     <div class="text-purple-400 font-bold mb-2"><i class="fas fa-shield-alt mr-2"></i>Kata Containers</div>
-                    <p class="text-sm text-gray-400">Lightweight VMs that run containers. VM security + container speed.</p>
+                    <p class="text-sm text-gray-400">Lightweight VMs that run containers. The boundary and performance depend on the guest, runtime and configuration.</p>
                 </div>
                 <div class="bg-gradient-to-br from-blue-900/30 to-green-900/30 border border-purple-500/30 rounded-xl p-4">
                     <div class="text-purple-400 font-bold mb-2"><i class="fas fa-fire mr-2"></i>Firecracker</div>
-                    <p class="text-sm text-gray-400">SmallroVMs de la AWS. Boot in ~125ms, minimal footprint. Used by Lambda and Fargate.</p>
+                    <p class="text-sm text-gray-400">Firecracker is a microVM technology. The displayed ~125 ms startup figure is an unverified illustrative input here, not a timing guarantee for this lab.</p>
                 </div>
             </div>
         </div>
@@ -541,6 +618,51 @@
     </div>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Initialize charts
         document.addEventListener('DOMContentLoaded', () => {
             initPerformanceChart();
@@ -671,6 +793,27 @@
                 containerStack.style.opacity = '1';
             }, 2000);
         }
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

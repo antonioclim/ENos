@@ -1,3 +1,24 @@
+# Lecture 07 — Synchronisation (Part2 semaphore buffer)
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C07_01_COURSE_PLAN.md)
+- [Concept Map](docs/C07_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C07_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C07_04_STUDY_GUIDE.md)
+- [07ex1 - Semaphore Operations](07ex1_-_Semaphore_Operations.html)
+- [07ex2 - Producer Consumer](07ex2_-_Producer_Consumer.html)
+- [07ex3 - Readers Writers](07ex3_-_Readers_Writers.html)
+- [Formative question bank](docs/C07_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 07
 

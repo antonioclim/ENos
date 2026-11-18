@@ -3,7 +3,7 @@
 
 Total problems: 12  
 Average time per problem: 3-5 minutes  
-Format: Reorder lines of code + identify distractors
+Format: Reorder the supplied lines of code and identify distractors. Independent steps may have more than one valid order. Use a fresh owned exercise directory for file operations; a solution is not a general-purpose cleanup script.
 
 ---
 
@@ -125,13 +125,13 @@ Level: Intermediate | Time: 3 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (3 lines + 2 distractors):
+SCRAMBLED LINES (2 required lines: choose one mkdir alternative, then tree; cd app is optional after tree):
 
    mkdir -p app/{src,tests,docs}
    tree app
    cd app
    mkdir app && mkdir src tests docs    ← DISTRACTOR 1
-   mkdir app/src app/tests app/docs     ← VALID ALTERNATIVE
+   mkdir -p app/src app/tests app/docs  ← VALID ALTERNATIVE
 ═══════════════════════════════════════════════════════════════
 ```
 
@@ -188,17 +188,18 @@ Distractor explanations:
 
 ---
 
-## PROBLEM 6: Export for Subshell
+## PROBLEM 6: Export to a New Interpreter
 
-Objective: Create a variable visible in a subshell
+Objective: Create a variable visible to a newly invoked `bash -c`. Begin with `unset PROJECT`; a parenthesised subshell already inherits ordinary shell variables.
 
 Level: Intermediate | Time: 4 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (4 lines + 1 distractor):
+SCRAMBLED LINES (4-line solution; the compact export assignment replaces two lines):
 
-   export PROJECT="OS_Lab"
+   export PROJECT
+   export PROJECT="OS_Lab"  ← COMPACT ALTERNATIVE
    bash -c 'echo "Project: $PROJECT"'
    echo "In current shell: $PROJECT"
    PROJECT="OS_Lab"
@@ -230,13 +231,13 @@ Distractor explanation: `$PROJECT="OS_Lab"` tries to execute the value of $PROJE
 
 ## PROBLEM 7: Adding to .bashrc
 
-Objective: Add an alias and apply the changes
+Objective: Add an alias and apply the changes in an interactive Bash session where `ll` is not already defined. Use a disposable exercise account or back up the configuration before editing it.
 
 Level: Intermediate | Time: 4 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (4 lines + 1 distractor):
+SCRAMBLED LINES (3 required lines, 1 optional temporary alias and 1 distractor):
 
    source ~/.bashrc
    alias ll='ls -la'
@@ -270,11 +271,11 @@ Level: Advanced | Time: 5 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (3 lines + 2 distractors):
+SCRAMBLED LINES (3 physical solution lines forming 2 command blocks, plus 2 distractors):
 
-   find . -name "*.tmp" -type f
-   find . -name "*.tmp" -delete
-   echo ".tmp files deleted"
+   find . -depth -type f -name "*.tmp" -print
+   find . -depth -type f -name "*.tmp" -delete &&
+       echo "Selected .tmp regular files deleted"
    rm *.tmp                    ← DISTRACTOR 1 (not recursive!)
    find . -name "*.tmp" | rm   ← DISTRACTOR 2 (wrong syntax!)
 ═══════════════════════════════════════════════════════════════
@@ -284,14 +285,16 @@ SCRAMBLED LINES (3 lines + 2 distractors):
 <summary>🔑 SOLUTION</summary>
 
 ```bash
-find . -name "*.tmp" -type f
-find . -name "*.tmp" -delete
-echo ".tmp files deleted"
+find . -depth -type f -name "*.tmp" -print
+find . -depth -type f -name "*.tmp" -delete &&
+    echo "Selected .tmp regular files deleted"
 ```
+
+The preview and deletion use the same scope and regular-file predicate. Review the preview in an owned exercise directory. They are separate traversals, so concurrent changes remain possible.
 
 Distractor explanations:
 - DISTRACTOR 1: `rm *.tmp` only deletes from current directory, not recursively
-- DISTRACTOR 2: `rm` doesn't read from stdin like that - should be `xargs rm` or `-exec rm`
+- DISTRACTOR 2: `rm` doesn't read from stdin like that - use a deliberately designed NUL-delimited `find -print0 | xargs -0` route or a quoted `-exec ... {} +` action, not a plain newline pipe
 </details>
 
 ---
@@ -333,17 +336,17 @@ Distractor explanation: `$? -eq 0` means success, not `$? -eq 1`!
 
 ## PROBLEM 10: Complex Globbing
 
-Objective: List only .txt and .md files from the current directory
+Objective: List the .txt and .md entries themselves in the current directory. The fixture contains at least one regular file of each type and no matching directories; shell globbing alone does not test file type.
 
 Level: Intermediate | Time: 3 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (2 correct lines + 2 alternatives + 1 distractor):
+SCRAMBLED LINES (2-line solution: one echo and one ls alternative, plus 2 distractors):
 
-   ls *.txt *.md
-   ls *.{txt,md}
-   ls -la | grep -E "\.(txt|md)$"  ← VALID ALTERNATIVE
+   ls -d -- *.txt *.md
+   ls -d -- *.{txt,md}
+   ls -la | grep -E "\.(txt|md)$"  ← DISTRACTOR (parses a formatted listing)
    echo "Text and markdown files:"
    ls *.[txt,md]               ← DISTRACTOR (wrong syntax!)
 ═══════════════════════════════════════════════════════════════
@@ -354,13 +357,13 @@ SCRAMBLED LINES (2 correct lines + 2 alternatives + 1 distractor):
 
 ```bash
 echo "Text and markdown files:"
-ls *.txt *.md
+ls -d -- *.txt *.md
 ```
 
 OR:
 ```bash
 echo "Text and markdown files:"
-ls *.{txt,md}
+ls -d -- *.{txt,md}
 ```
 
 Distractor explanation: `[txt,md]` is a character class, it would match a single character from the set t,x,m,d,comma - not extensions!
@@ -376,7 +379,7 @@ Level: Advanced | Time: 5 min
 
 ```
 ═══════════════════════════════════════════════════════════════
-SCRAMBLED LINES (6 lines + 1 distractor):
+SCRAMBLED LINES (7 physical lines, including the heredoc delimiters, plus 1 distractor):
 
    #!/bin/bash
    echo "Date: $(date)"

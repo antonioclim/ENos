@@ -1,5 +1,9 @@
 # S07 Instructor Guide — Final Evaluation Session
 
+## Current boundary
+
+Use [the local assessment contract](../homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md) before this historical session plan. Schedules, pass/participation rules and score consequences require the author's policy. No grade publication, external upload or institutional entry is authorised by running local diagnostics.
+
 ## Pre-Evaluation Preparation
 
 ### One Week Before
@@ -39,7 +43,7 @@
 ## Oral Verification Protocol
 
 ### Purpose
-Verify that students understand their own submissions and did not use AI/plagiarism.
+Observe whether students can explain and adapt their submissions. This does not, by itself, prove provenance or the absence of assistance.
 
 ### Procedure
 
@@ -61,10 +65,10 @@ Verify that students understand their own submissions and did not use AI/plagiar
 ## Grading Workflow
 
 ```
-1. Automated grading (autograder) → Base score
+1. Automated diagnostics → Per-check evidence and NOT_RUN states
 2. Manual review (edge cases) → Adjustments
-3. Oral verification → Authenticity check
-4. Final grade calculation → GRADING_POLICY.md formula
+3. Oral explanation → Recorded evidence of demonstrated understanding
+4. Explicit approved policy → Validated component aggregation
 5. Grade entry → University system
 ```
 

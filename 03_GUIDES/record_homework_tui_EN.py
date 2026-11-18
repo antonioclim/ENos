@@ -12,10 +12,11 @@
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 An elegant Matrix-style TUI for recording homework with asciinema.
-Features: RSA cryptographic signatures, automatic upload, beautiful animations.
+Features: terminal recording, legacy metadata tokens, optional upload and Matrix animations.
+Legacy public-key encryption does not authenticate the recording content.
 
-Requirements: Python 3.8+, asciinema, openssl, sshpass
-Auto-install: rich, questionary (Python packages)
+Requirements: Python 3.8+, asciinema CLI 2.x (asciicast v2), openssl, sshpass
+Python dependencies: rich, questionary (install in a virtual environment)
 
 Changelog:
     1.1.0 (2025-01): Type hints, improved docstrings, robust error handling
@@ -25,6 +26,9 @@ Changelog:
 from __future__ import annotations
 
 import os
+import argparse
+import shlex
+import importlib.util
 import sys
 import subprocess
 import tempfile
@@ -87,8 +91,14 @@ def load_config() -> Dict[str, Any]:
     
     try:
         with config_path.open('r', encoding='utf-8') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, IOError, PermissionError):
+            data = json.load(f)
+            if not isinstance(data, dict):
+                return {}
+            validators = {'surname': validate_surname, 'firstname': validate_firstname,
+                          'group': validate_group, 'specialization_key': lambda v: v in SPECIALIZATIONS}
+            return {key: value for key, value in data.items()
+                    if key in validators and isinstance(value, str) and validators[key](value)}
+    except (json.JSONDecodeError, OSError, UnicodeError):
         return {}
 
 
@@ -117,123 +127,68 @@ def save_config(data: Dict[str, str]) -> bool:
 
 
 # 
-# AUTO-INSTALL DEPENDENCIES
+# CHECK DEPENDENCIES
 # 
 
 def install_python_packages() -> None:
-    """
-    Install required Python packages if missing.
-    
-    Raises:
-        SystemExit: If installation fails critically.
-    """
-    # Check if pip is installed, if not - install it
-    try:
-        subprocess.run(
-            [sys.executable, '-m', 'pip', '--version'],
-            capture_output=True,
-            check=True
-        )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("\n\033[33m⚡ Installing pip...\033[0m\n")
-        subprocess.run(['sudo', 'apt', 'update', '-qq'], check=True)
-        subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-pip'], check=True)
-        print("\033[32m✓ pip has been installed!\033[0m\n")
-    
-    required: List[str] = ['rich', 'questionary']
-    missing: List[str] = []
-    
-    for pkg in required:
-        try:
-            __import__(pkg)
-        except ImportError:
-            missing.append(pkg)
-    
+    """Historical name: check dependencies without altering the interpreter or OS."""
+    missing = [name for name in ('rich', 'questionary') if importlib.util.find_spec(name) is None]
     if missing:
-        print(f"\n\033[33m⚡ Installing Python packages: {', '.join(missing)}...\033[0m\n")
-        
-        # Detect pip version to decide whether to use --break-system-packages
-        pip_version_result = subprocess.run(
-            [sys.executable, '-m', 'pip', '--version'],
-            capture_output=True,
-            text=True
-        )
-        pip_version_str = pip_version_result.stdout.split()[1] if pip_version_result.returncode == 0 else "0"
-        
-        # Extract major version
-        try:
-            pip_major_version = int(pip_version_str.split('.')[0])
-        except (ValueError, IndexError):
-            pip_major_version = 0
-        
-        # --break-system-packages is only needed for pip >= 23 on externally-managed systems
-        pip_cmd: List[str] = [sys.executable, '-m', 'pip', 'install', '--quiet', '--user']
-        
-        # Try first with --user (works on all versions)
-        try:
-            subprocess.run(pip_cmd + missing, check=True)
-        except subprocess.CalledProcessError:
-            # If --user fails, try without (may require sudo)
-            try:
-                subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet'] + missing, check=True)
-            except subprocess.CalledProcessError:
-                # Last attempt: with --break-system-packages (pip 23+)
-                if pip_major_version >= 23:
-                    subprocess.run(
-                        [sys.executable, '-m', 'pip', 'install', '--quiet', '--break-system-packages'] + missing,
-                        check=True
-                    )
-                else:
-                    # Install through apt as fallback
-                    print("\033[33m⚡ Installing through apt...\033[0m\n")
-                    apt_packages: List[str] = ['python3-rich']
-                    subprocess.run(['sudo', 'apt', 'install', '-y'] + apt_packages, check=False)
-                    subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', 'questionary'], check=True)
-        
-        print("\033[32m✓ Python packages have been installed!\033[0m\n")
-        
-        # Re-import after installation - add user path to sys.path if needed
-        import site
-        user_site = site.getusersitepackages()
-        if user_site not in sys.path:
-            sys.path.insert(0, user_site)
-        
-        # Re-import modules
-        for pkg in missing:
-            globals()[pkg] = __import__(pkg)
+        print('Missing Python packages: ' + ', '.join(missing), file=sys.stderr)
+        print('Create and activate a virtual environment, then run:', file=sys.stderr)
+        print('  python -m pip install rich questionary', file=sys.stderr)
+        raise SystemExit(1)
+
+
+def require_asciinema_v2() -> None:
+    """Reject unsupported output formats before the student's recording starts."""
+    try:
+        result = subprocess.run(['asciinema', '--version'], check=True,
+                                capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError) as error:
+        print('Cannot determine asciinema version: ' + str(error), file=sys.stderr)
+        raise SystemExit(1) from error
+    version = (result.stdout + '\n' + result.stderr).strip()
+    if re.fullmatch(r'asciinema 2\.[0-9]+(?:\.[0-9]+)?(?:[-+][0-9A-Za-z.-]+)?', version) is None:
+        print('This recorder requires asciinema CLI 2.x (asciicast v2). Found: ' + version,
+              file=sys.stderr)
+        print('CLI 3.x writes a different format. Use the supported 2.x lab package; '
+              'no recording was started and no package was changed.', file=sys.stderr)
+        raise SystemExit(1)
 
 
 def check_system_packages() -> None:
-    """
-    Check and install system packages if missing.
-    
-    Packages checked: asciinema, openssl, sshpass
-    """
-    packages: Dict[str, str] = {
-        'asciinema': 'asciinema',
-        'openssl': 'openssl',
-        'sshpass': 'sshpass'
-    }
-    
-    missing: List[str] = []
-    for cmd, pkg in packages.items():
-        if shutil.which(cmd) is None:
-            missing.append(pkg)
-    
+    """Check only the commands needed for the selected mode."""
+    required = ['asciinema'] + ([] if OFFLINE else ['openssl', 'sshpass', 'scp'])
+    missing = [name for name in required if shutil.which(name) is None]
     if missing:
-        print(f"\n\033[33m⚡ Installing system packages: {', '.join(missing)}...\033[0m\n")
-        subprocess.run(['sudo', 'apt', 'update', '-qq'], check=True)
-        subprocess.run(['sudo', 'apt', 'install', '-y'] + missing, check=True)
-        print("\033[32m✓ System packages have been installed!\033[0m\n")
+        print('Missing system commands: ' + ', '.join(missing), file=sys.stderr)
+        print('Ubuntu: sudo apt install asciinema openssl sshpass openssh-client', file=sys.stderr)
+        raise SystemExit(1)
+    require_asciinema_v2()
 
 
-# Run installation checks before importing rich/questionary
-try:
-    install_python_packages()
+def parse_options():
+    parser = argparse.ArgumentParser(description="Record an asciicast v2 homework. Legacy tokens do not authenticate content.")
+    parser.add_argument('--offline', action='store_true', help='Local practice only; no token, connection or upload')
+    parser.add_argument('--port', type=int, help='Instructor-confirmed SSH port (historical copies disagree)')
+    args = parser.parse_args()
+    if args.port is not None and not 1 <= args.port <= 65535:
+        parser.error('--port must be between 1 and 65535')
+    if not args.offline and args.port is None:
+        parser.error('Use --offline, or supply the confirmed --port; 1001/1002 is an open configuration decision.')
+    return args
+
+OFFLINE = False
+if __name__ == '__main__':
+    _options = parse_options()
+    OFFLINE = _options.offline
+    if _options.port is not None:
+        SCP_PORT = str(_options.port)
+
+install_python_packages()
+if __name__ == "__main__":
     check_system_packages()
-except Exception as e:
-    print(f"\033[31m✗ Installation error: {e}\033[0m")
-    sys.exit(1)
 
 # Now import the packages
 from rich.console import Console
@@ -517,7 +472,7 @@ def validate_surname(text: str) -> bool:
     """
     if not text:
         return False
-    if not re.match(r'^[a-zA-Z-]+$', text):
+    if not re.fullmatch(r'[a-zA-Z-]+', text):
         return False
     if text.startswith('-') or text.endswith('-'):
         return False
@@ -553,7 +508,7 @@ def validate_group(text: str) -> bool:
         >>> validate_group("123")
         False
     """
-    return bool(re.match(r'^\d{4}$', text))
+    return bool(re.fullmatch(r'[0-9]{4}', text))
 
 
 def validate_homework(text: str) -> bool:
@@ -574,7 +529,7 @@ def validate_homework(text: str) -> bool:
         >>> validate_homework("08a")
         False
     """
-    return bool(re.match(r'^0[1-7][a-zA-Z]$', text))
+    return bool(re.fullmatch(r'0[1-7][a-zA-Z]', text))
 
 
 # 
@@ -755,6 +710,8 @@ def start_recording(filepath: str, data: Dict[str, str]) -> None:
         filepath: Full path to the .cast file
         data: Dict with student data
     """
+    if Path(filepath).exists():
+        raise FileExistsError("A recording with this name already exists; preserve/move it before reusing the name.")
     show_section("🎬 RECORDING SESSION", "Type 'STOP_homework' to stop")
     
     # Create temporary bashrc with alias
@@ -806,7 +763,7 @@ echo ""
     # Run asciinema
     try:
         subprocess.run(
-            ['asciinema', 'rec', '--overwrite', filepath, '-c', f'bash --rcfile {temp_rc.name}'],
+            ['asciinema', 'rec', filepath, '-c', shlex.join(['bash', '--rcfile', temp_rc.name])],
             check=True
         )
     finally:
@@ -819,16 +776,16 @@ echo ""
 
 def generate_signature(filepath: str, data: Dict[str, str]) -> str:
     """
-    Generate cryptographic signature for the recording.
+    Generate legacy metadata token for the recording.
     
     Args:
         filepath: Path to the .cast file
         data: Dict with student data
         
     Returns:
-        Data string that was signed
+        Metadata string that was encrypted (not a digital signature)
     """
-    show_section("🔐 CRYPTOGRAPHIC SIGNATURE", "Securing the homework...")
+    show_section("🔐 LEGACY METADATA TOKEN", "Public-key encryption; not a signature or content-integrity proof")
     
     def do_sign() -> str:
         # Get file information
@@ -867,10 +824,10 @@ def generate_signature(filepath: str, data: Dict[str, str]) -> str:
             os.unlink(temp_key.name)
     
     # Execute with spinner
-    signed_data: str = spinner_task("Generating RSA signature...", do_sign)
+    signed_data: str = spinner_task("Generating legacy metadata token...", do_sign)
     
-    show_success("Cryptographic signature added!")
-    show_info(f"Signed data: {signed_data[:50]}...")
+    show_success("Legacy token added. Recording authenticity remains UNVERIFIED.")
+    show_info(f"Legacy metadata: {signed_data[:50]}...")
     
     return signed_data
 
@@ -886,6 +843,9 @@ def upload_homework(filepath: str, data: Dict[str, str]) -> bool:
     Returns:
         True if upload succeeded, False otherwise
     """
+    if OFFLINE:
+        show_info("Offline mode: local recording only.")
+        return False
     show_section("📤 UPLOADING TO SERVER", f"Destination: {SCP_SERVER}:{SCP_PORT}")
     
     filename: str = os.path.basename(filepath)
@@ -923,8 +883,7 @@ def upload_homework(filepath: str, data: Dict[str, str]) -> bool:
                     [
                         'sshpass', '-p', SCP_PASSWORD,
                         'scp', '-P', SCP_PORT,
-                        '-o', 'StrictHostKeyChecking=no',
-                        '-o', 'UserKnownHostsFile=/dev/null',
+                        '-o', 'StrictHostKeyChecking=yes',
                         '-o', 'LogLevel=ERROR',
                         filepath,
                         f"{scp_user}@{SCP_SERVER}:{scp_dest}/"
@@ -1020,6 +979,26 @@ def show_summary(data: Dict[str, str], filepath: str, upload_success: bool) -> N
     console.print(table)
 
 
+
+def add_recording_metadata(filepath: str, data: Dict[str, str]) -> None:
+    path = Path(filepath)
+    with path.open(encoding='utf-8') as stream:
+        header = json.loads(stream.readline())
+        events = stream.read()
+    if not isinstance(header, dict) or type(header.get('version')) is not int or header['version'] != 2:
+        raise ValueError('Expected asciicast v2. Local recording retained.')
+    header.update(student_name=data['surname'] + ' ' + data['firstname'], student_group=data['group'],
+                  seminar=int(data['homework'][:2]), homework=data['homework'])
+    fd, tmp = tempfile.mkstemp(prefix='.' + path.name + '.', dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+            stream.write(json.dumps(header, ensure_ascii=False) + '\n' + events)
+        os.chmod(tmp, path.stat().st_mode & 0o777)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp): os.unlink(tmp)
+
+
 def main() -> None:
     """Main entry point."""
     try:
@@ -1060,17 +1039,22 @@ def main() -> None:
         # Start recording
         start_recording(filepath, data)
         
-        # Generate signature
-        console.print()
-        generate_signature(filepath, data)
+        # Add self-declared identity labels; no authentication claim.
+        add_recording_metadata(filepath, data)
+        if not OFFLINE:
+            console.print()
+            show_warning('Legacy token is not a signature. Producer/verifier compatibility remains unresolved.')
+            generate_signature(filepath, data)
         
         # Upload
         console.print()
-        upload_success: bool = upload_homework(filepath, data)
+        upload_success: bool = False if OFFLINE else upload_homework(filepath, data)
         
         # Summary
         console.print()
         show_summary(data, filepath, upload_success)
+        if not OFFLINE and not upload_success:
+            raise SystemExit(1)
         
         # Final message
         console.print()
@@ -1092,6 +1076,8 @@ def main() -> None:
     except Exception as e:
         console.print()
         show_error(f"An error occurred: {e}")
+        if "filepath" in locals():
+            show_warning(f"Any completed recording is retained locally: {filepath}. Submission is unconfirmed.")
         sys.exit(1)
 
 

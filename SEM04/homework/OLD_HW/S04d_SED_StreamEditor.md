@@ -1,5 +1,7 @@
 # S04_TC03 - SED - Stream Editor
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Lab observation:** when working with `sed`/`awk`, most "bugs" are actually quoting and escaping issues. Test on a small file first, then scale. And yes, you'll almost certainly forget a backslash on your first attempt 🙂
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory Material - Seminar 4 (Redistributed)
@@ -38,7 +40,7 @@ At the end of this laboratory, the student will be able to:
 
 ### 2.1 Syntax
 
-```bash
+```text
 s/pattern/replacement/flags
 
 # Flags
@@ -91,7 +93,7 @@ sed 's/^/PREFIX: /' file.txt            # PREFIX: line
 sed 's/$/ :SUFFIX/' file.txt            # line :SUFFIX
 
 # & = the entire match
-sed 's/[0-9]*/(&)/' file.txt            # puts numbers in parentheses
+sed 's/[0-9][0-9]*/(&)/' file.txt        # wraps the first nonempty digit sequence
 ```
 
 ---
@@ -193,9 +195,13 @@ sed -f commands.sed file.txt
 
 ---
 
+A backup suffix may overwrite an existing `.bak` file; use a fresh owned fixture
+or check for collisions before `sed -i.bak`. GNU-only forms here include step
+addresses, case modifiers and extended BRE operators.
+
 ## 6. Important Options
 
-```bash
+```text
 -n      # Suppress implicit output (use with p)
 -i      # In-place editing (modifies the file)
 -i.bak  # In-place with backup
@@ -237,7 +243,7 @@ sed 's/[ \t]*$//' file.txt
 sed '/^$/d' file.txt
 
 # Compress multiple empty lines
-sed '/^$/N;/^\n$/d' file.txt
+sed '/./,/^$/!d' file.txt  # keep at most one blank line after a nonempty run; drop leading blanks
 
 # Remove excess whitespace
 sed 's/  */ /g' file.txt
@@ -249,8 +255,8 @@ sed 's/  */ /g' file.txt
 # DOS to Unix (remove CR)
 sed 's/\r$//' file.txt
 
-# Unix to DOS (add CR)
-sed 's/$\r/' file.txt
+# Normalise text records to CRLF (GNU sed); use a byte-level tool if preserving an unterminated final line is required
+sed 's/\r$//; s/$/\r/' file.txt
 
 # Lowercase to Uppercase (first letter)
 sed 's/^\(.\)/\U\1/' file.txt
@@ -260,7 +266,7 @@ sed 's/^\(.\)/\U\1/' file.txt
 
 ## Cheat Sheet
 
-```bash
+```text
 # SUBSTITUTION
 s/old/new/          first occurrence
 s/old/new/g         all
@@ -309,14 +315,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

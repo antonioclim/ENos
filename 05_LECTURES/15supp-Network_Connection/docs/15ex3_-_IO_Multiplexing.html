@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I/O Multiplexing Visualizer | course 15 - OS Networking</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>I/O Multiplexing Visualiser | course 15 - OS Networking</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #0a0a0f;
@@ -217,7 +217,84 @@
             background: #4b5563;
             border-radius: 3px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
@@ -229,7 +306,7 @@
                         <i class="fas fa-layer-group text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">I/O Multiplexing Visualizer</h1>
+                        <h1 class="text-xl font-bold">I/O Multiplexing Visualiser</h1>
                         <p class="text-sm text-gray-400">Lecture 15 • select() vs poll() vs epoll()</p>
                     </div>
                 </div>
@@ -243,7 +320,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Illustrative cost model</h2><p>The chart and cards use select=2N, poll=1.9N and epoll=5+3R cost units, where N is watched connections and R is ready connections. These constants are instructional inputs without measured provenance. The chart holds the currently selected ready fraction fixed. For the select example, descriptors are assumed consecutive from 3, so the largest is N+2 and must be below the common Linux/glibc FD_SETSIZE=1024. This is a descriptor-value bound, not a universal connection-count limit. Real costs depend on workload, changes to the interest set and returned events.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Problem Statement -->
@@ -253,17 +330,17 @@
                     <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg mb-2">The Problem: Server cu Multiple Conexiuni</h2>
-                    <p class="text-gray-400 text-sm mb-3">how may un singur thread to serveasca simultan mii de clienti without to blocheze?</p>
+                    <h2 class="font-bold text-lg mb-2">The Problem: A Server with Multiple Connections</h2>
+                    <p class="text-gray-400 text-sm mb-3">How can one thread handle many connections without blocking on one idle connection?</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="code-block">
                             <div class="code-header text-red-400">
                                 <i class="fas fa-times-circle mr-2"></i>Blocking I/O (WRONG)
                             </div>
                             <pre class="p-4 text-xs mono text-gray-300"><code>while (true) {
-    data = recv(client1);  <span class="text-red-400">// BLOCAT aici!</span>
-    <span class="text-gray-500">// Nu may servi client2, client3...</span>
-    <span class="text-gray-500">// pana client1 send date</span>
+    data = recv(client1);  <span class="text-red-400">// Blocked here</span>
+    <span class="text-gray-500">// Cannot serve client2, client3... in this blocking sequence</span>
+    <span class="text-gray-500">// until client1 provides data or the call completes for another reason</span>
 }</code></pre>
                         </div>
                         <div class="code-block">
@@ -273,7 +350,7 @@
                             <pre class="p-4 text-xs mono text-gray-300"><code>while (true) {
     ready = <span class="text-green-400">wait_for_any</span>(clients);
     for (fd in ready) {
-        handle(fd);  <span class="text-green-400">// only cele ready!</span>
+        handle(fd);  <span class="text-green-400">// only the ready descriptors</span>
     }
 }</code></pre>
                         </div>
@@ -329,7 +406,7 @@
                         </div>
                         
                         <div class="mb-4">
-                            <p class="text-sm text-gray-400 mb-3">fd_set este un bitmap - fiecare bit reprezinta un file descriptor:</p>
+                            <p class="text-sm text-gray-400 mb-3">An fd_set represents a descriptor set; in this bitmap illustration each bit corresponds to a file descriptor:</p>
                             <div class="bg-gray-900/50 rounded-xl p-4 relative overflow-hidden">
                                 <div id="selectScanIndicator" class="scan-indicator hidden"></div>
                                 <div class="flex items-center gap-2 mb-2">
@@ -346,19 +423,19 @@
                         </div>
 
                         <div class="code-block">
-                            <div class="code-header text-amber-400">Cod C - select()</div>
+                            <div class="code-header text-amber-400">C Code — select()</div>
                             <pre class="p-4 text-xs mono text-gray-300 overflow-x-auto"><code>fd_set readfds;
 FD_ZERO(&readfds);
-FD_SET(fd1, &readfds);  <span class="text-gray-500">// Seteaza bitul for fd1</span>
+FD_SET(fd1, &readfds);  <span class="text-gray-500">// Set the bit for fd1</span>
 FD_SET(fd2, &readfds);
 FD_SET(fd3, &readfds);
 
 <span class="text-amber-400">select</span>(maxfd+1, &readfds, NULL, NULL, timeout);
 
-<span class="text-gray-500">// after select, check all fd-urile</span>
+<span class="text-gray-500">// after select, inspect the returned descriptor sets</span>
 if (FD_ISSET(fd1, &readfds)) handle(fd1);
 if (FD_ISSET(fd2, &readfds)) handle(fd2);
-<span class="text-gray-500">// ... check fiecare!</span></code></pre>
+<span class="text-gray-500">// ... check every descriptor</span></code></pre>
                         </div>
 
                         <div class="mt-4 grid grid-cols-2 gap-3">
@@ -366,17 +443,17 @@ if (FD_ISSET(fd2, &readfds)) handle(fd2);
                                 <p class="text-xs font-semibold text-red-400 mb-2">Disadvantages:</p>
                                 <ul class="text-xs text-gray-300 space-y-1">
                                     <li>• FD_SETSIZE Limit (1024)</li>
-                                    <li>• Scans ALL fds-urile: O(n)</li>
-                                    <li>• fd_set modified, must reconstruit</li>
-                                    <li>• Copies entire structure la fiecare apel</li>
+                                    <li>• Scans the supplied descriptor range in this model</li>
+                                    <li>• fd_set is modified; rebuild or copy it before the next call</li>
+                                    <li>• Passes the descriptor sets again on each call</li>
                                 </ul>
                             </div>
                             <div class="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
                                 <p class="text-xs font-semibold text-green-400 mb-2">Advantages:</p>
                                 <ul class="text-xs text-gray-300 space-y-1">
                                     <li>• Portable (POSIX standard)</li>
-                                    <li>• Simple de inteles</li>
-                                    <li>• Available everywhere</li>
+                                    <li>• Simple interface for small descriptor sets</li>
+                                    <li>• Widely available on POSIX platforms</li>
                                 </ul>
                             </div>
                         </div>
@@ -395,7 +472,7 @@ if (FD_ISSET(fd2, &readfds)) handle(fd2);
                         </div>
                         
                         <div class="mb-4">
-                            <p class="text-sm text-gray-400 mb-3">pollfd array - fiecare element are fd, events cerute, and events returnate:</p>
+                            <p class="text-sm text-gray-400 mb-3">Each pollfd array entry contains a descriptor, requested events and returned events:</p>
                             <div class="bg-gray-900/50 rounded-xl p-4">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-xs">
@@ -417,7 +494,7 @@ if (FD_ISSET(fd2, &readfds)) handle(fd2);
                         </div>
 
                         <div class="code-block">
-                            <div class="code-header text-purple-400">Cod C - poll()</div>
+                            <div class="code-header text-purple-400">C Code — poll()</div>
                             <pre class="p-4 text-xs mono text-gray-300 overflow-x-auto"><code>struct pollfd fds[MAX_CLIENTS];
 fds[0].fd = fd1; fds[0].events = POLLIN;
 fds[1].fd = fd2; fds[1].events = POLLIN;
@@ -435,20 +512,20 @@ for (int i = 0; i < nfds; i++) {
 
                         <div class="mt-4 grid grid-cols-2 gap-3">
                             <div class="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                                <p class="text-xs font-semibold text-green-400 mb-2">Advantages fata de select():</p>
+                                <p class="text-xs font-semibold text-green-400 mb-2">Advantages Relative to select():</p>
                                 <ul class="text-xs text-gray-300 space-y-1">
-                                    <li>• Nu are limita FD_SETSIZE</li>
-                                    <li>• Nu must reconstruit array-ul</li>
+                                    <li>• Not constrained by the fd_set FD_SETSIZE bound</li>
+                                    <li>• The input descriptors/events can be reused; revents is refreshed by poll()</li>
                                     <li>• events/revents separate</li>
-                                    <li>• Mai curat API</li>
+                                    <li>• An array-based API</li>
                                 </ul>
                             </div>
                             <div class="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
                                 <p class="text-xs font-semibold text-red-400 mb-2">Still problematic:</p>
                                 <ul class="text-xs text-gray-300 space-y-1">
-                                    <li>• Tot O(n) for scan</li>
+                                    <li>• Still scans the supplied array</li>
                                     <li>• Copies array on each call</li>
-                                    <li>• Does not scale to 100k+ connections</li>
+                                    <li>• Large arrays can be costly; practical capacity needs workload measurements</li>
                                 </ul>
                             </div>
                         </div>
@@ -463,11 +540,11 @@ for (int i = 0; i < nfds; i++) {
                                 <i class="fas fa-bolt text-emerald-400"></i>
                                 epoll() - Event-based (Linux)
                             </h3>
-                            <span class="complexity-badge bg-emerald-500/20 text-emerald-400">O(1) per ready</span>
+                            <span class="complexity-badge bg-emerald-500/20 text-emerald-400">Event delivery proportional to returned events in this simplified model</span>
                         </div>
                         
                         <div class="mb-4">
-                            <p class="text-sm text-gray-400 mb-3">epoll return only fd-urile ready - nu scans all lista!</p>
+                            <p class="text-sm text-gray-400 mb-3">epoll_wait returns ready events from the registered interest set; its costs still depend on registration, wakeups and delivered events.</p>
                             <div class="bg-gray-900/50 rounded-xl p-4">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
@@ -477,9 +554,9 @@ for (int i = 0; i < nfds; i++) {
                                         </div>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-gray-500 mb-2">Ready List (only cele active!):</p>
+                                        <p class="text-xs text-gray-500 mb-2">Ready List (ready events):</p>
                                         <div id="epollReadyList" class="flex gap-1 flex-wrap min-h-[40px] bg-emerald-500/10 rounded-lg p-2">
-                                            <span class="text-gray-500 text-xs">Astept evenimente...</span>
+                                            <span class="text-gray-500 text-xs">Waiting for events...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -487,7 +564,7 @@ for (int i = 0; i < nfds; i++) {
                         </div>
 
                         <div class="code-block">
-                            <div class="code-header text-emerald-400">Cod C - epoll()</div>
+                            <div class="code-header text-emerald-400">C Code — epoll()</div>
                             <pre class="p-4 text-xs mono text-gray-300 overflow-x-auto"><code>int epfd = <span class="text-emerald-400">epoll_create1</span>(0);
 
 struct epoll_event ev;
@@ -499,7 +576,7 @@ ev.data.fd = fd1;
 struct epoll_event events[MAX_EVENTS];
 int n = <span class="text-emerald-400">epoll_wait</span>(epfd, events, MAX_EVENTS, timeout);
 
-<span class="text-gray-500">// events[] contains only fd-urile ready!</span>
+<span class="text-gray-500">// events[] contains the returned ready events</span>
 for (int i = 0; i < n; i++) {
     handle(events[i].data.fd);  <span class="text-emerald-400">// Direct access!</span>
 }</code></pre>
@@ -507,20 +584,20 @@ for (int i = 0; i < n; i++) {
 
                         <div class="mt-4 p-4 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-xl border border-emerald-500/30">
                             <p class="text-sm font-semibold text-emerald-400 mb-2">
-                                <i class="fas fa-star mr-2"></i>Why epoll wins la scala mare?
+                                <i class="fas fa-star mr-2"></i>Why Can epoll Help with Large Interest Sets?
                             </p>
                             <div class="grid grid-cols-3 gap-4 text-xs text-gray-300">
                                 <div>
-                                    <p class="text-emerald-400 font-semibold">1. O(1) per ready FD</p>
-                                    <p>Nu scans all lista - primeste direct lista ready</p>
+                                    <p class="text-emerald-400 font-semibold">1. Ready-Event Delivery</p>
+                                    <p>Retrieve ready events instead of submitting the whole interest set on every wait</p>
                                 </div>
                                 <div>
                                     <p class="text-emerald-400 font-semibold">2. Kernel-side storage</p>
-                                    <p>FD-urile stau in kernel, nu se copy la fiecare apel</p>
+                                    <p>The interest set is retained in the kernel; returned events still cross the interface</p>
                                 </div>
                                 <div>
                                     <p class="text-emerald-400 font-semibold">3. Edge/Level trigger</p>
-                                    <p>Control fin on notificarilor</p>
+                                    <p>Explicit level-triggered or edge-triggered notification semantics</p>
                                 </div>
                             </div>
                         </div>
@@ -546,7 +623,7 @@ for (int i = 0; i < n; i++) {
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-400 block mb-2">% Conexiuni Activee</label>
+                            <label class="text-xs text-gray-400 block mb-2">Ready Connections (%)</label>
                             <div class="flex items-center gap-2">
                                 <input type="range" id="activePercent" min="1" max="50" value="10" class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="activePercentValue" class="text-lg font-bold text-green-400 w-12 text-right">10%</span>
@@ -555,7 +632,7 @@ for (int i = 0; i < n; i++) {
                     </div>
 
                     <div class="bg-gray-900/50 rounded-xl p-4 mb-4">
-                        <p class="text-xs text-gray-400 mb-3">Clienti conectati (click for a activa/dezactiva):</p>
+                        <p class="text-xs text-gray-400 mb-3">Connected Clients (click to toggle readiness):</p>
                         <div id="clientGrid" class="server-container">
                             <!-- Generated by JS -->
                         </div>
@@ -573,7 +650,7 @@ for (int i = 0; i < n; i++) {
                             </div>
                         </div>
                         <div class="text-gray-400">
-                            Activee: <span id="activeCount" class="text-emerald-400 font-bold">5</span> / <span id="totalCount">50</span>
+                            Ready: <span id="activeCount" class="text-emerald-400 font-bold">5</span> / <span id="totalCount">50</span>
                         </div>
                     </div>
                 </div>
@@ -592,15 +669,15 @@ for (int i = 0; i < n; i++) {
                     <div class="grid grid-cols-3 gap-3">
                         <div class="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-center">
                             <p class="text-2xl font-bold text-amber-400" id="selectTime">0</p>
-                            <p class="text-xs text-gray-400">select() μs</p>
+                            <p class="text-xs text-gray-400">select() model units</p>
                         </div>
                         <div class="p-3 bg-purple-500/10 rounded-lg border border-purple-500/30 text-center">
                             <p class="text-2xl font-bold text-purple-400" id="pollTime">0</p>
-                            <p class="text-xs text-gray-400">poll() μs</p>
+                            <p class="text-xs text-gray-400">poll() model units</p>
                         </div>
                         <div class="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/30 text-center">
                             <p class="text-2xl font-bold text-emerald-400" id="epollTime">0</p>
-                            <p class="text-xs text-gray-400">epoll() μs</p>
+                            <p class="text-xs text-gray-400">epoll() model units</p>
                         </div>
                     </div>
                 </div>
@@ -645,8 +722,8 @@ for (int i = 0; i < n; i++) {
                     <div class="mt-4 p-3 bg-gray-800/50 rounded-lg">
                         <p class="text-xs text-gray-400">
                             <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-                            La <span id="connectionNote" class="text-white font-semibold">50</span> connections cu <span id="activeNote" class="text-emerald-400 font-semibold">5</span> active, 
-                            epoll processes only <span class="text-emerald-400 font-semibold">5</span> fd-uri in timp ce select/poll scans toate <span class="text-amber-400 font-semibold">50</span>.
+                            La <span id="connectionNote" class="text-white font-semibold">50</span> connections with <span id="activeNote" class="text-emerald-400 font-semibold">5</span> active, 
+                            In this model epoll reports <span id="readyExplanation" class="text-emerald-400 font-semibold">5</span> ready descriptors; select/poll inspect the configured set of <span id="totalExplanation" class="text-amber-400 font-semibold">50</span>.
                         </p>
                     </div>
                 </div>
@@ -661,7 +738,7 @@ for (int i = 0; i < n; i++) {
                 </div>
                 <div>
                     <h3 class="font-bold text-lg">The C10K Problem</h3>
-                    <p class="text-sm text-gray-400">how servesti 10.000+ connections simultane?</p>
+                    <p class="text-sm text-gray-400">How can a server handle 10,000 or more simultaneous connections?</p>
                 </div>
             </div>
             
@@ -671,24 +748,24 @@ for (int i = 0; i < n; i++) {
                         <i class="fas fa-times-circle text-red-400"></i>
                         <span class="font-semibold text-red-400">select()</span>
                     </div>
-                    <p class="text-sm text-gray-300 mb-2">Limitat la FD_SETSIZE (1024). Nu may depasi aceasta limita without recompilare.</p>
-                    <p class="text-xs text-gray-500">La 10K: ❌ Imposibil</p>
+                    <p class="text-sm text-gray-300 mb-2">The illustrated glibc fd_set interface has FD_SETSIZE=1024. Use poll/epoll for larger descriptor values rather than assuming a recompilation is a portable fix.</p>
+                    <p class="text-xs text-gray-500">At 10K: outside this fd_set descriptor range</p>
                 </div>
                 <div class="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="fas fa-exclamation-circle text-amber-400"></i>
                         <span class="font-semibold text-amber-400">poll()</span>
                     </div>
-                    <p class="text-sm text-gray-300 mb-2">Functioneaza dar becomes very slow - scans 10K fd-uri de fiecare data.</p>
-                    <p class="text-xs text-gray-500">La 10K: ⚠️ Foarte lent</p>
+                    <p class="text-sm text-gray-300 mb-2">The call examines the supplied 10,000-entry array each time; measured cost depends on the workload and implementation.</p>
+                    <p class="text-xs text-gray-500">At 10K: full-array scan cost</p>
                 </div>
                 <div class="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="fas fa-check-circle text-emerald-400"></i>
                         <span class="font-semibold text-emerald-400">epoll()</span>
                     </div>
-                    <p class="text-sm text-gray-300 mb-2">Proceseaza only connectionsle active. Scaleaza la milioane de connections!</p>
-                    <p class="text-xs text-gray-500">La 10K: ✅ Performant</p>
+                    <p class="text-sm text-gray-300 mb-2">Returns ready events from a persistent interest set. Practical capacity depends on memory, workload and the full server design.</p>
+                    <p class="text-xs text-gray-500">At 10K: avoids resubmitting the full interest set</p>
                 </div>
             </div>
         </div>
@@ -700,6 +777,51 @@ for (int i = 0; i < n; i++) {
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             currentTab: 'select',
@@ -741,7 +863,8 @@ for (int i = 0; i < n; i++) {
         // Chart
         let performanceChart;
 
-        function initChart() {
+        function ioCostModel(total, ready){return {select:total+2<1024?total*2:null,poll:total*1.9,epoll:5+ready*3};}
+function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             performanceChart = new Chart(ctx, {
                 type: 'line',
@@ -749,7 +872,7 @@ for (int i = 0; i < n; i++) {
                     labels: ['10', '50', '100', '500', '1K', '5K', '10K', '50K', '100K'],
                     datasets: [{
                         label: 'select()',
-                        data: [10, 50, 100, 500, 1000, 5000, null, null, null],
+                        data: [20, 100, 200, 1000, 2000, null, null, null, null],
                         borderColor: '#f59e0b',
                         backgroundColor: 'rgba(245, 158, 11, 0.1)',
                         fill: true,
@@ -781,7 +904,7 @@ for (int i = 0; i < n; i++) {
                             callbacks: {
                                 label: function(context) {
                                     if (context.raw === null) return context.dataset.label + ': N/A (limit reached)';
-                                    return context.dataset.label + ': ' + context.raw + ' μs';
+                                    return context.dataset.label + ': ' + context.raw + ' model units';
                                 }
                             }
                         }
@@ -793,7 +916,7 @@ for (int i = 0; i < n; i++) {
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
-                            title: { display: true, text: 'CPU Time (μs)', color: '#9ca3af' },
+                            title: { display: true, text: 'Illustrative cost units', color: '#9ca3af' },
                             ticks: { color: '#6b7280' },
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             type: 'logarithmic'
@@ -961,7 +1084,7 @@ for (int i = 0; i < n; i++) {
             const activeClients = state.clients.filter(c => c.active);
             
             if (activeClients.length === 0) {
-                readyList.innerHTML = '<span class="text-gray-500 text-xs">Astept evenimente...</span>';
+                readyList.innerHTML = '<span class="text-gray-500 text-xs">Waiting for events...</span>';
             } else {
                 readyList.innerHTML = '';
                 activeClients.forEach(client => {
@@ -973,28 +1096,13 @@ for (int i = 0; i < n; i++) {
             }
         }
 
-        function updatePerformanceBars() {
-            const total = state.clients.length;
-            const active = state.clients.filter(c => c.active).length;
-            
-            // Select and poll scale with total (O(n))
-            const selectPollWidth = Math.min(100, (total / 200) * 100);
-            elements.selectBar.style.width = selectPollWidth + '%';
-            elements.pollBar.style.width = selectPollWidth * 0.95 + '%';
-            
-            // Epoll scales with active (O(ready))
-            const epollWidth = Math.max(5, (active / total) * 50);
-            elements.epollBar.style.width = epollWidth + '%';
-            
-            // Update time estimates
-            const selectTime = total * 2;
-            const pollTime = Math.floor(total * 1.9);
-            const epollTime = Math.max(5, active * 3);
-            
-            elements.selectTime.textContent = selectTime;
-            elements.pollTime.textContent = pollTime;
-            elements.epollTime.textContent = epollTime;
-        }
+        function updatePerformanceBars(){
+ const total=state.clients.length,ready=state.clients.filter(c=>c.active).length,c=ioCostModel(total,ready),max=Math.max(c.select||0,c.poll,c.epoll,1);
+ for(const name of ['select','poll','epoll']){elements[name+'Bar'].style.width=c[name]===null?'0%':100*c[name]/max+'%';elements[name+'Time'].textContent=c[name]===null?'N/A':Number(c[name].toFixed(2));}
+ document.getElementById('readyExplanation').textContent=ready;document.getElementById('totalExplanation').textContent=total;
+ const ratio=total?ready/total:0,counts=[10,50,100,500,1000,5000,10000,50000,100000];
+ ['select','poll','epoll'].forEach((name,i)=>performanceChart.data.datasets[i].data=counts.map(n=>ioCostModel(n,Math.round(n*ratio))[name]));performanceChart.update();
+}
 
         // Simulation
         async function runSimulation() {
@@ -1080,6 +1188,7 @@ for (int i = 0; i < n; i++) {
         }
 
         function reset() {
+            enosTimers.cancel();
             generateClients();
         }
 
@@ -1106,6 +1215,27 @@ for (int i = 0; i < n; i++) {
         // Initialize
         initChart();
         generateClients();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

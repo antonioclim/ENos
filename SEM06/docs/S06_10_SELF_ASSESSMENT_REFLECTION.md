@@ -20,7 +20,7 @@ This document helps you evaluate your progress and identify areas requiring impr
 | ⬜ **0 - Don't Know** | Haven't heard of the concept | Cannot explain at all |
 | 🟨 **1 - Beginner** | Have seen it but don't use it | Can recognise but cannot write |
 | 🟧 **2 - Familiar** | Can use with documentation | Need to look up syntax |
-| 🟩 **3 - Competent** | Can use independently | Write correctly first time |
+| 🟩 **3 - Competent** | Can use independently | Can explain, test and correct their implementation |
 | 🟦 **4 - Advanced** | Can explain to others | Understand nuances and edge cases |
 
 ---
@@ -34,8 +34,8 @@ This document helps you evaluate your progress and identify areas requiring impr
 | Simple variable declaration | ⬜🟨🟧🟩🟦 | `var="value"` |
 | `readonly` variables | ⬜🟨🟧🟩🟦 | `readonly CONST="fix"` |
 | `local` variables in functions | ⬜🟨🟧🟩🟦 | `local x=10` |
-| Default values `${var:-default}` | ⬜🟨🟧🟩🟦 | When `var` is unset |
-| Error on unset `${var:?error}` | ⬜🟨🟧🟩🟦 | Fails if `var` is unset |
+| Default values `${var:-default}` | ⬜🟨🟧🟩🟦 | When `var` is unset or empty |
+| Error on unset `${var:?error}` | ⬜🟨🟧🟩🟦 | Fails if `var` is unset or empty |
 | String length `${#var}` | ⬜🟨🟧🟩🟦 | Character count |
 | Substring removal `${var%pattern}` | ⬜🟨🟧🟩🟦 | Suffix matching |
 | Pattern replacement `${var//old/new}` | ⬜🟨🟧🟩🟦 | Global replacement |
@@ -55,7 +55,7 @@ This document helps you evaluate your progress and identify areas requiring impr
 | `$1, $2, ...` - arguments | ⬜🟨🟧🟩🟦 | |
 | `$#` - number of arguments | ⬜🟨🟧🟩🟦 | |
 | `"$@"` vs `"$*"` difference | ⬜🟨🟧🟩🟦 | Quoting and word splitting |
-| `$$` - current PID | ⬜🟨🟧🟩🟦 | |
+| `$$` - main-shell PID (`BASHPID` is this Bash process) | ⬜🟨🟧🟩🟦 | |
 | `$?` - exit code | ⬜🟨🟧🟩🟦 | |
 | `$!` - background PID | ⬜🟨🟧🟩🟦 | |
 
@@ -224,7 +224,7 @@ This document helps you evaluate your progress and identify areas requiring impr
 
 | Concept | Self | Verification |
 |---------|------|--------------|
-| `set -e` exit on error | ⬜🟨🟧🟩🟦 | |
+| `set -e` eligible failures and conditional exceptions | ⬜🟨🟧🟩🟦 | |
 | `set -u` undefined vars | ⬜🟨🟧🟩🟦 | |
 | `set -o pipefail` | ⬜🟨🟧🟩🟦 | |
 | `trap` for cleanup | ⬜🟨🟧🟩🟦 | |
@@ -323,9 +323,11 @@ This document helps you evaluate your progress and identify areas requiring impr
 | 🟦 4 | | × 4 | |
 | **Total** | | | |
 
-**Maximum possible score:** ~400 points (100 competencies × 4)
+**Maximum possible score:** 472 points (118 competency rows × 4). Use the actual number of completed rows if intentionally selecting a subset. These are self-reported observations, not a validated measurement of attainment or a course grade.
 
-### Score Interpretation
+### Historical score interpretation proposal
+
+The bands below are reflection prompts without a validated empirical calibration; they do not establish certification or assessment thresholds.
 
 | Percentage | Level | Recommendation |
 |------------|-------|----------------|
@@ -362,11 +364,11 @@ This document helps you evaluate your progress and identify areas requiring impr
 | Area | Recommended resource |
 |------|----------------------|
 | Variables/Expansion | `docs/S06_09_VISUAL_CHEAT_SHEET.md` |
-| Control Flow | `docs/S06_01_Project_Architecture.md` |
-| Functions/Arrays | `docs/S06_01_Project_Architecture.md` |
-| I/O/Text Processing | `docs/S06_02_Monitor_Implementation.md` |
-| Error Handling | `docs/S06_06_Error_Handling.md` |
-| Testing | `docs/S06_05_Testing_Framework.md` |
+| Control Flow | `docs/projects/S06_P01_Project_Architecture.md` |
+| Functions/Arrays | `docs/projects/S06_P01_Project_Architecture.md` |
+| I/O/Text Processing | `docs/projects/S06_P02_Monitor_Implementation.md` |
+| Error Handling | `docs/projects/S06_P06_Error_Handling.md` |
+| Testing | `docs/projects/S06_P05_Testing_Framework.md` |
 | Projects | Source code in `scripts/projects/` |
 
 ---

@@ -7,11 +7,11 @@
 
 # TABLE OF CONTENTS
 
-1. [Competency Checklist per Module](#-competency-checklist)
-2. [Self-Assessment Questions](#-self-assessment-questions)
-3. [Reflection Exercises](#-reflection-exercises)
-4. [Individual Study Plan](#-individual-study-plan)
-5. [Learning Journal](#-learning-journal)
+1. [Competency Checklist per Module](#competency-checklist)
+2. [Self-Assessment Questions](#self-assessment-questions)
+3. [Reflection Exercises](#reflection-exercises)
+4. [Individual Study Plan](#individual-study-plan)
+5. [Learning Journal](#learning-journal)
 
 ---
 

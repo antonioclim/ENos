@@ -62,7 +62,8 @@ class TestParameters:
     assignment: str = ""
 
 
-def generate_student_seed(student_id: str, assignment: str, include_week: bool = True) -> int:
+def generate_student_seed(student_id: str, assignment: str, include_week: bool = True,
+                          *, week: Optional[str] = None) -> int:
     """
     Generate deterministic seed for reproducible randomisation.
     
@@ -73,6 +74,8 @@ def generate_student_seed(student_id: str, assignment: str, include_week: bool =
         student_id: Student identifier (e.g., matriculation number, email)
         assignment: Assignment identifier (e.g., "SEM03_HW", "PROJECT_1")
         include_week: Whether to include current week for weekly variation
+        week: Recorded YYYY-WW value for replay; defaults to the current week.
+            Retain the returned seed with the assignment for later reassessment.
     
     Returns:
         Integer seed for random number generator
@@ -91,7 +94,7 @@ def generate_student_seed(student_id: str, assignment: str, include_week: bool =
     
     # Build the combined string
     if include_week:
-        week = datetime.now().strftime('%Y-%W')
+        week = week if week is not None else datetime.now().strftime('%Y-%W')
         combined = f"{normalised_id}:{assignment}:{week}"
     else:
         combined = f"{normalised_id}:{assignment}"
@@ -123,25 +126,25 @@ def randomise_test_parameters(seed: int, student_id: str = "", assignment: str =
         >>> params.ip_addresses  # Same every time for this student
         ['10.0.47.123', '10.0.215.89', ...]
     """
-    random.seed(seed)
+    rng = random.Random(seed)
     
     params = TestParameters(seed=seed, student_id=student_id, assignment=assignment)
     
     # IP addresses for network exercises (private ranges)
     params.ip_addresses = [
-        f"10.0.{random.randint(1, 254)}.{random.randint(1, 254)}"
+        f"10.0.{rng.randint(1, 254)}.{rng.randint(1, 254)}"
         for _ in range(10)
     ]
     
     # Port numbers (non-privileged range)
     params.ports = [
-        random.randint(1024, 65535)
+        rng.randint(1024, 65535)
         for _ in range(10)
     ]
     
     # File sizes (1KB to 10MB)
     params.file_sizes = [
-        random.randint(1024, 10485760)
+        rng.randint(1024, 10485760)
         for _ in range(15)
     ]
     
@@ -149,102 +152,106 @@ def randomise_test_parameters(seed: int, student_id: str = "", assignment: str =
     file_prefixes = ['data', 'log', 'config', 'backup', 'output', 'input', 'temp', 'cache']
     file_extensions = ['.txt', '.log', '.cfg', '.dat', '.csv', '.json', '.xml', '.sh']
     params.file_names = [
-        f"{random.choice(file_prefixes)}_{random.randint(100, 999)}{random.choice(file_extensions)}"
+        f"{rng.choice(file_prefixes)}_{rng.randint(100, 999)}{rng.choice(file_extensions)}"
         for _ in range(10)
     ]
     
     # Directory names
     dir_prefixes = ['project', 'module', 'lib', 'src', 'test', 'doc', 'bin', 'etc']
     params.directory_names = [
-        f"{random.choice(dir_prefixes)}_{random.randint(10, 99)}"
+        f"{rng.choice(dir_prefixes)}_{rng.randint(10, 99)}"
         for _ in range(10)
     ]
     
     # Timestamps (2021-01-01 to 2025-12-31)
     params.timestamps = [
-        random.randint(1609459200, 1767225600)
+        rng.randint(1609459200, 1767225600)
         for _ in range(10)
     ]
     
     # Cron hours (0-23)
     params.cron_hours = [
-        random.randint(0, 23)
+        rng.randint(0, 23)
         for _ in range(5)
     ]
     
     # Cron days (1-28 to be safe)
     params.cron_days = [
-        random.randint(1, 28)
+        rng.randint(1, 28)
         for _ in range(5)
     ]
     
     # Process IDs
     params.pids = [
-        random.randint(1000, 65535)
+        rng.randint(1000, 65535)
         for _ in range(10)
     ]
     
     # Signals (common ones)
     common_signals = [1, 2, 3, 9, 15, 18, 19, 20]  # HUP, INT, QUIT, KILL, TERM, CONT, STOP, TSTP
     params.signals = [
-        random.choice(common_signals)
+        rng.choice(common_signals)
         for _ in range(5)
     ]
     
     # Usernames
     params.usernames = [
-        f"user{random.randint(100, 999)}"
+        f"user{rng.randint(100, 999)}"
         for _ in range(5)
     ]
     
     # Permissions (octal)
     common_perms = ['644', '755', '700', '750', '640', '600', '664', '775']
     params.permissions_octal = [
-        random.choice(common_perms)
+        rng.choice(common_perms)
         for _ in range(5)
     ]
     
     # Search patterns for grep/sed/awk
     pattern_bases = ['error', 'warning', 'info', 'debug', 'failed', 'success', 'start', 'end']
     params.search_patterns = [
-        f"{random.choice(pattern_bases)}[{random.randint(0, 9)}]"
+        f"{rng.choice(pattern_bases)}[{rng.randint(0, 9)}]"
         for _ in range(5)
     ]
     
     # Line numbers
     params.line_numbers = [
-        random.randint(1, 1000)
+        rng.randint(1, 1000)
         for _ in range(10)
     ]
     
     # Random strings (for various purposes)
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
     params.random_strings = [
-        ''.join(random.choices(chars, k=random.randint(6, 12)))
+        ''.join(rng.choices(chars, k=rng.randint(6, 12)))
         for _ in range(10)
     ]
     
     # Random numbers
     params.random_numbers = [
-        random.randint(1, 10000)
+        rng.randint(1, 10000)
         for _ in range(20)
     ]
     
     return params
 
 
-def get_student_test_data(student_id: str, seminar: int) -> Dict[str, Any]:
+def get_student_test_data(student_id: str, seminar: int, *, seed: Optional[int] = None,
+                          week: Optional[str] = None) -> Dict[str, Any]:
     """
     Convenience function to get test data for a specific seminar.
     
     Args:
         student_id: Student identifier
         seminar: Seminar number (1-7)
+        seed: Previously recorded seed; takes precedence over the current date.
+        week: Recorded YYYY-WW instance when a seed has not been saved.
     
     Returns:
         Dictionary with seminar-specific test parameters
     """
-    seed = generate_student_seed(student_id, f"SEM{seminar:02d}_HW")
+    if seed is None:
+        seed = generate_student_seed(student_id, f"SEM{seminar:02d}_HW", week=week)
     params = randomise_test_parameters(seed, student_id, f"SEM{seminar:02d}")
     
     # Return as dict for easier access
@@ -282,30 +289,37 @@ def extract_student_id(submission_path: str) -> Optional[str]:
     Returns:
         Extracted student ID or None
     """
-    import os
     import json
     from pathlib import Path
     
     path = Path(submission_path)
     
     # Check for metadata.json
+    archive_suffixes = ('.zip', '.tar.gz', '.tar.bz2', '.tar.xz', '.tgz', '.tar')
+    is_archive = any(path.name.lower().endswith(suffix) for suffix in archive_suffixes)
     metadata_file = path / 'metadata.json'
-    if metadata_file.exists():
+    if not is_archive and metadata_file.is_file():
         try:
             with open(metadata_file) as f:
                 data = json.load(f)
-                if 'student_id' in data:
-                    return str(data['student_id'])
-        except (json.JSONDecodeError, KeyError):
+                if isinstance(data, dict) and isinstance(data.get('student_id'), (str, int)):
+                    value = str(data['student_id']).strip()
+                    if value:
+                        return value
+        except (OSError, UnicodeError, json.JSONDecodeError):
             pass
     
     # Try to extract from directory name
-    dir_name = path.name if path.is_dir() else path.parent.name
+    if is_archive:
+        suffix = next(s for s in archive_suffixes if path.name.lower().endswith(s))
+        dir_name = path.name[:-len(suffix)]
+    else:
+        dir_name = path.name if path.is_dir() or not path.suffix else path.parent.name
     
     # Common patterns: student_123, 123456, ABC123
     import re
     patterns = [
-        r'student[_-]?(\d+)',
+        r'^student[_-]?(\d+)(?:[_-]|$)',
         r'^(\d{6,})$',
         r'^([A-Z]{2,3}\d{3,})$',
     ]
@@ -316,7 +330,8 @@ def extract_student_id(submission_path: str) -> Optional[str]:
             return match.group(1) if match.groups() else match.group(0)
     
     # Fallback: use directory name itself
-    return dir_name if dir_name else None
+    # Unknown archive names are not identities; never substitute their parent.
+    return None if is_archive else (dir_name or None)
 
 
 # Self-test when run directly

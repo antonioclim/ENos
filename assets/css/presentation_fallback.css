@@ -1,0 +1,18 @@
+/* Readable document mode when Reveal fails to load/initialise. */
+html.enos-static-presentation, .enos-static-presentation body {
+  height: auto !important; overflow: auto !important;
+}
+.enos-static-presentation .reveal, .enos-static-presentation .reveal .slides {
+  position: static !important; width: auto !important; height: auto !important;
+  overflow: visible !important; transform: none !important; inset: auto !important;
+}
+.enos-static-presentation .reveal .slides section {
+  display: block !important; visibility: visible !important; opacity: 1 !important;
+  position: static !important; transform: none !important; height: auto !important;
+  min-height: 0 !important; max-height: none !important; overflow: visible !important;
+  padding: 1rem !important; margin: 1rem auto !important; max-width: 75rem !important;
+}
+.enos-static-presentation .fragment {visibility: visible !important; opacity: 1 !important;}
+.enos-static-presentation pre, .enos-static-presentation code {max-height: none !important; white-space: pre-wrap !important; overflow-wrap: anywhere;}
+.enos-static-presentation .controls, .enos-static-presentation .progress {display: none !important;}
+.enos-resource-status {position: relative; padding: .8rem; margin: 0; background: #fff4cc; color: #111; font: 1rem/1.5 sans-serif;}

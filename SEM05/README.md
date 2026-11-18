@@ -22,9 +22,11 @@
 
 ---
 
+> **Status:** Read [the teaching and assessment contract](docs/TEACHING_CONTRACT.md). Assessment variants and historical provenance require author decisions. No remote service, LMS import or production acceptance is implied.
+
 ## Description
 
-This seminar represents the TURNING POINT of the Operating Systems course. Until now, students have learnt individual commands and simple scripts. From now on, they will write professional code that can be used in production.
+This seminar represents the TURNING POINT of the Operating Systems course. Until now, students have learnt individual commands and simple scripts. They will practise maintainable scripting patterns and verify their failure contracts. Production use requires separate review against the actual environment and data.
 
 ### Context and Prerequisites
 
@@ -44,7 +46,7 @@ What this seminar introduces:
 - Stability: `set -euo pipefail`, safe IFS, defensive checks
 - Error handling: trap EXIT/ERR/INT/TERM, cleanup patterns
 - Logging and Debug: professional logging system with levels, debugging techniques
-- Professional template: standard structure for production scripts
+- Professional template: a starting structure whose TODOs require implementation
 
 ### The Transition
 
@@ -92,22 +94,29 @@ At the end of this seminar, students will be able to:
 
 ### The Difference Between Amateur and Professional
 
-```bash
-# AMATEUR script
-cd /tmp/data
-rm -rf *
-process_file $1
-echo "Done"
+The fragile sequence below is a **non-executing deletion plan**, so its wrong-directory behaviour can be observed without deleting caller data:
 
-# PROFESSIONAL script
+```bash
+bash -c 'cd -- /a/deliberately/missing/teaching/path; printf "Would remove entries in: %s\n" "$PWD"'
+```
+
+A complete owned-fixture example makes ownership and failure handling explicit:
+
+```bash
 #!/bin/bash
 set -euo pipefail
-
-cd /tmp/data || die "Cannot cd to /tmp/data"
-[[ -n "${1:-}" ]] || { usage; exit 1; }
-rm -rf ./*  # ./* doesn't delete everything if cd fails
-process_file "$1"
-log_info "Processing completed successfully"
+work=
+cleanup() { [[ -z ${work:-} ]] || rm -rf -- "$work"; }
+trap cleanup EXIT
+work=$(mktemp -d) || exit 1
+mkdir -- "$work/cache"
+printf '%s\n' 'sample input' > "$work/input.txt"
+printf '%s\n' 'disposable cache' > "$work/cache/entry.txt"
+cd -- "$work/cache" || exit 1
+# The checked directory is owned by this run. ./* itself gives no ownership guarantee.
+rm -f -- ./*
+cat -- "$work/input.txt"
+printf '%s\n' 'Fixture processing completed'
 ```
 
 What happens when `cd` fails in the amateur version?
@@ -125,8 +134,8 @@ What happens when `cd` fails in the amateur version?
 
 | Skill | Immediate Benefit | Long-term Benefit |
 |-------|-------------------|-------------------|
-| `set -euo pipefail` | Errors detected instantly | Reliable scripts in production |
-| trap cleanup | No orphaned temporary files | Clean system, easy debugging |
+| `set -euo pipefail` | Exposes eligible failures and unset expansions | Supports explicit validation and testing |
+| trap cleanup | Removes owned resources on handled exits | Cannot cover SIGKILL or machine failure |
 | Logging | See what the script does | Post-mortem debugging |
 | Functions | Organised code | Reusable libraries |
 | Arrays | Correct list processing | Complex algorithms in Bash |
@@ -216,7 +225,7 @@ SEM05/
 │
 ├── formative/                             # Formative assessment
 │   ├── quiz.yaml                             # Quiz definition
-│   ├── quiz_lms.json                         # LMS export (Moodle/Canvas)
+│   ├── quiz_lms.json                         # Derived project JSON; not an LMS import format
 │   └── quiz_runner.py                        # Interactive quiz runner
 │
 └── ci/                                    # Continuous Integration
@@ -235,7 +244,7 @@ SEM05/
 unzip SEM05.zip
 cd SEM05
 
-# 2. Check Bash version (must be >= 4.0)
+# 2. Check Bash version (must be >= 4.4)
 bash --version
 
 # 3. Run the setup
@@ -290,8 +299,8 @@ cat docs/S05_06_SPRINT_EXERCISES.md | less
 
 - Local vs global variables: Demonstrate the DIFFERENCE with a concrete example
 - `declare -A` is MANDATORY: For any associative array
-- `set -e` is not magic: Does not work in subshells or pipes without pipefail
-- trap is not inherited: Must be reset in subshells
+- `set -e` has tested-context exceptions; ordinary `( ... )` subshells inherit it. Command substitutions normally clear it unless `inherit_errexit` or POSIX mode applies.
+- Trap inheritance is event-specific: `set -E` enables ERR inheritance. EXIT cannot run after SIGKILL or abrupt machine failure.
 
 ---
 
@@ -307,9 +316,9 @@ cat docs/S05_06_SPRINT_EXERCISES.md | less
    - Copy `scripts/templates/professional_script.sh`
    - Adapt for your needs
 
-3. `set -euo pipefail` ALWAYS
-   - First line after shebang
-   - No exceptions for new scripts
+3. Understand `set -euo pipefail` before using it
+   - Explain which statuses are expected and test them explicitly
+   - Treat global IFS changes as parsing choices, not an ownership or filename guarantee
 
 4. Test on ERROR cases, not just happy path. What happens if the file doesn't exist? What happens if the argument is missing? What happens if the disk is full?
 
@@ -325,13 +334,13 @@ nano ~/my_script.sh
 # 3. Check with shellcheck
 shellcheck ~/my_script.sh
 
-# 4. Test happy path
-./my_script.sh test_input.txt
+# 4. Implement the template TODOs, then test the actual saved path
+bash ~/my_script.sh test_input.txt
 
 # 5. Test error cases
-./my_script.sh                    # No arguments
-./my_script.sh nonexistent.txt    # Non-existent file
-./my_script.sh /etc/shadow        # File without permissions
+bash ~/my_script.sh                    # No arguments
+bash ~/my_script.sh nonexistent.txt    # Non-existent file
+bash ~/my_script.sh nonexistent.txt    # Controlled missing-file case; do not assume /etc/shadow is unreadable
 ```
 
 ### Common Mistakes to Avoid
@@ -342,7 +351,7 @@ shellcheck ~/my_script.sh
 | Associative array without `declare -A` | Treated as indexed | `declare -A hash` MANDATORY |
 | `return "string"` | Does not work (only 0-255) | Use `echo` for strings |
 | `local` outside function | Syntax error | Only inside functions |
-| trap in subshell | Not inherited | Reset in subshell |
+| trap inheritance | Depends on event/options | Test ERR with `set -E`; design EXIT cleanup per process |
 
 ---
 
@@ -352,13 +361,13 @@ shellcheck ~/my_script.sh
 
 - Ubuntu 24.04 LTS (recommended)
 - WSL2 on Windows 10/11
-- Any Linux distribution with Bash 4.0+
+- Any Linux distribution with Bash 4.4+
 
 ### Bash Version
 ```bash
 # Check version
 bash --version
-# Must be: GNU bash, version 4.0+ (for associative arrays)
+# Must be: GNU bash, version 4.4+ (including nameref and strict-array exercises)
 
 # On macOS, install new bash:
 brew install bash
@@ -422,14 +431,14 @@ fi
 
 Cause: The error is in a context where `set -e` doesn't work
 
-```bash
+```text
 # Contexts where set -e does NOT work:
 cmd1 || cmd2         # cmd1 can fail
 cmd1 && cmd2         # cmd1 can fail
 if cmd; then ...     # cmd can fail
 while cmd; do ...    # cmd can fail
 cmd | cmd2           # without pipefail, only last command
-$(cmd)               # in command substitution
+value=$(cmd)         # substitution usually clears -e; assignment propagates its final status
 ```
 
 ### 4. trap cleanup doesn't execute
@@ -464,9 +473,9 @@ get_value() {
 result=$(get_value)
 ```
 
-### 6. Array seems empty after iteration
+### 6. Array values split into extra loop arguments
 
-Cause: Iterating without quotes - word splitting
+Cause: Iterating without quotes applies word splitting and pathname expansion; it does not empty the array.
 
 ```bash
 arr=("one two" "three")

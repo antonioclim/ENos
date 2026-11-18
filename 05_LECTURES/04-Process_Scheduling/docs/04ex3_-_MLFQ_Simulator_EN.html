@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLFQ Simulator | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -101,7 +101,84 @@
             bottom: 4px;
             border-radius: 2px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -120,7 +197,7 @@
                 <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
             </span>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Declared MLFQ policy</h2><p>Strict priority between queues. Upper queues use round robin with their configured quantum. The lowest queue is FCFS. Higher-priority arrival preempts a lower-level job and preserves its used quantum; I/O-bound work yields after half its configured quantum, with zero simulated I/O latency, and retains its cumulative level budget. Exhausting that budget demotes upper-level work even if it would also yield. The lowest level has no quantum expiry. A priority boost moves unfinished active work to Q0 and resets all quantum budgets. These are explicit rules of this teaching model.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -135,7 +212,7 @@
                                 <span id="cpuProcess" class="text-sm font-bold">IDLE</span>
                             </div>
                             <div>
-                                <div class="text-xs text-stone-500 mb-1">Quantum ramas:</div>
+                                <div class="text-xs text-stone-500 mb-1">Remaining quantum:</div>
                                 <div class="w-32 h-4 bg-stone-200 rounded-full overflow-hidden">
                                     <div id="quantumBar" class="quantum-bar h-full bg-blue-500 rounded-full" style="width: 0%"></div>
                                 </div>
@@ -155,7 +232,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-layer-group text-purple-500"></i>
-                        Levels de Cozi
+                        Queue Levels
                     </h2>
                     <div id="queueContainer" class="space-y-3">
                         <!-- Queue levels will be rendered here -->
@@ -165,7 +242,7 @@
                 <!-- Gantt Chart -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-chart-gantt text-blue-500 mr-2"></i>Gantt Chart (colorat pe nivel)
+                        <i class="fas fa-chart-gantt text-blue-500 mr-2"></i>Gantt Chart (Colour by Level)
                     </h3>
                     <div class="relative h-12 bg-stone-100 rounded overflow-hidden" id="ganttChart">
                         <!-- Gantt segments will be rendered here -->
@@ -187,7 +264,7 @@
                         <i class="fas fa-terminal"></i> Event Log
                     </h3>
                     <div id="eventLog" class="h-40 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// MLFQ Scheduler ready. Add procese and apasa Start.</div>
+                        <div class="text-stone-500">// MLFQ scheduler ready. Add processes and press Start.</div>
                     </div>
                 </div>
             </div>
@@ -208,11 +285,11 @@
                             <!-- Quantum per queue will be rendered here -->
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Interval Boost (0 = dezactivat)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Boost Interval (0 = disabled)</label>
                             <input type="number" id="boostInterval" value="15" min="0" max="50" class="w-full p-2 border border-stone-300 rounded-lg text-sm mono focus:ring-2 focus:ring-purple-500">
                         </div>
                         <button onclick="applyConfig()" class="w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors">
-                            <i class="fas fa-check mr-1"></i> Aplica Configuratia
+                            <i class="fas fa-check mr-1"></i> Apply Configuration
                         </button>
                     </div>
                 </div>
@@ -220,7 +297,7 @@
                 <!-- Process Management -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Process
+                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Processs
                     </h3>
                     <div class="space-y-2">
                         <div class="grid grid-cols-2 gap-2">
@@ -234,14 +311,14 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Tip Proces</label>
+                            <label class="text-xs text-stone-500 block mb-1">Process Type</label>
                             <select id="processType" class="w-full p-2 border border-stone-300 rounded-lg text-sm bg-white">
-                                <option value="cpu">CPU-bound (foloseste tot quantum-ul)</option>
-                                <option value="io">I/O-bound (cedeaza before de quantum)</option>
+                                <option value="cpu">CPU-bound (uses the whole quantum)</option>
+                                <option value="io">I/O-bound (yields before its quantum ends)</option>
                             </select>
                         </div>
                         <button onclick="addProcess()" class="w-full p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
-                            <i class="fas fa-plus mr-1"></i> Add Process
+                            <i class="fas fa-plus mr-1"></i> Add Processs
                         </button>
                     </div>
                 </div>
@@ -249,7 +326,7 @@
                 <!-- Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controale Simulare
+                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Simulation Controls
                     </h3>
                     <div class="grid grid-cols-4 gap-2 mb-3">
                         <button id="btnPlay" onclick="togglePlay()" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
@@ -274,7 +351,7 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-pink-500 mr-2"></i>Scenarii Predefinite
+                        <i class="fas fa-flask text-pink-500 mr-2"></i>Predefined Scenarios
                     </h3>
                     <div class="grid grid-cols-1 gap-2">
                         <button onclick="loadScenario('io')" class="btn-action p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
@@ -287,7 +364,7 @@
                             <i class="fas fa-bolt text-yellow-500"></i> Boost Demo
                         </button>
                         <button onclick="loadScenario('mixed')" class="btn-action p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
-                            <i class="fas fa-random text-purple-500"></i> Mix Realist
+                            <i class="fas fa-random text-purple-500"></i> Mixed Workload Example
                         </button>
                     </div>
                 </div>
@@ -295,14 +372,14 @@
                 <!-- MLFQ Rules -->
                 <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-sm border border-purple-200 p-4">
                     <h3 class="text-sm font-semibold text-purple-800 mb-3">
-                        <i class="fas fa-book text-purple-500 mr-2"></i>Regulile MLFQ
+                        <i class="fas fa-book text-purple-500 mr-2"></i>MLFQ Rules
                     </h3>
                     <ol class="space-y-2 text-xs text-purple-700 list-decimal list-inside">
-                        <li>Un proces nou intra in coada de prioritate maxima (Q0)</li>
-                        <li>If un proces isi consuma quantum-ul, coboara un nivel</li>
-                        <li>If cedeaza CPU before de quantum (I/O), ramane la acelasi nivel</li>
-                        <li>Coada de prioritate mai mare se execute intai (Q0 > Q1 > ...)</li>
-                        <li><strong>Boost:</strong> Periodic, toate procesele urca in Q0 (previne starvation)</li>
+                        <li>A new process enters the highest-priority queue (Q0)</li>
+                        <li>A process that exhausts its cumulative level allotment is demoted, except at the final queue</li>
+                        <li>Yielding for I/O preserves its level and already-used allotment</li>
+                        <li>The highest-priority non-empty ready queue runs first (Q0 > Q1 > ...)</li>
+                        <li><strong>Boost:</strong> Periodically move unfinished work to Q0 and reset allotments; eventual service requires finite load and fair order</li>
                     </ol>
                 </div>
             </div>
@@ -317,6 +394,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== Constants ====================
         const QUEUE_COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e', '#8b5cf6'];
         const PROCESS_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
@@ -360,7 +473,11 @@
         }
 
         function applyConfig() {
-            config.numQueues = parseInt(document.getElementById('numQueues').value);
+            const count=enosInteger(document.getElementById('numQueues').value,2,5,'Queue count');
+            const boost=enosInteger(document.getElementById('boostInterval').value,0,1000,'Boost interval');
+            if (count === null || boost === null) return;
+            for (let i=0;i<count;i++) { const x=document.getElementById(`quantum${i}`); if (x && enosInteger(x.value,1,32,'Quantum') === null) return; }
+            config.numQueues = count;
             config.boostInterval = parseInt(document.getElementById('boostInterval').value);
             config.quantums = [];
             
@@ -369,10 +486,10 @@
                 config.quantums[i] = input ? parseInt(input.value) : Math.pow(2, i + 1);
             }
             
-            initQueues();
+            resetSimulation();
             renderQueues();
             renderQuantumConfig();
-            log(`Configuratie aplicata: ${config.numQueues} cozi, boost la ${config.boostInterval || 'dezactivat'}`);
+            log(`Configuration applied: ${config.numQueues} queues, boost interval ${config.boostInterval || 'disabled'}`);
         }
 
         // ==================== Queue Management ====================
@@ -391,7 +508,7 @@
         function renderQueues() {
             const container = document.getElementById('queueContainer');
             container.innerHTML = queues.map((q, i) => {
-                const isActive = simulation.currentProcess && getProcessQueue(simulation.currentProcess) === i;
+                const isActive = simulation.currentProcess && simulation.currentProcess.queueLevel === i;
                 const priorityLabel = i === 0 ? 'Highest' : i === queues.length - 1 ? 'Lowest' : '';
                 
                 return `
@@ -401,12 +518,12 @@
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded" style="background: ${QUEUE_COLORS[i]}"></div>
                                 <span class="font-semibold text-sm">Q${i}</span>
-                                <span class="text-xs text-stone-500">(${q.algorithm}, quantum=${q.quantum})</span>
+                                <span class="text-xs text-stone-500">(${q.algorithm}, ${q.algorithm === 'FCFS' ? 'I/O interval basis' : 'allotment'}=${q.quantum})</span>
                             </div>
                             <span class="text-xs px-2 py-0.5 rounded" style="background: ${QUEUE_COLORS[i]}20; color: ${QUEUE_COLORS[i]}">${priorityLabel}</span>
                         </div>
                         <div class="flex gap-2 min-h-[40px] items-center flex-wrap" id="queue-${i}">
-                            ${q.processes.length === 0 ? '<span class="text-xs text-stone-400 italic">Gol</span>' : ''}
+                            ${q.processes.length === 0 ? '<span class="text-xs text-stone-400 italic">Empty</span>' : ''}
                             ${q.processes.map(p => `
                                 <div class="process-chip ${simulation.currentProcess === p ? 'executing' : ''} px-3 py-2 rounded text-white text-xs font-bold shadow"
                                      style="background: ${p.color}">
@@ -433,6 +550,8 @@
             burst = burst ?? parseInt(document.getElementById('newBurst').value);
             type = type ?? document.getElementById('processType').value;
             
+            if (enosInteger(arrival,0,1000,'Arrival') === null || enosInteger(burst,1,1000,'Burst') === null) return;
+            if (arrival < simulation.time) { alert('Arrival must not precede the current time. Reset to edit the original workload.'); return; }
             processCounter++;
             const process = {
                 id: processCounter,
@@ -443,12 +562,14 @@
                 type: type,
                 color: PROCESS_COLORS[(processCounter - 1) % PROCESS_COLORS.length],
                 queueLevel: 0,
+                savedQuantum: 0,
+                ioBurstUsed: 0,
                 startTime: null,
                 finishTime: null
             };
             
             processes.push(process);
-            log(`Proces ${process.name} created: arrival=${arrival}, burst=${burst}, tip=${type}`);
+            log(`Process ${process.name} created: arrival=${arrival}, burst=${burst}, type=${type}`);
             
             // If process arrives now, add to queue
             if (arrival <= simulation.time) {
@@ -474,12 +595,18 @@
                 triggerBoost();
             }
             
+            // Higher queues preempt a lower queue; preserve its already used slice.
+            if (simulation.currentProcess && queues.some(q => q.level < simulation.currentProcess.queueLevel && q.processes.length)) {
+                const p=simulation.currentProcess; p.savedQuantum=simulation.quantumUsed;
+                queues[p.queueLevel].processes.unshift(p); simulation.currentProcess=null;
+            }
             // If no current process, select one
             if (!simulation.currentProcess) {
                 for (let i = 0; i < queues.length; i++) {
                     if (queues[i].processes.length > 0) {
                         simulation.currentProcess = queues[i].processes.shift();
-                        simulation.quantumUsed = 0;
+                        simulation.quantumUsed = simulation.currentProcess.savedQuantum || 0;
+                        simulation.currentProcess.savedQuantum=0;
                         
                         if (simulation.currentProcess.startTime === null) {
                             simulation.currentProcess.startTime = simulation.time;
@@ -499,7 +626,7 @@
                 
                 // Add to Gantt
                 const lastSeg = simulation.ganttSegments[simulation.ganttSegments.length - 1];
-                if (lastSeg && lastSeg.process === p && lastSeg.end === simulation.time) {
+                if (lastSeg && lastSeg.process === p && lastSeg.end === simulation.time && lastSeg.queueLevel === queueLevel) {
                     lastSeg.end = simulation.time + 1;
                 } else {
                     simulation.ganttSegments.push({
@@ -512,6 +639,7 @@
                 
                 p.remaining--;
                 simulation.quantumUsed++;
+                p.ioBurstUsed++;
                 
                 // Update UI
                 updateCPU();
@@ -523,19 +651,13 @@
                     simulation.currentProcess = null;
                     simulation.quantumUsed = 0;
                 }
-                // Check I/O (simulated: I/O bound processes yield before quantum)
-                else if (p.type === 'io' && simulation.quantumUsed >= Math.ceil(quantum / 2)) {
-                    // I/O bound: yields early, stays at same level
-                    queues[queueLevel].processes.push(p);
-                    log(`t=${simulation.time + 1}: ${p.name} yielded (I/O) → stays Q${queueLevel}`);
-                    simulation.currentProcess = null;
-                    simulation.quantumUsed = 0;
-                }
-                // Check quantum expiry
-                else if (simulation.quantumUsed >= quantum) {
+                // Cumulative CPU allotment takes precedence over a voluntary yield.
+                else if (queueLevel < queues.length - 1 && simulation.quantumUsed >= quantum) {
                     // Quantum expired: demote
                     const newLevel = Math.min(queueLevel + 1, queues.length - 1);
                     p.queueLevel = newLevel;
+                    p.savedQuantum = 0;
+                    p.ioBurstUsed = 0;
                     queues[newLevel].processes.push(p);
                     
                     if (newLevel > queueLevel) {
@@ -547,23 +669,33 @@
                     simulation.currentProcess = null;
                     simulation.quantumUsed = 0;
                 }
+                // Zero-duration I/O: yield to the queue tail, retaining used allotment.
+                else if (p.type === 'io' && p.ioBurstUsed >= Math.ceil(quantum / 2)) {
+                    p.savedQuantum = simulation.quantumUsed;
+                    p.ioBurstUsed = 0;
+                    queues[queueLevel].processes.push(p);
+                    log(`t=${simulation.time + 1}: ${p.name} yielded (I/O) → Q${queueLevel}, cumulative CPU=${p.savedQuantum}`);
+                    simulation.currentProcess = null;
+                    simulation.quantumUsed = 0;
+                }
             }
             
             simulation.time++;
             document.getElementById('currentTime').textContent = simulation.time;
             
+            updateCPU();
             renderQueues();
             renderGantt();
             
             // Check if simulation complete
             if (processes.every(p => p.finishTime !== null) && processes.length > 0) {
                 stopSimulation();
-                log('=== Simulare completa! ===');
+                log('=== Simulation complete ===');
             }
         }
 
         function triggerBoost() {
-            log(`t=${simulation.time}: ⚡ BOOST! Toate procesele → Q0`);
+            log(`t=${simulation.time}: ⚡ BOOST: all unfinished processes → Q0`);
             
             // Move all processes from lower queues to Q0
             for (let i = 1; i < queues.length; i++) {
@@ -577,8 +709,10 @@
             // Also boost current process if any
             if (simulation.currentProcess) {
                 simulation.currentProcess.queueLevel = 0;
+                simulation.quantumUsed = 0;
             }
             
+            processes.forEach(p => { p.savedQuantum=0; p.ioBurstUsed=0; });
             simulation.lastBoost = simulation.time;
             
             // Visual flash
@@ -605,11 +739,11 @@
                 
                 const qLevel = simulation.currentProcess.queueLevel;
                 const quantum = config.quantums[qLevel];
-                const remaining = quantum - simulation.quantumUsed;
+                const remaining = Math.max(0, quantum - simulation.quantumUsed);
                 
                 quantumBar.style.width = (remaining / quantum * 100) + '%';
-                quantumRemaining.textContent = remaining;
-                quantumTotal.textContent = quantum;
+                quantumRemaining.textContent = qLevel === queues.length - 1 ? 'FCFS' : remaining;
+                quantumTotal.textContent = qLevel === queues.length - 1 ? 'no expiry' : quantum;
             } else {
                 cpuBox.classList.add('idle');
                 cpuBox.classList.remove('running');
@@ -625,7 +759,7 @@
             const timeAxis = document.getElementById('ganttTimeAxis');
             
             if (simulation.ganttSegments.length === 0) {
-                container.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 text-sm">Gantt chart va aparea aici</div>';
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 text-sm">The Gantt chart will appear here</div>';
                 timeAxis.innerHTML = '';
                 return;
             }
@@ -646,9 +780,9 @@
             
             // Time axis
             timeAxis.innerHTML = '';
-            for (let t = 0; t <= maxTime; t += Math.ceil(maxTime / 20)) {
+            for (let t = 0; t <= maxTime; t += Math.max(1,Math.ceil(maxTime / 20))) {
                 const span = document.createElement('span');
-                span.style.width = unitWidth + 'px';
+                span.style.width = (Math.max(1,Math.max(1,Math.ceil(maxTime / 20)))*unitWidth) + 'px';
                 span.textContent = t;
                 timeAxis.appendChild(span);
             }
@@ -681,6 +815,7 @@
         }
 
         function resetSimulation() {
+            enosTimers.cancel();
             stopSimulation();
             
             simulation = {
@@ -698,6 +833,8 @@
                 p.queueLevel = 0;
                 p.startTime = null;
                 p.finishTime = null;
+                p.savedQuantum = 0;
+                p.ioBurstUsed = 0;
             });
             
             initQueues();
@@ -712,7 +849,7 @@
             renderQueues();
             renderGantt();
             
-            document.getElementById('eventLog').innerHTML = '<div class="text-stone-500">// Simulare resetata</div>';
+            document.getElementById('eventLog').innerHTML = '<div class="text-stone-500">// Simulation reset</div>';
         }
 
         // ==================== Scenarios ====================
@@ -734,7 +871,7 @@
                     for (let i = 1; i <= 5; i++) {
                         addProcess(i * 2, 2, 'cpu');
                     }
-                    log('⚠️ Scenario Starvation: Boost dezactivat. P1 va fi "infometat".');
+                    log('⚠️ Starvation scenario: boosting is disabled; observe P1 waiting behind higher-priority work.');
                     break;
                 case 'boost':
                     config.boostInterval = 10;
@@ -743,7 +880,7 @@
                     addProcess(0, 20, 'cpu');
                     addProcess(1, 15, 'cpu');
                     addProcess(2, 10, 'cpu');
-                    log('⚡ Scenario Boost: Boost la fiecare 10 unitati de timp.');
+                    log('⚡ Boost scenario: boost every 10 time units.');
                     break;
                 case 'mixed':
                     addProcess(0, 8, 'cpu');
@@ -777,6 +914,27 @@
         initQueues();
         renderQuantumConfig();
         renderQueues();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -1,9 +1,25 @@
-# GRADING_POLICY.md - Official Grading Policy
+# GRADING_POLICY.md - Historical policy proposal awaiting reconciliation
 
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Academic Year 2024-2025
 
 ---
+
+## Current decision boundary
+
+The following historical rules are preserved for author review. Other repository
+copies disagree on participation, component scales, project weights and rounding.
+The calculator defaults to `PENDING_POLICY` and leaves final grades blank. It can
+apply a complete explicit `--policy` JSON only after the user has selected those
+values; supplying a file is not proof of institutional approval. See
+[the current input contract](../homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
+
+The two rounding descriptions in this document are competing policies, not a
+floating-point or Python-rounding defect. Neither is silently selected. Duplicate
+assignments/tests, non-finite scores and conflicting identities are errors.
+Homework input uses `final_score`, already reviewed and adjusted, so no second
+late deduction is applied. Whether late work counts towards participation remains
+an explicit policy field.
 
 ## 1. Grading Formula
 

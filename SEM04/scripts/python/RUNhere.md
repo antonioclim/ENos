@@ -1,182 +1,178 @@
-# 📁 Python Tools — SEM04
+# Python tools — Seminar 4
 
-> **Location:** `SEM04/scripts/python/`  
-> **Purpose:** Automated grading, generation, and analysis tools  
-> **Python version:** ≥ 3.10 required
+Run the following commands from this directory. Python 3 and the dependencies listed in the seminar requirements are needed. Use a dedicated virtual environment if installing dependencies.
 
-## Contents
+Assessment output remains subject to the [open assessment contract](../../homework/ASSESSMENT_STATUS.md). No tool output alone establishes authorship or misconduct.
 
-| Tool | Purpose | CLI |
-|------|---------|-----|
-| `S04_01_autograder.py` | Automated homework evaluation | Yes |
-| `S04_02_quiz_generator.py` | Generate randomized quizzes | Yes |
-| `S04_03_report_generator.py` | Create reports | Yes |
-| `S04_04_personalized_data_generator.py` | Generate unique datasets | Yes |
-| `S04_05_similarity_checker.py` | Check submission similarity | Yes |
+## Tools and verified command-line help
 
-## Installation
+### S04_01_autograder.py
+
+Diagnostic homework checks; final assessment policy pending.
 
 ```bash
-# Install dependencies
-cd SEM04/
-pip install -r requirements.txt
-
-# Or install individually
-pip install pyyaml pytest
+python3 S04_01_autograder.py --help
 ```
 
----
+```text
+usage: S04_01_autograder.py [-h] [--verbose] [--json JSON_OUTPUT]
+                            [--self-test]
+                            [submission_file]
 
-## S04_01_autograder.py
+Run diagnostic command checks; assessment policy remains pending.
 
-**Purpose:** Automated homework evaluation with detailed feedback
+positional arguments:
+  submission_file     JSON object with student_id and solutions mapping
 
-### Usage
+options:
+  -h, --help          show this help message and exit
+  --verbose, -v
+  --json JSON_OUTPUT  Write the machine-readable result
+  --self-test
+```
+
+### S04_02_quiz_generator.py
+
+Personalised or random formative questions.
 
 ```bash
-python3 S04_01_autograder.py <submission> [options]
-
-Arguments:
-  submission       Path to submission directory or file
-
-Options:
-  --rubric PATH    Custom rubric file
-  --output FILE    Output file for grades (CSV)
-  --verbose        Detailed scoring breakdown
-  --batch          Process entire directory of submissions
-  --timeout SEC    Per-test timeout (default: 30)
+python3 S04_02_quiz_generator.py --help
 ```
 
-### Examples
+```text
+usage: S04_02_quiz_generator.py [-h] [--count COUNT]
+                                [--category {regex,grep,sed,awk,all}]
+                                [--format {text,html,json,moodle}]
+                                [--output OUTPUT] [--export-all]
+
+Quiz Generator for Text Processing
+
+options:
+  -h, --help            show this help message and exit
+  --count COUNT         Number of questions
+  --category {regex,grep,sed,awk,all}
+  --format {text,html,json,moodle}
+  --output OUTPUT, -o OUTPUT
+                        Output file (default: stdout)
+  --export-all          Export all questions in all formats
+```
+
+### S04_03_report_generator.py
+
+Descriptive result reports.
 
 ```bash
-# Grade single submission
-python3 S04_01_autograder.py ~/submissions/student123/
-
-# Grade all submissions with report
-python3 S04_01_autograder.py ~/submissions/ --batch --output grades.csv
-
-# Verbose grading
-python3 S04_01_autograder.py submission/ --verbose
+python3 S04_03_report_generator.py --help
 ```
 
-### Grading Criteria
+```text
+usage: S04_03_report_generator.py [-h] [--grades GRADES] [--output OUTPUT]
+                                  [--sample] [--json]
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Correctness | 60% | Passes test cases |
-| Style | 20% | shellcheck compliance |
-| Documentation | 20% | Comments, README |
+Report generator for Seminar 4
 
----
-
-## S04_02_quiz_generator.py
-
-**Purpose:** Generate randomized quizzes from question bank
-
-### Usage
-
-```bash
-python3 S04_02_quiz_generator.py [options]
-
-Options:
-  --count N        Number of unique quizzes to generate
-  --questions N    Questions per quiz (default: 10)
-  --seed N         Random seed for reproducibility
-  --output DIR     Output directory for generated quizzes
-  --format FMT     Output format: yaml, json, pdf, moodle
+options:
+  -h, --help            show this help message and exit
+  --grades GRADES, -g GRADES
+                        JSON file with autograder results
+  --output OUTPUT, -o OUTPUT
+                        Output file
+  --sample              Use test data
+  --json                Output in JSON format
 ```
 
-### Examples
+### S04_04_personalized_data_generator.py
 
-```bash
-# Generate 5 unique quizzes
-python3 S04_02_quiz_generator.py --count 5 --output quizzes/
-
-# Reproducible generation
-python3 S04_02_quiz_generator.py --seed 42 --count 3
-
-# Export for Moodle
-python3 S04_02_quiz_generator.py --format moodle --output moodle_quiz.xml
-```
-
----
-
-## S04_03_report_generator.py
-
-**Purpose:** Generate PDF/HTML reports from grading data
-
-### Usage
-
-```bash
-python3 S04_03_report_generator.py <grades_file> [options]
-
-Arguments:
-  grades_file      CSV file with grades data
-
-Options:
-  --format FMT     Output format: pdf, html, md (default: pdf)
-  --individual     Generate per-student reports
-  --summary        Include class statistics
-  --output DIR     Output directory
-```
-
-### Examples
-
-```bash
-# Generate summary report
-python3 S04_03_report_generator.py grades.csv --summary
-
-# Individual student reports
-python3 S04_03_report_generator.py grades.csv --individual --output reports/
-```
-
-
-## S04_04_personalized_data_generator.py
-
-**Purpose:** Generate unique datasets
+Deterministic data generation in a fresh directory; identifier checks and actual-file checks are distinct.
 
 ```bash
 python3 S04_04_personalized_data_generator.py --help
 ```
 
-## S04_05_similarity_checker.py
+```text
+usage: S04_04_personalized_data_generator.py [-h]
+                                             [--verify ID CHECKSUM | --verify-files ID DIRECTORY]
+                                             [--output-dir OUTPUT_DIR]
+                                             [student_id]
 
-**Purpose:** Check submission similarity
+S04_04_personalized_data_generator.py — Deterministic Teaching Data Generator
+
+Generates ID-seeded synthetic practice data. The 32-bit seed can collide;
+personalisation is not proof of authorship or prevention of solution sharing.
+The legacy 12-character MD5 value is a dataset identifier, not authentication.
+--verify compares that identifier only; --verify-files compares all five files
+byte-for-byte with regenerated content and still makes no authorship claim.
+
+Usage:
+    python3 S04_04_personalized_data_generator.py <MATRICOL>
+    python3 S04_04_personalized_data_generator.py --verify <MATRICOL> <CHECKSUM>
+
+Author: ing. dr. Antonio Clim, ASE Bucharest — CSIE
+Version: 1.0
+
+Retained author account (anecdotal, not a measured detection guarantee):
+    Last semester I caught 3 students with identical outputs on 'random' data.
+    Turns out they shared solutions. Now each student gets unique data,
+    so even if they share code, the outputs will not match. Checkmate.
+
+positional arguments:
+  student_id
+
+options:
+  -h, --help            show this help message and exit
+  --verify ID CHECKSUM  Compare the legacy identifier only; no submitted files
+                        are read
+  --verify-files ID DIRECTORY
+                        Compare all five named files against regenerated
+                        bytes, read-only
+  --output-dir OUTPUT_DIR
+                        Existing parent directory for new generated folders
+```
+
+### S04_05_similarity_checker.py
+
+Local teaching utility.
 
 ```bash
 python3 S04_05_similarity_checker.py --help
 ```
 
+```text
+usage: S04_05_similarity_checker.py [-h] [--threshold THRESHOLD] [--all-pairs]
+                                    [--json]
+                                    submissions_dir
 
----
+Check student submissions for code similarity
 
-## Common Options
+positional arguments:
+  submissions_dir       Directory containing student submission folders
 
-All Python tools support:
+options:
+  -h, --help            show this help message and exit
+  --threshold THRESHOLD, -t THRESHOLD
+                        Similarity threshold to flag (default: 0.7)
+  --all-pairs           Compare all file pairs (not just same-named exercises)
+  --json                Output results in JSON format
 
-| Option | Description |
-|--------|-------------|
-| `--help` | Show detailed help |
-| `--version` | Show tool version |
-| `--quiet` | Suppress non-essential output |
-| `--debug` | Enable debug logging |
+Examples:
+    S04_05_similarity_checker.py ./submissions/
+    S04_05_similarity_checker.py --threshold 0.80 ./submissions/
+    S04_05_similarity_checker.py --all-pairs ./submissions/
 
-## PYTHONPATH Setup
+The tool compares conservative lexical normalisations. Common templates and
+short answers can produce high similarity; the score does not establish misconduct.
 
-For importing shared `lib/` modules:
-
-```bash
-# Add to your .bashrc or run before scripts
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/../.."
-
-# Or run with path
-PYTHONPATH="../.." python3 S04_01_autograder.py submission/
+Typical workflow:
+    1. Run this before grading to flag suspicious submissions
+    2. Review flagged pairs manually
+    3. Conduct oral verification for high-similarity pairs
+    4. Document findings for academic integrity procedures
 ```
 
----
+## Evidence and outputs
 
-*See also: [`../../lib/`](../../lib/) for shared utilities*  
-*See also: [`../../tests/`](../../tests/) for test suite*
+Generators write to the path supplied on their command line. Answer keys and example solutions are teaching material; their publication policy remains an author decision. A timeout bounds runtime but does not isolate submitted shell code. Use the course exercise environment and inspect the submission before running evaluators.
 
-*Last updated: January 2026*
+The JSON quiz views are project exports. Native Moodle/Canvas/QTI import compatibility has not been verified in this phase.
+
+See [tests](../../tests/) and [demonstrations](../demo/).

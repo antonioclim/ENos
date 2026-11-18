@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buffer Overflow Conceptual Demo - Sisteme de Operare</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Buffer Overflow Conceptual Demo - Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Space Grotesk', sans-serif;
@@ -110,7 +110,84 @@
             background: rgba(239, 68, 68, 0.2);
             border-left: 3px solid #ef4444;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -124,7 +201,7 @@
                 <i class="fas fa-graduation-cap"></i>
                 <span>Educational purpose only - understanding security concepts</span>
             </div>
-        </header>
+        </header><p class="text-xs text-gray-400">The historical <code>gets()</code> demonstration is intentionally unsafe and was removed from ISO C11. Reserve space for the NUL byte, validate lengths and check return values. <a href="https://man7.org/linux/man-pages/man3/gets.3.html">gets</a> · <a href="https://man7.org/linux/man-pages/man3/strncpy.3.html">strncpy semantics</a> · <a href="https://man7.org/linux/man-pages/man3/sscanf.3.html">scanf field widths</a>.</p><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Conceptual byte layout</h2><p>The copied C string includes its terminating zero byte. This display encodes text as UTF-8 and uses a declared little-endian 32-bit teaching layout. Seven ASCII characters plus NUL fit in an eight-byte buffer; eight characters do not. Every change reconstructs the original saved values before copying. The vulnerable demonstration remains intentional and is not executed as native unsafe code.</p></section>
 
         <div class="grid lg:grid-cols-3 gap-6">
             <!-- Left: Code View -->
@@ -150,15 +227,15 @@
                     </div>
                     
                     <div class="mt-4 bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-sm">
-                        <div class="text-red-400 font-semibold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Problema:</div>
-                        <p class="text-gray-400"><code class="bg-gray-800 px-1 rounded">gets()</code> nu verifithat lungimea input-ului. may scrie dincolo de buffer!</p>
+                        <div class="text-red-400 font-semibold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Problem:</div>
+                        <p class="text-gray-400"><code class="bg-gray-800 px-1 rounded">gets()</code> does not check the destination buffer length and can write beyond it.</p>
                     </div>
                 </div>
                 
-                <!-- Input Simulation -->
+                <!-- Simulated Inpution -->
                 <div class="glass-card rounded-2xl p-5 mt-6">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-keyboard mr-2 text-green-400"></i>Input Simulat
+                        <i class="fas fa-keyboard mr-2 text-green-400"></i>Simulated Input
                     </h3>
                     
                     <div class="space-y-3">
@@ -178,7 +255,7 @@
                                 Safe (5)
                             </button>
                             <button onclick="setInput('AAAAAAAA')" class="px-3 py-2 bg-amber-700 hover:bg-amber-600 rounded-lg text-sm transition">
-                                Exact (8)
+                                8 Bytes + NUL (overflow)
                             </button>
                             <button onclick="setInput('AAAAAAAAXXXX')" class="px-3 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-sm transition">
                                 Overflow!
@@ -207,7 +284,7 @@
                         <div class="memorie-cell return-addr rounded-lg p-3 text-center" id="cell-ret">
                             <div class="text-xs text-gray-300 mb-1">Return Address</div>
                             <div class="mono text-sm" id="ret-value">0x08041234</div>
-                            <div class="text-xs text-gray-400 mt-1">Ade revine after func()</div>
+                            <div class="text-xs text-gray-400 mt-1">Return target after the function</div>
                         </div>
                         
                         <!-- Saved EBP -->
@@ -246,7 +323,7 @@
                         
                         <!-- Stack grows down indicator -->
                         <div class="text-center text-gray-600 text-xs pt-2 border-t border-gray-700">
-                            <i class="fas fa-arrow-down mr-1"></i> Adrese mai small (Stack Pointer)
+                            <i class="fas fa-arrow-down mr-1"></i> Lower Addresses (Stack Pointer)
                         </div>
                     </div>
                     
@@ -258,7 +335,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                            <span class="text-gray-400">Alte variables</span>
+                            <span class="text-gray-400">Other Variables</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-purple-600"></div>
@@ -306,7 +383,7 @@
                                 <span class="font-semibold text-green-400"><i class="fas fa-random mr-2"></i>ASLR</span>
                                 <span class="text-xs bg-green-600/30 text-green-400 px-2 py-1 rounded">ON</span>
                             </div>
-                            <p class="text-xs text-gray-400">Address Space Layout Randomization. Addresses change on every run.</p>
+                            <p class="text-xs text-gray-400">Address Space Layout Randomisation changes selected mappings when enabled; coverage and entropy depend on platform and configuration.</p>
                         </div>
                         
                         <!-- DEP/NX -->
@@ -315,16 +392,16 @@
                                 <span class="font-semibold text-green-400"><i class="fas fa-ban mr-2"></i>DEP/NX Bit</span>
                                 <span class="text-xs bg-green-600/30 text-green-400 px-2 py-1 rounded">ON</span>
                             </div>
-                            <p class="text-xs text-gray-400">Data Execution Prevention. Stack-ul e marcat non-executabil.</p>
+                            <p class="text-xs text-gray-400">Data Execution Prevention. The stack mapping is non-executable when this protection is enabled.</p>
                         </div>
                         
                         <!-- Safe Functions -->
                         <div class="protection-badge enabled border rounded-xl p-3">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-semibold text-green-400"><i class="fas fa-code mr-2"></i>Safe Functions</span>
+                                <span class="font-semibold text-green-400"><i class="fas fa-code mr-2"></i>Bounds and Termination</span>
                                 <span class="text-xs bg-green-600/30 text-green-400 px-2 py-1 rounded">USE</span>
                             </div>
-                            <p class="text-xs text-gray-400">Use <code class="bg-gray-800 px-1 rounded">fgets()</code>, <code class="bg-gray-800 px-1 rounded">strncpy()</code> instead of <code class="bg-gray-800 px-1 rounded">gets()</code>, <code class="bg-gray-800 px-1 rounded">strcpy()</code>.</p>
+                            <p class="text-xs text-gray-400">Use a bounded input operation such as <code class="bg-gray-800 px-1 rounded">fgets()</code> with the actual destination size and check its result. <code class="bg-gray-800 px-1 rounded">strncpy()</code> does not guarantee NUL termination when the source reaches the bound; handle termination and truncation explicitly. Never use <code class="bg-gray-800 px-1 rounded">gets()</code>.</p>
                         </div>
                     </div>
                 </div>
@@ -332,17 +409,17 @@
                 <!-- Attack Types -->
                 <div class="glass-card rounded-2xl p-5">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Typeuri de Atacuri
+                        <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Attack Categories
                     </h3>
                     
                     <div class="space-y-3 text-sm">
                         <div class="bg-gray-800/50 rounded-xl p-3">
                             <div class="text-amber-400 font-semibold">1. Variable Overwrite</div>
-                            <p class="text-xs text-gray-400 mt-1">Suprascrie variables adiacente (ex: flags, counters)</p>
+                            <p class="text-xs text-gray-400 mt-1">Overwrites adjacent variables, such as flags or counters</p>
                         </div>
                         <div class="bg-gray-800/50 rounded-xl p-3">
                             <div class="text-orange-400 font-semibold">2. Return Address Hijack</div>
-                            <p class="text-xs text-gray-400 mt-1">Modifithat adresa de return for a executa alt cod</p>
+                            <p class="text-xs text-gray-400 mt-1">Changes saved control-flow data in the conceptual layout</p>
                         </div>
                         <div class="bg-gray-800/50 rounded-xl p-3">
                             <div class="text-red-400 font-semibold">3. Code Injection</div>
@@ -360,24 +437,24 @@
         <!-- Historical Context -->
         <div class="glass-card rounded-2xl p-5 mt-6">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-history mr-2 text-purple-400"></i>Context Istoric
+                <i class="fas fa-history mr-2 text-purple-400"></i>Historical Context
             </h3>
             
             <div class="grid md:grid-cols-4 gap-4">
                 <div class="bg-gray-800/30 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-red-400">1988</div>
                     <div class="text-sm text-gray-400 mt-1">Morris Worm</div>
-                    <div class="text-xs text-gray-500">first worm major folosind buffer overflow</div>
+                    <div class="text-xs text-gray-500">A historical worm that exploited multiple weaknesses, including a buffer overflow</div>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-amber-400">1996</div>
                     <div class="text-sm text-gray-400 mt-1">"Smashing the Stack"</div>
-                    <div class="text-xs text-gray-500">Articolul lui Aleph One in Phrack</div>
+                    <div class="text-xs text-gray-500">Aleph One’s historical article in Phrack</div>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-green-400">2004</div>
                     <div class="text-sm text-gray-400 mt-1">Windows XP SP2</div>
-                    <div class="text-xs text-gray-500">DEP introdus in mainstream</div>
+                    <div class="text-xs text-gray-500">DEP support in Windows XP SP2</div>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-blue-400">Today</div>
@@ -390,7 +467,7 @@
         <!-- Safe Coding Types -->
         <div class="glass-card rounded-2xl p-5 mt-6">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-lightbulb mr-2 text-amber-400"></i>Practici de Cod Sigur
+                <i class="fas fa-lightbulb mr-2 text-amber-400"></i>Safer Coding Practices
             </h3>
             
             <div class="grid md:grid-cols-2 gap-4">
@@ -407,9 +484,9 @@
                     <div class="text-green-400 font-bold mb-2"><i class="fas fa-check mr-2"></i>Use:</div>
                     <div class="mono text-sm space-y-1">
                         <div><span class="text-green-400">fgets(buf, size, stdin)</span></div>
-                        <div><span class="text-green-400">strncpy(dst, src, n)</span></div>
+                        <div><span class="text-green-400">strncpy(dst, src, n) /* may omit NUL; not a drop-in safe string copy */</span></div>
                         <div><span class="text-green-400">snprintf(buf, size, fmt, ...)</span></div>
-                        <div><span class="text-green-400">scanf("%8s", buf)</span> - with limit</div>
+                        <div><span class="text-green-400">scanf("%7s", buf)</span> - for an 8-byte buffer; check the conversion result</div>
                     </div>
                 </div>
             </div>
@@ -422,6 +499,42 @@
     </div>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Initial state
         let bufferContent = ['00', '00', '00', '00', '00', '00', '00', '00'];
         let secretValue = '0x00000000';
@@ -430,91 +543,19 @@
         
         // Update visualization based on input
         function updateVisualization() {
-            const input = document.getElementById('utilizator-input').value;
-            const inputLength = input.length;
-            
-            document.getElementById('input-length').textContent = inputLength;
-            
-            // Reset all cells
-            resetCells();
-            
-            // Fill buffer cells
-            const chars = input.split('');
-            
-            // Update buffer content (displayed in hex)
-            for (let i = 0; i < 8; i++) {
-                if (i < chars.length) {
-                    bufferContent[i] = chars[i].charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-                } else {
-                    bufferContent[i] = '00';
-                }
-            }
-            
-            // Update buffer display
-            updateBufferDisplay();
-            
-            // Check for overflow
-            if (inputLength > 8) {
-                // Overflow into secret variable
-                const overflowChars = chars.slice(8);
-                
-                // Mark buffer cells as overflow
-                document.getElementById('cell-buffer-high').classList.add('overflow');
-                document.getElementById('cell-buffer-low').classList.add('overflow');
-                
-                // Update secret value
-                if (overflowChars.length > 0) {
-                    let secretHex = '';
-                    for (let i = 0; i < Math.min(4, overflowChars.length); i++) {
-                        secretHex = overflowChars[i].charCodeAt(0).toString(16).toUpperCase().padStart(2, '0') + secretHex;
-                    }
-                    secretValue = '0x' + secretHex.padStart(8, '0');
-                    document.getElementById('secret-value').textContent = secretValue;
-                    document.getElementById('cell-secret').classList.add('corrupted');
-                }
-                
-                // Further overflow into EBP
-                if (inputLength > 12) {
-                    const ebpChars = overflowChars.slice(4, 8);
-                    if (ebpChars.length > 0) {
-                        let ebpHex = '';
-                        for (let i = 0; i < Math.min(4, ebpChars.length); i++) {
-                            ebpHex = ebpChars[i].charCodeAt(0).toString(16).toUpperCase().padStart(2, '0') + ebpHex;
-                        }
-                        ebpValue = '0x' + ebpHex.padEnd(8, '0');
-                        document.getElementById('ebp-value').textContent = ebpValue;
-                        document.getElementById('cell-ebp').classList.add('corrupted');
-                    }
-                }
-                
-                // Further overflow into return address
-                if (inputLength > 16) {
-                    const retChars = overflowChars.slice(8, 12);
-                    if (retChars.length > 0) {
-                        let retHex = '';
-                        for (let i = 0; i < Math.min(4, retChars.length); i++) {
-                            retHex = retChars[i].charCodeAt(0).toString(16).toUpperCase().padStart(2, '0') + retHex;
-                        }
-                        retValue = '0x' + retHex.padEnd(8, '0');
-                        document.getElementById('ret-value').textContent = retValue;
-                        document.getElementById('cell-ret').classList.add('corrupted');
-                    }
-                }
-                
-                // Update status
-                updateStatus(inputLength);
-            } else {
-                // Safe
-                secretValue = '0x00000000';
-                ebpValue = '0x7FFF0100';
-                retValue = '0x08041234';
-                document.getElementById('secret-value').textContent = secretValue;
-                document.getElementById('ebp-value').textContent = ebpValue;
-                document.getElementById('ret-value').textContent = retValue;
-                
-                setStatusSafe();
-            }
-        }
+    const input=document.getElementById('utilizator-input').value;const bytes=[];
+    for(const ch of input){const c=ch.codePointAt(0);if(c===0)break;if(c<128)bytes.push(c);else if(c<2048)bytes.push(192|(c>>6),128|(c&63));else if(c<65536)bytes.push(224|(c>>12),128|((c>>6)&63),128|(c&63));else bytes.push(240|(c>>18),128|((c>>12)&63),128|((c>>6)&63),128|(c&63));}
+    document.getElementById('input-length').textContent=bytes.length+' bytes + 1 NUL';
+    const memory=[0,0,0,0,0,0,0,0,0,0,0,0,0,1,255,127,52,18,4,8];
+    const copied=[...bytes,0];copied.slice(0,memory.length).forEach((b,i)=>memory[i]=b);resetCells();
+    const hex=b=>b.toString(16).toUpperCase().padStart(2,'0');
+    bufferContent=memory.slice(0,8).map(hex);updateBufferDisplay();
+    const word=start=>'0x'+memory.slice(start,start+4).reverse().map(hex).join('');
+    secretValue=word(8);ebpValue=word(12);retValue=word(16);
+    document.getElementById('secret-value').textContent=secretValue;document.getElementById('ebp-value').textContent=ebpValue;document.getElementById('ret-value').textContent=retValue;
+    for(const [start,id] of [[8,'cell-secret'],[12,'cell-ebp'],[16,'cell-ret']])if(copied.length>start)document.getElementById(id).classList.add('corrupted');
+    if(copied.length>8){document.getElementById('cell-buffer-high').classList.add('overflow');updateStatus(copied.length);}else setStatusSafe();
+}
         
         // Update buffer display
         function updateBufferDisplay() {
@@ -541,35 +582,11 @@
         
         // Update status based on overflow severity
         function updateStatus(length) {
-            const title = document.getElementById('status-title');
-            const message = document.getElementById('status-message');
-            const panel = document.getElementById('status-panel');
-            
-            if (length > 16) {
-                title.innerHTML = '<i class="fas fa-skull-crossbones mr-2"></i>CRITICALAL: Return Address Corrupted!';
-                title.className = 'text-lg font-bold mb-3 flex items-center text-red-400';
-                message.innerHTML = `
-                    <p class="mb-2">Return address a fost suprascrito!</p>
-                    <p class="text-red-400">When the function ends, CPU will return to an attacker-controlled address.</p>
-                    <p class="mt-2 text-xs">Potential: Code execution, system compromise</p>
-                `;
-            } else if (length > 12) {
-                title.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>DANGER: Frame Pointer Corrupted';
-                title.className = 'text-lg font-bold mb-3 flex items-center text-orange-400';
-                message.innerHTML = `
-                    <p class="mb-2">Saved EBP a fost corupt!</p>
-                    <p>Stack frame will be invalid on return. Possible crash or unpredictable behaviour.</p>
-                `;
-            } else {
-                title.innerHTML = '<i class="fas fa-bug mr-2"></i>WARNING: Variable Overwrite';
-                title.className = 'text-lg font-bold mb-3 flex items-center text-amber-400';
-                message.innerHTML = `
-                    <p class="mb-2">variable "secret" a fost suprascrito!</p>
-                    <p>The value is no longer 0, so the condition <code class="bg-gray-800 px-1 rounded">if(secret != 0)</code> will be TRUE.</p>
-                    <p class="mt-2 text-amber-400">→ grant_access() va fi executat!</p>
-                `;
-            }
-        }
+    const title=document.getElementById('status-title'),message=document.getElementById('status-message');
+    title.textContent=length>16?'Return-address bytes overwritten in this model':length>12?'Saved frame-pointer bytes overwritten in this model':'Write exceeds the 8-byte buffer (including NUL)';
+    title.className='text-lg font-bold text-red-400';
+    message.textContent=`Copied ${length} bytes including the terminator. Secret value: ${secretValue}; the toy secret!=0 condition is ${parseInt(secretValue,16)!==0}. This conceptual layout does not establish exploitability; real layout, undefined behaviour and mitigations differ.`;
+}
         
         // Set safe status
         function setStatusSafe() {
@@ -589,6 +606,27 @@
         
         // Initialize
         updateVisualization();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

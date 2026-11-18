@@ -7,7 +7,12 @@
 
 ---
 
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
+
+
 ## 1. EVALUATION OF CURRENT MATERIALS
+
+> Inventory filenames and line counts below describe the historical design snapshot, not the current file map. Consult the repository tree and traceability matrix for current paths.
 
 ### 1.1 Existing Structure
 
@@ -114,13 +119,13 @@
 
 | ID | Misconception | Estimated Frequency | Practical Consequence |
 |----|---------------|---------------------|----------------------|
-| M3.1 | "`set -e` stops on ANY error" | 75% | Not in: subshells, if, `||`, `&&`, pipes |
+| M3.1 | "`set -e` stops on ANY error" | 75% | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |
 | M3.2 | "`pipefail` is activated by default" | 50% | Must be explicitly activated with `set -o pipefail` |
-| M3.3 | "trap is inherited in subshells" | 45% | It is NOT inherited! Resets in subshell |
+| M3.3 | "trap is inherited in subshells" | 45% | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |
 | M3.4 | "`$?` contains the last error from pipe" | 60% | Only from the last command (without pipefail) |
 | M3.5 | "`|| true` is equivalent to `set +e`" | 35% | Only for that specific command |
 | M3.6 | "`mktemp` never fails" | 40% | It can fail: full disk, permissions |
-| M3.7 | "trap EXIT executes only on success" | 55% | It executes ALWAYS on exit |
+| M3.7 | "trap EXIT executes only on success" | 55% | Runs on shell exit; not SIGKILL or machine failure |
 | M3.8 | "The order of traps does not matter" | 30% | It matters! The last one set wins |
 
 ### 2.4 Misconceptions about Logging/Debug
@@ -147,11 +152,13 @@
 | O4 | Students implement trap cleanup | 80% correct in assignment | Yes | Important | SEM |
 | O5 | Students use the template | 100% for assignments | Yes | Critical | SEM |
 
-### 3.2 Detailed Timeline (100 minutes)
+### 3.2 Historical Detailed Timeline (120 elapsed minutes)
+
+This is a retained alternative plan. The current instructor guide describes 100 teaching minutes plus a 10-minute break (110 elapsed). The author must choose the actual slot and activity subset; this review does not invent a timetable.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                    TIMELINE SEMINAR 9-10 (100 min)                           │
+│                    HISTORICAL SEMINAR 5 TIMELINE (120 elapsed min)                           │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │ PART 1 (50 min): Functions + Arrays                                          │
@@ -223,7 +230,7 @@
 │  │  │  └─ set options protect against errors                   │   │      │
 │  │  │                                                          │   │      │
 │  │  │  ERROR HANDLING: Graceful failure                        │   │      │
-│  │  │  └─ trap ensures resource cleanup                        │   │      │
+│  │  │  └─ trap supports owned-resource cleanup on handled exits                        │   │      │
 │  │  │                                                          │   │      │
 │  │  │  LOGGING: Production debugging                           │   │      │
 │  │  │  └─ Journaling of critical operations                    │   │      │
@@ -266,14 +273,15 @@ errors=$(extract_errors /var/log/syslog "ERROR|WARN")
 #### Example 3: Error handling for file operations
 ```bash
 # Without error handling (dangerous)
-rm -rf /tmp/workdir/*
+printf 'Would remove entries in: %s\n' /tmp/workdir  # Wrong example: observe only
 
 # With complete error handling
 cleanup_workdir() {
     local dir="${1:?Error: directory required}"
     [[ -d "$dir" ]] || { log_error "Not a directory: $dir"; return 1; }
     [[ "$dir" == /tmp/* ]] || { log_error "Refusing to clean non-temp: $dir"; return 1; }
-    rm -rf "${dir:?}"/* || { log_error "Failed to clean: $dir"; return 1; }
+    [[ ${OWNED_WORKDIR:-} && $dir == "$OWNED_WORKDIR" && -d $dir && ! -L $dir ]] || return 2
+    rm -rf -- "$dir"/* || { log_error "Failed to clean: $dir"; return 1; }
     log_info "Cleaned: $dir"
 }
 ```
@@ -320,7 +328,7 @@ cleanup_workdir() {
 - [ ] Clear demonstrations of local vs global variables
 - [ ] trap cleanup demonstrated and explained
 - [ ] All scripts pass shellcheck without warnings
-- [ ] Works on Bash 4.0+
+- [ ] Works on Bash 4.4+
 - [ ] Diagrams for execution flow
 - [ ] Before/after comparisons for fragile vs solid script
 
@@ -361,7 +369,7 @@ cleanup_workdir() {
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| Students do not have Bash 4.0+ | Medium | High | Check at beginning, alternatives |
+| Students do not have Bash 4.4+ | Medium | High | Check at beginning, alternatives |
 | Insufficient time for template | High | High | Prioritise, eliminate exercises |
 | Confusion local vs global | High | Medium | VISUAL demo, dedicated PI |
 | declare -A forgotten | High | High | Repeat 3+ times, checklist |

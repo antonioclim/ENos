@@ -17,6 +17,22 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from collections import defaultdict
 import statistics
+import math
+from html import escape
+
+def percentage_of(result: Dict) -> float:
+    """Read the supplied percentage or derive it from explicit point totals."""
+    supplied = result.get('percentage')
+    if supplied is not None and supplied != '':
+        value = float(supplied)
+    else:
+        maximum = float(result['total_points'])
+        if maximum <= 0:
+            raise ValueError('total_points must be positive when deriving a percentage')
+        value = float(result['earned_points']) / maximum * 100
+    if not math.isfinite(value):
+        raise ValueError('percentage must be finite')
+    return value
 
 class ReportGenerator:
     def __init__(self):
@@ -29,7 +45,7 @@ class ReportGenerator:
                 with open(json_file, 'r') as f:
                     data = json.load(f)
                     # Extract student name from filename
-                    data['student_name'] = json_file.stem.replace('_result', '')
+                    data.setdefault('student_name', json_file.stem.replace('_result', ''))
                     self.students_data.append(data)
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"⚠️  Error reading {json_file}: {e}")
@@ -43,15 +59,15 @@ class ReportGenerator:
                     'student_name': row.get('name', row.get('student', 'Unknown')),
                     'earned_points': float(row.get('points', row.get('score', 0))),
                     'total_points': float(row.get('total', row.get('max_score', 100))),
-                    'percentage': float(row.get('percentage', 0))
+                    'percentage': float(row['percentage']) if row.get('percentage') else None
                 })
     
     def calculate_statistics(self) -> Dict:
         """Calculate statistics about the results."""
         if not self.students_data:
-            return {}
+            raise ValueError("No assessment records supplied")
         
-        percentages = [s.get('percentage', s['earned_points'] / s['total_points'] * 100) 
+        percentages = [percentage_of(s) 
                        for s in self.students_data]
         
         return {
@@ -88,7 +104,7 @@ class ReportGenerator:
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write("═" * 70 + "\n")
             f.write("           SUMMARY REPORT - Seminar 1: Bash Shell\n")
-            f.write("           Operating Systems | ASE Bucharest - CSIE\n")
+            f.write("           Operating Systems | ASE Bucharest - CSIE\nAssessment status: PENDING_POLICY; scores and legacy bands are descriptive, not final grades.\n")
             f.write("═" * 70 + "\n\n")
             
             f.write(f"Generation date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -103,10 +119,10 @@ class ReportGenerator:
             f.write(f"  Std deviation:   {stats['stdev']:.1f}%\n")
             f.write(f"  Minimum:         {stats['min']:.1f}%\n")
             f.write(f"  Maximum:         {stats['max']:.1f}%\n")
-            f.write(f"  Pass rate:       {stats['pass_rate']:.1f}%\n\n")
+            f.write(f"  Records at ≥50% (descriptive):       {stats['pass_rate']:.1f}%\n\n")
             
             f.write("─" * 70 + "\n")
-            f.write("GRADE DISTRIBUTION\n")
+            f.write("LEGACY SCORE BANDS (policy pending)\n")
             f.write("─" * 70 + "\n\n")
             
             for grade, count in stats['grade_distribution'].items():
@@ -119,14 +135,14 @@ class ReportGenerator:
             f.write("─" * 70 + "\n\n")
             
             sorted_students = sorted(self.students_data, 
-                                    key=lambda x: x.get('percentage', x['earned_points'] / x['total_points'] * 100),
+                                    key=lambda x: percentage_of(x),
                                     reverse=True)
             
-            f.write(f"{'#':<4} {'Name':<30} {'Score':<15} {'Grade':<5}\n")
+            f.write(f"{'#':<4} {'Name':<30} {'Score':<15} {'Legacy band':<12}\n")
             f.write("─" * 60 + "\n")
             
             for i, student in enumerate(sorted_students, 1):
-                pct = student.get('percentage', student['earned_points'] / student['total_points'] * 100)
+                pct = percentage_of(student)
                 grade = self._get_grade(pct)
                 f.write(f"{i:<4} {student['student_name']:<30} {pct:>5.1f}%{'':<9} {grade:<5}\n")
             
@@ -144,7 +160,7 @@ class ReportGenerator:
         """Generate an interactive HTML report."""
         stats = self.calculate_statistics()
         sorted_students = sorted(self.students_data,
-                                key=lambda x: x.get('percentage', x['earned_points'] / x['total_points'] * 100),
+                                key=lambda x: percentage_of(x),
                                 reverse=True)
         
         html = f"""<!DOCTYPE html>
@@ -286,6 +302,7 @@ class ReportGenerator:
     </style>
 </head>
 <body>
+<p role="status">PENDING_POLICY: diagnostic points and historical score bands are descriptive; no final grade, eligibility decision or penalty is issued.</p>
     <div class="container">
         <header>
             <h1>📊 Seminar 1 Report</h1>
@@ -308,13 +325,13 @@ class ReportGenerator:
             </div>
             <div class="stat-card">
                 <div class="stat-value">{stats['pass_rate']:.0f}%</div>
-                <div class="stat-label">Pass Rate</div>
+                <div class="stat-label">Records at ≥50%</div>
             </div>
         </div>
         
         <div class="charts-grid">
             <div class="chart-container">
-                <h3 class="chart-title">Grade Distribution</h3>
+                <h3 class="chart-title">Legacy score bands (policy pending)</h3>
                 <canvas id="gradeChart"></canvas>
             </div>
             <div class="chart-container">
@@ -333,21 +350,21 @@ class ReportGenerator:
                     <th>Name</th>
                     <th>Score</th>
                     <th>Progress</th>
-                    <th>Grade</th>
+                    <th>Legacy band (policy pending)</th>
                 </tr>
             </thead>
             <tbody>
 """
         
         for i, student in enumerate(sorted_students, 1):
-            pct = student.get('percentage', student['earned_points'] / student['total_points'] * 100)
+            pct = percentage_of(student)
             grade = self._get_grade(pct)
             color = {'A': '#22c55e', 'B': '#3b82f6', 'C': '#eab308', 'D': '#f97316', 'F': '#ef4444'}[grade]
             
             html += f"""
                 <tr>
                     <td>{i}</td>
-                    <td>{student['student_name']}</td>
+                    <td>{escape(str(student['student_name']))}</td>
                     <td>{pct:.1f}%</td>
                     <td>
                         <div class="progress-bar">
@@ -365,7 +382,7 @@ class ReportGenerator:
     </div>
     
     <script>
-        // Grade Distribution Chart
+        // Legacy score bands (policy pending) Chart
         new Chart(document.getElementById('gradeChart'), {{
             type: 'doughnut',
             data: {{
@@ -387,7 +404,7 @@ class ReportGenerator:
         }});
         
         // Score Distribution Chart
-        const scores = [{','.join([str(s.get('percentage', s['earned_points'] / s['total_points'] * 100)) for s in sorted_students])}];
+        const scores = [{','.join([str(percentage_of(s)) for s in sorted_students])}];
         const bins = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         scores.forEach(s => {{
             const idx = Math.min(Math.floor(s / 10), 9);
@@ -443,10 +460,10 @@ class ReportGenerator:
         """Export results in CSV format."""
         with open(output_file, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['Name', 'Score', 'Total', 'Percentage', 'Grade'])
+            writer.writerow(['Name', 'Score', 'Total', 'Percentage', 'Legacy band (not a final grade)'])
             
             for student in self.students_data:
-                pct = student.get('percentage', student['earned_points'] / student['total_points'] * 100)
+                pct = percentage_of(student)
                 writer.writerow([
                     student['student_name'],
                     student['earned_points'],

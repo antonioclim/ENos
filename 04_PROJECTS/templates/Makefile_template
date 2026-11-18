@@ -8,9 +8,10 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 # Project variables
-NAME := $(shell basename $(CURDIR))
+NAME := $(shell basename "$(CURDIR)")
 VERSION := 1.0.0
-INSTALL_DIR := $(HOME)/.local/bin
+INSTALL_DIR ?= $(HOME)/.local/bin
+RUNTIME_DIR ?= $(HOME)/.local/share/$(NAME)
 
 # Directories
 SRC_DIR := src
@@ -34,7 +35,7 @@ NC := \033[0m
 #---------------------------------------
 
 .PHONY: all
-all: lint test ## Full verification (lint + test)
+all: syntax lint test ## Full verification (lint + test)
 
 .PHONY: help
 help: ## Display this help message
@@ -54,31 +55,37 @@ help: ## Display this help message
 lint: ## Check code quality with ShellCheck
 	@echo -e "$(YELLOW)═══ ShellCheck ═══$(NC)"
 	@if command -v shellcheck &>/dev/null; then \
-		shellcheck -x $(SCRIPTS) && \
+		plan=$$(mktemp); trap 'rm -f -- "$$plan"' EXIT; find "$(SRC_DIR)" -type f -name '*.sh' -print0 > "$$plan"; mapfile -d '' -t files < "$$plan"; \
+        [ $${#files[@]} -gt 0 ] || { echo "NOT_RUN: no Bash sources"; exit 2; }; \
+        shellcheck -x "$${files[@]}" && \
 		echo -e "$(GREEN)✓ ShellCheck passed$(NC)"; \
 	else \
-		echo -e "$(YELLOW)⚠ ShellCheck is not installed. Install with: sudo apt install shellcheck$(NC)"; \
+		echo -e "$(YELLOW)⚠ ShellCheck is not installed. Install with: sudo apt install shellcheck$(NC)"; exit 2; \
 	fi
 
 .PHONY: syntax
 syntax: ## Check Bash syntax
 	@echo -e "$(YELLOW)═══ Syntax Check ═══$(NC)"
-	@for script in $(SCRIPTS); do \
-		bash -n "$$script" && echo -e "$(GREEN)✓$(NC) $$script"; \
-	done
+	@plan=$$(mktemp); trap 'rm -f -- "$$plan"' EXIT; find "$(SRC_DIR)" -type f -name '*.sh' -print0 > "$$plan"; mapfile -d '' -t files < "$$plan"; \
+	[ $${#files[@]} -gt 0 ] || { echo "NOT_RUN: no Bash sources"; exit 2; }; \
+	failed=0; for script in "$${files[@]}"; do \
+		if bash -n "$$script"; then echo "Syntax OK: $$script"; else failed=$$((failed + 1)); fi; \
+	done; [ $$failed -eq 0 ]
 
 .PHONY: test
 test: ## Run all tests
 	@echo -e "$(YELLOW)═══ Running Tests ═══$(NC)"
 	@if [ -f "$(TEST_DIR)/run_all.sh" ]; then \
-		$(TEST_DIR)/run_all.sh; \
+		bash "$(TEST_DIR)/run_all.sh"; \
 	else \
 		passed=0; failed=0; \
-		for test in $(TESTS); do \
+		plan=$$(mktemp); trap 'rm -f -- "$$plan"' EXIT; find "$(TEST_DIR)" -maxdepth 1 -type f -name 'test_*.sh' -print0 | sort -z > "$$plan"; mapfile -d '' -t files < "$$plan"; \
+		[ $${#files[@]} -gt 0 ] || { echo "NOT_RUN: no tests"; exit 2; }; \
+		for test in "$${files[@]}"; do \
 			if bash "$$test"; then \
-				((passed++)); \
+				passed=$$((passed + 1)); \
 			else \
-				((failed++)); \
+				failed=$$((failed + 1)); \
 			fi; \
 		done; \
 		echo ""; \
@@ -87,24 +94,20 @@ test: ## Run all tests
 	fi
 
 .PHONY: test-verbose
-test-verbose: ## Run tests with detailed output
-	@echo -e "$(YELLOW)═══ Tests (verbose) ═══$(NC)"
-	@for test in $(TESTS); do \
-		echo "--- $$test ---"; \
-		bash "$$test" || true; \
-		echo ""; \
-	done
+test-verbose: test ## Run the same mandatory tests (test output is retained)
 
 #---------------------------------------
 # Installation
 #---------------------------------------
 
 .PHONY: install
-install: lint ## Install to ~/.local/bin
+install: syntax ## Install to ~/.local/bin
 	@echo -e "$(YELLOW)═══ Installation ═══$(NC)"
-	@mkdir -p $(INSTALL_DIR)
-	@cp $(MAIN) $(INSTALL_DIR)/$(NAME)
-	@chmod +x $(INSTALL_DIR)/$(NAME)
+	@mkdir -p "$(INSTALL_DIR)" "$(RUNTIME_DIR)"
+	@cp -a "$(SRC_DIR)" "$(RUNTIME_DIR)/"
+	@for resource in config etc resources templates; do if [ -d "$$resource" ]; then cp -a "$$resource" "$(RUNTIME_DIR)/"; fi; done
+	@printf '%s\n' '#!/bin/bash' 'exec bash "$(RUNTIME_DIR)/$(MAIN)" "$$@"' > "$(INSTALL_DIR)/$(NAME)"
+	@chmod +x "$(INSTALL_DIR)/$(NAME)"
 	@echo -e "$(GREEN)✓ Installed to $(INSTALL_DIR)/$(NAME)$(NC)"
 	@echo ""
 	@echo "Make sure $(INSTALL_DIR) is in PATH:"
@@ -113,7 +116,8 @@ install: lint ## Install to ~/.local/bin
 .PHONY: uninstall
 uninstall: ## Uninstall
 	@echo -e "$(YELLOW)═══ Uninstallation ═══$(NC)"
-	@rm -f $(INSTALL_DIR)/$(NAME)
+	@rm -f -- "$(INSTALL_DIR)/$(NAME)"
+	@echo "Runtime retained at $(RUNTIME_DIR); inspect before removing it."
 	@echo -e "$(GREEN)✓ Uninstalled$(NC)"
 
 #---------------------------------------
@@ -123,11 +127,8 @@ uninstall: ## Uninstall
 .PHONY: clean
 clean: ## Delete temporary files
 	@echo -e "$(YELLOW)═══ Cleanup ═══$(NC)"
-	@find . -type f -name "*.tmp" -delete
-	@find . -type f -name "*.bak" -delete
-	@find . -type f -name "*.log" -delete
-	@find . -type f -name "*~" -delete
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@echo "No source, logs, backups or fixtures are deleted by this template."
+	@echo "Add exact generated build targets to clean when your project defines them."
 	@echo -e "$(GREEN)✓ Cleaned$(NC)"
 
 .PHONY: clean-all
@@ -138,12 +139,12 @@ clean-all: clean uninstall ## Full cleanup + uninstall
 #---------------------------------------
 
 .PHONY: package
-package: clean ## Create archive for submission
+package: ## Create archive for submission
 	@echo -e "$(YELLOW)═══ Packaging ═══$(NC)"
 	@tar --exclude='.git' \
 	     --exclude='*.tmp' \
 	     --exclude='*.bak' \
-	     -czvf ../$(NAME)_$(VERSION).tar.gz .
+	     -czvf "../$(NAME)_$(VERSION).tar.gz" .
 	@echo -e "$(GREEN)✓ Created ../$(NAME)_$(VERSION).tar.gz$(NC)"
 
 #---------------------------------------
@@ -154,7 +155,7 @@ package: clean ## Create archive for submission
 docs: ## Generate documentation (if applicable)
 	@echo -e "$(YELLOW)═══ Documentation ═══$(NC)"
 	@echo "Documentation is in $(DOC_DIR)/"
-	@ls -la $(DOC_DIR)/ 2>/dev/null || echo "No documentation exists."
+	@test -d "$(DOC_DIR)" || { echo "NOT_RUN: no documentation directory"; exit 2; }; ls -la -- "$(DOC_DIR)/"
 
 #---------------------------------------
 # Info
@@ -162,23 +163,14 @@ docs: ## Generate documentation (if applicable)
 
 .PHONY: info
 info: ## Display project information
-	@echo "╔══════════════════════════════════════════════╗"
-	@echo "║     Project Information                      ║"
-	@echo "╚══════════════════════════════════════════════╝"
-	@echo "  Name:      $(NAME)"
-	@echo "  Version:   $(VERSION)"
-	@echo "  Scripts:   $(words $(SCRIPTS))"
-	@echo "  Tests:     $(words $(TESTS))"
-	@echo ""
-	@echo "Source files:"
-	@for f in $(SCRIPTS); do echo "  - $$f"; done
+	@printf 'Project: %s\nVersion: %s\n' "$(NAME)" "$(VERSION)"
+	@plan=$$(mktemp); trap 'rm -f -- "$$plan"' EXIT; find "$(SRC_DIR)" -type f -name '*.sh' -print0 > "$$plan"; mapfile -d '' -t files < "$$plan"; \
+	printf 'Scripts: %s\n' "$${#files[@]}"; printf '  %q\n' "$${files[@]}"
 
 .PHONY: loc
-loc: ## Count lines of code
-	@echo -e "$(YELLOW)═══ Lines of Code ═══$(NC)"
-	@wc -l $(SCRIPTS) | tail -1 | awk '{print "Total: " $$1 " lines"}'
-	@echo ""
-	@wc -l $(SCRIPTS) | sort -n
+loc: ## Count lines of Bash source
+	@plan=$$(mktemp); trap 'rm -f -- "$$plan"' EXIT; find "$(SRC_DIR)" -type f -name '*.sh' -print0 > "$$plan"; mapfile -d '' -t files < "$$plan"; \
+	[ $${#files[@]} -gt 0 ] || { echo 'NOT_RUN: no sources'; exit 2; }; wc -l -- "$${files[@]}"
 
 #---------------------------------------
 # Advanced development
@@ -188,12 +180,12 @@ loc: ## Count lines of code
 watch: ## Monitor changes and run tests
 	@echo "Monitoring changes (Ctrl+C to stop)..."
 	@while true; do \
-		inotifywait -q -e modify $(SCRIPTS) $(TESTS); \
+		inotifywait -q -r -e modify "$(SRC_DIR)" "$(TEST_DIR)"; \
 		clear; \
-		$(MAKE) test; \
+		$(MAKE) test || echo "Tests failed; waiting for another change"; \
 	done
 
 .PHONY: debug
 debug: ## Run main script with debug
 	@echo -e "$(YELLOW)═══ Debug Mode ═══$(NC)"
-	@bash -x $(MAIN) --help
+	@bash -x "$(MAIN)" --help

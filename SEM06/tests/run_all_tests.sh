@@ -39,17 +39,17 @@ log_info() {
 
 log_pass() {
     echo -e "${GREEN}[PASS]${NC} $1"
-    ((TESTS_PASSED++))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
 }
 
 log_fail() {
     echo -e "${RED}[FAIL]${NC} $1"
-    ((TESTS_FAILED++))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
 }
 
 log_skip() {
     echo -e "${YELLOW}[SKIP]${NC} $1"
-    ((TESTS_SKIPPED++))
+    TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
 }
 
 print_header() {
@@ -85,17 +85,11 @@ run_project_tests() {
 }
 
 run_main_test_runner() {
-    local test_runner="$SCRIPTS_DIR/test_runner.sh"
-    
-    if [[ -f "$test_runner" ]]; then
-        log_info "Running main test runner..."
-        if bash "$test_runner"; then
-            log_pass "Main test runner passed"
-        else
-            log_fail "Main test runner failed"
-        fi
+    log_info "Running maintained Python tests..."
+    if python3 -m pytest "$SCRIPT_DIR" -q; then
+        log_pass "Python tests passed"
     else
-        log_skip "Main test runner (not found)"
+        log_fail "Python tests failed or pytest is unavailable"
     fi
 }
 
@@ -119,7 +113,7 @@ validate_yaml() {
     
     if [[ -f "$quiz_yaml" ]]; then
         log_info "Validating quiz YAML..."
-        if python3 -c "import yaml; yaml.safe_load(open('$quiz_yaml'))"; then
+        if python3 -c 'import sys,yaml; yaml.safe_load(open(sys.argv[1]))' "$quiz_yaml"; then
             log_pass "Quiz YAML is valid"
         else
             log_fail "Quiz YAML validation failed"
@@ -134,7 +128,7 @@ validate_json() {
     
     if [[ -f "$quiz_json" ]]; then
         log_info "Validating quiz JSON..."
-        if python3 -c "import json; json.load(open('$quiz_json'))"; then
+        if python3 -c 'import sys,json; json.load(open(sys.argv[1]))' "$quiz_json"; then
             log_pass "Quiz JSON is valid"
         else
             log_fail "Quiz JSON validation failed"
@@ -202,7 +196,7 @@ main() {
         echo -e "${RED}Some tests failed!${NC}"
         exit 1
     else
-        echo -e "${GREEN}All tests passed!${NC}"
+        echo -e "${GREEN}All executed test groups passed; skipped: $TESTS_SKIPPED${NC}"
         exit 0
     fi
 }
@@ -211,18 +205,13 @@ main() {
 # HELP
 # ─────────────────────────────────────────────────────────────────────────────
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    echo "Usage: $0 [options]"
-    echo ""
-    echo "Options:"
-    echo "  -h, --help     Show this help message"
-    echo "  -v, --verbose  Verbose output"
-    echo ""
-    echo "Environment variables:"
-    echo "  LOG_LEVEL      Set to DEBUG for detailed output"
-    echo ""
-    exit 0
-fi
-
-# Run main
-main "$@"
+while (( $# )); do
+    case $1 in
+        -h|--help)
+            printf 'Usage: %s [--verbose]\n--verbose exports LOG_LEVEL=DEBUG for child diagnostics.\n' "$0"
+            exit 0;;
+        -v|--verbose) export LOG_LEVEL=DEBUG; shift;;
+        *) printf 'Unknown option: %s\n' "$1" >&2; exit 2;;
+    esac
+done
+main

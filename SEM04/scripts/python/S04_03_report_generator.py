@@ -10,6 +10,7 @@ Usage:
 """
 
 import json
+import statistics
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -40,7 +41,12 @@ EXERCISE_INFO = {
 def load_grades_file(filepath: Path) -> List[Dict]:
     """Loads an autograder results file."""
     with open(filepath) as f:
-        return json.load(f)
+        data = json.load(f)
+    if isinstance(data, dict):
+        data = [data]
+    if not isinstance(data, list) or any(not isinstance(r, dict) or 'exercises' not in r for r in data):
+        raise ValueError('Expected an autograder result or a list of such results')
+    return data
 
 def calculate_statistics(grades: List[Dict]) -> Dict:
     """Calculate statistics from autograder results."""
@@ -78,7 +84,7 @@ def calculate_statistics(grades: List[Dict]) -> Dict:
         stats["avg_score"] = sum(stats["scores"]) / len(stats["scores"])
         stats["max_score"] = max(stats["scores"])
         stats["min_score"] = min(stats["scores"])
-        stats["median_score"] = sorted(stats["scores"])[len(stats["scores"]) // 2]
+        stats["median_score"] = statistics.median(stats["scores"])
     
     return stats
 

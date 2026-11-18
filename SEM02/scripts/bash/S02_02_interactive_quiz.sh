@@ -52,6 +52,8 @@ TOTAL=0
 declare -a WRONG_ANSWERS=()
 TOPIC_FILTER=""
 QUICK_MODE=false
+QUESTION_INDEX=0
+declare -A SELECTED_QUESTIONS=()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # UTILITY FUNCTIONS
@@ -88,12 +90,15 @@ ask_question() {
     local correct="$4"
     local explanation="$5"
     
+    QUESTION_INDEX=$((QUESTION_INDEX + 1))
+    if $QUICK_MODE && [[ ! ${SELECTED_QUESTIONS[$QUESTION_INDEX]+selected} ]]; then return 0; fi
+
     # Apply topic filter if set
     if [[ -n "$TOPIC_FILTER" && "$topic" != "$TOPIC_FILTER" ]]; then
         return 0
     fi
     
-    ((TOTAL++))
+    TOTAL=$((TOTAL + 1))
     
     clear
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════╗${RESET}"
@@ -113,7 +118,7 @@ ask_question() {
     
     if [[ "$answer" == "$correct" ]]; then
         echo -e "\n${GREEN}${CHECK} CORRECT!${RESET}"
-        ((SCORE++))
+        SCORE=$((SCORE + 1))
     else
         echo -e "\n${RED}${CROSS} INCORRECT!${RESET} The correct answer was: ${BOLD}$correct${RESET}"
         WRONG_ANSWERS+=("Q$TOTAL: ${topic} - Answer: $correct")
@@ -265,7 +270,7 @@ run_quiz() {
         "tr 'hello' 'HELLO'"
         "tr 'h' 'H' | tr 'e' 'E' | ..."
         "tr 'a-z' 'A-Z'"
-        "tr [:lower:] [:upper:]"
+        "tr -d '[:lower:]'"
     )
     ask_question "pipes" \
         "To convert all lowercase letters to uppercase using tr, which is correct?" \
@@ -288,7 +293,7 @@ run_quiz() {
     local q11_opts=(
         "Works correctly, prints 1 to 5"
         "Syntax error"
-        "Prints literal string {1..\$n}"
+        "Prints literal string {1..5}"
         "Infinite loop"
     )
     ask_question "loops" \
@@ -356,6 +361,20 @@ main() {
         esac
     done
     
+    case "$TOPIC_FILTER" in
+        ""|ops|redir|pipes|loops) ;;
+        *) echo "Unknown topic: $TOPIC_FILTER" >&2; exit 2 ;;
+    esac
+    if $QUICK_MODE; then
+        local first=1 last=13
+        case "$TOPIC_FILTER" in
+            ops) first=1; last=3 ;;
+            redir) first=4; last=7 ;;
+            pipes) first=8; last=10 ;;
+            loops) first=11; last=13 ;;
+        esac
+        while IFS= read -r number; do SELECTED_QUESTIONS[$number]=1; done < <(seq "$first" "$last" | shuf -n 5)
+    fi
     run_quiz
 }
 

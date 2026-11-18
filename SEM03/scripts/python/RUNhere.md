@@ -1,164 +1,170 @@
-# 📁 Python Tools — SEM03
+# Python tools — Seminar 3
 
-> **Location:** `SEM03/scripts/python/`  
-> **Purpose:** Automated grading, generation, and analysis tools  
-> **Python version:** ≥ 3.10 required
+Run the following commands from this directory. Python 3 and the dependencies listed in the seminar requirements are needed. Use a dedicated virtual environment if installing dependencies.
 
-## Contents
+Assessment output remains subject to the [open assessment contract](../../homework/ASSESSMENT_STATUS.md). No tool output alone establishes authorship or misconduct.
 
-| Tool | Purpose | CLI |
-|------|---------|-----|
-| `S03_01_autograder.py` | Automated homework evaluation | Yes |
-| `S03_02_quiz_generator.py` | Generate randomized quizzes | Yes |
-| `S03_03_report_generator.py` | Create reports | Yes |
+## Tools and verified command-line help
 
-## Installation
+### S03_01_autograder.py
+
+Diagnostic homework checks; final assessment policy pending.
 
 ```bash
-# Install dependencies
-cd SEM03/
-pip install -r requirements.txt
-
-# Or install individually
-pip install pyyaml pytest
+python3 S03_01_autograder.py --help
 ```
 
----
+```text
+usage: S03_01_autograder.py [-h] [--submission SUBMISSION] [--verbose]
+                            [--output OUTPUT] [--batch BATCH]
+                            [--create-sample] [--test-cron TEST_CRON]
+                            [--test-find TEST_FIND]
+                            [--test-permissions TEST_PERMISSIONS] [--no-color]
 
-## S03_01_autograder.py
+Automated grader for Seminar 3 OS assignments
 
-**Purpose:** Automated homework evaluation with detailed feedback
+options:
+  -h, --help            show this help message and exit
+  --submission SUBMISSION, -s SUBMISSION
+                        Directory with submission to grade
+  --verbose, -v         Verbose mode
+  --output OUTPUT, -o OUTPUT
+                        Output file for report (JSON or MD)
+  --batch BATCH, -b BATCH
+                        Batch grading - directory with multiple submissions
+  --create-sample       Create a sample submission for testing
+  --test-cron TEST_CRON
+                        Test a cron expression
+  --test-find TEST_FIND
+                        Test a find command
+  --test-permissions TEST_PERMISSIONS
+                        Test octal permissions (e.g.: 755)
+  --no-color            Disable colours
 
-### Usage
+Usage examples:
+  S03_01_autograder.py --submission ./student_assignment/
+  S03_01_autograder.py --submission ./student_assignment/ --verbose
+  S03_01_autograder.py --submission ./student_assignment/ --output report.json
+  S03_01_autograder.py --create-sample
+  S03_01_autograder.py --test-cron "0 3 * * *"
+  S03_01_autograder.py --test-find "find . -type f -name '*.txt'"
+```
+
+### S03_02_quiz_generator.py
+
+Personalised or random formative questions.
 
 ```bash
-python3 S03_01_autograder.py <submission> [options]
-
-Arguments:
-  submission       Path to submission directory or file
-
-Options:
-  --rubric PATH    Custom rubric file
-  --output FILE    Output file for grades (CSV)
-  --verbose        Detailed scoring breakdown
-  --batch          Process entire directory of submissions
-  --timeout SEC    Per-test timeout (default: 30)
+python3 S03_02_quiz_generator.py --help
 ```
 
-### Examples
+```text
+usage: S03_02_quiz_generator.py [-h] [--interactive] [--generate N]
+                                [--count COUNT]
+                                [--category {find_xargs,parameters,permissions,cron,mixed}]
+                                [--difficulty {easy,medium,hard}] [--balanced]
+                                [--export FILE] [--with-answers] [--stats]
+                                [--list-questions] [--no-color] [--version]
+
+Quiz Generator for Seminar 03 OS
+
+options:
+  -h, --help            show this help message and exit
+  --interactive, -i     Start interactive quiz in terminal
+  --generate N, -g N    Generate quiz with N questions
+  --count COUNT, -c COUNT
+                        Number of questions (default: 10)
+  --category {find_xargs,parameters,permissions,cron,mixed}, -cat {find_xargs,parameters,permissions,cron,mixed}
+                        Question category
+  --difficulty {easy,medium,hard}, -d {easy,medium,hard}
+                        Filter by difficulty
+  --balanced, -b        Select balanced from all categories
+  --export FILE, -e FILE
+                        Export quiz (format detected from extension: .html,
+                        .json, .md)
+  --with-answers, -a    Include answers in Markdown export
+  --stats, -s           Display question bank statistics
+  --list-questions, -l  List all questions
+  --no-color            Disable terminal colours
+  --version, -v         show program's version number and exit
+
+Examples:
+  S03_02_quiz_generator.py --interactive                    # Interactive quiz with 10 questions
+  S03_02_quiz_generator.py --generate 15 --difficulty hard  # Hard quiz with 15 questions
+  S03_02_quiz_generator.py --category permissions --count 5 # Quiz with permissions only
+  S03_02_quiz_generator.py --export quiz.html               # Export as interactive HTML
+  S03_02_quiz_generator.py --stats                          # Display statistics
+```
+
+### S03_03_report_generator.py
+
+Descriptive result reports.
 
 ```bash
-# Grade single submission
-python3 S03_01_autograder.py ~/submissions/student123/
-
-# Grade all submissions with report
-python3 S03_01_autograder.py ~/submissions/ --batch --output grades.csv
-
-# Verbose grading
-python3 S03_01_autograder.py submission/ --verbose
+python3 S03_03_report_generator.py --help
 ```
 
-### Grading Criteria
+```text
+usage: S03_03_report_generator.py [-h] [--student DIR] [--class DIR]
+                                  [--output FILE]
+                                  [--format {console,markdown,html}]
+                                  [--name NAME] [--demo] [--no-color]
+                                  [--version]
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Correctness | 60% | Passes test cases |
-| Style | 20% | shellcheck compliance |
-| Documentation | 20% | Comments, README |
+Report Generator for Seminar 03 OS
 
----
+options:
+  -h, --help            show this help message and exit
+  --student DIR, -s DIR
+                        Generate report for a student (directory with results)
+  --class DIR, -c DIR   Generate report for a class (directory with student
+                        subdirectories)
+  --output FILE, -o FILE
+                        Output file (format detected from extension)
+  --format {console,markdown,html}, -f {console,markdown,html}
+                        Output format (default: console)
+  --name NAME           Student name (for individual reports)
+  --demo                Run demo with synthetic data
+  --no-color            Disable colours in console output
+  --version, -v         show program's version number and exit
 
-## S03_02_quiz_generator.py
+Examples:
+  S03_03_report_generator.py --student results_dir/student1           # Individual report
+  S03_03_report_generator.py --class submissions/                     # Class report
+  S03_03_report_generator.py --student results/ -o report.html        # Export to HTML
+  S03_03_report_generator.py --demo                                   # Demo with synthetic data
+```
 
-**Purpose:** Generate randomized quizzes from question bank
+## Evidence and outputs
 
-### Usage
+Generators write to the path supplied on their command line. Answer keys and example solutions are teaching material; their publication policy remains an author decision. A timeout bounds runtime but does not isolate submitted shell code. Use the course exercise environment and inspect the submission before running evaluators.
+
+The JSON quiz views are project exports. Native Moodle/Canvas/QTI import compatibility has not been verified in this phase.
+
+See [tests](../../tests/) and [demonstrations](../demo/).
+
+### S03_cron_expression.py
+
+Read-only five-field schedule validator. No crontab is read or installed.
 
 ```bash
-python3 S03_02_quiz_generator.py [options]
-
-Options:
-  --count N        Number of unique quizzes to generate
-  --questions N    Questions per quiz (default: 10)
-  --seed N         Random seed for reproducibility
-  --output DIR     Output directory for generated quizzes
-  --format FMT     Output format: yaml, json, pdf, moodle
+python3 S03_cron_expression.py --help
 ```
 
-### Examples
+```text
+usage: S03_cron_expression.py [-h] [--json] expression
 
-```bash
-# Generate 5 unique quizzes
-python3 S03_02_quiz_generator.py --count 5 --output quizzes/
+Read-only schedule syntax validator; never reads or installs a crontab.
+Declared subset: Debian/Vixie five-field schedules, numeric/name lists,
+ascending ranges, positive steps on * or ranges, and the eight known macros. A
+schedule has exactly five fields or one macro, without a command. Calendar
+existence, DST, daemon behaviour, job execution and command safety are not
+tested.
 
-# Reproducible generation
-python3 S03_02_quiz_generator.py --seed 42 --count 3
+positional arguments:
+  expression
 
-# Export for Moodle
-python3 S03_02_quiz_generator.py --format moodle --output moodle_quiz.xml
+options:
+  -h, --help  show this help message and exit
+  --json
 ```
-
----
-
-## S03_03_report_generator.py
-
-**Purpose:** Generate PDF/HTML reports from grading data
-
-### Usage
-
-```bash
-python3 S03_03_report_generator.py <grades_file> [options]
-
-Arguments:
-  grades_file      CSV file with grades data
-
-Options:
-  --format FMT     Output format: pdf, html, md (default: pdf)
-  --individual     Generate per-student reports
-  --summary        Include class statistics
-  --output DIR     Output directory
-```
-
-### Examples
-
-```bash
-# Generate summary report
-python3 S03_03_report_generator.py grades.csv --summary
-
-# Individual student reports
-python3 S03_03_report_generator.py grades.csv --individual --output reports/
-```
-
-
-
----
-
-## Common Options
-
-All Python tools support:
-
-| Option | Description |
-|--------|-------------|
-| `--help` | Show detailed help |
-| `--version` | Show tool version |
-| `--quiet` | Suppress non-essential output |
-| `--debug` | Enable debug logging |
-
-## PYTHONPATH Setup
-
-For importing shared `lib/` modules:
-
-```bash
-# Add to your .bashrc or run before scripts
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/../.."
-
-# Or run with path
-PYTHONPATH="../.." python3 S03_01_autograder.py submission/
-```
-
----
-
-*See also: [`../../lib/`](../../lib/) for shared utilities*  
-*See also: [`../../tests/`](../../tests/) for test suite*
-
-*Last updated: January 2026*

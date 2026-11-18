@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml hard_vs_symbolic_link
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Hard Link vs Symbolic Link
 
 skinparam rectangle {
@@ -18,7 +18,7 @@ rectangle "**HARD LINK**" as hard #C8E6C9 {
         rectangle "**Inode 12345**\nLinks: 2\nSize: 6 bytes" as hard_in #FFFFFF
     }
     
-    rectangle "Data Block 100\n\"Hello\\n\"" as hard_data #FFE0B2
+    rectangle "Data Block 100\nHello + newline (6 bytes)" as hard_data #FFE0B2
     
     hard_orig -[#27AE60,bold]-> hard_in
     hard_link -[#27AE60,bold]-> hard_in
@@ -28,7 +28,7 @@ rectangle "**HARD LINK**" as hard #C8E6C9 {
     ✓ **Same inode** (12345)
     ✓ On deleting original → data remains
     ✗ Cannot cross filesystem
-    ✗ Cannot link to directories
+    ✗ Ordinary users cannot hard-link directories
     end note
 }
 
@@ -41,10 +41,10 @@ rectangle "**SYMBOLIC LINK**" as sym #E3F2FD {
     
     rectangle "Inode Table" as sym_inode #FFF9C4 {
         rectangle "**Inode 12345**\nLinks: 1\nType: file" as sym_in1 #FFFFFF
-        rectangle "**Inode 67890**\nLinks: 1\nType: **symlink**\nContent: \"original.txt\"" as sym_in2 #FFFFFF
+        rectangle "**Inode 67890**\nLinks: 1\nType: **symlink**\nTarget path: original.txt" as sym_in2 #FFFFFF
     }
     
-    rectangle "Data Block 100\n\"Hello\\n\"" as sym_data #FFE0B2
+    rectangle "Data Block 100\nHello + newline (6 bytes)" as sym_data #FFE0B2
     
     sym_orig -[#27AE60,bold]-> sym_in1
     sym_link -[#E74C3C,dashed]-> sym_in2 : different inode!
@@ -64,8 +64,8 @@ hard -[hidden]right-> sym
 legend bottom
 |= Aspect |= Hard Link |= Symbolic Link |
 | Inode | SAME | DIFFERENT |
-| Cross-filesystem | ❌ | ✅ |
-| Link to directories | ❌ | ✅ |
+| Cross-filesystem | No | Yes |
+| Link to directories | No | Yes |
 | On deleting target | Data remains | Link broken |
 | Space | Only dir entry | Dir entry + inode |
 endlegend

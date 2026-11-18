@@ -28,8 +28,8 @@ set -euo pipefail
 #-------------------------------------------------------------------------------
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly DATA_DIR="${SCRIPT_DIR}/../../resources/sample_data"
-readonly DEMO_DIR="$HOME/demo_sem4/data"
+readonly DATA_DIR="${ENOS_SEM04_RESOURCE_DIR:-${SCRIPT_DIR}/../../resources/generated_data}"
+readonly DEMO_DIR="${ENOS_SEM04_DATA_DIR:-$HOME/demo_sem4/data}"
 
 # Colours for output
 readonly RED='\033[0;31m'
@@ -91,7 +91,7 @@ GENERATED FILES:
 
 LOCATIONS:
     • ~/demo_sem4/data/    - Main directory for demonstrations
-    • ./resources/sample_data/ - Backup in the seminar package
+    • ./resources/generated_data/ - Generated demo copy (not committed test fixtures)
 
 EXAMPLES:
     ./S04_01_setup_seminar.sh              # Standard setup
@@ -407,12 +407,32 @@ main() {
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
     
-    # Clean if requested
-    if [[ "$CLEAN" == true ]]; then
-        log_warning "Cleaning existing directories..."
-        rm -rf "$DEMO_DIR" 2>/dev/null || true
-        rm -rf "$DATA_DIR" 2>/dev/null || true
-    fi
+    # Reuse only a directory previously created for this generator. Never erase
+    # a caller directory recursively or overwrite the deterministic test fixtures.
+    local target
+    for target in "$DEMO_DIR" "$DATA_DIR"; do
+        [[ ! -L "$target" ]] || { log_error "Refusing symlink directory: $target"; exit 1; }
+        if [[ -e "$target" && (! -d "$target" || ! -f "$target/.enos-seminar4-generated" || -L "$target/.enos-seminar4-generated") ]]; then
+            log_error "Unowned destination exists: $target. Select a new ENOS_SEM04_DATA_DIR / ENOS_SEM04_RESOURCE_DIR."
+            exit 1
+        fi
+        # Refuse links even in a previously generated directory. The marker is
+        # an ownership convention, not a sandbox or a concurrent-write lock.
+        local name
+        for name in access.log employees.csv config.txt emails.txt test.txt; do
+            if [[ -L "$target/$name" || (-e "$target/$name" && ! -f "$target/$name") ]]; then
+                log_error "Refusing non-regular output: $target/$name"
+                exit 1
+            fi
+        done
+    done
+    for target in "$DEMO_DIR" "$DATA_DIR"; do
+        mkdir -p -- "$target"
+        : > "$target/.enos-seminar4-generated"
+        if [[ "$CLEAN" == true ]]; then
+            rm -f -- "$target/access.log" "$target/employees.csv" "$target/config.txt" "$target/emails.txt" "$target/test.txt"
+        fi
+    done
     
     # Generate in demo directory
     log_info "=== Preparing demo directory ==="

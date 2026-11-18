@@ -1,5 +1,7 @@
 # S03_TC04 - Options and Switches in Scripts
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (Redistributed)
 
@@ -55,6 +57,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -o|--output)
+            [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty option value" >&2; exit 1; }
             OUTPUT="$2"
             shift 2
             ;;
@@ -75,7 +78,8 @@ done
 
 echo "Verbose: $VERBOSE"
 echo "Output: $OUTPUT"
-echo "Arguments: ${ARGS[@]}"
+ARGS+=("$@")  # Preserve operands after -- as well.
+printf 'Argument: %s\n' "${ARGS[@]}"
 ```
 
 ---
@@ -84,7 +88,7 @@ echo "Arguments: ${ARGS[@]}"
 
 ### 3.1 Basic Syntax
 
-```bash
+```text
 while getopts "optstring" opt; do
     case $opt in
         ...
@@ -142,8 +146,8 @@ while getopts ":hvo:n:f" opt; do
         o) OUTPUT="$OPTARG" ;;
         n)
             NUM="$OPTARG"
-            if ! [[ "$NUM" =~ ^[0-9]+$ ]]; then
-                echo "Error: -n requires a number" >&2
+            if ! [[ "$NUM" =~ ^[1-9][0-9]{0,3}$ ]]; then
+                echo "Error: -n requires a decimal integer from 1 to 9999" >&2
                 exit 1
             fi
             ;;
@@ -199,19 +203,23 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -o|--output)
+            [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty option value" >&2; exit 1; }
             OUTPUT="$2"
             shift 2
             ;;
         --output=*)
             OUTPUT="${1#*=}"
+            [[ -n $OUTPUT ]] || { echo "Empty option value" >&2; exit 1; }
             shift
             ;;
         -c|--config)
+            [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty option value" >&2; exit 1; }
             CONFIG="$2"
             shift 2
             ;;
         --config=*)
             CONFIG="${1#*=}"
+            [[ -n $CONFIG ]] || { echo "Empty option value" >&2; exit 1; }
             shift
             ;;
         --)
@@ -233,7 +241,7 @@ ARGS=("$@")
 
 ### 4.2 Patterns for Long Options
 
-```bash
+```text
 # Option with =
 --config=value    # ${1#*=} extracts "value"
 
@@ -244,9 +252,11 @@ ARGS=("$@")
 case $1 in
     --config=*)
         CONFIG="${1#*=}"
+        [[ -n $CONFIG ]] || { echo "Empty option value" >&2; exit 1; }
         shift
         ;;
     --config)
+        [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty option value" >&2; exit 1; }
         CONFIG="$2"
         shift 2
         ;;
@@ -283,7 +293,12 @@ validate_range() {
 
 ---
 
-## 6. Professional Script Template
+## 6. Parser Template (processing remains an exercise)
+
+The log function succeeds in quiet mode. Arity is checked before `$2` is read;
+`set -e` does not replace explicit status handling. The following template parses
+options and reports the input; implement and test the processing/dry-run/output
+contract in the marked exercise section before calling it a complete processor.
 
 ```bash
 #!/bin/bash
@@ -311,7 +326,7 @@ Options:
 EOF
 }
 
-log() { $VERBOSE && echo "[INFO] $*" >&2; }
+log() { if "$VERBOSE"; then printf '[INFO] %s\n' "$*" >&2; fi; return 0; }
 error() { echo "[ERROR] $*" >&2; exit 1; }
 
 parse_args() {
@@ -321,8 +336,8 @@ parse_args() {
             -V|--version) echo "$VERSION"; exit 0 ;;
             -v|--verbose) VERBOSE=true; shift ;;
             -n|--dry-run) DRY_RUN=true; shift ;;
-            -o|--output) OUTPUT="$2"; shift 2 ;;
-            --output=*) OUTPUT="${1#*=}"; shift ;;
+            -o|--output) [[ $# -ge 2 && -n $2 ]] || error "Missing output"; OUTPUT="$2"; shift 2 ;;
+            --output=*) OUTPUT="${1#*=}"; [[ -n $OUTPUT ]] || error "Empty output"; shift ;;
             --) shift; break ;;
             -*) error "Unknown option: $1" ;;
             *) break ;;
@@ -373,7 +388,7 @@ shift $((OPTIND-1))
 
 ## Cheat Sheet
 
-```bash
+```text
 # GETOPTS
 while getopts ":hvo:n:" opt; do
     case $opt in
@@ -414,14 +429,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

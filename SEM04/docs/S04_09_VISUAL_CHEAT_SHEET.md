@@ -3,7 +3,7 @@
 
 > **Operating Systems** | Bucharest University of Economic Studies - CSIE  
 > **Seminar 4** | Quick Reference Card  
-> **Format**: Print-friendly A4
+> **Format**: Multi-section quick reference. Check pagination in the chosen renderer; no single-A4-page claim.
 
 ---
 
@@ -44,6 +44,10 @@
 
 ## BRE vs ERE - CRITICAL DIFFERENCES
 
+This table targets GNU grep. BRE `\+`, `\?`, `\|` are GNU extensions; GNU grep
+ERE backreferences are not portable AWK ERE. GNU grep supports `\w`, `\s` and
+`\b` in BRE/ERE; `\d` and lazy quantifiers need its PCRE mode when available.
+
 ```
 ┌──────────────────┬───────────────────┬───────────────────┐
 │ Function         │ BRE (grep)        │ ERE (grep -E)     │
@@ -58,7 +62,6 @@
 
 💡 RECOMMENDATION: Always use grep -E to avoid escaping!
 
-*(`grep` is probably the command I use most frequently. Simple, fast, efficient.)*
 
 ```
 
@@ -79,6 +82,9 @@
 
 ## POSIX Character Classes
 
+The ASCII equivalences below assume `LC_ALL=C`. POSIX class membership depends
+on locale; these are not universal Unicode equivalences.
+
 ```
 ┌────────────────┬────────────────────────────────┬──────────────────────┐
 │ Class          │ Equivalent                     │ Description          │
@@ -95,9 +101,11 @@
 
 ## Common Patterns
 
+These extract lexical shapes, not complete email/URL/IP/date validity. Use anchors
+for a whole-line requirement and separate octet/calendar/grammar validation.
+
 ```bash
 
-*Personal note: I prefer Bash scripts for simple automations and Python when the logic becomes complex. It is a matter of pragmatism.*
 
 # IP Address (basic)
 grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' file.txt
@@ -114,6 +122,9 @@ grep -oE '[0-9]{2}/[0-9]{2}/[0-9]{4}' file.txt
 # MAC Address
 grep -oE '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}' file.txt
 ```
+
+*Personal note: I prefer Bash scripts for simple automations and Python when the logic becomes complex. It is a matter of pragmatism.*
+
 
 ---
 
@@ -289,6 +300,9 @@ END {
 }
 ```
 
+The `-F,` examples below use simple unquoted records, one header and numeric
+fields. They do not parse quoted commas or multiline CSV.
+
 ## Practical Examples
 
 ```bash
@@ -302,10 +316,10 @@ awk -F, '{print $1, $3}' data.csv
 awk -F, 'NR > 1 {sum += $3} END {print sum}' data.csv
 
 # Average
-awk -F, 'NR > 1 {sum += $3; count++} END {print sum/count}' data.csv
+awk -F, 'NR > 1 {sum += $3; count++} END {if(count) print sum/count; else print "undefined (0 records)"}' data.csv
 
 # Filter: salary > 5000
-awk -F, '$4 > 5000 {print $2, $4}' employees.csv
+awk -F, 'NR>1 && $4 ~ /^[0-9]+$/ && $4 > 5000 {print $2, $4}' employees.csv
 
 # Count per group
 awk -F, 'NR > 1 {count[$3]++} END {for (k in count) print k, count[k]}' data.csv
@@ -317,6 +331,9 @@ awk -F, 'NR > 1 {printf "%-20s %8.2f\n", $2, $4}' employees.csv
 ---
 
 # NANO - SIMPLE EDITOR
+
+Nano 7.x also has Ctrl+S (Save) and Ctrl+T (Execute menu). Inspect the installed
+help for version/configuration differences; availability is not guaranteed.
 
 ## Essential Shortcuts
 
@@ -373,3 +390,8 @@ awk -F, 'NR > 1 {printf "%-20s %8.2f\n", $2, $4}' employees.csv
 ---
 
 *Cheat Sheet for Operating Systems Seminar 4 | ASE Bucharest - CSIE*
+
+
+## Retained Author Notes
+
+*(`grep` is probably the command I use most frequently. Simple, fast, efficient.)*

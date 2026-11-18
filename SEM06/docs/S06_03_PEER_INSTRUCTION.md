@@ -20,11 +20,13 @@ For each question in this document, follow this protocol:
    - If **<30% correct**: Mini-lecture needed before re-vote
 5. **Reveal answer** with explanation (2 min)
 
-### Optimal Conditions
+### Local Teaching Targets
 
-- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
+The percentages and classroom anecdotes in this document are retained instructional estimates with unresolved empirical provenance. They are not measured outcomes or guaranteed improvements; author confirmation or a fully identified study is required for empirical claims.
+
+- **Target first-vote accuracy:** 40-60% (local design target, not an established universal optimum)
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote improvement:** The inherited 20–30% increase is an unverified planning estimate; record actual results separately
 
 ### Question Notation
 
@@ -67,13 +69,13 @@ echo "Backup directory: $BACKUP_DIR"
 
 ### Question
 
-What happens when you run this script?
+Assume a fresh non-interactive Bash, `set +eu`, no command named `BACKUP_DIR` and an unset `BACKUP_DIR`. Which option describes both output streams and continuation?
 
 | Option | Answer |
 |--------|--------|
 | **A** | Displays "Backup directory: /var/backups" |
-| **B** | Error: "BACKUP_DIR: command not found" |
-| **C** | Displays "Backup directory: " (empty variable) |
+| **B** | A command-not-found diagnostic on stderr, then `Backup directory: ` on stdout; the final echo succeeds |
+| **C** | Only `Backup directory: ` on stdout, with no diagnostic |
 | **D** | Syntax error at line 2 |
 
 ---
@@ -88,7 +90,7 @@ This one catches *everyone* coming from Python or JavaScript. Bash reads `BACKUP
 
 **Why students pick wrong answers:**
 - **A** — They assume Bash is forgiving (it isn't)
-- **C** — They confuse this with reading an undefined variable
+- **C** — The empty stdout line does occur, but the diagnostic is also emitted; this option omits it
 - **D** — Close, but it's a runtime error, not a parse-time syntax error
 
 **Demo fix:** `BACKUP_DIR="/var/backups"` — no spaces.
@@ -174,7 +176,7 @@ If file "my file.txt" exists, what happens?
 
 **First vote target:** 30-40% correct (this is tricky)
 
-`[ ]` is the old POSIX `test` command. It's dumb—it sees `$FILE` expand to two words and chokes. `[[ ]]` is a Bash builtin that handles this properly.
+`[ ]` is the old POSIX `test` command. It's dumb—it sees `$FILE` expand to two words and chokes. `[[ ]]` is a Bash conditional compound command that handles this properly.
 
 **What happens under the hood:**
 - `[ -f my file.txt ]` becomes three arguments: `-f`, `my`, `file.txt`. Error.
@@ -226,12 +228,12 @@ Both do the same thing, but `$()` wins on readability and nesting:
 dir=`dirname \`which python\``   # Headache
 
 # Much cleaner
-dir=$(dirname $(which python))
+dir=$(dirname -- "$(command -v python3)")
 ```
 
 **Why students pick wrong answers:**
 - **A** — Functionally yes, stylistically no
-- **C** — Performance is identical
+- **C** — Syntax age does not establish a speed advantage; both forms perform command substitution
 - **D** — Both run in a subshell
 
 **Bottom line:** Backticks are legacy. Use `$()` in new code.
@@ -244,7 +246,7 @@ dir=$(dirname $(which python))
 
 ```bash
 #!/bin/bash
-TEMP_FILE=$(mktemp)
+TEMP_FILE=$(mktemp) || exit 1
 
 cleanup() {
     rm -f "$TEMP_FILE"
@@ -252,6 +254,8 @@ cleanup() {
 }
 
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 echo "Processing data..."
 # ... processing ...
@@ -266,7 +270,7 @@ When does the `cleanup` function run?
 |--------|--------|
 | **A** | Only if script terminates with `exit 0` |
 | **B** | Only if user presses Ctrl+C |
-| **C** | On any termination: normal exit, error, or Ctrl+C |
+| **C** | On shell exit, including a handled INT/TERM that exits; not after SIGKILL or system failure |
 | **D** | Only if you call `cleanup` explicitly |
 
 ---
@@ -277,11 +281,12 @@ When does the `cleanup` function run?
 
 **First vote target:** 40-50% correct
 
-`EXIT` fires on *any* termination:
+`EXIT` runs when this shell exits and can execute its trap:
 - `exit 0` or `exit 1`
 - Reaching end of script
 - Error with `set -e`
-- Ctrl+C (after INT handler, if any)
+- Ctrl+C through the explicit INT handler above
+- SIGKILL, SIGSTOP and machine failure cannot be handled by this trap
 
 This is your safety net for temp files. Use it.
 
@@ -301,6 +306,7 @@ This is your safety net for temp files. Use it.
 ```bash
 #!/bin/bash
 set -e
+set +o pipefail  # Explicitly disabled for this question
 
 cat nonexistent.txt | grep "pattern" | wc -l
 echo "Script continues..."
@@ -312,29 +318,24 @@ What happens if file "nonexistent.txt" doesn't exist?
 
 | Option | Answer |
 |--------|--------|
-| **A** | Script stops immediately after `cat` |
-| **B** | Error message, but continues and prints "Script continues..." |
-| **C** | Displays "0" and "Script continues..." |
-| **D** | Depends on `pipefail` setting |
+| **A** | The pipeline is cancelled immediately when cat fails, before wc can output |
+| **B** | Diagnostic on stderr; stdout contains `0` and `Script continues...`; the script exits successfully |
+| **C** | Only `0` is printed on stdout and the script stops before the final echo |
+| **D** | The shown shell option state is unspecified, so no prediction is possible |
 
 ---
 
 ### Instructor Notes
 
-**Correct answer: D**
+**Correct answer: B**
 
 **First vote target:** 25-35% correct (hard one!)
 
-Here's the gotcha: `set -e` only checks the *last* command in a pipe. `cat` fails, but `wc -l` succeeds (returns 0), so the pipe "succeeds."
+Without pipefail, a pipeline takes the status of its final command. `wc -l` succeeds, so this pipeline has status 0 even though `cat` and `grep` fail. All pipeline commands may already have run: errexit is not an instant pipeline cancellation mechanism.
 
-With `set -o pipefail`, the pipe returns the first non-zero exit code.
+With `set -o pipefail`, Bash uses the **rightmost nonzero** status, or zero if every command succeeds. `set -e` then acts on the pipeline status subject to its documented conditional-context exceptions. Use explicit `if`/status handling for expected failures; strict options are useful but do not replace a failure contract.
 
-**Bottom line:** Always use `set -euo pipefail`. The trio. Non-negotiable.
-
-**Why students pick wrong answers:**
-- **A** — True only *with* pipefail
-- **B** — True only *without* pipefail
-- **C** — Ignores the cat error entirely
+**Why the other answers do not fit:** A claims early cancellation; C omits continuation; D ignores the explicit `set +o pipefail`.
 
 ---
 
@@ -342,14 +343,14 @@ With `set -o pipefail`, the pipe returns the first non-zero exit code.
 
 ### Scenario
 
-You want to delete log files:
+Compare deletion argument lists without deleting files. Set `LOG_DIR` to an owned fixture directory; these commands print their arguments only:
 
 ```bash
 # Variant 1
-find /logs -name "*.log" -exec rm {} \;
+find "$LOG_DIR" -name "*.log" -exec printf 'Would remove: <%s>\n' {} \;
 
 # Variant 2
-find /logs -name "*.log" | xargs rm
+find "$LOG_DIR" -name "*.log" | xargs printf 'Would remove: <%s>\n'
 ```
 
 ### Question
@@ -375,7 +376,7 @@ What's the potential problem with Variant 2?
 
 **The fix:**
 ```bash
-find /logs -name "*.log" -print0 | xargs -0 rm
+find "$LOG_DIR" -name "*.log" -print0 | xargs -0 -r printf 'Would remove: <%s>\n'
 ```
 `-print0` uses null bytes as delimiters. `-0` tells xargs to expect them.
 
@@ -443,11 +444,11 @@ check_health() {
     local retry=0
     
     while [[ $retry -lt $max_retries ]]; do
-        if curl -sf http://localhost:8080/health; then
+        if curl --connect-timeout 1 --max-time 2 -sf http://localhost:8080/health; then
             return 0
         fi
-        ((retry++))
-        sleep 2
+        retry=$((retry + 1))
+        if ((retry < max_retries)); then sleep 2; fi
     done
     return 1
 }
@@ -480,7 +481,7 @@ sleep $((2 ** retry))  # 2s, 4s, 8s...
 ```
 
 **Why students pick wrong answers:**
-- **A** — CPU usage is negligible regardless
+- **A** — Spacing requests may reduce load too, but B states the recovery purpose; the relative CPU cost is workload-dependent
 - **C** — sleep is optional, just useful
 - **D** — curl has its own timeout setting
 
@@ -501,12 +502,12 @@ Deployment failed. System shows:
 
 ### Question
 
-Safest rollback method?
+Assume GNU coreutils, an owned release directory, an unused `.current.next` pathname and a separately health-checked previous release. Which method replaces the current directory symlink without a missing-link window?
 
 | Option | Answer |
 |--------|--------|
 | **A** | `rm -rf v1.1.0 && mv v1.0.0 current` |
-| **B** | `ln -sf v1.0.0 current` |
+| **B** | `ln -s v1.0.0 .current.next && mv -Tf -- .current.next current` |
 | **C** | `rm current && ln -s v1.0.0 current` |
 | **D** | `cp -r v1.0.0/* v1.1.0/` |
 
@@ -518,14 +519,14 @@ Safest rollback method?
 
 **First vote target:** 35-45% correct
 
-`ln -sf` is atomic. One operation. Zero downtime. The old symlink gets replaced in a single syscall.
+Create a new link under a different name, then rename it over `current` on the same filesystem. GNU `mv -T` treats `current` as the destination entry rather than following the directory symlink. The rename provides filesystem namespace atomicity. It does not prove zero application downtime, connection continuity or successful reload. If staging fails, `&&` leaves the old live link unchanged.
 
 **Why students pick wrong answers:**
 - **A** — Destroys v1.1.0 (you might need it for debugging!)
 - **C** — Gap between `rm` and `ln` = downtime
 - **D** — Overwrites files instead of clean switch
 
-**Professional wisdom:** Never delete old releases. Disk is cheap. Sleep is precious.
+**Retention decision:** Keep the required healthy rollback releases according to an explicit retention and capacity policy; no unlimited-retention policy is assumed here.
 
 ---
 

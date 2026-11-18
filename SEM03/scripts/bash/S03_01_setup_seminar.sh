@@ -490,7 +490,8 @@ create_cron_exercises_files() {
 # Test script for cron
 # Writes timestamp to log
 
-LOG_FILE="${HOME}/sem5-6_lab/cron_exercises/logs/test_cron.log"
+BASE_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+LOG_FILE="$BASE_DIR/cron_exercises/logs/test_cron.log"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Cron job executed" >> "$LOG_FILE"
 SHEOF
@@ -505,9 +506,10 @@ SHEOF
 set -e
 
 # Configurations
-BACKUP_DIR="${HOME}/sem5-6_lab/cron_exercises/output"
-LOG_FILE="${HOME}/sem5-6_lab/cron_exercises/logs/backup.log"
-SOURCE_DIR="${HOME}/sem5-6_lab/find_exercises/project"
+BASE_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+BACKUP_DIR="$BASE_DIR/cron_exercises/output"
+LOG_FILE="$BASE_DIR/cron_exercises/logs/backup.log"
+SOURCE_DIR="$BASE_DIR/find_exercises/project"
 
 # Logging function
 log() {
@@ -515,7 +517,7 @@ log() {
 }
 
 # Lock file to prevent simultaneous executions
-LOCK_FILE="/tmp/backup_demo.lock"
+LOCK_FILE="$BACKUP_DIR/.backup_demo.lock"
 exec 200>"$LOCK_FILE"
 if ! flock -n 200; then
     log "ERROR: Another instance is already running"
@@ -535,7 +537,9 @@ fi
 
 # Clean old backups (keep last 5)
 cd "$BACKUP_DIR"
-ls -t backup_*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
+# Names are generated timestamps; NUL records preserve any accepted filename.
+find . -maxdepth 1 -type f -name 'backup_*.tar.gz' -printf '%f\0' |
+    sort -zr | tail -z -n +6 | xargs -0 -r rm -f --
 
 log "END: Backup completed"
 SHEOF
@@ -546,7 +550,8 @@ SHEOF
 #!/bin/bash
 # Demo: System monitoring script
 
-LOG_FILE="${HOME}/sem5-6_lab/cron_exercises/logs/monitor.log"
+BASE_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+LOG_FILE="$BASE_DIR/cron_exercises/logs/monitor.log"
 
 {
     echo "=== System Monitor Report ==="

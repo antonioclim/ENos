@@ -179,7 +179,7 @@ Step 1: Create a test directory with edge cases:
 mkdir -p test_dir
 echo "Hello World" > "test_dir/normal.txt"
 echo "Test" > "test_dir/file with spaces.txt"
-echo "" > "test_dir/empty.txt"
+: > "test_dir/empty.txt"  # zero bytes, unlike echo which adds a newline
 echo -e "Line1\nLine2\nLine3" > "test_dir/multiline.txt"
 touch "test_dir/.hidden.txt"
 mkdir "test_dir/subdir"
@@ -392,7 +392,7 @@ nano L4_COMPARISON.txt
 | 3 | Doesn't check cp success | Major | Silent errors |
 | 4 | `backup_$f` may overwrite | Major | Doesn't check if exists |
 | 5 | Doesn't exclude backup_* | Minor | May create backup_backup_... |
-| 6 | Shebang ok but no set -e | Minor | Continues on errors |
+| 6 | Failure handling is absent | Major | Check cp status explicitly; set -e alone is not a universal replacement |
 | 7 | "Done" message unconditional | Minor | Displayed even on failure |
 | 8 | Doesn't log what it does | Minor | Difficult debugging |
 | 9 | Has no help/usage | Minor | Poor UX |
@@ -485,15 +485,15 @@ Step 3: Document differences:
 
 ---
 
-## EXERCISE L6: The Fingerprint Detective
+## EXERCISE L6: Code Quality, Evidence and Disclosure
 
 Duration: 10 min | Mode: Individual | Level: ⭐⭐⭐
 
 ### Objective
-Learn to recognise AI-generated code patterns — a skill that will help you evaluate your own AI-assisted work and avoid obvious "tells" that trigger automated detection.
+Evaluate correctness and clarity, state what evidence supports each conclusion and document any assistance accurately. Cosmetic style is not reliable evidence of authorship.
 
 ### The Challenge
-You receive two scripts that accomplish the same task (counting regular files in a directory). One was written by a student under time pressure, one by ChatGPT. Your job: figure out which is which.
+Compare two supplied teaching examples for counting regular files. Their source labels are not demonstrated evidence. Test both with no matching files, hidden files, spaces and strict mode; explain the accepted input scope.
 
 ### Script A
 ```bash
@@ -529,12 +529,12 @@ Complete this analysis:
 
 ```
 ╔════════════════════════════════════════════════════════════════════╗
-║  AI FINGERPRINT ANALYSIS                                           ║
+║  CODE QUALITY AND EVIDENCE ANALYSIS                                           ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
-║  1. Which script is AI-generated?  □ A  □ B                        ║
+║  1. What can be established from the supplied code alone?                        ║
 ║                                                                    ║
-║  2. What "tells" revealed it? (list at least 3)                    ║
+║  2. Which three technical observations can you reproduce?                    ║
 ║     a) ________________________________________________            ║
 ║     b) ________________________________________________            ║
 ║     c) ________________________________________________            ║
@@ -543,7 +543,7 @@ Complete this analysis:
 ║     Why? ___________________________________________________       ║
 ║                                                                    ║
 ║  4. If you used AI to help write code, how would you modify        ║
-║     the output to make it look more "human"?                       ║
+║     the output to improve correctness and disclose assistance?                       ║
 ║     ____________________________________________________________   ║
 ║                                                                    ║
 ╚════════════════════════════════════════════════════════════════════╝
@@ -551,28 +551,17 @@ Complete this analysis:
 
 ### Discussion Points (for instructor)
 
-**Common AI tells present in Script B:**
-1. Variable naming: `file_count` vs `c` — beginners under pressure use short names
-2. Comment density: 3 lines of comments for 7 lines of code (43%) — students under-comment
-3. Output formatting: "Total regular files:" vs raw number — AI loves polished output
-4. Consistent style: Perfect indentation throughout — students are messier
-5. Explanation in comments: AI explains *what* code does; students explain *why* (if at all)
+Discuss initialisation, strict-mode arithmetic status, hidden-file scope, symlinks,
+output contracts and readable naming. Either a human or a language model can write
+clear or unclear code; naming and formatting do not determine authorship. Preserve
+intentional debugging examples A and B until students have analysed them. On an empty directory, A prints an empty count because `c` is unset, whereas B prints zero. They are not equivalent on that fixture; both postfix increments can return status 1 on their first increment under `set -e`. These are technical observations, not authorship evidence.
 
-**The irony:** Script B is technically "better" code — but that's precisely what makes it suspicious for a beginner assignment. Good code from a novice should have rough edges.
+### Assessment status
 
-**Key teaching point:** Understanding these patterns helps students in two ways:
-- Evaluate AI-generated code more critically
-- If using AI assistance, learn to "humanise" the output appropriately
-
-### Grading Rubric
-
-| Criterion | Points |
-|----------|--------|
-| Correct identification | 3p |
-| At least 3 valid "tells" identified | 4p |
-| Thoughtful submission choice rationale | 2p |
-| Practical humanisation strategy | 3p |
-| **Total** | **12p** |
+`PENDING_POLICY`: the former 12-point attribution/concealment rubric is not applied.
+Use this as a formative discussion about tested behaviour, limitations and accurate
+disclosure. The author may approve a transparent rubric for these objectives or keep
+the activity ungraded; no replacement weights or sanctions are selected here.
 
 ---
 
@@ -585,8 +574,8 @@ At the end of these exercises, you should be able to evaluate:
 | Critical evaluation of AI code | □ Beginner □ Medium □ Advanced | L1, L2 |
 | Prompt engineering | □ Beginner □ Medium □ Advanced | L3 |
 | AI output debugging | □ Beginner □ Medium □ Advanced | L2, L4 |
-| Human vs AI comparison | □ Beginner □ Medium □ Advanced | L4, L6 |
-| Recognising AI fingerprints | □ Beginner □ Medium □ Advanced | L6 |
+| Evidence and code-quality comparison | □ Beginner □ Medium □ Advanced | L4, L6 |
+| Recognising limits of authorship inference | □ Beginner □ Medium □ Advanced | L6 |
 | Understanding AI constraints | □ Beginner □ Medium □ Advanced | All |
 
 ---

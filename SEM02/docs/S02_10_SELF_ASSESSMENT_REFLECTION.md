@@ -51,8 +51,8 @@ Answer honestly (1 = Not at all, 5 = Perfectly):
 | Competency | 1 | 2 | 3 | 4 | 5 |
 |------------|---|---|---|---|---|
 | I know the difference between `;` and `&&` | □ | □ | □ | □ | □ |
-| I can explain what `||` does | □ | □ | □ | □ | □ |
-| I understand the order `cmd && success || error` | □ | □ | □ | □ | □ |
+| I can explain what `\|\|` does | □ | □ | □ | □ | □ |
+| I understand the order `cmd && success \|\| error` | □ | □ | □ | □ | □ |
 | I can use `&` for background | □ | □ | □ | □ | □ |
 | I know the difference between `{}` and `()` | □ | □ | □ | □ | □ |
 | I understand exit codes (`$?`, 0=success) | □ | □ | □ | □ | □ |
@@ -123,7 +123,7 @@ Answer honestly (1 = Not at all, 5 = Perfectly):
 | Competency | 1 | 2 | 3 | 4 | 5 |
 |------------|---|---|---|---|---|
 | I can use `sort` with options (-n, -r, -k) | □ | □ | □ | □ | □ |
-| **I know that `uniq` requires `sort` first!** | □ | □ | □ | □ | □ |
+| **I know uniq combines adjacent equal lines; sort groups them for global deduplication** | □ | □ | □ | □ | □ |
 | I can extract columns with `cut` | □ | □ | □ | □ | □ |
 | I know that `tr` operates on CHARACTERS | □ | □ | □ | □ | □ |
 | I can construct complex pipelines | □ | □ | □ | □ | □ |

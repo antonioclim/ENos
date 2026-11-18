@@ -33,6 +33,18 @@ Method: Pair Programming with switch at half-time
 
 ---
 
+## Owned Workspace (once per session)
+
+All filesystem exercises below use one fresh root owned by the learner. Do not
+reuse a directory containing unrelated work. Paths with spaces are supported;
+GNU find/stat/tar and Bash are the declared tools.
+
+```bash
+SPRINT_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/enos-s03-sprints.XXXXXX")
+export SPRINT_ROOT
+printf 'Workspace: %s\n' "$SPRINT_ROOT"
+```
+
 ## SECTION 1: FIND SPRINTS
 
 ### SPRINT F1: File Hunter
@@ -41,16 +53,16 @@ Method: Pair Programming with switch at half-time
 #### Setup (1 minute)
 ```bash
 # Copy and execute:
-mkdir -p ~/sprint_f1/{src,docs,tests,logs,backup,temp}
-touch ~/sprint_f1/src/{main,utils,config}.{c,h,py}
-touch ~/sprint_f1/docs/{README.md,manual.txt,api.html,guide.pdf}
-touch ~/sprint_f1/tests/test_{unit,integration,e2e}_{1..3}.py
-touch ~/sprint_f1/logs/app_{debug,info,error}.log
-dd if=/dev/zero of=~/sprint_f1/backup/archive.tar bs=1M count=3 2>/dev/null
-touch -d "10 days ago" ~/sprint_f1/temp/old_cache.tmp
-touch -d "40 days ago" ~/sprint_f1/temp/ancient_cache.tmp
-touch ~/sprint_f1/temp/recent_cache.tmp
-cd ~/sprint_f1
+mkdir -p "$SPRINT_ROOT/sprint_f1"/{src,docs,tests,logs,backup,temp}
+touch "$SPRINT_ROOT/sprint_f1"/src/{main,utils,config}.{c,h,py}
+touch "$SPRINT_ROOT/sprint_f1"/docs/{README.md,manual.txt,api.html,guide.pdf}
+touch "$SPRINT_ROOT/sprint_f1"/tests/test_{unit,integration,e2e}_{1..3}.py
+touch "$SPRINT_ROOT/sprint_f1"/logs/app_{debug,info,error}.log
+dd if=/dev/zero of="$SPRINT_ROOT/sprint_f1"/backup/archive.tar bs=1M count=3 2>/dev/null
+touch -d "10 days ago" "$SPRINT_ROOT/sprint_f1"/temp/old_cache.tmp
+touch -d "40 days ago" "$SPRINT_ROOT/sprint_f1"/temp/ancient_cache.tmp
+touch "$SPRINT_ROOT/sprint_f1"/temp/recent_cache.tmp
+cd "$SPRINT_ROOT/sprint_f1"
 echo "✅ Setup complete! Current directory: $(pwd)"
 ```
 
@@ -119,7 +131,7 @@ find . -type f -size +1M
 
 # 4. Modified in 7 days, without logs/
 find . -type f -mtime -7 ! -path "./logs/*"
-# Output: variable
+# Output: 24 files in this fresh fixture (before adding reports/scripts)
 
 # 5. .tmp > 30 days with size
 find . -name "*.tmp" -type f -mtime +30 -printf '%s %p\n'
@@ -136,31 +148,31 @@ find . -type f -printf '%s %p\n' | sort -rn | head -5
 
 #### Setup (1 minute)
 ```bash
-mkdir -p ~/sprint_f2/{project,cache,logs,temp}
+mkdir -p "$SPRINT_ROOT/sprint_f2"/{project,cache,logs,temp}
 
 # Code files
-touch ~/sprint_f2/project/{app,lib,main}.{js,ts,jsx}
-echo "console.log('test');" > ~/sprint_f2/project/app.js
+touch "$SPRINT_ROOT/sprint_f2"/project/{app,lib,main}.{js,ts,jsx}
+echo "console.log('test');" > "$SPRINT_ROOT/sprint_f2"/project/app.js
 
 # Cache files
-touch ~/sprint_f2/cache/{session,data,auth}_{001..010}.cache
-touch -d "8 days ago" ~/sprint_f2/cache/old_{1..5}.cache
+touch "$SPRINT_ROOT/sprint_f2"/cache/{session,data,auth}_{001..010}.cache
+touch -d "8 days ago" "$SPRINT_ROOT/sprint_f2"/cache/old_{1..5}.cache
 
 # Log files of different sizes
 for i in 1 2 3; do
-    dd if=/dev/zero of=~/sprint_f2/logs/app_$i.log bs=1K count=$((i*100)) 2>/dev/null
+    dd if=/dev/zero of="$SPRINT_ROOT/sprint_f2"/logs/app_$i.log bs=1K count=$((i*100)) 2>/dev/null
 done
-dd if=/dev/zero of=~/sprint_f2/logs/giant.log bs=1M count=15 2>/dev/null
+dd if=/dev/zero of="$SPRINT_ROOT/sprint_f2"/logs/giant.log bs=1M count=15 2>/dev/null
 
 # Temporary files
-touch ~/sprint_f2/temp/{tmp,temp,scratch}_{1..5}.{tmp,bak,swp}
-touch -d "20 days ago" ~/sprint_f2/temp/old_backup.bak
+touch "$SPRINT_ROOT/sprint_f2"/temp/{tmp,temp,scratch}_{1..5}.{tmp,bak,swp}
+touch -d "20 days ago" "$SPRINT_ROOT/sprint_f2"/temp/old_backup.bak
 
 # Files with spaces (challenge!)
-touch "~/sprint_f2/project/my component.jsx"
-touch "~/sprint_f2/logs/error report.log"
+touch "$SPRINT_ROOT/sprint_f2/project/my component.jsx"
+touch "$SPRINT_ROOT/sprint_f2/logs/error report.log"
 
-cd ~/sprint_f2
+cd "$SPRINT_ROOT/sprint_f2"
 echo "✅ Setup complete!"
 ```
 
@@ -174,7 +186,7 @@ echo "✅ Setup complete!"
    DO NOT DELETE THEM YET!
 
 2. 🟡 Find log files larger than 500KB and display 
-   size in MB: "X.XX MB: /path/to/file"
+   size in MiB: "X.XX MiB: /path/to/file"
 
 3. 🟡 Using xargs, count lines in all .js files
    (beware of files with spaces!)
@@ -186,7 +198,7 @@ echo "✅ Setup complete!"
 5. 🔴 Find empty directories and display them.
 
 BONUS ⭐: Archive all .log files into a tar.gz
-         using find and xargs.
+         using one GNU tar invocation fed by find -print0 (xargs batching must not recreate the same archive).
 
 ═══════════════════════════════════════════════════════════════
 ```
@@ -220,7 +232,7 @@ find ./cache -name "*.cache" -type f -mtime +7
 # 2. Logs > 500KB with size in MB
 find ./logs -name "*.log" -type f -size +500k \
     -printf '%s %p\n' | \
-    awk '{printf "%.2f MB: %s\n", $1/1048576, $2}'
+    awk '{bytes=$1; sub(/^[^ ]+ /, ""); printf "%.2f MiB: %s\n", bytes/1048576, $0}'
 
 # 3. Lines in .js (with spaces)
 find . -name "*.js" -type f -print0 | xargs -0 wc -l
@@ -235,7 +247,7 @@ find . -type d -empty
 
 # BONUS: Archive logs
 find . -name "*.log" -type f -print0 | \
-    xargs -0 tar czvf logs_archive.tar.gz
+    tar --null -T - -czvf logs_archive.tar.gz
 ```
 
 ---
@@ -247,8 +259,8 @@ find . -name "*.log" -type f -print0 | \
 
 #### Setup
 ```bash
-mkdir -p ~/sprint_s1
-cd ~/sprint_s1
+mkdir -p "$SPRINT_ROOT/sprint_s1"
+cd "$SPRINT_ROOT/sprint_s1"
 echo "✅ Directory created: $(pwd)"
 ```
 
@@ -348,7 +360,7 @@ shift $((OPTIND - 1))
 # Validation: at least one file
 if [ $# -eq 0 ]; then
     echo "Error: No file specified!" >&2
-    usage
+    exit 1
 fi
 
 # Validation: iterations is positive number
@@ -372,7 +384,7 @@ for file in "$@"; do
         echo "  Iterations: $iterations"
     fi
     
-    ((file_count++))
+    file_count=$((file_count + 1))
 done
 
 echo "Done! Processed $file_count files in $iterations iterations"
@@ -385,8 +397,8 @@ echo "Done! Processed $file_count files in $iterations iterations"
 
 #### Setup
 ```bash
-mkdir -p ~/sprint_s2/data
-cd ~/sprint_s2
+mkdir -p "$SPRINT_ROOT/sprint_s2"/data
+cd "$SPRINT_ROOT/sprint_s2"
 
 # Create test files
 echo -e "line1\nline2\nline3" > data/small.txt
@@ -420,8 +432,8 @@ Create a script "analyse.sh" that:
 4. 🔴 Nicely formatted output:
    FILE          LINES    WORDS    CHARS
    small.txt         3       3       18
-   medium.txt      100     500     2000
-   TOTAL           103     503     2018
+   medium.txt      100     500     2292
+   TOTAL           103     503     2310
 
 ═══════════════════════════════════════════════════════════════
 ```
@@ -476,7 +488,7 @@ for file in "$@"; do
     
     lines=$(wc -l < "$file")
     words=$(wc -w < "$file")
-    chars=$(wc -c < "$file")
+    chars=$(wc -m < "$file")
     
     printf "%-20s" "$(basename "$file")"
     $show_lines && printf "%10d" "$lines"
@@ -484,9 +496,9 @@ for file in "$@"; do
     $show_chars && printf "%10d" "$chars"
     echo ""
     
-    ((total_lines += lines))
-    ((total_words += words))
-    ((total_chars += chars))
+    total_lines=$((total_lines + lines))
+    total_words=$((total_words + words))
+    total_chars=$((total_chars + chars))
 done
 
 # Total
@@ -507,8 +519,8 @@ echo ""
 
 #### Setup
 ```bash
-mkdir -p ~/sprint_p1/{public,private,scripts,shared}
-cd ~/sprint_p1
+mkdir -p "$SPRINT_ROOT/sprint_p1"/{public,private,scripts,shared}
+cd "$SPRINT_ROOT/sprint_p1"
 
 # Public - should be readable by all
 touch public/{index.html,style.css,logo.png}
@@ -602,8 +614,8 @@ find . -type f -perm 777 -ls
 
 #### Setup
 ```bash
-mkdir -p ~/sprint_p2
-cd ~/sprint_p2
+mkdir -p "$SPRINT_ROOT/sprint_p2"
+cd "$SPRINT_ROOT/sprint_p2"
 
 # Simulate a team project
 mkdir -p company_project/{src,docs,releases}
@@ -614,7 +626,13 @@ touch company_project/releases/v1.0.tar.gz
 echo "✅ Setup complete!"
 ```
 
-#### Requirements (Real Scenario)
+#### Requirements (Teaching Scenario)
+
+A private mode-2770 parent would block other users from every child, even one with
+mode 1775. This exercise deliberately grants parent search-only access (2771) to
+make the stated public release path possible. Keeping the parent private instead
+requires publishing releases elsewhere; choose that separate design if privacy is
+the requirement. A default ACL can alter creation, so the umask check assumes none.
 
 ```
 ═══════════════════════════════════════════════════════════════
@@ -652,9 +670,13 @@ SECURITY REQUIREMENTS:
 #### Solutions
 
 ```bash
-# 1. Main directory with SGID
-chmod 2770 company_project/
-# drwxrws---
+# 1. Existing group and membership are prerequisites; do not create accounts/groups here.
+# For an owned one-user mode demonstration, choose TEAM_GROUP=$(id -gn).
+TEAM_GROUP=${TEAM_GROUP:-developers}
+chgrp -R -- "$TEAM_GROUP" company_project/ || exit 1
+# Parent search for others permits access to the known releases/ path, not listing.
+chmod 2771 company_project/
+# drwxrws--x
 
 # 2. src/ - restrictive
 chmod 750 company_project/src/
@@ -694,7 +716,7 @@ fi
 
 # Check numeric permissions
 stat_main=$(stat -c %a company_project)
-[ "$stat_main" = "2770" ] && echo "✅ company_project/ = 2770" || echo "❌ company_project/ = $stat_main"
+[ "$stat_main" = "2771" ] && echo "✅ company_project/ = 2771" || echo "❌ company_project/ = $stat_main"
 
 stat_src=$(stat -c %a company_project/src)
 [ "$stat_src" = "750" ] && echo "✅ src/ = 750" || echo "❌ src/ = $stat_src"
@@ -766,8 +788,10 @@ cat > cron_solutions.txt << 'EOF'
 # 4. Report Sunday 23:00 with logging
 0 23 * * 0 /home/user/weekly_report.sh >> /var/log/weekly.log 2>&1
 
-# 5. Complex monitoring
-*/5 9-17 1-7,15-21 * 1-5 /opt/monitor.sh
+# 5. Working days AND dates 1–7/15–21, from 09:00 through 17:00 inclusive.
+# Cron DOM/DOW restrictions combine by OR; put the day-of-month guard in the command.
+*/5 9-16 * * 1-5 case "$(date +\%d)" in 0[1-7]|1[5-9]|2[01]) /opt/monitor.sh;; esac
+0 17 * * 1-5 case "$(date +\%d)" in 0[1-7]|1[5-9]|2[01]) /opt/monitor.sh;; esac
 
 # BONUS: At reboot
 @reboot /home/user/startup_tasks.sh
@@ -795,24 +819,24 @@ REQUIRED FEATURES:
    PATH=/usr/local/bin:/usr/bin:/bin
 
 2. 🟡 Logging:
-   - All messages to /var/log/maintenance.log
+   - All messages to OWNED_WORKSPACE/maintenance.log
    - Include timestamp with each message
    - Function: log_message() { ... }
 
 3. 🟡 Lock file to prevent multiple executions:
-   - Lock: /tmp/daily_maintenance.lock
-   - If lock exists, exit with message
+   - Lock: OWNED_WORKSPACE/maintenance.lock
+   - If a nonblocking flock cannot be acquired, exit with a message
 
 4. 🔴 Tasks (all with logging):
-   a) Delete .tmp files older than 7 days from /tmp
-   b) Compress .log files older than 30 days
+   a) Delete .tmp files older than 7 days under OWNED_WORKSPACE/tmp
+   b) Compress .log files older than 30 days under OWNED_WORKSPACE/logs
    c) Check disk space (warning if > 80%)
 
 5. 🔴 Cleanup at the end:
-   - Remove lock file
+   - Release the descriptor lock on exit; retain its pathname
    - Log execution duration
 
-BONUS ⭐: Add trap for cleanup on errors/interrupt
+BONUS ⭐: Add trap for temporary-list cleanup and exit-status logging
 
 ═══════════════════════════════════════════════════════════════
 ```
@@ -821,73 +845,70 @@ BONUS ⭐: Add trap for cleanup on errors/interrupt
 
 ```bash
 #!/bin/bash
-# daily_maintenance.sh - Maintenance script for cron
-
-# 1. Explicit PATH
+# daily_maintenance.sh OWNED_WORKSPACE
+set -euo pipefail
 PATH=/usr/local/bin:/usr/bin:/bin
 export PATH
-
-# Configuration
-LOG_FILE="/var/log/maintenance.log"
-LOCK_FILE="/tmp/daily_maintenance.lock"
+[[ $# == 1 ]] || { echo "Usage: $0 OWNED_WORKSPACE" >&2; exit 1; }
+WORK=$(realpath -e -- "$1")
+[[ $WORK != / && -O $WORK && -d $WORK/tmp && -d $WORK/logs && ! -L $WORK/tmp && ! -L $WORK/logs && -f $WORK/.enos-maintenance-fixture ]] || exit 1
+LOG_FILE="$WORK/maintenance.log"
+[[ ! -L $LOG_FILE && ! -L $WORK/maintenance.lock ]] || exit 1
+exec 9>"$WORK/maintenance.lock"
+flock -n 9 || { echo "Another invocation holds the lock" >&2; exit 2; }
 START_TIME=$(date +%s)
-
-# 2. Logging function
-log_message() {
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[$timestamp] $1" >> "$LOG_FILE"
-}
-
-# 5. BONUS: Trap for cleanup
+log_message() { printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*" >> "$LOG_FILE"; }
+LIST=$(mktemp "$WORK/.maintenance-list.XXXXXX")
 cleanup() {
-    rm -f "$LOCK_FILE"
-    local end_time
-    end_time=$(date +%s)
-    local duration=$((end_time - START_TIME))
-    log_message "Script terminated. Duration: ${duration}s"
+    local status=$?
+    rm -f -- "$LIST"
+    log_message "Terminated with status $status after $(($(date +%s)-START_TIME)) s" || status=1
+    return "$status"
 }
 trap cleanup EXIT
-
-# 3. Lock file
-if [ -f "$LOCK_FILE" ]; then
-    log_message "ERROR: Script already running (lock exists)"
-    exit 1
-fi
-touch "$LOCK_FILE"
-
-log_message "=== START Daily Maintenance ==="
-
-# 4a. Delete old .tmp files
-log_message "Task: Cleanup /tmp..."
-deleted_count=$(find /tmp -name "*.tmp" -type f -mtime +7 -delete -print 2>/dev/null | wc -l)
-log_message "  Deleted $deleted_count .tmp files"
-
-# 4b. Compress old logs
-log_message "Task: Compressing old logs..."
+trap 'exit 130' INT
+trap 'exit 143' TERM
+log_message 'START owned maintenance'
+# Preserve NUL boundaries and count only successful deletions.
+find "$WORK/tmp" -type f -name '*.tmp' -mtime +7 -delete -print0 > "$LIST"
+deleted_count=0
+while IFS= read -r -d '' file; do
+    printf -v quoted '%q' "$file"
+    log_message "Deleted $quoted"
+    deleted_count=$((deleted_count + 1))
+done < "$LIST"
+log_message "Deleted $deleted_count files"
+find "$WORK/logs" -type f -name '*.log' -mtime +30 -print0 > "$LIST"
 compressed_count=0
-while IFS= read -r -d '' logfile; do
-    gzip "$logfile" 2>/dev/null && ((compressed_count++))
-done < <(find /var/log -name "*.log" -type f -mtime +30 -print0 2>/dev/null)
-log_message "  Compressed $compressed_count log files"
-
-# 4c. Disk space check
-log_message "Task: Checking disk space..."
-while read -r line; do
-    usage=$(echo "$line" | awk '{print $5}' | tr -d '%')
-    mount=$(echo "$line" | awk '{print $6}')
-    
-    if [ "$usage" -gt 80 ]; then
-        log_message "  ⚠️ WARNING: $mount using $usage%"
-    else
-        log_message "  ✓ $mount: $usage%"
-    fi
-done < <(df -h | grep -E '^/dev' | awk '{print $5" "$6}')
-
-log_message "=== END Daily Maintenance ==="
-
-# Cleanup is done automatically via trap
+while IFS= read -r -d '' file; do
+    [[ ! -e $file.gz && ! -L $file.gz ]] || { log_message 'Compression destination already exists'; exit 1; }
+    gzip -- "$file" || { log_message 'Compression failed'; exit 1; }
+    compressed_count=$((compressed_count + 1))
+done < "$LIST"
+log_message "Compressed $compressed_count logs"
+# GNU df emits usage then the entire mount target. read puts remaining spaces in mount.
+df --output=pcent,target -- "$WORK" > "$LIST"
+disk_rows=0
+{ IFS= read -r header || { log_message 'Missing disk usage header'; exit 1; }
+  while read -r percent mount; do
+      disk_rows=$((disk_rows + 1))
+      [[ $percent =~ ^([0-9]{1,3})%$ && -n $mount ]] || { log_message 'Invalid disk usage data'; exit 1; }
+      usage=$((10#${BASH_REMATCH[1]}))
+      ((usage <= 100)) || { log_message 'Invalid usage percentage'; exit 1; }
+      if ((usage > 80)); then log_message "WARNING: $mount using $usage%"
+      else log_message "Usage: $mount at $usage%"; fi
+  done
+} < "$LIST"
+((disk_rows > 0)) || { log_message 'No disk usage records'; exit 1; }
+log_message 'END owned maintenance'
 ```
+
+Before running, create a fresh `mktemp -d` directory with `tmp/`, `logs/` and an empty
+`.enos-maintenance-fixture` marker. Populate only disposable test files. No cron
+job is installed by this example. Descriptor locking assumes a local filesystem
+supporting `flock`. A held lock differs from the mere existence of its file.
+
+
 
 ---
 
@@ -909,12 +930,14 @@ log_message "=== END Daily Maintenance ==="
 ### Post-Sprint Cleanup
 
 ```bash
-# Cleanup all sprint directories
-rm -rf ~/sprint_f1 ~/sprint_f2 ~/sprint_s1 ~/sprint_s2
-rm -rf ~/sprint_p1 ~/sprint_p2
-rm -f ~/test_cron.sh /tmp/cron_test.log
-
-echo "✅ Cleanup complete!"
+# Remove only the fresh session root after inspecting it; never guessed home paths.
+cd -- "${SPRINT_ROOT:?}" || exit 1
+printf 'Review this owned workspace before cleanup: %s\n' "$SPRINT_ROOT"
+cd -- "${TMPDIR:-/tmp}" || exit 1
+case ${SPRINT_ROOT##*/} in enos-s03-sprints.*) ;; *) exit 1;; esac
+[[ -d $SPRINT_ROOT && -O $SPRINT_ROOT && ! -L $SPRINT_ROOT ]] || exit 1
+rm -rf -- "$SPRINT_ROOT"
+unset SPRINT_ROOT
 ```
 
 ---

@@ -8,7 +8,7 @@ Seminar 05: Advanced Bash Scripting
 USAGE:
     python3 quiz_runner.py quiz.yaml
     python3 quiz_runner.py quiz.yaml --shuffle
-    python3 quiz_runner.py quiz.yaml --category functii
+    python3 quiz_runner.py quiz.yaml --category Functions
 
 DEPENDENCIES:
     pip install pyyaml rich
@@ -22,6 +22,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from lib.quiz_contract import validate_bank, export_bank
 
 try:
     import yaml
@@ -68,7 +71,13 @@ class QuizRunner:
             print(f"Error: File {self.quiz_path} does not exist.")
             sys.exit(1)
         with open(self.quiz_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f)
+        validate_bank(data)
+        if any(not isinstance(q.get('options'), list) for q in data.get('questions', [])):
+            raise ValueError('SEM05 requires the documented list-based options schema')
+        if 'questions' not in data:
+            raise ValueError('SEM05 requires a questions list')
+        return data
 
     def _print_header(self):
         """Display quiz header."""
@@ -96,24 +105,26 @@ class QuizRunner:
                 f"\n[bold cyan]Question {num}/{total}[/bold cyan] "
                 f"[dim]({q.get('bloom', '').upper()} | {q.get('topic', '')})[/dim]"
             )
-            self.console.print(f"\n[bold]{q.get('text', '')}[/bold]")
+            self.console.print(f"\n[bold]{q.get('question', q.get('text', ''))}[/bold]")
             if 'code' in q and q['code']:
                 self.console.print()
                 syntax = Syntax(q['code'].strip(), "bash", theme="monokai", line_numbers=True)
                 self.console.print(syntax)
             self.console.print()
             for i, opt in enumerate(q.get('options', [])):
+                opt = opt["text"] if isinstance(opt, dict) else opt
                 letter = chr(65 + i)
                 self.console.print(f"  [yellow]{letter})[/yellow] {opt}")
         else:
             print(f"\n--- Question {num}/{total} ({q.get('bloom', '').upper()}) ---")
-            print(f"\n{q.get('text', '')}")
+            print(f"\n{q.get('question', q.get('text', ''))}")
             if 'code' in q and q['code']:
                 print("\n```bash")
                 print(q['code'].strip())
                 print("```")
             print()
             for i, opt in enumerate(q.get('options', [])):
+                opt = opt["text"] if isinstance(opt, dict) else opt
                 print(f"  {chr(65 + i)}) {opt}")
 
     def _get_answer(self, num_options: int) -> int:
@@ -122,13 +133,13 @@ class QuizRunner:
         while True:
             if self.use_rich:
                 self.console.print()
-                answer = self.console.input("[bold green]Your answer (A/B/C/D): [/bold green]")
+                answer = self.console.input(f"[bold green]Your answer ({'/'.join(valid)}): [/bold green]")
             else:
-                answer = input("\nYour answer (A/B/C/D): ")
+                answer = input(f"\nYour answer ({'/'.join(valid)}): ")
             answer = answer.strip().upper()
             if answer in valid:
                 return ord(answer) - 65
-            print("Invalid answer. Enter A, B, C or D.")
+            print("Invalid answer. Enter one of: " + ", ".join(valid))
 
     def _show_feedback(self, q: dict, user_answer: int, correct: bool):
         """Display feedback after answer."""
@@ -182,13 +193,18 @@ class QuizRunner:
         self._print_header()
         questions = self.quiz_data.get('questions', [])
         if category:
-            questions = [q for q in questions if q.get('topic') == category]
+            questions = [q for q in questions if q.get('topic', '').casefold() == category.casefold()]
         if shuffle:
             questions = questions.copy()
             random.shuffle(questions)
+        if limit is not None and limit < 1:
+            raise ValueError("limit must be positive")
         if limit and limit < len(questions):
             questions = questions[:limit]
 
+        if not questions:
+            raise ValueError("No questions match the selected category")
+        self.result = QuizResult()
         self.result.total_questions = len(questions)
         self.result.start_time = datetime.now().isoformat()
 
@@ -206,6 +222,7 @@ class QuizRunner:
             if correct:
                 self.result.categories_score[cat][0] += 1
 
+            self.result.answers.append({"question_id": q.get("id"), "answer": user_answer, "correct": correct, "points": q.get("points", 5) if correct else 0, "max_points": q.get("points", 5), "bloom": q.get("bloom")})
             self._show_feedback(q, user_answer, correct)
             if i < len(questions):
                 input("\nPress Enter for next question...")
@@ -222,6 +239,10 @@ class QuizRunner:
             'score_percent': (self.result.correct_answers / self.result.total_questions * 100
                               if self.result.total_questions > 0 else 0),
             'categories': self.result.categories_score,
+            'answers': self.result.answers,
+            'earned_points': sum(a['points'] for a in self.result.answers),
+            'max_points': sum(a['max_points'] for a in self.result.answers),
+            'assessment_scope': 'Formative practice; no institutional grade or eligibility decision.',
         }
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
@@ -238,12 +259,27 @@ def main():
     parser.add_argument('--no-rich', action='store_true', help='Disable rich formatting')
     parser.add_argument('--export-results', type=str, help='Export results to JSON')
 
+    parser.add_argument('--validate', action='store_true', help='Validate the bank and derived totals without starting a quiz')
+    parser.add_argument('--export-bank', '--export-lms', dest='export_bank', type=Path, help='Export local ENos JSON bank data; not Moodle XML/Canvas QTI')
     args = parser.parse_args()
     runner = QuizRunner(args.quiz_file, use_rich=not args.no_rich)
+    if args.export_bank:
+        args.export_bank.write_text(json.dumps(export_bank(runner.quiz_data, runner.quiz_path), ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+        return 0
+    if args.validate:
+        print(json.dumps(validate_bank(runner.quiz_data)))
+        return 0
     runner.run(shuffle=args.shuffle, category=args.category, limit=args.limit)
     if args.export_results:
         runner.export_results(args.export_results)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, yaml.YAMLError) as error:
+        print('Quiz error: ' + str(error), file=sys.stderr)
+        raise SystemExit(1)
+    except (EOFError, KeyboardInterrupt):
+        print('Quiz interrupted; no complete result exported.', file=sys.stderr)
+        raise SystemExit(130)

@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inode Structure Explorer - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
+        
         
         body {
             font-family: 'Nunito', sans-serif;
@@ -113,7 +113,84 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             pointer-events: none;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -290,12 +367,12 @@
                             <i class="fas fa-chevron-right ml-auto text-gray-600"></i>
                         </div>
                         
-                        <!-- Blockk Pointers Section -->
+                        <!-- Block Pointers Section -->
                         <div class="mt-4 mb-2 text-sm text-gray-500 font-semibold">
-                            <i class="fas fa-th mr-1"></i> Blockk Pointers
+                            <i class="fas fa-th mr-1"></i> Block Pointers
                         </div>
                         
-                        <!-- Direct Blockks -->
+                        <!-- Direct Blocks -->
                         <div class="p-3 rounded-lg bg-gray-800/30">
                             <div class="text-sm text-gray-400 mb-2">Direct Pointers [0-11]:</div>
                             <div class="grid grid-cols-6 gap-2" id="direct-blocks">
@@ -303,7 +380,7 @@
                             </div>
                         </div>
                         
-                        <!-- Indirect Blockks -->
+                        <!-- Indirect Blocks -->
                         <div class="grid grid-cols-3 gap-2 mt-2">
                             <div class="block-pointer p-3 rounded-lg bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 border border-yellow-500/30 text-center cursor-pointer" onclick="showFieldDetail('single')">
                                 <div class="text-xs text-yellow-400 mb-1">Single Indirect</div>
@@ -334,13 +411,13 @@
                         </div>
                         <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-center">
                             <i class="fas fa-route text-2xl text-red-400 mb-2"></i>
-                            <div class="font-semibold text-red-300">Path-ul complet</div>
-                            <div class="text-xs text-gray-400 mt-1">Derivat din structura FS</div>
+                            <div class="font-semibold text-red-300">The complete path</div>
+                            <div class="text-xs text-gray-400 mt-1">Derived from the filesystem structure</div>
                         </div>
                         <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-center">
                             <i class="fas fa-database text-2xl text-red-400 mb-2"></i>
-                            <div class="font-semibold text-red-300">Contentul the file</div>
-                            <div class="text-xs text-gray-400 mt-1">only pointeri la blocks!</div>
+                            <div class="font-semibold text-red-300">The file contents</div>
+                            <div class="text-xs text-gray-400 mt-1">This classical pointer-tree model stores block references; other inode formats can store small inline data.</div>
                         </div>
                     </div>
                 </div>
@@ -370,6 +447,42 @@
     </div>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Inode data for different files
         const inodeData = {
             12345: {
@@ -387,7 +500,7 @@
                 atime: '2024-01-15 10:30:00',
                 mtime: '2024-01-10 14:22:00',
                 ctime: '2024-01-10 14:22:00',
-                directBlockks: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012],
+                directBlocks: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012],
                 singleIndirect: 2000,
                 doubleIndirect: 3000,
                 tripleIndirect: null
@@ -407,7 +520,7 @@
                 atime: '2024-01-14 09:15:00',
                 mtime: '2024-01-01 18:00:00',
                 ctime: '2024-01-01 18:00:00',
-                directBlockks: [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+                directBlocks: [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
                 singleIndirect: 2500,
                 doubleIndirect: 3500,
                 tripleIndirect: null
@@ -427,7 +540,7 @@
                 atime: '2024-01-15 11:00:00',
                 mtime: '2024-01-12 20:30:00',
                 ctime: '2024-01-12 20:30:00',
-                directBlockks: [3001, 3002, null, null, null, null, null, null, null, null, null, null],
+                directBlocks: [3001, 3002, null, null, null, null, null, null, null, null, null, null],
                 singleIndirect: null,
                 doubleIndirect: null,
                 tripleIndirect: null
@@ -447,7 +560,7 @@
                 atime: '2024-01-15 12:00:00',
                 mtime: '2024-01-10 08:00:00',
                 ctime: '2024-01-10 08:00:00',
-                directBlockks: [100, null, null, null, null, null, null, null, null, null, null, null],
+                directBlocks: [100, null, null, null, null, null, null, null, null, null, null, null],
                 singleIndirect: null,
                 doubleIndirect: null,
                 tripleIndirect: null
@@ -467,7 +580,7 @@
                 atime: '2024-01-15 10:35:00',
                 mtime: '2024-01-15 10:30:00',
                 ctime: '2024-01-15 10:30:00',
-                directBlockks: [500, 501, null, null, null, null, null, null, null, null, null, null],
+                directBlocks: [500, 501, null, null, null, null, null, null, null, null, null, null],
                 singleIndirect: null,
                 doubleIndirect: null,
                 tripleIndirect: null
@@ -485,7 +598,7 @@
                         <p class="text-sm text-gray-300">The field <strong>mode</strong> contains the type of the file and access permissions.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3">
-                            <div class="text-xs text-gray-400 mb-2">Descompunere:</div>
+                            <div class="text-xs text-gray-400 mb-2">Breakdown:</div>
                             <div class="mono text-lg mb-2" id="mode-breakdown">-rwxr-xr-x</div>
                             <div class="grid grid-cols-4 gap-1 text-xs">
                                 <div class="text-center p-1 bg-purple-900/30 rounded">
@@ -512,7 +625,7 @@
                             <div class="space-y-1 text-xs">
                                 <div><span class="text-red-400">SUID (4000)</span> - execute as owner</div>
                                 <div><span class="text-orange-400">SGID (2000)</span> - execute as group</div>
-                                <div><span class="text-yellow-400">Sticky (1000)</span> - only owner can delete</div>
+                                <div><span class="text-yellow-400">Sticky (1000)</span> - file owner, directory owner or privileged process may delete, subject to checks</div>
                             </div>
                         </div>
                     </div>
@@ -524,7 +637,7 @@
                 color: 'green',
                 content: `
                     <div class="space-y-3">
-                        <p class="text-sm text-gray-300">Identificatorul numeric al <strong>owner-ului</strong> the file.</p>
+                        <p class="text-sm text-gray-300">The file <strong>owner’s</strong> numeric identifier.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3">
                             <div class="flex justify-between items-center">
@@ -539,8 +652,8 @@
                         
                         <div class="text-xs text-gray-400">
                             <p>• UID 0 = root (superuser)</p>
-                            <p>• UID 1-999 = system accounts</p>
-                            <p>• UID 1000+ = regular users</p>
+                            <p>• UID 1–999 = illustrative system-account range; distribution policy varies</p>
+                            <p>• UID 1000+ = illustrative regular-user range; distribution policy varies</p>
                         </div>
                     </div>
                 `
@@ -551,7 +664,7 @@
                 color: 'green',
                 content: `
                     <div class="space-y-3">
-                        <p class="text-sm text-gray-300">Identificatorul numeric al <strong>grupului</strong> the file.</p>
+                        <p class="text-sm text-gray-300">The file <strong>group’s</strong> numeric identifier.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3">
                             <div class="flex justify-between items-center">
@@ -589,9 +702,9 @@
                         </div>
                         
                         <div class="text-xs text-gray-400">
-                            <p>• for directoare: dimensiunea metadatelor</p>
+                            <p>• For directories: logical directory-data size, not the sum of child-file sizes</p>
                             <p>• For files: the content size</p>
-                            <p>• for symlinks: lungimea path-ului</p>
+                            <p>• For symbolic links: length of the stored target pathname</p>
                         </div>
                     </div>
                 `
@@ -611,12 +724,12 @@
                         
                         <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 text-xs">
                             <div class="text-red-400 font-semibold mb-1">⚠️ Important:</div>
-                            <p class="text-gray-300">When link count becomes <strong>0</strong>, the inode and the data is deleted (freed).</p>
+                            <p class="text-gray-300">When link count becomes <strong>0</strong>, the inode and data can be reclaimed once no open reference remains.</p>
                         </div>
                         
                         <div class="text-xs text-gray-400">
-                            <p>• Directories have min. 2 (. and link from parent)</p>
-                            <p>• Files have min. 1</p>
+                            <p>• The classical directory model starts at two links; real filesystems can report differently</p>
+                            <p>• A named regular file has at least one link; an open unlinked file can have zero</p>
                         </div>
                     </div>
                 `
@@ -627,7 +740,7 @@
                 color: 'blue',
                 content: `
                     <div class="space-y-3">
-                        <p class="text-sm text-gray-300">Timpul ultimului <strong>acces</strong> (citire) al the file.</p>
+                        <p class="text-sm text-gray-300">The file’s last <strong>access</strong> timestamp, subject to filesystem and mount-policy update rules.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3">
                             <div class="text-xs text-gray-400">Last accessed:</div>
@@ -636,8 +749,8 @@
                         
                         <div class="text-xs text-gray-400">
                             <p>Updated when:</p>
-                            <p>• The file este citit</p>
-                            <p>• Directoryul este listat</p>
+                            <p>• The file is read</p>
+                            <p>• The directory is listed</p>
                             <p class="mt-2 text-amber-400">Note: Can be disabled (noatime) for performance.</p>
                         </div>
                     </div>
@@ -682,9 +795,9 @@
                             <p>Updated when:</p>
                             <p>• Permissions change (chmod)</p>
                             <p>• Owner changes (chown)</p>
-                            <p>• Hard link is createded</p>
+                            <p>• A hard link is created</p>
                             <p>• Content is modified (includes mtime)</p>
-                            <p class="mt-2 text-red-400">⚠️ NU may fi setat manual!</p>
+                            <p class="mt-2 text-red-400">⚠️ Not settable directly through the ordinary timestamp-setting API.</p>
                         </div>
                     </div>
                 `
@@ -698,7 +811,7 @@
                         <p class="text-sm text-gray-300">Pointer to a block containing <strong>pointers to data blocks</strong>.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center">
-                            <div class="text-sm text-gray-400">Inode → Index Blockk → Data Blockks</div>
+                            <div class="text-sm text-gray-400">Inode → Index Block → Data Blocks</div>
                             <div class="flex items-center justify-center gap-2 mt-2">
                                 <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-xs">I</div>
                                 <i class="fas fa-arrow-right text-yellow-400"></i>
@@ -714,7 +827,7 @@
                         
                         <div class="text-xs text-gray-400">
                             <p>With block size 4KB and pointers of 4 bytes:</p>
-                            <p class="mono text-green-400">1024 pointeri × 4KB = 4MB extra</p>
+                            <p class="mono text-green-400">1024 pointers × 4KB = 4MB extra</p>
                         </div>
                     </div>
                 `
@@ -729,7 +842,7 @@
                         
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center text-xs">
                             <div class="text-gray-400">Inode → Index → Index → Data</div>
-                            <div class="mt-2 text-orange-400">2 nivele de indirectare</div>
+                            <div class="mt-2 text-orange-400">Two levels of indirection</div>
                         </div>
                         
                         <div class="text-xs text-gray-400">
@@ -745,17 +858,17 @@
                 color: 'red',
                 content: `
                     <div class="space-y-3">
-                        <p class="text-sm text-gray-300">Pointer cu <strong>3 nivele</strong> de indirectare.</p>
+                        <p class="text-sm text-gray-300">Pointer through <strong>three levels</strong> of indirection.</p>
                         
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center text-xs">
                             <div class="text-gray-400">Inode → Idx → Idx → Idx → Data</div>
-                            <div class="mt-2 text-red-400">3 nivele de indirectare</div>
+                            <div class="mt-2 text-red-400">Three levels of indirection</div>
                         </div>
                         
                         <div class="text-xs text-gray-400">
                             <p>With block size 4KB:</p>
                             <p class="mono text-green-400">1024³ × 4KB = 4TB extra</p>
-                            <p class="mt-2">Rar folosit - only for filee foarte mari.</p>
+                            <p class="mt-2">Used only when this legacy pointer tree grows beyond the earlier levels.</p>
                         </div>
                     </div>
                 `
@@ -811,8 +924,8 @@
             
             // Update direct blocks
             const directContainer = document.getElementById('direct-blocks');
-            directContainer.innerHTML = data.directBlockks.map((block, i) => `
-                <div class="block-pointer p-2 rounded bg-gradient-to-br ${block ? 'from-green-900/30 to-green-800/20 border border-green-500/30' : 'from-gray-800/30 to-gray-700/20 border border-gray-600/30'} text-center text-xs cursor-pointer" onclick="showBlockkDetail(${i}, ${block})">
+            directContainer.innerHTML = data.directBlocks.map((block, i) => `
+                <div class="block-pointer p-2 rounded bg-gradient-to-br ${block ? 'from-green-900/30 to-green-800/20 border border-green-500/30' : 'from-gray-800/30 to-gray-700/20 border border-gray-600/30'} text-center text-xs cursor-pointer" onclick="showBlockDetail(${i}, ${block})">
                     <div class="text-gray-500">[${i}]</div>
                     <div class="${block ? 'text-green-400' : 'text-gray-600'}">${block || 'null'}</div>
                 </div>
@@ -826,11 +939,29 @@
             document.getElementById('double-indirect').className = `mono text-sm ${data.doubleIndirect ? '' : 'text-gray-500'}`;
             
             document.getElementById('triple-indirect').textContent = data.tripleIndirect ? `→ block ${data.tripleIndirect}` : '(null)';
+            if(window.enosSelectedInodeField)showFieldDetail(window.enosSelectedInodeField);
         }
 
         // Show field detail
-        function showFieldDetail(field) {
+        function inodeDetailContent(field, content, data) {
+    if(field==='mode') {
+        content=content.replace(/-rwxr-xr-x/g,enosEscape(data.mode));
+        const groups=[data.mode.slice(0,1),data.mode.slice(1,4),data.mode.slice(4,7),data.mode.slice(7,10)];let i=0;
+        content=content.replace(/(<div class="font-bold text-(?:purple|green|blue|amber)-400">)([^<]+)(<\/div>)/g,(_,a,b,c)=>a+enosEscape(groups[i++])+c);
+    }
+    if(field==='uid')content=content.replace('>1000<','>'+data.uid+'<').replace('>user<','>'+enosEscape(data.user)+'<');
+    if(field==='gid')content=content.replace('>1000<','>'+data.gid+'<').replace('>users<','>'+enosEscape(data.group)+'<');
+    if(field==='size')content=content.replace('45,678',data.size.toLocaleString()).replace('≈ 44.6 KB',formatSize(data.size));
+    if(field==='links')content=content.replace('id="detail-links">3<','id="detail-links">'+data.links+'<');
+    for(const f of ['atime','mtime','ctime'])if(field===f)content=content.replace(new RegExp('(id="detail-'+f+'">)[^<]*'),(_,p)=>p+enosEscape(data[f]));
+    const pointer={single:'singleIndirect',double:'doubleIndirect',triple:'tripleIndirect'}[field];
+    const value=pointer?(data[pointer]===null?'null (not allocated)':data[pointer]):field==='mode'?data.mode:field==='uid'?data.uid+' ('+data.user+')':field==='gid'?data.gid+' ('+data.group+')':data[field];
+    return '<p>Selected inode '+data.number+': '+enosEscape(String(value??''))+'</p>'+content;
+}
+function showFieldDetail(field) {
             const detail = fieldDetails[field];
+            window.enosSelectedInodeField=field;
+            const data=inodeData[currentInode];
             if (!detail) return;
             
             // Highlight selected field
@@ -847,13 +978,13 @@
                         </div>
                         <div class="font-bold text-${detail.color}-400">${detail.title}</div>
                     </div>
-                    ${detail.content}
+                    ${inodeDetailContent(field, detail.content, data)}
                 </div>
             `;
         }
 
         // Show block detail
-        function showBlockkDetail(index, blockNum) {
+        function showBlockDetail(index, blockNum) {
             const content = document.getElementById('detail-content');
             content.innerHTML = `
                 <div class="detail-panel">
@@ -861,12 +992,12 @@
                         <div class="w-10 h-10 rounded-lg bg-green-600/30 flex items-center justify-center">
                             <i class="fas fa-cube text-green-400"></i>
                         </div>
-                        <div class="font-bold text-green-400">Direct Blockk [${index}]</div>
+                        <div class="font-bold text-green-400">Direct Block [${index}]</div>
                     </div>
                     
                     ${blockNum ? `
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center mb-3">
-                            <div class="text-xs text-gray-400">Blockk Number:</div>
+                            <div class="text-xs text-gray-400">Block Number:</div>
                             <div class="text-2xl font-bold text-green-400 mono">${blockNum}</div>
                         </div>
                         
@@ -878,12 +1009,12 @@
                         </div>
                         
                         <div class="mt-3 text-xs text-gray-400">
-                            <p>Blockksle directe permit acces fast without indirectare.</p>
-                            <p class="mt-1">12 pointeri × 4KB = <span class="text-green-400">48KB</span> direct accesibil</p>
+                            <p>Direct blocks require no pointer-block indirection in this model.</p>
+                            <p class="mt-1">12 pointers × 4KB = <span class="text-green-400">48KB</span> directly addressable</p>
                         </div>
                     ` : `
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center">
-                            <div class="text-gray-500">Blockk nealocat</div>
+                            <div class="text-gray-500">Unallocated block</div>
                             <div class="text-xs text-gray-600 mt-1">The file does not use this slot</div>
                         </div>
                     `}
@@ -898,6 +1029,27 @@
             if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
             return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
         }
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

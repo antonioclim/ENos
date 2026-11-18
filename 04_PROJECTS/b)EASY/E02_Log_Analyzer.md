@@ -57,7 +57,7 @@ Three things matter here: syslog (`/var/log/syslog`), apache/nginx access logs a
 
 ## Interface
 
-```bash
+```text
 ./log_analyzer.sh [OPTIONS] <log_file|log_dir>
 
 Options:
@@ -82,6 +82,8 @@ Examples:
 ---
 
 ## Output Example
+
+These are synthetic illustrations, not measured runs or acceptance evidence.
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -176,14 +178,19 @@ E02_Log_Analyzer/
 ### Syslog parsing
 
 ```bash
-# Format: Jan 20 14:30:45 hostname service[pid]: message
+# Limited classic syslog grammar: Jan 20 14:30:45 hostname service[pid]: message
+# Diagnostic TSV only; escape fields for stored interchange. Year/timezone must be supplied.
+# This parser does not claim RFC5424 or native severity where the input lacks it.
 parse_syslog() {
     awk '{
         timestamp = $1" "$2" "$3
         host = $4
-        match($5, /([^[]+)/, service)
-        message = substr($0, index($0,$6))
-        print timestamp"|"host"|"service[1]"|"message
+        service = $5
+        sub(/\[.*/, "", service); sub(/:$/, "", service)
+        message = $0
+        # Remove exactly the five header tokens, not an earlier matching word.
+        for (i=0; i<5; i++) sub(/^[[:space:]]*[^[:space:]]+[[:space:]]*/, "", message)
+        print timestamp"\t"host"\t"service"\t"message
     }' "$1"
 }
 ```
@@ -200,7 +207,12 @@ date_to_epoch() {
 ### Level counting
 
 ```bash
-grep -cE "(ERROR|WARN|INFO|DEBUG)" "$logfile" | sort | uniq -c
+# For a declared explicit severity token per line (not inferred from message substrings).
+awk '
+BEGIN {levels[1]="ERROR"; levels[2]="WARN"; levels[3]="INFO"; levels[4]="DEBUG"}
+{ for(i=1;i<=NF;i++) if($i ~ /^(ERROR|WARN|INFO|DEBUG)$/) {count[$i]++; break} }
+END {for(i=1;i<=4;i++) printf "%s %d\n", levels[i], count[levels[i]]+0}
+' "$logfile"
 ```
 
 ---

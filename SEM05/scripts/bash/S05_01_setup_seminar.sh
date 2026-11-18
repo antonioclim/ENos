@@ -126,12 +126,15 @@ check_dependencies() {
     
     echo "Bash version: ${BASH_VERSION}"
     
+    (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4) )) || { log_error "Bash 4.4+ is required"; errors=$((errors+1)); }
     # Required
-    check_command bash true || ((errors++))
-    check_command cat true || ((errors++))
-    check_command grep true || ((errors++))
-    check_command sed true || ((errors++))
-    check_command awk true || ((errors++))
+    check_command bash true || errors=$((errors+1))
+    check_command cat true || errors=$((errors+1))
+    check_command grep true || errors=$((errors+1))
+    check_command sed true || errors=$((errors+1))
+    check_command awk true || errors=$((errors+1))
+    check_command realpath true || errors=$((errors+1))
+    check_command mktemp true || errors=$((errors+1))
     
     # Optional but recommended
     check_command shellcheck false
@@ -207,138 +210,8 @@ main "$@"
 TEMPLATE
 
     # Professional template
-    cat > "$WORK_DIR/templates/professional_template.sh" << 'TEMPLATE'
-#!/bin/bash
-#
-# Script: [NAME]
-# Description: [DESCRIPTION]
-# Author: [STUDENT NAME]
-# Version: 1.0.0
-# Date: [DATE]
-#
-
-set -euo pipefail
-IFS=$'\n\t'
-
-# ============================================================
-# CONSTANTS
-# ============================================================
-readonly SCRIPT_NAME=$(basename "$0")
-readonly SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-readonly VERSION="1.0.0"
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-VERBOSE="${VERBOSE:-0}"
-DEBUG="${DEBUG:-false}"
-LOG_FILE="${LOG_FILE:-/tmp/${SCRIPT_NAME%.*}.log}"
-
-# ============================================================
-# HELPER FUNCTIONS
-# ============================================================
-usage() {
-    cat << EOF
-$SCRIPT_NAME v$VERSION
-
-DESCRIPTION:
-    [Script description]
-
-USAGE:
-    $SCRIPT_NAME [options] <arguments>
-
-OPTIONS:
-    -h, --help      Display this message
-    -v, --verbose   Verbose mode
-    -V, --version   Display version
-
-EXAMPLES:
-    $SCRIPT_NAME input.txt
-    $SCRIPT_NAME -v --output result.txt input.txt
-
-EOF
-}
-
-log() {
-    local level=$1
-    shift
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $*" | tee -a "$LOG_FILE"
-}
-
-die() {
-    log ERROR "$*"
-    exit 1
-}
-
-debug() {
-    [[ "$DEBUG" == "true" ]] && log DEBUG "$@"
-    return 0
-}
-
-# ============================================================
-# CLEANUP
-# ============================================================
-cleanup() {
-    local exit_code=$?
-    debug "Cleanup triggered with exit code: $exit_code"
-    # Add cleanup code here
-    exit $exit_code
-}
-
-trap cleanup EXIT
-trap 'log WARN "Interrupted"; exit 130' INT TERM
-
-# ============================================================
-# ARGUMENT PARSING
-# ============================================================
-parse_args() {
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -h|--help)
-                usage
-                exit 0
-                ;;
-            -v|--verbose)
-                ((VERBOSE++))
-                shift
-                ;;
-            -V|--version)
-                echo "$SCRIPT_NAME v$VERSION"
-                exit 0
-                ;;
-            --)
-                shift
-                break
-                ;;
-            -*)
-                die "Unknown option: $1"
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
-    
-    # Validate required arguments
-    # [[ $# -ge 1 ]] || die "Missing required argument"
-}
-
-# ============================================================
-# MAIN
-# ============================================================
-main() {
-    parse_args "$@"
-    
-    log INFO "Script starting..."
-    
-    # Your code here
-    echo "Hello, World!"
-    
-    log INFO "Script completed successfully"
-}
-
-main "$@"
-TEMPLATE
+    # Keep the generated reference aligned with the maintained source.
+    cp -- "$SCRIPT_DIR/../templates/professional_script.sh" "$WORK_DIR/templates/professional_template.sh"
 
     chmod +x "$WORK_DIR/templates/"*.sh
     echo -e "  ${GREEN}✓${NC} Created: simple_template.sh"
@@ -476,6 +349,10 @@ count_words() {
 
 # Test
 main() {
+    # TODO: remove this guard after completing and testing all requirements.
+    printf 'UNIMPLEMENTED exercise: complete the TODOs first.\n' >&2
+    return 3
+
     echo "=== Test validate_email ==="
     if validate_email "test@example.com"; then
         echo "✓ test@example.com is valid"
@@ -491,15 +368,16 @@ main() {
     
     echo ""
     echo "=== Test count_words ==="
-    echo "one two three four five" > /tmp/test_words.txt
-    local count
-    count=$(count_words /tmp/test_words.txt)
+    local test_file count
+    test_file=$(mktemp) || return 1
+    echo "one two three four five" > "$test_file"
+    count=$(count_words "$test_file")
     if [[ "$count" == "5" ]]; then
         echo "✓ count_words: $count (correct)"
     else
         echo "✗ count_words: $count (expected: 5)"
     fi
-    rm -f /tmp/test_words.txt
+    rm -f -- "$test_file"
 }
 
 main
@@ -531,6 +409,10 @@ set -euo pipefail
 # config[host]=...
 
 main() {
+    # TODO: remove this guard after completing and testing all requirements.
+    printf 'UNIMPLEMENTED exercise: complete the TODOs first.\n' >&2
+    return 3
+
     echo "=== Fruits ==="
     # TODO: Iterate and display the fruits
     # for fruit in "${fruits[@]}"; do
@@ -584,6 +466,10 @@ validate() {
 }
 
 main() {
+    # TODO: remove this guard after completing and testing all requirements.
+    printf 'UNIMPLEMENTED exercise: complete the TODOs first.\n' >&2
+    return 3
+
     validate "$@"
     
     local input="$1"
@@ -623,7 +509,7 @@ print_summary() {
     if command -v tree &>/dev/null; then
         tree -L 2 "$WORK_DIR"
     else
-        find "$WORK_DIR" -maxdepth 2 -type d | head -20
+        find "$WORK_DIR" -maxdepth 2 -type d | sed -n '1,20p'
     fi
     
     echo ""
@@ -645,6 +531,7 @@ print_summary() {
 main() {
     local check_only=false
     local clean=false
+    local verbose=false
     
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -660,7 +547,9 @@ main() {
                 clean=true
                 shift
                 ;;
+            -v|--verbose) verbose=true; shift ;;
             -d|--dir)
+                [[ $# -ge 2 ]] || die "--dir requires a path"
                 WORK_DIR="$2"
                 shift 2
                 ;;
@@ -687,9 +576,15 @@ main() {
         exit 0
     fi
     
+    [[ ! -L $WORK_DIR ]] || die "Refusing a symlink workspace"
+    WORK_DIR=$(realpath -m -- "$WORK_DIR") || die "Cannot resolve workspace"
+    [[ $WORK_DIR != / && $WORK_DIR != "$HOME" && ! -L $WORK_DIR ]] || die "Unsafe working directory"
+    if [[ $verbose == true ]]; then log_info "Resolved workspace: $WORK_DIR"; fi
+    # Clean only a workspace created by this setup script.
     # Clean if requested
     if [[ "$clean" == "true" && -d "$WORK_DIR" ]]; then
-        log_warn "Removing existing directory: $WORK_DIR"
+        [[ -f "$WORK_DIR/.enos-s05-owned" ]] || die "Refusing to clean a directory without the setup ownership marker"
+        log_warn "Removing existing owned directory: $WORK_DIR"
         rm -rf "$WORK_DIR"
     fi
     
@@ -705,6 +600,7 @@ main() {
     
     # Run setup
     create_structure
+    printf 'ENOS_S05_SETUP_V1\n' > "$WORK_DIR/.enos-s05-owned"
     create_templates
     create_test_files
     create_exercises

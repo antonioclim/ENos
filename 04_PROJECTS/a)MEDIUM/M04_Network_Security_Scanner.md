@@ -61,7 +61,7 @@ Security scanner for local networks: active host detection, port scanning, servi
 
 ## CLI Interface
 
-```bash
+```text
 ./netscan.sh <command> [options] <target>
 
 Commands:
@@ -129,7 +129,7 @@ Scanning 256 hosts...
 Summary:
   Total scanned:    256
   Hosts up:         12 (4.7%)
-  Hosts down:       244
+  No response:      244 (not proof that hosts are down)
   Scan duration:    8.3 seconds
 ```
 
@@ -273,17 +273,21 @@ ping_sweep() {
     local subnet="$1"  # e.g.: 192.168.1
     local max_parallel="${2:-20}"
     
-    for i in {1..254}; do
-        echo "$subnet.$i"
-    done | xargs -P "$max_parallel" -I {} sh -c '
-        ping -c 1 -W 1 {} >/dev/null 2>&1 && echo "{} up"
-    '
+    [[ $subnet =~ ^([0-9]{1,3}\.){2}[0-9]{1,3}$ && $max_parallel =~ ^[1-9][0-9]*$ ]] || return 2
+    local -a octets
+    IFS=. read -r -a octets <<< "$subnet"
+    for i in "${octets[@]}"; do ((10#$i <= 255)) || return 2; done
+    for i in {1..254}; do printf '%s\0' "$subnet.$i"; done |
+        xargs -0 -P "$max_parallel" -n 1 sh -c '
+            if ping -c 1 -W 1 "$1" >/dev/null 2>&1; then printf "%s up\n" "$1"; fi
+        ' _
 }
 
 # Or with GNU parallel (more efficient)
 ping_sweep_parallel() {
     local subnet="$1"
-    seq 1 254 | parallel -j 50 "ping -c 1 -W 1 ${subnet}.{} >/dev/null 2>&1 && echo '${subnet}.{} up'"
+    # Reuse the validated argv-based implementation; no subnet interpolation into code.
+    ping_sweep "$subnet" 50
 }
 ```
 
@@ -296,7 +300,9 @@ scan_port() {
     local timeout="${3:-2}"
     
     # Bash built-in (fastest)
-    timeout "$timeout" bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null
+    [[ $host =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ && $port =~ ^[0-9]{1,5}$ && $timeout =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    (( 10#$port >= 1 && 10#$port <= 65535 )) || return 2
+    timeout "$timeout" bash -c 'exec 3<>"/dev/tcp/$1/$2"' _ "$host" "$port" 2>/dev/null
     return $?
 }
 
@@ -318,9 +324,11 @@ scan_ports_parallel() {
     local host="$1"
     local ports="$2"  # e.g.: "22 80 443 8080"
     
-    echo "$ports" | tr ' ' '\n' | xargs -P 20 -I {} bash -c "
-        timeout 2 bash -c 'echo >/dev/tcp/$host/{}' 2>/dev/null && echo '{} open'
-    "
+    [[ $host =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ && $ports =~ ^[0-9[:space:]]+$ ]] || return 2
+    export -f scan_port
+    printf '%s\n' "$ports" | tr ' ' '\n' | xargs -r -P 20 -n 1 bash -c '
+        if scan_port "$1" "$2" 2; then printf "%s open\n" "$2"; fi
+    ' _ "$host"
 }
 ```
 
@@ -358,10 +366,11 @@ arp_scan() {
     
     # Requires root privileges
     if command -v arp-scan &>/dev/null; then
-        sudo arp-scan --interface="$interface" --localnet
+        arp-scan --interface="$interface" --localnet
     else
-        # Fallback: read ARP table after ping sweep
-        ip neigh show | awk '/REACHABLE|STALE/ {print $1, $5}'
+        # Cached IPv4 neighbours for this interface only, not an active/fresh scan.
+        echo "Cached neighbour observation; absent/stale entries do not establish host state" >&2
+        ip -4 neigh show dev "$interface" | awk '/REACHABLE|STALE/ {print $1, $5}'
     fi
 }
 ```
@@ -417,7 +426,7 @@ HTML_HEADER
 
 ## ⚠️ Legal Warnings
 
-**IMPORTANT:** Network scanning without authorisation is illegal in most jurisdictions.
+**Scope:** obtain explicit authorisation for the selected targets and methods. Legal requirements depend on jurisdiction and context; this teaching project does not supply legal advice.
 
 - Use this tool ONLY on networks you own or have explicit authorisation for
 - For testing, use the local network or your own virtual machines

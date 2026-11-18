@@ -1,0 +1,14 @@
+# Generated local environments and build/test caches; teaching archives remain versioned.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+node_modules/
+*.egg-info/
+build/
+dist/

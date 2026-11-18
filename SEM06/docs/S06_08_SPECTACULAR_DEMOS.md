@@ -5,6 +5,8 @@
 
 ---
 
+> **Execution and evidence contract:** Bash 4.4+ on GNU/Linux. Run repository-relative commands from the repository root. Examples use disposable, explicitly owned paths. Expected failures must be captured in `if` statements when `set -e` is enabled. See [TEACHING_CONTRACT.md](TEACHING_CONTRACT.md) for evidence limits and author decisions.
+
 ## Purpose of Demos
 
 Spectacular demos serve to:
@@ -18,63 +20,40 @@ Spectacular demos serve to:
 ## Demo 1: Real-Time System Dashboard 🖥️
 
 ### Wow Factor
-A live dashboard showing system state in real time, updated every second, directly in terminal.
-
-### Preparation
-
-```bash
-cd ~/sem06/demo
-```
+A live dashboard showing system state in real time, sampled at bounded intervals, directly in terminal.
 
 ### Demo Script
 
-```bash
-#!/bin/bash
-# dashboard_live.sh - Real-time system dashboard
+Run from the repository root. Each CPU observation spans 0.2 seconds; the pause separates samples.
 
-while true; do
-    clear
-    
-    # Header with effect
-    echo -e "\033[1;36m"
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║           SYSTEM DASHBOARD - $(date '+%H:%M:%S')                    ║"
-    echo "║           Host: $(hostname)                                   "
-    echo "╚══════════════════════════════════════════════════════════════╝"
-    echo -e "\033[0m"
-    
-    # CPU Bar
-    cpu=$(grep "^cpu " /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; if(NR==1){u1=u;t1=t}else{print int((u-u1)*100/(t-t1))}}')
-    cpu=${cpu:-$(top -bn1 | grep "Cpu(s)" | awk '{print int($2)}')}
-    bar=$(printf "%-${cpu}s" | tr ' ' '█')
-    empty=$(printf "%-$((100-cpu))s" | tr ' ' '░')
-    echo -e "CPU:  [\033[32m${bar}\033[0m${empty}] ${cpu}%"
-    
-    # Memory Bar
-    mem=$(free | awk '/Mem:/ {print int($3/$2*100)}')
-    bar=$(printf "%-${mem}s" | tr ' ' '█')
-    empty=$(printf "%-$((100-mem))s" | tr ' ' '░')
-    echo -e "MEM:  [\033[33m${bar}\033[0m${empty}] ${mem}%"
-    
-    # Disk Bar
-    disk=$(df / | awk 'NR==2 {print int($3/$2*100)}')
-    bar=$(printf "%-${disk}s" | tr ' ' '█')
-    empty=$(printf "%-$((100-disk))s" | tr ' ' '░')
-    echo -e "DISK: [\033[34m${bar}\033[0m${empty}] ${disk}%"
-    
-    echo ""
-    echo -e "\033[1mTop Processes:\033[0m"
-    ps aux --sort=-%cpu | head -6 | tail -5 | awk '{printf "  %-10s %5s%% CPU  %5s%% MEM  %s\n", $1, $3, $4, $11}'
-    
-    echo ""
-    echo -e "\033[90mPress Ctrl+C to exit\033[0m"
-    
-    sleep 1
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+SEM06_DIR=$(realpath -- SEM06)
+source "$SEM06_DIR/scripts/examples/monitor_examples.sh"
+trap 'exit 130' INT
+trap 'exit 143' TERM
+# Five samples keep this demonstration bounded; increase deliberately for projection.
+for ((sample=1; sample<=5; sample++)); do
+    printf '\nSYSTEM DASHBOARD — sample %s at %s\n' "$sample" "$(date -u +%H:%M:%S)"
+    for metric in cpu memory disk; do
+        case $metric in
+            cpu) if value=$(get_cpu_usage 0.2); then :; else value=; fi ;;
+            memory) if value=$(get_memory_usage); then :; else value=; fi ;;
+            disk) if value=$(get_disk_usage /); then :; else value=; fi ;;
+        esac
+        if [[ -n $value ]]; then
+            printf '%-6s %s %s%%\n' "$metric" "$(draw_bar "$value" 40)" "$value"
+        else
+            printf '%-6s unavailable\n' "$metric"
+        fi
+    done
+    ((sample == 5)) || sleep 1
 done
 ```
 
 ### Key Moment
-"Everything comes from /proc - text files you can read. It's not magic, it's Unix."
+"The helpers combine /proc counters and df. CPU is an interval estimate, memory uses MemAvailable and disk follows df percentage semantics. Unavailable evidence stays unavailable."
 
 ### Variants
 - Add network traffic with `/proc/net/dev`
@@ -86,184 +65,99 @@ done
 ## Demo 2: Backup Time Machine ⏰
 
 ### Wow Factor
-Demonstration of "time travel" - restore to any point in the past.
+Demonstration of restoring one of three explicitly captured states; uncaptured past states cannot be recovered.
 
-### Preparation
+### Disposable demonstration
 
-```bash
-mkdir -p ~/demo_backup/{source,snapshots}
-cd ~/demo_backup
-echo "Version 1 - Original" > source/document.txt
-```
-
-### Demo Script
+From the repository root, the complete maintained function below creates and removes only its own workspace. It does not inspect or modify the user's existing data.
 
 ```bash
-#!/bin/bash
-# time_machine.sh - Snapshot-based backup with time travel
-
-SNAPSHOTS_DIR="snapshots"
-SOURCE="source"
-
-snapshot() {
-    local ts=$(date +%Y%m%d_%H%M%S)
-    local snap_dir="$SNAPSHOTS_DIR/$ts"
-    
-    echo "📸 Creating snapshot: $ts"
-    cp -r "$SOURCE" "$snap_dir"
-    echo "$ts" >> "$SNAPSHOTS_DIR/history.log"
-    echo "✓ Snapshot created"
-}
-
-list_snapshots() {
-    echo "📜 Available snapshots:"
-    ls -1 "$SNAPSHOTS_DIR" | grep -v history.log | while read snap; do
-        echo "  → $snap"
-    done
-}
-
-restore() {
-    local target="$1"
-    if [[ -d "$SNAPSHOTS_DIR/$target" ]]; then
-        echo "⏰ Travelling back to: $target"
-        rm -rf "$SOURCE"
-        cp -r "$SNAPSHOTS_DIR/$target" "$SOURCE"
-        echo "✓ Restored to $target"
-    else
-        echo "❌ Snapshot not found: $target"
-    fi
-}
-
-# Demo flow
-echo "=== BACKUP TIME MACHINE ==="
-echo ""
-
-# Create initial snapshot
-snapshot
-sleep 2
-
-# Modify file
-echo "Version 2 - Modified" > source/document.txt
-echo "📝 File modified: $(cat source/document.txt)"
-snapshot
-sleep 2
-
-# Modify again
-echo "Version 3 - Oops, wrong changes!" > source/document.txt
-echo "📝 File modified: $(cat source/document.txt)"
-snapshot
-
-# Show history
-echo ""
-list_snapshots
-
-# Restore to first version
-echo ""
-first_snap=$(ls -1 "$SNAPSHOTS_DIR" | grep -v history.log | head -1)
-restore "$first_snap"
-echo "📄 Current content: $(cat source/document.txt)"
+SEM06_DIR=$(realpath -- SEM06)
+EXAMPLE_DIR="$SEM06_DIR/scripts/examples"
+snapshot_demo() (
+    set -euo pipefail
+    local work= SNAPSHOT_RESULT= first_snapshot= previous= stage= id=0
+    trap '[[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+    work=$(mktemp -d) || exit 1
+    mkdir -- "$work/source" "$work/snapshots"
+    local -a history=()
+    snapshot() {
+        local target
+        id=$((id+1)); target="$work/snapshots/version_$id"
+        stage=$(mktemp -d "$work/snapshots/.partial.XXXXXX") || return 1
+        cp -a -- "$work/source/." "$stage/" || return 1
+        mv -- "$stage" "$target" || return 1
+        history+=("version_$id"); SNAPSHOT_RESULT="version_$id"
+        printf 'Full-copy snapshot: %s\n' "$SNAPSHOT_RESULT"
+    }
+    restore_snapshot() {
+        local version=$1 old
+        [[ $version =~ ^version_[1-9][0-9]*$ && -d $work/snapshots/$version ]] || return 2
+        stage=$(mktemp -d "$work/.restore.XXXXXX") || return 1
+        cp -a -- "$work/snapshots/$version/." "$stage/" || return 1
+        old="$work/source.previous"
+        [[ ! -e $old ]] || return 1
+        mv -- "$work/source" "$old" || return 1
+        if ! mv -- "$stage" "$work/source"; then mv -- "$old" "$work/source"; return 1; fi
+        rm -rf -- "$old" || return 1
+    }
+    printf 'Version 1\n' > "$work/source/document.txt"
+    snapshot; first_snapshot=$SNAPSHOT_RESULT
+    printf 'Version 2\n' > "$work/source/document.txt"
+    snapshot
+    printf 'Version 3\n' > "$work/source/document.txt"
+    snapshot
+    printf 'Available: %s\n' "${history[@]}"
+    restore_snapshot "$first_snapshot"
+    [[ $(cat -- "$work/source/document.txt") == 'Version 1' ]]
+    printf 'Restored: %s\n' "$(cat -- "$work/source/document.txt")"
+)
+snapshot_demo
 ```
 
 ### Key Moment
-"This is the principle behind git, Time Machine (macOS) and ZFS snapshots. Incremental backup in action."
+"This example makes full copies. It illustrates saved states, not the incremental, deduplicated or copy-on-write algorithms of Git, Time Machine or ZFS. Restore stages a copy and performs two renames with rollback on failure; the entire restore is not one atomic replacement."
 
 ---
 
-## Demo 3: Zero-Downtime Deployment 🚀
+## Demo 3: Local Release Activation 🚀
 
 ### Wow Factor
-We change the version of an "application" live, without a single second of downtime.
+We change the local path that selects a prepared application release and verify the recorded rollback target.
 
-### Preparation
+### Disposable demonstration
 
-```bash
-mkdir -p ~/demo_deploy/{releases,shared}
-cd ~/demo_deploy
-
-# Create "versions"
-mkdir releases/v1.0.0
-echo "<h1>App v1.0.0</h1>" > releases/v1.0.0/index.html
-
-mkdir releases/v2.0.0  
-echo "<h1>App v2.0.0 - NEW!</h1>" > releases/v2.0.0/index.html
-
-# Initial link
-ln -s releases/v1.0.0 current
-```
-
-### Demo Script
+From the repository root, the complete maintained function below creates and removes only its own workspace. It does not inspect or modify the user's existing data.
 
 ```bash
-#!/bin/bash
-# zero_downtime_deploy.sh
-
-RELEASES="releases"
-CURRENT="current"
-
-show_status() {
-    local version=$(readlink "$CURRENT" | xargs basename)
-    echo "🌐 Current version: $version"
-    echo "📄 Content: $(cat $CURRENT/index.html)"
-}
-
-deploy() {
-    local new_version="$1"
-    
-    echo "🚀 Deploying $new_version..."
-    echo ""
-    
-    # Show current state
-    echo "BEFORE:"
-    show_status
-    echo ""
-    
-    # Atomic switch!
-    echo "⚡ Switching (atomic operation)..."
-    ln -sfn "$RELEASES/$new_version" "$CURRENT"
-    
-    # Show new state
-    echo ""
-    echo "AFTER:"
-    show_status
-}
-
-rollback() {
-    local versions=($(ls -1 "$RELEASES" | sort -V))
-    local current=$(readlink "$CURRENT" | xargs basename)
-    
-    for ((i=0; i<${#versions[@]}; i++)); do
-        if [[ "${versions[$i]}" == "$current" && $i -gt 0 ]]; then
-            local prev="${versions[$((i-1))]}"
-            echo "⏪ Rolling back to $prev..."
-            ln -sfn "$RELEASES/$prev" "$CURRENT"
-            echo "✓ Rollback complete"
-            return 0
-        fi
+SEM06_DIR=$(realpath -- SEM06)
+EXAMPLE_DIR="$SEM06_DIR/scripts/examples"
+release_demo() (
+    set -euo pipefail
+    local work= version digest previous
+    trap '[[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+    work=$(mktemp -d) || exit 1
+    mkdir -- "$work/source" "$work/releases"
+    for version in v1 v2; do
+        printf 'Application %s\n' "$version" > "$work/source/index.html"
+        tar -czf "$work/$version.tar.gz" -C "$work/source" index.html
+        digest=$(sha256sum -- "$work/$version.tar.gz"); digest=${digest%% *}
+        python3 "$EXAMPLE_DIR/release_reference.py" create "$work/releases" demo "$version" "$work/$version.tar.gz" "$digest" >/dev/null
     done
-    echo "❌ No previous version available"
-}
-
-# Demo
-echo "=== ZERO-DOWNTIME DEPLOYMENT ==="
-echo ""
-
-show_status
-echo ""
-echo "Press ENTER to deploy v2.0.0..."
-read
-
-deploy "v2.0.0"
-
-echo ""
-echo "Press ENTER to rollback..."
-read
-
-rollback
-show_status
+    python3 "$EXAMPLE_DIR/release_reference.py" activate "$work/releases" demo v1
+    printf 'Before: %s\n' "$(readlink -- "$work/releases/demo/current")"
+    python3 "$EXAMPLE_DIR/release_reference.py" activate "$work/releases" demo v2
+    printf 'After: %s\n' "$(readlink -- "$work/releases/demo/current")"
+    previous=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["previous"])' "$work/releases/demo/transition.json")
+    python3 "$EXAMPLE_DIR/release_reference.py" activate "$work/releases" demo "$previous"
+    printf 'Rolled back: %s\n' "$(readlink -- "$work/releases/demo/current")"
+    cat -- "$work/releases/demo/current/index.html"
+)
+release_demo
 ```
 
 ### Key Moment
-"`ln -sfn` is atomic - there is no moment when `current` doesn't point to a valid version. That's the secret of zero-downtime deployment."
+"A staged symlink followed by same-filesystem os.replace atomically changes a directory entry. Service continuity, request draining, database compatibility and capacity remain separate conditions; this file-only fixture measures none of them."
 
 ---
 
@@ -275,79 +169,36 @@ Real-time visualisation of process tree, showing parent-child relationships.
 ### Demo Script
 
 ```bash
-#!/bin/bash
-# process_tree.sh - Interactive process tree
-
-show_tree() {
-    echo "🌳 Process Tree (your terminal branch):"
-    echo ""
-    
-    # Get current shell's ancestry
-    local pid=$$
-    local chain=""
-    
-    while [[ $pid -ne 1 ]]; do
-        local cmd=$(ps -p $pid -o comm= 2>/dev/null)
-        local ppid=$(ps -p $pid -o ppid= 2>/dev/null | tr -d ' ')
-        chain="$cmd ($pid) → $chain"
-        pid=$ppid
+process_demo() (
+    set -euo pipefail
+    local -a children=()
+    local pid parent command steps=0
+    cleanup_children() {
+        local child
+        for child in "${children[@]}"; do kill -TERM "$child" 2>/dev/null || :; done
+        for child in "${children[@]}"; do wait "$child" 2>/dev/null || :; done
+    }
+    trap cleanup_children EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    for duration in 8 9 10; do sleep "$duration" & children+=("$!"); done
+    printf 'Owned children: %s\n' "${children[*]}"
+    pid=$BASHPID
+    while [[ $pid =~ ^[1-9][0-9]*$ ]] && ((steps < 64)); do
+        command=$(ps -p "$pid" -o comm=) || break
+        parent=$(ps -p "$pid" -o ppid=) || break
+        parent=${parent//[[:space:]]/}
+        printf '%s (PID %s; parent %s)\n' "$command" "$pid" "$parent"
+        [[ $parent =~ ^[0-9]+$ && $parent != "$pid" ]] || break
+        pid=$parent; steps=$((steps+1))
     done
-    
-    echo "init (1) → $chain"
-    echo ""
-    
-    # Show children
-    echo "🌿 My children:"
-    pstree -p $$ 2>/dev/null || ps --ppid $$ -o pid,comm
-}
-
-spawn_children() {
-    echo "🐣 Spawning child processes..."
-    
-    # Background processes
-    sleep 100 &
-    echo "  Child 1: sleep (PID: $!)"
-    
-    (while true; do sleep 1; done) &
-    echo "  Child 2: subshell (PID: $!)"
-    
-    cat /dev/zero > /dev/null &
-    echo "  Child 3: cat (PID: $!)"
-    
-    echo ""
-    show_tree
-}
-
-cleanup() {
-    echo ""
-    echo "🧹 Cleaning up children..."
-    pkill -P $$
-    echo "✓ All children terminated"
-}
-
-trap cleanup EXIT
-
-echo "=== PROCESS TREE VISUALISER ==="
-echo ""
-show_tree
-
-echo ""
-echo "Press ENTER to spawn children..."
-read
-spawn_children
-
-echo ""
-echo "Press ENTER to see updated tree..."
-read
-show_tree
-
-echo ""
-echo "Press ENTER to cleanup and exit..."
-read
+    printf 'Ancestry is a time-dependent observation; disappearing entries are possible.\n'
+)
+process_demo
 ```
 
 ### Key Moment
-"Every process has a parent. When the parent dies, children become orphans and are adopted by init/systemd. Trap ensures cleanup."
+"The observed ancestry can change during traversal. Namespace roots and subreapers affect reparenting. This demo tracks, signals and waits only its three direct children; EXIT cleanup cannot run after SIGKILL or host loss."
 
 ---
 
@@ -375,17 +226,17 @@ echo ""
 # Signal handlers
 trap 'echo "📨 Caught SIGUSR1 - Custom signal 1!"' SIGUSR1
 trap 'echo "📨 Caught SIGUSR2 - Custom signal 2!"' SIGUSR2
-trap 'echo "📨 Caught SIGTERM - Termination request (graceful)"; exit 0' SIGTERM
-trap 'echo "📨 Caught SIGINT - Interrupt (Ctrl+C)"; exit 0' SIGINT
+trap 'echo "📨 Caught SIGTERM - Termination request (graceful)"; exit 143' SIGTERM
+trap 'echo "📨 Caught SIGINT - Interrupt (Ctrl+C)"; exit 130' SIGINT
 trap 'echo "📨 Caught SIGHUP - Hangup (terminal closed)"' SIGHUP
 
-echo "Waiting for signals... (Ctrl+C to exit)"
+echo "Waiting for signals for at most 30 seconds (Ctrl+C to exit)"
 echo ""
 
 # Counter to show we're alive
 count=0
-while true; do
-    ((count++))
+while ((count < 30)); do
+    count=$((count+1))
     echo -ne "\r⏱️  Running for ${count}s... "
     sleep 1
 done
@@ -404,48 +255,24 @@ Demonstrates file descriptors and advanced redirection.
 ### Demo Script
 
 ```bash
-#!/bin/bash
-# fd_magic.sh - File descriptor demonstration
-
-echo "=== FILE DESCRIPTOR MAGIC ==="
-echo ""
-
-# Show current FDs
-echo "📂 Current file descriptors:"
-ls -la /proc/$$/fd/
-echo ""
-
-# Create custom FD
-exec 3>custom_output.txt
-echo "✨ Created FD 3 pointing to custom_output.txt"
-ls -la /proc/$$/fd/3
-echo ""
-
-# Write through custom FD
-echo "Hello from FD 3!" >&3
-echo "📝 Wrote to FD 3"
-echo "Content: $(cat custom_output.txt)"
-echo ""
-
-# Duplicate FD (backup stdout)
-exec 4>&1  # Save stdout to FD 4
-echo "✨ Saved stdout to FD 4"
-
-# Redirect stdout to file
-exec 1>stdout_capture.txt
-echo "This goes to file, not screen"
-
-# Restore stdout
-exec 1>&4
-exec 4>&-  # Close FD 4
-echo "✨ Restored stdout"
-echo "Captured: $(cat stdout_capture.txt)"
-echo ""
-
-# Cleanup
-exec 3>&-
-rm -f custom_output.txt stdout_capture.txt
-echo "🧹 Cleaned up"
+descriptor_demo() (
+    set -euo pipefail
+    local work=
+    trap 'exec 3>&-; [[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+    work=$(mktemp -d) || exit 1
+    exec 3>"$work/custom_output.txt"
+    printf 'Hello from FD 3!\n' >&3
+    printf 'FD 3 target: %s\n' "$(readlink -- "/proc/$BASHPID/fd/3")"
+    cat -- "$work/custom_output.txt"
+    exec 4>&1
+    exec 1>"$work/stdout_capture.txt"
+    printf 'This goes to the owned file\n'
+    exec 1>&4
+    exec 4>&-
+    printf 'Captured: %s\n' "$(cat -- "$work/stdout_capture.txt")"
+    exec 3>&-
+)
+descriptor_demo
 ```
 
 ### Key Moment
@@ -461,7 +288,7 @@ echo "🧹 Cleaned up"
 |------|----------|-------------|
 | Dashboard | 5 min | Seminar opening |
 | Time Machine | 7 min | After Backup section |
-| Zero-Downtime | 5 min | After Deployer section |
+| Local Release Activation | 5 min | After Deployer section |
 | Process Tree | 5 min | When discussing fork/exec |
 | Signal Catcher | 5 min | During trap and signals |
 | FD Magic | 7 min | During advanced redirection |
@@ -484,12 +311,7 @@ echo "🧹 Cleaned up"
 
 ## Complete Demo Files
 
-Scripts are in `scripts/`:
-- `scripts/demo_monitor.sh` — Complete monitor
-- `scripts/demo_backup.sh` — Backup with all functions
-- `scripts/demo_deployer.sh` — Deployer with strategies
-
-Run with `--demo` for spectacle mode or `--step` for step-by-step.
+Run `bash SEM06/scripts/examples/owned_demos.sh --help` for the four maintained disposable modes. The dashboard uses `monitor_examples.sh`; the bounded signal catcher is shown in full above. There are no `--demo` or `--step` switches. These demonstrations are local teaching fixtures, not native acceptance of a deployed service.
 
 ---
 

@@ -1,7 +1,7 @@
-# 📁 Lecture 13 Documentation — Security in Sisteme de Operare
+# 📁 Lecture 13 Documentation — Security in Operating Systems
 
 > **Location:** `05_LECTURES/13-Security_in_Operating_Systems/docs/`  
-> **Topic:** AAA, permisiuni, capabilities, vulnerabilities
+> **Topic:** AAA, permissions, capabilities, vulnerabilities
 
 ## Contents
 
@@ -22,7 +22,7 @@
 
 | File | Purpose |
 |------|---------|
-| `C13_01_COURSE_PLAN.md` | Obiective de învățare and session timing |
+| `C13_01_COURSE_PLAN.md` | Learning objectives and session timing |
 | `C13_02_CONCEPT_MAP.md` | Visual topic relationships |
 | `C13_03_DISCUSSION_QUESTIONS.md` | Peer instruction discussion questions |
 | `C13_04_STUDY_GUIDE.md` | Self-study guide and key concepts |
@@ -43,18 +43,17 @@ xdg-open 13ex1_-_Permissions_Calculator.html
 ```
 
 **Features:**
-- Self-contained (no server required)
+- No server required; optional web fonts/chart assets may need internet, with a textual chart fallback offline
 - Interactive controls and visualizations  
 - Step-by-step execution modes
 - Reset buttons to restart simulations
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM director:
+Run the lecture quiz from this `docs/` directory:
 
 ```bash
-cd ../../SEM01/formative/
-python3 quiz_runner.py --file ../../05_LECTURES/13-Security_in_Operating_Systems/docs/C13_05_FORMATIVE_ASSESSMENT.yaml
+python3 ../../quiz_runner.py "C13_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42
 ```
 
 **Or manually review:**
@@ -83,7 +82,7 @@ python3 quiz_runner.py --file ../../05_LECTURES/13-Security_in_Operating_Systems
 
 - **Parent:** [`../README.md`](../README.md) — Lecture unit overview
 - **Scripts:** [`../scripts/`](../scripts/) — Demo scripts (if available)
-- **Diagrams:** [`../../00_SUPPLEMENTARY/diagrams_png/`](../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
+- **Diagrams:** [`../../../00_SUPPLEMENTARY/diagrams_png/`](../../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
 
 ---
 

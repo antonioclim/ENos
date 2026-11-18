@@ -1,3 +1,23 @@
+# Lecture 01 — Introduction to Operating Systems
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C01_01_COURSE_PLAN.md)
+- [Concept Map](docs/C01_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C01_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C01_04_STUDY_GUIDE.md)
+- [01ex1 - Dual Mode Simulator](docs/01ex1_-_Dual_Mode_Simulator.html)
+- [01ex2 - Kernel Architectures](docs/01ex2_-_Kernel_Architectures.html)
+- [Formative question bank](docs/C01_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
 
 # Demonstration Scripts — Week 01
@@ -75,7 +95,7 @@ This script demonstrates the **Batch Processing** algorithm discussed in Week 1:
 
 1. **Vary job order**: Run with `0.5 1 2 3.5` instead. Compare average waiting times.
 2. **Large batch**: Create 20 random jobs and observe the waiting time growth.
-3. **Connect to history**: Why did batch processing increase CPU utilisation from 30% to 90%?
+3. **Connect to history**: Under what workload and I/O assumptions could batch processing improve utilisation? Treat any chosen percentages as hypothetical until measured.
 
 ---
 

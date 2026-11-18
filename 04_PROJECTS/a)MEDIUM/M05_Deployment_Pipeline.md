@@ -63,7 +63,7 @@ Complete deployment pipeline for applications: build, test, package, deploy with
 
 ## CLI Interface
 
-```bash
+```text
 ./deploy.sh <command> [options]
 
 Commands:
@@ -333,46 +333,97 @@ detect_project_type() {
 ### Atomic deploy with symlink
 
 ```bash
-deploy_symlink() {
-    local package="$1"
-    local env="$2"
-    local version="$3"
-    
-    local releases_dir="/opt/${PROJECT}/releases"
-    local current_link="/opt/${PROJECT}/current"
-    local target_dir="${releases_dir}/${version}"
-    
-    # Extract to releases/
-    mkdir -p "$target_dir"
-    tar -xzf "$package" -C "$target_dir"
-    
-    # Atomic symlink swap
-    ln -sfn "$target_dir" "${current_link}.new"
-    mv -Tf "${current_link}.new" "$current_link"
-    
-    echo "Deployed $version"
+# Populate these maps from a validated configuration parser, never eval its data.
+declare -A ENV_PATHS=() ENV_HOSTS=() ENV_USERS=()
+resolve_environment() {
+    local env="$1"
+    [[ $env =~ ^[A-Za-z0-9_-]+$ && -n ${ENV_PATHS[$env]:-} ]] || return 2
+    [[ ${ENV_HOSTS[$env]:-localhost} == localhost ]] || { echo "Remote transport must be implemented explicitly" >&2; return 2; }
+    [[ ${ENV_USERS[$env]:-$(id -un)} == "$(id -un)" ]] || return 2
+    [[ ${ENV_PATHS[$env]} == /* && ${ENV_PATHS[$env]} != / && ! -L ${ENV_PATHS[$env]} ]] || return 2
+    printf '%s\n' "${ENV_PATHS[$env]}"
 }
 
-rollback_symlink() {
-    local env="$1"
-    local version="$2"
-    
-    local releases_dir="/opt/${PROJECT}/releases"
-    local current_link="/opt/${PROJECT}/current"
-    
-    if [[ -z "$version" ]]; then
-        # Find previous version
-        version=$(ls -t "$releases_dir" | sed -n '2p')
-    fi
-    
-    [[ -d "${releases_dir}/${version}" ]] || die "Version $version not found"
-    
-    ln -sfn "${releases_dir}/${version}" "${current_link}.new"
-    mv -Tf "${current_link}.new" "$current_link"
-    
-    echo "Rolled back to $version"
+valid_release() { [[ $1 =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && $1 != . && $1 != .. ]]; }
+
+validate_package() {
+    # Caller supplies an independently retained expected content digest.
+    python3 - "$1" "${PACKAGE_SHA256:-}" <<'PACKAGE'
+import hashlib,re,sys,tarfile
+from pathlib import Path,PurePosixPath
+path=Path(sys.argv[1]); expected=sys.argv[2]
+if not re.fullmatch(r'[0-9a-f]{64}',expected): raise SystemExit('Expected SHA-256 required')
+if hashlib.sha256(path.read_bytes()).hexdigest()!=expected: raise SystemExit('Package digest mismatch')
+with tarfile.open(path,'r:gz') as archive:
+    seen=set()
+    for item in archive:
+        name=PurePosixPath(item.name)
+        if name.is_absolute() or '..' in name.parts or item.name in seen: raise SystemExit('Unsafe/duplicate member')
+        if not (item.isfile() or item.isdir()): raise SystemExit('This teaching package accepts only regular files/directories')
+        seen.add(item.name)
+    if not seen: raise SystemExit('Empty package')
+PACKAGE
 }
+
+deploy_symlink() (
+    local package="$1" env="$2" version="$3" root stage switch previous=''
+    valid_release "$version" || return 2
+    root=$(resolve_environment "$env") || return 2
+    [[ -r "$package" ]] || return 1
+    mkdir -p -- "$root/releases" || return 1
+    exec {lock_fd}>"$root/deploy.lock" || return 1
+    flock -n "$lock_fd" || return 1  # Keep this inode; do not unlink on unlock.
+    [[ ! -e "$root/releases/$version" ]] || return 1
+    [[ ! -e "$root/current" || -L "$root/current" ]] || return 1
+    if [[ -L "$root/current" ]]; then
+        previous=$(readlink -- "$root/current") || return 1
+        [[ $previous == releases/* && $previous != */../* ]] || return 1
+    fi
+    stage=$(mktemp -d "$root/releases/.stage.XXXXXX") || return 1
+    switch=$(mktemp -d "$root/.switch.XXXXXX") || { rm -rf -- "$stage"; return 1; }
+    trap 'rm -rf -- "$stage" "$switch"' EXIT
+    # Validate and extract one owned snapshot, not a mutable external pathname.
+    cp -- "$package" "$switch/package.tar.gz" || return 1
+    validate_package "$switch/package.tar.gz" || return 1
+    tar --extract --gzip --file="$switch/package.tar.gz" --directory="$stage" --no-same-owner || return 1
+    touch "$stage/.complete" || return 1
+    mv -- "$stage" "$root/releases/$version" || return 1
+    ln -s "releases/$version" "$switch/current" || return 1
+    # Record planned transition before promotion; recovery compares it with current.
+    printf '%s\n%s\n' "$previous" "releases/$version" > "$switch/transition" || return 1
+    mv -- "$switch/transition" "$root/transition" || return 1
+    mv -Tf -- "$switch/current" "$root/current" || return 1
+    printf 'Deployed %s to %s\n' "$version" "$env"
+)
+
+rollback_symlink() (
+    local env="$1" version="${2:-}" root previous active
+    root=$(resolve_environment "$env") || return 2
+    exec {lock_fd}>"$root/deploy.lock" || return 1
+    flock -n "$lock_fd" || return 1
+    if [[ -z "$version" ]]; then
+        [[ -r "$root/transition" ]] || return 1
+        { IFS= read -r previous; IFS= read -r active; } < "$root/transition" || return 1
+        [[ $(readlink -- "$root/current") == "$active" && $previous == releases/* ]] || return 1
+        version=${previous#releases/}
+    fi
+    valid_release "$version" || { echo "No valid predecessor" >&2; return 1; }
+    [[ -d "$root/releases/$version" && ! -L "$root/releases/$version" && -f "$root/releases/$version/.complete" ]] || return 1
+    local switch
+    switch=$(mktemp -d "$root/.rollback.XXXXXX") || return 1
+    trap 'rm -rf -- "$switch"' EXIT
+    ln -s "releases/$version" "$switch/current" || return 1
+    mv -Tf -- "$switch/current" "$root/current" || return 1
+    printf 'Rolled back %s to %s\n' "$env" "$version"
+)
 ```
+
+The atomic boundary above is replacement of one symlink on the same filesystem.
+It does not reverse database migrations, restart a service or prove zero downtime.
+`validate_package` checks the supplied SHA-256 and permitted tar member types/paths on an owned copy. It rejects links/special files in this bounded teaching format. The digest establishes consistency with an expected value, not package authorship or build/test acceptance; those gates need their own evidence contract.
+The `transition` record supplies a predecessor, not a directory-mtime guess. After
+an interrupted transition, compare the record and actual link before choosing any
+recovery action. Remote transport and application health gates remain student work.
 
 ### Health check with retry
 
@@ -383,12 +434,14 @@ health_check() {
     local retries="${3:-3}"
     local delay="${4:-5}"
     
+    [[ $timeout =~ ^[1-9][0-9]*$ && $retries =~ ^[1-9][0-9]*$ && $delay =~ ^[0-9]+$ ]] || return 2
+    # timeout is per attempt; worst case includes retries and inter-attempt delays.
     local attempt=1
     while [[ $attempt -le $retries ]]; do
         log_info "Health check attempt $attempt/$retries..."
         
         local status
-        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url")
+        status=$(curl -s -o /dev/null -w "%{http_code}" --max-time "$timeout" -- "$url") || status=TRANSPORT_ERROR
         
         if [[ "$status" == "200" ]]; then
             log_info "Health check passed (HTTP $status)"
@@ -397,7 +450,7 @@ health_check() {
         
         log_warn "Health check failed (HTTP $status)"
         
-        ((attempt++))
+        attempt=$((attempt + 1))
         [[ $attempt -le $retries ]] && sleep "$delay"
     done
     
@@ -415,14 +468,15 @@ get_next_version() {
     case "$strategy" in
         semver)
             local current
-            current=$(cat VERSION 2>/dev/null || echo "0.0.0")
-            
-            IFS='.' read -r major minor patch <<< "$current"
+            if [[ -e VERSION ]]; then current=$(cat VERSION) || return 1; else current=0.0.0; fi
+            [[ $current =~ ^([0-9]{1,8})[.]([0-9]{1,8})[.]([0-9]{1,8})$ ]] || return 2
+            local major=$((10#${BASH_REMATCH[1]})) minor=$((10#${BASH_REMATCH[2]})) patch=$((10#${BASH_REMATCH[3]}))
             
             case "$increment" in
                 major) echo "$((major + 1)).0.0" ;;
                 minor) echo "${major}.$((minor + 1)).0" ;;
                 patch) echo "${major}.${minor}.$((patch + 1))" ;;
+                *) return 2 ;;
             esac
             ;;
         timestamp)
@@ -431,6 +485,7 @@ get_next_version() {
         git-sha)
             git rev-parse --short HEAD
             ;;
+        *) return 2 ;;
     esac
 }
 ```
@@ -438,20 +493,32 @@ get_next_version() {
 ### Old releases cleanup
 
 ```bash
-cleanup_old_releases() {
-    local releases_dir="$1"
-    local keep="$2"
-    local current
-    
-    current=$(readlink /opt/${PROJECT}/current | xargs basename)
-    
-    ls -t "$releases_dir" | tail -n +$((keep + 1)) | while read -r release; do
-        [[ "$release" == "$current" ]] && continue
-        
-        log_info "Removing old release: $release"
-        rm -rf "${releases_dir}/${release}"
+cleanup_old_releases() (
+    local env="$1" keep="$2" root current previous='' target=''
+    [[ $keep =~ ^[0-9]+$ ]] || return 2
+    root=$(resolve_environment "$env") || return 2
+    exec {lock_fd}>"$root/deploy.lock" || return 1
+    flock -n "$lock_fd" || return 1
+    current=$(readlink -- "$root/current") || return 1
+    if [[ -r "$root/transition" ]]; then
+        { IFS= read -r previous; IFS= read -r target; } < "$root/transition" || return 1
+    fi
+    local -a releases=()
+    local path release kept=0
+    while IFS= read -r -d '' path; do
+        release=${path##*/}
+        valid_release "$release" || continue
+        [[ -f "$path/.complete" && ! -L "$path" ]] || continue
+        releases+=("$release")
+    done < <(find "$root/releases" -mindepth 1 -maxdepth 1 -type d -print0 | sort -zr)
+    # Lexical release order is explicit here; replace with a validated version ledger
+    # if IDs are not lexically chronological. Current and predecessor are protected.
+    for release in "${releases[@]}"; do
+        [[ "releases/$release" == "$current" || "releases/$release" == "$previous" ]] && continue
+        if ((kept < keep)); then kept=$((kept + 1)); continue; fi
+        rm -rf -- "$root/releases/$release" || return 1
     done
-}
+)
 ```
 
 ---

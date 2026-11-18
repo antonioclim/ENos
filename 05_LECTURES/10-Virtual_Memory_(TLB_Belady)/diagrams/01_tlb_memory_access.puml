@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml tlb_memory_access
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title TLB (Translation Lookaside Buffer)
 
 skinparam activity {
@@ -14,21 +14,26 @@ start
 
 :Extract **Page Number**;
 
-if (Search in\n**TLB**?) then (HIT ~98%)
-    #C8E6C9:Frame# found directly!;
-    :Memory access: **1×**;
-else (MISS ~2%)
-    #FFCDD2:Consult **Page Table**
-    (can be 2-4 levels);
-    :Memory accesses: **2-4×**;
+if (Search in\n**TLB**?) then (hit)
+    :Frame# found directly!;
+    :No page-table read in this simplified hit path;
+else (miss)
+    :Consult **Page Table**
+    (one-level table in the numeric example);
+    :Read page-table entry (m in the example);
     
-    if (Page valid?) then (Yes)
+    if (PTE permits this access?) then (Yes)
         :Update TLB;
     else (No - Page Fault)
-        #FFE0B2:Kernel interrupt
-        Load page from disk;
-        :Update Page Table;
-        :Update TLB;
+        :Page-fault exception
+        Demand-zero / CoW / disk-backed / protection case;
+        if (Kernel can resolve the fault?) then (yes)
+            :Resolve, update page table and retry access;
+            :Refresh translation in the TLB;
+        else (no)
+            :Report unrecoverable access fault;
+            stop
+        endif
     endif
 endif
 
@@ -40,7 +45,8 @@ Frame# + Offset;
 stop
 
 legend right
-**EAT Calculation (Effective Access Time)**
+**One-level, no-fault EAT model**
+Hit path assumes cached permissions allow the access.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 α = TLB hit rate (e.g. 98%)
 ε = TLB access (e.g. 1 ns)
@@ -52,8 +58,11 @@ Example:
 0.98×(1+100) + 0.02×(1+200)
 = 98.98 + 4.02 = **103 ns**
 
-Without TLB: 200 ns
-With TLB: 103 ns → **49% faster!**
+Without TLB: 200 ns (one table read + data)
+With TLB: 103 ns → **48.5% latency reduction**
+Speed ratio: 200/103 ≈ 1.94
+L-level uncached walk: EAT = ε + m + (1-α)Lm
+Real walk caches/parallelism and faults require a richer model.
 endlegend
 
 @enduml

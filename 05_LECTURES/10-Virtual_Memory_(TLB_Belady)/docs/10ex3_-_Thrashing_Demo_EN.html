@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thrashing Demonstration | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -44,7 +44,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -56,22 +133,22 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Thrashing Demonstration</h1>
-                    <p class="text-xs text-stone-500">Colaps prin Paginare Excesiva</p>
+                    <p class="text-xs text-stone-500">Excessive Paging and Lost Useful Work</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                 <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
             </span>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Thrashing model and units</h2><p>These are illustrative stochastic curves, not measured operating-system results. A simulation step represents 0.5 seconds; fault rate is faults per simulated second. Presets rebuild every process and use the selected size as its working set: normal 4×40/256, near-thrashing 8×40/256 and thrashing 15×40/256. The model uses a 1.5 working-set/RAM threshold for the thrashing warning; real behaviour depends on workload and paging policy.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Thrashing Warning Banner -->
         <div id="thrashingBanner" class="hidden mb-6 warning-banner bg-red-100 border-2 border-red-400 rounded-xl p-4 flex items-center gap-4">
             <div class="text-4xl animate-pulse">⚠️</div>
             <div>
-                <h3 class="font-bold text-red-800 text-lg">THRASHING DETECTAT!</h3>
-                <p class="text-sm text-red-700">Sistemul petrece mai mult timp facand paginare than executand processes.</p>
+                <h3 class="font-bold text-red-800 text-lg">THRASHING THRESHOLD EXCEEDED</h3>
+                <p class="text-sm text-red-700">The system spends more time paging than doing useful process work.</p>
             </div>
             <button onclick="hideThrashingBanner()" class="ml-auto text-red-500 hover:text-red-700">
                 <i class="fas fa-times text-xl"></i>
@@ -81,11 +158,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Left Panel -->
             <div class="lg:col-span-8 space-y-6">
-                <!-- CPU Utilization vs Multiprogramming Chart -->
+                <!-- CPU Utilisation vs Multiprogramming Chart -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-chart-area text-blue-500"></i>
-                        CPU Utilization vs Grad de Multiprogramare
+                        CPU Utilisation vs Multiprogramming Level
                     </h2>
                     <div class="h-72">
                         <canvas id="mainChart"></canvas>
@@ -101,14 +178,14 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <div class="w-4 h-0.5 bg-amber-500 border-t-2 border-dashed"></div>
-                            <span>Punct Optim</span>
+                            <span>Model Peak</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live System State -->
                 <div class="grid grid-cols-2 gap-4">
-                    <!-- CPU Utilization Gauge -->
+                    <!-- CPU Utilisation Gauge -->
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-microchip text-blue-500"></i>
@@ -130,12 +207,12 @@
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-memory text-green-500"></i>
-                            Memorie Fizica
+                            Physical Memory
                         </h3>
                         <div class="space-y-3">
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
-                                    <span>Folosita</span>
+                                    <span>Used</span>
                                     <span id="memUsed">0 MB</span>
                                 </div>
                                 <div class="h-4 bg-stone-200 rounded-full overflow-hidden">
@@ -144,7 +221,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2 text-xs text-center">
                                 <div class="p-2 bg-stone-50 rounded">
-                                    <div class="text-stone-500">Frame-uri</div>
+                                    <div class="text-stone-500">Frames</div>
                                     <div id="frameCount" class="font-bold">0</div>
                                 </div>
                                 <div class="p-2 bg-stone-50 rounded">
@@ -161,7 +238,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
                             <i class="fas fa-tasks text-purple-500"></i>
-                            Procese Active (<span id="processCount">0</span>)
+                            Active Processes (<span id="processCount">0</span>)
                         </h3>
                         <div class="text-xs text-stone-500">
                             Page Faults/sec: <span id="faultRate" class="font-bold text-red-600">0</span>
@@ -179,7 +256,7 @@
                         <div id="totalFaults" class="text-2xl font-bold text-red-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">Timp in Paginare</div>
+                        <div class="text-xs text-stone-500 mb-1">Time Spent Paging</div>
                         <div id="pagingTime" class="text-2xl font-bold text-amber-600">0%</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
@@ -198,11 +275,11 @@
                 <!-- Simulation Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-sliders-h text-blue-500 mr-2"></i>Control Simulare
+                        <i class="fas fa-sliders-h text-blue-500 mr-2"></i>Simulation Controls
                     </h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Procese in Sistem</label>
+                            <label class="text-xs text-stone-500 block mb-1">Processes in the System</label>
                             <input type="range" id="processSlider" min="1" max="20" value="5" class="w-full" oninput="updateProcessCount()">
                             <div class="flex justify-between text-xs text-stone-400">
                                 <span>1</span>
@@ -211,12 +288,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Memorie Totala (MB)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Total Memory (MB)</label>
                             <input type="number" id="totalMemory" value="256" min="64" max="1024" step="64" 
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Dimensiune Medie Proces (MB)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Mean Process Size (MB)</label>
                             <input type="number" id="processSize" value="40" min="10" max="100" 
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
@@ -230,13 +307,13 @@
                     </h3>
                     <div class="space-y-2">
                         <button onclick="startSimulation()" id="btnStart" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-play mr-1"></i> Start Simulare
+                            <i class="fas fa-play mr-1"></i> Start Simulation
                         </button>
                         <button onclick="stopSimulation()" id="btnStop" class="btn-action w-full p-3 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium" disabled>
                             <i class="fas fa-stop mr-1"></i> Stop
                         </button>
                         <button onclick="addProcess()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
-                            <i class="fas fa-plus mr-1"></i> Add Process
+                            <i class="fas fa-plus mr-1"></i> Add Processs
                         </button>
                         <button onclick="removeProcess()" class="btn-action w-full p-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded text-sm">
                             <i class="fas fa-minus mr-1"></i> Remove Process
@@ -247,11 +324,11 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('normal')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>Functionare Normala
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>Normal Operation
                         </button>
                         <button onclick="loadScenario('nearThrashing')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-exclamation-circle text-amber-500 mr-2"></i>Near Thrashing
@@ -268,15 +345,15 @@
                 <!-- Info Panel -->
                 <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-sm border border-red-200 p-4">
                     <h3 class="text-sm font-semibold text-red-800 mb-3">
-                        <i class="fas fa-info-circle text-red-500 mr-2"></i>Ce este Thrashing?
+                        <i class="fas fa-info-circle text-red-500 mr-2"></i>What is Thrashing?
                     </h3>
                     <div class="space-y-2 text-xs text-red-700">
-                        <p>Thrashing apare when sistemul petrece mai mult timp facand swap de pagini than executand processes utile.</p>
+                        <p>Thrashing occurs when excessive paging dominates useful process execution.</p>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>Cauze:</strong> Prea multe processes, memorie insuficienta, localitate slaba
+                            <strong>Causes:</strong> Too many active processes, insufficient memory or poor locality
                         </div>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>solutions:</strong> Reduce gradul de multiprogramare, add memorie, foloseste Working Set
+                            <strong>Responses:</strong> Reduce active multiprogramming, add memory or use working-set allocation
                         </div>
                     </div>
                 </div>
@@ -284,17 +361,17 @@
                 <!-- Prevention Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>Prevenire Thrashing
+                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>Reducing Thrashing
                     </h3>
                     <div class="space-y-2 text-xs text-stone-600">
                         <div class="p-2 bg-green-50 rounded-lg">
-                            <strong>Working Set Model:</strong> Aloca fiecarui proces paginile din WS
+                            <strong>Working Set Model:</strong> Allocate frames for each process’s current working set
                         </div>
                         <div class="p-2 bg-blue-50 rounded-lg">
-                            <strong>Page Fault Frequency:</strong> Monitorizeaza rata de fault per proces
+                            <strong>Page Fault Frequency:</strong> Monitor each process’s page-fault rate
                         </div>
                         <div class="p-2 bg-amber-50 rounded-lg">
-                            <strong>Load Control:</strong> Suspenda processes when sistemul este supraincarcat
+                            <strong>Load Control:</strong> Suspend selected processes when memory demand exceeds capacity
                         </div>
                     </div>
                 </div>
@@ -310,6 +387,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let processes = [];
         let totalMemory = 256;
@@ -345,7 +467,7 @@
                 data: {
                     labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
                     datasets: [{
-                        label: 'CPU Utilization',
+                        label: 'CPU Utilisation',
                         data: generateCPUCurve(),
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -389,7 +511,7 @@
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Grad de Multiprogramare' }
+                            title: { display: true, text: 'Multiprogramming Level' }
                         },
                         y: {
                             type: 'linear',
@@ -477,7 +599,7 @@
             document.getElementById('processCount').textContent = processes.length;
             
             if (processes.length === 0) {
-                container.innerHTML = '<div class="text-stone-400 text-sm text-center py-4">Niciun proces activ</div>';
+                container.innerHTML = '<div class="text-stone-400 text-sm text-center py-4">No active processes</div>';
                 return;
             }
             
@@ -552,7 +674,7 @@
             });
             
             stats.totalFaults += totalFaultsThisStep;
-            stats.faultRate = totalFaultsThisStep;
+            stats.faultRate = totalFaultsThisStep / 0.5; // faults per simulated second (500 ms tick)
             
             // Calculate CPU utilization (inverse relationship with page faults at high load)
             if (overcommit < 1) {
@@ -653,7 +775,7 @@
 
         // ==================== Scenarios ====================
         function loadScenario(type) {
-            stopSimulation();
+            enosTimers.cancel(); stopSimulation(); processes=[];
             stats = { totalFaults: 0, faultRate: 0, cpuUtilization: 0, pagingTime: 0, throughput: 0 };
             
             switch(type) {
@@ -665,7 +787,7 @@
                 case 'nearThrashing':
                     document.getElementById('processSlider').value = 8;
                     document.getElementById('totalMemory').value = 256;
-                    document.getElementById('processSize').value = 35;
+                    document.getElementById('processSize').value = 40;
                     break;
                 case 'thrashing':
                     document.getElementById('processSlider').value = 15;
@@ -683,8 +805,10 @@
                     return;
             }
             
+            processSize=Number(document.getElementById('processSize').value);
             updateProcessCount();
-            startSimulation();
+            processes.forEach(p=>{p.size=processSize;p.workingSet=processSize;});
+            simulationStep();startSimulation();
         }
 
         async function gradualIncrease() {
@@ -702,6 +826,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', init);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

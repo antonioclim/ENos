@@ -1,6 +1,8 @@
 # Parsons Problems - Seminar 03
 ## Operating Systems | Command Reordering and Construction
 
+Working mutations below use only a fresh owned exercise directory; `/var/log` and `/etc` searches are read-only illustrations. GNU findutils and Debian/Ubuntu cron are the stated targets. Redundant or alternative correct lines are not syntax errors.
+
 Purpose: Reordering exercises for syntax consolidation and command structure comprehension
 Estimated duration: 3-5 minutes per problem
 Method: Scrambled lines + 1-2 distractors (unnecessary or incorrect lines)
@@ -141,13 +143,13 @@ find . -type f \( -name "*.sh" -o -name "*.py" \) ! -path "./build/*"
 🧩 PARSONS PROBLEM #F03: Safe Deletion
 
 📝 REQUIREMENT:
-Find temporary files (*.tmp) older than 30 days
-in /tmp and delete them WITH CONFIRMATION for each.
+Find temporary files (*.tmp) at least 31 complete days old
+in an owned `temp/` fixture and delete them WITH CONFIRMATION for each.
 
 📦 SCRAMBLED LINES:
 ─────────────────────────────────────────────────────────────────
    -mtime +30
-   find /tmp
+   find ./temp
    -name "*.tmp"
    -type f
    -ok rm {} \;
@@ -162,14 +164,14 @@ in /tmp and delete them WITH CONFIRMATION for each.
 
 ✅ SOLUTION:
 ```bash
-find /tmp -type f -name "*.tmp" -mtime +30 -ok rm {} \;
+find ./temp -type f -name "*.tmp" -mtime +30 -ok rm {} \;
 ```
 
 📖 EXPLANATION:
-1. `find /tmp` - search in /tmp
+1. `find ./temp` - search in the owned fixture
 2. `-type f` - files only
 3. `-name "*.tmp"` - temporary files
-4. `-mtime +30` - older than 30 days
+4. `-mtime +30` - at least 31 complete days old
 5. `-ok rm {} \;` - delete with confirmation ("-ok" requests confirmation)
 
 ❌ DISTRACTORS:
@@ -229,7 +231,7 @@ find src/ -type f -name "*.c" -print0 | xargs -0 wc -l
 📝 REQUIREMENT:
 Find .conf files from /etc (first level only) and 
 display for each: permissions, size, path.
-Format: drwxr-xr-x 1234 /etc/file.conf
+Format: -rw-r--r-- 1234 /etc/file.conf
 
 📦 SCRAMBLED LINES:
 ─────────────────────────────────────────────────────────────────
@@ -305,7 +307,7 @@ echo "OK: $1 and $2"
 ```
 
 📖 EXPLANATION:
-1. `#!/bin/bash` - mandatory shebang
+1. `#!/bin/bash` - selects Bash for direct execution; `bash script.sh` already selects the interpreter
 2. `if [ $# -ne 2 ]; then` - $# = number of arguments
 3. `-ne` = not equal (numeric)
 4. `exit 1` - terminate with error code
@@ -367,7 +369,7 @@ done
 
 ❌ DISTRACTORS:
 - `shift $#` - would delete all arguments at once
-- `for arg in $@; do` - would work, but not the requested pattern with shift
+- `for arg in $@; do` - loses argument boundaries and does not implement the requested shift pattern
 
 ---
 
@@ -430,7 +432,7 @@ shift $((OPTIND - 1))
 
 ❌ DISTRACTORS:
 - `getopts "hvo" opt` - missing ":" after o (doesn't accept argument)
-- `shift $(OPTIND)` - would delete one too many
+- `shift $(OPTIND)` - attempts to execute a command named OPTIND; it does not perform arithmetic
 
 ---
 
@@ -474,7 +476,7 @@ verbose="${4:-false}"
 
 ❌ DISTRACTORS:
 - `${USER:=guest}` - := ASSIGNS (modifies variable), doesn't just return
-- `$3 || "/tmp/output.txt"` - invalid syntax in bash
+- `output=$3 || "/tmp/output.txt"` - syntactically valid, but assignment success prevents the fallback command; it does not supply a default
 
 ---
 
@@ -524,41 +526,30 @@ Octal calculation:
 
 ### PP-P02: Symbolic chmod for Security
 
-```
-═══════════════════════════════════════════════════════════════
-🧩 PARSONS PROBLEM #P02: Directory Security
+**Requirement:** In an owned `project/` tree containing regular files and directories,
+remove group/other write from both, remove **all** regular-file execute bits and keep
+the directories' existing search bits. Do not follow symlinks.
 
-📝 REQUIREMENT:
-Remove write permission for group and others from 
-all files in a directory (recursive), but keep 
-execute only for directories.
+**Scrambled whole lines** (use the two correct lines; either order is valid):
 
-📦 SCRAMBLED LINES:
-─────────────────────────────────────────────────────────────────
-   chmod -R go-w project/
-   find project/ -type f -exec chmod go-w {} +
-   find project/ -type d -exec chmod go+X {} +               ← ❌
-   chmod -R 644 project/                                     ← ❌
-─────────────────────────────────────────────────────────────────
-
-⏱️ Estimated time: 3 minutes
-
-═══════════════════════════════════════════════════════════════
+```text
+find project/ -type f -exec chmod go-w,a-x {} +
+find project/ -type d -exec chmod go-w {} +
+chmod -R 644 project/                                  # distractor
+chmod -R go-w project/                                 # incomplete alternative
 ```
 
-✅ SOLUTION:
+**Solution:**
+
 ```bash
-chmod -R go-w project/
+find project/ -type f -exec chmod go-w,a-x {} +
+find project/ -type d -exec chmod go-w {} +
 ```
 
-📖 EXPLANATION:
-1. `-R` - recursive
-2. `go-w` - group and others, minus write
-3. This keeps other permissions intact
-
-❌ DISTRACTORS:
-- `find project/ -type d -exec chmod go+X {} +` - adds execute, not required
-- `chmod -R 644 project/` - overwrites all permissions (problems with directories)
+`go-w` alone preserves executable regular files, so it does not satisfy the complete
+requirement. Recursive 644 removes directory search bits. Capital `X` would add
+execute to directories **and** files already executable by any class; it cannot
+implement this exact no-executable-files requirement.
 
 ---
 
@@ -572,7 +563,8 @@ chmod -R go-w project/
 Configure the "shared" directory such that:
 1. Anyone from the group can create files
 2. New files inherit the directory's group
-3. Only the owner can delete their own files
+3. Sticky deletion restriction: file owner, directory owner or privileged process
+Precondition: shared/ already belongs to the intended existing group and has mode 0770.
 
 📦 SCRAMBLED LINES:
 ─────────────────────────────────────────────────────────────────
@@ -601,7 +593,7 @@ chmod 3770 shared/
 
 📖 EXPLANATION:
 1. `chmod g+s shared/` - SGID: new files inherit group
-2. `chmod +t shared/` - Sticky bit: only owner deletes
+2. `chmod +t shared/` - Sticky bit: file owner, directory owner or privileged process may remove entries
 3. `chmod 3770` - 3 = SGID(2) + Sticky(1), 770 = rwxrwx---
 
 ❌ DISTRACTORS:
@@ -642,13 +634,14 @@ umask 0077
 ```
 
 📖 EXPLANATION:
-umask REMOVES permissions from default (666 for files, 777 for directories):
-- Files: 666 - 077 = 600 (rw-------)
-- Directories: 777 - 077 = 700 (rwx------)
+Without an inherited default ACL, final mode = requested mode & ~umask:
+- Files: `0666 & ~0077 = 0600` (rw-------)
+- Directories: `0777 & ~0077 = 0700` (rwx------)
+- The mask removes bits; arithmetic subtraction is not the rule.
 
 ❌ DISTRACTORS:
-- `umask 177` - would result in 500 for directories (r-x------)
-- `umask 600` - would result in 066/077, not what we want
+- `umask 177` - would result in 0600 for directories (rw-------), with no owner search bit
+- `umask 600` - would result in 0066/0177, not what we want
 
 ---
 
@@ -694,45 +687,29 @@ Format: `min hour day month dow command`
 
 ---
 
-### PP-C02: Cron with Interval
+### PP-C02: Cron with an Inclusive Endpoint
 
-```
-═══════════════════════════════════════════════════════════════
-🧩 PARSONS PROBLEM #C02: Repeated Monitoring
+**Requirement:** On Monday–Friday, monitor every 15 minutes from 09:00 through
+17:00 inclusive (no 17:15, 17:30 or 17:45 run).
 
-📝 REQUIREMENT:
-Create a cron job that runs every 15 minutes, 
-only on working days (Monday-Friday), between 9:00-17:00.
+**Scrambled complete lines** (choose both correct lines):
 
-📦 SCRAMBLED LINES:
-─────────────────────────────────────────────────────────────────
-   */15 9-17 * * 1-5 /usr/local/bin/monitor.sh
-   0,15,30,45 9-17 * * 1-5 /usr/local/bin/monitor.sh         ← ✅
-   15 9-17 * * 1-5 /usr/local/bin/monitor.sh                 ← ❌
-   */15 9-17 * * Mon-Fri /usr/local/bin/monitor.sh           ← ❌
-─────────────────────────────────────────────────────────────────
-
-⏱️ Estimated time: 4 minutes
-
-═══════════════════════════════════════════════════════════════
-```
-
-✅ SOLUTIONS (equivalent):
 ```cron
-*/15 9-17 * * 1-5 /usr/local/bin/monitor.sh
-# OR
-0,15,30,45 9-17 * * 1-5 /usr/local/bin/monitor.sh
+0 17 * * 1-5 /usr/local/bin/monitor.sh
+*/15 9-16 * * 1-5 /usr/local/bin/monitor.sh
+# Distractor: */15 9-17 * * 1-5 /usr/local/bin/monitor.sh
+# Distractor: 15 9-17 * * 1-5 /usr/local/bin/monitor.sh
 ```
 
-📖 EXPLANATION:
-- `*/15` - every 15 minutes (0, 15, 30, 45)
-- `9-17` - between hours 9 and 17 (inclusive)
-- `* *` - any day of month, any month
-- `1-5` - days 1-5 (Monday-Friday)
+**Solution** (the two lines may be reordered):
 
-❌ DISTRACTORS:
-- `15 9-17 * * 1-5` - would run only at minute 15 (not every 15 min)
-- `Mon-Fri` - not standard numeric format (some crons accept it, others don't)
+```cron
+*/15 9-16 * * 1-5 /usr/local/bin/monitor.sh
+0 17 * * 1-5 /usr/local/bin/monitor.sh
+```
+
+`0,15,30,45` is equivalent to `*/15`; Debian/Ubuntu cron also accepts `Mon-Fri`.
+The 9–17 hour range with `*/15` runs through 17:45 and violates this endpoint.
 
 ---
 
@@ -776,7 +753,7 @@ Create a cron job that:
 
 ❌ DISTRACTORS:
 - `>` - overwrites file (not append)
-- `sun` - not standard numeric format
+- `sun` is valid on the selected Debian/Ubuntu cron; it is not the defect in that line
 - `&>>` - works in modern bash, but cron uses /bin/sh
 
 ---
@@ -795,9 +772,9 @@ sets PATH explicitly and prevents overlapping executions.
 ─────────────────────────────────────────────────────────────────
    PATH=/usr/local/bin:/usr/bin:/bin
    SHELL=/bin/bash
-   0 * * * * flock -n /tmp/job.lock /home/user/hourly.sh
+   0 * * * * flock -n /home/user/.local/state/course/job.lock /home/user/hourly.sh
    0 * * * * /home/user/hourly.sh                            ← ❌
-   * * * * * flock -n /tmp/job.lock /home/user/hourly.sh     ← ❌
+   * * * * * flock -n /home/user/.local/state/course/job.lock /home/user/hourly.sh     ← ❌
 ─────────────────────────────────────────────────────────────────
 
 ⏱️ Estimated time: 5 minutes
@@ -809,14 +786,14 @@ sets PATH explicitly and prevents overlapping executions.
 ```cron
 PATH=/usr/local/bin:/usr/bin:/bin
 SHELL=/bin/bash
-0 * * * * flock -n /tmp/job.lock /home/user/hourly.sh
+0 * * * * flock -n /home/user/.local/state/course/job.lock /home/user/hourly.sh
 ```
 
 📖 EXPLANATION:
 1. `PATH=...` - explicitly sets paths (cron has minimal PATH)
 2. `SHELL=/bin/bash` - forces bash instead of sh
 3. `0 * * * *` - at minute 0 of every hour
-4. `flock -n` - non-blocking lock (if lock exists, doesn't run)
+4. `flock -n` - fails when another process **holds** the lock, not merely when the file exists. Pre-create the private state directory; use a local filesystem with supported locking and do not unlink a live lock file.
 
 ❌ DISTRACTORS:
 - Without `flock` - risk of overlapping executions
@@ -873,80 +850,68 @@ find /var -type f -size +100M -printf '%s %p\n' 2>/dev/null | sort -rn | head -1
 
 ---
 
-### PP-I02: Complete Administration Script
+### PP-I02: Owned Workspace Cleanup
 
-```
-═══════════════════════════════════════════════════════════════
-🧩 PARSONS PROBLEM #I02: Admin Script
+**Requirement:** Reorder the following four blocks without editing them. Validate all
+arguments before any change, preview by default (`-d`), require `-a` to apply and
+log only successfully deleted regular `.tmp` files at least **eight complete days**
+old. The log and preview use NUL delimiters, preserving arbitrary filenames.
+No root privileges or system cleanup paths are needed.
 
-📝 REQUIREMENT:
-Write the structure of a script that:
-1. Verifies if running as root
-2. Accepts -d option for dry-run
-3. Cleans .tmp files older than 7 days
-4. Logs actions
+Prepare a fresh fixture once:
 
-📦 SCRAMBLED LINES:
-─────────────────────────────────────────────────────────────────
-   #!/bin/bash
-   
-   # Root verification
-   if [ "$(id -u)" -ne 0 ]; then
-       echo "Requires root"; exit 1
-   fi
-   
-   # Option parsing
-   dry_run=false
-   while getopts "d" opt; do
-       case $opt in
-           d) dry_run=true ;;
-       esac
-   done
-   
-   # Action
-   if [ "$dry_run" = true ]; then
-       find /tmp -name "*.tmp" -mtime +7 -print
-   else
-       find /tmp -name "*.tmp" -mtime +7 -delete
-   fi | tee -a /var/log/cleanup.log
-   
-   if [ "$USER" != "root" ]; then                            ← ❌
-   find /tmp -name "*.tmp" -mtime -7 -delete                 ← ❌
-─────────────────────────────────────────────────────────────────
-
-⏱️ Estimated time: 6 minutes
-
-═══════════════════════════════════════════════════════════════
+```bash
+CLEANUP_WORK=$(mktemp -d "${TMPDIR:-/tmp}/enos-cleanup.XXXXXX")
+mkdir -- "$CLEANUP_WORK/data"
+: > "$CLEANUP_WORK/.enos-cleanup-fixture"
+touch -d '9 days ago' "$CLEANUP_WORK/data/old.tmp"
 ```
 
-✅ SOLUTION:
+The workspace marker declares this disposable fixture; do not put unrelated files
+in its `data/` directory. The example assumes no concurrent replacement of paths.
+
+**Scrambled blocks:**
+
+```text
+D: the if "$apply" ... fi action block below
+B: the while getopts ... done and shift block below
+A: #!/bin/bash, set -euo pipefail, apply=false
+C: both workspace-validation lines below (including argument count)
+```
+
+**Solution: A → B → C → D** (copyable complete model):
+
 ```bash
 #!/bin/bash
-
-# Root verification
-if [ "$(id -u)" -ne 0 ]; then
-    echo "Requires root"; exit 1
-fi
-
-# Option parsing
-dry_run=false
-while getopts "d" opt; do
+set -euo pipefail
+apply=false
+while getopts ':adh' opt; do
     case $opt in
-        d) dry_run=true ;;
+        a) apply=true ;; d) apply=false ;;
+        h) echo "Usage: $0 [-a apply|-d preview] OWNED_WORKSPACE"; exit 0 ;;
+        *) echo "Invalid option" >&2; exit 1 ;;
     esac
 done
-
-# Action
-if [ "$dry_run" = true ]; then
-    find /tmp -name "*.tmp" -mtime +7 -print
+shift "$((OPTIND - 1))"
+[[ $# == 1 ]] || { echo "One workspace is required" >&2; exit 1; }
+workspace=$(realpath -e -- "$1")
+[[ $workspace != / && -d $workspace/data && ! -L $workspace/data && -O $workspace && -f $workspace/.enos-cleanup-fixture && ! -L $workspace/.enos-cleanup-fixture ]] || exit 1
+if "$apply"; then
+    [[ ! -L $workspace/deleted.paths0 ]] || exit 1
+    find "$workspace/data" -type f -name '*.tmp' -mtime +7 -delete -print0 |
+        tee -a "$workspace/deleted.paths0"
 else
-    find /tmp -name "*.tmp" -mtime +7 -delete
-fi | tee -a /var/log/cleanup.log
+    find "$workspace/data" -type f -name '*.tmp' -mtime +7 -print0
+fi
 ```
 
-❌ DISTRACTORS:
-- `if [ "$USER" != "root" ]` - $USER variable can be modified
-- `-mtime -7` - would delete files NEWER than 7 days (opposite!)
+**Incorrect alternatives:** ignoring `getopts` errors can reach the action with bad
+arguments; `-mtime -7` selects recent files; `-delete` without `-print0` cannot provide
+a deletion list. GNU `find` evaluates `-print0` only after a successful `-delete`.
+The pipeline uses `pipefail`, so a traversal, deletion or log-write error is nonzero.
+A partial run may have successful deletions; its NUL log records those, not a claim
+of transactional rollback. Preview emits no log file. Convert a preview for display
+with a NUL-aware reader; do not split arbitrary filenames on whitespace.
 
 ---
 
@@ -982,7 +947,7 @@ fi | tee -a /var/log/cleanup.log
 |---------|----------|
 | PP-F01 | `find /var/log -maxdepth 3 -type f -name "*.log" -size +100k -mtime -7` |
 | PP-F02 | `find . -type f \( -name "*.sh" -o -name "*.py" \) ! -path "./build/*"` |
-| PP-F03 | `find /tmp -type f -name "*.tmp" -mtime +30 -ok rm {} \;` |
+| PP-F03 | `find ./temp -type f -name "*.tmp" -mtime +30 -ok rm {} \;` |
 | PP-F04 | `find src/ -type f -name "*.c" -print0 \| xargs -0 wc -l` |
 | PP-F05 | `find /etc -maxdepth 1 -type f -name "*.conf" -printf '%M %s %p\n'` |
 | PP-S01 | if + $# -ne 2 + exit 1 |
@@ -990,11 +955,11 @@ fi | tee -a /var/log/cleanup.log
 | PP-S03 | getopts "hvo:" + case + OPTIND |
 | PP-S04 | ${VAR:-default} pattern |
 | PP-P01 | `chmod 750` |
-| PP-P02 | `chmod -R go-w` |
+| PP-P02 | Two type-specific find/chmod commands; regular files also lose a-x |
 | PP-P03 | `chmod 3770` or `g+s` + `+t` |
 | PP-P04 | `umask 077` |
 | PP-C01 | `0 3 * * *` |
-| PP-C02 | `*/15 9-17 * * 1-5` |
+| PP-C02 | `*/15 9-16 * * 1-5` plus `0 17 * * 1-5` |
 | PP-C03 | `0 2 * * 0 ... >> log 2>&1` |
 | PP-C04 | PATH + flock + `0 * * * *` |
 

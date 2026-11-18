@@ -1,164 +1,47 @@
-# 📁 Python Tools — SEM05
+# Python Tools — SEM05
 
-> **Location:** `SEM05/scripts/python/`  
-> **Purpose:** Automated grading, generation, and analysis tools  
-> **Python version:** ≥ 3.10 required
+Python 3.10 or later is required. Commands below run from `SEM05/scripts/python/` and use the actual shipped interfaces. Each tool supports `--help`; options are tool-specific.
 
-## Contents
-
-| Tool | Purpose | CLI |
-|------|---------|-----|
-| `S05_01_autograder.py` | Automated homework evaluation | Yes |
-| `S05_02_quiz_generator.py` | Generate randomized quizzes | Yes |
-| `S05_03_report_generator.py` | Create reports | Yes |
-
-## Installation
+## Autograder diagnostics
 
 ```bash
-# Install dependencies
-cd SEM05/
-pip install -r requirements.txt
-
-# Or install individually
-pip install pyyaml pytest
+python3 S05_01_autograder.py --help
+python3 S05_01_autograder.py ./submission.sh --verbose
+python3 S05_01_autograder.py --batch ./submissions --json > results.json
+python3 S05_01_autograder.py ./submission.sh --test-config ./test_cases.json --json
 ```
 
----
+The positional input is a Bash script. `--batch DIRECTORY` evaluates the selected scripts in a directory. `--json` writes parseable JSON to stdout; diagnostics use stderr. The optional test configuration is JSON, not a marking rubric or YAML configuration. It can define execution cases, so use trusted submissions/fixtures in an isolated working area. A subprocess timeout is not a security sandbox. The tool has no `--rubric`, `--output`, `--timeout` or CSV batch flag.
 
-## S05_01_autograder.py
+Source-pattern checks and locally executed cases provide diagnostic evidence. They do not enact the conflicting assessment proposals or prove authorship. Missing tooling is not a successful check.
 
-**Purpose:** Automated homework evaluation with detailed feedback
-
-### Usage
+## Quiz generation
 
 ```bash
-python3 S05_01_autograder.py <submission> [options]
-
-Arguments:
-  submission       Path to submission directory or file
-
-Options:
-  --rubric PATH    Custom rubric file
-  --output FILE    Output file for grades (CSV)
-  --verbose        Detailed scoring breakdown
-  --batch          Process entire directory of submissions
-  --timeout SEC    Per-test timeout (default: 30)
+python3 S05_02_quiz_generator.py --list
+python3 S05_02_quiz_generator.py --topic arrays --count 5 --no-shuffle
+python3 S05_02_quiz_generator.py --difficulty medium --count 5 --export quiz.json
+python3 S05_02_quiz_generator.py --count 5 --html quiz.html
 ```
 
-### Examples
+`--count` means questions, not separate quizzes. Topics are `functions`, `arrays`, `robustness`, `trap` and `integration`; difficulty is `easy`, `medium` or `hard`. The exported JSON is a custom repository format. No Moodle XML, Canvas QTI, PDF, YAML export or seeded randomisation is promised by this interface. The generated HTML is a local practice artefact, not a submitted grade.
+
+## Reports from autograder JSON
 
 ```bash
-# Grade single submission
-python3 S05_01_autograder.py ~/submissions/student123/
-
-# Grade all submissions with report
-python3 S05_01_autograder.py ~/submissions/ --batch --output grades.csv
-
-# Verbose grading
-python3 S05_01_autograder.py submission/ --verbose
+python3 S05_03_report_generator.py --grades results.json
+python3 S05_03_report_generator.py --grades results.json --format json --output report.json
+python3 S05_03_report_generator.py --summary
 ```
 
-### Grading Criteria
+`--grades` accepts autograder result JSON; malformed or unavailable input fails explicitly. Output formats are `text` and `json`. `--summary` lists available exercises. PDF/HTML reports, CSV input and per-student report directories are not implemented here.
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Correctness | 60% | Passes test cases |
-| Style | 20% | shellcheck compliance |
-| Documentation | 20% | Comments, README |
+## Shared code and tests
 
----
-
-## S05_02_quiz_generator.py
-
-**Purpose:** Generate randomized quizzes from question bank
-
-### Usage
+The shared [repository library](../../../lib/) is separate from these script-local implementations. Do not add an unrelated relative PYTHONPATH merely to run these entry points. Run maintained tests from the repository root:
 
 ```bash
-python3 S05_02_quiz_generator.py [options]
-
-Options:
-  --count N        Number of unique quizzes to generate
-  --questions N    Questions per quiz (default: 10)
-  --seed N         Random seed for reproducibility
-  --output DIR     Output directory for generated quizzes
-  --format FMT     Output format: yaml, json, pdf, moodle
+python3 -m pytest SEM05/tests
 ```
 
-### Examples
-
-```bash
-# Generate 5 unique quizzes
-python3 S05_02_quiz_generator.py --count 5 --output quizzes/
-
-# Reproducible generation
-python3 S05_02_quiz_generator.py --seed 42 --count 3
-
-# Export for Moodle
-python3 S05_02_quiz_generator.py --format moodle --output moodle_quiz.xml
-```
-
----
-
-## S05_03_report_generator.py
-
-**Purpose:** Generate PDF/HTML reports from grading data
-
-### Usage
-
-```bash
-python3 S05_03_report_generator.py <grades_file> [options]
-
-Arguments:
-  grades_file      CSV file with grades data
-
-Options:
-  --format FMT     Output format: pdf, html, md (default: pdf)
-  --individual     Generate per-student reports
-  --summary        Include class statistics
-  --output DIR     Output directory
-```
-
-### Examples
-
-```bash
-# Generate summary report
-python3 S05_03_report_generator.py grades.csv --summary
-
-# Individual student reports
-python3 S05_03_report_generator.py grades.csv --individual --output reports/
-```
-
-
-
----
-
-## Common Options
-
-All Python tools support:
-
-| Option | Description |
-|--------|-------------|
-| `--help` | Show detailed help |
-| `--version` | Show tool version |
-| `--quiet` | Suppress non-essential output |
-| `--debug` | Enable debug logging |
-
-## PYTHONPATH Setup
-
-For importing shared `lib/` modules:
-
-```bash
-# Add to your .bashrc or run before scripts
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/../.."
-
-# Or run with path
-PYTHONPATH="../.." python3 S05_01_autograder.py submission/
-```
-
----
-
-*See also: [`../../lib/`](../../lib/) for shared utilities*  
-*See also: [`../../tests/`](../../tests/) for test suite*
-
-*Last updated: January 2026*
+Dependencies belong to the project's declared Python environment. Test execution and linting results must be recorded separately from installation. See [tests](../../tests/) and [the teaching contract](../../docs/TEACHING_CONTRACT.md).

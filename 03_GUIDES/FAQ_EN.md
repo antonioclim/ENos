@@ -1,5 +1,7 @@
 # ❓ FAQ - Frequently Asked Questions
 
+> **v6 candidate correction:** Follow the [current recording contract](RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+
 ## Homework Recording System - Operating Systems 2023-2027
 
 **Version:** 1.1.1 | **Last updated:** January 2025
@@ -13,7 +15,7 @@
 3. [Running and Usage](#running-and-usage)
 4. [Recording](#recording)
 5. [Upload and Network](#upload-and-network)
-6. [Cryptographic Signature](#cryptographic-signature)
+6. [Legacy Metadata Token](#legacy-metadata-token)
 7. [Specific Errors](#specific-errors)
 8. [Verification](#verification)
 
@@ -23,8 +25,9 @@
 
 ### Q: Why must I use my own terminal and not the sop.ase.ro server?
 
-**A:** The asciinema recording captures ALL terminal activity. On the server, your activity would mix with other students' and the resulting file would be unusable. Additionally, the cryptographic signature is based on the LOCAL user.
+**A:** Asciicast v2 records its associated pseudoterminal stream and timing. Ordinary text recording does not capture unrelated sessions or ambient audio. Use your own configured lab environment so that commands and files belong to the intended exercise; the metadata labels do not authenticate the user.
 
+> **Historical anecdote — capture context and provenance unconfirmed. Standard asciicast does not record audio or unrelated sessions.**
 > *A former student once ran the script on the shared server. The resulting 47-minute recording included three other students' work, a coffee break conversation and someone's Spotify playlist playing in the background. Don't be that student.*
 
 ---
@@ -45,12 +48,12 @@
 | Aspect | Python TUI | Bash |
 |--------|------------|------|
 | Interface | Graphical (Matrix theme) | Plain text |
-| Dependencies | Python 3.8+, rich, questionary | Bash only |
+| Dependencies | Python 3.8+, rich, questionary | Bash, Python 3 and asciinema; online mode also needs OpenSSL/SSH tools |
 | Animations | Yes (rain, spinners) | No |
 | Menus | Interactive (arrow keys) | Text input |
 | Recommendation | For most users | Backup/minimal systems |
 
-The Bash version is there as a fallback if you have trouble with Python dependencies. Both produce identical output files.
+The Bash version is there as a fallback if you have trouble with Python dependencies. The two interfaces share the naming/metadata contract, but the two folders retain incompatible historical token formats. See the current contract.
 
 ---
 
@@ -66,7 +69,7 @@ Most students complete the entire process in under 15 minutes once they know wha
 
 ### Q: Should I do a practice run first?
 
-**A:** Absolutely. Spend 2 minutes doing a test run with fictitious data (group `0000`, surname `TEST`). This eliminates surprises when it matters. See the "Practice Run" section in the Student Guide.
+**A:** Absolutely. Spend 2 minutes doing a test run with fictitious data (group `0000`, surname `TEST`). Run with `--offline` so that practice cannot attempt an upload. See the "Practice Run" section in the Student Guide.
 
 ---
 
@@ -99,7 +102,9 @@ which asciinema openssl sshpass
 **A:** Yes:
 ```bash
 # Python
-pip3 install --user rich questionary
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
 
 # System
 sudo apt install asciinema openssl sshpass
@@ -112,19 +117,12 @@ sudo apt install asciinema openssl sshpass
 **A:** Ubuntu 24.04 uses PEP 668 (externally-managed-environment). Solutions:
 
 ```bash
-# Option 1: --break-system-packages (recommended for this script)
-pip3 install --user --break-system-packages rich questionary
-
-# Option 2: pipx (for CLI applications)
-pipx install rich questionary
-
-# Option 3: venv (for projects)
-python3 -m venv ~/.venvs/homework
-source ~/.venvs/homework/bin/activate
-pip install rich questionary
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
 ```
 
-The script handles this automatically, but good to know if you're doing manual installation.
+Use the active virtual environment for both installation and execution. No automatic system-package override is attempted.
 
 ---
 
@@ -145,7 +143,7 @@ brew install hudochenkov/sshpass/sshpass
 
 **A:** The terminal does not support Katakana characters. Solutions:
 1. Use a font with complete Unicode support (Cascadia Code, Fira Code)
-2. Or use the Bash version: `./record_homework_EN.sh`
+2. Or use the Bash version: `bash record_homework_EN.sh --offline`
 
 It's purely cosmetic — the functionality is identical.
 
@@ -230,7 +228,7 @@ Keep it focused on the homework tasks.
 
 ### Q: Why does it use port 1001 and not 22?
 
-**A:** The sop.ase.ro server uses port 1001 for SCP/SSH for security reasons. Some corporate/university networks block port 22.
+**A:** The historical copies disagree on 1001/1002; no current service configuration or reason for the port choice is verified. Obtain the confirmed port from the instructor.
 
 ---
 
@@ -238,9 +236,9 @@ Keep it focused on the homework tasks.
 
 **A:** Check in order:
 1. **Internet:** `ping google.com`
-2. **Port open:** `nc -zv sop.ase.ro 1001`
-3. **VPN:** Disconnect temporarily
-4. **Firewall:** Try from mobile hotspot
+2. **Port open:** `nc -zv sop.ase.ro "$ENOS_CONFIRMED_PORT"`
+3. **VPN:** Check the approved network route with your administrator
+4. **Firewall:** Request a rule for the confirmed host/port where required
 
 If nothing works, send manually later with the displayed command.
 
@@ -250,7 +248,7 @@ If nothing works, send manually later with the displayed command.
 
 **A:** Yes:
 ```bash
-scp -P 1001 FILENAME.cast stud-id@sop.ase.ro:/home/HOMEWORKS/SPECIALISATION/
+scp -P "$ENOS_CONFIRMED_PORT" FILENAME.cast stud-id@sop.ase.ro:/home/HOMEWORKS/SPECIALISATION/
 ```
 Replace FILENAME and SPECIALISATION with your values.
 
@@ -262,11 +260,11 @@ Replace FILENAME and SPECIALISATION with your values.
 
 ---
 
-## Cryptographic Signature
+## Legacy Metadata Token
 
 ### Q: What data is included in the signature?
 
-**A:** The signed string contains:
+**A:** The legacy encrypted metadata contains:
 - Surname + First name
 - Group
 - File size (bytes)
@@ -278,7 +276,7 @@ Replace FILENAME and SPECIALISATION with your values.
 
 ### Q: Can I verify the signature?
 
-**A:** Not directly - only the instructor has the private key. You can verify that it exists:
+**A:** These scripts encrypt metadata with a public key; decryption with the matching private key is not digital-signature verification. You can inspect the footer syntax, which establishes no authenticity:
 ```bash
 tail -3 FILENAME.cast
 # You should see "## " followed by Base64
@@ -293,13 +291,13 @@ Or use the verification script:
 
 ### Q: What happens if I modify the .cast file?
 
-**A:** The signature becomes invalid and the homework will be rejected. The file size is part of the signature, so any modification is detected.
+**A:** The existing public-key-encrypted metadata token is not a digital signature and does not bind the recording content. It cannot establish authorship, non-repudiation or detect every edit. Preserve the original recording; the institutional verification and resubmission contract remains pending author decision.
 
 ---
 
 ### Q: Can I use another student's signature?
 
-**A:** No. The signature includes your system username and file path. Any inconsistency is detected. Don't even think about it.
+**A:** The existing public-key-encrypted metadata token is not a digital signature and does not bind the recording content. It cannot establish authorship, non-repudiation or detect every edit. Preserve the original recording; the institutional verification and resubmission contract remains pending author decision.
 
 ---
 
@@ -314,17 +312,17 @@ Or use the verification script:
 
 This checks:
 - File exists and has correct extension
-- File size is reasonable
-- Cryptographic signature is present
-- Filename format is correct
+- Supported header/event structure parses
+- Footer syntax is reported separately; authentication remains UNVERIFIED
+- Self-declared header identity is reported
 
 ---
 
 ### Q: The verification script says "signature missing" but I typed STOP_homework!
 
-**A:** The signature is added AFTER the recording stops, not during. Possible causes:
+**A:** The legacy token is attempted only after an online recording. Offline mode deliberately omits it. A missing token does not prove that the events are lost. For an online attempt, possible causes include:
 1. You pressed Ctrl+C instead of STOP_homework or Ctrl+D
-2. The script crashed before generating the signature
+2. The script failed before adding the legacy metadata token
 3. You're looking at a different file
 
 Re-record if necessary.
@@ -337,9 +335,10 @@ Re-record if necessary.
 
 **A:**
 ```bash
-pip3 install --user rich
-# Or
-python3 -m pip install rich
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
+# Use the same activated interpreter for both installation and execution.
 ```
 
 ---
@@ -350,7 +349,7 @@ python3 -m pip install rich
 ```bash
 chmod +x record_homework_tui_EN.py
 # Or run with:
-python3 record_homework_tui_EN.py
+python record_homework_tui_EN.py --offline
 ```
 
 ---

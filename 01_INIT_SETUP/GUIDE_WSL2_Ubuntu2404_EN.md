@@ -1,4 +1,10 @@
 # COMPLETE INSTALLATION GUIDE FOR BEGINNERS
+
+> **Phase 5 source correction:** Keep the academic identifier (for example `AP_1001_A`) in your student records. The machine hostname is a separate DNS-compatible label: map that example to `ap-1001-a` by lowercasing and replacing underscores with hyphens. This is a technical mapping, not an authentication or grading rule. Usernames must also satisfy the installer: start with a lower-case letter, use a suitable unique local username and keep the full student identity separately.
+
+Use a unique local password that you can retain securely. Never configure the shared historical example password `stud` on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.
+
+The architecture-dependent MSI commands are the legacy manual-install route. For supported current Windows versions, follow [Microsoft WSL installation](https://learn.microsoft.com/en-us/windows/wsl/install); [manual installation](https://learn.microsoft.com/en-us/windows/wsl/install-manual) distinguishes x64 and ARM64. Preserve existing `/etc/wsl.conf` sections when applying the shown settings.
 ## Ubuntu 24.04 LTS on WSL2 (Windows Subsystem for Linux)
 
 *(WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*
@@ -7,6 +13,7 @@
 ### Operating Systems - Academic Year 2024-2025
 
 > **Lab observation:** In practice, most WSL2 problems come from two places: (1) virtualisation features disabled in BIOS/UEFI or in Windows, and (2) a "skipped" reboot after installation. Quickly check with `wsl --status` and `wsl --list --verbose` before reinventing the wheel.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 ---
 
@@ -57,7 +64,7 @@ At the end of this guide, you will be able to:
 
 - [ ] **LO1:** Check if your Windows system supports WSL2 (virtualisation active, compatible Windows version)
 - [ ] **LO2:** Enable and configure WSL2 from PowerShell as Administrator
-- [ ] **LO3:** Install and configure Ubuntu 24.04 LTS with correct user (surname) and hostname in format `INITIAL_GROUP_SERIES`
+- [ ] **LO3:** Install and configure Ubuntu 24.04 LTS with correct user (surname) and hostname in format `initials-group-series`
 - [ ] **LO4:** Start/stop the SSH service and connect remotely with PuTTY
 - [ ] **LO5:** Transfer files between Windows and Ubuntu using WinSCP or drag & drop
 - [ ] **LO6:** Diagnose and solve the 3 most common problems: disabled virtualisation, SSH not starting, forgotten password
@@ -129,6 +136,7 @@ ls -la
 ## What is WSL2?
 
 > **Personal recommendation:** WSL2 is the solution I recommend to students. I have tested VirtualBox, dual-boot, Docker containers — WSL2 offers the best balance between simplicity and functionality. Plus you do not have to restart the computer 5 times per seminar, which is a big plus.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 WSL2 (Windows Subsystem for Linux 2) is a Windows feature that allows you to run Linux directly in Windows, without installing a separate operating system.
 
@@ -164,6 +172,7 @@ If you have an older version, you need to update Windows before going further.
 - If it says "Disabled" — you need to enable virtualisation in BIOS (see Section 13)
 
 > **True story from 2023:** A student spent 3 hours debugging "WSL won't start" — turned out their gaming laptop had virtualisation disabled by the manufacturer. One BIOS setting, problem solved. Always check virtualisation first.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 ---
 
@@ -217,6 +226,7 @@ Wait for it to finish. Again you will see "The operation completed successfully.
 3. Wait for it to restart completely
 
 > **Lab observation:** About 20% of students forget the restart after enabling WSL2 features. The commands succeed, but nothing works until you reboot. I now make everyone restart before continuing — saves hours of confusion.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 ---
 
@@ -231,7 +241,10 @@ After restart, open PowerShell as Administrator again (see the instructions from
 **Command 1 — Download the update:**
 
 ```powershell
-Invoke-WebRequest -Uri https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi -OutFile wsl_update_x64.msi -UseBasicParsing
+$EnosArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
+if ($EnosArch -notin @('x64', 'arm64')) { throw 'Unsupported host architecture for this WSL2 package route' }
+$EnosPackage = "wsl_update_$EnosArch.msi"
+Invoke-WebRequest -Uri "https://wslstorestorage.blob.core.windows.net/wslblob/$EnosPackage" -OutFile $EnosPackage -UseBasicParsing
 ```
 
 Wait for it to download (may take 1-2 minutes depending on internet).
@@ -239,7 +252,7 @@ Wait for it to download (may take 1-2 minutes depending on internet).
 **Command 2 — Install the update:**
 
 ```powershell
-msiexec /i wsl_update_x64.msi /quiet
+msiexec /i $EnosPackage
 ```
 
 Wait a few seconds.
@@ -301,18 +314,18 @@ You will see:
 New password:
 ```
 
-**WHAT TO TYPE:** `stud`
+**WHAT TO TYPE:** a unique local password
 
 **⚠️ VERY IMPORTANT:** When you type the password, YOU WILL NOT SEE ANYTHING ON SCREEN — no stars, no dots, nothing! This is normal for Linux. Type the password and press Enter.
 
-Yes, the password is literally "stud". No, it is not the most secure password in the world. Yes, it is fine for a learning environment. Please do not use "stud" for your bank account.
+Use a unique local password that you can retain securely. Never configure the shared historical example password `stud` on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.
 
 You will see:
 ```
 Retype new password:
 ```
 
-Type `stud` again and press Enter.
+Type your chosen local password again and press Enter.
 
 ## Done!
 
@@ -344,7 +357,7 @@ sudo apt update && sudo apt -y upgrade
 
 What happens:
 - `sudo` = run the command with administrator rights
-- The system will ask for your password (`stud`)
+- The system will ask for your unique local password
 - Again, you will not see the password when you type it — type it and press Enter
 - `apt update` = checks what updates are available
 - `apt upgrade` = installs the updates
@@ -362,12 +375,12 @@ You will see a lot of text on screen — this is normal. Wait until the prompt r
 
 In the course, each student must have a unique "hostname" (computer name) that identifies you. The format is:
 
-**Format:** `INITIAL_GROUP_SERIES`
+**Format:** `initials-group-series`
 
 Examples:
-- Ana Popescu, group 1001, series A → `AP_1001_A`
-- Ion Marin Ionescu, group 2034, series B → `IMI_2034_B`
-- Maria Stan, group 1502, series C → `MS_1502_C`
+- Ana Popescu, group 1001, series A → `ap-1001-a`
+- Ion Marin Ionescu, group 2034, series B → `imi-2034-b`
+- Maria Stan, group 1502, series C → `ms-1502-c`
 
 ## Find your details
 
@@ -378,12 +391,12 @@ Before going further, note down:
 
 ## Create the configuration file
 
-The following command will create the configuration file. **REPLACE** `INITIAL_GROUP_SERIES` with your hostname (e.g.: `AP_1001_A`).
+The following command will create the configuration file. **REPLACE** `initials-group-series` with your hostname (e.g.: `ap-1001-a`).
 
 ```bash
 sudo tee /etc/wsl.conf << 'EOF'
 [network]
-hostname = INITIAL_GROUP_SERIES
+hostname = initials-group-series
 generateHosts = false
 
 [boot]
@@ -396,7 +409,7 @@ EOF
 ```bash
 sudo tee /etc/wsl.conf << 'EOF'
 [network]
-hostname = AP_1001_A
+hostname = ap-1001-a
 generateHosts = false
 
 [boot]
@@ -404,20 +417,20 @@ systemd = true
 EOF
 ```
 
-If it asks for password, type `stud` and press Enter.
+If it asks for password, type your chosen local password and press Enter.
 
 ## Add the hostname to the hosts file
 
-Again, **REPLACE** `INITIAL_GROUP_SERIES` with your hostname:
+Again, **REPLACE** `initials-group-series` with your hostname:
 
 ```bash
-echo "127.0.0.1    INITIAL_GROUP_SERIES" | sudo tee -a /etc/hosts
+echo "127.0.0.1    initials-group-series" | sudo tee -a /etc/hosts
 ```
 
 **Concrete example** for Ana Popescu, group 1001, series A:
 
 ```bash
-echo "127.0.0.1    AP_1001_A" | sudo tee -a /etc/hosts
+echo "127.0.0.1    ap-1001-a" | sudo tee -a /etc/hosts
 ```
 
 ## Apply the changes
@@ -442,7 +455,7 @@ In Ubuntu, run:
 hostname
 ```
 
-You should see your hostname (e.g.: `AP_1001_A`). If you see something else, repeat the steps above.
+You should see your hostname (e.g.: `ap-1001-a`). If you see something else, repeat the steps above.
 
 ---
 
@@ -601,7 +614,7 @@ In the main screen (Session):
 
 **Step 4:** At first connection, a security message about "host key" appears. Click `Accept` or `Yes`.
 
-**Step 5:** If it asks for password, type `stud` and press Enter
+**Step 5:** If it asks for password, type your chosen local password and press Enter
 
 Done! Now you have a PuTTY window connected to your Ubuntu.
 
@@ -633,7 +646,7 @@ WinSCP is a program that allows you to transfer files between Windows and Linux.
 - Host name: the IP address of Ubuntu (e.g.: `172.24.123.45`)
 - Port number: `22`
 - User name: your username (e.g.: `popescu`)
-- Password: `stud`
+- Password: your unique local password
 
 **Step 3:** Click on `Save`
 
@@ -832,7 +845,7 @@ hostname && whoami && lsb_release -d && hostname -I && echo "---" && ls ~/Books 
 ## What you should see
 
 If everything is OK, you should see:
-- Your hostname (e.g.: `AP_1001_A`)
+- Your hostname (e.g.: `ap-1001-a`)
 - Your username (e.g.: `popescu`)
 - Ubuntu 24.04
 - An IP address
@@ -906,7 +919,7 @@ Check:
 1. Is Ubuntu running? (the black window must be open)
 2. Is SSH started? Run in Ubuntu: `sudo service ssh status`
 3. Is the IP address correct? Run in Ubuntu: `hostname -I`
-4. Is Windows Firewall not blocking? Try temporarily disabling the firewall
+4. Is Windows Firewall not blocking? Inspect the firewall rule for the intended host/SSH port; do not disable the firewall
 
 ## Problem: Message "Error: 0x80370102"
 
@@ -945,10 +958,10 @@ These are the mistakes I see students make most often. Learn from their experien
 **Wrong formats:**
 - ❌ `ana popescu 1001 A` (spaces not allowed)
 - ❌ `AnaPopescu_1001_A` (full name, not initials)
-- ❌ `ap_1001_a` (lowercase — should be uppercase)
+- ❌ `ap_1001_a` (underscores are not valid in the static hostname)
 
 **Correct format:**
-- ✅ `AP_1001_A`
+- ✅ `ap-1001-a`
 
 ## Mistake 5: Closing the Ubuntu window thinking it stops WSL
 
@@ -1052,8 +1065,8 @@ Before the first seminar, check that you have:
 - [ ] WSL2 installed and updated
 - [ ] Ubuntu 24.04 LTS installed
 - [ ] Account created with your surname (e.g.: popescu)
-- [ ] Password set (stud)
-- [ ] Hostname configured (e.g.: AP_1001_A)
+- [ ] Unique local password set
+- [ ] Hostname configured (e.g.: ap-1001-a)
 - [ ] System updated (apt update && apt upgrade)
 - [ ] Software packages installed
 - [ ] SSH working
@@ -1102,11 +1115,11 @@ Answer honestly to the following questions. If you cannot tick all of them, revi
 
 **Next steps:**
 1. Download homework recording tools → see `02_INIT_HOMEWORKS/`
-2. Browse the Bash reference → see `03_GUIDES/01_Bash_Scripting_Guide.md`
+2. Browse the Bash reference → see [SEM01 shell fundamentals](../SEM01/README.md)
 3. Attend SEM01 with your environment ready
 
 **If something breaks later:**
-- Check `03_GUIDES/03_Observability_and_Debugging_Guide.md`
+- Check [SEM05 scripting and debugging](../SEM05/README.md)
 - Or ask an AI assistant (Section 15)
 
 ---

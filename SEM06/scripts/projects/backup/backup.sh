@@ -77,7 +77,8 @@ prepare_backup_environment() {
     for dir in "${dirs[@]}"; do
         if [[ ! -d "$dir" ]]; then
             if ! mkdir -p "$dir" 2>/dev/null; then
-                log_warn "Cannot create directory: $dir (continuing without)"
+                log_error "Cannot create required directory: $dir"
+                return 1
             else
                 log_debug "Directory created: $dir"
             fi
@@ -86,12 +87,13 @@ prepare_backup_environment() {
     
     # Check available space
     local available_mb
-    available_mb=$(get_available_space_mb "$BACKUP_DEST" 2>/dev/null || echo "0")
+    available_mb=$(get_available_space_mb "$BACKUP_DEST") || { log_error "Destination space unavailable"; return 1; }
+    [[ $available_mb =~ ^[0-9]+$ ]] || return 1
     
     if [[ "$available_mb" -lt 100 ]]; then
-        log_warn "Low space in destination: ${available_mb}MB available"
+        log_warn "Low space in destination: ${available_mb}MiB available"
     else
-        log_debug "Available space in destination: ${available_mb}MB"
+        log_debug "Available space in destination: ${available_mb}MiB"
     fi
     
     return 0
@@ -106,8 +108,8 @@ run_pre_backup_script() {
     fi
     
     if [[ ! -x "$PRE_BACKUP_SCRIPT" ]]; then
-        log_warn "Pre-backup script is not executable: $PRE_BACKUP_SCRIPT"
-        return 0
+        log_error "Configured pre-backup script is not executable: $PRE_BACKUP_SCRIPT"
+        return 1
     fi
     
     log_info "Executing pre-backup script: $PRE_BACKUP_SCRIPT"
@@ -135,8 +137,8 @@ run_post_backup_script() {
     fi
     
     if [[ ! -x "$POST_BACKUP_SCRIPT" ]]; then
-        log_warn "Post-backup script is not executable: $POST_BACKUP_SCRIPT"
-        return 0
+        log_error "Configured post-backup script is not executable: $POST_BACKUP_SCRIPT"
+        return 1
     fi
     
     log_info "Executing post-backup script: $POST_BACKUP_SCRIPT"
@@ -149,7 +151,7 @@ run_post_backup_script() {
     else
         local exit_code=$?
         log_warn "Post-backup script failed with code: $exit_code"
-        return 0  # Don't stop process for post-backup errors
+        return "$exit_code"  # Archive exists, but the configured workflow did not complete
     fi
 }
 
@@ -162,7 +164,7 @@ perform_backup() {
     
     # Generate backup name
     local backup_name
-    backup_name=$(get_backup_name_for_type "$backup_type")
+    backup_name=$(get_backup_name_for_type "$backup_type" "$BACKUP_PREFIX")
     
     local archive_path="${BACKUP_DEST}/${backup_name}"
     
@@ -182,7 +184,8 @@ perform_backup() {
             valid_sources+=("$source")
             log_debug "Valid source: $source"
         else
-            log_warn "Non-existent source (ignored): $source"
+            log_error "Configured source is missing; refusing a partial backup: $source"
+            return 1
         fi
     done
     
@@ -193,15 +196,13 @@ perform_backup() {
     
     # Create temporary exclude file
     local exclude_file
-    exclude_file=$(mktemp)
-    trap "rm -f '$exclude_file'" RETURN
-    
-    create_exclude_file "$exclude_file"
+    exclude_file=$(create_exclude_file "${EXCLUDE_PATTERNS[@]}") || return 1
     
     # Dry-run mode
     if [[ "${DRY_RUN:-false}" == "true" ]]; then
         log_info "[DRY-RUN] Would create archive: $archive_path"
         log_info "[DRY-RUN] Sources: ${valid_sources[*]}"
+        rm -f -- "$exclude_file"
         return 0
     fi
     
@@ -215,9 +216,68 @@ perform_backup() {
     local start_time
     start_time=$(date +%s)
     
-    if ! create_archive "$archive_path" "$exclude_file" "${valid_sources[@]}"; then
+    local staged="${archive_path}.partial" snapshot="" parent="" identity=""
+    if [[ "${INCREMENTAL:-false}" == true ]]; then
+        snapshot="${BACKUP_DEST}/.snapshot.partial"
+        identity=$(printf '%s\0' "${valid_sources[@]}" "${EXCLUDE_PATTERNS[@]}" | sha256sum | cut -d' ' -f1) || return 1
+        rm -f -- "$snapshot"
+        # A single atomic JSON pointer selects immutable archive/snapshot state.
+        # Old three-file state without this pointer starts a fresh full chain.
+        if [[ "$backup_type" == daily && -f "$BACKUP_DEST/.state.json" ]]; then
+            local state
+            state=$(python3 - "$BACKUP_DEST" "$identity" <<'PYSTATE'
+import json,pathlib,sys
+root=pathlib.Path(sys.argv[1])
+try:
+    data=json.loads((root/'.state.json').read_text())
+    for key in ('archive','snapshot','identity'):
+        if not isinstance(data.get(key),str):raise ValueError('Invalid state fields')
+    for key in ('archive','snapshot'):
+        name=data[key]
+        if not name or pathlib.Path(name).name!=name or name in ('.','..'):raise ValueError('Invalid state path')
+        path=root/name
+        if not path.is_file() or path.is_symlink():raise ValueError('Missing or unsafe chain state')
+    if data['identity']==sys.argv[2]:print(data['archive'])
+except (OSError,ValueError) as exc:
+    print(exc,file=sys.stderr);sys.exit(1)
+PYSTATE
+) || return 1
+            if [[ -n $state ]]; then
+                parent=$state
+                cp -- "$BACKUP_DEST/$parent.snar" "$snapshot" || return 1
+            fi
+        fi
+    fi
+    if ! create_archive_multi "$staged" "$COMPRESSION" "$exclude_file" "$snapshot" "${valid_sources[@]}"; then
+        rm -f -- "$exclude_file" "$staged"
+        [[ -z "$snapshot" ]] || rm -f -- "$snapshot"
         log_error "Error creating archive!"
         return 1
+    fi
+    rm -f -- "$exclude_file"
+    # Publication and incremental-state advancement happen only after verification.
+    if ! tar -tf "$staged" >/dev/null; then rm -f -- "$staged"; return 1; fi
+    mv -- "$staged" "$archive_path" || return 1
+    if [[ -n "$snapshot" ]]; then
+        printf '%s\n' "$parent" > "$archive_path.parent" || return 1
+        save_checksum "$archive_path" "$CHECKSUM_ALGORITHM" || return 1
+        mv -- "$snapshot" "$archive_path.snar" || return 1
+        python3 - "$BACKUP_DEST" "$backup_name" "$identity" <<'PYCOMMIT'
+import json,os,pathlib,sys,tempfile
+root=pathlib.Path(sys.argv[1]);name=sys.argv[2]
+fd,path=tempfile.mkstemp(prefix='.state.',dir=root)
+try:
+    with os.fdopen(fd,'w') as stream:
+        json.dump(dict(archive=name,snapshot=name+'.snar',identity=sys.argv[3]),stream);stream.write('\n')
+    os.replace(path,root/'.state.json')
+finally:
+    if os.path.exists(path):os.unlink(path)
+PYCOMMIT
+        [[ $? == 0 ]] || return 1
+        # Compatibility/display copies are not authoritative for the next increment.
+        cp -- "$archive_path.snar" "$BACKUP_DEST/.snapshot" || return 1
+        printf '%s\n' "$backup_name" > "$BACKUP_DEST/.latest" || return 1
+        printf '%s\n' "$identity" > "$BACKUP_DEST/.sources" || return 1
     fi
     
     local end_time
@@ -230,7 +290,7 @@ perform_backup() {
         archive_size=$(get_file_size "$archive_path")
         
         log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        log_info "Backup created successfully!"
+        log_info "Archive created; final verification and hooks remain"
         log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         log_info "Archive: $archive_path"
         log_info "Size: $archive_size"
@@ -255,8 +315,8 @@ verify_created_backup() {
     local archive_path="${BACKUP_ARCHIVE_PATH:-}"
     
     if [[ -z "$archive_path" || ! -f "$archive_path" ]]; then
-        log_warn "No archive to verify"
-        return 0
+        log_error "No archive to verify"
+        return 1
     fi
     
     if [[ "${VERIFY_BACKUP:-true}" != "true" ]]; then
@@ -280,10 +340,11 @@ verify_created_backup() {
     if [[ "${SAVE_CHECKSUM:-true}" == "true" ]]; then
         local checksum_file="${archive_path}.${CHECKSUM_ALGORITHM:-sha256}"
         
-        if save_checksum "$archive_path" "$checksum_file"; then
+        if save_checksum "$archive_path" "${CHECKSUM_ALGORITHM:-sha256}"; then
             log_info "✓ Checksum saved: $checksum_file"
         else
-            log_warn "Could not save checksum"
+            log_error "Could not save checksum"
+            return 1
         fi
     fi
     
@@ -295,25 +356,10 @@ verify_created_backup() {
 # -----------------------------------------------------------------------------
 apply_retention_policy() {
     local backup_type="${1:-daily}"
-    
-    log_info "Applying retention policy for: $backup_type"
-    
+    [[ "$backup_type" != full && "${DRY_RUN:-false}" != true ]] || return 0
     local retention
-    retention=$(get_retention_for_type "$backup_type")
-    
-    log_debug "Retention for $backup_type: $retention backups"
-    
-    # Number-based rotation
-    local rotated
-    rotated=$(rotate_backups "$BACKUP_DEST" "$retention" "${BACKUP_PREFIX:-backup}_${backup_type}")
-    
-    if [[ "$rotated" -gt 0 ]]; then
-        log_info "Old backups deleted: $rotated"
-    else
-        log_debug "No backups to delete"
-    fi
-    
-    return 0
+    retention=$(get_retention_for_type "$backup_type") || return 1
+    rotate_backups "$BACKUP_DEST" "$retention" "${BACKUP_PREFIX}_${backup_type}_*.tar*"
 }
 
 # -----------------------------------------------------------------------------
@@ -344,7 +390,7 @@ generate_final_report() {
     
     # Send email notification if configured
     if [[ "${NOTIFY_EMAIL:-false}" == "true" ]]; then
-        send_notification "$status" "$error_msg"
+        send_notification "$status" "$error_msg" || { log_error "Notification delivery failed"; return 1; }
     fi
 }
 
@@ -382,12 +428,15 @@ ${error_msg:+Error: $error_msg}"
     
     local recipients="${EMAIL_RECIPIENTS:-root}"
     
+    [[ -n $recipients && $recipients != -* && $recipients != *$'\n'* && $subject != *$'\n'* ]] || return 1
     if command -v mail &>/dev/null; then
-        echo "$body" | mail -s "$subject" "$recipients" 2>/dev/null && \
-            log_info "Email notification sent" || \
-            log_warn "Error sending email notification"
+        if printf '%s\n' "$body" | timeout 15 mail -s "$subject" -- "$recipients"; then
+            log_info "Mail transport accepted the notification (delivery not independently confirmed)"
+        else
+            log_error "Mail transport failed"; return 1
+        fi
     else
-        log_debug "Command 'mail' is not available"
+        log_error "Configured mail transport is unavailable"; return 1
     fi
 }
 
@@ -395,38 +444,24 @@ ${error_msg:+Error: $error_msg}"
 # List existing backups
 # -----------------------------------------------------------------------------
 list_backups() {
-    log_info "Existing backups in: $BACKUP_DEST"
-    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
-    if [[ ! -d "$BACKUP_DEST" ]]; then
-        log_warn "Backup directory does not exist"
-        return 0
-    fi
-    
-    local count=0
-    local total_size=0
-    
-    while IFS= read -r archive; do
-        if [[ -n "$archive" ]]; then
-            local size
-            size=$(stat -c%s "$archive" 2>/dev/null || echo "0")
-            local human_size
-            human_size=$(numfmt --to=iec-i --suffix=B "$size" 2>/dev/null || echo "${size}B")
-            local date
-            date=$(stat -c%y "$archive" 2>/dev/null | cut -d' ' -f1,2 | cut -d'.' -f1)
-            
-            printf "  %-50s %10s  %s\n" "$(basename "$archive")" "$human_size" "$date"
-            
-            ((count++))
-            total_size=$((total_size + size))
-        fi
-    done < <(find "$BACKUP_DEST" -maxdepth 1 -name "*.tar*" -type f 2>/dev/null | sort)
-    
-    log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
-    local total_human
-    total_human=$(numfmt --to=iec-i --suffix=B "$total_size" 2>/dev/null || echo "${total_size}B")
-    log_info "Total: $count backups, $total_human"
+    log_info "Existing archives in: $BACKUP_DEST"
+    python3 - "$BACKUP_DEST" <<'PYLIST'
+import datetime,json,sys
+from pathlib import Path
+root=Path(sys.argv[1]); extensions=('.tar','.tar.gz','.tar.bz2','.tar.xz','.tar.zst')
+try:
+    if not root.is_dir(): raise ValueError('backup directory is unavailable')
+    archives=sorted((p for p in root.iterdir() if p.is_file() and not p.is_symlink() and p.name.endswith(extensions)),key=lambda p:p.name)
+    rows=[]
+    for path in archives:
+        stat=path.stat()
+        rows.append((path.name,stat.st_size,datetime.datetime.fromtimestamp(stat.st_mtime,datetime.timezone.utc).isoformat()))
+    for name,size,date in rows:
+        print(f'{json.dumps(name,ensure_ascii=True)}\t{size} bytes\t{date}')
+    print(f'Total: {len(rows)} archives, {sum(r[1] for r in rows)} bytes',file=sys.stderr)
+except (OSError,ValueError) as exc:
+    print(f'Cannot list archives: {exc}',file=sys.stderr);raise SystemExit(1)
+PYLIST
 }
 
 # -----------------------------------------------------------------------------
@@ -452,11 +487,15 @@ restore_backup() {
         fi
     fi
     
+    [[ ! -L $dest ]] || { log_error "Symlink restore destination refused"; return 1; }
+    if [[ -d $dest && -n "$(find "$dest" -mindepth 1 -print -quit)" ]]; then
+        log_error "Restoration requires an empty destination"; return 1
+    fi
     # Verify checksum if exists
     local checksum_file="${archive}.${CHECKSUM_ALGORITHM:-sha256}"
     if [[ -f "$checksum_file" ]]; then
         log_info "Verifying checksum..."
-        if verify_checksum "$archive" "$checksum_file"; then
+        if verify_checksum "$archive" "${CHECKSUM_ALGORITHM:-sha256}"; then
             log_info "✓ Checksum valid"
         else
             log_error "✗ Invalid checksum! Archive may be corrupted."
@@ -470,12 +509,42 @@ restore_backup() {
     if [[ "${DRY_RUN:-false}" == "true" ]]; then
         log_info "[DRY-RUN] Would extract to: $dest"
         log_info "[DRY-RUN] Archive contents:"
-        list_archive_contents "$archive" | head -20
+        local listing
+        listing=$(list_archive_contents "$archive") || return 1
+        printf '%s\n' "$listing" | sed -n '1,20p'
         return 0
     fi
     
+    if [[ -f "$archive.parent" ]]; then
+        # GNU incremental extraction removes entries absent from each directory dump.
+        # Refuse a populated destination so unrelated files cannot be removed.
+        if [[ -d "$dest" && -n "$(find "$dest" -mindepth 1 -print -quit)" ]]; then
+            log_error "Incremental restoration requires an empty destination"
+            return 1
+        fi
+        local chain=("$archive") current="$archive" parent seen="|$(basename "$archive")|" i
+        while [[ -f "$current.parent" ]]; do
+            parent=$(<"$current.parent")
+            [[ -n "$parent" ]] || break
+            [[ "$parent" != */* && "$parent" != . && "$parent" != .. && "$seen" != *"|$parent|"* ]] || return 1
+            current="$(dirname "$archive")/$parent"
+            [[ -f "$current" && -f "$current.parent" ]] || { log_error "Incomplete backup chain"; return 1; }
+            seen+="$parent|"
+            chain+=("$current")
+        done
+        for current in "${chain[@]}"; do
+            verify_checksum "$current" "$CHECKSUM_ALGORITHM" || return 1
+            python3 "$LIB_DIR/validate_archive.py" "$current" || return 1
+        done
+        mkdir -p -- "$dest" || return 1
+        for ((i=${#chain[@]}-1; i>=0; i--)); do
+            tar --extract --listed-incremental=/dev/null --file="${chain[i]}" --directory="$dest" || return 1
+        done
+        return 0
+    fi
     # Create destination directory if it doesn't exist
-    mkdir -p "$dest"
+    python3 "$LIB_DIR/validate_archive.py" "$archive" || return 1
+    mkdir -p -- "$dest" || return 1
     
     # Extract archive
     if extract_archive "$archive" "$dest"; then
@@ -498,16 +567,15 @@ main() {
     BACKUP_DURATION=""
     
     # Initialise configuration
-    init_config "$@"
+    init_config "$@" || return 1
     
     # Configure logging
-    setup_logging
+    setup_logging || return 1
     
     # Process special modes
     case "${MODE:-backup}" in
         list)
-            list_backups
-            exit 0
+            if list_backups; then return 0; else return 1; fi
             ;;
         restore)
             restore_backup "${RESTORE_ARCHIVE:-}" "${RESTORE_DEST:-.}"
@@ -529,6 +597,12 @@ main() {
             ;;
     esac
     
+    # A dry run has no locks, hooks, log files, retention or filesystem effects.
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "[DRY-RUN] Sources: ${BACKUP_SOURCES[*]}"
+        log_info "[DRY-RUN] Destination: $BACKUP_DEST; type: $BACKUP_TYPE; incremental: $INCREMENTAL"
+        return 0
+    fi
     # Normal backup mode
     local exit_code=0
     local error_msg=""
@@ -546,7 +620,7 @@ main() {
     fi
     
     # Cleanup on exit
-    trap 'release_lock "${LOCK_FILE:-/var/run/backup.lock}"; generate_final_report "${exit_code:-1}" "$error_msg"' EXIT
+    trap 'status=$?; release_lock "${LOCK_FILE:-}"; if ((status == 0)); then generate_final_report SUCCESS; else generate_final_report FAILED "exit $status"; fi' EXIT
     
     # Prepare environment
     if ! prepare_backup_environment; then
@@ -568,7 +642,7 @@ main() {
     log_info "Determined backup type: $backup_type"
     
     # Override with manually specified type
-    if [[ -n "${BACKUP_TYPE:-}" ]]; then
+    if [[ -n "${BACKUP_TYPE:-}" && "$BACKUP_TYPE" != auto ]]; then
         backup_type="$BACKUP_TYPE"
         log_info "Backup type override: $backup_type"
     fi
@@ -588,10 +662,10 @@ main() {
     fi
     
     # Apply retention
-    apply_retention_policy "$backup_type"
+    apply_retention_policy "$backup_type" || return 1
     
     # Execute post-backup script
-    run_post_backup_script "${BACKUP_ARCHIVE_PATH:-}"
+    run_post_backup_script "${BACKUP_ARCHIVE_PATH:-}" || return $?
     
     log_info "═══════════════════════════════════════════════════════════════"
     log_info "     BACKUP COMPLETED SUCCESSFULLY"

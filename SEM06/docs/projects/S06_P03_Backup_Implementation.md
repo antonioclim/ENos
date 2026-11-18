@@ -1,5 +1,13 @@
 # Backup Project - Detailed Implementation
 
+## Executable contracts and recovery limits
+
+The repository programme is `SEM06/scripts/projects/backup/backup.sh`, with `lib/core.sh`, `lib/utils.sh` and `lib/config.sh`. Its CLI is available through `--help`; for example, from `SEM06`, `bash scripts/projects/backup/backup.sh --source /owned/source --dest /owned/backups --type full --incremental`, followed by `--type daily --incremental`. Restore uses `--restore ARCHIVE --restore-dir EMPTY_DIRECTORY`. The subcommand API taught below belongs to a separately extracted reference implementation; it is not an alternative spelling of the repository CLI.
+
+Use owned, quiescent source trees and a destination outside every source. GNU tar incremental metadata records directory deletions and renames; restoration must apply the complete parent chain with `--listed-incremental=/dev/null`. A saved checksum establishes byte equality against that record, not publisher authenticity. The examples assume trusted locally produced archives; importing arbitrary archives requires a separate path/link and resource-limit validation policy. No example authorises writing to live directories.
+
+Retention values below are illustrative parameters. The caller chooses them explicitly for the dataset; the lesson does not adopt an institutional retention policy. A complete chain, including its full base and checksum/metadata sidecars, is the unit of retention.
+
 ## Contents
 
 1. [General Overview](#1-general-overview)
@@ -144,145 +152,307 @@ Examples:
 
 ### 3.1 The create_archive() Function
 
+Save this complete local engine as `lib/backup_reference.py`. Bash retains configuration, orchestration, hooks and reporting; Python performs exact pathname handling, standard JSON serialisation and atomic state-file replacement while invoking GNU tar with an argument vector. Each build uses a fresh staging directory and a separate snapshot. `.chain.json` advances only after archive verification/publication. This covers ordinary command failure, not crash durability of a multi-file transaction. A failed publication can leave an unreferenced generation for inspection, while the previous state pointer remains authoritative.
+
+```python
+#!/usr/bin/env python3
+"""Local teaching backup engine: GNU tar, explicit chains and owned destinations.
+
+Sources must be quiescent for a consistent backup. Publication is failure-checked,
+not a multi-file crash-durable transaction. Test fixtures never contain live data.
+"""
+import argparse
+import csv
+import datetime as dt
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import uuid
+
+EXTENSIONS = { 'none': '.tar', 'gzip': '.tar.gz', 'bzip2': '.tar.bz2', 'xz': '.tar.xz', 'zstd': '.tar.zst' }
+SIDECARS = ('.sha256', '.sha512', '.sha1', '.md5', '.meta.json', '.parent', '.manifest')
+
+
+def atomic_text(path, text):
+    fd, temporary = tempfile.mkstemp(prefix='.state.', dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w') as output: output.write(text); output.flush(); os.fsync(output.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary): os.unlink(temporary)
+
+
+def digest(path, algorithm='sha256'):
+    if algorithm not in ('sha256', 'sha512', 'sha1', 'md5'): raise ValueError('Unsupported checksum')
+    result = hashlib.new(algorithm)
+    with path.open('rb') as source:
+        for chunk in iter(lambda: source.read(1024*1024), b''): result.update(chunk)
+    return result.hexdigest()
+
+
+def write_checksum(path, algorithm='sha256'):
+    # JSON sidecars name the basename; moving the archive/sidecar pair preserves identity.
+    atomic_text(Path(str(path)+'.'+algorithm), json.dumps({'file': path.name, 'digest': digest(path, algorithm)})+'\n')
+
+
+def verify_checksum(path, algorithm='sha256'):
+    sidecar = Path(str(path)+'.'+algorithm)
+    if not sidecar.is_file(): raise ValueError('UNVERIFIED: checksum is missing')
+    data = json.loads(sidecar.read_text())
+    if data.get('file') != path.name or data.get('digest') != digest(path, algorithm): raise ValueError('Checksum mismatch')
+
+
+def tar_list(path):
+    subprocess.run(['tar', '--list', '--file='+str(path)], check=True, stdout=subprocess.DEVNULL)
+
+
+def archives(root):
+    return sorted(p for p in root.rglob('*') if p.is_file() and not p.is_symlink()
+                  and any(p.name.endswith(ext) for ext in EXTENSIONS.values()))
+
+
+def metadata(path):
+    data = json.loads(Path(str(path)+'.meta.json').read_text())
+    dt.datetime.fromisoformat(data['timestamp'])
+    if not isinstance(data['sources'], list) or not data['sources']: raise ValueError('Missing source metadata')
+    return data
+
+
+def chain(target, catalogue):
+    by_name = {}
+    for archive in catalogue:
+        if archive.name in by_name: raise ValueError('Duplicate archive basename')
+        by_name[archive.name] = archive
+    result, seen, current = [], set(), target
+    while True:
+        if current.name in seen: raise ValueError('Cycle in backup chain')
+        seen.add(current.name); result.append(current)
+        parent_path = Path(str(current)+'.parent')
+        if not parent_path.is_file(): raise ValueError('Incomplete chain metadata')
+        parent = parent_path.read_text().strip()
+        if not parent: break
+        if Path(parent).name != parent or parent not in by_name: raise ValueError('Missing/invalid chain parent')
+        current = by_name[parent]
+    result.reverse()
+    if metadata(result[0])['type'] != 'full': raise ValueError('Chain has no full base')
+    return result
+
+
+def create(root, kind, sources, compression='gzip', prefix='backup', excludes=(), algorithm='sha256', checksum=True, verify=True):
+    if kind not in ('full', 'incremental') or compression not in EXTENSIONS: raise ValueError('Invalid type/compression')
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]*', prefix): raise ValueError('Invalid archive prefix')
+    sources = [Path(p).resolve(strict=True) for p in sources]
+    if not sources: raise ValueError('No sources')
+    root = root.resolve()
+    if root == Path('/') or any(root == p or p in root.parents for p in sources):
+        raise ValueError('Use a destination outside every source')
+    root.mkdir(parents=True, exist_ok=True)
+    with (root/'.backup.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        identity = hashlib.sha256(json.dumps([list(map(str,sources)),list(excludes)],sort_keys=True).encode()).hexdigest()
+        state_path = root/'.chain.json'
+        previous = json.loads(state_path.read_text()) if state_path.exists() else None
+        incremental = kind == 'incremental' and previous is not None and previous.get('identity') == identity
+        parent = previous['latest'] if incremental else ''
+        if incremental:
+            catalogue = archives(root)
+            candidates = [p for p in catalogue if p.name == parent]
+            if len(candidates) != 1: raise ValueError('Latest parent is missing or ambiguous')
+            for item in chain(candidates[0], catalogue): verify_checksum(item, metadata(item)['algorithm'])
+        # Every chain requires a checksum, including when --no-checksum was requested.
+        if not checksum and (kind == 'incremental' or incremental): raise ValueError('Incremental chains require checksums')
+        stamp = dt.datetime.now(dt.timezone.utc)
+        effective = 'incremental' if incremental else 'full'
+        name = f'{prefix}_{effective}_{stamp:%Y%m%d_%H%M%S}_{uuid.uuid4().hex[:10]}{EXTENSIONS[compression]}'
+        target = root/name
+        with tempfile.TemporaryDirectory(prefix='.build.', dir=root) as temporary:
+            stage = Path(temporary); archive = stage/name; snapshot = stage/'snapshot.snar'
+            if incremental:
+                source_snapshot = root/previous['snapshot']
+                if source_snapshot.parent != root or not source_snapshot.is_file(): raise ValueError('Snapshot unavailable')
+                shutil.copyfile(source_snapshot, snapshot)
+            command = ['tar', '--create', '--file='+str(archive), '--listed-incremental='+str(snapshot)]
+            if compression != 'none': command += ['--'+compression]
+            command += ['--exclude='+pattern for pattern in excludes]
+            command += ['--directory=/', '--']+[str(p).lstrip('/') for p in sources]
+            subprocess.run(command, check=True, stdout=sys.stderr)
+            tar_list(archive)  # Publication always requires a readable archive structure.
+            meta = {'timestamp':stamp.isoformat(), 'type':effective, 'sources':list(map(str,sources)),
+                    'algorithm':algorithm, 'checksum':checksum, 'parent':parent}
+            (stage/(name+'.meta.json')).write_text(json.dumps(meta)+'\n')
+            (stage/(name+'.parent')).write_text(parent+'\n')
+            if checksum: write_checksum(archive, algorithm)
+            if verify and checksum: verify_checksum(archive, algorithm)
+            # Commit complete generation files, then one state pointer.
+            snapshot_name = '.snapshot.'+uuid.uuid4().hex
+            os.replace(snapshot, root/snapshot_name)
+            for member in sorted(stage.iterdir()): os.replace(member, root/member.name)
+            atomic_text(state_path, json.dumps({'identity':identity,'latest':name,'snapshot':snapshot_name})+'\n')
+            temporary_link = root/('.latest.'+uuid.uuid4().hex)
+            try: temporary_link.symlink_to(name); os.replace(temporary_link, root/'latest')
+            finally:
+                if temporary_link.is_symlink(): temporary_link.unlink()
+        # The old snapshot is no longer referenced by committed state.
+        if previous and previous.get('snapshot') != snapshot_name:
+            old = root/previous.get('snapshot','')
+            if old.parent == root and old.name.startswith('.snapshot.') and old.is_file(): old.unlink()
+    return target
+
+
+def restore(root, target, destination, files=()):
+    catalogue = archives(root)
+    sequence = chain(target, catalogue)
+    if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
+        raise ValueError('Restore requires an empty destination')
+    for path in sequence:
+        data = metadata(path)
+        if not data.get('checksum'): raise ValueError('UNVERIFIED: restore needs an explicit verified archive')
+        verify_checksum(path, data['algorithm']); tar_list(path)
+    # GNU incremental extraction includes deletion records; apply full + every parent in order.
+    destination.mkdir(parents=True, exist_ok=True)
+    for path in sequence:
+        subprocess.run(['tar','--extract','--listed-incremental=/dev/null','--no-same-owner',
+                        '--file='+str(path),'--directory='+str(destination)],check=True)
+    if files:
+        raise ValueError('Selective chain restore: restore to a disposable staging tree, then copy explicitly selected paths')
+
+
+def select_at(root, instant):
+    target = dt.datetime.strptime(instant, '%Y%m%d_%H%M%S').replace(tzinfo=dt.timezone.utc)
+    candidates = [(dt.datetime.fromisoformat(metadata(p)['timestamp']), p) for p in archives(root)]
+    candidates = [(stamp,p) for stamp,p in candidates if stamp <= target]
+    if not candidates: raise ValueError('No recovery point at or before requested time')
+    selected = max(candidates)[1]
+    chain(selected, archives(root))  # Refuse a missing base before extraction.
+    return selected
+
+
+def rotate(root, daily, weekly, monthly, apply=False):
+    if any(n < 0 or n > 10000 for n in (daily,weekly,monthly)): raise ValueError('Invalid retention count')
+    catalogue = archives(root)
+    groups = {}
+    for path in catalogue:
+        sequence = chain(path,catalogue); base = sequence[0].name
+        groups.setdefault(base,[]).append(path)
+    heads = []
+    for base, members in groups.items():
+        last = max(members,key=lambda p:metadata(p)['timestamp'])
+        heads.append((dt.datetime.fromisoformat(metadata(last)['timestamp']),base,members))
+    heads.sort(reverse=True,key=lambda row:row[0])
+    keep = {}; now = dt.datetime.now(dt.timezone.utc)
+    # One newest recovery chain per calendar bucket, with all ancestors retained.
+    for tier,count,key in [('daily',daily,lambda t:t.date()),
+                            ('weekly',weekly,lambda t:t.isocalendar()[:2]),
+                            ('monthly',monthly,lambda t:(t.year,t.month))]:
+        selected = set()
+        for stamp,base,members in heads:
+            if stamp > now: raise ValueError('Future timestamp requires review')
+            bucket=key(stamp)
+            if bucket not in selected and len(selected)<count:
+                selected.add(bucket); keep.setdefault(base,tier)
+    state = json.loads((root/'.chain.json').read_text()) if (root/'.chain.json').exists() else None
+    if state:
+        latest=[p for p in catalogue if p.name==state.get('latest')]
+        if len(latest)!=1: raise ValueError('Active chain pointer unavailable')
+        keep.setdefault(chain(latest[0],catalogue)[0].name,'daily')
+    plans=[]
+    for stamp,base,members in heads:
+        for path in members:
+            tier=keep.get(base); destination=root/tier/path.name if tier else None
+            if destination==path: continue
+            plans.append({'source':str(path),'destination':str(destination) if destination else None})
+            if apply:
+                if destination: destination.parent.mkdir(exist_ok=True)
+                for suffix in ('',)+SIDECARS:
+                    source=Path(str(path)+suffix)
+                    if not source.exists(): continue
+                    if destination:
+                        target=Path(str(destination)+suffix)
+                        if target.exists(): raise ValueError('Rotation collision')
+                        os.replace(source,target)
+                    else: source.unlink()
+    if apply and state:
+        matches=[p for p in archives(root) if p.name==state['latest']]
+        link=root/('.latest.'+uuid.uuid4().hex)
+        try: link.symlink_to(matches[0].relative_to(root)); os.replace(link,root/'latest')
+        finally:
+            if link.is_symlink(): link.unlink()
+    return plans
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__); sub=parser.add_subparsers(dest='action',required=True)
+    p=sub.add_parser('create'); p.add_argument('root',type=Path); p.add_argument('kind',choices=('full','incremental')); p.add_argument('sources',nargs='+')
+    p.add_argument('--compression',default='gzip',choices=EXTENSIONS); p.add_argument('--prefix',default='backup'); p.add_argument('--exclude',action='append',default=[])
+    p.add_argument('--algorithm',default='sha256'); p.add_argument('--no-checksum',action='store_true'); p.add_argument('--no-verify',action='store_true')
+    p=sub.add_parser('restore'); p.add_argument('root',type=Path); p.add_argument('target',type=Path); p.add_argument('destination',type=Path)
+    p=sub.add_parser('at'); p.add_argument('root',type=Path); p.add_argument('instant')
+    p=sub.add_parser('rotate'); p.add_argument('root',type=Path); p.add_argument('daily',type=int); p.add_argument('weekly',type=int); p.add_argument('monthly',type=int); p.add_argument('--apply',action='store_true')
+    p=sub.add_parser('list'); p.add_argument('root',type=Path); p.add_argument('--format',choices=('human','json','csv'),default='human'); p.add_argument('--latest',action='store_true')
+    p=sub.add_parser('verify'); p.add_argument('archive',type=Path)
+    args=parser.parse_args()
+    if args.action=='create': print(create(args.root,args.kind,args.sources,args.compression,args.prefix,args.exclude,args.algorithm,not args.no_checksum,not args.no_verify))
+    elif args.action=='restore': restore(args.root,args.target,args.destination)
+    elif args.action=='at': print(select_at(args.root,args.instant))
+    elif args.action=='rotate': print(json.dumps(rotate(args.root,args.daily,args.weekly,args.monthly,args.apply),indent=2))
+    elif args.action=='verify': verify_checksum(args.archive,metadata(args.archive)['algorithm']); tar_list(args.archive)
+    elif args.action=='list':
+        rows=[dict(path=str(p),size=p.stat().st_size,**metadata(p)) for p in archives(args.root)]
+        rows.sort(key=lambda r:r['timestamp'],reverse=True)
+        if args.latest: rows=rows[:1]
+        if args.format=='json': print(json.dumps({'backups':rows},ensure_ascii=False))
+        elif args.format=='csv':
+            writer=csv.writer(sys.stdout); writer.writerow(('path','type','timestamp','size'))
+            for row in rows: writer.writerow([row[k] for k in ('path','type','timestamp','size')])
+        else:
+            for row in rows: print(f"{row['timestamp']} {row['type']} {row['size']} {row['path']}")
+
+
+if __name__=='__main__':
+    try: main()
+    except (OSError,ValueError,KeyError,subprocess.CalledProcessError) as error:
+        print(error,file=sys.stderr); raise SystemExit(1)
+```
+
+The Bash wrapper below preserves the chapter API and prints only the completed archive pathname to stdout. Diagnostics go to stderr. Each explicit full backup starts a new chain; an incremental request without a compatible base creates a full checkpoint.
+
+
 This is the main function for creating backups:
 
 ```bash
+backup_engine() {
+    python3 "${BACKUP_ENGINE_PATH:-${LIB_DIR:?Set LIB_DIR}/backup_reference.py}" "$@"
+}
 create_archive() {
-    local backup_type="${1:-full}"
-    local destination="${2:-}"
-    local -a sources=("${@:3}")
-    
-    # Initial validations
-    if [[ ${#sources[@]} -eq 0 ]]; then
-        log_error "No sources specified for backup"
-        return 1
+    local kind=${1:-full} destination=${2:-} source exclusions pattern external
+    shift 2
+    (($# > 0)) || return 2
+    destination=${destination:-$(get_config backup_destination '')}
+    [[ -n $destination ]] || return 2
+    local -a command=(create "$destination" "$kind" "$@"
+        --compression "$(get_config compression gzip)" --prefix "$(get_config backup_prefix backup)"
+        --algorithm "$(get_config checksum_algorithm sha256)")
+    exclusions=$(get_config exclude_patterns '')
+    local -a patterns=()
+    IFS=',' read -ra patterns <<< "$exclusions"
+    for pattern in "${patterns[@]}"; do [[ -z $pattern ]] || command+=(--exclude "$pattern"); done
+    external=$(get_config exclude_file '')
+    if [[ -n $external ]]; then
+        [[ -r $external ]] || return 2
+        while IFS= read -r pattern || [[ -n $pattern ]]; do
+            [[ -z $pattern || $pattern == \#* ]] || command+=(--exclude "$pattern")
+        done < "$external"
     fi
-    
-    if [[ -z "$destination" ]]; then
-        destination=$(get_config "backup_destination" "/var/backups")
-    fi
-    
-    # Create destination directory if it doesn't exist
-    mkdir -p "$destination" || {
-        log_error "Cannot create directory: $destination"
-        return 1
-    }
-    
-    # Generate archive name
-    local timestamp prefix archive_name
-    timestamp=$(date '+%Y%m%d_%H%M%S')
-    prefix=$(get_config "backup_prefix" "backup")
-    
-    case "$backup_type" in
-        full)        archive_name="${prefix}_full_${timestamp}" ;;
-        incremental) archive_name="${prefix}_incr_${timestamp}" ;;
-        *)           archive_name="${prefix}_${backup_type}_${timestamp}" ;;
-    esac
-    
-    # Determine extension based on compression
-    local compression extension
-    compression=$(get_config "compression" "gzip")
-    extension=$(get_compression_extension "$compression")
-    
-    local archive_path="${destination}/${archive_name}.tar${extension}"
-    
-    log_info "Starting $backup_type backup: $archive_path"
-    log_info "Sources: ${sources[*]}"
-    
-    # Build tar command
-    local -a tar_cmd=(tar)
-    
-    # Basic options
-    tar_cmd+=(--create)
-    tar_cmd+=(--file="$archive_path")
-    
-    # Preserve permissions and metadata
-    tar_cmd+=(--preserve-permissions)
-    tar_cmd+=(--same-owner)
-    tar_cmd+=(--atime-preserve=system)
-    
-    # Verbose if active
-    if [[ "$(get_config 'verbose' 'false')" == "true" ]]; then
-        tar_cmd+=(--verbose)
-    fi
-    
-    # Add compression
-    case "$compression" in
-        gzip)  tar_cmd+=(--gzip) ;;
-        bzip2) tar_cmd+=(--bzip2) ;;
-        xz)    tar_cmd+=(--xz) ;;
-        zstd)  tar_cmd+=(--zstd) ;;
-        none)  ;; # No compression
-    esac
-    
-    # Add exclusions
-    local exclude_file
-    exclude_file=$(create_exclude_file)
-    if [[ -n "$exclude_file" ]]; then
-        tar_cmd+=(--exclude-from="$exclude_file")
-    fi
-    
-    # For incremental backup, use snapshot
-    if [[ "$backup_type" == "incremental" ]]; then
-        local snapshot_file="${destination}/.state/snapshot.snar"
-        mkdir -p "$(dirname "$snapshot_file")"
-        tar_cmd+=(--listed-incremental="$snapshot_file")
-    fi
-    
-    # Add sources (with handle for spaces in path)
-    for src in "${sources[@]}"; do
-        if [[ -e "$src" ]]; then
-            tar_cmd+=("$src")
-        else
-            log_warning "Source does not exist: $src"
-        fi
-    done
-    
-    # Execute backup with progress tracking
-    local start_time end_time duration
-    start_time=$(date +%s)
-    
-    log_info "Command: ${tar_cmd[*]}"
-    
-    if "${tar_cmd[@]}" 2>&1 | while IFS= read -r line; do
-        log_debug "$line"
-    done; then
-        end_time=$(date +%s)
-        duration=$((end_time - start_time))
-        
-        log_info "Backup completed in $(format_duration $duration)"
-        
-        # Generate metadata and checksum
-        generate_metadata "$archive_path" "$backup_type" "${sources[@]}"
-        generate_checksum "$archive_path"
-        
-        # Create symlink to latest
-        create_latest_symlink "$archive_path"
-        
-        # Apply rotation if configured
-        if [[ "$(get_config 'rotation_enabled' 'false')" == "true" ]]; then
-            apply_rotation "$destination"
-        fi
-        
-        # Cleanup
-        [[ -n "$exclude_file" ]] && rm -f "$exclude_file"
-        
-        # Display statistics
-        local archive_size
-        archive_size=$(stat -c %s "$archive_path" 2>/dev/null || echo "0")
-        log_info "Archive size: $(format_bytes $archive_size)"
-        
-        echo "$archive_path"
-        return 0
-    else
-        log_error "Backup failed!"
-        [[ -n "$exclude_file" ]] && rm -f "$exclude_file"
-        
-        # Delete partial archive
-        [[ -f "$archive_path" ]] && rm -f "$archive_path"
-        
-        return 1
-    fi
+    [[ $(get_config generate_checksum true) == true ]] || command+=(--no-checksum)
+    [[ $(get_config verify_after_backup true) == true ]] || command+=(--no-verify)
+    backup_engine "${command[@]}"
 }
 ```
 
@@ -291,58 +461,22 @@ create_archive() {
 Generates a temporary file with exclusion patterns:
 
 ```bash
-create_exclude_file() {
-    local exclude_patterns exclude_file
-    
-    # Get patterns from configuration
-    exclude_patterns=$(get_config "exclude_patterns" "")
-    
-    if [[ -z "$exclude_patterns" ]]; then
-        return 0
-    fi
-    
-    # Create temporary file
-    exclude_file=$(mktemp)
-    
-    # Standard patterns
-    cat > "$exclude_file" <<'EOF'
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*~
-
-# Caches
-.cache
-__pycache__
-*.pyc
-node_modules
-
-# Logs (optional)
-*.log
-
-# System files
-/proc
-/sys
-/dev
-/run
-/tmp
-/var/tmp
-EOF
-    
-    # Add patterns from configuration
-    echo "$exclude_patterns" | tr ',' '\n' >> "$exclude_file"
-    
-    # Add from external file if it exists
-    local external_exclude
-    external_exclude=$(get_config "exclude_file" "")
-    
-    if [[ -f "$external_exclude" ]]; then
-        cat "$external_exclude" >> "$exclude_file"
-    fi
-    
-    echo "$exclude_file"
-}
+# For a caller that needs a GNU tar --exclude-from file. The caller owns/removes it.
+create_exclude_file() (
+    local output patterns pattern external
+    output=$(mktemp) || return 1
+    trap 'rm -f -- "$output"' EXIT
+    patterns=$(get_config exclude_patterns '')
+    local -a items=()
+    IFS=',' read -ra items <<< "$patterns"
+    for pattern in "${items[@]}"; do
+        [[ -z $pattern ]] || printf '%s\n' "$pattern" >> "$output" || return 1
+    done
+    external=$(get_config exclude_file '')
+    if [[ -n $external ]]; then cat -- "$external" >> "$output" || return 1; fi
+    printf '%s\n' "$output"
+    trap - EXIT  # Ownership transfers to the successful caller only.
+)
 ```
 
 ### 3.3 The apply_rotation() Function
@@ -350,144 +484,14 @@ EOF
 Implements the grandfather-father-son rotation policy:
 
 ```bash
+# Calendar-bucket GFS: newest complete chain in each of N daily/weekly/monthly buckets.
+# All tiers are scanned on every run; dependencies and the current chain are protected.
 apply_rotation() {
-    local backup_dir="$1"
-    
-    local daily_keep weekly_keep monthly_keep
-    daily_keep=$(get_config "rotation_daily" "7")
-    weekly_keep=$(get_config "rotation_weekly" "4")
-    monthly_keep=$(get_config "rotation_monthly" "12")
-    
-    log_info "Applying rotation: daily=$daily_keep, weekly=$weekly_keep, monthly=$monthly_keep"
-    
-    # Create rotation directories if they don't exist
-    mkdir -p "${backup_dir}/daily"
-    mkdir -p "${backup_dir}/weekly"
-    mkdir -p "${backup_dir}/monthly"
-    
-    local today day_of_week day_of_month
-    today=$(date '+%Y%m%d')
-    day_of_week=$(date '+%u')  # 1=Monday, 7=Sunday
-    day_of_month=$(date '+%d')
-    
-    # Process each backup in main directory
-    for archive in "$backup_dir"/*.tar*; do
-        [[ ! -f "$archive" ]] && continue
-        
-        local archive_name archive_date
-        archive_name=$(basename "$archive")
-        
-        # Extract date from archive name (format: prefix_type_YYYYMMDD_HHMMSS)
-        if [[ "$archive_name" =~ _([0-9]{8})_ ]]; then
-            archive_date="${BASH_REMATCH[1]}"
-        else
-            continue
-        fi
-        
-        # Calculate age in days
-        local age_days
-        age_days=$(( ($(date -d "$today" +%s) - $(date -d "$archive_date" +%s)) / 86400 ))
-        
-        # Classify the backup
-        if [[ $age_days -eq 0 ]]; then
-            # Today's backup - stays in daily
-            mv_if_needed "$archive" "${backup_dir}/daily/"
-            
-        elif [[ $age_days -lt $daily_keep ]]; then
-            # In daily window
-            mv_if_needed "$archive" "${backup_dir}/daily/"
-            
-        elif [[ $age_days -lt $((weekly_keep * 7)) ]]; then
-            # Candidate for weekly (keep only Sunday's)
-            local archive_day_of_week
-            archive_day_of_week=$(date -d "$archive_date" '+%u')
-            
-            if [[ "$archive_day_of_week" == "7" ]]; then
-                mv_if_needed "$archive" "${backup_dir}/weekly/"
-            else
-                log_info "Deleting old daily backup: $archive_name"
-                rm_with_related "$archive"
-            fi
-            
-        elif [[ $age_days -lt $((monthly_keep * 30)) ]]; then
-            # Candidate for monthly (keep first of month)
-            local archive_day_of_month
-            archive_day_of_month=$(date -d "$archive_date" '+%d')
-            
-            if [[ "$archive_day_of_month" == "01" ]]; then
-                mv_if_needed "$archive" "${backup_dir}/monthly/"
-            else
-                log_info "Deleting old weekly backup: $archive_name"
-                rm_with_related "$archive"
-            fi
-            
-        else
-            # Too old - delete
-            log_info "Deleting old monthly backup: $archive_name"
-            rm_with_related "$archive"
-        fi
-    done
-    
-    # Clean up in each rotation directory
-    cleanup_rotation_dir "${backup_dir}/daily" "$daily_keep"
-    cleanup_rotation_dir "${backup_dir}/weekly" "$weekly_keep"
-    cleanup_rotation_dir "${backup_dir}/monthly" "$monthly_keep"
-}
-
-# Helper function for moving
-mv_if_needed() {
-    local src="$1"
-    local dest_dir="$2"
-    
-    [[ ! -f "$src" ]] && return 0
-    
-    local dest="${dest_dir}/$(basename "$src")"
-    
-    if [[ "$src" != "$dest" ]]; then
-        mv "$src" "$dest_dir/"
-        
-        # Also move associated files (.sha256, .meta, .manifest)
-        local base="${src%.*.*}"  # Remove .tar.gz
-        [[ -f "${base}.sha256" ]] && mv "${base}.sha256" "$dest_dir/"
-        [[ -f "${base}.meta" ]] && mv "${base}.meta" "$dest_dir/"
-        [[ -f "${base}.manifest" ]] && mv "${base}.manifest" "$dest_dir/"
-    fi
-}
-
-# Delete archive and associated files
-rm_with_related() {
-    local archive="$1"
-    
-    rm -f "$archive"
-    
-    local base="${archive%.*.*}"
-    rm -f "${base}.sha256"
-    rm -f "${base}.meta"
-    rm -f "${base}.manifest"
-}
-
-# Clean directory keeping only the last N archives
-cleanup_rotation_dir() {
-    local dir="$1"
-    local keep="$2"
-    
-    [[ ! -d "$dir" ]] && return 0
-    
-    # Count archives
-    local count
-    count=$(find "$dir" -maxdepth 1 -name "*.tar*" -type f | wc -l)
-    
-    if [[ $count -gt $keep ]]; then
-        local to_delete=$((count - keep))
-        
-        # Delete the oldest (sorted by date)
-        find "$dir" -maxdepth 1 -name "*.tar*" -type f -printf '%T@ %p\n' | \
-            sort -n | head -n "$to_delete" | cut -d' ' -f2- | \
-            while IFS= read -r archive; do
-                log_info "Rotation: deleting $archive"
-                rm_with_related "$archive"
-            done
-    fi
+    local root=$1
+    local -a command=(rotate "$root" "$(get_config rotation_daily 7)"
+        "$(get_config rotation_weekly 4)" "$(get_config rotation_monthly 12)")
+    [[ $(get_config dry_run false) == true ]] || command+=(--apply)
+    backup_engine "${command[@]}"
 }
 ```
 
@@ -496,309 +500,72 @@ cleanup_rotation_dir() {
 Restores a backup completely or selectively:
 
 ```bash
-extract_archive() {
-    local archive="$1"
-    local destination="${2:-.}"
-    local -a files=("${@:3}")  # Specific files for selective extraction
-    
-    # Validations
-    if [[ ! -f "$archive" ]]; then
-        log_error "Archive does not exist: $archive"
-        return 1
-    fi
-    
-    # Verify integrity if checksum exists
-    local checksum_file="${archive}.sha256"
-    if [[ -f "$checksum_file" ]]; then
-        log_info "Verifying integrity before restoration..."
-        if ! verify_checksum "$archive"; then
-            log_error "Integrity verification failed!"
-            log_error "Archive may be corrupted. Use --force to continue."
-            
-            if [[ "$(get_config 'force' 'false')" != "true" ]]; then
-                return 1
-            fi
-            log_warning "Forced continuation - beware of possible corruption!"
-        fi
-    fi
-    
-    # Create destination directory
-    mkdir -p "$destination" || {
-        log_error "Cannot create directory: $destination"
-        return 1
-    }
-    
-    # Detect compression type from extension
-    local compression=""
-    case "$archive" in
-        *.tar.gz|*.tgz)   compression="--gzip" ;;
-        *.tar.bz2|*.tbz2) compression="--bzip2" ;;
-        *.tar.xz|*.txz)   compression="--xz" ;;
-        *.tar.zst)        compression="--zstd" ;;
-        *.tar)            compression="" ;;
-    esac
-    
-    # Build tar command
-    local -a tar_cmd=(tar)
-    tar_cmd+=(--extract)
-    tar_cmd+=(--file="$archive")
-    tar_cmd+=(--directory="$destination")
-    
-    # Preserve permissions
-    tar_cmd+=(--preserve-permissions)
-    
-    # Options for owner (requires root)
-    if [[ $EUID -eq 0 ]]; then
-        tar_cmd+=(--same-owner)
-    else
-        tar_cmd+=(--no-same-owner)
-    fi
-    
-    # Compression
-    [[ -n "$compression" ]] && tar_cmd+=("$compression")
-    
-    # Verbose
-    if [[ "$(get_config 'verbose' 'false')" == "true" ]]; then
-        tar_cmd+=(--verbose)
-    fi
-    
-    # Specific files for selective extraction
-    if [[ ${#files[@]} -gt 0 ]]; then
-        log_info "Selective extraction: ${files[*]}"
-        for f in "${files[@]}"; do
-            # Remove leading slash for tar
-            tar_cmd+=("${f#/}")
-        done
-    fi
-    
-    log_info "Restoring from: $archive"
-    log_info "To: $destination"
-    
-    local start_time end_time
-    start_time=$(date +%s)
-    
-    if "${tar_cmd[@]}" 2>&1 | while IFS= read -r line; do
-        log_debug "$line"
-    done; then
-        end_time=$(date +%s)
-        log_info "Restoration completed in $((end_time - start_time)) seconds"
-        return 0
-    else
-        log_error "Restoration failed!"
-        return 1
-    fi
-}
-
-# Incremental restoration - requires all backups in order
-restore_incremental() {
-    local backup_dir="$1"
-    local destination="$2"
-    local target_date="${3:-}"  # Restore to a specific moment
-    
-    log_info "Incremental restoration from: $backup_dir"
-    
-    # Find the most recent full backup
-    local full_backup
-    full_backup=$(find "$backup_dir" -name "*_full_*.tar*" -type f | sort -r | head -1)
-    
-    if [[ -z "$full_backup" ]]; then
-        log_error "No full backup found!"
-        return 1
-    fi
-    
-    log_info "Full backup: $(basename "$full_backup")"
-    
-    # Restore the full backup
-    extract_archive "$full_backup" "$destination" || return 1
-    
-    # Find and apply incremental backups
-    local full_timestamp
-    if [[ "$full_backup" =~ _([0-9]{8}_[0-9]{6})\. ]]; then
-        full_timestamp="${BASH_REMATCH[1]}"
-    fi
-    
-    # Sort incrementals chronologically
-    local -a incremental_backups
-    while IFS= read -r -d '' incr; do
-        if [[ "$incr" =~ _([0-9]{8}_[0-9]{6})\. ]]; then
-            local incr_timestamp="${BASH_REMATCH[1]}"
-            
-            # Verify if newer than full
-            if [[ "$incr_timestamp" > "$full_timestamp" ]]; then
-                # Check target_date if specified
-                if [[ -z "$target_date" ]] || [[ "$incr_timestamp" < "$target_date" ]]; then
-                    incremental_backups+=("$incr")
-                fi
-            fi
-        fi
-    done < <(find "$backup_dir" -name "*_incr_*.tar*" -type f -print0 | sort -z)
-    
-    log_info "Found ${#incremental_backups[@]} incremental backups"
-    
-    # Apply incrementals in order
-    for incr in "${incremental_backups[@]}"; do
-        log_info "Applying incremental: $(basename "$incr")"
-        extract_archive "$incr" "$destination" || {
-            log_error "Error applying incremental backup!"
-            return 1
-        }
+extract_archive() (
+    local archive=$1 destination=$2 root stage selected relative
+    shift 2
+    root=${BACKUP_CATALOGUE_ROOT:-$(dirname -- "$archive")}
+    if (($# == 0)); then backup_engine restore "$root" "$archive" "$destination"; return $?; fi
+    # Selective restore uses a disposable complete chain first, including deletion records.
+    [[ ! -e $destination || -d $destination ]] || return 2
+    [[ ! -d $destination || -z $(find "$destination" -mindepth 1 -print -quit) ]] || return 2
+    stage=$(mktemp -d) || return 1
+    trap 'rm -rf -- "$stage"' EXIT
+    backup_engine restore "$root" "$archive" "$stage" || return 1
+    for selected in "$@"; do
+        [[ $selected != /* && $selected != '..' && $selected != ../* && $selected != */../* && $selected != */.. ]] || return 2
+        [[ -e $stage/$selected || -L $stage/$selected ]] || return 2
     done
-    
-    log_info "Incremental restoration completed"
-    return 0
+    mkdir -p -- "$destination" || return 1
+    for selected in "$@"; do
+        (cd -- "$stage" && cp -a --parents -- "$selected" "$destination") || return 1
+    done
+)
+restore_incremental() {
+    local root=$1 destination=$2 target_date=${3:-} archive
+    if [[ -n $target_date ]]; then archive=$(backup_engine at "$root" "$target_date") || return 1
+    else archive=$(readlink -f -- "$root/latest") || return 1; fi
+    BACKUP_CATALOGUE_ROOT=$root extract_archive "$archive" "$destination"
 }
 ```
 
 ### 3.5 Verification Functions
 
 ```bash
+# The reference engine's sidecars are JSON, distinct from coreutils text sidecars.
 generate_checksum() {
-    local file="$1"
-    local algorithm="${2:-sha256}"
-    
-    [[ ! -f "$file" ]] && return 1
-    
-    local checksum_file="${file}.${algorithm}"
-    local checksum_cmd
-    
-    case "$algorithm" in
-        md5)    checksum_cmd="md5sum" ;;
-        sha1)   checksum_cmd="sha1sum" ;;
-        sha256) checksum_cmd="sha256sum" ;;
-        sha512) checksum_cmd="sha512sum" ;;
-        *)
-            log_error "Unknown algorithm: $algorithm"
-            return 1
-            ;;
-    esac
-    
-    log_info "Generating $algorithm checksum for $(basename "$file")"
-    
-    if $checksum_cmd "$file" > "$checksum_file"; then
-        log_info "Checksum saved: $checksum_file"
-        return 0
-    else
-        log_error "Error generating checksum!"
-        return 1
-    fi
+    python3 - "${BACKUP_ENGINE_PATH:-${LIB_DIR:?}/backup_reference.py}" "$1" "${2:-sha256}" <<'PY'
+import importlib.util,pathlib,sys
+spec=importlib.util.spec_from_file_location('backup_reference',sys.argv[1]); module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+module.write_checksum(pathlib.Path(sys.argv[2]),sys.argv[3])
+PY
 }
-
 verify_checksum() {
-    local file="$1"
-    local algorithm="${2:-}"
-    
-    [[ ! -f "$file" ]] && {
-        log_error "File does not exist: $file"
-        return 1
-    }
-    
-    # Auto-detect checksum type
-    local checksum_file=""
-    for algo in sha256 sha1 md5; do
-        if [[ -f "${file}.${algo}" ]]; then
-            checksum_file="${file}.${algo}"
-            algorithm="$algo"
-            break
-        fi
-    done
-    
-    if [[ -z "$checksum_file" ]]; then
-        log_warning "No checksum file found for: $file"
-        return 0  # Not an error - just no checksum
+    local archive=$1 algorithm=${2:-} candidate
+    if [[ -z $algorithm ]]; then
+        for candidate in sha256 sha512 sha1 md5; do
+            if [[ -f $archive.$candidate ]]; then algorithm=$candidate; break; fi
+        done
     fi
-    
-    local checksum_cmd
-    case "$algorithm" in
-        md5)    checksum_cmd="md5sum" ;;
-        sha1)   checksum_cmd="sha1sum" ;;
-        sha256) checksum_cmd="sha256sum" ;;
-        sha512) checksum_cmd="sha512sum" ;;
-    esac
-    
-    log_info "Verifying $algorithm: $(basename "$file")"
-    
-    # Change to file directory for correct verification
-    local dir file_name
-    dir=$(dirname "$file")
-    file_name=$(basename "$file")
-    
-    if (cd "$dir" && $checksum_cmd --check --status "$(basename "$checksum_file")" 2>/dev/null); then
-        log_info "✓ Integrity verification OK"
-        return 0
-    else
-        log_error "✗ Integrity verification FAILED!"
-        return 1
-    fi
+    [[ -n $algorithm ]] || { printf 'UNVERIFIED: no checksum for %s\n' "$archive" >&2; return 2; }
+    python3 - "${BACKUP_ENGINE_PATH:-${LIB_DIR:?}/backup_reference.py}" "$archive" "$algorithm" <<'PY'
+import importlib.util,pathlib,sys
+spec=importlib.util.spec_from_file_location('backup_reference',sys.argv[1]); module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+try: module.verify_checksum(pathlib.Path(sys.argv[2]),sys.argv[3])
+except (OSError,ValueError) as error: print(error,file=sys.stderr); raise SystemExit(1)
+PY
 }
-
-# Verify archive - test that it can be extracted
 verify_archive() {
-    local archive="$1"
-    
-    [[ ! -f "$archive" ]] && {
-        log_error "Archive does not exist: $archive"
-        return 1
-    }
-    
-    log_info "Verifying archive: $archive"
-    
-    # Detect compression
-    local compression=""
-    case "$archive" in
-        *.tar.gz|*.tgz)   compression="--gzip" ;;
-        *.tar.bz2|*.tbz2) compression="--bzip2" ;;
-        *.tar.xz|*.txz)   compression="--xz" ;;
-        *.tar.zst)        compression="--zstd" ;;
-    esac
-    
-    # Test with tar
-    local -a tar_cmd=(tar --test-label --file="$archive")
-    [[ -n "$compression" ]] && tar_cmd+=("$compression")
-    
-    if "${tar_cmd[@]}" 2>/dev/null; then
-        log_info "✓ Archive is valid"
-        
-        # Also verify checksum if it exists
-        verify_checksum "$archive"
-        
-        return 0
-    else
-        log_error "✗ Archive is corrupted or invalid!"
-        return 1
-    fi
+    local archive=$1
+    verify_structure "$archive" || return 1
+    verify_checksum "$archive" || return 1
 }
-
-# Generate manifest (file list)
-generate_manifest() {
-    local archive="$1"
-    local manifest_file="${archive%.*.*}.manifest"
-    
-    [[ ! -f "$archive" ]] && return 1
-    
-    log_info "Generating manifest for $(basename "$archive")"
-    
-    # Detect compression
-    local compression=""
-    case "$archive" in
-        *.tar.gz|*.tgz)   compression="--gzip" ;;
-        *.tar.bz2|*.tbz2) compression="--bzip2" ;;
-        *.tar.xz|*.txz)   compression="--xz" ;;
-        *.tar.zst)        compression="--zstd" ;;
-    esac
-    
-    local -a tar_cmd=(tar --list --verbose --file="$archive")
-    [[ -n "$compression" ]] && tar_cmd+=("$compression")
-    
-    if "${tar_cmd[@]}" > "$manifest_file" 2>/dev/null; then
-        local file_count
-        file_count=$(wc -l < "$manifest_file")
-        log_info "Manifest generated: $file_count files"
-        return 0
-    else
-        log_error "Error generating manifest!"
-        return 1
-    fi
-}
+generate_manifest() (
+    local archive=$1 temporary
+    temporary=$(mktemp "$(dirname -- "$archive")/.manifest.XXXXXX") || return 1
+    trap 'rm -f -- "$temporary"' EXIT
+    tar --list --verbose --file="$archive" > "$temporary" || return 1
+    mv -- "$temporary" "$archive.manifest"
+)
 ```
 
 ---
@@ -859,8 +626,8 @@ show_progress_bar() {
     local empty=$((width - filled))
     
     local bar=""
-    bar+=$(printf '%*s' "$filled" '' | tr ' ' '█')
-    bar+=$(printf '%*s' "$empty" '' | tr ' ' '░')
+    bar+=$(printf '%*s' "$filled" '' | tr ' ' '#')
+    bar+=$(printf '%*s' "$empty" '' | tr ' ' '-')
     
     printf "\r%s: [%s] %3d%% (%d/%d)" \
         "$prefix" "$bar" "$percent" "$current" "$total"
@@ -908,25 +675,17 @@ log_message() {
 ```bash
 # Format bytes to human readable
 format_bytes() {
-    local bytes="${1:-0}"
-    local precision="${2:-2}"
-    
-    if ! [[ "$bytes" =~ ^[0-9]+$ ]]; then
-        echo "0 B"
-        return
-    fi
-    
-    if [[ $bytes -lt 1024 ]]; then
-        echo "${bytes} B"
-    elif [[ $bytes -lt $((1024 * 1024)) ]]; then
-        printf "%.${precision}f KiB" "$(echo "scale=10; $bytes / 1024" | bc)"
-    elif [[ $bytes -lt $((1024 * 1024 * 1024)) ]]; then
-        printf "%.${precision}f MiB" "$(echo "scale=10; $bytes / 1024 / 1024" | bc)"
-    elif [[ $bytes -lt $((1024 * 1024 * 1024 * 1024)) ]]; then
-        printf "%.${precision}f GiB" "$(echo "scale=10; $bytes / 1024 / 1024 / 1024" | bc)"
-    else
-        printf "%.${precision}f TiB" "$(echo "scale=10; $bytes / 1024 / 1024 / 1024 / 1024" | bc)"
-    fi
+    python3 - "${1:-0}" "${2:-2}" <<'PY'
+import sys
+from decimal import Decimal
+try:
+    raw,precision=sys.argv[1:]; precision=int(precision)
+    if not raw.isdigit() or not 0<=precision<=8: raise ValueError()
+    value=Decimal(raw); units=('B','KiB','MiB','GiB','TiB','PiB'); unit=0
+    while value>=1024 and unit<len(units)-1: value/=1024; unit+=1
+    print(f'{value:.{precision}f} {units[unit]}',end='')
+except ValueError: raise SystemExit(2)
+PY
 }
 
 # Format duration
@@ -950,7 +709,7 @@ calculate_source_size() {
     for src in "${sources[@]}"; do
         if [[ -e "$src" ]]; then
             local size
-            size=$(du -sb "$src" 2>/dev/null | cut -f1)
+            size=$(du -sb -- "$src" 2>/dev/null | cut -f1)
             total_size=$((total_size + size))
         fi
     done
@@ -962,7 +721,8 @@ calculate_source_size() {
 estimate_compression_ratio() {
     local compression="${1:-gzip}"
     
-    # Typical compression ratios (approximate)
+    # Illustrative planning inputs only, not measured or generally typical ratios.
+    # Real ratios depend on the source corpus and must be measured before sizing storage.
     case "$compression" in
         none)  echo "1.0" ;;
         gzip)  echo "0.4" ;;  # ~60% reduction
@@ -990,66 +750,33 @@ get_compression_extension() {
 ### 4.3 Lock and Concurrency Functions
 
 ```bash
-# Variables for lock
-declare -g LOCK_FILE=""
-declare -g LOCK_FD=""
-
+declare -g LOCK_FILE='' LOCK_FD='' TEMP_DIR=''
 create_lockfile() {
-    local lock_name="${1:-backup}"
-    LOCK_FILE="/var/lock/${lock_name}.lock"
-    
-    # Try to obtain the lock
-    exec {LOCK_FD}>"$LOCK_FILE"
-    
-    if flock -n "$LOCK_FD"; then
-        # We obtained the lock
-        echo $$ > "$LOCK_FILE"
-        log_debug "Lock obtained: $LOCK_FILE"
-        return 0
-    else
-        # Someone else has the lock
-        local other_pid
-        other_pid=$(cat "$LOCK_FILE" 2>/dev/null || echo "unknown")
-        log_error "Another instance is running (PID: $other_pid)"
-        return 1
-    fi
+    local name=${1:-backup}
+    [[ $name =~ ^[A-Za-z0-9_-]+$ ]] || return 2
+    : "${BACKUP_LOCK_DIR:?Set an existing owned lock directory}"
+    [[ -d $BACKUP_LOCK_DIR ]] || return 2
+    LOCK_FILE=$BACKUP_LOCK_DIR/$name.lock
+    exec {LOCK_FD}>>"$LOCK_FILE" || return 1
+    if flock -n "$LOCK_FD"; then return 0; fi
+    exec {LOCK_FD}>&-; LOCK_FD=''; return 1
 }
-
 remove_lockfile() {
-    if [[ -n "$LOCK_FD" ]]; then
-        flock -u "$LOCK_FD" 2>/dev/null
-        exec {LOCK_FD}>&-
-    fi
-    
-    [[ -f "$LOCK_FILE" ]] && rm -f "$LOCK_FILE"
-    log_debug "Lock released"
+    if [[ -n $LOCK_FD ]]; then exec {LOCK_FD}>&-; LOCK_FD=''; fi
+    # Persistent pathname: never unlink a lock used by other contenders.
+    return 0
 }
-
-# Cleanup handler for signals
 setup_cleanup_handler() {
-    trap 'cleanup_on_exit' EXIT
-    trap 'cleanup_on_signal SIGINT' SIGINT
-    trap 'cleanup_on_signal SIGTERM' SIGTERM
+    trap cleanup_on_exit EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
 }
-
 cleanup_on_exit() {
-    local exit_code=$?
-    
-    stop_progress
-    remove_lockfile
-    
-    # Delete temporary files
-    if [[ -n "${TEMP_DIR:-}" && -d "$TEMP_DIR" ]]; then
-        rm -rf "$TEMP_DIR"
-    fi
-    
-    exit $exit_code
-}
-
-cleanup_on_signal() {
-    local signal="$1"
-    log_warning "Received signal $signal, stopping..."
-    exit 130
+    local rc=$?
+    stop_progress || :
+    remove_lockfile || :
+    if [[ -n $TEMP_DIR ]]; then rm -rf -- "$TEMP_DIR"; fi
+    return "$rc"
 }
 ```
 
@@ -1095,6 +822,11 @@ set_defaults() {
     CONFIG[verbose]="false"
     CONFIG[dry_run]="false"
     CONFIG[force]="false"
+    CONFIG[generate_checksum]="true"
+    CONFIG[exclude_file]=""
+    CONFIG[backup_sources]=""
+    CONFIG[output_format]="human"
+    CONFIG[show_latest_only]="false"
     
     # Hooks
     CONFIG[pre_backup_hook]=""
@@ -1111,7 +843,8 @@ load_config() {
     
     # Set default values first
     set_defaults
-    
+    CONFIG_FILE=""
+    [[ -z $config_file || -r $config_file ]] || return 2
     # Search for configuration file
     local search_paths=(
         "$config_file"
@@ -1133,7 +866,7 @@ load_config() {
     
     # Parse file if it exists
     if [[ -n "$CONFIG_FILE" ]]; then
-        parse_config_file "$CONFIG_FILE"
+        parse_config_file "$CONFIG_FILE" || return 2
     else
         log_warning "No configuration file found, using default values"
     fi
@@ -1148,7 +881,7 @@ parse_config_file() {
     local current_section=""
     
     while IFS= read -r line || [[ -n "$line" ]]; do
-        ((line_num++))
+        line_num=$((line_num + 1))
         
         # Remove whitespace
         line="${line#"${line%%[![:space:]]*}"}"
@@ -1173,17 +906,19 @@ parse_config_file() {
                 key="${current_section}_${key}"
             fi
             
-            # Remove quotes
-            value="${value#[\"\']}"
-            value="${value%[\"\']}"
-            
-            # Expand variables
-            value=$(eval echo "$value" 2>/dev/null) || value="${BASH_REMATCH[2]}"
-            
+            # Literal data with optional matching outer quotes; never evaluate values.
+            if [[ $value == \"* || $value == \'* ]]; then
+                local quote=${value:0:1}
+                [[ ${#value} -ge 2 && ${value: -1} == "$quote" ]] || return 2
+                value=${value:1:${#value}-2}
+            fi
+            [[ -v CONFIG[$key] ]] || { log_error "Unknown configuration key: $key"; return 2; }
+
             CONFIG["$key"]="$value"
             log_debug "Config: $key = $value"
         else
-            log_warning "Line $line_num: invalid format: $line"
+            log_error "Invalid configuration line $line_num"
+            return 2
         fi
     done < "$file"
 }
@@ -1197,7 +932,7 @@ validate_config() {
         none|gzip|bzip2|xz|zstd) ;;
         *)
             log_error "Invalid compression: $compression"
-            ((errors++))
+            errors=$((errors + 1))
             ;;
     esac
     
@@ -1205,7 +940,7 @@ validate_config() {
     local level="${CONFIG[compression_level]}"
     if ! [[ "$level" =~ ^[0-9]$ ]]; then
         log_error "Invalid compression level: $level (must be 0-9)"
-        ((errors++))
+        errors=$((errors + 1))
     fi
     
     # Validate checksum algorithm
@@ -1214,7 +949,7 @@ validate_config() {
         md5|sha1|sha256|sha512) ;;
         *)
             log_error "Invalid checksum algorithm: $algorithm"
-            ((errors++))
+            errors=$((errors + 1))
             ;;
     esac
     
@@ -1223,7 +958,7 @@ validate_config() {
         local val="${CONFIG[$key]}"
         if ! [[ "$val" =~ ^[0-9]+$ ]]; then
             log_error "Invalid $key: $val"
-            ((errors++))
+            errors=$((errors + 1))
         fi
     done
     
@@ -1369,6 +1104,10 @@ parse_arguments() {
     # Parse remaining arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            -c|--config|-d|--destination|-t|--type|-z|--compression|-e|--exclude|-a|--archive|-o|--output|--format)
+                [[ $# -ge 2 && -n $2 ]] || { log_error "Missing value for $1"; return 2; };;
+        esac
+        case "$1" in
             -h|--help)
                 show_help
                 exit 0
@@ -1457,6 +1196,11 @@ parse_arguments() {
 
 ```bash
 execute_action() {
+    if [[ $(get_config dry_run false) == true ]]; then
+        printf '[DRY RUN] action=%q destination=%q archive=%q restore=%q\n' "$ACTION" "$DESTINATION" "$ARCHIVE_PATH" "$RESTORE_PATH"
+        printf '[DRY RUN] source=%q\n' "${SOURCES[@]}"
+        return 0  # Before locks, hooks, mkdir, logging destinations, restore or rotation.
+    fi
     case "$ACTION" in
         backup)
             do_backup
@@ -1533,8 +1277,8 @@ do_backup() {
     
     # Create the backup
     local result
-    result=$(create_archive "$BACKUP_TYPE" "$DESTINATION" "${SOURCES[@]}")
-    local exit_code=$?
+    local exit_code=0
+    if result=$(create_archive "$BACKUP_TYPE" "$DESTINATION" "${SOURCES[@]}"); then :; else exit_code=$?; fi
     
     if [[ $exit_code -eq 0 ]]; then
         # Execute post-hook
@@ -1546,6 +1290,7 @@ do_backup() {
             "$post_hook" || log_warning "Post-backup hook failed"
         fi
         
+        if [[ $(get_config rotation_enabled false) == true ]]; then apply_rotation "$DESTINATION" || return 1; fi
         log_info "Backup created successfully: $result"
     else
         # Execute error hook
@@ -1610,78 +1355,9 @@ do_list() {
 }
 
 list_backups() {
-    local dir="$1"
-    local format="${2:-human}"
-    
-    case "$format" in
-        json)
-            echo "{"
-            echo "  \"backups\": ["
-            local first=true
-            ;;
-        csv)
-            echo "filename,type,date,size,compression"
-            ;;
-        *)
-            echo "╔════════════════════════════════════════════════════════════════╗"
-            echo "║                    Available Backups                            ║"
-            echo "╠════════════════════════════════════════════════════════════════╣"
-            ;;
-    esac
-    
-    # Search for backups in all subdirectories
-    find "$dir" -name "*.tar*" -type f | sort -r | while IFS= read -r archive; do
-        local name type date_str size compression
-        
-        name=$(basename "$archive")
-        size=$(stat -c %s "$archive" 2>/dev/null || echo "0")
-        
-        # Extract type and date from name
-        if [[ "$name" =~ _([a-z]+)_([0-9]{8}_[0-9]{6})\. ]]; then
-            type="${BASH_REMATCH[1]}"
-            date_str="${BASH_REMATCH[2]}"
-        else
-            type="unknown"
-            date_str="unknown"
-        fi
-        
-        # Detect compression
-        case "$name" in
-            *.gz)  compression="gzip" ;;
-            *.bz2) compression="bzip2" ;;
-            *.xz)  compression="xz" ;;
-            *.zst) compression="zstd" ;;
-            *)     compression="none" ;;
-        esac
-        
-        case "$format" in
-            json)
-                $first || echo ","
-                first=false
-                printf '    {"name": "%s", "type": "%s", "date": "%s", "size": %d, "compression": "%s"}' \
-                    "$name" "$type" "$date_str" "$size" "$compression"
-                ;;
-            csv)
-                echo "$name,$type,$date_str,$size,$compression"
-                ;;
-            *)
-                printf "║ %-60s ║\n" "$name"
-                printf "║   Type: %-10s Size: %-15s Compression: %-10s ║\n" \
-                    "$type" "$(format_bytes $size)" "$compression"
-                ;;
-        esac
-    done
-    
-    case "$format" in
-        json)
-            echo ""
-            echo "  ]"
-            echo "}"
-            ;;
-        human)
-            echo "╚════════════════════════════════════════════════════════════════╝"
-            ;;
-    esac
+    local -a command=(list "$1" --format "${2:-human}")
+    [[ $(get_config show_latest_only false) == true ]] && command+=(--latest)
+    backup_engine "${command[@]}"
 }
 
 do_rotate() {
@@ -1697,23 +1373,23 @@ do_rotate() {
 
 ```bash
 main() {
-    # Parse arguments
-    parse_arguments "$@"
-    
-    # Load configuration
-    load_config "${CONFIG_FILE:-}"
-    
-    # Set log file
-    LOG_FILE=$(get_config "log_file" "/var/log/backup.log")
-    
-    # Execute action
+    local -a args=("$@")
+    local i config=''
+    for ((i=0; i<${#args[@]}; i++)); do
+        if [[ ${args[i]} == -c || ${args[i]} == --config ]]; then
+            ((i+1 < ${#args[@]})) || return 2
+            config=${args[i+1]}
+        fi
+    done
+    load_config "$config" || return 2
+    parse_arguments "${args[@]}" || return 2
+    validate_config || return 2
+    if [[ $(get_config dry_run false) == true ]]; then execute_action; return $?; fi
+    LOG_FILE=$(get_config log_file '')
+    setup_cleanup_handler
     execute_action
 }
-
-# Run main
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then main "$@"; fi
 ```
 
 ---
@@ -1794,86 +1470,29 @@ fi
 ### 8.1 Multi-Level Verification
 
 ```bash
-# Level 1: Archive structure verification
-verify_structure() {
-    local archive="$1"
-    
-    tar --test-label -f "$archive" 2>/dev/null
-}
-
-# Level 2: Checksum verification
-verify_integrity() {
-    local archive="$1"
-    
-    verify_checksum "$archive"
-}
-
-# Level 3: Content verification (extract and compare)
-verify_content() {
-    local archive="$1"
-    local original_dir="$2"
-    
-    local temp_dir
-    temp_dir=$(mktemp -d)
-    
-    # Extract to temporary directory
-    extract_archive "$archive" "$temp_dir"
-    
-    # Compare with original
-    diff -rq "$original_dir" "$temp_dir" > /dev/null 2>&1
-    local result=$?
-    
-    rm -rf "$temp_dir"
-    return $result
-}
+verify_structure() { tar --list --file="$1" >/dev/null; }
+verify_integrity() { verify_checksum "$1"; }
+verify_content() (
+    local archive=$1 original=$2 temporary rc=0 root_member
+    original=$(realpath -- "$original") || return 2
+    temporary=$(mktemp -d) || return 1
+    trap 'rm -rf -- "$temporary"' EXIT
+    extract_archive "$archive" "$temporary" || return 1
+    # This engine archives absolute source names relative to /. Compare the matching root.
+    root_member=${original#/}
+    [[ -e $temporary/$root_member ]] || return 1
+    if diff -rq -- "$original" "$temporary/$root_member"; then :; else rc=$?; fi
+    return "$rc"
+)
 ```
 
 ### 8.2 Point-in-Time Restoration
 
 ```bash
 restore_to_point_in_time() {
-    local backup_dir="$1"
-    local destination="$2"
-    local target_datetime="$3"  # Format: YYYYMMDD_HHMMSS
-    
-    log_info "Restoring to point: $target_datetime"
-    
-    # Find the last full backup before target
-    local full_backup=""
-    while IFS= read -r backup; do
-        if [[ "$backup" =~ _([0-9]{8}_[0-9]{6})\. ]]; then
-            local backup_time="${BASH_REMATCH[1]}"
-            if [[ "$backup_time" < "$target_datetime" || "$backup_time" == "$target_datetime" ]]; then
-                full_backup="$backup"
-                break
-            fi
-        fi
-    done < <(find "$backup_dir" -name "*_full_*.tar*" | sort -r)
-    
-    if [[ -z "$full_backup" ]]; then
-        log_error "No full backup found before $target_datetime"
-        return 1
-    fi
-    
-    # Restore full backup
-    log_info "Restoring full: $(basename "$full_backup")"
-    extract_archive "$full_backup" "$destination"
-    
-    # Apply incrementals up to target
-    while IFS= read -r incr_backup; do
-        if [[ "$incr_backup" =~ _([0-9]{8}_[0-9]{6})\. ]]; then
-            local incr_time="${BASH_REMATCH[1]}"
-            
-            # Verify it's between full and target
-            if [[ "$incr_time" > "${full_backup##*_full_}" ]] && \
-               [[ "$incr_time" < "$target_datetime" || "$incr_time" == "$target_datetime" ]]; then
-                log_info "Applying incremental: $(basename "$incr_backup")"
-                extract_archive "$incr_backup" "$destination"
-            fi
-        fi
-    done < <(find "$backup_dir" -name "*_incr_*.tar*" | sort)
-    
-    log_info "Restoration completed to point $target_datetime"
+    local root=$1 destination=$2 target_datetime=$3 target
+    target=$(backup_engine at "$root" "$target_datetime") || return 1
+    BACKUP_CATALOGUE_ROOT=$root extract_archive "$target" "$destination"
 }
 ```
 
@@ -1984,3 +1603,7 @@ The system can be extended for:
 - End-to-end encryption
 - Web interface for management
 - Integration with alerting systems
+
+### Technical reference for the corrected examples
+
+For the snapshot and deletion-record contract, see the [GNU tar incremental-dump manual](https://www.gnu.org/software/tar/manual/html_section/Incremental-Dumps.html).

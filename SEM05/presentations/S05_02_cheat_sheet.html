@@ -52,7 +52,7 @@
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
             gap: 20px;
         }
         
@@ -177,7 +177,86 @@
                 break-inside: avoid;
             }
         }
-    </style>
+    @media screen and (max-width: 700px) {
+ .two-column,.two-columns,.three-columns,.cols { flex-direction: column; }
+ pre,code { overflow-wrap: anywhere; } table { display: block; overflow-x: auto; }
+}
+</style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="container">
@@ -188,17 +267,17 @@
             
             <!-- STRICT MODE -->
             <div class="card">
-                <div class="card-title strict">🛡️ Strict Mode (MANDATORY)</div>
+                <div class="card-title strict">🛡️ Bash Options and Explicit Checks</div>
                 <div class="examples">
                     <span class="comment">#!/bin/bash</span><br>
                     <span class="cmd">set -e</span>          <span class="comment"># Exit on error</span><br>
                     <span class="cmd">set -u</span>          <span class="comment"># Error on undefined var</span><br>
-                    <span class="cmd">set -o pipefail</span> <span class="comment"># Catch pipe errors</span><br><br>
+                    <span class="cmd">set -o pipefail</span> <span class="comment"># Rightmost nonzero pipeline status, or zero</span><br><br>
                     <span class="comment"># Or compact:</span><br>
                     <span class="cmd">set -euo pipefail</span>
                 </div>
                 <div class="warning">
-                    ⚠️ <code>set -e</code> does NOT catch errors in: <code>if/while</code>, after <code>||/&&</code>, subshells
+                    ⚠️ <code>set -e</code> has test-context exceptions: <code>if/while/until</code>, non-final <code>&amp;&amp;/||</code> commands and tested functions. A final failure may exit. <code>(...)</code> inherits it; <code>$(...)</code> normally clears it unless <code>inherit_errexit</code> is enabled.
                 </div>
             </div>
             
@@ -259,7 +338,7 @@
                     <tr><td>Key count</td><td><code>${#config[@]}</code></td></tr>
                 </table>
                 <div class="warning">
-                    ⚠️ WITHOUT <code>declare -A</code>: <code>hash[host]="x"</code> → <code>hash[0]="x"</code> (host=0!)
+                    ⚠️ WITHOUT <code>declare -A</code>: <code>hash[host]="x"</code> → <code>hash[0]="x"</code> (unset arithmetic host becomes 0 without nounset; it is not a string key)
                 </div>
             </div>
             
@@ -267,18 +346,19 @@
             <div class="card">
                 <div class="card-title trap">🧹 Trap and Cleanup</div>
                 <div class="examples">
+                    <span class="cmd">TEMP=""  # initialise before installing the trap</span><br>
                     <span class="cmd">cleanup() {</span><br>
                     <span class="cmd">    local exit_code=$?</span><br>
                     <span class="cmd">    [[ -f "$TEMP" ]] && rm -f "$TEMP"</span><br>
                     <span class="cmd">    exit $exit_code</span><br>
                     <span class="cmd">}</span><br><br>
-                    <span class="cmd">trap cleanup EXIT</span>  <span class="comment"># On any exit</span><br>
-                    <span class="cmd">trap 'echo "Ctrl+C"' INT</span>  <span class="comment"># On Ctrl+C</span>
+                    <span class="cmd">trap cleanup EXIT</span>  <span class="comment"># Best-effort cleanup</span><br>
+                    <span class="cmd">trap 'exit 130' INT; trap 'exit 143' TERM</span>  <span class="comment"># On Ctrl+C</span>
                 </div>
                 <table>
-                    <tr><th>Signal</th><th>When</th></tr>
-                    <tr><td><code>EXIT</code></td><td>On script exit (any mode)</td></tr>
-                    <tr><td><code>ERR</code></td><td>On error (with set -e)</td></tr>
+                    <tr><th>Trap event / signal</th><th>When</th></tr>
+                    <tr><td><code>EXIT</code></td><td>On ordinary shell exit; not SIGKILL/power loss</td></tr>
+                    <tr><td><code>ERR</code></td><td>On eligible nonzero status; -e is not required</td></tr>
                     <tr><td><code>INT</code></td><td>Ctrl+C</td></tr>
                     <tr><td><code>TERM</code></td><td>kill (default)</td></tr>
                     <tr><td><code>DEBUG</code></td><td>Before each command</td></tr>
@@ -293,7 +373,7 @@
                     <tr><td><code>${VAR:-default}</code></td><td>Return default if unset/empty</td></tr>
                     <tr><td><code>${VAR:=default}</code></td><td>Set VAR to default if unset/empty</td></tr>
                     <tr><td><code>${VAR:?error}</code></td><td>Error if unset/empty</td></tr>
-                    <tr><td><code>${VAR:+alt}</code></td><td>Return alt if VAR IS set</td></tr>
+                    <tr><td><code>${VAR:+alt}</code></td><td>Return alt only if VAR is set and nonempty; VAR= gives an empty expansion</td></tr>
                 </table>
                 <div class="examples">
                     <span class="comment"># Pattern for arguments:</span><br>

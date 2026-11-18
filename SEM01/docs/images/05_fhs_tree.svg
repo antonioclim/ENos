@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 450" width="750" height="450">
-  <defs>
-    <linearGradient id="dirGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#2d333b;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#22272e;stop-opacity:1" />
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 450" width="750" height="450" role="img" xml:lang="en" aria-labelledby="sem01-05-fhs-tree-title sem01-05-fhs-tree-desc">
+  <title id="sem01-05-fhs-tree-title">File System Hierarchy (FHS) - Simplified</title><desc id="sem01-05-fhs-tree-desc">Selected directories descend from the filesystem root. A user home contains configuration and personal directories; /var contains logs. /tmp cleanup is governed by system policy. The diagram is simplified and the home layout is illustrative.</desc><defs>
+    <linearGradient id="sem01-05-fhs-tree-dirGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d333b;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#22272e;stop-opacity:1"/>
     </linearGradient>
   </defs>
   
@@ -11,119 +11,112 @@
   <rect width="750" height="450" fill="#161b22"/>
   
   <!-- Title -->
-  <text x="375" y="30" font-family="Inter, sans-serif" font-size="18" font-weight="bold" fill="#e6edf3" text-anchor="middle">File System Hierarchy (FHS) - Simplified</text>
+  <text x="375" y="30" font-family="Inter, sans-serif" font-size="18" font-weight="bold" fill="#e6edf3" text-anchor="middle" id="sem01-05-fhs-tree-text-1">File System Hierarchy (FHS) - Simplified</text>
   
   <!-- Root -->
   <rect x="335" y="50" width="80" height="35" rx="6" fill="#f85149" stroke="#f85149"/>
-  <text x="375" y="73" font-family="JetBrains Mono, monospace" font-size="16" fill="#161b22" text-anchor="middle" font-weight="bold">/</text>
+  <text x="375" y="73" font-family="JetBrains Mono, monospace" font-size="16" fill="#161b22" text-anchor="middle" font-weight="bold" id="sem01-05-fhs-tree-text-2">/</text>
   
   <!-- Lines from root -->
-  <line x1="375" y1="85" x2="375" y2="100" stroke="#30363d" stroke-width="2"/>
-  <line x1="100" y1="100" x2="650" y2="100" stroke="#30363d" stroke-width="2"/>
+  <line x1="375" y1="85" x2="375" y2="100" stroke="#738399" stroke-width="2"/>
+  <line x1="100" y1="100" x2="650" y2="100" stroke="#738399" stroke-width="2"/>
   
   <!-- Vertical lines to directories -->
-  <line x1="100" y1="100" x2="100" y2="120" stroke="#30363d" stroke-width="2"/>
-  <line x1="210" y1="100" x2="210" y2="120" stroke="#30363d" stroke-width="2"/>
-  <line x1="320" y1="100" x2="320" y2="120" stroke="#30363d" stroke-width="2"/>
-  <line x1="430" y1="100" x2="430" y2="120" stroke="#30363d" stroke-width="2"/>
-  <line x1="540" y1="100" x2="540" y2="120" stroke="#30363d" stroke-width="2"/>
-  <line x1="650" y1="100" x2="650" y2="120" stroke="#30363d" stroke-width="2"/>
+  <line x1="100" y1="100" x2="100" y2="120" stroke="#738399" stroke-width="2"/>
+  <line x1="210" y1="100" x2="210" y2="120" stroke="#738399" stroke-width="2"/>
+  <line x1="320" y1="100" x2="320" y2="120" stroke="#738399" stroke-width="2"/>
+  <line x1="430" y1="100" x2="430" y2="120" stroke="#738399" stroke-width="2"/>
+  <line x1="540" y1="100" x2="540" y2="120" stroke="#738399" stroke-width="2"/>
+  <line x1="650" y1="100" x2="650" y2="120" stroke="#738399" stroke-width="2"/>
   
   <!-- /bin -->
   <g transform="translate(50, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#58a6ff" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#58a6ff" text-anchor="middle">/bin</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Essential</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">binaries</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#58a6ff" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#58a6ff" text-anchor="middle" id="sem01-05-fhs-tree-text-3">/bin</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-4">Essential</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-5">binaries</text>
   </g>
   
   <!-- /etc -->
   <g transform="translate(160, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#d29922" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#d29922" text-anchor="middle">/etc</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">System</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">config</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#d29922" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#d29922" text-anchor="middle" id="sem01-05-fhs-tree-text-6">/etc</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-7">System</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-8">config</text>
   </g>
   
   <!-- /home -->
   <g transform="translate(270, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#3fb950" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#3fb950" text-anchor="middle">/home</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">User</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">directories</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#3fb950" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#3fb950" text-anchor="middle" id="sem01-05-fhs-tree-text-9">/home</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-10">User</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-11">directories</text>
   </g>
   
   <!-- /tmp -->
   <g transform="translate(380, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#8b949e" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#8b949e" text-anchor="middle">/tmp</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Temporary</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">(cleared!)</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#8b949e" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-12">/tmp</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-13">Temporary</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-14">(policy-based)</text>
   </g>
   
   <!-- /var -->
   <g transform="translate(490, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#a371f7" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#a371f7" text-anchor="middle">/var</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Variable</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">data</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#a371f7" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#a371f7" text-anchor="middle" id="sem01-05-fhs-tree-text-15">/var</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-16">Variable</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-17">data</text>
   </g>
   
   <!-- /usr -->
   <g transform="translate(600, 120)">
-    <rect width="100" height="60" rx="6" fill="url(#dirGrad)" stroke="#39c5cf" stroke-width="2"/>
-    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#39c5cf" text-anchor="middle">/usr</text>
-    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">User</text>
-    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">programs</text>
+    <rect width="100" height="60" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#39c5cf" stroke-width="2"/>
+    <text x="50" y="25" font-family="JetBrains Mono, monospace" font-size="14" fill="#39c5cf" text-anchor="middle" id="sem01-05-fhs-tree-text-18">/usr</text>
+    <text x="50" y="45" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-19">User</text>
+    <text x="50" y="55" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-20">programs</text>
   </g>
   
   <!-- /home subdirectories -->
-  <line x1="320" y1="180" x2="320" y2="210" stroke="#30363d" stroke-width="2"/>
+  <line x1="320" y1="180" x2="320" y2="210" stroke="#738399" stroke-width="2"/>
   <g transform="translate(270, 210)">
-    <rect width="100" height="50" rx="6" fill="url(#dirGrad)" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,2"/>
-    <text x="50" y="20" font-family="JetBrains Mono, monospace" font-size="12" fill="#3fb950" text-anchor="middle">~/</text>
-    <text x="50" y="38" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">Your home</text>
+    <rect width="100" height="50" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="50" y="20" font-family="JetBrains Mono, monospace" font-size="12" fill="#3fb950" text-anchor="middle" id="sem01-05-fhs-tree-text-21">~/</text>
+    <text x="50" y="38" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-22">Your home</text>
   </g>
   
   <!-- ~ subdirectories -->
-  <line x1="320" y1="260" x2="320" y2="280" stroke="#30363d" stroke-width="1"/>
-  <line x1="240" y1="280" x2="400" y2="280" stroke="#30363d" stroke-width="1"/>
-  <line x1="240" y1="280" x2="240" y2="295" stroke="#30363d" stroke-width="1"/>
-  <line x1="320" y1="280" x2="320" y2="295" stroke="#30363d" stroke-width="1"/>
-  <line x1="400" y1="280" x2="400" y2="295" stroke="#30363d" stroke-width="1"/>
+  <line x1="320" y1="260" x2="320" y2="280" stroke="#738399" stroke-width="1"/>
+  <line x1="210" y1="280" x2="430" y2="280" stroke="#738399" stroke-width="1"/>
+  <line x1="210" y1="280" x2="210" y2="295" stroke="#738399" stroke-width="1"/>
+  <line x1="320" y1="280" x2="320" y2="295" stroke="#738399" stroke-width="1"/>
+  <line x1="430" y1="280" x2="430" y2="295" stroke="#738399" stroke-width="1"/>
   
-  <g transform="translate(195, 295)">
+  <g transform="translate(165, 295)">
     <rect width="90" height="40" rx="4" fill="#1e252e" stroke="#30363d"/>
-    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e" text-anchor="middle">.bashrc</text>
+    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-23">.bashrc</text>
   </g>
   
   <g transform="translate(275, 295)">
     <rect width="90" height="40" rx="4" fill="#1e252e" stroke="#30363d"/>
-    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e" text-anchor="middle">Documents/</text>
+    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-24">Documents/</text>
   </g>
   
-  <g transform="translate(355, 295)">
+  <g transform="translate(385, 295)">
     <rect width="90" height="40" rx="4" fill="#1e252e" stroke="#30363d"/>
-    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e" text-anchor="middle">Desktop/</text>
+    <text x="45" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-25">Desktop/</text>
   </g>
   
   <!-- /var subdirectories -->
-  <line x1="540" y1="180" x2="540" y2="210" stroke="#30363d" stroke-width="2"/>
+  <line x1="540" y1="180" x2="540" y2="210" stroke="#738399" stroke-width="2"/>
   <g transform="translate(490, 210)">
-    <rect width="100" height="50" rx="6" fill="url(#dirGrad)" stroke="#a371f7" stroke-width="1" stroke-dasharray="4,2"/>
-    <text x="50" y="20" font-family="JetBrains Mono, monospace" font-size="12" fill="#a371f7" text-anchor="middle">/var/log</text>
-    <text x="50" y="38" font-family="Inter, sans-serif" font-size="10" fill="#8b949e" text-anchor="middle">System logs</text>
+    <rect width="100" height="50" rx="6" fill="url(#sem01-05-fhs-tree-dirGrad)" stroke="#a371f7" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="50" y="20" font-family="JetBrains Mono, monospace" font-size="12" fill="#a371f7" text-anchor="middle" id="sem01-05-fhs-tree-text-26">/var/log</text>
+    <text x="50" y="38" font-family="Inter, sans-serif" font-size="10" fill="#b7c1cc" text-anchor="middle" id="sem01-05-fhs-tree-text-27">System logs</text>
   </g>
   
   <!-- Legend -->
   <g transform="translate(50, 370)">
     <rect width="650" height="65" rx="6" fill="#1e252e" stroke="#30363d"/>
-    <text x="325" y="22" font-family="Inter, sans-serif" font-size="12" fill="#e6edf3" text-anchor="middle" font-weight="bold">Mnemonics</text>
-    <text x="80" y="48" font-family="JetBrains Mono, monospace" font-size="11" fill="#d29922">/etc</text>
-    <text x="130" y="48" font-family="Inter, sans-serif" font-size="10" fill="#8b949e">= Editable Text Config</text>
-    <text x="290" y="48" font-family="JetBrains Mono, monospace" font-size="11" fill="#a371f7">/var</text>
-    <text x="340" y="48" font-family="Inter, sans-serif" font-size="10" fill="#8b949e">= VARiable data</text>
-    <text x="480" y="48" font-family="JetBrains Mono, monospace" font-size="11" fill="#8b949e">/tmp</text>
-    <text x="530" y="48" font-family="Inter, sans-serif" font-size="10" fill="#8b949e">= TeMPorary (cleared at reboot!)</text>
-  </g>
+    <text x="325" y="20" font-family="Arial, sans-serif" font-size="12" fill="#e6edf3" text-anchor="middle" font-weight="bold" id="sem01-05-fhs-tree-text-28">Mnemonics and temporary storage</text><text x="325" y="39" font-family="Arial, sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle" id="sem01-05-fhs-tree-text-29">/etc: configuration mnemonic; /var: variable data</text><text x="325" y="56" font-family="Arial, sans-serif" font-size="11" fill="#c9d1d9" text-anchor="middle" id="sem01-05-fhs-tree-text-30">/tmp cleanup depends on system policy; do not rely on persistence.</text></g>
 </svg>

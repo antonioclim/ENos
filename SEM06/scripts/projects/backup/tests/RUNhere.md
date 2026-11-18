@@ -1,43 +1,26 @@
-# 📁 Test Suite — Backup Project
+# Tests — Backup runtime project
 
-> **Location:** `SEM06/scripts/projects/backup/tests/`  
-> **Purpose:** Automated tests for backup functionality
-
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `test_backup.sh` | Main test suite |
-
----
-
-## Running Tests
+From the repository root:
 
 ```bash
-# From project directory
-./tests/test_backup.sh
-
-# Via Makefile
-make test
-
-# Verbose mode
-./tests/test_backup.sh --verbose
+bash SEM06/scripts/projects/backup/tests/test_backup.sh
 ```
 
----
+The supported aggregate target is `make -C SEM06 test`; no project-local Makefile
+is supplied. Run scripts through Bash so a checkout's executable-bit presentation
+does not determine whether the tests can start.
 
-## Test Coverage
+The Bash harness accepts `--verbose` and `--filter PATTERN`. Its actual groups
+cover logging, naming/type selection, archive extensions and creation, extraction,
+checksums including corruption, exclusions and sizes, retention and complete
+owned-file backup cycles. These are the functions in `test_backup.sh`; no invented
+`test_config_loading` or `test_incremental` name is required.
 
-| Test | Description |
-|------|-------------|
-| `test_config_loading` | Configuration file parsing |
-| `test_backup_creation` | Basic backup creation |
-| `test_incremental` | Incremental backup detection |
-| `test_rotation` | Old backup cleanup |
-| `test_error_handling` | Invalid input handling |
+The stronger full/incremental semantic fixture is in
+`SEM06/tests/test_runtime_semantics.py`: it compares restored bytes after creation,
+modification, deletion and rename and rejects a corrupted archive before restore.
+A passing archive listing alone does not establish reconstruction or durability.
+Compression tools or filesystem capabilities unavailable in a target environment
+must remain explicit limits. No real backup store is used by the local fixtures.
 
----
-
-*See also: [`../lib/`](../lib/) for modules being tested*
-
-*Last updated: January 2026*
+See [the project guide](../README.md) and [library modules](../lib/).

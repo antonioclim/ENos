@@ -1,164 +1,126 @@
-# 📁 Python Tools — SEM02
+# Python tools — Seminar 2
 
-> **Location:** `SEM02/scripts/python/`  
-> **Purpose:** Automated grading, generation, and analysis tools  
-> **Python version:** ≥ 3.10 required
+Run the following commands from this directory. Python 3 and the dependencies listed in the seminar requirements are needed. Use a dedicated virtual environment if installing dependencies.
 
-## Contents
+Assessment output remains subject to the [open assessment contract](../../homework/ASSESSMENT_STATUS.md). No tool output alone establishes authorship or misconduct.
 
-| Tool | Purpose | CLI |
-|------|---------|-----|
-| `S02_01_autograder.py` | Automated homework evaluation | Yes |
-| `S02_02_quiz_generator.py` | Generate randomized quizzes | Yes |
-| `S02_03_report_generator.py` | Create reports | Yes |
+## Tools and verified command-line help
 
-## Installation
+### S02_01_autograder.py
+
+Diagnostic homework checks; final assessment policy pending.
 
 ```bash
-# Install dependencies
-cd SEM02/
-pip install -r requirements.txt
-
-# Or install individually
-pip install pyyaml pytest
+python3 S02_01_autograder.py --help
 ```
 
----
+```text
+usage: S02_01_autograder.py [-h] [-o OUTPUT] [-q] directory
 
-## S02_01_autograder.py
+Autograder for OS Seminar 2 homework
 
-**Purpose:** Automated homework evaluation with detailed feedback
+positional arguments:
+  directory             Directory with student homework
 
-### Usage
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        JSON output file
+  -q, --quiet           Quiet mode (final score only)
+
+Examples:
+  python3 S02_01_autograder.py ~/my_homework/
+  python3 S02_01_autograder.py ./submissions/student_name/
+  python3 S02_01_autograder.py --output report.json ./homework/
+```
+
+### S02_02_quiz_generator.py
+
+Personalised or random formative questions.
 
 ```bash
-python3 S02_01_autograder.py <submission> [options]
-
-Arguments:
-  submission       Path to submission directory or file
-
-Options:
-  --rubric PATH    Custom rubric file
-  --output FILE    Output file for grades (CSV)
-  --verbose        Detailed scoring breakdown
-  --batch          Process entire directory of submissions
-  --timeout SEC    Per-test timeout (default: 30)
+python3 S02_02_quiz_generator.py --help
 ```
 
-### Examples
+```text
+usage: S02_02_quiz_generator.py [-h] [--student STUDENT] [--grupa GRUPA]
+                                [--students STUDENTS] [--count COUNT]
+                                [--format {txt,html,json,md,all}]
+                                [--output OUTPUT] [--answers] [--seed SEED]
+                                [--list-questions] [--stats]
+
+Personalised quiz generator for Seminar 2
+
+options:
+  -h, --help            show this help message and exit
+  --student STUDENT, -s STUDENT
+                        Student name
+  --grupa GRUPA, -g GRUPA
+                        Student group
+  --students STUDENTS, -S STUDENTS
+                        File with student list (format: Name,Group)
+  --count COUNT, -c COUNT
+                        Number of questions (default: 15)
+  --format {txt,html,json,md,all}, -f {txt,html,json,md,all}
+                        Export format (default: txt)
+  --output OUTPUT, -o OUTPUT
+                        Output directory (default: current directory)
+  --answers, -a         Include correct answers
+  --seed SEED           Manual seed for randomisation
+  --list-questions      List all questions in the bank
+  --stats               Display question bank statistics
+
+Usage examples:
+  S02_02_quiz_generator.py --student "Smith John" --grupa 1051
+  S02_02_quiz_generator.py --students list.txt --output ./quizzes/
+  S02_02_quiz_generator.py --student "Test" --grupa 1000 --format html --answers
+  S02_02_quiz_generator.py --count 20 --format all --output ./export/
+```
+
+### S02_03_report_generator.py
+
+Descriptive result reports.
 
 ```bash
-# Grade single submission
-python3 S02_01_autograder.py ~/submissions/student123/
-
-# Grade all submissions with report
-python3 S02_01_autograder.py ~/submissions/ --batch --output grades.csv
-
-# Verbose grading
-python3 S02_01_autograder.py submission/ --verbose
+python3 S02_03_report_generator.py --help
 ```
 
-### Grading Criteria
+```text
+usage: S02_03_report_generator.py [-h] [--input INPUT]
+                                  [--format {txt,html,csv,moodle,all}]
+                                  [--output OUTPUT] [--compare BEFORE AFTER]
+                                  [--filter-group FILTER_GROUP]
+                                  [--min-score MIN_SCORE] [--quiet]
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Correctness | 60% | Passes test cases |
-| Style | 20% | shellcheck compliance |
-| Documentation | 20% | Comments, README |
+Report and statistics generator for evaluations
 
----
+options:
+  -h, --help            show this help message and exit
+  --input INPUT, -i INPUT
+                        JSON/CSV file or directory with results
+  --format {txt,html,csv,moodle,all}, -f {txt,html,csv,moodle,all}
+                        Report format (default: txt)
+  --output OUTPUT, -o OUTPUT
+                        Output file or directory
+  --compare BEFORE AFTER, -c BEFORE AFTER
+                        Compare two sets of results
+  --filter-group FILTER_GROUP, -g FILTER_GROUP
+                        Filter only a specific group
+  --min-score MIN_SCORE
+                        Filter students with minimum score
+  --quiet, -q           Quiet mode (no terminal output)
 
-## S02_02_quiz_generator.py
-
-**Purpose:** Generate randomized quizzes from question bank
-
-### Usage
-
-```bash
-python3 S02_02_quiz_generator.py [options]
-
-Options:
-  --count N        Number of unique quizzes to generate
-  --questions N    Questions per quiz (default: 10)
-  --seed N         Random seed for reproducibility
-  --output DIR     Output directory for generated quizzes
-  --format FMT     Output format: yaml, json, pdf, moodle
+Usage examples:
+  S02_03_report_generator.py --input ./results/
+  S02_03_report_generator.py --input ./results/ --format html --output report.html
+  S02_03_report_generator.py --input results.json --format csv --output export.csv
+  S02_03_report_generator.py --compare ./week1/ ./week2/ --output progress.html
 ```
 
-### Examples
+## Evidence and outputs
 
-```bash
-# Generate 5 unique quizzes
-python3 S02_02_quiz_generator.py --count 5 --output quizzes/
+Generators write to the path supplied on their command line. Answer keys and example solutions are teaching material; their publication policy remains an author decision. A timeout bounds runtime but does not isolate submitted shell code. Use the course exercise environment and inspect the submission before running evaluators.
 
-# Reproducible generation
-python3 S02_02_quiz_generator.py --seed 42 --count 3
+The JSON quiz views are project exports. Native Moodle/Canvas/QTI import compatibility has not been verified in this phase.
 
-# Export for Moodle
-python3 S02_02_quiz_generator.py --format moodle --output moodle_quiz.xml
-```
-
----
-
-## S02_03_report_generator.py
-
-**Purpose:** Generate PDF/HTML reports from grading data
-
-### Usage
-
-```bash
-python3 S02_03_report_generator.py <grades_file> [options]
-
-Arguments:
-  grades_file      CSV file with grades data
-
-Options:
-  --format FMT     Output format: pdf, html, md (default: pdf)
-  --individual     Generate per-student reports
-  --summary        Include class statistics
-  --output DIR     Output directory
-```
-
-### Examples
-
-```bash
-# Generate summary report
-python3 S02_03_report_generator.py grades.csv --summary
-
-# Individual student reports
-python3 S02_03_report_generator.py grades.csv --individual --output reports/
-```
-
-
-
----
-
-## Common Options
-
-All Python tools support:
-
-| Option | Description |
-|--------|-------------|
-| `--help` | Show detailed help |
-| `--version` | Show tool version |
-| `--quiet` | Suppress non-essential output |
-| `--debug` | Enable debug logging |
-
-## PYTHONPATH Setup
-
-For importing shared `lib/` modules:
-
-```bash
-# Add to your .bashrc or run before scripts
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/../.."
-
-# Or run with path
-PYTHONPATH="../.." python3 S02_01_autograder.py submission/
-```
-
----
-
-*See also: [`../../lib/`](../../lib/) for shared utilities*  
-*See also: [`../../tests/`](../../tests/) for test suite*
-
-*Last updated: January 2026*
+See [tests](../../tests/) and [demonstrations](../demo/).

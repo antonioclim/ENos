@@ -1,440 +1,1380 @@
 {
-  "quiz": {
+  "schema_version": 1,
+  "format": "ENos local formative bank data; not Moodle XML or Canvas QTI",
+  "source": {
+    "filename": "quiz.yaml",
+    "sha256": "a22aa5ff735c35ae5ee14a4e88a8e7e950ce165547495600ef6511b042c594a1"
+  },
+  "metadata": {
+    "seminar": 6,
     "title": "CAPSTONE: Integrated Bash Projects",
-    "description": "Formative quiz for Seminar 6 - Operating Systems",
-    "metadata": {
-      "course": "Operating Systems",
-      "institution": "ASE Bucharest - CSIE",
-      "semester": "2024-2025",
-      "seminar": 6,
-      "version": "1.0.0",
-      "language": "en",
-      "time_limit_minutes": 25,
-      "passing_score": 60,
-      "total_points": 100,
-      "bloom_distribution": {
-        "remember": 3,
-        "understand": 5,
-        "apply": 6,
-        "analyse": 2,
-        "evaluate": 2
-      }
+    "version": "1.1.0",
+    "language": "en",
+    "estimated_time_minutes": 30,
+    "total_points": 140,
+    "pass_threshold": 60,
+    "bloom_distribution": {
+      "remember": 5,
+      "understand": 6,
+      "apply": 8,
+      "analyse": 2,
+      "evaluate": 2
     },
-    "settings": {
-      "shuffle_questions": false,
-      "shuffle_answers": true,
-      "show_correct_answers": true,
-      "show_explanations": true,
-      "allow_backtrack": true,
-      "one_question_per_page": false
+    "subjects": [
+      "Modular Bash architecture",
+      "Error handling and trap",
+      "Professional logging",
+      "Incremental backup",
+      "Deployment strategies",
+      "Health checks",
+      "Testing in Bash",
+      "Cron and systemd timers"
+    ],
+    "question_count": 23,
+    "source_review": "2026-11-17; unpublished Phase 5 candidate",
+    "assessment_scope": "Formative self-assessment only; question weights and local feedback thresholds do not adopt a course grading policy."
+  },
+  "derived_counts": {
+    "question_count": 23,
+    "total_points": 140,
+    "bloom_distribution": {
+      "remember": 5,
+      "understand": 6,
+      "apply": 8,
+      "analyse": 2,
+      "evaluate": 2
+    }
+  },
+  "configuration": {
+    "show_explanations": true,
+    "show_misconceptions": true,
+    "random_order": false,
+    "allow_return": true,
+    "time_limit": false,
+    "messages": {
+      "welcome": "CAPSTONE Quiz - Integrated Bash Projects",
+      "final_pass": "You have demonstrated understanding of CAPSTONE concepts!",
+      "final_fail": "Review the materials and try again."
     },
-    "questions": [
-      {
+    "feedback_level": {
+      "90": "Excellent! You're ready for advanced projects.",
+      "75": "Good! Consolidate deployment concepts.",
+      "60": "Sufficient. Focus on error handling and testing.",
+      "0": "Requires additional study. Start with modular architecture."
+    }
+  },
+  "assessment_scope": "Formative practice; no institutional grade or publication/confidentiality policy is selected.",
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multiple_choice",
+      "topic": "Error handling",
+      "bloom_level": "remember",
+      "points": 5,
+      "question_text": "Which command enables errexit, nounset and pipefail together in Bash? Their documented context-dependent exceptions still apply.",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "set -e",
+          "correct": false,
+          "feedback": "-e enables only errexit, with documented exceptions; it does not enable nounset or pipefail."
+        },
+        {
+          "id": "b",
+          "text": "set -euo pipefail",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "set -x",
+          "correct": false,
+          "feedback": "-x activates debug mode (prints commands), not error handling"
+        },
+        {
+          "id": "d",
+          "text": "set -v",
+          "correct": false,
+          "feedback": "-v displays lines read, doesn't manage errors"
+        }
+      ],
+      "explanation": "set -euo pipefail enables three distinct options: errexit for unguarded failures subject to exceptions, nounset for relevant unset-variable expansions, and the rightmost non-zero pipeline status (or zero if every component succeeds). It is not a universal exception handler. Parenthesised subshells and command substitutions have different errexit rules; ERR inheritance is controlled separately.",
+      "source_question": {
         "id": "q01",
-        "type": "multiple_choice",
-        "bloom_level": "remember",
+        "type": "mcq",
+        "bloom": "remember",
         "points": 5,
-        "topic": "Error handling",
-        "question_text": "Which command sets strict behaviour in Bash to stop execution on first error, undefined variables, and pipe errors?",
-        "answers": [
-          {"id": "a", "text": "set -e", "correct": false},
-          {"id": "b", "text": "set -euo pipefail", "correct": true},
-          {"id": "c", "text": "set -x", "correct": false},
-          {"id": "d", "text": "set -v", "correct": false}
-        ],
-        "explanation": "`set -euo pipefail` combines: -e (stops on first error), -u (error on undefined variables), -o pipefail (pipe returns error of first command that fails).",
-        "feedback": {
-          "a": "Only -e stops on errors, but doesn't detect undefined variables",
+        "subject": "Error handling",
+        "text": "Which command enables errexit, nounset and pipefail together in Bash? Their documented context-dependent exceptions still apply.",
+        "options": {
+          "a": "set -e",
+          "b": "set -euo pipefail",
+          "c": "set -x",
+          "d": "set -v"
+        },
+        "correct": "b",
+        "explanation": "set -euo pipefail enables three distinct options: errexit for unguarded failures subject to exceptions, nounset for relevant unset-variable expansions, and the rightmost non-zero pipeline status (or zero if every component succeeds). It is not a universal exception handler. Parenthesised subshells and command substitutions have different errexit rules; ERR inheritance is controlled separately.",
+        "misconceptions": {
+          "a": "-e enables only errexit, with documented exceptions; it does not enable nounset or pipefail.",
           "c": "-x activates debug mode (prints commands), not error handling",
           "d": "-v displays lines read, doesn't manage errors"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q02",
+      "type": "multiple_choice",
+      "topic": "Trap and signals",
+      "bloom_level": "remember",
+      "points": 5,
+      "question_text": "In a terminal with the usual Ctrl+C interrupt character and ISIG enabled, which signal is sent to the foreground process group when Ctrl+C is pressed?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "SIGTERM",
+          "correct": false,
+          "feedback": "SIGTERM is the default signal of kill command, not Ctrl+C"
+        },
+        {
+          "id": "b",
+          "text": "SIGKILL",
+          "correct": false,
+          "feedback": "SIGKILL cannot be caught and terminates process immediately"
+        },
+        {
+          "id": "c",
+          "text": "SIGINT",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "SIGHUP",
+          "correct": false,
+          "feedback": "SIGHUP is sent when terminal closes"
+        }
+      ],
+      "explanation": "The terminal driver sends SIGINT to the foreground process group under the stated terminal settings. A process can handle it; the effect depends on its handler and terminal mode.",
+      "source_question": {
         "id": "q02",
-        "type": "multiple_choice",
-        "bloom_level": "remember",
+        "type": "mcq",
+        "bloom": "remember",
         "points": 5,
-        "topic": "Trap and signals",
-        "question_text": "Which signal is sent to a process when the user presses Ctrl+C?",
-        "answers": [
-          {"id": "a", "text": "SIGTERM", "correct": false},
-          {"id": "b", "text": "SIGKILL", "correct": false},
-          {"id": "c", "text": "SIGINT", "correct": true},
-          {"id": "d", "text": "SIGHUP", "correct": false}
-        ],
-        "explanation": "SIGINT (Signal Interrupt) is sent by terminal when user presses Ctrl+C. Can be caught with `trap` for cleanup.",
-        "feedback": {
+        "subject": "Trap and signals",
+        "text": "In a terminal with the usual Ctrl+C interrupt character and ISIG enabled, which signal is sent to the foreground process group when Ctrl+C is pressed?",
+        "options": {
+          "a": "SIGTERM",
+          "b": "SIGKILL",
+          "c": "SIGINT",
+          "d": "SIGHUP"
+        },
+        "correct": "c",
+        "explanation": "The terminal driver sends SIGINT to the foreground process group under the stated terminal settings. A process can handle it; the effect depends on its handler and terminal mode.",
+        "misconceptions": {
           "a": "SIGTERM is the default signal of kill command, not Ctrl+C",
           "b": "SIGKILL cannot be caught and terminates process immediately",
           "d": "SIGHUP is sent when terminal closes"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q03",
+      "type": "multiple_choice",
+      "topic": "Exit codes",
+      "bloom_level": "remember",
+      "points": 5,
+      "question_text": "Which exit code indicates successful execution in Unix convention?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "1",
+          "correct": false,
+          "feedback": "1 indicates generic error"
+        },
+        {
+          "id": "b",
+          "text": "-1",
+          "correct": false,
+          "feedback": "-1 is not success; Bash exit -1 yields status 255 rather than a negative externally visible status."
+        },
+        {
+          "id": "c",
+          "text": "0",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "255",
+          "correct": false,
+          "feedback": "255 indicates error, not success"
+        }
+      ],
+      "explanation": "Zero conventionally means success. Non-zero statuses can distinguish errors or documented non-success outcomes such as grep finding no match. Bash exposes an 8-bit status; check it immediately or use a tested command.",
+      "source_question": {
         "id": "q03",
-        "type": "multiple_choice",
-        "bloom_level": "remember",
+        "type": "mcq",
+        "bloom": "remember",
         "points": 5,
-        "topic": "Exit codes",
-        "question_text": "Which exit code indicates successful execution in Unix convention?",
-        "answers": [
-          {"id": "a", "text": "1", "correct": false},
-          {"id": "b", "text": "-1", "correct": false},
-          {"id": "c", "text": "0", "correct": true},
-          {"id": "d", "text": "255", "correct": false}
-        ],
-        "explanation": "Unix convention: exit code 0 = success, anything else = error. Check with `$?` or directly in conditions.",
-        "feedback": {
+        "subject": "Exit codes",
+        "text": "Which exit code indicates successful execution in Unix convention?\n",
+        "options": {
+          "a": "1",
+          "b": "-1",
+          "c": "0",
+          "d": "255"
+        },
+        "correct": "c",
+        "explanation": "Zero conventionally means success. Non-zero statuses can distinguish errors or documented non-success outcomes such as grep finding no match. Bash exposes an 8-bit status; check it immediately or use a tested command.",
+        "misconceptions": {
           "a": "1 indicates generic error",
-          "b": "Exit codes are 0-255, -1 is not valid",
+          "b": "-1 is not success; Bash exit -1 yields status 255 rather than a negative externally visible status.",
           "d": "255 indicates error, not success"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q19",
+      "type": "multiple_choice",
+      "topic": "Signal listing",
+      "bloom_level": "remember",
+      "points": 5,
+      "question_text": "Which command displays the complete list of signals available in the system?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "kill -l",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "b",
+          "text": "signal --list",
+          "correct": false,
+          "feedback": "There is no 'signal' command in standard Unix"
+        },
+        {
+          "id": "c",
+          "text": "trap -p",
+          "correct": false,
+          "feedback": "trap -p shows active traps, not the signal list"
+        },
+        {
+          "id": "d",
+          "text": "ps -s",
+          "correct": false,
+          "feedback": "ps -s is not the command for listing available signal names."
+        }
+      ],
+      "explanation": "`kill -l` lists all available signals with their numbers.\nExample output: 1) SIGHUP  2) SIGINT  3) SIGQUIT ...\n\n`trap -p` shows currently active traps, not the signal list.\n",
+      "source_question": {
+        "id": "q19",
+        "type": "mcq",
+        "bloom": "remember",
+        "points": 5,
+        "subject": "Signal listing",
+        "text": "Which command displays the complete list of signals available in the system?\n",
+        "options": {
+          "a": "kill -l",
+          "b": "signal --list",
+          "c": "trap -p",
+          "d": "ps -s"
+        },
+        "correct": "a",
+        "explanation": "`kill -l` lists all available signals with their numbers.\nExample output: 1) SIGHUP  2) SIGINT  3) SIGQUIT ...\n\n`trap -p` shows currently active traps, not the signal list.\n",
+        "misconceptions": {
+          "b": "There is no 'signal' command in standard Unix",
+          "c": "trap -p shows active traps, not the signal list",
+          "d": "ps -s is not the command for listing available signal names."
+        }
+      }
+    },
+    {
+      "id": "q20",
+      "type": "multiple_choice",
+      "topic": "Compression algorithms",
+      "bloom_level": "remember",
+      "points": 5,
+      "question_text": "Which listed compression tool normally uses the LZMA2 codec in the .xz container? This identifies a format; it does not assume a universal performance ranking.",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "gzip",
+          "correct": false,
+          "feedback": "gzip uses a different format/codec."
+        },
+        {
+          "id": "b",
+          "text": "bzip2",
+          "correct": false,
+          "feedback": "bzip2 uses a different compression pipeline, not the .xz/LZMA2 pairing."
+        },
+        {
+          "id": "c",
+          "text": "xz",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "lz4",
+          "correct": false,
+          "feedback": "lz4 is not the .xz/LZMA2 pairing."
+        }
+      ],
+      "explanation": "xz commonly uses LZMA2 in the .xz container. Compression ratio, CPU time, decompression cost and memory depend on data, preset, threads and implementation. A universal ordering by speed or output size cannot be inferred from an algorithm name.",
+      "source_question": {
+        "id": "q20",
+        "type": "mcq",
+        "bloom": "remember",
+        "points": 5,
+        "subject": "Compression algorithms",
+        "text": "Which listed compression tool normally uses the LZMA2 codec in the .xz container? This identifies a format; it does not assume a universal performance ranking.",
+        "options": {
+          "a": "gzip",
+          "b": "bzip2",
+          "c": "xz",
+          "d": "lz4"
+        },
+        "correct": "c",
+        "explanation": "xz commonly uses LZMA2 in the .xz container. Compression ratio, CPU time, decompression cost and memory depend on data, preset, threads and implementation. A universal ordering by speed or output size cannot be inferred from an algorithm name.",
+        "misconceptions": {
+          "a": "gzip uses a different format/codec.",
+          "b": "bzip2 uses a different compression pipeline, not the .xz/LZMA2 pairing.",
+          "d": "lz4 is not the .xz/LZMA2 pairing."
+        }
+      }
+    },
+    {
+      "id": "q04",
+      "type": "multiple_choice",
+      "topic": "Modular architecture",
+      "bloom_level": "understand",
+      "points": 6,
+      "question_text": "Why do we separate code into lib/core.sh, lib/utils.sh, lib/config.sh\ninstead of writing everything in a single file?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Because Bash doesn't allow files larger than 1000 lines",
+          "correct": false,
+          "feedback": "Bash has no fixed 1000-line source limit; resource limits still exist."
+        },
+        {
+          "id": "b",
+          "text": "For reuse, isolated testing, and easy maintenance",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Because `source` only works with small files",
+          "correct": false,
+          "feedback": "source has no small-file-only rule; it executes the selected code in the current shell."
+        },
+        {
+          "id": "d",
+          "text": "To make the script harder for others to understand",
+          "correct": false,
+          "feedback": "Modularisation increases clarity, doesn't reduce it"
+        }
+      ],
+      "explanation": "Clear module interfaces can support reuse, focused testing and maintenance. Changes may still affect callers and require integration checks. source executes code in the current shell; it is not an isolation boundary.",
+      "source_question": {
         "id": "q04",
-        "type": "multiple_choice",
-        "bloom_level": "understand",
+        "type": "mcq",
+        "bloom": "understand",
         "points": 6,
-        "topic": "Modular architecture",
-        "question_text": "Why do we separate code into lib/core.sh, lib/utils.sh, lib/config.sh instead of writing everything in a single file?",
-        "answers": [
-          {"id": "a", "text": "Because Bash doesn't allow files larger than 1000 lines", "correct": false},
-          {"id": "b", "text": "For reuse, isolated testing, and easy maintenance", "correct": true},
-          {"id": "c", "text": "Because `source` only works with small files", "correct": false},
-          {"id": "d", "text": "To make the script harder for others to understand", "correct": false}
-        ],
-        "explanation": "Modular architecture offers: reuse, independent testing, easy maintenance, and clarity of responsibilities.",
-        "feedback": {
-          "a": "Bash has no size limits for files",
-          "c": "`source` works with files of any size",
+        "subject": "Modular architecture",
+        "text": "Why do we separate code into lib/core.sh, lib/utils.sh, lib/config.sh\ninstead of writing everything in a single file?\n",
+        "options": {
+          "a": "Because Bash doesn't allow files larger than 1000 lines",
+          "b": "For reuse, isolated testing, and easy maintenance",
+          "c": "Because `source` only works with small files",
+          "d": "To make the script harder for others to understand"
+        },
+        "correct": "b",
+        "explanation": "Clear module interfaces can support reuse, focused testing and maintenance. Changes may still affect callers and require integration checks. source executes code in the current shell; it is not an isolation boundary.",
+        "misconceptions": {
+          "a": "Bash has no fixed 1000-line source limit; resource limits still exist.",
+          "c": "source has no small-file-only rule; it executes the selected code in the current shell.",
           "d": "Modularisation increases clarity, doesn't reduce it"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q05",
+      "type": "multiple_choice",
+      "topic": "Incremental backup",
+      "bloom_level": "understand",
+      "points": 6,
+      "question_text": "How does an incremental backup work compared to a full one?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Copies all files on each run",
+          "correct": false,
+          "feedback": "This is the definition of full backup"
+        },
+        {
+          "id": "b",
+          "text": "Records changes relative to an earlier successful backup, according to the backup format",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Compresses files more than full backup",
+          "correct": false,
+          "feedback": "Compression doesn't define backup type"
+        },
+        {
+          "id": "d",
+          "text": "Deletes old files automatically",
+          "correct": false,
+          "feedback": "Rotation/deletion is separate from backup type"
+        }
+      ],
+      "explanation": "Incremental backups depend on a suitable full/base backup and the required increment chain. A usable format must represent the intended data and metadata changes, including deletions when exact restoration is required. find -newer alone selects modification times and cannot provide a complete deletion-aware incremental restore contract.",
+      "source_question": {
         "id": "q05",
-        "type": "multiple_choice",
-        "bloom_level": "understand",
+        "type": "mcq",
+        "bloom": "understand",
         "points": 6,
-        "topic": "Incremental backup",
-        "question_text": "How does an incremental backup work compared to a full one?",
-        "answers": [
-          {"id": "a", "text": "Copies all files on each run", "correct": false},
-          {"id": "b", "text": "Copies only files modified since the last backup", "correct": true},
-          {"id": "c", "text": "Compresses files more than full backup", "correct": false},
-          {"id": "d", "text": "Deletes old files automatically", "correct": false}
-        ],
-        "explanation": "Incremental backup uses `find -newer` to find modified files. Saves time and space by copying only changes.",
-        "feedback": {
+        "subject": "Incremental backup",
+        "text": "How does an incremental backup work compared to a full one?\n",
+        "options": {
+          "a": "Copies all files on each run",
+          "b": "Records changes relative to an earlier successful backup, according to the backup format",
+          "c": "Compresses files more than full backup",
+          "d": "Deletes old files automatically"
+        },
+        "correct": "b",
+        "explanation": "Incremental backups depend on a suitable full/base backup and the required increment chain. A usable format must represent the intended data and metadata changes, including deletions when exact restoration is required. find -newer alone selects modification times and cannot provide a complete deletion-aware incremental restore contract.",
+        "misconceptions": {
           "a": "This is the definition of full backup",
           "c": "Compression doesn't define backup type",
           "d": "Rotation/deletion is separate from backup type"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q06",
+      "type": "multiple_choice",
+      "topic": "Health checks",
+      "bloom_level": "understand",
+      "points": 6,
+      "question_text": "For a simplified HTTP health check configured to require a 2xx response from a named endpoint, what is directly checked?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Whether port 22 SSH is open",
+          "correct": false,
+          "feedback": "SSH is for administration, not for application health check"
+        },
+        {
+          "id": "b",
+          "text": "Whether application responds with 2xx code to a specific endpoint",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Whether server CPU is below 50%",
+          "correct": false,
+          "feedback": "CPU monitoring is separate from application health check"
+        },
+        {
+          "id": "d",
+          "text": "Whether admin user can login",
+          "correct": false,
+          "feedback": "A separate authenticated probe could test login; that is not the stated endpoint/status check."
+        }
+      ],
+      "explanation": "The check requests the named HTTP endpoint and applies the explicitly configured status/body expectations. A2xx response alone does not establish correctness of every application function, database state or deployment.",
+      "source_question": {
         "id": "q06",
-        "type": "multiple_choice",
-        "bloom_level": "understand",
+        "type": "mcq",
+        "bloom": "understand",
         "points": 6,
-        "topic": "Health checks",
-        "question_text": "What does an HTTP health check verify for a web application?",
-        "answers": [
-          {"id": "a", "text": "Whether port 22 SSH is open", "correct": false},
-          {"id": "b", "text": "Whether application responds with 2xx code to a specific endpoint", "correct": true},
-          {"id": "c", "text": "Whether server CPU is below 50%", "correct": false},
-          {"id": "d", "text": "Whether admin user can login", "correct": false}
-        ],
-        "explanation": "HTTP health check sends GET request to an endpoint (/health) and verifies HTTP 2xx response. Different from resource monitoring.",
-        "feedback": {
+        "subject": "Health checks",
+        "text": "For a simplified HTTP health check configured to require a 2xx response from a named endpoint, what is directly checked?",
+        "options": {
+          "a": "Whether port 22 SSH is open",
+          "b": "Whether application responds with 2xx code to a specific endpoint",
+          "c": "Whether server CPU is below 50%",
+          "d": "Whether admin user can login"
+        },
+        "correct": "b",
+        "explanation": "The check requests the named HTTP endpoint and applies the explicitly configured status/body expectations. A2xx response alone does not establish correctness of every application function, database state or deployment.",
+        "misconceptions": {
           "a": "SSH is for administration, not for application health check",
           "c": "CPU monitoring is separate from application health check",
-          "d": "Authentication is functionality, not health check"
+          "d": "A separate authenticated probe could test login; that is not the stated endpoint/status check."
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q07",
+      "type": "multiple_choice",
+      "topic": "Logging",
+      "bloom_level": "understand",
+      "points": 6,
+      "question_text": "In the logging convention used by these projects, which order runs from least to most severe among the four listed levels?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "ERROR, WARN, INFO, DEBUG",
+          "correct": false,
+          "feedback": "Order is reversed"
+        },
+        {
+          "id": "b",
+          "text": "DEBUG, INFO, WARN, ERROR",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "INFO, DEBUG, ERROR, WARN",
+          "correct": false,
+          "feedback": "DEBUG is less severe than INFO"
+        },
+        {
+          "id": "d",
+          "text": "WARN, ERROR, DEBUG, INFO",
+          "correct": false,
+          "feedback": "Order is completely incorrect"
+        }
+      ],
+      "explanation": "Standard order of logging levels:\nDEBUG < INFO < WARN < ERROR < FATAL\n- DEBUG: detailed information for debugging\n- INFO: normal execution events\n- WARN: unexpected but recoverable situations\n- ERROR: errors affecting functionality\n",
+      "source_question": {
         "id": "q07",
-        "type": "multiple_choice",
-        "bloom_level": "understand",
+        "type": "mcq",
+        "bloom": "understand",
         "points": 6,
-        "topic": "Logging",
-        "question_text": "What is the correct order of logging levels from least severe to most severe?",
-        "answers": [
-          {"id": "a", "text": "ERROR, WARN, INFO, DEBUG", "correct": false},
-          {"id": "b", "text": "DEBUG, INFO, WARN, ERROR", "correct": true},
-          {"id": "c", "text": "INFO, DEBUG, ERROR, WARN", "correct": false},
-          {"id": "d", "text": "WARN, ERROR, DEBUG, INFO", "correct": false}
-        ],
-        "explanation": "Standard order: DEBUG < INFO < WARN < ERROR < FATAL. DEBUG for details, INFO for normal events, WARN for unexpected situations, ERROR for errors.",
-        "feedback": {
+        "subject": "Logging",
+        "text": "In the logging convention used by these projects, which order runs from least to most severe among the four listed levels?",
+        "options": {
+          "a": "ERROR, WARN, INFO, DEBUG",
+          "b": "DEBUG, INFO, WARN, ERROR",
+          "c": "INFO, DEBUG, ERROR, WARN",
+          "d": "WARN, ERROR, DEBUG, INFO"
+        },
+        "correct": "b",
+        "explanation": "Standard order of logging levels:\nDEBUG < INFO < WARN < ERROR < FATAL\n- DEBUG: detailed information for debugging\n- INFO: normal execution events\n- WARN: unexpected but recoverable situations\n- ERROR: errors affecting functionality\n",
+        "misconceptions": {
           "a": "Order is reversed",
           "c": "DEBUG is less severe than INFO",
           "d": "Order is completely incorrect"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q08",
+      "type": "multiple_choice",
+      "topic": "Deployment strategies",
+      "bloom_level": "understand",
+      "points": 6,
+      "question_text": "What is the main advantage of Blue-Green deployment strategy?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Requires less memory than Rolling deployment",
+          "correct": false,
+          "feedback": "Maintaining two serving environments normally needs additional capacity; no fixed memory ratio is assumed."
+        },
+        {
+          "id": "b",
+          "text": "Can switch traffic back quickly if the old environment remains healthy and state-compatible",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Doesn't require load balancer",
+          "correct": false,
+          "feedback": "Some explicit routing mechanism is required; its form depends on the deployment."
+        },
+        {
+          "id": "d",
+          "text": "Works without downtime ever",
+          "correct": false,
+          "feedback": "Switch itself can cause micro-downtime"
+        }
+      ],
+      "explanation": "Blue-green keeps separate old and new serving environments. Rollback can switch routing back if capacity, health and application/data compatibility permit it. DNS caches, connection/session behaviour and migrations mean neither switching nor rollback is universally instant.",
+      "source_question": {
         "id": "q08",
-        "type": "multiple_choice",
-        "bloom_level": "understand",
+        "type": "mcq",
+        "bloom": "understand",
         "points": 6,
-        "topic": "Deployment strategies",
-        "question_text": "What is the main advantage of Blue-Green deployment strategy?",
-        "answers": [
-          {"id": "a", "text": "Requires less memory than Rolling deployment", "correct": false},
-          {"id": "b", "text": "Allows instant rollback through traffic switch", "correct": true},
-          {"id": "c", "text": "Doesn't require load balancer", "correct": false},
-          {"id": "d", "text": "Works without downtime ever", "correct": false}
-        ],
-        "explanation": "Blue-Green: two identical environments, deploy on Green, instant traffic switch, rollback = switch back to Blue.",
-        "feedback": {
-          "a": "Blue-Green requires double the resources",
-          "c": "Traffic switch requires load balancer or DNS",
+        "subject": "Deployment strategies",
+        "text": "What is the main advantage of Blue-Green deployment strategy?\n",
+        "options": {
+          "a": "Requires less memory than Rolling deployment",
+          "b": "Can switch traffic back quickly if the old environment remains healthy and state-compatible",
+          "c": "Doesn't require load balancer",
+          "d": "Works without downtime ever"
+        },
+        "correct": "b",
+        "explanation": "Blue-green keeps separate old and new serving environments. Rollback can switch routing back if capacity, health and application/data compatibility permit it. DNS caches, connection/session behaviour and migrations mean neither switching nor rollback is universally instant.",
+        "misconceptions": {
+          "a": "Maintaining two serving environments normally needs additional capacity; no fixed memory ratio is assumed.",
+          "c": "Some explicit routing mechanism is required; its form depends on the deployment.",
           "d": "Switch itself can cause micro-downtime"
         }
-      },
-      {
-        "id": "q09",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
-        "points": 6,
-        "topic": "Trap cleanup",
-        "question_text": "What is the correct syntax to execute the `cleanup` function on script termination (normal or via Ctrl+C)?",
-        "answers": [
-          {"id": "a", "text": "trap cleanup EXIT SIGINT", "correct": false},
-          {"id": "b", "text": "trap 'cleanup' EXIT INT", "correct": true},
-          {"id": "c", "text": "on_exit cleanup", "correct": false},
-          {"id": "d", "text": "finally { cleanup }", "correct": false}
-        ],
-        "explanation": "Correct syntax: `trap 'command' SIGNALS...`. EXIT for normal termination, INT for SIGINT (without SIG prefix).",
-        "feedback": {
-          "a": "SIGINT is not valid in trap, use INT",
-          "c": "on_exit doesn't exist in standard Bash",
-          "d": "finally is from other languages, not Bash"
+      }
+    },
+    {
+      "id": "q22",
+      "type": "multiple_choice",
+      "topic": "Cron scheduling",
+      "bloom_level": "understand",
+      "points": 5,
+      "question_text": "What does the cron expression \"0 3 * * 0\" schedule?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Every day at 03:00",
+          "correct": false,
+          "feedback": "Would be 0 3 * * * (all weekdays)"
+        },
+        {
+          "id": "b",
+          "text": "Every Sunday at 03:00",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Every hour on the 3rd day",
+          "correct": false,
+          "feedback": "Would be 0 * 3 * *"
+        },
+        {
+          "id": "d",
+          "text": "Every 3 minutes on Sunday",
+          "correct": false,
+          "feedback": "*/3 would mean every 3 minutes"
         }
-      },
-      {
-        "id": "q10",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
+      ],
+      "explanation": "Cron format: minute hour day month weekday\n0 3 * * 0 = minute 0, hour 3, any day, any month, Sunday (0)\nResult: Every Sunday at 03:00\n\nWeekday field: 0=Sunday, 1=Monday, ..., 6=Saturday\n",
+      "source_question": {
+        "id": "q22",
+        "type": "mcq",
+        "bloom": "understand",
+        "points": 5,
+        "subject": "Cron scheduling",
+        "text": "What does the cron expression \"0 3 * * 0\" schedule?\n",
+        "options": {
+          "a": "Every day at 03:00",
+          "b": "Every Sunday at 03:00",
+          "c": "Every hour on the 3rd day",
+          "d": "Every 3 minutes on Sunday"
+        },
+        "correct": "b",
+        "explanation": "Cron format: minute hour day month weekday\n0 3 * * 0 = minute 0, hour 3, any day, any month, Sunday (0)\nResult: Every Sunday at 03:00\n\nWeekday field: 0=Sunday, 1=Monday, ..., 6=Saturday\n",
+        "misconceptions": {
+          "a": "Would be 0 3 * * * (all weekdays)",
+          "c": "Would be 0 * 3 * *",
+          "d": "*/3 would mean every 3 minutes"
+        }
+      }
+    },
+    {
+      "id": "q09",
+      "type": "multiple_choice",
+      "topic": "Trap cleanup",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "In Bash, compare trap cleanup EXIT SIGINT and trap 'cleanup' EXIT INT. Which statement is correct?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Only the SIGINT spelling is accepted",
+          "correct": false,
+          "feedback": "Bash also accepts INT."
+        },
+        {
+          "id": "b",
+          "text": "Both spellings install EXIT and interrupt actions; they do not guarantee exactly-once cleanup",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Both execute cleanup immediately when registered",
+          "correct": false,
+          "feedback": "The action runs when the event occurs, not at registration."
+        },
+        {
+          "id": "d",
+          "text": "Either form makes cleanup run after SIGKILL",
+          "correct": false,
+          "feedback": "SIGKILL cannot be trapped."
+        }
+      ],
+      "explanation": "Bash accepts INT and SIGINT. The action is stored for later execution. An INT handler that returns can allow the script to continue, followed by EXIT cleanup later; choose explicit handler exit behaviour and idempotent cleanup if exactly-once effects matter. SIGKILL cannot be caught.",
+      "source_question": {
+        "id": "q09",
+        "type": "mcq",
+        "bloom": "apply",
         "points": 6,
-        "topic": "Find with timestamp",
-        "question_text": "Which command finds files modified after timestamp.txt?",
-        "answers": [
-          {"id": "a", "text": "find /data -newer timestamp.txt -type f", "correct": true},
-          {"id": "b", "text": "find /data -mtime +timestamp.txt", "correct": false},
-          {"id": "c", "text": "find /data --after timestamp.txt", "correct": false},
-          {"id": "d", "text": "find /data -modified > timestamp.txt", "correct": false}
-        ],
-        "explanation": "`find -newer` compares mtime of files with reference file. Returns files modified AFTER reference.",
-        "feedback": {
+        "subject": "Trap cleanup",
+        "text": "In Bash, compare trap cleanup EXIT SIGINT and trap 'cleanup' EXIT INT. Which statement is correct?",
+        "options": {
+          "a": "Only the SIGINT spelling is accepted",
+          "b": "Both spellings install EXIT and interrupt actions; they do not guarantee exactly-once cleanup",
+          "c": "Both execute cleanup immediately when registered",
+          "d": "Either form makes cleanup run after SIGKILL"
+        },
+        "correct": "b",
+        "explanation": "Bash accepts INT and SIGINT. The action is stored for later execution. An INT handler that returns can allow the script to continue, followed by EXIT cleanup later; choose explicit handler exit behaviour and idempotent cleanup if exactly-once effects matter. SIGKILL cannot be caught.",
+        "misconceptions": {
+          "a": "Bash also accepts INT.",
+          "c": "The action runs when the event occurs, not at registration.",
+          "d": "SIGKILL cannot be trapped."
+        }
+      }
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "topic": "Find with timestamp",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which command finds files modified after timestamp.txt?\n",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "find /data -newer timestamp.txt -type f",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "b",
+          "text": "find /data -mtime +timestamp.txt",
+          "correct": false,
+          "feedback": "-mtime uses days, not reference file"
+        },
+        {
+          "id": "c",
+          "text": "find /data --after timestamp.txt",
+          "correct": false,
+          "feedback": "--after is not a valid option for find"
+        },
+        {
+          "id": "d",
+          "text": "find /data -modified > timestamp.txt",
+          "correct": false,
+          "feedback": "Invalid syntax, wrong redirection"
+        }
+      ],
+      "explanation": "find -newer compares modification times with the reference; -type f restricts results to regular files. It is useful for selecting changes, but it alone neither represents deletions nor proves a complete incremental backup.",
+      "source_question": {
+        "id": "q10",
+        "type": "mcq",
+        "bloom": "apply",
+        "points": 6,
+        "subject": "Find with timestamp",
+        "text": "Which command finds files modified after timestamp.txt?\n",
+        "options": {
+          "a": "find /data -newer timestamp.txt -type f",
+          "b": "find /data -mtime +timestamp.txt",
+          "c": "find /data --after timestamp.txt",
+          "d": "find /data -modified > timestamp.txt"
+        },
+        "correct": "a",
+        "explanation": "find -newer compares modification times with the reference; -type f restricts results to regular files. It is useful for selecting changes, but it alone neither represents deletions nor proves a complete incremental backup.",
+        "misconceptions": {
           "b": "-mtime uses days, not reference file",
           "c": "--after is not a valid option for find",
           "d": "Invalid syntax, wrong redirection"
         }
-      },
-      {
-        "id": "q11",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
-        "points": 6,
-        "topic": "Functions with return",
-        "question_text": "How do you return a numeric value from a Bash function?",
-        "answers": [
-          {"id": "a", "text": "return $value where value is 0-255", "correct": false},
-          {"id": "b", "text": "echo $value and capture with $(function)", "correct": false},
-          {"id": "c", "text": "Both methods are correct, for different purposes", "correct": true},
-          {"id": "d", "text": "export RESULT=$value", "correct": false}
-        ],
-        "explanation": "Bash offers two methods: `return N` for exit code (0-255), `echo value` for output captured with $(). Use return for status, echo for values.",
-        "feedback": {
-          "a": "Correct but incomplete - only works for 0-255",
-          "b": "Correct but incomplete - only for values, not status",
-          "d": "Export modifies environment, not a pattern for return"
+      }
+    },
+    {
+      "id": "q11",
+      "type": "multiple_choice",
+      "topic": "Functions with return",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which statement correctly distinguishes a Bash function status from arbitrary numeric output?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "return can convey an arbitrarily large result without status wrapping",
+          "correct": false,
+          "feedback": "An externally observed status is 8-bit, not an arbitrary result channel."
+        },
+        {
+          "id": "b",
+          "text": "Command substitution captures the exit status as text automatically",
+          "correct": false,
+          "feedback": "Command substitution captures stdout, not status."
+        },
+        {
+          "id": "c",
+          "text": "return sets status; quoted printf output can be captured with command substitution for data",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "export from a command-substitution child updates the parent shell",
+          "correct": false,
+          "feedback": "The child cannot export changes back into its parent."
         }
-      },
-      {
-        "id": "q12",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
+      ],
+      "explanation": "Use an explicit non-zero/zero status for the function contract. Use printf \"%s\\n\" \"$value\" for numeric/string output and capture it with result=$(function_name), while checking that command's status when required. Command substitution strips trailing newlines and cannot update the parent's environment.",
+      "source_question": {
+        "id": "q11",
+        "type": "mcq",
+        "bloom": "apply",
         "points": 6,
-        "topic": "HTTP verification",
-        "question_text": "Which command checks if a web server responds successfully?",
-        "answers": [
-          {"id": "a", "text": "ping localhost:8080", "correct": false},
-          {"id": "b", "text": "curl -sf http://localhost:8080/health", "correct": true},
-          {"id": "c", "text": "wget --check localhost:8080", "correct": false},
-          {"id": "d", "text": "nc -z localhost 8080", "correct": false}
-        ],
-        "explanation": "`curl -sf`: -s for silent, -f for fail on HTTP errors. Verifies real HTTP response, not just TCP connection.",
-        "feedback": {
+        "subject": "Functions with return",
+        "text": "Which statement correctly distinguishes a Bash function status from arbitrary numeric output?",
+        "options": {
+          "a": "return can convey an arbitrarily large result without status wrapping",
+          "b": "Command substitution captures the exit status as text automatically",
+          "c": "return sets status; quoted printf output can be captured with command substitution for data",
+          "d": "export from a command-substitution child updates the parent shell"
+        },
+        "correct": "c",
+        "explanation": "Use an explicit non-zero/zero status for the function contract. Use printf \"%s\\n\" \"$value\" for numeric/string output and capture it with result=$(function_name), while checking that command's status when required. Command substitution strips trailing newlines and cannot update the parent's environment.",
+        "misconceptions": {
+          "a": "An externally observed status is 8-bit, not an arbitrary result channel.",
+          "b": "Command substitution captures stdout, not status.",
+          "d": "The child cannot export changes back into its parent."
+        }
+      }
+    },
+    {
+      "id": "q12",
+      "type": "multiple_choice",
+      "topic": "HTTP verification",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which listed command makes an HTTP request to /health and enables curl failure status for ordinary HTTP 4xx/5xx responses, rather than only probing a TCP port?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "ping localhost:8080",
+          "correct": false,
+          "feedback": "ping verifies ICMP, not HTTP, and doesn't accept port"
+        },
+        {
+          "id": "b",
+          "text": "curl -sf http://localhost:8080/health",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "wget --check localhost:8080",
+          "correct": false,
+          "feedback": "--check is not a valid wget option"
+        },
+        {
+          "id": "d",
+          "text": "nc -z localhost 8080",
+          "correct": false,
+          "feedback": "nc -z only checks open TCP port, not HTTP"
+        }
+      ],
+      "explanation": "curl -sf makes the HTTP request and enables --fail handling. It does not by itself require exactly 2xx, validate the response body or impose a timeout. A deployment health policy should state accepted status/body conditions and connect/overall timeouts. nc -z checks a TCP connection only.",
+      "source_question": {
+        "id": "q12",
+        "type": "mcq",
+        "bloom": "apply",
+        "points": 6,
+        "subject": "HTTP verification",
+        "text": "Which listed command makes an HTTP request to /health and enables curl failure status for ordinary HTTP 4xx/5xx responses, rather than only probing a TCP port?",
+        "options": {
+          "a": "ping localhost:8080",
+          "b": "curl -sf http://localhost:8080/health",
+          "c": "wget --check localhost:8080",
+          "d": "nc -z localhost 8080"
+        },
+        "correct": "b",
+        "explanation": "curl -sf makes the HTTP request and enables --fail handling. It does not by itself require exactly 2xx, validate the response body or impose a timeout. A deployment health policy should state accepted status/body conditions and connect/overall timeouts. nc -z checks a TCP connection only.",
+        "misconceptions": {
           "a": "ping verifies ICMP, not HTTP, and doesn't accept port",
           "c": "--check is not a valid wget option",
           "d": "nc -z only checks open TCP port, not HTTP"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q13",
+      "type": "multiple_choice",
+      "topic": "Arrays in Bash",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which syntax preserves every element of an indexed Bash array during iteration, including spaces, glob characters and empty elements?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "for item in $ARRAY; do",
+          "correct": false,
+          "feedback": "$ARRAY without [@] returns only first element"
+        },
+        {
+          "id": "b",
+          "text": "for item in ${ARRAY[@]}; do",
+          "correct": false,
+          "feedback": "Without quotes, spaces in elements cause problems"
+        },
+        {
+          "id": "c",
+          "text": "for item in \"${ARRAY[@]}\"; do",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "foreach item in ARRAY; do",
+          "correct": false,
+          "feedback": "foreach doesn't exist in Bash"
+        }
+      ],
+      "explanation": "`\"${ARRAY[@]}\"` - correct form:\n- `[@]` expands all elements\n- Double quotes preserve elements with spaces as units\n- Without quotes, \"hello world\" becomes two elements\n",
+      "source_question": {
         "id": "q13",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
+        "type": "mcq",
+        "bloom": "apply",
         "points": 6,
-        "topic": "Arrays in Bash",
-        "question_text": "Which syntax correctly iterates over array elements?",
-        "answers": [
-          {"id": "a", "text": "for item in $ARRAY; do", "correct": false},
-          {"id": "b", "text": "for item in ${ARRAY[@]}; do", "correct": false},
-          {"id": "c", "text": "for item in \"${ARRAY[@]}\"; do", "correct": true},
-          {"id": "d", "text": "foreach item in ARRAY; do", "correct": false}
-        ],
-        "explanation": "`\"${ARRAY[@]}\"` - [@] expands all elements, double quotes preserve elements with spaces as units.",
-        "feedback": {
+        "subject": "Arrays in Bash",
+        "text": "Which syntax preserves every element of an indexed Bash array during iteration, including spaces, glob characters and empty elements?",
+        "options": {
+          "a": "for item in $ARRAY; do",
+          "b": "for item in ${ARRAY[@]}; do",
+          "c": "for item in \"${ARRAY[@]}\"; do",
+          "d": "foreach item in ARRAY; do"
+        },
+        "correct": "c",
+        "explanation": "`\"${ARRAY[@]}\"` - correct form:\n- `[@]` expands all elements\n- Double quotes preserve elements with spaces as units\n- Without quotes, \"hello world\" becomes two elements\n",
+        "misconceptions": {
           "a": "$ARRAY without [@] returns only first element",
           "b": "Without quotes, spaces in elements cause problems",
           "d": "foreach doesn't exist in Bash"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q14",
+      "type": "multiple_choice",
+      "topic": "Checksum verification",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which command checks files against an existing SHA-256 checksum manifest? The manifest must come from a trusted source if authenticity is required.",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "sha256sum -c backup.sha256",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "b",
+          "text": "sha256sum backup.tar.gz",
+          "correct": false,
+          "feedback": "Calculates hash, doesn't verify existing one"
+        },
+        {
+          "id": "c",
+          "text": "diff backup.sha256 backup.tar.gz",
+          "correct": false,
+          "feedback": "diff compares content, doesn't verify checksum"
+        },
+        {
+          "id": "d",
+          "text": "cmp --checksum backup.tar.gz",
+          "correct": false,
+          "feedback": "--checksum is not a valid option for cmp"
+        }
+      ],
+      "explanation": "sha256sum -c reads the stored hashes and filenames and checks the corresponding file bytes. Running sha256sum without -c computes a digest. Matching a locally changeable checksum is not a signature or proof of authorship.",
+      "source_question": {
         "id": "q14",
-        "type": "multiple_choice",
-        "bloom_level": "apply",
+        "type": "mcq",
+        "bloom": "apply",
         "points": 6,
-        "topic": "Checksum verification",
-        "question_text": "Which command verifies backup integrity using checksum?",
-        "answers": [
-          {"id": "a", "text": "md5sum -c backup.md5", "correct": true},
-          {"id": "b", "text": "sha256sum backup.tar.gz", "correct": false},
-          {"id": "c", "text": "diff backup.md5 backup.tar.gz", "correct": false},
-          {"id": "d", "text": "cmp --checksum backup.tar.gz", "correct": false}
-        ],
-        "explanation": "`md5sum -c file.md5`: -c (check) reads file with hashes and verifies each. Returns exit code 0 if all pass.",
-        "feedback": {
+        "subject": "Checksum verification",
+        "text": "Which command checks files against an existing SHA-256 checksum manifest? The manifest must come from a trusted source if authenticity is required.",
+        "options": {
+          "a": "sha256sum -c backup.sha256",
+          "b": "sha256sum backup.tar.gz",
+          "c": "diff backup.sha256 backup.tar.gz",
+          "d": "cmp --checksum backup.tar.gz"
+        },
+        "correct": "a",
+        "explanation": "sha256sum -c reads the stored hashes and filenames and checks the corresponding file bytes. Running sha256sum without -c computes a digest. Matching a locally changeable checksum is not a signature or proof of authorship.",
+        "misconceptions": {
           "b": "Calculates hash, doesn't verify existing one",
           "c": "diff compares content, doesn't verify checksum",
           "d": "--checksum is not a valid option for cmp"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q21",
+      "type": "multiple_choice",
+      "topic": "Bash testing",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "A test runs under set -e and must report an assertion even if my_function explicitly returns non-zero. Assume assertEquals EXPECTED ACTUAL is defined. Which pattern captures the status without an unguarded expected failure exiting first?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "test $(my_function) -eq 0",
+          "correct": false,
+          "feedback": "This tests stdout content, not exit code"
+        },
+        {
+          "id": "b",
+          "text": "status=0; my_function || status=$?; assertEquals 0 \"$status\"",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "my_function && printf success",
+          "correct": false,
+          "feedback": "The message is skipped on failure and no failure assertion is made."
+        },
+        {
+          "id": "d",
+          "text": "assert my_function returns 0",
+          "correct": false,
+          "feedback": "This syntax doesn't exist in Bash testing"
+        }
+      ],
+      "explanation": "The OR-list guards the invocation and captures its status immediately. The assertion then runs for either outcome. A function invoked in a tested context can have errexit ignored inside its body, so it must implement its error contract explicitly; this harness is not equivalent to an unguarded call relying on implicit errexit.",
+      "source_question": {
+        "id": "q21",
+        "type": "mcq",
+        "bloom": "apply",
+        "points": 6,
+        "subject": "Bash testing",
+        "text": "A test runs under set -e and must report an assertion even if my_function explicitly returns non-zero. Assume assertEquals EXPECTED ACTUAL is defined. Which pattern captures the status without an unguarded expected failure exiting first?",
+        "options": {
+          "a": "test $(my_function) -eq 0",
+          "b": "status=0; my_function || status=$?; assertEquals 0 \"$status\"",
+          "c": "my_function && printf success",
+          "d": "assert my_function returns 0"
+        },
+        "correct": "b",
+        "explanation": "The OR-list guards the invocation and captures its status immediately. The assertion then runs for either outcome. A function invoked in a tested context can have errexit ignored inside its body, so it must implement its error contract explicitly; this harness is not equivalent to an unguarded call relying on implicit errexit.",
+        "misconceptions": {
+          "a": "This tests stdout content, not exit code",
+          "c": "The message is skipped on failure and no failure assertion is made.",
+          "d": "This syntax doesn't exist in Bash testing"
+        }
+      }
+    },
+    {
+      "id": "q23",
+      "type": "multiple_choice",
+      "topic": "Systemd timers",
+      "bloom_level": "apply",
+      "points": 6,
+      "question_text": "Which statement about systemd calendar timers scheduling daily 02:30 is correct?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Only OnCalendar=02:30 is valid",
+          "correct": false,
+          "feedback": "Both the short and complete calendar form are valid."
+        },
+        {
+          "id": "b",
+          "text": "OnCalendar=02:30 and OnCalendar=*-*-* 02:30:00 are equivalent daily calendar forms",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "OnUnitActiveSec=24h always runs at wall-clock 02:30",
+          "correct": false,
+          "feedback": "This runs 24h after last activation, not at fixed time"
+        },
+        {
+          "id": "d",
+          "text": "OnBootSec=02:30 repeats at 02:30 every day",
+          "correct": false,
+          "feedback": "OnBootSec runs relative to boot, not daily"
+        }
+      ],
+      "explanation": "The short and full OnCalendar forms normalise to the same daily 02:30 calendar expression. Relative activation/boot timers have different semantics. Check the target system's time zone, DST and timer accuracy requirements; parsing the expression does not start a service.",
+      "source_question": {
+        "id": "q23",
+        "type": "mcq",
+        "bloom": "apply",
+        "points": 6,
+        "subject": "Systemd timers",
+        "text": "Which statement about systemd calendar timers scheduling daily 02:30 is correct?",
+        "options": {
+          "a": "Only OnCalendar=02:30 is valid",
+          "b": "OnCalendar=02:30 and OnCalendar=*-*-* 02:30:00 are equivalent daily calendar forms",
+          "c": "OnUnitActiveSec=24h always runs at wall-clock 02:30",
+          "d": "OnBootSec=02:30 repeats at 02:30 every day"
+        },
+        "correct": "b",
+        "explanation": "The short and full OnCalendar forms normalise to the same daily 02:30 calendar expression. Relative activation/boot timers have different semantics. Check the target system's time zone, DST and timer accuracy requirements; parsing the expression does not start a service.",
+        "misconceptions": {
+          "a": "Both the short and complete calendar form are valid.",
+          "c": "This runs 24h after last activation, not at fixed time",
+          "d": "OnBootSec runs relative to boot, not daily"
+        }
+      }
+    },
+    {
+      "id": "q15",
+      "type": "multiple_choice",
+      "topic": "Debug script",
+      "bloom_level": "analyse",
+      "points": 8,
+      "question_text": "With errexit off, BACKUP_FILE and SOURCE_DIR set, and tar returning non-zero, why can this code still print a false success message?\n\n```bash\ntar czf \"$BACKUP_FILE\" \"$SOURCE_DIR\" 2>/dev/null\necho \"Backup completed\"\n```",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "The tar status is not tested and its stderr is discarded",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "b",
+          "text": "echo doesn't work after tar",
+          "correct": false,
+          "feedback": "echo works independently of previous commands"
+        },
+        {
+          "id": "c",
+          "text": "The code proves that BACKUP_FILE is undefined",
+          "correct": false,
+          "feedback": "The question explicitly states that the variable is set; it does not identify a missing-variable cause."
+        },
+        {
+          "id": "d",
+          "text": "SOURCE_DIR contains only empty directories",
+          "correct": false,
+          "feedback": "tar would include directories, even empty ones"
+        }
+      ],
+      "explanation": "The unconditional echo is independent of the previous status. Keep diagnostic evidence and branch on the tar result before reporting success. This snippet does not establish a particular reason for failure or a particular archive size.",
+      "source_question": {
         "id": "q15",
-        "type": "multiple_choice",
-        "bloom_level": "analyse",
+        "type": "mcq",
+        "bloom": "analyse",
         "points": 8,
-        "topic": "Debug script",
-        "question_text": "A backup script displays \"Backup completed\" but the archive file is empty. What is the most likely cause?\n\n```bash\ntar czf \"$BACKUP_FILE\" \"$SOURCE_DIR\" 2>/dev/null\necho \"Backup completed\"\n```",
-        "answers": [
-          {"id": "a", "text": "The tar command failed but error was suppressed", "correct": true},
-          {"id": "b", "text": "echo doesn't work after tar", "correct": false},
-          {"id": "c", "text": "BACKUP_FILE is not defined", "correct": false},
-          {"id": "d", "text": "SOURCE_DIR contains only empty directories", "correct": false}
-        ],
-        "explanation": "`2>/dev/null` suppresses stderr, hiding tar errors. Fix: remove redirection or check $? after tar.",
-        "feedback": {
+        "subject": "Debug script",
+        "text": "With errexit off, BACKUP_FILE and SOURCE_DIR set, and tar returning non-zero, why can this code still print a false success message?\n\n```bash\ntar czf \"$BACKUP_FILE\" \"$SOURCE_DIR\" 2>/dev/null\necho \"Backup completed\"\n```",
+        "options": {
+          "a": "The tar status is not tested and its stderr is discarded",
+          "b": "echo doesn't work after tar",
+          "c": "The code proves that BACKUP_FILE is undefined",
+          "d": "SOURCE_DIR contains only empty directories"
+        },
+        "correct": "a",
+        "explanation": "The unconditional echo is independent of the previous status. Keep diagnostic evidence and branch on the tar result before reporting success. This snippet does not establish a particular reason for failure or a particular archive size.",
+        "misconceptions": {
           "b": "echo works independently of previous commands",
-          "c": "Undefined BACKUP_FILE would cause tar error, not empty archive",
+          "c": "The question explicitly states that the variable is set; it does not identify a missing-variable cause.",
           "d": "tar would include directories, even empty ones"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q16",
+      "type": "multiple_choice",
+      "topic": "Race condition",
+      "bloom_level": "analyse",
+      "points": 8,
+      "question_text": "Assume two independent top-level Bash processes use the same owned PID_FILE. Why is this check-then-write pattern racy?\n\n```bash\nif [[ ! -f \"$PID_FILE\" ]]; then\n    echo $$ > \"$PID_FILE\"\nfi\n```",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "$$ doesn't contain the correct PID",
+          "correct": false,
+          "feedback": "$$ correctly contains current process PID"
+        },
+        {
+          "id": "b",
+          "text": "Two instances can check simultaneously and both write",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "PID_FILE must be in /var/run",
+          "correct": false,
+          "feedback": "Location doesn't affect race condition"
+        },
+        {
+          "id": "d",
+          "text": "Echo cannot write to files",
+          "correct": false,
+          "feedback": "echo can write to files with redirection"
+        }
+      ],
+      "explanation": "Race condition (TOCTOU - Time Of Check To Time Of Use):\n- Instance A checks: file doesn't exist\n- Instance B checks: file doesn't exist\n- Both write their PID\n\nFix: use atomic `mkdir` or `flock`:\n```bash\nexec 200>\"$LOCK_FILE\"\nflock -n 200 || exit 1\n```\n\nUse an owned lock directory/file and retain the descriptor lock for the complete critical section. Do not unlink a live flock lock path, which could allow another inode to be locked independently.\n",
+      "source_question": {
         "id": "q16",
-        "type": "multiple_choice",
-        "bloom_level": "analyse",
+        "type": "mcq",
+        "bloom": "analyse",
         "points": 8,
-        "topic": "Race condition",
-        "question_text": "Why can this pattern for PID file cause problems?\n\n```bash\nif [[ ! -f \"$PID_FILE\" ]]; then\n    echo $$ > \"$PID_FILE\"\nfi\n```",
-        "answers": [
-          {"id": "a", "text": "$$ doesn't contain the correct PID", "correct": false},
-          {"id": "b", "text": "Two instances can check simultaneously and both write", "correct": true},
-          {"id": "c", "text": "PID_FILE must be in /var/run", "correct": false},
-          {"id": "d", "text": "Echo cannot write to files", "correct": false}
-        ],
-        "explanation": "Race condition (TOCTOU): between check and write, another instance can pass. Fix: use `flock` for atomic locking.",
-        "feedback": {
+        "subject": "Race condition",
+        "text": "Assume two independent top-level Bash processes use the same owned PID_FILE. Why is this check-then-write pattern racy?\n\n```bash\nif [[ ! -f \"$PID_FILE\" ]]; then\n    echo $$ > \"$PID_FILE\"\nfi\n```",
+        "options": {
+          "a": "$$ doesn't contain the correct PID",
+          "b": "Two instances can check simultaneously and both write",
+          "c": "PID_FILE must be in /var/run",
+          "d": "Echo cannot write to files"
+        },
+        "correct": "b",
+        "explanation": "Race condition (TOCTOU - Time Of Check To Time Of Use):\n- Instance A checks: file doesn't exist\n- Instance B checks: file doesn't exist\n- Both write their PID\n\nFix: use atomic `mkdir` or `flock`:\n```bash\nexec 200>\"$LOCK_FILE\"\nflock -n 200 || exit 1\n```\n\nUse an owned lock directory/file and retain the descriptor lock for the complete critical section. Do not unlink a live flock lock path, which could allow another inode to be locked independently.\n",
+        "misconceptions": {
           "a": "$$ correctly contains current process PID",
           "c": "Location doesn't affect race condition",
           "d": "echo can write to files with redirection"
         }
-      },
-      {
+      }
+    },
+    {
+      "id": "q17",
+      "type": "multiple_choice",
+      "topic": "Deployment strategy",
+      "bloom_level": "evaluate",
+      "points": 8,
+      "question_text": "An application requires zero downtime and instant rollback but cannot duplicate its infrastructure. Without further capacity, routing and data-compatibility assumptions, which conclusion is justified?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Blue-green automatically satisfies all requirements without extra capacity",
+          "correct": false,
+          "feedback": "Separate serving environments have capacity costs and state/routing requirements."
+        },
+        {
+          "id": "b",
+          "text": "No named strategy alone guarantees all requirements; the deployment contract needs more information",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "c",
+          "text": "Recreate guarantees zero downtime",
+          "correct": false,
+          "feedback": "Stopping/replacing the service can cause an outage."
+        },
+        {
+          "id": "d",
+          "text": "Big bang guarantees instantaneous safe rollback",
+          "correct": false,
+          "feedback": "A one-step rollout does not by itself create a safe rollback contract."
+        }
+      ],
+      "explanation": "Rolling may reduce additional capacity but usually needs gradual reversal/redeployment and does not guarantee instant rollback. Blue-green needs retained serving capacity and compatible state. Zero downtime and rollback guarantees require explicit workload, capacity, routing and migration assumptions.",
+      "source_question": {
         "id": "q17",
-        "type": "multiple_choice",
-        "bloom_level": "evaluate",
+        "type": "mcq",
+        "bloom": "evaluate",
         "points": 8,
-        "topic": "Deployment strategy",
-        "question_text": "For an application requiring zero downtime and instant rollback, but you have limited resources (cannot double infrastructure), which strategy is most suitable?",
-        "answers": [
-          {"id": "a", "text": "Blue-Green deployment", "correct": false},
-          {"id": "b", "text": "Rolling deployment", "correct": true},
-          {"id": "c", "text": "Recreate deployment", "correct": false},
-          {"id": "d", "text": "Big bang deployment", "correct": false}
-        ],
-        "explanation": "Rolling deployment: replaces instances one by one, doesn't require double resources, zero downtime. Trade-off: slower rollback.",
-        "feedback": {
-          "a": "Blue-Green requires double infrastructure",
-          "c": "Recreate stops everything before deploy - downtime",
-          "d": "Big bang doesn't offer zero downtime"
-        }
-      },
-      {
-        "id": "q18",
-        "type": "multiple_choice",
-        "bloom_level": "evaluate",
-        "points": 8,
-        "topic": "Compression choice",
-        "question_text": "For daily backups on a server with limited CPU but sufficient storage space, which compression algorithm do you choose?",
-        "answers": [
-          {"id": "a", "text": "xz (best compression ratio)", "correct": false},
-          {"id": "b", "text": "gzip (speed/compression balance)", "correct": false},
-          {"id": "c", "text": "zstd (fast with good compression)", "correct": true},
-          {"id": "d", "text": "No compression (fastest)", "correct": false}
-        ],
-        "explanation": "zstd offers best trade-off: speed comparable or better than gzip, superior compression, much lower CPU usage than xz.",
-        "feedback": {
-          "a": "xz is slow and consumes much CPU",
-          "b": "gzip is ok but zstd is superior in both aspects",
-          "d": "No compression wastes space unnecessarily"
-        }
-      },
-      {
-        "id": "q19",
-        "type": "multiple_choice",
-        "bloom_level": "remember",
-        "points": 5,
-        "topic": "Signal listing",
-        "question_text": "Which command displays the complete list of signals available in the system?",
-        "answers": [
-          {"id": "a", "text": "kill -l", "correct": true},
-          {"id": "b", "text": "signal --list", "correct": false},
-          {"id": "c", "text": "trap -p", "correct": false},
-          {"id": "d", "text": "ps -s", "correct": false}
-        ],
-        "explanation": "kill -l lists all available signals with their numbers. Example: 1) SIGHUP 2) SIGINT 3) SIGQUIT...",
-        "feedback": {
-          "b": "There is no 'signal' command in standard Unix",
-          "c": "trap -p shows active traps, not the signal list",
-          "d": "ps -s shows session IDs, not signals"
-        }
-      },
-      {
-        "id": "q20",
-        "type": "multiple_choice",
-        "bloom_level": "remember",
-        "points": 5,
-        "topic": "Compression algorithms",
-        "question_text": "Which compression algorithm typically produces the smallest files but takes the longest time to compress?",
-        "answers": [
-          {"id": "a", "text": "gzip", "correct": false},
-          {"id": "b", "text": "bzip2", "correct": false},
-          {"id": "c", "text": "xz", "correct": true},
-          {"id": "d", "text": "lz4", "correct": false}
-        ],
-        "explanation": "xz (LZMA2) achieves best compression ratio but is slowest. Ranking by compression: xz > bzip2 > gzip > lz4. Ranking by speed: lz4 > gzip > bzip2 > xz.",
-        "feedback": {
-          "a": "gzip is balanced but not the best compression",
-          "b": "bzip2 is better than gzip but slower than xz",
-          "d": "lz4 is fastest but with lowest compression ratio"
+        "subject": "Deployment strategy",
+        "text": "An application requires zero downtime and instant rollback but cannot duplicate its infrastructure. Without further capacity, routing and data-compatibility assumptions, which conclusion is justified?",
+        "options": {
+          "a": "Blue-green automatically satisfies all requirements without extra capacity",
+          "b": "No named strategy alone guarantees all requirements; the deployment contract needs more information",
+          "c": "Recreate guarantees zero downtime",
+          "d": "Big bang guarantees instantaneous safe rollback"
+        },
+        "correct": "b",
+        "explanation": "Rolling may reduce additional capacity but usually needs gradual reversal/redeployment and does not guarantee instant rollback. Blue-green needs retained serving capacity and compatible state. Zero downtime and rollback guarantees require explicit workload, capacity, routing and migration assumptions.",
+        "misconceptions": {
+          "a": "Separate serving environments have capacity costs and state/routing requirements.",
+          "c": "Stopping/replacing the service can cause an outage.",
+          "d": "A one-step rollout does not by itself create a safe rollback contract."
         }
       }
-    ]
-  },
-  "export_info": {
-    "format_version": "1.0",
-    "compatible_with": ["Moodle 3.9+", "Canvas", "Blackboard"],
-    "export_date": "2025-01-27",
-    "generator": "SEM06 Quiz Generator"
-  }
+    },
+    {
+      "id": "q18",
+      "type": "multiple_choice",
+      "topic": "Compression choice",
+      "bloom_level": "evaluate",
+      "points": 8,
+      "question_text": "A server has limited CPU and ample storage, but no workload, transfer-time or restore measurements are provided. What is a justified compression decision?",
+      "code": "",
+      "answers": [
+        {
+          "id": "a",
+          "text": "Always choose xz because it is universally smallest",
+          "correct": false,
+          "feedback": "The ratio and cost depend on data and preset."
+        },
+        {
+          "id": "b",
+          "text": "Always choose gzip because it is universally fastest",
+          "correct": false,
+          "feedback": "Speed depends on implementation, configuration and workload."
+        },
+        {
+          "id": "c",
+          "text": "Benchmark candidate codecs/settings and no compression against explicit backup/restore constraints",
+          "correct": true,
+          "feedback": ""
+        },
+        {
+          "id": "d",
+          "text": "Always choose no compression because it is universally fastest end to end",
+          "correct": false,
+          "feedback": "Reduced I/O can change end-to-end time; the result needs measurement."
+        }
+      ],
+      "explanation": "There is no universal winner from those two facts alone. Data compressibility, CPU, I/O/transfer limits, memory, backup window and restore latency matter. Retain measured inputs/results, including unfavourable results, before selecting an empirical optimum. No benchmark is invented here.",
+      "source_question": {
+        "id": "q18",
+        "type": "mcq",
+        "bloom": "evaluate",
+        "points": 8,
+        "subject": "Compression choice",
+        "text": "A server has limited CPU and ample storage, but no workload, transfer-time or restore measurements are provided. What is a justified compression decision?",
+        "options": {
+          "a": "Always choose xz because it is universally smallest",
+          "b": "Always choose gzip because it is universally fastest",
+          "c": "Benchmark candidate codecs/settings and no compression against explicit backup/restore constraints",
+          "d": "Always choose no compression because it is universally fastest end to end"
+        },
+        "correct": "c",
+        "explanation": "There is no universal winner from those two facts alone. Data compressibility, CPU, I/O/transfer limits, memory, backup window and restore latency matter. Retain measured inputs/results, including unfavourable results, before selecting an empirical optimum. No benchmark is invented here.",
+        "misconceptions": {
+          "a": "The ratio and cost depend on data and preset.",
+          "b": "Speed depends on implementation, configuration and workload.",
+          "d": "Reduced I/O can change end-to-end time; the result needs measurement."
+        }
+      }
+    }
+  ]
 }

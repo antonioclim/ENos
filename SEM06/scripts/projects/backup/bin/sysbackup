@@ -44,12 +44,5 @@ if [[ ! -f "$MAIN_SCRIPT" ]]; then
     exit 1
 fi
 
-# Verify it's executable
-if [[ ! -x "$MAIN_SCRIPT" ]]; then
-    echo "ERROR: Main script is not executable: $MAIN_SCRIPT" >&2
-    echo "Run: chmod +x $MAIN_SCRIPT" >&2
-    exit 1
-fi
-
-# Execute main script with all arguments
-exec "$MAIN_SCRIPT" "$@"
+# The tracked main script is a readable Bash source, not an executable-bit contract.
+exec bash "$MAIN_SCRIPT" "$@"

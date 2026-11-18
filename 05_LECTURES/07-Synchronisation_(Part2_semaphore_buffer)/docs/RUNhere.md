@@ -10,6 +10,9 @@
 
 | File | Description |
 |------|-------------|
+| `../07ex1_-_Semaphore_Operations.html` | Interactive model |
+| `../07ex2_-_Producer_Consumer.html` | Interactive model |
+| `../07ex3_-_Readers_Writers.html` | Interactive model |
 
 
 ### Formative Assessment (YAML)
@@ -37,24 +40,23 @@ Open any `.html` file directly in a web browser:
 
 ```bash
 # Linux/WSL
-xdg-open XXex1_-_Simulator.html
+xdg-open ../07ex1_-_Semaphore_Operations.html
 
 # Or simply double-click the file in your file manager
 ```
 
 **Features:**
-- Self-contained (no server required)
+- No server required; optional web fonts/chart assets may need internet, with a textual chart fallback offline
 - Interactive controls and visualizations  
 - Step-by-step execution modes
 - Reset buttons to restart simulations
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the lecture self-assessment from this `docs/` directory (Python with PyYAML):
 
 ```bash
-cd ../../SEM01/formative/
-python3 quiz_runner.py --file ../../05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/docs/C07_05_FORMATIVE_ASSESSMENT.yaml
+python3 ../../quiz_runner.py "C07_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42
 ```
 
 **Or manually review:**
@@ -83,7 +85,7 @@ python3 quiz_runner.py --file ../../05_LECTURES/07-Synchronisation_(Part2_semaph
 
 - **Parent:** [`../README.md`](../README.md) — Lecture unit overview
 - **Scripts:** [`../scripts/`](../scripts/) — Demo scripts (if available)
-- **Diagrams:** [`../../00_SUPPLEMENTARY/diagrams_png/`](../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
+- **Diagrams:** [`../../../00_SUPPLEMENTARY/diagrams_png/`](../../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
 
 ---
 

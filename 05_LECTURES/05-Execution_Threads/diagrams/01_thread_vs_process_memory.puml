@@ -1,5 +1,5 @@
 @startuml thread_vs_process_memory
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Thread vs Process - Memory Layout
 
 skinparam rectangle {
@@ -22,9 +22,10 @@ rectangle "**SEPARATE PROCESSES**" as procs #FAFAFA {
     }
     
     note bottom of procs
-    **COMPLETE Isolation**
-    A cannot access B's memory
-    Communication: IPC (pipes, sockets)
+    **Private address spaces**
+    Ordinary private mappings are inaccessible to another process.
+    Explicit shared memory, debugging permissions and kernel trust matter.
+    Communication: IPC (pipes, sockets, shared mappings)
     end note
 }
 
@@ -47,7 +48,7 @@ rectangle "**ONE PROCESS WITH THREADS**" as threads #FAFAFA {
     
     note bottom of threads
     **MINIMAL Isolation**
-    All threads see the same data
+    Threads share one address space (including accessible stack memory)
     ⚠️ **Synchronisation needed!**
     end note
 }
@@ -64,4 +65,5 @@ legend bottom
 | Crash | Only the process | Entire process |
 endlegend
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seminar 1: Bash Shell | Operating Systems</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0d1117;
@@ -549,6 +547,102 @@
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
     </style>
+
+<style id="seminar-accessible-print">
+button.quiz-option, button.tab { font: inherit; color: inherit; text-align: left; }
+button.quiz-option { width: 100%; }
+button.nav-dot { padding: 0; border: 1px solid currentColor; }
+button:focus-visible, input:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+@media print {
+  .presentation, .slide-container { display: block !important; height: auto !important; }
+  .slide { height: auto !important; min-height: 0 !important; overflow: visible !important; animation: none !important; }
+  .slide-content { overflow: visible !important; }
+  .nav, .nav-bar, .shortcuts, .keyboard-info, .search-container, .tabs, .filter-tabs, .stats, .print-btn { display: none !important; }
+  .slide *, .card *, .header *, .example *, .diagram * { color: #000 !important; -webkit-text-fill-color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+  .card, .card.hidden, .card[style], .quiz-option { display: block !important; background: #fff !important; color: #000 !important; border: 1px solid #777 !important; }
+  .card-header, .example, .terminal, .terminal-header, .terminal-body, .diagram, .column, .quiz-question { background: #fff !important; color: #000 !important; }
+  .grid { display: block !important; }
+  .card { margin-bottom: 8mm; break-inside: avoid; }
+  pre, code, .example, .diagram { white-space: pre-wrap !important; overflow: visible !important; }
+  h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="presentation">
@@ -584,17 +678,17 @@
             <div class="slide-content">
                 <div class="three-columns">
                     <div class="card slide-up" style="animation-delay: 0.1s">
-                        <div class="card-title">🧭 Navigare</div>
+                        <div class="card-title">🧭 Navigation</div>
                         <ul>
                             <li>File system structure</li>
-                            <li>Comenzi: <code>pwd</code>, <code>cd</code>, <code>ls</code></li>
+                            <li>Commands: <code>pwd</code>, <code>cd</code>, <code>ls</code></li>
                             <li>Absolute vs relative paths</li>
                         </ul>
                     </div>
                     <div class="card slide-up" style="animation-delay: 0.2s">
-                        <div class="card-title">📦 Variabile</div>
+                        <div class="card-title">📦 Variables</div>
                         <ul>
-                            <li>Local vs environment variables</li>
+                            <li>Shell variables and exported environment variables</li>
                             <li><code>export</code> and subprocesses</li>
                             <li>Quoting: single vs double</li>
                         </ul>
@@ -685,18 +779,18 @@
 │   ├── passwd
 │   ├── hosts
 │   └── bash.bashrc
-├── <span class="var">home/</span>            ← USERI
+├── <span class="var">home/</span>            ← USERS
 │   └── <span class="cmd">student/</span>      ← Your HOME (~)
 │       ├── Desktop/
 │       ├── Documents/
 │       └── <span class="flag">.bashrc</span>   ← Personal config
-├── <span class="comment">tmp/</span>             ← Temporary (deleted!)
+├── <span class="comment">tmp/</span>             ← Temporaryy (policy-based cleanup)
 ├── <span class="string">var/</span>             ← Variable data
 │   └── log/         ← Logs
 └── <span class="cmd">usr/</span>             ← User programs
                     </div>
                     <div>
-                        <h3>Key directoryies:</h3>
+                        <h3>Key directories:</h3>
                         <table>
                             <tr>
                                 <th>Directory</th>
@@ -716,19 +810,19 @@
                             <tr>
                                 <td><code>/tmp</code></td>
                                 <td><span class="highlight-yellow">T</span>e<span class="highlight-yellow">MP</span>orar</td>
-                                <td>Temporary files</td>
+                                <td>Temporaryy files</td>
                             </tr>
                             <tr>
                                 <td><code>/home</code></td>
                                 <td><span class="highlight-yellow">HOME</span></td>
-                                <td>User directoryies</td>
+                                <td>User directories</td>
                             </tr>
                         </table>
                         
                         <div class="callout callout-warning">
                             <span class="callout-icon">⚠️</span>
                             <div>
-                                <strong>Trap:</strong> <code>/tmp</code> is deleted on reboot! Do not store important data there.
+                                <strong>Trap:</strong> <code>/tmp</code> may be cleaned at boot or by age, depending on system policy. Do not store persistent work there.
                             </div>
                         </div>
                     </div>
@@ -736,11 +830,11 @@
             </div>
         </div>
 
-        <!-- Slide 5: Comenzi Navigare -->
+        <!-- Slide 5: Comenzi Navigation -->
         <div class="slide" data-slide="5">
             <div class="slide-header">
                 <div class="slide-number">Commands</div>
-                <h2>Navigare: pwd, cd, ls</h2>
+                <h2>Navigation: pwd, cd, ls</h2>
             </div>
             <div class="slide-content">
                 <div class="terminal">
@@ -792,7 +886,7 @@
         <div class="slide" data-slide="6">
             <div class="slide-header">
                 <div class="slide-number">Peer Instruction</div>
-                <h2>Question: What does this display?</h2>
+                <h2>Question: Assuming each cd succeeds, what does the final pwd display?</h2>
             </div>
             <div class="slide-content">
                 <div class="quiz-container">
@@ -802,25 +896,25 @@
 <span class="cmd">pwd</span></code></pre>
                     
                     <div class="quiz-options">
-                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                        <button type="button" class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
                             <span class="quiz-option-letter">A</span>
                             <span>/home/student</span>
-                        </div>
-                        <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)">
+                        </button>
+                        <button type="button" class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)">
                             <span class="quiz-option-letter">B</span>
                             <span>/var/log</span>
-                        </div>
-                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
                             <span class="quiz-option-letter">C</span>
                             <span>/</span>
-                        </div>
-                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)">
                             <span class="quiz-option-letter">D</span>
                             <span>Error - cd - command does not exist</span>
-                        </div>
+                        </button>
                     </div>
                     
-                    <div class="quiz-feedback callout callout-success" id="quiz-feedback">
+                    <div class="quiz-feedback callout callout-success" id="quiz-feedback" role="status" aria-live="polite">
                         <span class="callout-icon">✓</span>
                         <div>
                             <strong>Correct!</strong> <code>cd -</code> returns to the previous directory. After <code>cd ~</code>, the previous directory was <code>/var/log</code>.
@@ -830,7 +924,7 @@
             </div>
         </div>
 
-        <!-- Slide 7: Variabile -->
+        <!-- Slide 7: Variables -->
         <div class="slide" data-slide="7">
             <div class="slide-header">
                 <div class="slide-number">Variables</div>
@@ -841,18 +935,18 @@
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          BASH VARIABLES                                  │
 ├─────────────────────┬─────────────────────┬─────────────────────────────┤
-│      <span class="cmd">LOCAL</span>          │   <span class="var">ENVIRONMENT (export)</span>     │        <span class="flag">SPECIAL</span>            │
+│      <span class="cmd">SHELL</span>          │   <span class="var">ENVIRONMENT (export)</span>     │        <span class="flag">SPECIAL</span>            │
 ├─────────────────────┼─────────────────────┼─────────────────────────────┤
 │  VAR="valoare"      │  export VAR="val"   │  $? $$ $! $0 $1-$9          │
 │                     │                     │                             │
-│  Exists ONLY in     │  Inherited by       │  Set automatically             │
-│  current shell    │  subprocesses         │  by shell                   │
+│  Available in     │  Inherited by       │  Set automatically             │
+│  this shell/subshell │  subprocesses         │  by shell                   │
 └─────────────────────┴─────────────────────┴─────────────────────────────┘
                 </div>
                 
                 <div class="two-columns" style="margin-top: 30px;">
                     <div>
-                        <h3>Local Variable</h3>
+                        <h3>Unexported Shell Variable</h3>
                         <pre><code><span class="var">NUME</span>=<span class="string">"Ion"</span>
 <span class="cmd">echo</span> <span class="var">$NUME</span>           <span class="comment"># Ion</span>
 <span class="cmd">bash</span> -c <span class="string">'echo $NUME'</span>  <span class="comment"># (empty!)</span></code></pre>
@@ -899,9 +993,9 @@
 <span class="cmd">echo</span> <span class="var">"Hello $NUME"</span>
 <span class="output"># Output: Hello Student</span>
 
-<span class="comment"># No quotes - word splitting</span>
+<span class="comment"># Unquoted lexical whitespace separates command words</span>
 <span class="cmd">echo</span> Hello    <span class="var">$NUME</span>
-<span class="output"># Output: Hello Student (spaces were compressed!)</span></code></pre>
+<span class="output"># Output: Hello Student (echo inserts one space between its arguments)</span></code></pre>
                 
                 <div class="callout callout-warning" style="margin-top: 20px;">
                     <span class="callout-icon">⚠️</span>
@@ -928,7 +1022,7 @@ NON-LOGIN SHELL (new terminal):
 │   ~/.bashrc     │ ← Executed!
 └─────────────────┘
 
-LOGIN SHELL (ssh, login):
+INTERACTIVE LOGIN SHELL:
 ┌─────────────────┐
 │  /etc/profile   │
 └────────┬────────┘
@@ -938,12 +1032,12 @@ LOGIN SHELL (ssh, login):
 └────────┬────────┘
          ▼
 ┌─────────────────┐
-│   ~/.bashrc     │ ← source ~/.bashrc
+│   ~/.bashrc     │ ← only if the chosen profile explicitly sources it
 └─────────────────┘
                         </div>
                     </div>
                     <div>
-                        <h3>Typical content:</h3>
+                        <p>After /etc/profile, Bash reads the first readable file among ~/.bash_profile, ~/.bash_login and ~/.profile. An interactive non-login Bash reads ~/.bashrc.</p><h3>Typical content:</h3>
                         <pre><code><span class="comment"># Aliases</span>
 <span class="cmd">alias</span> ll=<span class="string">'ls -la'</span>
 <span class="cmd">alias</span> cls=<span class="string">'clear'</span>
@@ -996,7 +1090,7 @@ LOGIN SHELL (ssh, login):
                         <td><code class="highlight">?</code></td>
                         <td>Exactly one character</td>
                         <td><code>file?.txt</code></td>
-                        <td>file1.txt, fileA.txt (NU file10.txt!)</td>
+                        <td>file1.txt, fileA.txt (not file10.txt!)</td>
                     </tr>
                     <tr>
                         <td><code class="highlight">[abc]</code></td>
@@ -1036,7 +1130,7 @@ LOGIN SHELL (ssh, login):
             <div class="slide-content">
                 <div class="three-columns">
                     <div class="card">
-                        <div class="card-title">🧭 Navigare</div>
+                        <div class="card-title">🧭 Navigation</div>
                         <pre style="background: transparent; border: none; padding: 0;"><code><span class="cmd">pwd</span>          <span class="comment"># where am I</span>
 <span class="cmd">cd</span> DIR       <span class="comment"># change dir</span>
 <span class="cmd">cd</span> ~         <span class="comment"># home</span>
@@ -1045,7 +1139,7 @@ LOGIN SHELL (ssh, login):
 <span class="cmd">ls</span> -la       <span class="comment"># listing</span></code></pre>
                     </div>
                     <div class="card">
-                        <div class="card-title">📦 Variabile</div>
+                        <div class="card-title">📦 Variables</div>
                         <pre style="background: transparent; border: none; padding: 0;"><code><span class="var">VAR</span>=<span class="string">"val"</span>    <span class="comment"># local</span>
 <span class="cmd">export</span> VAR   <span class="comment"># environment</span>
 <span class="cmd">echo</span> <span class="var">$VAR</span>    <span class="comment"># display</span>
@@ -1160,7 +1254,9 @@ LOGIN SHELL (ssh, login):
         function initProgress() {
             const progress = document.getElementById('nav-progress');
             for (let i = 1; i <= totalSlides; i++) {
-                const dot = document.createElement('span');
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', `Go to slide ${i}`);
                 dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
                 dot.onclick = () => goToSlide(i);
                 progress.appendChild(dot);
@@ -1171,10 +1267,12 @@ LOGIN SHELL (ssh, login):
             const dots = document.querySelectorAll('.nav-dot');
             dots.forEach((dot, index) => {
                 dot.classList.toggle('active', index + 1 === currentSlide);
+                dot.setAttribute('aria-current', index + 1 === currentSlide ? 'step' : 'false');
             });
         }
 
         function goToSlide(n) {
+            if (!Number.isInteger(n)) n = 1;
             document.querySelector('.slide.active').classList.remove('active');
             currentSlide = n;
             if (currentSlide < 1) currentSlide = totalSlides;
@@ -1193,6 +1291,9 @@ LOGIN SHELL (ssh, login):
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
+            const target = e.target;
+            if (target && (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName) || target.isContentEditable)) return;
+
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 e.preventDefault();
                 nextSlide();
@@ -1214,6 +1315,10 @@ LOGIN SHELL (ssh, login):
             });
             
             const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.toggle('callout-success', isCorrect);
+            feedback.classList.toggle('callout-error', !isCorrect);
+            feedback.querySelector('strong').textContent = isCorrect ? 'Correct!' : 'Not this option.';
+            feedback.querySelector('.callout-icon').textContent = isCorrect ? '✓' : '✗';
             feedback.style.display = 'flex';
         }
 

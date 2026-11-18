@@ -1,7 +1,7 @@
 # VISUAL CHEAT SHEET: Utilities, Scripts, Permissions, Cron
 ## Seminar 03 | Operating Systems | UES Bucharest - CSIE
 
-> **Quick reference** - Print this document (2-3 pages) for instant access to all commands
+> **Quick reference** - Reference for GNU tools and Debian/Ubuntu cron; printed pagination depends on the renderer
 
 ---
 
@@ -20,7 +20,7 @@
 │         │         └── Filter criteria (tests)                       │
 │         └── Where you search (default: current directory)           │
 │                                                                     │
-│   COMPLETE EXAMPLE:                                                 │
+│   PARSER FRAGMENT (define usage/defaults and validate values):                                                 │
 │   find /var/log -type f -name "*.log" -size +10M -exec ls -lh {} \; │
 │        └─PATH──┘ └─────────EXPRESSIONS────────────┘ └────ACTION────┘ │
 │                                                                     │
@@ -79,7 +79,7 @@
 ├───────────────────────────────────────────────────────────────────┤
 │ EXAMPLES:                                                         │
 │   -size +100M     │ Larger than 100 MB                           │
-│   -size -1k       │ Smaller than 1 KB                            │
+│   -size -1024c    │ Byte lengths 0–1023                            │
 │   -size 0         │ Empty files                                  │
 │   -size +1G       │ Larger than 1 GB (careful with HDD!)         │
 └───────────────────────────────────────────────────────────────────┘
@@ -99,13 +99,13 @@
 │ Access       │ -atime           │ -amin                           │
 │ Change*      │ -ctime           │ -cmin                           │
 └────────────┴────────────────────┴─────────────────────────────────┘
-* ctime = change time (metadata, not content)
+* ctime = inode change time (metadata changes and content writes), not creation
 
 VALUE INTERPRETATION:
 ┌─────────────────────────────────────────────────────────────────┐
 │  -mtime 0   │ Modified in the last 24 hours                     │
 │  -mtime 1   │ Modified between 24-48 hours ago                  │
-│  -mtime +7  │ Modified more than 7 days ago                     │
+│  -mtime +7  │ Age at least 8 complete days                     │
 │  -mtime -7  │ Modified in the last 7 days                       │
 └─────────────────────────────────────────────────────────────────┘
 
@@ -172,7 +172,7 @@ PERMISSION EXAMPLES:
 │ -printf FORMAT │ Custom format                                   │
 │ -delete        │ Delete (⚠️ CAUTION!)                            │
 │ -exec CMD {} \;│ Execute CMD for each file                       │
-│ -exec CMD {} + │ Execute CMD with all files (batch)              │
+│ -exec CMD {} + │ Execute CMD in size-bounded batches              │
 │ -ok CMD {} \;  │ Like -exec but asks for confirmation            │
 └───────────────────────────────────────────────────────────────────┘
 
@@ -204,7 +204,7 @@ EXAMPLE:
 │ -0             │ Null-delimited input (with find -print0)        │
 │ -n NUM         │ Maximum NUM arguments per execution             │
 │ -I{}           │ Placeholder for substitution                    │
-│ -P NUM         │ Run NUM processes in parallel                   │
+│ -P NUM         │ At most NUM concurrent child processes                   │
 │ -t             │ Verbose - display executed command              │
 │ -p             │ Interactive - ask for confirmation              │
 │ -L NUM         │ Maximum NUM lines per execution                 │
@@ -256,7 +256,7 @@ locate COMMANDS:
 │  $@    │ All arguments (as array)                                │
 │  $*    │ All arguments (as string)                               │
 │  $?    │ Exit status of last command                             │
-│  $$    │ PID of current process                                  │
+│  $$    │ PID of invoking Bash; see BASHPID for subshell                                  │
 │  $!    │ PID of last background process                          │
 └────────┴──────────────────────────────────────────────────────────┘
 
@@ -347,7 +347,7 @@ SPECIAL VARIABLES:
   $OPTARG  - option argument (when option has :)
   $OPTIND  - index of next argument to process
 
-COMPLETE EXAMPLE:
+PARSER FRAGMENT (define usage/defaults and validate values):
 ┌─────────────────────────────────────────────────────────────────┐
 │ #!/bin/bash                                                     │
 │ verbose=false                                                   │
@@ -359,8 +359,8 @@ COMPLETE EXAMPLE:
 │         v) verbose=true ;;                                      │
 │         o) output="$OPTARG" ;;                                  │
 │         n) count="$OPTARG" ;;                                   │
-│         :) echo "Option -$OPTARG requires argument" ;;          │
-│         \?) echo "Invalid option: -$OPTARG" ;;                  │
+│         :) echo "Option -$OPTARG requires argument"; exit 1 ;;          │
+│         \?) echo "Invalid option: -$OPTARG"; exit 1 ;;                  │
 │     esac                                                        │
 │ done                                                            │
 │ shift $((OPTIND - 1))                                          │
@@ -381,9 +381,9 @@ COMPLETE EXAMPLE:
 │         -v|--verbose)                                            │
 │             verbose=true; shift ;;                               │
 │         -o|--output)                                             │
-│             output="$2"; shift 2 ;;                              │
+│             [[ $# -ge 2 && -n $2 ]] || exit 1; output="$2"; shift 2 ;;                              │
 │         --output=*)                                              │
-│             output="${1#*=}"; shift ;;                           │
+│             output="${1#*=}"; [[ -n $output ]] || exit 1; shift ;;                           │
 │         --)                                                      │
 │             shift; break ;;                                      │
 │         -*)                                                      │
@@ -426,7 +426,7 @@ COMPLETE EXAMPLE:
 └─────────┴──────────────────────┴──────────────────────────────────┘
 
 ⚠️  x on directory ≠ execute! It means ACCESS!
-⚠️  To delete a file, you need w on DIRECTORY, not on file!
+⚠️  Deletion needs directory write + search; sticky/ACL/privilege rules also apply.
 ```
 
 ## 3.2 chmod - Octal Mode
@@ -473,7 +473,7 @@ COMPLETE EXAMPLE:
 │   WHO:      u = owner    g = group    o = others    a = all      │
 │   OPERATOR: + = add      - = remove   = = set exactly            │
 │   WHAT:     r = read     w = write    x = execute                │
-│                          X = execute only if directory            │
+│                          X = directory OR file already executable by any class            │
 │                                                                   │
 ├───────────────────────────────────────────────────────────────────┤
 │ EXAMPLES:                                                         │
@@ -481,7 +481,7 @@ COMPLETE EXAMPLE:
 │   chmod go-w file.txt        # Remove write for group+others     │
 │   chmod a+r file.txt         # Add read for all                  │
 │   chmod u=rwx,g=rx,o=r file  # Set explicitly: 754               │
-│   chmod -R u+rwX,go-w dir/   # Recursive, X only for directories │
+│   chmod -R u+rwX,go-w dir/   # Recursive; X is conditional, not directory-only │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -498,22 +498,22 @@ COMPLETE EXAMPLE:
 │   - Files: 666 (rw-rw-rw-)                                       │
 │   - Directories: 777 (rwxrwxrwx)                                 │
 │                                                                   │
-│   Final permissions = Default - umask                            │
+│   Final mode = requested mode & ~umask (bitwise)                            │
 │                                                                   │
 ├───────────────────────────────────────────────────────────────────┤
 │ EXAMPLES:                                                         │
 │                                                                   │
 │   umask 022:                                                      │
-│   - Files:       666 - 022 = 644 (rw-r--r--)                     │
-│   - Directories: 777 - 022 = 755 (rwxr-xr-x)                     │
+│   - Files:       666 & ~022 = 644 (rw-r--r--)                     │
+│   - Directories: 777 & ~022 = 755 (rwxr-xr-x)                     │
 │                                                                   │
 │   umask 077:                                                      │
-│   - Files:       666 - 077 = 600 (rw-------)                     │
-│   - Directories: 777 - 077 = 700 (rwx------)                     │
+│   - Files:       666 & ~077 = 600 (rw-------)                     │
+│   - Directories: 777 & ~077 = 700 (rwx------)                     │
 │                                                                   │
 │   umask 027:                                                      │
-│   - Files:       666 - 027 = 640 (rw-r-----)                     │
-│   - Directories: 777 - 027 = 750 (rwxr-x---)                     │
+│   - Files:       666 & ~027 = 640 (rw-r-----)                     │
+│   - Directories: 777 & ~027 = 750 (rwxr-x---)                     │
 │                                                                   │
 └───────────────────────────────────────────────────────────────────┘
 
@@ -524,6 +524,10 @@ COMMANDS:
   
 PERSISTENCE: Add to ~/.bashrc for permanence
 ```
+
+Size units round up; age units round down. Mode creation above assumes no default
+ACL. Counterexample to subtraction: mask 0177 yields file 0600 and directory 0600.
+Every ancestor needs search permission for path access.
 
 ## 3.5 Special Permissions
 
@@ -550,7 +554,7 @@ PERSISTENCE: Add to ~/.bashrc for permanence
 │                                                                   │
 │   Sticky Bit             - 1xxx - chmod +t or chmod 1755         │
 │   ┌─────────────────────────────────────────────────────────────┐ │
-│   │ On directory: Only file's owner can delete it              │ │
+│   │ On directory: File owner, directory owner or privilege may delete              │ │
 │   │ Example: /tmp (drwxrwxrwt) - all can write, only owner     │ │
 │   │          of own file can delete                            │ │
 │   │ Display: 't' in others' x position                         │ │
@@ -628,7 +632,7 @@ COMMON EXAMPLES:
 │ 0 9-17 * * 1-5     │ Monday-Friday, 9-17, every hour            │
 │ 30 4 1,15 * *      │ On 1st and 15th of month, at 4:30 AM       │
 │ 0 0 1 1 *          │ 1 January at midnight                      │
-│ */5 9-17 * * 1-5   │ Every 5 min, 9-17, Monday-Friday          │
+│ */5 9-17 * * 1-5   │ Every 5 min, 09:00–17:55, Mon–Fri          │
 └────────────────────┴─────────────────────────────────────────────┘
 ```
 

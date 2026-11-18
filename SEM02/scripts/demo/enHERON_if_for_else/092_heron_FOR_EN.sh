@@ -1,4 +1,17 @@
 #!/bin/bash
+set -euo pipefail
+command -v bc >/dev/null 2>&1 || { echo 'Error: bc is required.' >&2; exit 2; }
+calculate() {
+    local result
+    if ! result=$(printf '%s\n' "$1" | bc 2>&1); then
+        echo "Calculator failed: $result" >&2; return 2
+    fi
+    if [[ ! $result =~ ^-?([0-9]+([.][0-9]*)?|[.][0-9]+)$ ]]; then
+        echo "Calculator returned an invalid scalar: $result" >&2; return 2
+    fi
+    printf '%s\n' "$result"
+}
+
 # =============================================================================
 # heron_FOR.sh
 # Heron's Method (Babylonian) for computing the square root
@@ -49,7 +62,7 @@ if ! [[ "$N" =~ ^[0-9]+$ ]]; then
 fi
 
 # Special case: 0 (avoid division by zero in the formula)
-if [ "$N" -eq 0 ]; then
+if [[ $N =~ ^0+$ ]]; then
     echo "sqrt(0) = 0"
     exit 0
 fi
@@ -62,7 +75,7 @@ fi
 # bc = Basic Calculator for decimal arithmetic
 # scale=8 = 8 decimal places (more precise than in heron_IF.sh)
 # Increasing scale lets us observe convergence more clearly in the output
-x=$(echo "scale=8; $N / 2" | bc)
+x=$(calculate "scale=8; $N / 2")
 
 echo "--------------------------------------"
 echo "Number: N = $N"
@@ -102,7 +115,7 @@ for step in {1..10}; do
 
     # Heron's formula: x_new = ( x_old + N / x_old ) / 2
     # Written ONCE — this is the power of the loop compared to IF
-    x=$(echo "scale=8; ($x + $N / $x) / 2" | bc)
+    x=$(calculate "scale=8; ($x + $N / $x) / 2")
 
     # $step = counter variable — takes the values 1, 2, 3, ..., 10
     echo "Step $step: x = $x"
@@ -122,8 +135,8 @@ echo "--------------------------------------"
 #   From step 4 onward, the value no longer changes.
 #   Yet FOR continues until step 10 — performing 6 unnecessary steps.
 #
-# Conclusion: FOR cannot detect convergence and stop on its own.
-#   => If we want dynamic stopping, we need WHILE + break.
+# Conclusion: This fixed-count design does not test convergence; Bash for can stop with break.
+#   => Dynamic stopping can use for or while with an explicit condition or break.
 #      (see heron_WHILE.sh)
 # -----------------------------------------------------------------------------
 

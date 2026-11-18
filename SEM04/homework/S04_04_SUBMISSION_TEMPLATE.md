@@ -1,5 +1,7 @@
 # Submission Template - Seminar 4 Assignment
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 ## Archive Structure
 
 Create a ZIP archive named: `SurnameName_Group_Assignment4.zip`
@@ -19,7 +21,7 @@ SurnameName_Group_Assignment4/
 │   ├── employees_updated.csv
 │   └── sales_summary.txt
 │
-└── README.txt               # Optional - implementation notes
+└── README.txt               # Requirement unresolved: main assignment requires this; see status
 ```
 
 ---
@@ -54,12 +56,16 @@ Key aspects: [ ] `output/` folder contains all generated files, [ ] outputs are 
 
 ## README.txt Template
 
-Copy and complete in README.txt (optional):
+The main assignment requires README.txt; this template formerly called it
+optional. The conflict is recorded in [assessment status](ASSESSMENT_STATUS.md).
+The superset below captures the available evidence without selecting a penalty:
 
 ```
-=== SEMINAR 07-08 ASSIGNMENT ===
+=== SEMINAR 04 ASSIGNMENT ===
 Name: [Surname Name]
 Group: [Group]
+Matricol: [Your ID]
+Data Checksum: [legacy identifier from the generator]
 Date: [Date]
 
 === COMPLETED EXERCISES ===
@@ -100,8 +106,8 @@ Approximately: [X] hours
 - Do not ignore errors - handle them
 
 ### Do
-- Test on files from `resources/sample_data/`
-- Use `shellcheck` for syntax validation
+- Check the intended input schema. The main assignment names personalised `student_ID/` data; committed sample_data is a separate unit-test fixture
+- Use `bash -n` for Bash syntax and `shellcheck` (when installed) for static diagnostics
 - Verify on Linux (not just Windows)
 - Comment important sections
 
@@ -110,7 +116,9 @@ Approximately: [X] hours
 ## Useful Commands
 
 ```bash
-# Check bash syntax (install: apt install shellcheck)
+# Check Bash syntax; ShellCheck is a separate optional static analyser
+bash -n ex1_validator.sh
+# If installed:
 shellcheck ex1_validator.sh
 
 # Make all scripts executable
@@ -120,7 +128,7 @@ chmod +x *.sh
 zip -r SurnameName_Group_Assignment4.zip SurnameName_Group_Assignment4/
 
 # Test a script
-./ex1_validator.sh ../resources/sample_data/contacts.txt
+./ex1_validator.sh ../student_YOUR_MATRICOL/contacts.txt
 
 # Check archive size
 ls -lh SurnameName_Group_Assignment4.zip

@@ -82,7 +82,7 @@ critical() {
 
 pause() {
     echo ""
-    read -r -p "Press Enter to continue..." </dev/tty 2>/dev/null || true
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || true; fi
     echo ""
 }
 
@@ -282,8 +282,11 @@ echo "Status: $?"
     echo "WITH pipefail + PIPESTATUS:"
     code 'set -o pipefail
 cat nonexistent_file.txt | grep "pattern"
-echo "Pipeline status: $?"
-echo "Individual: ${PIPESTATUS[@]}"'
+statuses=("${PIPESTATUS[@]}")  # Capture immediately: any command overwrites it
+printf "Individual: %s\n" "${statuses[*]}"
+status=0
+for item in "${statuses[@]}"; do (( item == 0 )) || status=$item; done
+echo "Pipeline status: $status"'
     
     run_in_subshell '
 set -o pipefail
@@ -411,7 +414,7 @@ echo "Test 1: does not reach"
 '
     
     echo ""
-    warning "Behaviour varies between Bash versions!"
+    warning "An echo command returns its own status; a failed substitution does not make echo fail."
     
     pause
     
@@ -424,7 +427,8 @@ echo "Test 1: does not reach"
     echo "  3. Any command negated with !"
     echo "  4. Functions called in test context"
     echo "  5. Commands in pipes (without pipefail)"
-    echo "  6. Subshells (without shopt inherit_errexit)"
+    echo "  6. Command substitutions clear -e by default (inherit_errexit/POSIX changes this)"
+    echo "     Ordinary ( ... ) subshells inherit -e, subject to the same test-context exceptions."
     echo ""
     
     warning "SOLUTION: EXPLICIT checking of important errors!"
@@ -460,7 +464,7 @@ IFS=$'\''\n\t'\'''
     echo "  -e (errexit)   : Exit on first error (with limitations!)"
     echo "  -u (nounset)   : Error for undefined variables"
     echo "  -o pipefail    : Propagate errors in pipes"
-    echo "  IFS            : Safe separator (avoids word splitting)"
+    echo "  IFS            : Changes splitting delimiters; quoted expansions are still required"
     
     pause
     
@@ -522,10 +526,10 @@ demo_quiz() {
     echo -e "${BOLD}Q1: With 'set -e', does the script stop if 'false' is in an if?${NC}"
     echo "    a) Yes"
     echo "    b) No"
-    read -r -p "Answer (a/b): " ans </dev/tty
+    read -r -p "Answer (a/b): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "b" ]]; then
         good "Correct! set -e does not work in test context (if/while)."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. set -e ignores errors in if/while/until."
     fi
@@ -536,10 +540,10 @@ demo_quiz() {
     echo "    a) 0"
     echo "    b) 1"
     echo "    c) Depends"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "a" ]]; then
         good "Correct! Without pipefail, returns exit code of last command (true=0)."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. Without pipefail, pipeline returns status of last command."
     fi
@@ -550,10 +554,10 @@ demo_quiz() {
     echo "    a) \$VAR"
     echo "    b) \${VAR:-default}"
     echo "    c) You cannot"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "b" ]]; then
         good "Correct! \${VAR:-default} provides default value and avoids error."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. \${VAR:-default} returns default if VAR is undefined."
     fi
@@ -563,10 +567,10 @@ demo_quiz() {
     echo -e "${BOLD}Q4: Does 'false || true' stop script with set -e?${NC}"
     echo "    a) Yes"
     echo "    b) No"
-    read -r -p "Answer (a/b): " ans </dev/tty
+    read -r -p "Answer (a/b): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "b" ]]; then
         good "Correct! || \"rescues\" the error - set -e does not apply."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. Commands followed by || or && do not trigger set -e."
     fi
@@ -577,10 +581,10 @@ demo_quiz() {
     echo "    a) Sets newline and tab as separators (avoids spaces)"
     echo "    b) Enables debugging"
     echo "    c) Sets UTF-8 encoding"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "a" ]]; then
         good "Correct! Removes space from IFS for safer word splitting."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. IFS controls how Bash separates words."
     fi

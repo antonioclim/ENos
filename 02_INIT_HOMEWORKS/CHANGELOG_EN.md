@@ -1,5 +1,7 @@
 # 📜 CHANGELOG
 
+> **Historical changelog:** statements below describe the source editions. They are not current guarantees of content authentication, installation behaviour or institutional acceptance. Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md).
+
 All notable changes to this project are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).

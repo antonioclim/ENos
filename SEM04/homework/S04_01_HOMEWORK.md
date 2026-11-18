@@ -1,11 +1,16 @@
 # Mandatory Assignment — Seminar 04: Text Processing
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > Operating Systems | ASE Bucharest — CSIE  
 > Deadline: One week from seminar  
 > Points: 100% (10% of final grade)  
 > Submission: `.zip` archive on the e-learning platform
 
-*Fair warning: last semester three students submitted identical outputs on 'randomly generated' data. They all got zero. This semester, your data is unique to your matricol number. Sharing solutions will not work anymore.*
+> Retained author account: “last semester three students submitted identical outputs on
+> randomly generated data. They all got zero.” This anecdote does not establish a
+> current policy or detection rate. ID-seeded datasets can collide and do not
+> prevent code sharing, prove authorship or determine a sanction.
 
 ---
 
@@ -21,7 +26,7 @@ After completing this assignment, you will demonstrate ability to:
 
 ## ⚠️ CRITICAL: Personalised Data Requirement
 
-This assignment uses **personalised test data**. Each student works with unique files.
+This assignment uses **personalised test data**. Data are reproducible for an ID and generator version; unique outputs for every possible ID are not guaranteed.
 
 ### Step 1: Generate YOUR Data
 ```bash
@@ -32,7 +37,7 @@ make generate-data ID=YOUR_MATRICOL
 make generate-data ID=123456
 ```
 
-This creates a folder `student_123456/` with your unique test files and a **checksum**.
+This creates a folder `student_123456/` with synthetic test files, a legacy dataset identifier and a per-file SHA-256 manifest.
 
 ### Step 2: Note Your Checksum
 The generator outputs something like:
@@ -41,11 +46,21 @@ The generator outputs something like:
   Checksum: a7b3c9f2e1d4
 ```
 
-**You MUST include this checksum in your submission.** We verify it.
+The public assignment requests this identifier in README.txt; its assessment
+consequence remains pending. `--verify ID CHECKSUM` compares the regenerated
+identifier only. To inspect actual data files read-only, use:
+
+```bash
+python3 scripts/python/S04_04_personalized_data_generator.py --verify-files 123456 student_123456
+```
+
+Matching content/hashes do not authenticate identity or authorship. Regeneration
+refuses existing output; use `--output-dir` with a fresh existing parent directory
+rather than overwriting evidence.
 
 ### Step 3: Work With YOUR Data
 All exercises must be completed using files from YOUR `student_MATRICOL/` folder.
-Using the generic `resources/sample_data/` files will result in **−50% penalty**.
+The reference `resources/sample_data/` fixtures have a different schema. The historical −50% proposal is not applied while the contradictory assessment contract is unresolved.
 
 ---
 
@@ -63,7 +78,7 @@ Using the generic `resources/sample_data/` files will result in **−50% penalty
 ### Task
 Create `ex1_validator.sh` which processes `contacts.txt`:
 
-1. **(10%)** Validate emails — display total found, valid count with list and invalid count with list
+1. **(10%, historical weight)** Validate emails — display total found, valid count with list and invalid count with list
 2. **(8%)** Extract unique IP addresses, sorted numerically
 3. **(7%)** Find Romanian phone numbers (formats: 07XX-XXX-XXX, 07XX.XXX.XXX and 07XXXXXXXX)
 
@@ -93,11 +108,15 @@ Total found: 12
 
 === RO PHONE NUMBERS ===
 0721-123-456
-0733 345 678
+0733.345.678
 [...]
 ```
 
 ### Tips
+The generated `Contact: ...` record is the full candidate, including invalid
+ones; extracting only already-valid substrings loses invalid records. State a
+limited email grammar, rather than claiming full RFC validity.
+
 Email regex needs to handle: dots in local part, subdomains and plus-addressing.
 IP sorting: `sort -t. -k1,1n -k2,2n -k3,3n -k4,4n` for proper numeric order.
 
@@ -119,7 +138,11 @@ Create `ex2_log_analyzer.sh` which analyses `server.log`:
 
 ### Tips
 The log format is: `[YYYY-MM-DD HH:MM:SS] [LEVEL] message`
-For severity counting: `awk -F'[][]' '{count[$2]++}'` extracts the bracketed level.
+For severity counting, bracket field `$4` is the level and `$2` is the timestamp.
+Use the exact `[timestamp] [INFO|WARNING|ERROR|DEBUG] message` schema. The reference
+model excludes malformed records from percentages, reports their count and exits
+2 for a partial report. Zero valid events makes percentages undefined. This is a
+technical reporting denominator, not an assessment weight.
 Failed auth patterns include: "Authentication failed", "denied" and "invalid credentials"
 
 ---
@@ -139,8 +162,13 @@ Create `ex3_data_transform.sh` which processes `employees.csv`:
 ```
 
 ### Tips
+The personalised schema is `ID,Name,Department,Salary,Email,HireDate,Status`, so
+department is `$3`, salary `$4` and email `$5`. The committed test fixture has a
+different order; validate the header before using positional fields. Simple AWK
+models accept unquoted records only, with numeric salaries.
+
 Currency formatting in awk: `printf "$%'d", salary` (locale-dependent) or manual formatting.
-Year calculation: `$(date +%Y)` gives current year; parse hire_date and subtract.
+Year calculation in the reference uses current UTC year minus hire year, an explicit calendar-year approximation. Completed-anniversary tenure would require month/day comparison and must be specified separately.
 
 ---
 
@@ -160,7 +188,7 @@ Create `ex4_sales_report.sh` which processes `sales.csv`:
 
 ### Tips
 Revenue = quantity × unit_price. 
-Standard deviation in awk requires two passes or running sums of x and x².
+The model uses population standard deviation over the supplied quantities. Zero transactions makes its mean/threshold undefined; no anomaly conclusion is asserted. The top-three report uses revenue descending with lexical tie order, and all maximum salesperson ties are shown.
 Date gaps: sort dates, check if consecutive differ by more than 1 day.
 
 ---
@@ -211,7 +239,12 @@ Notes: [Optional implementation notes]
 
 ---
 
-## Anti-Plagiarism Policy
+## Retained Anti-Plagiarism Policy Proposal — Pending Author Decision
+
+The rules below are historical wording. No automatic sanction, identity finding
+or misconduct conclusion is adopted by this revision. Oral responses, code
+similarity, fingerprints and metadata need contextual evidence and an approved
+assessment process.
 
 - **Copied code = 0% for ALL involved** (no exceptions)
 - Discussion of approaches is fine; sharing code is not
@@ -254,7 +287,7 @@ A: Use WSL2 or the lab VM. Native Windows will not work.
 A: Up to +10% for genuinely useful extensions (not just fancy output colours).
 
 **Q: What if my checksum does not match?**
-A: Regenerate data with the same matricol. Checksums are deterministic.
+A: Compare the same ID and generator version in a fresh output parent. The legacy identifier is deterministic for the five generated contents; answer-file generated_at is runtime metadata. Use --verify-files to compare actual submitted source data.
 
 ---
 

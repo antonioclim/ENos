@@ -6,11 +6,11 @@
     <title>🐧 Seminar 2: Operators, Redirection, Filters and Loops | OS ASE-CSIE</title>
     
     <!-- Reveal.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/night.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.6.1/reveal.css">
+    <link rel="stylesheet" href="../../assets/css/reveal-night-4.6.1.css">
     
     <!-- Highlight.js for code -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/11.9.0/monokai.css">
     
     <style>
         /* Custom styles */
@@ -121,6 +121,8 @@
         
         /* Diagrams ASCII */
         .ascii-diagram {
+            white-space: pre;
+            overflow-x: auto;
             font-family: 'Courier New', monospace;
             font-size: 0.65em;
             text-align: left;
@@ -222,6 +224,104 @@
             border: 2px solid #4a5568;
         }
     </style>
+
+<style id="seminar-accessible-print">
+button.quiz-option, button.tab { font: inherit; color: inherit; text-align: left; }
+button.quiz-option { width: 100%; }
+button.nav-dot { padding: 0; border: 1px solid currentColor; }
+button:focus-visible, input:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+@media print {
+  .presentation, .slide-container { display: block !important; height: auto !important; }
+  .slide { height: auto !important; min-height: 0 !important; overflow: visible !important; animation: none !important; }
+  .slide-content { overflow: visible !important; }
+  .nav, .nav-bar, .shortcuts, .keyboard-info, .search-container, .tabs, .filter-tabs, .stats, .print-btn { display: none !important; }
+  .slide *, .card *, .header *, .example *, .diagram * { color: #000 !important; -webkit-text-fill-color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+  .card, .card.hidden, .card[style], .quiz-option { display: block !important; background: #fff !important; color: #000 !important; border: 1px solid #777 !important; }
+  .card-header, .example, .terminal, .terminal-header, .terminal-body, .diagram, .column, .quiz-question { background: #fff !important; color: #000 !important; }
+  .grid { display: block !important; }
+  .card { margin-bottom: 8mm; break-inside: avoid; }
+  pre, code, .example, .diagram {
+            white-space: pre;
+            overflow-x: auto; white-space: pre-wrap !important; overflow: visible !important; }
+  h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+}
+</style>
+<link rel="stylesheet" data-enos-presentation-fallback href="../../assets/css/presentation_fallback.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="reveal">
@@ -279,7 +379,7 @@
                 <h2>What Do We Already Know?</h2>
                 <div class="two-columns">
                     <div class="box-green">
-                        <h3>From SEM01-02</h3>
+                        <h3>From SEM01</h3>
                         <ul class="small-text">
                             <li>Navigation: <code>cd</code>, <code>ls</code>, <code>pwd</code></li>
                             <li>Files: <code>cp</code>, <code>mv</code>, <code>rm</code></li>
@@ -414,10 +514,14 @@ mkdir backup && echo "✓ Created" || echo "✗ Error"</code></pre>
                 
                 <div class="fragment box-orange" style="margin-top: 20px;">
                     <h4>Watch out for evaluation order!</h4>
-                    <pre><code class="language-bash"># CORRECT: clear structure
-[ -f config.txt ] && source config.txt || echo "Config missing"
+                    <pre><code class="language-bash"># Distinguish a missing file from a failing sourced script
+if [ -f config.txt ]; then
+    source config.txt || echo "Config failed"
+else
+    echo "Config missing"
+fi
 
-# WRONG: echo can fail and trigger ||
+# With cmd1 &amp;&amp; cmd2 || cmd3, either failing command may trigger cmd3
 false && echo "OK" || echo "Error"  # Output: Error</code></pre>
                 </div>
             </section>
@@ -476,8 +580,8 @@ fg %1</code></pre>
 └─────────┘       |        └─────────┘       |        └─────────┘
                 pipe                       pipe
                 </div>
-                <pre class="fragment"><code class="language-bash"># Example: Count .txt files
-ls -la | grep ".txt" | wc -l
+                <pre class="fragment"><code class="language-bash"># Count regular .txt files in the current directory (GNU find)
+find . -maxdepth 1 -type f -name "*.txt" -printf x | wc -c
 
 # Filter and sort processes
 ps aux | grep python | sort -k4 -rn</code></pre>
@@ -491,7 +595,7 @@ ps aux | grep python | sort -k4 -rn</code></pre>
                         <h4><code>{ cmd; }</code> - Inline group</h4>
                         <ul class="small-text">
                             <li>Executes in the current shell</li>
-                            <li>Variables persist</li>
+                            <li>Changes remain in the current shell</li>
                             <li>Requires <code>;</code> and spaces</li>
                         </ul>
                         <pre><code class="language-bash">{ cd /tmp; pwd; }
@@ -501,7 +605,7 @@ ps aux | grep python | sort -k4 -rn</code></pre>
                         <h4><code>( cmd )</code> - Subshell</h4>
                         <ul class="small-text">
                             <li>Executes in a new subshell</li>
-                            <li>Variables do NOT persist</li>
+                            <li>Changes do not propagate to the parent shell</li>
                             <li>Isolated from parent shell</li>
                         </ul>
                         <pre><code class="language-bash">( cd /tmp; pwd )
@@ -642,7 +746,7 @@ EOF</code></pre>
             <section>
                 <h2>Here String <code>&lt;&lt;&lt;</code></h2>
                 <div class="box-orange">
-                    <p>Sends a <strong>string</strong> directly to stdin (single line)</p>
+                    <p>Sends a <strong>string</strong> directly to stdin; embedded newlines are preserved and a final newline is added</p>
                 </div>
                 <pre><code class="language-bash"># Instead of echo + pipe
 echo "hello world" | tr 'a-z' 'A-Z'
@@ -853,7 +957,7 @@ wc -l < /etc/passwd
 who | wc -l
 
 # How many .txt files?
-ls *.txt 2>/dev/null | wc -l</code></pre>
+find . -maxdepth 1 -type f -name "*.txt" -printf x | wc -c</code></pre>
             </section>
             
             <!-- Slide 33: head and tail -->
@@ -899,15 +1003,14 @@ tail -f /var/log/syslog</code></pre>
     sort -rn | \
     head -5</code></pre>
                 <div class="fragment ascii-diagram" style="font-size: 0.55em;">
-history → extract → sort      → count      → sort      → limit
-          cmd      alphabetic   duplicates   descending   top 5
-
- 1 ls    →  ls   →   ls    →  45 ls    →  45 ls   →  45 ls
- 2 cd       cd       cd       32 cd       32 cd      32 cd
- 3 ls       ls       git      28 git      28 git     28 git
- 4 git      cat      cat      15 cat      22 pwd     22 pwd
- 5 cat      pwd      pwd      22 pwd      15 cat     15 cat
-                </div>
+history → extract → sort → uniq -c → sort -rn → head -5
+1 ls         ls       cat     1 cat       2 ls        2 ls
+2 cd         cd       cd      1 cd        1 git       1 git
+3 ls         ls       git     1 git       1 cd        1 cd
+4 git        git      ls      2 ls        1 cat       1 cat
+5 cat        cat      ls
+Tie order shown assumes LC_ALL=C; this five-line fixture is illustrative.
+                    </div>
             </section>
             
             <!-- Slide 35: Peer Instruction Q3 -->
@@ -924,8 +1027,8 @@ history → extract → sort      → count      → sort      → limit
                     <div class="quiz-option">D) 1</div>
                 </div>
                 <p class="fragment small-text" style="margin-top: 20px; color: #68d391;">
-                    ✅ Answer: <strong>B</strong> - uniq removes only consecutive duplicates!<br>
-                    <span class="tiny-text">red, green, red, blue, green → 5 lines (missing sort!)</span>
+                    ✅ Answer: <strong>C</strong> - uniq removes only consecutive duplicates!<br>
+                    <span class="tiny-text">All six lines remain: there are no adjacent duplicates. With sort | uniq, the result would contain three lines.</span>
                 </p>
             </section>
             
@@ -1124,7 +1227,7 @@ cat numbers.txt | while read num; do
     ((total += num))
 done
 echo $total</code></pre>
-                    <p>If numbers.txt contains 1, 2, 3 (on separate lines), what is displayed?</p>
+                    <p>With Bash lastpipe disabled, if numbers.txt contains 1, 2, 3 on separate lines, what is displayed?</p>
                 </div>
                 <div style="margin-top: 30px;">
                     <div class="quiz-option">A) 6</div>
@@ -1247,7 +1350,7 @@ echo -e "\n✓ Report saved to: $REPORT"</code></pre>
                 <h2>Seminar 2 Homework</h2>
                 <div class="box-blue" style="text-align: left;">
                     <h4>Pipeline Master</h4>
-                    <p class="small-text">Consult <code>teme/S02_01_TEMA.md</code> for:</p>
+                    <p class="small-text">Consult <code>homework/S02_01_HOMEWORK.md</code> for:</p>
                     <ul class="small-text">
                         <li>Operator exercises (20%)</li>
                         <li>Redirection exercises (20%)</li>
@@ -1258,7 +1361,7 @@ echo -e "\n✓ Report saved to: $REPORT"</code></pre>
                 </div>
                 <p style="margin-top: 30px;">
                     <strong>Deadline:</strong> Next seminar<br>
-                    <span class="small-text">Generate the structure with: <code>./S02_02_creeaza_tema.sh "Name" Group</code></span>
+                    <span class="small-text">Generate the structure with: <code>bash homework/S02_02_create_homework.sh "Name" Group</code></span>
                 </p>
             </section>
             
@@ -1302,10 +1405,10 @@ echo -e "\n✓ Report saved to: $REPORT"</code></pre>
     </div>
     
     <!-- Reveal.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/markdown/markdown.min.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.6.1/reveal.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.6.1/plugin/highlight/highlight.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.6.1/plugin/notes/notes.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.6.1/plugin/markdown/markdown.js"></script>
     
     <script>
         Reveal.initialize({
@@ -1336,5 +1439,6 @@ echo -e "\n✓ Report saved to: $REPORT"</code></pre>
             document.body.classList.toggle('blackout');
         });
     </script>
+<script src="../../assets/js/presentation_fallback.js"></script>
 </body>
 </html>

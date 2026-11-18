@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banker's Algorithm | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -83,7 +83,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -95,7 +172,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Banker's Algorithm</h1>
-                    <p class="text-xs text-stone-500">Deadlock Avoidance-ului</p>
+                    <p class="text-xs text-stone-500">Deadlock Avoidance</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
@@ -127,16 +204,16 @@
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Procese (n)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Processes (n)</label>
                             <input type="number" id="numProcesses" value="5" min="2" max="10" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="initializeMatrices()">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Resurse (m)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Resources (m)</label>
                             <input type="number" id="numResources" value="3" min="2" max="6" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="initializeMatrices()">
                         </div>
                         <div class="col-span-2 flex gap-2">
                             <button onclick="initializeMatrices()" class="flex-1 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition-colors">
-                                <i class="fas fa-sync-alt mr-1"></i> Reinitializare
+                                <i class="fas fa-sync-alt mr-1"></i> Reinitialise
                             </button>
                             <button onclick="loadExample()" class="flex-1 p-2 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm transition-colors">
                                 <i class="fas fa-flask mr-1"></i> Exemplu
@@ -164,7 +241,7 @@
                             <i class="fas fa-hand-holding text-green-500"></i>
                             Allocation
                         </h3>
-                        <p class="text-xs text-stone-500 mb-2">Resurse alocate curent</p>
+                        <p class="text-xs text-stone-500 mb-2">Currently allocated resources</p>
                         <div id="allocationMatrix" class="overflow-x-auto">
                             <!-- Matrix will be rendered here -->
                         </div>
@@ -176,7 +253,7 @@
                             <i class="fas fa-chart-line text-blue-500"></i>
                             Maximum
                         </h3>
-                        <p class="text-xs text-stone-500 mb-2">Cerere maxima posibila</p>
+                        <p class="text-xs text-stone-500 mb-2">Declared Maximum Claim</p>
                         <div id="maxMatrix" class="overflow-x-auto">
                             <!-- Matrix will be rendered here -->
                         </div>
@@ -199,7 +276,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-shield-alt text-green-500"></i>
-                        Algoritm de Siguranta (Safety Algorithm)
+                        Safety Algorithm
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -222,9 +299,9 @@
                     
                     <!-- Safe Sequence -->
                     <div class="mt-4">
-                        <h4 class="text-xs text-stone-500 mb-2">Secventa Safe</h4>
+                        <h4 class="text-xs text-stone-500 mb-2">Safe Sequence</h4>
                         <div id="safeSequence" class="flex gap-2 flex-wrap min-h-[40px] items-center bg-stone-50 rounded p-2">
-                            <span class="text-stone-400 text-sm italic">Run algoritmul for a vedea secventa</span>
+                            <span class="text-stone-400 text-sm italic">Run the algorithm to view the sequence</span>
                         </div>
                     </div>
                 </div>
@@ -235,7 +312,7 @@
                         <i class="fas fa-terminal"></i> Algorithm Steps
                     </h3>
                     <div id="algorithmLog" class="h-48 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// Apasa "Check Siguranta" for a rula algoritmul</div>
+                        <div class="text-stone-500">// Press "Check Safety" to run the algorithm</div>
                     </div>
                 </div>
             </div>
@@ -245,14 +322,14 @@
                 <!-- Safety Check -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-check-circle text-green-500 mr-2"></i>verification Siguranta
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>Safety Check
                     </h3>
                     <div class="space-y-2">
                         <button onclick="runSafetyAlgorithm()" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-play mr-1"></i> Check Siguranta (Instant)
+                            <i class="fas fa-play mr-1"></i> Check Safety (Instant)
                         </button>
                         <button onclick="runSafetyAlgorithmAnimated()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-film mr-1"></i> verification Animata
+                            <i class="fas fa-film mr-1"></i> Animated Check
                         </button>
                     </div>
                 </div>
@@ -260,23 +337,23 @@
                 <!-- Resource Request -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-hand-paper text-blue-500 mr-2"></i>Simulare Cerere
+                        <i class="fas fa-hand-paper text-blue-500 mr-2"></i>Request Simulation
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Proces care cere</label>
+                            <label class="text-xs text-stone-500 block mb-1">Requesting process</label>
                             <select id="requestProcess" class="w-full p-2 border border-stone-300 rounded text-sm">
                                 <!-- Processes will be added here -->
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Vector Request</label>
+                            <label class="text-xs text-stone-500 block mb-1">Request Vector</label>
                             <div id="requestVector" class="flex gap-2 flex-wrap">
                                 <!-- Request inputs will be added here -->
                             </div>
                         </div>
                         <button onclick="simulateRequest()" class="btn-action w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-paper-plane mr-1"></i> send Cerere
+                            <i class="fas fa-paper-plane mr-1"></i> Submit Request
                         </button>
                     </div>
                 </div>
@@ -294,7 +371,7 @@
                             <i class="fas fa-times-circle text-red-500 mr-2"></i>Unsafe State
                         </button>
                         <button onclick="loadPreset('classic')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-book text-blue-500 mr-2"></i>Exemplu Clasic (5P, 3R)
+                            <i class="fas fa-book text-blue-500 mr-2"></i>Classical Example (5P, 3R)
                         </button>
                     </div>
                 </div>
@@ -302,31 +379,31 @@
                 <!-- Algorithm Explanation -->
                 <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl shadow-sm border border-green-200 p-4">
                     <h3 class="text-sm font-semibold text-green-800 mb-3">
-                        <i class="fas fa-book text-green-500 mr-2"></i>Algoritmul de Siguranta
+                        <i class="fas fa-book text-green-500 mr-2"></i>The Safety Algorithm
                     </h3>
                     <ol class="text-xs text-green-700 space-y-2 list-decimal list-inside">
-                        <li><strong>Initializare:</strong> Work = Available, Finish[i] = false</li>
+                        <li><strong>Initialise:</strong> Work = Available, Finish[i] = false</li>
                         <li><strong>find i:</strong> Finish[i] = false and Need[i] ≤ Work</li>
-                        <li><strong>Simuleaza:</strong> Work = Work + Allocation[i], Finish[i] = true</li>
-                        <li><strong>Repeta:</strong> Pana nu mai gasesti procese</li>
-                        <li><strong>Check:</strong> If toate Finish[i] = true → SAFE</li>
+                        <li><strong>Simulate:</strong> Work = Work + Allocation[i], Finish[i] = true</li>
+                        <li><strong>Repeat:</strong> Until no further unfinished process can complete</li>
+                        <li><strong>Check:</strong> If every Finish[i] is true → SAFE</li>
                     </ol>
                 </div>
 
                 <!-- Formulas -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formule Cheie
+                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Key Formulae
                     </h3>
                     <div class="space-y-2 text-xs mono">
                         <div class="p-2 bg-stone-50 rounded">
                             <strong>Need</strong> = Max - Allocation
                         </div>
                         <div class="p-2 bg-stone-50 rounded">
-                            <strong>Conditie Safe:</strong> Need[i] ≤ Work
+                            <strong>Candidate Completion Condition:</strong> Need[i] ≤ Work
                         </div>
                         <div class="p-2 bg-stone-50 rounded">
-                            <strong>after finish:</strong> Work += Alloc[i]
+                            <strong>After simulated completion:</strong> Work += Alloc[i]
                         </div>
                     </div>
                 </div>
@@ -337,26 +414,26 @@
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-stone-200 p-6">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-book-open text-indigo-500"></i>
-                Intelegerea Algoritmului Bancherului
+                Understanding the Banker’s Algorithm
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-stone-600">
                 <div>
-                    <h4 class="font-semibold text-stone-800 mb-2">Analogie cu Banca</h4>
-                    <p>Banca (OS) are o suma limitata de bani (resurse). Clientii (procesele) au lines de credit (Max). Banca must to asigure ca may satisface toate creditele chiar in cel mai bad caz.</p>
+                    <h4 class="font-semibold text-stone-800 mb-2">Bank Analogy</h4>
+                    <p>The bank (OS) has limited funds (resources). Customers (processes) declare credit limits (Max). Before granting a request, the bank checks that some completion order can meet all declared maxima.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li><strong>Available:</strong> Bani in seif</li>
-                        <li><strong>Max:</strong> Limita de credit</li>
-                        <li><strong>Allocation:</strong> Bani imprumutati</li>
-                        <li><strong>Need:</strong> Cat mai may cere clientul</li>
+                        <li><strong>Available:</strong> Funds in the vault</li>
+                        <li><strong>Max:</strong> Credit limit</li>
+                        <li><strong>Allocation:</strong> Funds currently lent</li>
+                        <li><strong>Need:</strong> The customer’s remaining maximum claim</li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-stone-800 mb-2">Safe State vs Nesigura</h4>
+                    <h4 class="font-semibold text-stone-800 mb-2">Safe vs Unsafe State</h4>
                     <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500 mb-2">
-                        <strong>Stare SIGURA:</strong> Exists cel putin o secventa de procese care pot finish toate without deadlock.
+                        <strong>SAFE State:</strong> At least one order allows every process to complete within its declared maximum claim.
                     </div>
                     <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-                        <strong>Stare NESIGURA:</strong> Nu exists nicio secventa garantata. NU inseamna neaparat deadlock, dar riscul exists!
+                        <strong>UNSAFE State:</strong> No safe completion sequence exists. This does not by itself mean the system is already deadlocked.
                     </div>
                 </div>
             </div>
@@ -370,7 +447,52 @@
         </div>
     </footer>
 
-    <script>
+    <script>function bankerValid() {
+ const total=available.map((v,j)=>v+allocation.reduce((sum,row)=>sum+row[j],0));
+ if(available.some(v=>!Number.isInteger(v)||v<0) || allocation.some((row,i)=>row.some((a,j)=>!Number.isInteger(a)||a<0||!Number.isInteger(maximum[i][j])||maximum[i][j]<a||maximum[i][j]>total[j]))) {
+  alert('Require nonnegative integer entries, Allocation ≤ Maximum and each declared Maximum ≤ total resource capacity.');return false;
+ }return true;
+}
+function bankerInvalidate() { enosTimers.cancel(); hideBanner(); renderSafeSequence([]); renderWorkVector(available); renderFinishArray(Array(n).fill(false)); }
+function bankerAvailable(j,value) { const v=enosInteger(value,0,1000,'Available');if(v===null){renderAvailable();return;}available[j]=v;bankerInvalidate();renderNeedMatrix(); }
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let n = 5; // processes
         let m = 3; // resources
@@ -381,8 +503,12 @@
 
         // ==================== Initialization ====================
         function initializeMatrices() {
-            n = parseInt(document.getElementById('numProcesses').value);
-            m = parseInt(document.getElementById('numResources').value);
+            enosTimers.cancel();
+            const count=enosInteger(document.getElementById('numProcesses').value,1,10,'Processes');
+            const resourcesCount=enosInteger(document.getElementById('numResources').value,1,5,'Resources');
+            if(count===null || resourcesCount===null)return;
+            n=count;
+            m=resourcesCount;
             
             // Initialize with zeros
             allocation = Array(n).fill(null).map(() => Array(m).fill(0));
@@ -416,7 +542,7 @@
                 label.innerHTML = `
                     <span class="text-xs text-stone-500 mb-1">R${j}</span>
                     <input type="number" value="${available[j]}" min="0" max="20"
-                           onchange="available[${j}] = parseInt(this.value) || 0; renderNeedMatrix();"
+                           onchange="bankerAvailable(${j}, this.value);"
                            class="matrix-cell w-12 p-2 text-center border border-amber-300 rounded text-sm mono bg-amber-50">
                 `;
                 container.appendChild(label);
@@ -479,7 +605,7 @@
         }
 
         function updateMatrixValue(prefix, i, j, value) {
-            const val = parseInt(value) || 0;
+            const val=enosInteger(value,0,1000,'Matrix entry');if(val===null){renderAll();return;}bankerInvalidate();
             if (prefix === 'alloc') {
                 allocation[i][j] = val;
             } else if (prefix === 'max') {
@@ -511,7 +637,7 @@
         function renderSafeSequence(sequence) {
             const container = document.getElementById('safeSequence');
             if (sequence.length === 0) {
-                container.innerHTML = '<span class="text-stone-400 text-sm italic">Run algoritmul for a vedea secventa</span>';
+                container.innerHTML = '<span class="text-stone-400 text-sm italic">Run the algorithm to view the sequence</span>';
                 return;
             }
             container.innerHTML = sequence.map((p, idx) => `
@@ -561,6 +687,7 @@
         }
 
         function runSafetyAlgorithm() {
+if(!bankerValid())return;
             clearLog();
             const result = safetyCheck();
             
@@ -569,13 +696,14 @@
             renderSafeSequence(result.sequence);
             
             if (result.safe) {
-                showBanner('safe', 'Stare SIGURA!', `Secventa safe: ${result.sequence.map(p => 'P' + p).join(' → ')}`);
+                showBanner('safe', 'SAFE State!', `Safe sequence: ${result.sequence.map(p => 'P' + p).join(' → ')}`);
             } else {
-                showBanner('unsafe', 'Stare NESIGURA!', 'Nu exists nicio secventa safe. Risc de deadlock!');
+                showBanner('unsafe', 'UNSAFE State!', 'No safe sequence exists; future requests can lead to deadlock.');
             }
         }
 
         async function runSafetyAlgorithmAnimated() {
+if(!bankerValid())return;
             clearLog();
             hideBanner();
             
@@ -585,7 +713,7 @@
             const sequence = [];
             
             log('=== ALGORITM DE SIGURANTA ===');
-            log(`Initializare: Work = Available = [${work.join(', ')}]`);
+            log(`Initialise: Work = Available = [${work.join(', ')}]`);
             log(`Finish = [${finish.map(f => f ? 'T' : 'F').join(', ')}]`);
             
             renderWorkVector(work);
@@ -601,7 +729,7 @@
                     
                     // Highlight current process
                     highlightProcess(i, 'checking');
-                    log(`\nVerific P${i}:`);
+                    log(`\nChecking P${i}:`);
                     log(`  Need[${i}] = [${need[i].join(', ')}]`);
                     log(`  Work = [${work.join(', ')}]`);
                     await sleep(animationSpeed);
@@ -637,7 +765,7 @@
                         await sleep(animationSpeed);
                         break;
                     } else {
-                        log(`  ✗ Need[${i}] > Work → P${i} nu may finish acum`);
+                        log(`  ✗ Need[${i}] > Work → P${i} cannot finish now`);
                         highlightProcess(i, 'blocked');
                         await sleep(animationSpeed / 2);
                         clearProcessHighlights();
@@ -651,12 +779,12 @@
             const allFinished = finish.every(f => f);
             if (allFinished) {
                 log('\n=== result: STARE SIGURA ===');
-                log(`Secventa safe: ${sequence.map(p => 'P' + p).join(' → ')}`);
-                showBanner('safe', 'Stare SIGURA!', `Secventa safe: ${sequence.map(p => 'P' + p).join(' → ')}`);
+                log(`Safe sequence: ${sequence.map(p => 'P' + p).join(' → ')}`);
+                showBanner('safe', 'SAFE State!', `Safe sequence: ${sequence.map(p => 'P' + p).join(' → ')}`);
             } else {
                 log('\n=== result: STARE NESIGURA ===');
-                log(`Procese care nu pot finish: ${finish.map((f, i) => f ? null : 'P' + i).filter(x => x).join(', ')}`);
-                showBanner('unsafe', 'Stare NESIGURA!', 'Nu exists nicio secventa safe. Risc de deadlock!');
+                log(`Processes that cannot finish: ${finish.map((f, i) => f ? null : 'P' + i).filter(x => x).join(', ')}`);
+                showBanner('unsafe', 'UNSAFE State!', 'No safe sequence exists; future requests can lead to deadlock.');
             }
         }
 
@@ -690,7 +818,7 @@
                         }
                         finish[i] = true;
                         sequence.push(i);
-                        log(`  Work devine [${work.join(', ')}]`);
+                        log(`  Work becomes [${work.join(', ')}]`);
                         found = true;
                         break;
                     }
@@ -698,17 +826,18 @@
             }
             
             const safe = finish.every(f => f);
-            log(safe ? '✓ Toate procesele pot finish → SAFE' : '✗ Unele procese blocate → UNSAFE');
+            log(safe ? '✓ All processes can finish → SAFE' : '✗ Some processes cannot be guaranteed to finish → UNSAFE');
             
             return { safe, sequence, finish, finalWork: work };
         }
 
         // ==================== Resource Request ====================
         function simulateRequest() {
-            const processIdx = parseInt(document.getElementById('requestProcess').value);
+            if(!bankerValid())return;
+            const processIdx=enosInteger(document.getElementById('requestProcess').value,0,n-1,'Process');if(processIdx===null)return;
             const request = [];
             for (let j = 0; j < m; j++) {
-                request[j] = parseInt(document.getElementById(`request_${j}`).value) || 0;
+                request[j]=enosInteger(document.getElementById(`request_${j}`).value,0,1000,'Request');if(request[j]===null)return;
             }
             
             clearLog();
@@ -720,8 +849,8 @@
             for (let j = 0; j < m; j++) {
                 if (request[j] > need[processIdx][j]) {
                     log(`✗ Request[${j}]=${request[j]} > Need[${j}]=${need[processIdx][j]}`);
-                    log('error: Procesul a cerut mai mult than nevoia declarata!');
-                    showBanner('error', 'Cerere Invalida!', 'Procesul a cerut mai mult than nevoia maxima declarata.');
+                    log('Error: the request exceeds the declared remaining need.');
+                    showBanner('error', 'Invalid Request!', 'The request exceeds the declared remaining maximum claim.');
                     return;
                 }
             }
@@ -731,15 +860,15 @@
             for (let j = 0; j < m; j++) {
                 if (request[j] > available[j]) {
                     log(`✗ Request[${j}]=${request[j]} > Available[${j}]=${available[j]}`);
-                    log('Procesul must to astepte - resurse insuficiente.');
-                    showBanner('wait', 'Waiting!', 'Resursele nu sunt disponibile momentan. Procesul must to astepte.');
+                    log('The process must wait: insufficient resources are currently available.');
+                    showBanner('wait', 'Waiting!', 'The resources are currently unavailable. The process must wait.');
                     return;
                 }
             }
             log('✓ Request ≤ Available');
             
             // Step 3: Pretend to allocate
-            log('\nSimulare alocare temporara...');
+            log('\nSimulating a provisional allocation...');
             const tempAvailable = [...available];
             const tempAllocation = allocation.map(row => [...row]);
             
@@ -758,19 +887,19 @@
             available = tempAvailable;
             allocation = tempAllocation;
             
-            log('\nRulare algoritm siguranta pe starea new...');
+            log('\nRunning the safety algorithm on the candidate state...');
             const result = safetyCheck();
             
             if (result.safe) {
-                log('\n✓ Cererea may fi acordata!');
-                showBanner('safe', 'Cerere Acordata!', `Starea ramane safe. Secventa: ${result.sequence.map(p => 'P' + p).join(' → ')}`);
+                log('\n✓ The request can be granted.');
+                showBanner('safe', 'Request Granted!', `The state remains safe. Sequence: ${result.sequence.map(p => 'P' + p).join(' → ')}`);
                 renderAll();
             } else {
-                log('\n✗ Cererea NU may fi acordata - ar duce la unsafe state!');
+                log('\n✗ The request cannot be granted because it would lead to an unsafe state.');
                 // Rollback
                 available = oldAvailable;
                 allocation = oldAllocation;
-                showBanner('unsafe', 'Cerere Refuzata!', 'Acordarea ar duce la o unsafe state. Procesul must to astepte.');
+                showBanner('unsafe', 'Request Deferred!', 'Granting the request would produce an unsafe state. The process must wait.');
             }
         }
 
@@ -793,17 +922,9 @@
                     break;
                     
                 case 'unsafe':
-                    n = 4;
-                    m = 3;
-                    document.getElementById('numProcesses').value = n;
-                    document.getElementById('numResources').value = m;
-                    
-                    allocation = [[0,1,0], [2,0,0], [3,0,2], [2,1,1]];
-                    maximum = [[7,5,3], [3,2,2], [9,0,2], [4,2,2]];
-                    available = [1, 1, 0];
-                    break;
-                    
-                case 'classic':
+ n=2;m=1;document.getElementById('numProcesses').value=n;document.getElementById('numResources').value=m;
+ allocation=[[2],[2]];maximum=[[3],[3]];available=[0];break;
+                    case 'classic':
                     n = 5;
                     m = 3;
                     document.getElementById('numProcesses').value = n;
@@ -885,6 +1006,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadPreset('classic');
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

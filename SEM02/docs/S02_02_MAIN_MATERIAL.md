@@ -2,7 +2,7 @@
 ## Operating Systems | ASE Bucharest - CSIE
 
 > Lab observation: note down key commands and relevant output (2-3 lines) as you work. It helps with debugging and, honestly, by the end you'll have a good README without extra effort.
-Version: 1.0 | Seminar: 3-4  
+Version: 1.0 | Seminar: 02  
 approach: Language as Vehicle (Bash for understanding OS concepts)  
 Estimated study time: 3-4 hours
 
@@ -14,7 +14,7 @@ At the end of studying this material, you will be able to:
 
 | # | Objective | Bloom Level | Verification |
 |---|-----------|-------------|--------------|
-| O1 | Explain the difference between `;`, `&&`, `||` and `&` | Understanding | PI Quiz |
+| O1 | Explain the difference between `;`, `&&`, `\|\|` and `&` | Understanding | PI Quiz |
 | O2 | Build efficient pipelines with `\|` | Applying | Sprint |
 | O3 | Redirect stdout, stderr and stdin correctly | Applying | Exercises |
 | O4 | Use filters `sort`, `uniq`, `cut`, `tr`, `wc`, `head`, `tail` | Applying | Sprint |
@@ -107,7 +107,7 @@ The `;` (semicolon) operator separates commands that execute one after another, 
 echo "First command" ; echo "Second command" ; echo "Third command"
 ```
 
-Key behaviour: Even if a command fails, the following ones execute!
+With `errexit` disabled, `;` does not test the preceding status: the following command executes after a failure. `set -e`, explicit `exit`, signals and shell errors can end the shell; the separator itself does not override those conditions.
 
 ```bash
 # Demonstration: middle command fails
@@ -127,8 +127,9 @@ When to use `;`:
 
 ```bash
 # Practical example: cleanup and setup
-cd ~ ; rm -rf temp ; mkdir temp ; cd temp
-# All execute, even if rm fails (directory doesn't exist)
+# Read-only demonstration: the third command still executes.
+printf 'start\n'; false; printf 'continues\n'
+# Use an owned mktemp directory for any later file-operation exercise.
 ```
 
 **⚠️ Warning**: For critical operations where failure matters, use `&&`!
@@ -164,11 +165,13 @@ mkdir project && echo "Created!"  # second time
 Pattern 1: Chaining dependent operations
 ```bash
 
-*Personal note: Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.*
 
 # All must succeed to continue
 cd /var/log && grep "error" syslog && echo "Errors found"
 ```
+
+*Personal note: Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.*
+
 
 Pattern 2: Verification before action
 ```bash
@@ -265,11 +268,13 @@ For predictable behaviour, use grouping with `{}`:
 # Correct grouping with braces
 mkdir test && { echo "Success"; ls test; } || { echo "Error"; exit 1; }
 
-> 💡 I've observed that students who draw the diagram on paper before writing code have much better results.
 
 ```
 
-Golden rule: When combining `&&` and `||`, always put success action AFTER `&&` and error action AFTER `||`.
+> 💡 I've observed that students who draw the diagram on paper before writing code have much better results.
+
+
+`cmd && success || error` also runs `error` if `success` fails; braces do not remove that behaviour. For a true two-way branch use `if cmd; then success; else error; fi`. The short chain above assumes its reporting commands succeed.
 
 ---
 
@@ -704,6 +709,10 @@ Characteristics:
 
 ---
 
+### Exercise input and measurement contract
+
+Examples using `cut -d,`, `awk -F,` or `IFS=, read` accept **simple unquoted comma-separated fields**, one record per line, with no embedded comma, quote or newline. They do not implement general CSV. Quoted CSV needs a CSV parser such as Python's `csv` module. Expected sort output uses `LC_ALL=C`; character/byte examples state a UTF-8 locale separately. Process commands give a changing snapshot of processes, not a fixed host measurement or thread count. Author recollections and numerical performance anecdotes in this material are preserved as unverified observations, not benchmark results.
+
 ## 3.2 sort - Sorting
 
 🎯 SUBGOAL 3.2.1: Sort text alphabetically and numerically
@@ -783,8 +792,8 @@ sort colours.txt | uniq
 # Count occurrences
 sort colours.txt | uniq -c
 # 1 blue
-# 2 red
 # 1 green
+# 2 red
 
 # Sort by frequency
 sort colours.txt | uniq -c | sort -rn
@@ -914,7 +923,7 @@ echo "hello123world" | tr -cd '0-9'
 
 # Squeeze (-s): compress consecutive repeats
 echo "heeellooo" | tr -s 'eo'
-# helo
+# hello (the two l characters are not in the squeeze set)
 
 # Utility: normalise spaces
 echo "too   many    spaces" | tr -s ' '
@@ -965,7 +974,7 @@ wc -m file.txt  # characters (for Unicode)
 
 ```bash
 # How many processes are running?
-ps aux | wc -l
+ps -e -o pid= | wc -l
 
 # How many unique users?
 cut -d':' -f1 /etc/passwd | sort -u | wc -l
@@ -1097,7 +1106,7 @@ find . -type f | sed 's/.*\.//' | sort | uniq -c | sort -rn
 
 Processes per user:
 ```bash
-ps aux | awk '{print $1}' | sort | uniq -c | sort -rn
+ps -e -o user= | sort | uniq -c | sort -rn
 ```
 
 ---
@@ -1344,19 +1353,27 @@ done
 
 ```bash
 #!/bin/bash
-# backup_files.sh - Backup files modified today
+# backup_files.sh - Backup regular .txt files modified less than 24 hours ago
 
-backup_dir="$HOME/backup_$(date +%Y%m%d)"
-mkdir -p "$backup_dir"
+backup_dir=$(mktemp -d "$HOME/backup_$(date +%Y%m%d).XXXXXX") || exit 1
 
 count=0
 for file in *.txt; do
     [ -f "$file" ] || continue  # skip if doesn't exist
     
-    if [ -n "$(find "$file" -mtime 0 2>/dev/null)" ]; then
-        cp "$file" "$backup_dir/"
-        echo "✓ Backup: $file"
-        ((count++))
+    if selected=$(find "./$file" -maxdepth 0 -type f -mtime 0 -print); then
+        [[ -n $selected ]] || continue
+    else
+        printf 'Cannot inspect: %s\n' "$file" >&2; exit 1
+    fi
+    if [[ -n $selected ]]; then
+        if cp -- "$file" "$backup_dir/"; then
+            echo "✓ Backup: $file"
+            count=$((count + 1))
+        else
+            printf 'Copy failed: %s\n' "$file" >&2
+            exit 1
+        fi
     fi
 done
 
@@ -1369,6 +1386,7 @@ echo "Total files saved: $count"
 ```bash
 #!/bin/bash
 # process_logs.sh - Analyse logs
+set -o pipefail
 
 for logfile in /var/log/*.log; do
     [ -r "$logfile" ] || {
@@ -1376,7 +1394,15 @@ for logfile in /var/log/*.log; do
         continue
     }
     
-    errors=$(grep -c "ERROR" "$logfile" 2>/dev/null || echo 0)
+    if errors=$(grep -c "ERROR" "$logfile"); then
+        :
+    else
+        grep_status=$?
+        if ((grep_status != 1)); then
+            printf 'Cannot analyse: %s\n' "$logfile" >&2; exit "$grep_status"
+        fi
+        # grep status 1 is a normal zero-match result; stdout already contains 0.
+    fi
     
     if [ "$errors" -gt 0 ]; then
         echo "$(basename "$logfile"): $errors errors"
@@ -1446,7 +1472,7 @@ uniq [-cd]       remove CONSECUTIVE duplicates (needs sort!)
 cut -d: -f1,3    extract fields
 paste f1 f2      combine files in columns
 tr 'ab' 'AB'     transform characters
-wc [-lwc]        count lines/words/characters
+wc [-lwc]        count newlines/words/bytes; -m for characters
 head -n N        first N lines
 tail -n N        last N lines
 tail -f          follow file live

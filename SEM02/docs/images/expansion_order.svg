@@ -1,91 +1,44 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 450" width="650" height="450">
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 650" width="820" height="650" role="img" xml:lang="en" aria-labelledby="sem02-expansion-order-title sem02-expansion-order-desc">
+  <title id="sem02-expansion-order-title">Bash Expansion Order</title>
+  <desc id="sem02-expansion-order-desc">Bash performs brace and tilde expansion, then parameter, arithmetic and command substitution, then word splitting, pathname expansion and quote removal where the command context permits them. For N=5, {1..$N} becomes the single word {1..5}, not a sequence.</desc>
   <defs>
-    <style>
-      .step { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
-      .step-active { fill: #2c5282; stroke: #4299e1; }
-      .step-problem { fill: #9b2c2c; stroke: #fc8181; }
-      .text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 12px; text-anchor: middle; }
-      .text-title { font-size: 16px; font-weight: bold; }
-      .text-code { font-size: 11px; fill: #faf089; }
-      .text-note { font-size: 10px; fill: #a0aec0; }
-      .arrow { stroke: #718096; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-      .num { fill: #4299e1; font-size: 14px; font-weight: bold; }
-    </style>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+    <marker id="sem02-expansion-order-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
     </marker>
   </defs>
-  
-  <!-- Background -->
-  <rect width="650" height="450" fill="#1a202c"/>
-  
-  <!-- Title -->
-  <text x="325" y="30" class="text text-title">Ordinea Expansion în Bash</text>
-  <text x="325" y="50" class="text text-note">(De ce {1..$N} nu funcționează)</text>
-  
-  <!-- Step 1: Brace Expansion -->
-  <text x="30" y="95" class="num">1</text>
-  <rect x="50" y="75" width="180" height="50" class="step step-active"/>
-  <text x="140" y="97" class="text">Brace Expansion</text>
-  <text x="140" y="115" class="text text-code">{1..5} → 1 2 3 4 5</text>
-  
-  <!-- Arrow -->
-  <path d="M230 100 L260 100" class="arrow"/>
-  
-  <!-- Step 2: Tilde Expansion -->
-  <text x="270" y="95" class="num">2</text>
-  <rect x="290" y="75" width="150" height="50" class="step"/>
-  <text x="365" y="97" class="text">Tilde Expansion</text>
-  <text x="365" y="115" class="text text-code">~ → /home/user</text>
-  
-  <!-- Arrow -->
-  <path d="M440 100 L470 100" class="arrow"/>
-  
-  <!-- Step 3: Parameter Expansion -->
-  <text x="480" y="95" class="num">3</text>
-  <rect x="500" y="75" width="130" height="50" class="step step-active"/>
-  <text x="565" y="97" class="text">Variable Exp.</text>
-  <text x="565" y="115" class="text text-code">$VAR → valoare</text>
-  
-  <!-- Step 4: Command Substitution -->
-  <text x="30" y="175" class="num">4</text>
-  <rect x="50" y="155" width="180" height="50" class="step"/>
-  <text x="140" y="177" class="text">Command Subst.</text>
-  <text x="140" y="195" class="text text-code">$(cmd) → output</text>
-  
-  <!-- Arrow -->
-  <path d="M230 180 L260 180" class="arrow"/>
-  
-  <!-- Step 5: Arithmetic Expansion -->
-  <text x="270" y="175" class="num">5</text>
-  <rect x="290" y="155" width="150" height="50" class="step"/>
-  <text x="365" y="177" class="text">Arithmetic Exp.</text>
-  <text x="365" y="195" class="text text-code">$((1+2)) → 3</text>
-  
-  <!-- Arrow -->
-  <path d="M440 180 L470 180" class="arrow"/>
-  
-  <!-- Step 6: Word Splitting -->
-  <text x="480" y="175" class="num">6</text>
-  <rect x="500" y="155" width="130" height="50" class="step"/>
-  <text x="565" y="177" class="text">Word Splitting</text>
-  <text x="565" y="195" class="text text-code">pe spații/IFS</text>
-  
-  <!-- PROBLEMA -->
-  <rect x="50" y="240" width="580" height="90" class="step step-problem"/>
-  <text x="340" y="265" class="text text-title">⚠ PROBLEMA: {1..$N}</text>
-  <text x="340" y="290" class="text">Brace Expansion (pasul 1) se face ÎNAINTE de Variable Expansion (pasul 3)</text>
-  <text x="340" y="310" class="text text-code">N=5; for i in {1..$N}  →  {1..$N} rămâne LITERAL (nu expandat)</text>
-  
-  <!-- SOLUȚII -->
-  <rect x="50" y="350" width="270" height="80" class="step"/>
-  <text x="185" y="375" class="text">✓ Soluție 1: seq</text>
-  <text x="185" y="400" class="text text-code">for i in $(seq 1 $N)</text>
-  <text x="185" y="418" class="text text-note">$(seq) e command subst., după var exp.</text>
-  
-  <rect x="340" y="350" width="290" height="80" class="step"/>
-  <text x="485" y="375" class="text">✓ Soluție 2: C-style for</text>
-  <text x="485" y="400" class="text text-code">for ((i=1; i&lt;=N; i++))</text>
-  <text x="485" y="418" class="text text-note">Arithmetic context, N e evaluat</text>
+  <rect width="820" height="650" fill="#f8fafc"/>
+  <text x="410.0" y="30" font-family="Arial, sans-serif" font-size="20" fill="#0f172a" text-anchor="middle" font-weight="bold" id="sem02-expansion-order-text-1">Bash Expansion Order</text>
+  <rect x="85" y="55" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="76" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-2">1  Brace expansion</text>
+  <text x="105" y="97" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-3">{1..5} → five words: 1 2 3 4 5</text>
+  <path d="M 410 108 L 410 119" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#sem02-expansion-order-arrow)"/>
+  <rect x="85" y="120" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="141" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-4">2  Tilde expansion</text>
+  <text x="105" y="162" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-5">~ → the home directory in an eligible context</text>
+  <path d="M 410 173 L 410 184" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#sem02-expansion-order-arrow)"/>
+  <rect x="85" y="185" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="206" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-6">3  Parameter, arithmetic and command substitution</text>
+  <text x="105" y="227" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-7">Same stage, left to right: $VAR, $((1+2)), $(command)</text>
+  <path d="M 410 238 L 410 249" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#sem02-expansion-order-arrow)"/>
+  <rect x="85" y="250" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="271" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-8">4  Word splitting</text>
+  <text x="105" y="292" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-9">Unquoted expansion results: fields determined by IFS</text>
+  <path d="M 410 303 L 410 314" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#sem02-expansion-order-arrow)"/>
+  <rect x="85" y="315" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="336" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-10">5  Pathname expansion</text>
+  <text x="105" y="357" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-11">Eligible *, ? and [...] patterns → matching filenames</text>
+  <path d="M 410 368 L 410 379" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#sem02-expansion-order-arrow)"/>
+  <rect x="85" y="380" width="650" height="53" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="105" y="401" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold" id="sem02-expansion-order-text-12">6  Quote removal</text>
+  <text x="105" y="422" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem02-expansion-order-text-13">Remove syntactic quotes; quoted characters remain protected</text>
+  <text x="410" y="460" font-family="Arial, sans-serif" font-size="12" fill="#334155" text-anchor="middle" id="sem02-expansion-order-text-14">Quoting and command context control which stages apply.</text>
+  <text x="410" y="480" font-family="Arial, sans-serif" font-size="12" fill="#334155" text-anchor="middle" id="sem02-expansion-order-text-15">Process substitution, where supported, occurs alongside stage 3.</text>
+  <rect x="30" y="495" width="760" height="67" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.5"/>
+  <text x="410" y="519" font-family="monospace" font-size="15" fill="#9a3412" text-anchor="middle" id="sem02-expansion-order-text-16">N=5; printf '%s\n' {1..$N}</text>
+  <text x="410" y="545" font-family="Arial, sans-serif" font-size="13" fill="#334155" text-anchor="middle" id="sem02-expansion-order-text-17">Output: {1..5} — one word. Brace expansion is not repeated after $N expands.</text>
+  <rect x="30" y="575" width="760" height="60" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+  <text x="410" y="596" font-family="Arial, sans-serif" font-size="12" fill="#334155" text-anchor="middle" id="sem02-expansion-order-text-18">Alternative loop headers, for a validated positive integer N:</text>
+  <text x="220" y="620" font-family="monospace" font-size="12" fill="#166534" text-anchor="middle" id="sem02-expansion-order-text-19">for i in $(seq 1 "$N")</text>
+  <text x="600" y="620" font-family="monospace" font-size="12" fill="#166534" text-anchor="middle" id="sem02-expansion-order-text-20">for ((i=1; i&lt;=N; i++))</text>
 </svg>

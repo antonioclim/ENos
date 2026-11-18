@@ -563,9 +563,99 @@
                 border: 1px solid #ccc;
             }
         }
-    </style>
+    
+button.accordion-header, button.collapsible-header {width:100%;border:0;text-align:left;font:inherit;color:inherit;}
+button.progress-step {border:0;background:transparent;font:inherit;color:inherit;}
+:focus-visible {outline:3px solid #245db4;outline-offset:3px;}
+@media print {
+  .tab-content, .os-content, .accordion-content, .collapsible-content {display:block!important;max-height:none!important;overflow:visible!important;opacity:1!important;}
+  .tabs-nav,.os-selector,.copy-btn,.nav-buttons,.mark-done,.progress-container,.progress-tracker,.scroll-top {display:none!important;}
+  body,.card,.code-block,pre {background:#fff!important;color:#111!important;box-shadow:none!important;}
+  pre,code {white-space:pre-wrap!important;overflow-wrap:anywhere!important;}
+  h1,h2,h3,h4 {break-after:avoid;}
+  .tab-content,.card {break-inside:auto;}
+}
+
+</style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
+<p style="max-width:72rem;margin:1rem auto;padding:1rem">Recording prerequisite: <strong>asciinema CLI 2.x / asciicast v2</strong>. The scripts check the installed version before recording; CLI 3.x is not supported by this workflow. They do not change packages automatically.</p>
+
     <header>
         <h1>Homework Recording Guide</h1>
         <p>Operating Systems 2023-2027 | ASE Bucharest</p>
@@ -582,29 +672,32 @@
         </ul>
     </nav>
 
-    <main>
-        <!-- Progress Tracker -->
+    <main><section id="enos-python-environment" aria-labelledby="enos-python-environment-title">
+<h2 id="enos-python-environment-title">Use one Python environment</h2>
+<p>From the directory containing this candidate's recorder, create and activate a local environment. Install these dependencies explicitly; the recorder does not install system packages or change system Python.</p>
+<pre><code>python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
+python record_homework_tui_EN.py --offline</code></pre>
+<p>Keep that environment active for the run. System commands such as asciinema are separate prerequisites. Online mode additionally requires the confirmed port and the unresolved institutional contract; a practice group number does not disable networking.</p>
+</section>
+<div class="alert alert-warning"><p><strong>v6 candidate:</strong> Use <code>--offline</code> for practice. See the <a href="../03_GUIDES/RECORDING_CONTRACT.md">current recording contract</a>. The service port, replacement protocol and assessment policy remain unresolved.</p></div>
+<section aria-labelledby="enos-online-confirmation-title">
+<h2 id="enos-online-confirmation-title">Before an authorised online run</h2>
+<p>Obtain the host, account, port and host-key fingerprint from the service owner through a trusted channel. The supplied clients target <code>sop.ase.ro</code>; a different confirmed destination requires the client configuration to be reconciled first. Install only the verified <code>known_hosts</code> entry. The clients use <code>StrictHostKeyChecking=yes</code>.</p>
+<p>After the configuration and use of the existing workflow have been confirmed, use the current client interface:</p>
+<pre><code>read -r -p 'SSH port confirmed by the service owner: ' ENOS_CONFIRMED_PORT
+python record_homework_tui_EN.py --port "$ENOS_CONFIRMED_PORT"</code></pre>
+<p>The Bash alternative is <code>bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"</code>. Neither historical port is selected here. If host-key verification fails, retain the local recording, confirm the fingerprint independently with the service owner and correct only the specifically verified entry. Do not disable checking or delete entries merely to suppress a warning. Use <code>--offline</code> for local practice while configuration remains unresolved.</p>
+</section>
+        <!-- Section position, not completion evidence -->
+<p>The navigation below shows your reading position. Scrolling does not mark work complete.</p>
         <div class="progress-tracker">
-            <div class="progress-step" data-step="1">
-                <div class="progress-dot">1</div>
-                <span class="progress-label">Configuration</span>
-            </div>
-            <div class="progress-step" data-step="2">
-                <div class="progress-dot">2</div>
-                <span class="progress-label">Download</span>
-            </div>
-            <div class="progress-step" data-step="3">
-                <div class="progress-dot">3</div>
-                <span class="progress-label">Run</span>
-            </div>
-            <div class="progress-step" data-step="4">
-                <div class="progress-dot">4</div>
-                <span class="progress-label">Recording</span>
-            </div>
-            <div class="progress-step" data-step="5">
-                <div class="progress-dot">5</div>
-                <span class="progress-label">Upload</span>
-            </div>
+            <button type="button" class="progress-step" data-step="1"><span class="progress-dot">1</span><span class="progress-label">Configuration</span></button>
+            <button type="button" class="progress-step" data-step="2"><span class="progress-dot">2</span><span class="progress-label">Quick start</span></button>
+            <button type="button" class="progress-step" data-step="3"><span class="progress-dot">3</span><span class="progress-label">Student data</span></button>
+            <button type="button" class="progress-step" data-step="4"><span class="progress-dot">4</span><span class="progress-label">Recording</span></button>
+            <button type="button" class="progress-step" data-step="5"><span class="progress-dot">5</span><span class="progress-label">Upload</span></button>
         </div>
 
         <!-- Initial Configuration -->
@@ -615,7 +708,7 @@
                 <span class="alert-icon">💡</span>
                 <div>
                     <strong>First use takes longer!</strong><br>
-                    The script will automatically install all required dependencies (1-3 minutes).
+                    Install prerequisites explicitly, then use one Python virtual environment for installation and execution. The script checks dependencies without installing them.
                 </div>
             </div>
 
@@ -663,10 +756,10 @@ ls -la ~/HOMEWORKS</code><button class="copy-btn" onclick="copyCode(this)">📋 
                 </div>
 
                 <div class="collapsible">
-                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h4>Option A: Copy with WinSCP</h4>
                         <span class="collapsible-icon">▼</span>
-                    </div>
+                    </button>
                     <div class="collapsible-content">
                         <ol>
                             <li>Open <strong>WinSCP</strong> and connect to your Ubuntu/WSL system</li>
@@ -677,10 +770,10 @@ ls -la ~/HOMEWORKS</code><button class="copy-btn" onclick="copyCode(this)">📋 
                 </div>
 
                 <div class="collapsible">
-                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h4>Option B: Download directly with wget in terminal</h4>
                         <span class="collapsible-icon">▼</span>
-                    </div>
+                    </button>
                     <div class="collapsible-content">
                         <pre><code># Enter the HOMEWORKS directory
 cd ~/HOMEWORKS
@@ -695,10 +788,10 @@ wget -O record_homework_tui_EN.py "https://drive.google.com/uc?export=download&i
                 </div>
 
                 <div class="collapsible">
-                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h4>Option C: Copy from Windows to WSL</h4>
                         <span class="collapsible-icon">▼</span>
-                    </div>
+                    </button>
                     <div class="collapsible-content">
                         <pre><code># Files from Windows are at /mnt/c/Users/{WindowsName}/Downloads/
 cp /mnt/c/Users/{WindowsName}/Downloads/record_homework_tui_EN.py ~/HOMEWORKS/</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
@@ -735,7 +828,7 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
             <div class="step">
                 <span class="step-number">2</span>
                 <h4>Run the script</h4>
-                <pre><code>python3 record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
+                <pre><code>python record_homework_tui_EN.py --offline</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
             </div>
 
             <div class="step">
@@ -831,16 +924,16 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
 
             <p>After stopping the recording, the script automatically:</p>
             <ol>
-                <li>✅ Generates the cryptographic signature</li>
+                <li>Save self-declared header metadata. Offline mode ends locally without a token or connection.</li>
                 <li>✅ Uploads the file to server (3 attempts)</li>
                 <li>✅ Displays the final summary</li>
             </ol>
 
             <div class="collapsible">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>If the upload succeeds</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
                     <div class="alert alert-success">
                         <span class="alert-icon">🎉</span>
@@ -850,19 +943,20 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
             </div>
 
             <div class="collapsible active">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>If the upload fails</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
-                    <p>The file is <strong>saved locally</strong> and you will see the command for manual submission:</p>
-                    <pre><code>scp -P 1002 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home/HOMEWORKS/eninfo/</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
+                    <p>The file is <strong>saved locally</strong>. The following is a filename/account illustration; use only the actual account and destination confirmed for your submission. Verify the host key through the service owner before any authorised transfer:</p>
+                    <pre><code>: "${ENOS_CONFIRMED_PORT:?Set the SSH port confirmed by the service owner}"
+scp -o StrictHostKeyChecking=yes -P "$ENOS_CONFIRMED_PORT" 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home/HOMEWORKS/eninfo/</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
                     
                     <div class="alert alert-danger">
                         <span class="alert-icon">⚠️</span>
                         <div>
                             <strong>DO NOT modify the .cast file!</strong><br>
-                            The signature becomes invalid if you modify the file.
+                            Preserve the original recording. This legacy token does not bind the event content or detect every edit.
                         </div>
                     </div>
                 </div>
@@ -877,21 +971,22 @@ chmod +x record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyC
             <h2>Common Problems</h2>
 
             <div class="collapsible">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>"Permission denied" during installation</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
                     <pre><code>cd ~/HOMEWORKS
-sudo python3 record_homework_tui_EN.py</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
+source ~/.venvs/enos-recorder/bin/activate
+python record_homework_tui_EN.py --offline</code><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
                 </div>
             </div>
 
             <div class="collapsible">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>"Connection refused" during upload</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
                     <p><strong>Possible causes:</strong></p>
                     <ul>
@@ -904,10 +999,10 @@ sudo python3 record_homework_tui_EN.py</code><button class="copy-btn" onclick="c
             </div>
 
             <div class="collapsible">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>The script does not start</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
                     <pre><code># Check Python version
 python3 --version
@@ -917,31 +1012,32 @@ python3 --version
             </div>
 
             <div class="collapsible">
-                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
                     <h4>I entered the wrong data</h4>
                     <span class="collapsible-icon">▼</span>
-                </div>
+                </button>
                 <div class="collapsible-content">
-                    <p>Run the script again and enter the correct data. The previous file will be overwritten.</p>
+                    <p>Run the script again and enter the correct data. The recorder refuses to overwrite an existing recording. Preserve or move the earlier file before creating a new local recording; the institutional resubmission rule remains unresolved.</p>
                 </div>
             </div>
         </section>
 
         <!-- About Signature -->
         <section id="signature">
-            <h2>About the Cryptographic Signature</h2>
+<p>The following metadata are encrypted in the historical online format. No digital-signature or content-binding guarantee is established. A new institutional protocol requires an author decision.</p>
+            <h2>About the Legacy Metadata Token</h2>
             
-            <p>Each recording is <strong>digitally signed</strong> with RSA. This guarantees:</p>
+            <p>Online mode encrypts metadata with a public key. The intended properties below are <strong>not established</strong>:</p>
             
             <ul>
-                <li>✅ <strong>Authenticity</strong> - the instructor verifies that you created the file</li>
-                <li>✅ <strong>Integrity</strong> - the file cannot be modified after signing</li>
-                <li>✅ <strong>Non-repudiation</strong> - you cannot deny that you sent the homework</li>
+                <li><strong>Authenticity:</strong> self-declared labels do not prove authorship</li>
+                <li><strong>Integrity:</strong> the legacy token does not bind the event content</li>
+                <li><strong>Non-repudiation:</strong> no supported proof is established</li>
             </ul>
 
             <div class="alert alert-info">
                 <span class="alert-icon">🔒</span>
-                <div><strong>You CANNOT</strong> forge another student's signature!</div>
+                <div>The legacy token does not prove authorship, integrity or non-repudiation.</div>
             </div>
         </section>
     </main>
@@ -954,64 +1050,70 @@ python3 --version
     </footer>
 
     <script>
-        // Copy code functionality
-        function copyCode(btn) {
-            const pre = btn.parentElement;
-            const code = pre.querySelector('code').innerText;
-            
-            navigator.clipboard.writeText(code).then(() => {
-                btn.textContent = '✅ Copied!';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.textContent = '📋 Copy';
-                    btn.classList.remove('copied');
-                }, 2000);
-            });
-        }
 
-        // Collapsible functionality
-        function toggleCollapsible(header) {
-            const collapsible = header.parentElement;
-            collapsible.classList.toggle('active');
-        }
+function safeRead(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+function safeWrite(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* Session remains usable. */ } }
+async function copyCode(btn) {
+    const block = btn.closest('.code-block, .cmd-block, pre');
+    const source = block && (block.querySelector('code') || block.querySelector('pre') || block);
+    if (!source) return;
+    const text = source.textContent.replace(/📋 Copy|✓ Copied!|✅ Copied!/g, '').trim();
+    try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✓ Copied!';
+    } catch (_) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('aria-label', 'Command text — press Control+C or Command+C to copy');
+        area.style.width = '100%';
+        block.appendChild(area); area.focus(); area.select();
+        btn.textContent = 'Select text and copy';
+        area.addEventListener('blur', () => area.remove(), {once:true});
+    }
+    setTimeout(() => { btn.textContent = '📋 Copy'; }, 2500);
+}
+function toggleAccordion(header) {
+    const open = header.parentElement.classList.toggle('open');
+    header.setAttribute('aria-expanded', String(open));
+}
+function toggleCollapsible(header) {
+    const open = header.parentElement.classList.toggle('active');
+    header.setAttribute('aria-expanded', String(open));
+}
+function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
+document.querySelectorAll('.accordion-header, .collapsible-header').forEach((button, i) => {
+    button.setAttribute('aria-expanded', String(button.parentElement.classList.contains('open') || button.parentElement.classList.contains('active')));
+    const panel = button.nextElementSibling;
+    if (panel) { panel.id = panel.id || 'disclosure-panel-' + i; button.setAttribute('aria-controls', panel.id); }
+});
+document.querySelectorAll('.checklist input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', () => input.closest('li').classList.toggle('checked', input.checked));
+});
+const scrollButton = document.getElementById('scrollTop');
+if (scrollButton) {
+    scrollButton.setAttribute('aria-label', 'Scroll to the top');
+    window.addEventListener('scroll', () => scrollButton.classList.toggle('visible', window.scrollY > 500));
+}
 
-        // Progress tracker
-        const progressSteps = document.querySelectorAll('.progress-step');
-        progressSteps.forEach((step, index) => {
-            step.addEventListener('click', () => {
-                const sections = ['configuration', 'configuration', 'quickstart', 'recording', 'upload'];
-                const targetId = sections[index];
-                document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
-            });
-        });
+const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
+const sectionIds = ['configuration','quickstart','data','recording','upload'];
+progressSteps.forEach((step, index) => {
+    step.addEventListener('click', () => { const target=document.getElementById(sectionIds[index]);
+        if(target) target.scrollIntoView({behavior:'smooth'}); });
+});
+function updateProgress() {
+    let active=0;
+    sectionIds.forEach((id,index)=>{const section=document.getElementById(id);if(section && window.scrollY+200>=section.offsetTop)active=index;});
+    progressSteps.forEach((step,index)=>{step.classList.toggle('active',index===active);step.classList.remove('completed');
+        if(index===active)step.setAttribute('aria-current','step');else step.removeAttribute('aria-current');});
+}
+window.addEventListener('scroll',updateProgress); updateProgress();
+document.querySelectorAll('nav a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
+    const target=document.getElementById(link.getAttribute('href').slice(1));
+    if(target){event.preventDefault();target.scrollIntoView({behavior:'smooth'});}
+}));
 
-        // Update progress on scroll
-        function updateProgress() {
-            const sections = document.querySelectorAll('section');
-            const scrollPos = window.scrollY + 200;
-            
-            let currentSection = 0;
-            sections.forEach((section, index) => {
-                if (scrollPos >= section.offsetTop) {
-                    currentSection = index;
-                }
-            });
-
-            progressSteps.forEach((step, index) => {
-                step.classList.remove('active', 'completed');
-                if (index < currentSection) {
-                    step.classList.add('completed');
-                } else if (index === currentSection) {
-                    step.classList.add('active');
-                }
-            });
-        }
-
-        window.addEventListener('scroll', updateProgress);
-        updateProgress();
-
-        // Smooth navigation highlight
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.prevent
+</script>
+</body>
+</html>

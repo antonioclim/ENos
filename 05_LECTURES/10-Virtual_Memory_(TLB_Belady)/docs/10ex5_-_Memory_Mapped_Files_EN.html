@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory-Mapped Files | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -53,7 +53,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -82,7 +159,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-project-diagram text-indigo-500"></i>
-                        Vizualizare Mapping
+                        Mapping Visualisation
                     </h2>
                     
                     <div class="relative">
@@ -129,7 +206,7 @@
                                     <!-- Virtual memory regions will be rendered here -->
                                 </div>
                                 <div class="mt-2 text-xs text-stone-500">
-                                    Regiuni mapate: <span id="mappedRegions">0</span>
+                                    Mapped regions: <span id="mappedRegions">0</span>
                                 </div>
                             </div>
                         </div>
@@ -140,7 +217,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-users text-blue-500"></i>
-                        Procese cu Mapping Shared
+                        Processes with Shared Mappings
                     </h3>
                     <div id="processViews" class="grid grid-cols-2 gap-4">
                         <!-- Process views will be rendered here -->
@@ -151,7 +228,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-code text-green-500"></i>
-                        Simulator mmap()
+                        mmap() Simulator
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="p-3 bg-stone-900 rounded-lg">
@@ -231,7 +308,7 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Nume file</label>
+                            <label class="text-xs text-stone-500 block mb-1">File Name</label>
                             <input type="text" id="fileName" value="data.bin" class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <div>
@@ -240,7 +317,7 @@
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <button onclick="createFile()" class="w-full p-2 bg-amber-500 hover:bg-amber-600 text-white rounded text-sm">
-                            <i class="fas fa-plus mr-1"></i> Creaza file
+                            <i class="fas fa-plus mr-1"></i> Create File
                         </button>
                     </div>
                 </div>
@@ -248,11 +325,11 @@
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>Actions Rapide
+                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>Quick Actions
                     </h3>
                     <div class="space-y-2">
                         <button onclick="addProcess()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
-                            <i class="fas fa-plus mr-1"></i> Add Proces
+                            <i class="fas fa-plus mr-1"></i> Add Process
                         </button>
                         <button onclick="unmapAll()" class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm">
                             <i class="fas fa-unlink mr-1"></i> Unmap All (munmap)
@@ -266,17 +343,17 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('sharedLib')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-book text-blue-500 mr-2"></i>Biblioteca Shareda
+                            <i class="fas fa-book text-blue-500 mr-2"></i>Shared Library
                         </button>
                         <button onclick="loadScenario('cow')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-copy text-green-500 mr-2"></i>Copy-on-Write
                         </button>
                         <button onclick="loadScenario('ipc')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-exchange-alt text-amber-500 mr-2"></i>IPC cu Memorie Shareda
+                            <i class="fas fa-exchange-alt text-amber-500 mr-2"></i>IPC with Shared Memory
                         </button>
                     </div>
                 </div>
@@ -287,12 +364,12 @@
                         <i class="fas fa-info-circle text-indigo-500 mr-2"></i>Memory-Mapped Files
                     </h3>
                     <div class="space-y-2 text-xs text-indigo-700">
-                        <p>Permite accesarea fisierelor ca and how ar fi in memorie, folosind instructiuni de load/store in loc de read()/write().</p>
+                        <p>Access mapped file bytes through memory loads/stores rather than explicit read()/write() calls for each access.</p>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>MAP_SHARED:</strong> Modificarile sunt vizibile tuturor and scrise inapoi in file
+                            <strong>MAP_SHARED:</strong> Changes can be shared through the mapping and written back to the file; synchronisation and persistence require explicit handling
                         </div>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>MAP_PRIVATE:</strong> Copy-on-Write - modificarile sunt private procesului
+                            <strong>MAP_PRIVATE:</strong> Copy-on-write: modifications are private to the mapping and do not update the file
                         </div>
                     </div>
                 </div>
@@ -304,16 +381,16 @@
                     </h3>
                     <div class="space-y-2 text-xs text-stone-600">
                         <div class="p-2 bg-green-50 rounded-lg">
-                            <strong>Zero-copy:</strong> Nu necesita copiere intre kernel and user space
+                            <strong>Zero-copy:</strong> Can avoid an explicit copy between a kernel buffer and a separate user buffer; this is not a universal zero-copy guarantee
                         </div>
                         <div class="p-2 bg-blue-50 rounded-lg">
-                            <strong>Lazy loading:</strong> Paginile se incarca only when sunt accesate
+                            <strong>Lazy loading:</strong> Pages are faulted in when accessed if not already resident
                         </div>
                         <div class="p-2 bg-purple-50 rounded-lg">
-                            <strong>Sharing:</strong> Acelasi file may fi mapat de mai multe procese
+                            <strong>Sharing:</strong> The same file can be mapped by multiple processes
                         </div>
                         <div class="p-2 bg-amber-50 rounded-lg">
-                            <strong>Simplicity:</strong> Acces ca la array in loc de seek+read
+                            <strong>Simplicity:</strong> Array-like access instead of explicit seek/read sequences
                         </div>
                     </div>
                 </div>
@@ -328,7 +405,50 @@
         </div>
     </footer>
 
-    <script>
+    <script>function mappedPage(mapping) {
+ const blockNum=Math.floor(mapping.offset/PAGE_SIZE);
+ let cached=pageCache.find(c=>c.blockNum===blockNum);
+ if(!cached){cached={blockNum,data:file.blocks[blockNum].data,dirty:false,refCount:mappings.filter(m=>m.offset<=blockNum*PAGE_SIZE && m.offset+m.length>blockNum*PAGE_SIZE).length};pageCache.push(cached);log(`Demand fault: loaded block ${blockNum}`);}
+ return cached;
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         const PAGE_SIZE = 4096;
         
@@ -374,7 +494,7 @@
             mappings = [];
             
             renderAll();
-            log(`file "${name}" created (${size / 1024} KB, ${numBlocks} blocuri)`);
+            log(`file "${name}" created (${size / 1024} KB, ${numBlocks} blocks)`);
         }
 
         function generateRandomData() {
@@ -385,13 +505,14 @@
 
         // ==================== mmap Operations ====================
         function executeMmap() {
-            const offset = parseInt(document.getElementById('mmapOffset').value);
-            const length = parseInt(document.getElementById('mmapLength').value);
+            const offset=enosInteger(document.getElementById('mmapOffset').value,0,file.size-1,'Offset');if(offset===null)return;
+            const length=enosInteger(document.getElementById('mmapLength').value,1,file.size,'Length');if(length===null)return;
+            if(offset%PAGE_SIZE!==0){log('mmap offset must be page aligned.');return;}
             const prot = document.getElementById('mmapProt').value;
             const flags = document.getElementById('mmapFlags').value;
             
             if (offset + length > file.size) {
-                log('error: Mapping depaseste dimensiunea fisierului!');
+                log('Error: the model mapping exceeds the file size.');
                 return;
             }
             
@@ -411,25 +532,8 @@
             
             mappings.push(mapping);
             
-            // Load affected blocks into page cache
-            const startBlock = Math.floor(offset / PAGE_SIZE);
-            const endBlock = Math.ceil((offset + length) / PAGE_SIZE);
-            
-            for (let i = startBlock; i < endBlock; i++) {
-                if (!pageCache.find(c => c.blockNum === i)) {
-                    pageCache.push({
-                        blockNum: i,
-                        data: file.blocks[i].data,
-                        dirty: false,
-                        refCount: 1
-                    });
-                    log(`Page fault: Bloc ${i} loaded in page cache`);
-                } else {
-                    pageCache.find(c => c.blockNum === i).refCount++;
-                }
-            }
-            
-            log(`mmap() executat: addr=0x${startAddr.toString(16)}, length=${length}, flags=${flags}`);
+            // Mapping reserves address metadata; cache pages load on access.
+            log(`mmap() completed: addr=0x${startAddr.toString(16)}, length=${length}, flags=${flags}`);
             
             renderAll();
             updateMmapCode(offset, length, prot, flags);
@@ -451,42 +555,43 @@
 
         function readMappedMemory() {
             if (mappings.length === 0) {
-                log('error: Nu exists mappings active!');
+                log('Error: there are no active mappings.');
                 return;
             }
             
             const mapping = mappings[mappings.length - 1];
             const blockNum = Math.floor(mapping.offset / PAGE_SIZE);
-            const cached = pageCache.find(c => c.blockNum === blockNum);
+            if(!mapping.prot.includes('r')){log('Read permission denied.');return;}
+            const cached=mappedPage(mapping);
             
             if (cached) {
-                log(`READ la 0x${mapping.startAddr.toString(16)}: "${cached.data}"`);
+                log(`READ la 0x${mapping.startAddr.toString(16)}: "${mapping.cowCopied ? mapping.privateData : cached.data}"`);
                 highlightBlock(blockNum, 'read');
             }
         }
 
         function writeMappedMemory() {
             if (mappings.length === 0) {
-                log('error: Nu exists mappings active!');
+                log('Error: there are no active mappings.');
                 return;
             }
             
             const mapping = mappings[mappings.length - 1];
             
             if (!mapping.prot.includes('w')) {
-                log('error: Mapping nu are permisiune de scriere!');
+                log('Error: the mapping is not writable.');
                 return;
             }
             
             const blockNum = Math.floor(mapping.offset / PAGE_SIZE);
-            const cached = pageCache.find(c => c.blockNum === blockNum);
+            const cached=mappedPage(mapping);
             
             if (cached) {
-                if (mapping.flags === 'private' && !mapping.cowCopied) {
+                if (mapping.flags === 'private') {
                     // Copy-on-Write
-                    log(`CoW: Creation copie privata for bloc ${blockNum}`);
+                    log(`CoW: create a private copy of block ${blockNum}`);
                     mapping.cowCopied = true;
-                    mapping.privateData = cached.data + ' [MODIFIED]';
+                    mapping.privateData = generateRandomData() + ' [PRIVATE MODIFIED]';
                 } else if (mapping.flags === 'shared') {
                     cached.dirty = true;
                     cached.data = generateRandomData() + ' [MOD]';
@@ -508,16 +613,16 @@
                     file.blocks[cached.blockNum].data = cached.data;
                     cached.dirty = false;
                     synced++;
-                    log(`msync: Bloc ${cached.blockNum} scris pe disk`);
+                    log(`msync: Bloc ${cached.blockNum} written to disk`);
                 }
             });
             
             mappings.forEach(m => m.dirty = false);
             
             if (synced === 0) {
-                log('msync: Nu exists pagini dirty de sincronizat');
+                log('msync: no dirty shared pages to synchronise.');
             } else {
-                log(`msync: ${synced} pagini sincronizate cu the file`);
+                log(`msync: ${synced} model pages synchronised with the file.`);
             }
             
             renderAll();
@@ -526,16 +631,16 @@
         function unmapAll() {
             mappings = [];
             pageCache.forEach(c => c.refCount = 0);
-            pageCache = pageCache.filter(c => c.refCount > 0);
+            // Dirty shared cache survives unmap until writeback; private copies end with their mappings.
             
-            log('munmap: Toate mappings-urile au fost eliminate');
+            log('munmap: all model mappings removed');
             renderAll();
         }
 
         function flushCache() {
             syncToFile();
             pageCache = [];
-            log('Page cache golit');
+            log('Model page cache cleared');
             renderAll();
         }
 
@@ -548,7 +653,7 @@
                 color: colors[(id - 1) % colors.length]
             });
             
-            log(`Proces added: Process ${String.fromCharCode(64 + id)}`);
+            log(`Process added: Process ${String.fromCharCode(64 + id)}`);
             renderAll();
         }
 
@@ -586,7 +691,7 @@
             const container = document.getElementById('pageCache');
             
             if (pageCache.length === 0) {
-                container.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Cache gol</div>';
+                container.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Empty cache</div>';
             } else {
                 container.innerHTML = pageCache.map(entry => `
                     <div class="p-2 rounded border ${entry.dirty ? 'bg-amber-50 border-amber-300' : 'bg-purple-50 border-purple-300'} text-xs"
@@ -608,7 +713,7 @@
             const container = document.getElementById('virtualMemory');
             
             if (mappings.length === 0) {
-                container.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Nu exists mappings</div>';
+                container.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">No mappings</div>';
             } else {
                 container.innerHTML = mappings.map(m => {
                     const process = processes.find(p => p.id === m.processId);
@@ -644,7 +749,7 @@
                     <div class="p-3 rounded-lg border-2" style="border-color: ${proc.color}; background: ${proc.color}10">
                         <div class="font-bold text-sm mb-2" style="color: ${proc.color}">${proc.name}</div>
                         ${procMappings.length === 0 
-                            ? '<div class="text-xs text-stone-400">Nu exists mappings</div>'
+                            ? '<div class="text-xs text-stone-400">No mappings</div>'
                             : procMappings.map(m => `
                                 <div class="text-xs p-1 bg-white rounded mb-1">
                                     0x${m.startAddr.toString(16)} (${m.length}B)
@@ -676,7 +781,7 @@
             
             switch(type) {
                 case 'sharedLib':
-                    log('\n=== Scenariu: Biblioteca Shareda ===');
+                    log('\n=== Scenario: Shared Library ===');
                     document.getElementById('mmapProt').value = 'rx';
                     document.getElementById('mmapFlags').value = 'shared';
                     executeMmap();
@@ -693,20 +798,20 @@
                         dirty: false
                     });
                     pageCache[0].refCount++;
-                    log('Ambele procese mapeaza aceeasi biblioteca');
+                    log('Both processes map the same library');
                     renderAll();
                     break;
                     
                 case 'cow':
-                    log('\n=== Scenariu: Copy-on-Write ===');
+                    log('\n=== Scenario: Copy-on-Write ===');
                     document.getElementById('mmapProt').value = 'rw';
                     document.getElementById('mmapFlags').value = 'private';
                     executeMmap();
-                    log('MAP_PRIVATE: Modificarile vor crea copii private');
+                    log('MAP_PRIVATE: writes create private copies');
                     break;
                     
                 case 'ipc':
-                    log('\n=== Scenariu: IPC cu Memorie Shareda ===');
+                    log('\n=== Scenario: IPC with Shared Memory ===');
                     addProcess();
                     document.getElementById('mmapProt').value = 'rw';
                     document.getElementById('mmapFlags').value = 'shared';
@@ -723,7 +828,7 @@
                         dirty: false
                     });
                     pageCache[0].refCount++;
-                    log('Ambele procese pot citi/scrie in aceeasi regiune');
+                    log('Both processes can read/write the same shared region; synchronisation remains necessary');
                     renderAll();
                     break;
             }
@@ -740,6 +845,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', init);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

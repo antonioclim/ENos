@@ -1,3 +1,4 @@
+# Historical configuration reference, not an automatically loaded combined linter config.
 # ═══════════════════════════════════════════════════════════════════════════════
 # linting.toml — Linting Configuration for SEM06 CAPSTONE
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -57,7 +58,7 @@ exclude = [
 
 [tool.ruff]
 # Target Python version
-target-version = "py39"
+target-version = "py310"
 
 # Maximum line length
 line-length = 100
@@ -71,6 +72,7 @@ exclude = [
     "*.pyc",
 ]
 
+[tool.ruff.lint]
 # Activated rules
 select = [
     "E",   # pycodestyle errors
@@ -88,19 +90,18 @@ ignore = [
     "E402",  # Module level import not at top
     "B008",  # Do not perform function calls in argument defaults
     "B905",  # zip() without an explicit strict parameter
-    "W503",  # Line break before binary operator
 ]
 
 # Allow unused variables if they start with _
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Allow import * in __init__.py
 "__init__.py" = ["F401", "F403"]
 # Allow long lines in tests
 "**/test_*.py" = ["E501"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["formative", "scripts"]
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,7 +124,6 @@ exclude = [
 
 ignore = [
     "E501",  # Line too long
-    "W503",  # Line break before binary operator
     "E203",  # Whitespace before ':'
     "E266",  # Too many leading '#' for block comment
 ]

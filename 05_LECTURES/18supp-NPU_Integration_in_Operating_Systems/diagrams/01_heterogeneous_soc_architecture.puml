@@ -46,4 +46,5 @@ note right of npu
   AI Workloads
 end note
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

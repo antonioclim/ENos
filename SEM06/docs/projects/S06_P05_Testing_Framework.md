@@ -43,453 +43,187 @@ The separation between unit and integration tests reflects validation granularit
 
 ### test_runner.sh Implementation
 
+This is the complete extracted teaching runner, separate from the maintained compact runner in `SEM06/scripts/examples/test_runner.sh`. Save it beside the assertion module below. It keeps result records outside isolated workers, loads the complete test file and its dependencies for each test, treats setup failures as failures, handles explicit skip status 77, enforces a per-test timeout and stops across files when requested. Empty selection returns 2 rather than reporting a passing suite.
+
+`setup_file`/`teardown_file` execute once per file. Shared fixture data belongs in files under `TEST_TEMP_DIR`; any scalar paths initialised by `setup_file` and needed by child tests must be **exported**. Bash arrays and unexported variables do not cross a new Bash process. Per-test `setup`, the test and `teardown` share one child shell, so ordinary module functions and setup variables remain available. Tests are trusted executable code; command-string assertions deliberately evaluate test source, never untrusted configuration.
+
+
 ```bash
-#!/bin/bash
-#===============================================================================
-# test_runner.sh - Testing framework for Bash projects
-# Version: 2.0
-# Inspired by: TAP (Test Anything Protocol), Bats, shUnit2
-#===============================================================================
+#!/usr/bin/env bash
+# Extract as tests/test_runner.sh beside test_helpers.sh.
+# Bash 4.4+, GNU timeout and Python 3. Trusted test code is sourced deliberately.
+set -uo pipefail
+RUNNER_PATH=$(realpath -- "${BASH_SOURCE[0]}") || exit 2
 
-set -o pipefail
-
-#-------------------------------------------------------------------------------
-# Global state variables
-#-------------------------------------------------------------------------------
-declare -g TEST_DIR=""
-declare -g TEST_TEMP_DIR=""
-declare -g TESTS_RUN=0
-declare -g TESTS_PASSED=0
-declare -g TESTS_FAILED=0
-declare -g TESTS_SKIPPED=0
-declare -g CURRENT_TEST=""
-declare -g TEST_OUTPUT=""
-declare -g VERBOSE=0
-declare -g STOP_ON_FAILURE=0
-declare -g TEST_TIMEOUT=30
-declare -g FILTER_PATTERN=""
-
-declare -ga FAILED_TESTS=()
-declare -ga SKIPPED_TESTS=()
-
-# Colours for output
-declare -gr RED='\033[0;31m'
-declare -gr GREEN='\033[0;32m'
-declare -gr YELLOW='\033[0;33m'
-declare -gr BLUE='\033[0;34m'
-declare -gr CYAN='\033[0;36m'
-declare -gr NC='\033[0m'
-
-#-------------------------------------------------------------------------------
-# Framework initialisation
-#-------------------------------------------------------------------------------
-test_framework_init() {
-    TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    TEST_TEMP_DIR="${TMPDIR:-/tmp}/test_$$_$(date +%s)"
-    
-    mkdir -p "$TEST_TEMP_DIR"
-    
-    # Load helpers
-    if [[ -f "${TEST_DIR}/test_helpers.sh" ]]; then
-        source "${TEST_DIR}/test_helpers.sh"
-    fi
-    
-    # Trap for cleanup
-    trap test_framework_cleanup EXIT
-    trap 'test_framework_interrupt' INT TERM
+record_result() {
+    python3 - "$1" "$2" "$3" "$4" "$5" "$6" <<'PY'
+import json,pathlib,sys
+path,name,rc,duration,output,phase=sys.argv[1:]
+record={'name':name,'status':'pass' if rc=='0' else 'skip' if rc=='77' else 'fail',
+        'exit_code':int(rc),'duration_ms':int(duration),'phase':phase,
+        'output':pathlib.Path(output).read_text(errors='replace')}
+pathlib.Path(path).write_text(json.dumps(record)+'\n')
+PY
 }
 
-test_framework_cleanup() {
-    local exit_code=$?
-    
-    # Cleanup temporaries
-    if [[ -d "$TEST_TEMP_DIR" ]]; then
-        rm -rf "$TEST_TEMP_DIR"
-    fi
-    
-    # Restore environment
-    cd "$OLDPWD" 2>/dev/null || true
-    
-    return $exit_code
-}
-
-test_framework_interrupt() {
-    echo -e "\n${YELLOW}Test execution interrupted${NC}"
-    test_print_summary
-    exit 130
-}
-
-#-------------------------------------------------------------------------------
-# Test discovery and execution
-#-------------------------------------------------------------------------------
-discover_tests() {
-    local test_type="${1:-all}"
-    local -a test_files=()
-    
-    case "$test_type" in
-        unit)
-            test_files=("${TEST_DIR}"/unit/test_*.sh)
-            ;;
-        integration)
-            test_files=("${TEST_DIR}"/integration/test_*.sh)
-            ;;
-        all|*)
-            test_files=("${TEST_DIR}"/unit/test_*.sh "${TEST_DIR}"/integration/test_*.sh)
-            ;;
-    esac
-    
-    # Filter existing files
-    local -a valid_files=()
-    for file in "${test_files[@]}"; do
-        if [[ -f "$file" ]]; then
-            valid_files+=("$file")
+test_child() {
+    local file=$1 function=$2 work=$3
+    cd -- "$work" || return 1
+    export TEST_WORK_DIR=$work
+    source "$TEST_DIR/test_helpers.sh" || return 1
+    source "$file" || return 1  # Load the complete module and its dependencies.
+    test_teardown() {
+        local rc=$?
+        trap - EXIT
+        if declare -F teardown >/dev/null; then
+            if teardown; then :; else rc=1; fi
         fi
+        exit "$rc"
+    }
+    trap test_teardown EXIT
+    set -Ee
+    if declare -F setup >/dev/null; then setup; fi  # Failure is failure, never skip.
+    "$function"
+}
+
+file_worker() {
+    local file=$1 result_dir=$2 output rc=0 test name line origin start end count=0 file_rc=0
+    source "$TEST_DIR/test_helpers.sh" || return 1
+    source "$file" || return 1
+    local -a functions=()
+    # Query Bash's parsed definitions, including whitespace/newline formatting.
+    shopt -s extdebug
+    while IFS= read -r test; do
+        [[ $test == test_* ]] || continue
+        read -r name line origin < <(declare -F "$test")
+        [[ $origin == "$file" ]] || continue
+        if [[ -n $FILTER_PATTERN ]]; then
+            [[ $name =~ $FILTER_PATTERN ]]; rc=$?
+            ((rc != 2)) || return 2
+            ((rc == 0)) || continue
+        fi
+        functions+=("$name")
+    done < <(compgen -A function | sort)
+    shopt -u extdebug
+    if ((${#functions[@]} == 0)); then return 0; fi
+    output=$result_dir/setup.out
+    if declare -F setup_file >/dev/null; then
+        if setup_file > "$output" 2>&1; then :
+        else
+            rc=$?
+            record_result "$result_dir/000000.json" "$file::setup_file" "$rc" 0 "$output" setup_file || return 1
+            return 1
+        fi
+    fi
+    for test in "${functions[@]}"; do
+        count=$((count+1)); local work=$TEST_TEMP_DIR/work.$BASHPID.$count
+        mkdir -- "$work" || return 1
+        output=$result_dir/$count.out
+        start=$(date +%s%N)
+        if timeout --kill-after=1 "$TEST_TIMEOUT" bash "$RUNNER_PATH" --child "$file" "$test" "$work" > "$output" 2>&1; then rc=0
+        else rc=$?; fi
+        end=$(date +%s%N)
+        record_result "$result_dir/$(printf '%06d' "$count").json" "$file::$test" "$rc" "$(((end-start)/1000000))" "$output" test || return 1
+        printf '%-5s %s\n' "$([[ $rc == 0 ]] && printf PASS || { [[ $rc == 77 ]] && printf SKIP || printf FAIL; })" "$test"
+        if [[ $VERBOSE == 1 || ( $rc != 0 && $rc != 77 ) ]]; then cat -- "$output"; fi
+        rm -rf -- "$work"
+        if ((rc != 0 && rc != 77)); then file_rc=1; [[ $STOP_ON_FAILURE == 0 ]] || break; fi
     done
-    
-    printf '%s\n' "${valid_files[@]}"
-}
-
-discover_test_functions() {
-    local test_file="$1"
-    
-    # Extract functions starting with "test_"
-    grep -E '^[[:space:]]*(function[[:space:]]+)?test_[a-zA-Z0-9_]+[[:space:]]*\(\)' "$test_file" \
-        | sed -E 's/^[[:space:]]*(function[[:space:]]+)?([a-zA-Z0-9_]+)\(\).*/\2/' \
-        | sort
-}
-
-run_test_file() {
-    local test_file="$1"
-    local file_tests_run=0
-    local file_tests_passed=0
-    
-    echo -e "\n${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}  Test File: $(basename "$test_file")${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    
-    # Create subshell for isolation
-    (
-        # Load test file
-        source "$test_file" || {
-            echo -e "${RED}Failed to source test file: $test_file${NC}"
-            exit 1
-        }
-        
-        # Execute file-level setup (if exists)
-        if declare -f setup_file >/dev/null 2>&1; then
-            setup_file || {
-                echo -e "${RED}setup_file failed${NC}"
-                exit 1
-            }
+    if declare -F teardown_file >/dev/null; then
+        output=$result_dir/teardown.out
+        if teardown_file > "$output" 2>&1; then :
+        else
+            rc=$?; file_rc=1
+            record_result "$result_dir/999999.json" "$file::teardown_file" "$rc" 0 "$output" teardown_file || return 1
         fi
-        
-        # Discover and execute test functions
-        local -a test_functions
-        mapfile -t test_functions < <(discover_test_functions "$test_file")
-        
-        for test_func in "${test_functions[@]}"; do
-            # Apply filter if specified
-            if [[ -n "$FILTER_PATTERN" && ! "$test_func" =~ $FILTER_PATTERN ]]; then
-                continue
-            fi
-            
-            run_single_test "$test_func"
-        done
-        
-        # Execute file-level teardown
-        if declare -f teardown_file >/dev/null 2>&1; then
-            teardown_file
-        fi
-    )
-    
-    return $?
-}
-
-run_single_test() {
-    local test_func="$1"
-    local start_time
-    local end_time
-    local duration
-    local exit_code
-    
-    CURRENT_TEST="$test_func"
-    ((TESTS_RUN++))
-    
-    # Per-test setup
-    local test_workdir="${TEST_TEMP_DIR}/${test_func}"
-    mkdir -p "$test_workdir"
-    cd "$test_workdir" || return 1
-    
-    # Execute setup (if exists)
-    if declare -f setup >/dev/null 2>&1; then
-        setup 2>/dev/null || {
-            test_skip "setup failed"
-            return 0
-        }
     fi
-    
-    # Capture output and execute with timeout
-    start_time=$(date +%s%N)
-    
-    TEST_OUTPUT=$(timeout "$TEST_TIMEOUT" bash -c "
-        set -e
-        source '${TEST_DIR}/test_helpers.sh' 2>/dev/null || true
-        $(declare -f "$test_func")
-        $test_func
-    " 2>&1)
-    exit_code=$?
-    
-    end_time=$(date +%s%N)
-    duration=$(( (end_time - start_time) / 1000000 ))  # ms
-    
-    # Per-test teardown
-    if declare -f teardown >/dev/null 2>&1; then
-        teardown 2>/dev/null || true
-    fi
-    
-    # Evaluate result
-    case $exit_code in
-        0)
-            ((TESTS_PASSED++))
-            printf "${GREEN}  ✓${NC} %-50s ${BLUE}(%d ms)${NC}\n" "$test_func" "$duration"
-            [[ $VERBOSE -eq 1 && -n "$TEST_OUTPUT" ]] && echo "    Output: $TEST_OUTPUT"
-            ;;
-        77)
-            # Special code for skip
-            ((TESTS_SKIPPED++))
-            SKIPPED_TESTS+=("$test_func")
-            printf "${YELLOW}  ⊘${NC} %-50s ${YELLOW}(skipped)${NC}\n" "$test_func"
-            [[ -n "$TEST_OUTPUT" ]] && echo "    Reason: $TEST_OUTPUT"
-            ;;
-        124)
-            # Timeout
-            ((TESTS_FAILED++))
-            FAILED_TESTS+=("$test_func (timeout)")
-            printf "${RED}  ✗${NC} %-50s ${RED}(timeout after ${TEST_TIMEOUT}s)${NC}\n" "$test_func"
-            ;;
-        *)
-            ((TESTS_FAILED++))
-            FAILED_TESTS+=("$test_func")
-            printf "${RED}  ✗${NC} %-50s ${RED}(exit code: $exit_code)${NC}\n" "$test_func"
-            if [[ -n "$TEST_OUTPUT" ]]; then
-                echo -e "${RED}    Error output:${NC}"
-                echo "$TEST_OUTPUT" | sed 's/^/      /'
-            fi
-            
-            if [[ $STOP_ON_FAILURE -eq 1 ]]; then
-                echo -e "\n${RED}Stopping on first failure${NC}"
-                exit 1
-            fi
-            ;;
-    esac
-    
-    # Cleanup workdir
-    cd "$TEST_TEMP_DIR"
-    rm -rf "$test_workdir"
-    
-    return 0
+    return "$file_rc"
 }
 
-#-------------------------------------------------------------------------------
-# Results summarisation
-#-------------------------------------------------------------------------------
-test_print_summary() {
-    local total_time
-    
-    echo -e "\n${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}  TEST SUMMARY${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    
-    echo -e "  Total:   ${TESTS_RUN}"
-    echo -e "  ${GREEN}Passed:  ${TESTS_PASSED}${NC}"
-    echo -e "  ${RED}Failed:  ${TESTS_FAILED}${NC}"
-    echo -e "  ${YELLOW}Skipped: ${TESTS_SKIPPED}${NC}"
-    
-    if [[ ${#FAILED_TESTS[@]} -gt 0 ]]; then
-        echo -e "\n${RED}  Failed tests:${NC}"
-        for test in "${FAILED_TESTS[@]}"; do
-            echo -e "    ${RED}✗${NC} $test"
-        done
-    fi
-    
-    if [[ ${#SKIPPED_TESTS[@]} -gt 0 && $VERBOSE -eq 1 ]]; then
-        echo -e "\n${YELLOW}  Skipped tests:${NC}"
-        for test in "${SKIPPED_TESTS[@]}"; do
-            echo -e "    ${YELLOW}⊘${NC} $test"
-        done
-    fi
-    
-    # Exit code based on results
-    if [[ $TESTS_FAILED -gt 0 ]]; then
-        echo -e "\n${RED}═══════════════════════════════════════════════════════════${NC}"
-        echo -e "${RED}  TESTS FAILED${NC}"
-        echo -e "${RED}═══════════════════════════════════════════════════════════${NC}"
-        return 1
-    else
-        echo -e "\n${GREEN}═══════════════════════════════════════════════════════════${NC}"
-        echo -e "${GREEN}  ALL TESTS PASSED${NC}"
-        echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
-        return 0
-    fi
+summarise() {
+    python3 - "$TEST_TEMP_DIR" "$REPORT_FORMAT" "$REPORT_FILE" <<'PY'
+import json,pathlib,sys,xml.etree.ElementTree as ET
+root,form,out=sys.argv[1:]; rows=[]
+for path in sorted(pathlib.Path(root).glob('results.*/*.json')): rows.append(json.loads(path.read_text()))
+counts={s:sum(r['status']==s for r in rows) for s in ('pass','fail','skip')}
+print(f"Total: {len(rows)}; passed: {counts['pass']}; failed: {counts['fail']}; skipped: {counts['skip']}")
+if not rows: print('No tests selected; this is not a passing suite.')
+if form:
+    if form=='json': text=json.dumps({'results':rows,'counts':counts},indent=2)+'\n'
+    elif form=='tap':
+        text='TAP version 13\n1..'+str(len(rows))+'\n'
+        for i,r in enumerate(rows,1):
+            name=r['name'].replace('\n',' ').replace('\r',' ').replace('#','_')
+            text+=('not ok' if r['status']=='fail' else 'ok')+f' {i} - {name}'+(' # SKIP requested' if r['status']=='skip' else '')+'\n'
+    elif form=='junit':
+        suite=ET.Element('testsuite',name='CAPSTONE',tests=str(len(rows)),failures=str(counts['fail']),skipped=str(counts['skip']))
+        for r in rows:
+            case=ET.SubElement(suite,'testcase',name=r['name'],time=str(r['duration_ms']/1000))
+            if r['status']=='fail': ET.SubElement(case,'failure',message='exit '+str(r['exit_code'])).text=r['output']
+            elif r['status']=='skip': ET.SubElement(case,'skipped').text=r['output']
+            ET.SubElement(case,'system-out').text=r['output']
+        text=ET.tostring(suite,encoding='unicode')+'\n'
+    else: text=''.join(f"{r['status']}: {r['name']} ({r['exit_code']})\n" for r in rows)
+    pathlib.Path(out or ('test-results.'+{'junit':'xml','text':'txt'}.get(form,form))).write_text(text)
+raise SystemExit(1 if counts['fail'] else 0 if rows else 2)
+PY
 }
 
-#-------------------------------------------------------------------------------
-# Report generation
-#-------------------------------------------------------------------------------
-generate_report() {
-    local format="${1:-text}"
-    local output_file="${2:-}"
-    
-    case "$format" in
-        tap)
-            generate_tap_report "$output_file"
-            ;;
-        junit)
-            generate_junit_report "$output_file"
-            ;;
-        json)
-            generate_json_report "$output_file"
-            ;;
-        *)
-            generate_text_report "$output_file"
-            ;;
-    esac
-}
-
-generate_tap_report() {
-    local output="${1:-/dev/stdout}"
-    
-    {
-        echo "TAP version 13"
-        echo "1..${TESTS_RUN}"
-        
-        local i=1
-        # Generated from stored results...
-    } > "$output"
-}
-
-generate_junit_report() {
-    local output="${1:-test-results.xml}"
-    
-    cat > "$output" <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="CAPSTONE Tests" tests="${TESTS_RUN}" failures="${TESTS_FAILED}" skipped="${TESTS_SKIPPED}">
-    <!-- Individual test cases would be inserted here -->
-</testsuite>
-EOF
-}
-
-#-------------------------------------------------------------------------------
-# Main
-#-------------------------------------------------------------------------------
 main() {
-    local test_type="all"
-    local report_format=""
-    local report_file=""
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -t|--type)
-                test_type="$2"
-                shift 2
-                ;;
-            -v|--verbose)
-                VERBOSE=1
-                shift
-                ;;
-            -f|--filter)
-                FILTER_PATTERN="$2"
-                shift 2
-                ;;
-            -s|--stop-on-failure)
-                STOP_ON_FAILURE=1
-                shift
-                ;;
-            --timeout)
-                TEST_TIMEOUT="$2"
-                shift 2
-                ;;
-            --report)
-                report_format="$2"
-                shift 2
-                ;;
-            --report-file)
-                report_file="$2"
-                shift 2
-                ;;
-            -h|--help)
-                show_help
-                exit 0
-                ;;
-            *)
-                echo "Unknown option: $1"
-                exit 1
-                ;;
+    local type=all option value file worker_rc index=0
+    export TEST_DIR=${TEST_DIR:-$(dirname -- "$RUNNER_PATH")}
+    TEST_DIR=$(realpath -- "$TEST_DIR") || return 2
+    export TEST_TIMEOUT=30 FILTER_PATTERN='' VERBOSE=0 STOP_ON_FAILURE=0
+    REPORT_FORMAT=''; REPORT_FILE=''
+    while (($#)); do
+        option=$1; shift
+        case $option in
+            -t|--type|-f|--filter|--timeout|--report|--report-file)
+                (($#)) || { printf 'Missing value for %s\n' "$option" >&2; return 2; }; value=$1; shift;;
+        esac
+        case $option in
+            -t|--type) type=$value;; -f|--filter) FILTER_PATTERN=$value;;
+            --timeout) TEST_TIMEOUT=$value;; --report) REPORT_FORMAT=$value;; --report-file) REPORT_FILE=$value;;
+            -v|--verbose) VERBOSE=1;; -s|--stop-on-failure) STOP_ON_FAILURE=1;;
+            -h|--help) printf '%s\n' 'Usage: test_runner.sh [-t unit|integration|all] [-f REGEX] [-v] [-s] [--timeout SECONDS] [--report text|tap|junit|json] [--report-file PATH]'; return 0;;
+            *) printf 'Unknown option: %s\n' "$option" >&2; return 2;;
         esac
     done
-    
-    # Initialisation
-    test_framework_init
-    
-    echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║           CAPSTONE TEST FRAMEWORK v2.0                    ║${NC}"
-    echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
-    echo -e "  Type: $test_type"
-    [[ -n "$FILTER_PATTERN" ]] && echo -e "  Filter: $FILTER_PATTERN"
-    echo ""
-    
-    # Discovery and execution
-    local -a test_files
-    mapfile -t test_files < <(discover_tests "$test_type")
-    
-    if [[ ${#test_files[@]} -eq 0 ]]; then
-        echo -e "${YELLOW}No test files found${NC}"
-        exit 0
-    fi
-    
-    for file in "${test_files[@]}"; do
-        run_test_file "$file" || true
+    [[ $type == all || $type == unit || $type == integration ]] || return 2
+    [[ $TEST_TIMEOUT =~ ^[1-9][0-9]{0,3}$ ]] || return 2
+    case $REPORT_FORMAT in ''|text|tap|junit|json) :;; *) return 2;; esac
+    [[ '' =~ $FILTER_PATTERN ]]; local filter_rc=$?; ((filter_rc != 2)) || return 2
+    [[ -r $TEST_DIR/test_helpers.sh ]] || { printf 'Missing test_helpers.sh\n' >&2; return 2; }
+    export TEST_TEMP_DIR
+    TEST_TEMP_DIR=$(mktemp -d) || return 1
+    trap 'rc=$?; rm -rf -- "$TEST_TEMP_DIR"; exit "$rc"' EXIT
+    trap 'exit 130' INT; trap 'exit 143' TERM
+    local -a files=()
+    shopt -s nullglob
+    [[ $type == integration ]] || files+=("$TEST_DIR"/unit/test_*.sh)
+    [[ $type == unit ]] || files+=("$TEST_DIR"/integration/test_*.sh)
+    for file in "${files[@]}"; do
+        index=$((index+1)); local result_dir=$TEST_TEMP_DIR/results.$(printf '%06d' "$index")
+        mkdir -- "$result_dir" || return 1
+        if bash "$RUNNER_PATH" --worker "$file" "$result_dir"; then worker_rc=0
+        else worker_rc=$?; fi
+        if ((worker_rc != 0)); then
+            # Source/setup/worker failures without a record must never become zero tests/pass.
+            if [[ -z $(find "$result_dir" -name '*.json' -print -quit) ]]; then
+                printf 'File worker failed with exit %s\n' "$worker_rc" > "$result_dir/worker.out"
+                record_result "$result_dir/000000.json" "$file::worker" "$worker_rc" 0 "$result_dir/worker.out" worker || return 1
+            fi
+            [[ $STOP_ON_FAILURE == 0 ]] || break
+        fi
     done
-    
-    # Summarisation
-    test_print_summary
-    local result=$?
-    
-    # Report generation
-    if [[ -n "$report_format" ]]; then
-        generate_report "$report_format" "$report_file"
-    fi
-    
-    return $result
+    summarise
 }
 
-show_help() {
-    cat <<'EOF'
-CAPSTONE Test Framework v2.0
-
-Usage: test_runner.sh [OPTIONS]
-
-Options:
-    -t, --type TYPE         Run specific test type: unit, integration, all
-    -v, --verbose           Show verbose output including test stdout
-    -f, --filter PATTERN    Run only tests matching regex pattern
-    -s, --stop-on-failure   Stop execution on first failed test
-    --timeout SECONDS       Timeout per test (default: 30)
-    --report FORMAT         Generate report: tap, junit, json, text
-    --report-file FILE      Output file for report
-    -h, --help              Show this help
-
-Examples:
-    ./test_runner.sh                          # Run all tests
-    ./test_runner.sh -t unit                  # Run only unit tests
-    ./test_runner.sh -f "test_backup.*"       # Run tests matching pattern
-    ./test_runner.sh -v --report junit        # Verbose + JUnit report
-EOF
-}
-
-# Execution
-main "$@"
+case ${1:-} in
+    --child) shift; test_child "$@";;
+    --worker) shift; file_worker "$@";;
+    *) main "$@";;
+esac
 ```
 
 ---
@@ -626,66 +360,26 @@ assert_matches() {
 # Numeric assertions
 #-------------------------------------------------------------------------------
 
-assert_equals_numeric() {
-    local expected="$1"
-    local actual="$2"
-    local message="${3:-Numeric values not equal}"
-    
-    if (( expected == actual )); then
-        return 0
-    else
-        echo "ASSERT_EQUALS_NUMERIC FAILED: $message"
-        echo "  Expected: $expected"
-        echo "  Actual:   $actual"
-        return 1
-    fi
+_assert_numeric() {
+    local operation=$1; shift
+    python3 - "$operation" "$@" <<'PY'
+import math,sys
+try:
+    operation,*values=sys.argv[1:]; values=list(map(float,values))
+    if not all(map(math.isfinite,values)): raise ValueError()
+    if operation=='eq': ok=values[0]==values[1]
+    elif operation=='gt': ok=values[0]>values[1]
+    elif operation=='lt': ok=values[0]<values[1]
+    else: ok=values[1]<=values[0]<=values[2]
+    if not ok: print('Numeric assertion failed:',operation,values,file=sys.stderr)
+    raise SystemExit(0 if ok else 1)
+except (ValueError,IndexError): print('Invalid numeric assertion input',file=sys.stderr); raise SystemExit(1)
+PY
 }
-
-assert_greater_than() {
-    local value="$1"
-    local threshold="$2"
-    local message="${3:-Value not greater than threshold}"
-    
-    if (( value > threshold )); then
-        return 0
-    else
-        echo "ASSERT_GREATER_THAN FAILED: $message"
-        echo "  Value:     $value"
-        echo "  Threshold: $threshold"
-        return 1
-    fi
-}
-
-assert_less_than() {
-    local value="$1"
-    local threshold="$2"
-    local message="${3:-Value not less than threshold}"
-    
-    if (( value < threshold )); then
-        return 0
-    else
-        echo "ASSERT_LESS_THAN FAILED: $message"
-        echo "  Value:     $value"
-        echo "  Threshold: $threshold"
-        return 1
-    fi
-}
-
-assert_in_range() {
-    local value="$1"
-    local min="$2"
-    local max="$3"
-    local message="${4:-Value not in expected range}"
-    
-    if (( value >= min && value <= max )); then
-        return 0
-    else
-        echo "ASSERT_IN_RANGE FAILED: $message"
-        echo "  Value: $value"
-        echo "  Range: [$min, $max]"
-        return 1
-    fi
-}
+assert_equals_numeric() { _assert_numeric eq "$1" "$2"; }
+assert_greater_than() { _assert_numeric gt "$1" "$2"; }
+assert_less_than() { _assert_numeric lt "$1" "$2"; }
+assert_in_range() { _assert_numeric range "$1" "$2" "$3"; }
 
 #-------------------------------------------------------------------------------
 # File and directory assertions
@@ -741,7 +435,7 @@ assert_file_contains() {
         return 1
     fi
     
-    if grep -qF "$content" "$filepath"; then
+    if grep -qF -- "$content" "$filepath"; then
         return 0
     else
         echo "ASSERT_FILE_CONTAINS FAILED: $message"
@@ -755,7 +449,7 @@ assert_file_empty() {
     local filepath="$1"
     local message="${2:-File is not empty}"
     
-    if [[ ! -s "$filepath" ]]; then
+    if [[ -f "$filepath" && ! -s "$filepath" ]]; then
         return 0
     else
         echo "ASSERT_FILE_EMPTY FAILED: $message"
@@ -832,8 +526,8 @@ assert_exit_code() {
     local command="$2"
     local message="${3:-Exit code mismatch}"
     
-    eval "$command" >/dev/null 2>&1
-    local actual=$?
+    local actual=0
+    if eval "$command" >/dev/null 2>&1; then :; else actual=$?; fi
     
     if [[ "$actual" -eq "$expected" ]]; then
         return 0
@@ -852,7 +546,7 @@ assert_output_equals() {
     local message="${3:-Output mismatch}"
     
     local actual
-    actual=$(eval "$command" 2>&1)
+    if actual=$(eval "$command" 2>&1); then :; else :; fi
     
     if [[ "$actual" == "$expected" ]]; then
         return 0
@@ -870,7 +564,7 @@ assert_output_contains() {
     local message="${3:-Output does not contain expected}"
     
     local actual
-    actual=$(eval "$command" 2>&1)
+    if actual=$(eval "$command" 2>&1); then :; else :; fi
     
     if [[ "$actual" == *"$expected"* ]]; then
         return 0
@@ -888,7 +582,7 @@ assert_stderr_contains() {
     local message="${3:-Stderr does not contain expected}"
     
     local stderr_output
-    stderr_output=$(eval "$command" 2>&1 1>/dev/null)
+    if stderr_output=$(eval "$command" 2>&1 1>/dev/null); then :; else :; fi
     
     if [[ "$stderr_output" == *"$expected"* ]]; then
         return 0
@@ -962,45 +656,44 @@ create_temp_file() {
     local content="${1:-}"
     local filename="${2:-test_file_$$}"
     
-    local filepath="${TEST_TEMP_DIR}/${filename}"
-    echo -n "$content" > "$filepath"
-    echo "$filepath"
+    [[ $filename != */* && $filename != . && $filename != .. ]] || return 2
+    local filepath
+    filepath=$(mktemp "${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/${filename}.XXXXXX") || return 1
+    printf '%s' "$content" > "$filepath" || return 1
+    printf '%s\n' "$filepath"
 }
 
 # Create temporary directory for test
 create_temp_dir() {
     local dirname="${1:-test_dir_$$}"
     
-    local dirpath="${TEST_TEMP_DIR}/${dirname}"
-    mkdir -p "$dirpath"
-    echo "$dirpath"
+    [[ $dirname != */* && $dirname != . && $dirname != .. ]] || return 2
+    mktemp -d "${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/${dirname}.XXXXXX"
 }
 
 # Mock for command
 mock_command() {
-    local cmd_name="$1"
-    local mock_output="$2"
-    local mock_exit_code="${3:-0}"
-    
-    # Create mock script in temporary PATH
-    local mock_dir="${TEST_TEMP_DIR}/mocks"
-    mkdir -p "$mock_dir"
-    
-    cat > "${mock_dir}/${cmd_name}" <<EOF
-#!/bin/bash
-echo "$mock_output"
-exit $mock_exit_code
-EOF
-    chmod +x "${mock_dir}/${cmd_name}"
-    
-    # Add to beginning of PATH
-    export PATH="${mock_dir}:$PATH"
+    local cmd_name=$1 mock_output=$2 mock_exit_code=${3:-0}
+    [[ $cmd_name =~ ^[A-Za-z_][A-Za-z0-9_-]*$ && $mock_exit_code =~ ^[0-9]{1,3}$ ]] || return 2
+    ((10#$mock_exit_code <= 255)) || return 2
+    local mock_dir=${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/mocks
+    mkdir -p -- "$mock_dir" || return 1
+    printf '%s' "$mock_output" > "$mock_dir/$cmd_name.output" || return 1
+    printf '%s\n' "$mock_exit_code" > "$mock_dir/$cmd_name.status" || return 1
+    cat > "$mock_dir/$cmd_name" <<'SH'
+#!/usr/bin/env bash
+cat -- "$0.output"
+read -r status < "$0.status"
+exit "$status"
+SH
+    chmod +x -- "$mock_dir/$cmd_name" || return 1
+    export PATH="$mock_dir:$PATH"
 }
 
 # Restore original command (remove mock)
 unmock_command() {
     local cmd_name="$1"
-    rm -f "${TEST_TEMP_DIR}/mocks/${cmd_name}"
+    rm -f -- "${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/mocks/${cmd_name}"{,.output,.status}
 }
 
 # Capture output with stdout/stderr separation
@@ -1011,11 +704,10 @@ capture_output() {
     local -n exit_var="$4"
     
     local tmp_stdout tmp_stderr
-    tmp_stdout=$(mktemp)
-    tmp_stderr=$(mktemp)
+    tmp_stdout=$(mktemp) || return 1
+    tmp_stderr=$(mktemp) || { rm -f -- "$tmp_stdout"; return 1; }
     
-    eval "$command" > "$tmp_stdout" 2> "$tmp_stderr"
-    exit_var=$?
+    if eval "$command" > "$tmp_stdout" 2> "$tmp_stderr"; then exit_var=0; else exit_var=$?; fi
     
     stdout_var=$(<"$tmp_stdout")
     stderr_var=$(<"$tmp_stderr")
@@ -1054,321 +746,89 @@ require_non_root() {
 ### Test for Monitor Core
 
 ```bash
-#!/bin/bash
-# tests/unit/test_monitor_core.sh
-
-source "$(dirname "$0")/../test_helpers.sh"
-source "$(dirname "$0")/../../lib/monitor_core.sh"
-
-#-------------------------------------------------------------------------------
-# Setup and Teardown
-#-------------------------------------------------------------------------------
+#!/usr/bin/env bash
+# tests/unit/test_monitor_core.sh for the extracted P02 teaching modules.
+: "${MONITOR_MODULE:?Set the absolute path of the extracted monitor_core.sh}"
+: "${MONITOR_DATA_PATH:?Set the absolute path of monitor_data.py}"
+source "$MONITOR_MODULE"
 setup() {
-    # Create mock for /proc/stat
-    MOCK_PROC_STAT=$(create_temp_file "cpu  1000 200 500 8000 100 50 30 0 0 0
-cpu0 500 100 250 4000 50 25 15 0 0 0
-cpu1 500 100 250 4000 50 25 15 0 0 0")
+    CPU_STAT_PATH=$TEST_WORK_DIR/stat.before
+    CPU_STAT_SECOND_PATH=$TEST_WORK_DIR/stat.after
+    export CPU_STAT_PATH CPU_STAT_SECOND_PATH CPU_SAMPLE_INTERVAL=0
+    printf 'cpu 100 0 0 800 100 0 0 0 999 999\ncpu0 100 0 0 800 100 0 0 0 999 999\n' > "$CPU_STAT_PATH"
+    printf 'cpu 120 0 0 870 110 0 0 0 999 999\ncpu0 120 0 0 870 110 0 0 0 999 999\n' > "$CPU_STAT_SECOND_PATH"
+    export PROC_MEMINFO=$TEST_WORK_DIR/meminfo
+    printf 'MemTotal: 1000 kB\nMemAvailable: 400 kB\nMemFree: 100 kB\nBuffers: 50 kB\nCached: 300 kB\nSwapTotal: 0 kB\nSwapFree: 0 kB\n' > "$PROC_MEMINFO"
 }
-
-teardown() {
-    rm -f "$MOCK_PROC_STAT"
+test_cpu_known_interval() { assert_equals 20.0 "$(get_cpu_usage)"; }
+test_cpu_reset_is_unavailable() {
+    cp -- "$CPU_STAT_PATH" "$CPU_STAT_SECOND_PATH"
+    local rc=0
+    if get_cpu_usage; then :; else rc=$?; fi
+    assert_equals 2 "$rc"
 }
-
-#-------------------------------------------------------------------------------
-# Tests for get_cpu_usage
-#-------------------------------------------------------------------------------
-test_get_cpu_usage_returns_valid_percentage() {
-    # Arrange
-    local result
-    
-    # Act
-    result=$(get_cpu_usage)
-    
-    # Assert
-    assert_matches "$result" '^[0-9]+(\.[0-9]+)?$' \
-        "CPU usage should be a valid number"
-    assert_in_range "${result%.*}" 0 100 \
-        "CPU usage should be between 0 and 100"
+test_memory_known_values() {
+    local value
+    value=$(get_memory_info percent)
+    assert_equals 60.0 "$value"
+    get_memory_info json > "$TEST_WORK_DIR/memory.json"
+    python3 - "$TEST_WORK_DIR/memory.json" <<'PY'
+import json,sys
+data=json.load(open(sys.argv[1])); assert data['used_kb']==600 and data['swap_percent']==0
+PY
 }
-
-test_get_cpu_usage_per_core_returns_array() {
-    # Arrange
-    local -a results
-    
-    # Act
-    mapfile -t results < <(get_cpu_usage_per_core)
-    
-    # Assert
-    assert_greater_than "${#results[@]}" 0 \
-        "Should return at least one core"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for get_memory_info
-#-------------------------------------------------------------------------------
-test_get_memory_info_returns_all_fields() {
-    # Act
-    local output
-    output=$(get_memory_info)
-    
-    # Assert
-    assert_contains "$output" "total" "Should contain total memory"
-    assert_contains "$output" "used" "Should contain used memory"
-    assert_contains "$output" "free" "Should contain free memory"
-    assert_contains "$output" "available" "Should contain available memory"
-}
-
-test_get_memory_percentage_valid_range() {
-    # Act
-    local percentage
-    percentage=$(get_memory_percentage)
-    
-    # Assert
-    assert_in_range "${percentage%.*}" 0 100 \
-        "Memory percentage should be 0-100"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for parse_proc_stat
-#-------------------------------------------------------------------------------
-test_parse_proc_stat_extracts_cpu_times() {
-    # Arrange
-    local proc_stat="cpu  1000 200 500 8000 100 50 30 0 0 0"
-    
-    # Act
-    local -a times
-    IFS=' ' read -ra times <<< "${proc_stat#cpu  }"
-    
-    # Assert
-    assert_equals_numeric 1000 "${times[0]}" "User time"
-    assert_equals_numeric 200 "${times[1]}" "Nice time"
-    assert_equals_numeric 500 "${times[2]}" "System time"
-    assert_equals_numeric 8000 "${times[3]}" "Idle time"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for alerting
-#-------------------------------------------------------------------------------
-test_check_threshold_triggers_alert() {
-    # Arrange
-    local value=95
-    local threshold=90
-    local metric="cpu"
-    
-    # Act & Assert
-    assert_true "[[ $value -gt $threshold ]]" \
-        "Value $value should exceed threshold $threshold"
-}
-
-test_check_threshold_no_alert_when_below() {
-    # Arrange
-    local value=50
-    local threshold=90
-    
-    # Act & Assert
-    assert_false "[[ $value -gt $threshold ]]" \
-        "Value $value should not exceed threshold $threshold"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for output formatting
-#-------------------------------------------------------------------------------
-test_format_bytes_converts_correctly() {
-    # Test cases: bytes -> expected output
-    assert_equals "1.00 KB" "$(format_bytes 1024)"
-    assert_equals "1.00 MB" "$(format_bytes 1048576)"
-    assert_equals "1.00 GB" "$(format_bytes 1073741824)"
-}
-
-test_format_json_valid_structure() {
-    # Arrange
-    local output
-    
-    # Act
-    output=$(format_output_json)
-    
-    # Assert
-    # Verify that output is valid JSON
-    if command -v jq >/dev/null 2>&1; then
-        assert_success "echo '$output' | jq . >/dev/null" \
-            "Output should be valid JSON"
-    else
-        test_skip "jq not available for JSON validation"
-    fi
+test_memory_missing_input_fails() {
+    rm -- "$PROC_MEMINFO"
+    local rc=0; if get_memory_info json; then :; else rc=$?; fi
+    assert_equals 2 "$rc"
 }
 ```
 
 ### Test for Backup Core
 
 ```bash
-#!/bin/bash
-# tests/unit/test_backup_core.sh
-
-source "$(dirname "$0")/../test_helpers.sh"
-
-# Load tested module
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "${SCRIPT_DIR}/lib/backup_core.sh"
-
-#-------------------------------------------------------------------------------
-# Global setup
-#-------------------------------------------------------------------------------
+#!/usr/bin/env bash
+# tests/unit/test_backup_core.sh for P03's explicit reference engine.
+: "${BACKUP_ENGINE_PATH:?Set the absolute path of backup_reference.py}"
 setup_file() {
-    export TEST_BACKUP_DIR="${TEST_TEMP_DIR}/backup_tests"
-    mkdir -p "$TEST_BACKUP_DIR"/{source,dest}
-    
-    # Create test files
-    echo "test content 1" > "${TEST_BACKUP_DIR}/source/file1.txt"
-    echo "test content 2" > "${TEST_BACKUP_DIR}/source/file2.txt"
-    mkdir -p "${TEST_BACKUP_DIR}/source/subdir"
-    echo "nested content" > "${TEST_BACKUP_DIR}/source/subdir/nested.txt"
+    export TEST_BACKUP_DIR=$TEST_TEMP_DIR/backup_fixtures
+    mkdir -p -- "$TEST_BACKUP_DIR"
 }
-
-teardown_file() {
-    rm -rf "$TEST_BACKUP_DIR"
+teardown_file() { rm -rf -- "$TEST_BACKUP_DIR"; }
+setup() {
+    export SOURCE_DIR=$TEST_WORK_DIR/source DEST_DIR=$TEST_WORK_DIR/archives
+    mkdir -- "$SOURCE_DIR"
+    printf original > "$SOURCE_DIR/file with spaces"
+    printf remove > "$SOURCE_DIR/delete.txt"
 }
-
-#-------------------------------------------------------------------------------
-# Tests for create_archive
-#-------------------------------------------------------------------------------
-test_create_archive_creates_tarball() {
-    # Arrange
-    local source_dir="${TEST_BACKUP_DIR}/source"
-    local dest_dir="${TEST_BACKUP_DIR}/dest"
-    local archive_name="test_backup"
-    
-    # Act
-    create_archive "$source_dir" "$dest_dir" "$archive_name" "gzip"
-    
-    # Assert
-    assert_file_exists "${dest_dir}/${archive_name}.tar.gz" \
-        "Archive should be created"
+test_create_archive_and_chain_restoration() {
+    local full incremental
+    full=$(python3 "$BACKUP_ENGINE_PATH" create "$DEST_DIR" full "$SOURCE_DIR")
+    assert_file_exists "$full"
+    printf modified > "$SOURCE_DIR/file with spaces"
+    rm -- "$SOURCE_DIR/delete.txt"
+    printf new > "$SOURCE_DIR/new.txt"
+    incremental=$(python3 "$BACKUP_ENGINE_PATH" create "$DEST_DIR" incremental "$SOURCE_DIR")
+    python3 "$BACKUP_ENGINE_PATH" restore "$DEST_DIR" "$incremental" "$TEST_WORK_DIR/restored"
+    local restored=$TEST_WORK_DIR/restored/${SOURCE_DIR#/}
+    assert_file_contains "$restored/file with spaces" modified
+    assert_file_not_exists "$restored/delete.txt"
+    assert_file_contains "$restored/new.txt" new
 }
-
-test_create_archive_with_different_compression() {
-    local source_dir="${TEST_BACKUP_DIR}/source"
-    local dest_dir="${TEST_BACKUP_DIR}/dest"
-    
-    # Test gzip
-    create_archive "$source_dir" "$dest_dir" "test_gzip" "gzip"
-    assert_file_exists "${dest_dir}/test_gzip.tar.gz"
-    
-    # Test bzip2
-    create_archive "$source_dir" "$dest_dir" "test_bzip2" "bzip2"
-    assert_file_exists "${dest_dir}/test_bzip2.tar.bz2"
-    
-    # Test xz (if available)
-    if command -v xz >/dev/null 2>&1; then
-        create_archive "$source_dir" "$dest_dir" "test_xz" "xz"
-        assert_file_exists "${dest_dir}/test_xz.tar.xz"
-    fi
+test_corruption_is_failure() {
+    local archive rc=0
+    archive=$(python3 "$BACKUP_ENGINE_PATH" create "$DEST_DIR" full "$SOURCE_DIR")
+    printf corrupt >> "$archive"
+    if python3 "$BACKUP_ENGINE_PATH" verify "$archive"; then :; else rc=$?; fi
+    assert_not_equals 0 "$rc"
 }
-
-test_create_archive_preserves_structure() {
-    # Arrange
-    local source_dir="${TEST_BACKUP_DIR}/source"
-    local dest_dir="${TEST_BACKUP_DIR}/dest"
-    local extract_dir="${TEST_BACKUP_DIR}/extract"
-    mkdir -p "$extract_dir"
-    
-    # Act
-    create_archive "$source_dir" "$dest_dir" "structure_test" "gzip"
-    tar -xzf "${dest_dir}/structure_test.tar.gz" -C "$extract_dir"
-    
-    # Assert
-    assert_file_exists "${extract_dir}/file1.txt"
-    assert_file_exists "${extract_dir}/subdir/nested.txt"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for exclude patterns
-#-------------------------------------------------------------------------------
-test_create_exclude_file_generates_valid_patterns() {
-    # Arrange
-    local -a patterns=("*.log" "*.tmp" "cache/")
-    local exclude_file
-    
-    # Act
-    exclude_file=$(create_exclude_file "${patterns[@]}")
-    
-    # Assert
-    assert_file_exists "$exclude_file"
-    assert_file_contains "$exclude_file" "*.log"
-    assert_file_contains "$exclude_file" "*.tmp"
-    assert_file_contains "$exclude_file" "cache/"
-}
-
-test_backup_excludes_patterns() {
-    # Arrange
-    local source_dir="${TEST_BACKUP_DIR}/source"
-    echo "log content" > "${source_dir}/test.log"
-    
-    local -a exclude=("*.log")
-    
-    # Act
-    create_archive "$source_dir" "${TEST_BACKUP_DIR}/dest" "exclude_test" "gzip" \
-        --exclude-from=<(printf '%s\n' "${exclude[@]}")
-    
-    # Extract and verify
-    local extract_dir="${TEST_BACKUP_DIR}/extract_exclude"
-    mkdir -p "$extract_dir"
-    tar -xzf "${TEST_BACKUP_DIR}/dest/exclude_test.tar.gz" -C "$extract_dir"
-    
-    # Assert
-    assert_file_not_exists "${extract_dir}/test.log" \
-        "Excluded file should not be in archive"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for integrity verification
-#-------------------------------------------------------------------------------
-test_generate_checksum_creates_valid_hash() {
-    # Arrange
-    local test_file="${TEST_BACKUP_DIR}/source/file1.txt"
-    
-    # Act
-    local checksum
-    checksum=$(generate_checksum "$test_file" "sha256")
-    
-    # Assert
-    assert_matches "$checksum" '^[a-f0-9]{64}$' \
-        "SHA256 should be 64 hex characters"
-}
-
-test_verify_checksum_detects_corruption() {
-    # Arrange
-    local test_file="${TEST_BACKUP_DIR}/source/file1.txt"
-    local correct_checksum
-    correct_checksum=$(sha256sum "$test_file" | cut -d' ' -f1)
-    local wrong_checksum="0000000000000000000000000000000000000000000000000000000000000000"
-    
-    # Assert
-    assert_success "verify_checksum '$test_file' '$correct_checksum' 'sha256'" \
-        "Correct checksum should verify"
-    assert_fails "verify_checksum '$test_file' '$wrong_checksum' 'sha256'" \
-        "Wrong checksum should fail"
-}
-
-#-------------------------------------------------------------------------------
-# Tests for rotation
-#-------------------------------------------------------------------------------
-test_apply_rotation_keeps_correct_count() {
-    # Arrange
-    local backup_dir="${TEST_BACKUP_DIR}/rotation"
-    mkdir -p "$backup_dir"
-    
-    # Create 5 backups
-    for i in {1..5}; do
-        touch -d "$i days ago" "${backup_dir}/backup_${i}.tar.gz"
-    done
-    
-    # Act - keep only 3
-    apply_rotation "$backup_dir" 3 "*.tar.gz"
-    
-    # Assert
-    local count
-    count=$(find "$backup_dir" -name "*.tar.gz" | wc -l)
-    assert_equals_numeric 3 "$count" "Should keep only 3 backups"
+test_list_excludes_sidecars() {
+    python3 "$BACKUP_ENGINE_PATH" create "$DEST_DIR" full "$SOURCE_DIR" >/dev/null
+    python3 "$BACKUP_ENGINE_PATH" list "$DEST_DIR" --format json > "$TEST_WORK_DIR/list.json"
+    python3 - "$TEST_WORK_DIR/list.json" <<'PY'
+import json,sys
+assert len(json.load(open(sys.argv[1]))['backups'])==1
+PY
 }
 ```
 
@@ -1381,123 +841,54 @@ test_apply_rotation_keeps_correct_count() {
 Mocking in Bash involves temporarily replacing commands or functions with controlled implementations:
 
 ```bash
-#!/bin/bash
-# tests/mocks/mock_commands.sh
-
-#-------------------------------------------------------------------------------
-# Mock for external commands
-#-------------------------------------------------------------------------------
-
-# Mock curl for testing without network
+#!/usr/bin/env bash
+# tests/mocks/mock_commands.sh: child-visible state is exported or file-backed.
 mock_curl() {
-    local mock_response="$1"
-    local mock_exit_code="${2:-0}"
-    
-    # Save original function
-    if declare -f curl >/dev/null 2>&1; then
-        eval "original_curl() { $(declare -f curl | tail -n +2); }"
-    fi
-    
-    # Define mock
-    curl() {
-        echo "$mock_response"
-        return "$mock_exit_code"
-    }
+    export MOCK_CURL_BODY=$1 MOCK_CURL_EXIT=${2:-0} MOCK_CURL_HTTP_STATUS=${3:-200}
+    : "${MOCK_CURL_PROGRAM:?Use SEM06/scripts/examples/mock_curl.py}"
+    export MOCK_CURL_PROGRAM
+    curl() { python3 "$MOCK_CURL_PROGRAM" "$@"; }
     export -f curl
 }
-
-unmock_curl() {
-    if declare -f original_curl >/dev/null 2>&1; then
-        eval "curl() { $(declare -f original_curl | tail -n +2); }"
-    else
-        unset -f curl
-    fi
-}
-
-# Mock for systemctl
+unmock_curl() { unset -f curl; }
 mock_systemctl() {
-    local service_status="${1:-active}"
-    
+    export MOCK_SERVICE_STATUS=${1:-active}
     systemctl() {
-        local cmd="$1"
-        local service="$2"
-        
-        case "$cmd" in
-            status)
-                echo "● ${service}.service - Mock Service"
-                echo "   Active: ${service_status}"
-                [[ "$service_status" == "active" ]] && return 0 || return 3
-                ;;
-            is-active)
-                [[ "$service_status" == "active" ]] && echo "active" || echo "inactive"
-                [[ "$service_status" == "active" ]] && return 0 || return 3
-                ;;
-            start|stop|restart)
-                return 0
-                ;;
+        local action=${1:-} service=${2:-}
+        case $action in
+            status) printf '%s: %s\n' "$service" "$MOCK_SERVICE_STATUS";;
+            is-active) [[ ${2:-} == --quiet ]] || printf '%s\n' "$MOCK_SERVICE_STATUS";;
+            start|stop|restart) return "${MOCK_SERVICE_MUTATION_STATUS:-0}";;
+            *) return 2;;
         esac
+        [[ $MOCK_SERVICE_STATUS == active ]] && return 0
+        return 3
     }
     export -f systemctl
 }
-
-#-------------------------------------------------------------------------------
-# Mock for filesystem
-#-------------------------------------------------------------------------------
-
-# Simulate limited disk space
 mock_disk_space() {
-    local available_kb="$1"
-    
+    export MOCK_AVAILABLE_KB=$1
+    [[ $MOCK_AVAILABLE_KB =~ ^[0-9]+$ ]] || return 2
     df() {
-        local path="${!#}"  # Last argument
-        echo "Filesystem     1K-blocks    Used Available Use% Mounted on"
-        echo "/dev/mock      10000000 5000000  ${available_kb}  50% ${path}"
+        printf 'Filesystem 1K-blocks Used Available Use%% Mounted on\n'
+        printf '/dev/mock 10000000 5000000 %s 50%% %s\n' "$MOCK_AVAILABLE_KB" "${!#}"
     }
     export -f df
 }
-
-# Mock /proc/meminfo
 create_mock_meminfo() {
-    local total_kb="$1"
-    local free_kb="$2"
-    local available_kb="$3"
-    
-    cat <<EOF
-MemTotal:       ${total_kb} kB
-MemFree:        ${free_kb} kB
-MemAvailable:   ${available_kb} kB
-Buffers:        100000 kB
-Cached:         500000 kB
-SwapTotal:      2000000 kB
-SwapFree:       2000000 kB
-EOF
+    printf 'MemTotal: %s kB\nMemFree: %s kB\nMemAvailable: %s kB\nBuffers: 100 kB\nCached: 200 kB\nSwapTotal: 0 kB\nSwapFree: 0 kB\n' "$1" "$2" "$3"
 }
-
-#-------------------------------------------------------------------------------
-# Mock for processes
-#-------------------------------------------------------------------------------
-
-# Mock ps for process monitoring testing
 mock_ps() {
-    local -a processes=("$@")
-    
-    ps() {
-        echo "  PID TTY          TIME CMD"
-        for proc in "${processes[@]}"; do
-            echo "$proc"
-        done
-    }
+    export MOCK_PS_FILE=${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/ps.records
+    printf '%s\n' "$@" > "$MOCK_PS_FILE"
+    ps() { cat -- "$MOCK_PS_FILE"; }
     export -f ps
 }
-
-# Mock pgrep
 mock_pgrep() {
-    local -a matching_pids=("$@")
-    
-    pgrep() {
-        printf '%s\n' "${matching_pids[@]}"
-        [[ ${#matching_pids[@]} -gt 0 ]] && return 0 || return 1
-    }
+    export MOCK_PGREP_FILE=${TEST_WORK_DIR:-${TEST_TEMP_DIR:?}}/pgrep.records
+    : > "$MOCK_PGREP_FILE"
+    (($# == 0)) || printf '%s\n' "$@" > "$MOCK_PGREP_FILE"
+    pgrep() { [[ -s $MOCK_PGREP_FILE ]] || return 1; cat -- "$MOCK_PGREP_FILE"; }
     export -f pgrep
 }
 ```
@@ -1505,61 +896,37 @@ mock_pgrep() {
 ### Integration Test with Mocking
 
 ```bash
-#!/bin/bash
-# tests/integration/test_monitor_integration.sh
-
-source "$(dirname "$0")/../test_helpers.sh"
-source "$(dirname "$0")/../mocks/mock_commands.sh"
-
-#-------------------------------------------------------------------------------
-# Complete monitoring workflow test
-#-------------------------------------------------------------------------------
+#!/usr/bin/env bash
+# Extracted module integration: all data sources are explicit local fixtures/adapters.
+: "${MONITOR_MODULE:?Extract the P02 core, config and cycle functions into this module}"
+source "$MONITOR_MODULE"
+setup() {
+    OUTPUT_FORMAT=json; MONITOR_CPU=true; MONITOR_MEMORY=true; MONITOR_DISK=true; MONITOR_PROCESSES=true
+    get_config() { case $1 in disk_mounts) printf '/fixture';; *) printf '%s' "${2:-}";; esac; }
+    get_cpu_usage() { printf '95.5\n'; }
+    get_memory_info() { printf '{"percent_used":50.0,"used_kb":500}\n'; }
+    get_disk_usage() { printf '{"percent_used":25,"mount_point":"/fixture"}\n'; }
+    get_process_info() { printf '{"total_processes":0,"total_threads":0,"zombie_processes":0,"top_processes":[]}\n'; }
+    get_hostname() { printf 'fixture"host'; }
+    send_alert() { printf '%s %s\n' "$1" "$2" >> "$TEST_WORK_DIR/alerts"; }
+}
 test_monitor_full_cycle() {
-    # Arrange - Setup mocks
-    create_mock_meminfo 8000000 2000000 4000000 > /tmp/mock_meminfo
-    export PROC_MEMINFO="/tmp/mock_meminfo"
-    
-    mock_disk_space 5000000
-    
-    # Act - Run monitor
-    local output
-    output=$(./monitor.sh --once --format json 2>&1)
-    
-    # Assert
-    assert_contains "$output" '"memory"' "Output should contain memory data"
-    assert_contains "$output" '"disk"' "Output should contain disk data"
-    
-    # Cleanup
-    rm -f /tmp/mock_meminfo
+    run_monitoring_cycle > "$TEST_WORK_DIR/result.json"
+    python3 - "$TEST_WORK_DIR/result.json" <<'PY'
+import json,sys
+data=json.load(open(sys.argv[1])); assert set(data['metrics'])=={'cpu','memory','disks','processes'}
+assert data['hostname']=='fixture"host' and data['metrics']['cpu']['status']=='CRITICAL'
+PY
+    assert_file_contains "$TEST_WORK_DIR/alerts" 'CRITICAL cpu'
 }
-
-test_monitor_threshold_alerting() {
-    # Arrange - Simulate high CPU
-    mock_cpu_high() {
-        echo "95.5"
-    }
-    export -f get_cpu_usage
-    get_cpu_usage() { mock_cpu_high; }
-    
-    # Act
-    local output
-    output=$(./monitor.sh --once --alert-cpu 90 2>&1)
-    
-    # Assert
-    assert_contains "$output" "ALERT" "Should trigger CPU alert"
-    assert_contains "$output" "threshold" "Should mention threshold"
-}
-
-test_monitor_output_to_file() {
-    # Arrange
-    local output_file="${TEST_TEMP_DIR}/monitor_output.log"
-    
-    # Act
-    ./monitor.sh --once --output "$output_file"
-    
-    # Assert
-    assert_file_exists "$output_file"
-    assert_file_not_empty "$output_file"
+test_unavailable_is_null_with_failure_status() {
+    get_cpu_usage() { return 2; }
+    local rc=0; if run_monitoring_cycle > "$TEST_WORK_DIR/unavailable.json"; then :; else rc=$?; fi
+    assert_equals 1 "$rc"
+    python3 - "$TEST_WORK_DIR/unavailable.json" <<'PY'
+import json,sys
+assert json.load(open(sys.argv[1]))['metrics']['cpu'] is None
+PY
 }
 ```
 
@@ -1604,7 +971,7 @@ validate_ip() {
     read -ra octets <<< "$ip"
     
     for octet in "${octets[@]}"; do
-        if (( octet > 255 )); then
+        if (( 10#$octet > 255 )); then
             return 1
         fi
     done
@@ -1618,7 +985,8 @@ validate_ip() {
     local ipv4_regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
     local ipv6_regex='^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
     
-    # ... extended implementation
+    # TODO: Implement compressed IPv6 and embedded IPv4 validation; regex alone is insufficient.
+    :
 }
 ```
 
@@ -1635,18 +1003,22 @@ Create a complete test set for a configuration parser:
 
 test_parse_config_reads_key_value() {
     # Implement test for reading key=value
+    : # TODO: Supply assertions; this placeholder is not a test result.
 }
 
 test_parse_config_handles_comments() {
     # Test that lines with # are ignored
+    : # TODO: Supply assertions; this placeholder is not a test result.
 }
 
 test_parse_config_handles_empty_lines() {
     # Test for empty lines
+    : # TODO: Supply assertions; this placeholder is not a test result.
 }
 
 test_parse_config_handles_quoted_values() {
     # Test for values in quotes
+    : # TODO: Supply assertions; this placeholder is not a test result.
 }
 ```
 
@@ -1696,6 +1068,10 @@ Create a reusable fixtures system:
 ```
 
 ---
+
+## Running the maintained repository tests
+
+From `SEM06`, `python3 -m pytest tests/test_capstone.py` runs the repository's project tests (pytest is a declared development dependency). `python3 -m unittest discover -s tests -p test_teaching_examples.py` runs maintained example tests. The extracted chapter runner and test modules above require their documented module paths; neither these commands nor a syntax check claim execution of Docker, systemd, remote SSH or production deployment.
 
 ## Additional Resources
 

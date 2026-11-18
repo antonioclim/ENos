@@ -63,7 +63,7 @@ Centralised log aggregation, parsing and analysis system from multiple sources: 
 
 ## CLI Interface
 
-```bash
+```text
 ./logagg.sh <command> [options]
 
 Commands:
@@ -157,7 +157,6 @@ ACTIVE ALERTS
 17:45:26.123 [ERROR] myapp     Connection refused to redis:6379
                                Retry attempt 4/5, backing off 4s
 17:45:28.456 [WARN]  postgres  checkpoints are occurring too frequently
-17:45:30.789 [INFO]  myapp     Connection to redis restored
 17:45:31.012 [WARN]  nginx     upstream server restored
 17:46:00.000 [ERROR] sshd      Failed password for invalid user admin
                                from 192.168.1.100 port 54321
@@ -294,37 +293,19 @@ M13_Log_Aggregator/
 
 ```bash
 tail_multiple_files() {
-    local files=("$@")
-    
-    # Using tail with --follow=name for rotation
-    tail -F "${files[@]}" 2>/dev/null | while read -r line; do
-        # Determine source from prefix added by tail
-        local source file
-        if [[ "$line" =~ ^==\>\ (.+)\ \<== ]]; then
-            file="${BASH_REMATCH[1]}"
-            continue
-        fi
-        
-        process_log_line "$file" "$line"
-    done
+    python3 "${TAIL_HELPER:?Path to 04_PROJECTS/reference/tail_reference.py}" "$@"
 }
 
-# Alternative: parallel tails
-tail_parallel() {
-    local pids=()
-    
-    for source in "${SOURCES[@]}"; do
-        tail -F "$source" | while read -r line; do
-            echo "$source|$line"
-        done &
-        pids+=($!)
-    done
-    
-    # Cleanup on exit
-    trap 'kill "${pids[@]}" 2>/dev/null' EXIT
-    wait
-}
+# Same implementation owns every child and serialises complete JSON records.
+tail_parallel() { tail_multiple_files "${SOURCES[@]}"; }
 ```
+
+The [collector reference](../reference/tail_reference.py) attaches source identity
+before collection, preserves physical line bytes and uses one JSON serialisation
+point. It starts with zero backlog and reaps every owned child on exit. Rotation,
+copy-truncation and initial attachment can lose or repeat observations; this is
+not an exactly-once ingestion protocol. Multiline messages require a declared
+application framing rule; binary line content is base64-labelled.
 
 ### Syslog parsing
 
@@ -342,15 +323,15 @@ parse_syslog() {
         local pid="${BASH_REMATCH[4]//[\[\]]/}"
         local message="${BASH_REMATCH[5]}"
         
-        # Detect level from message
-        local level="INFO"
-        case "$message" in
-            *[Ee]rror*|*ERROR*|*[Ff]ail*) level="ERROR" ;;
-            *[Ww]arn*|*WARNING*) level="WARN" ;;
-            *[Dd]ebug*|*DEBUG*) level="DEBUG" ;;
-        esac
-        
-        echo "$timestamp|$host|$service|$pid|$level|$message"
+        # Classic month/day records have no native priority, year or timezone.
+        # Supply the archive year and timezone explicitly; rollover is not inferred.
+        python3 - "$timestamp" "${SYSLOG_YEAR:?Archive year required}" "${SYSLOG_TIMEZONE:?Timezone required}" "$host" "$service" "$pid" "$message" <<'PYSYSLOG'
+import datetime as dt,json,sys
+from zoneinfo import ZoneInfo
+stamp=dt.datetime.strptime(sys.argv[2]+' '+sys.argv[1],'%Y %b %d %H:%M:%S').replace(tzinfo=ZoneInfo(sys.argv[3]))
+print(json.dumps({'timestamp':stamp.astimezone(dt.timezone.utc).isoformat(),'host':sys.argv[4],'service':sys.argv[5],'pid':sys.argv[6],
+ 'level':'UNKNOWN','priority':None,'message':sys.argv[7],'source_format':'classic_syslog','assumed_year':sys.argv[2],'assumed_timezone':sys.argv[3]}))
+PYSYSLOG
     fi
 }
 ```
@@ -367,28 +348,17 @@ read_journald() {
         unit_args+=(-u "$unit")
     done
     
-    journalctl "${unit_args[@]}" --since "$since" \
-        -o json --no-pager | while read -r json_line; do
-        
-        # Parse JSON
-        local timestamp service message priority
-        timestamp=$(echo "$json_line" | jq -r '.__REALTIME_TIMESTAMP // empty')
-        service=$(echo "$json_line" | jq -r '.SYSLOG_IDENTIFIER // ._SYSTEMD_UNIT // "unknown"')
-        message=$(echo "$json_line" | jq -r '.MESSAGE // empty')
-        priority=$(echo "$json_line" | jq -r '.PRIORITY // "6"')
-        
-        # Convert priority to level
-        local level
-        case "$priority" in
-            0|1|2) level="CRIT" ;;
-            3)     level="ERROR" ;;
-            4)     level="WARN" ;;
-            5|6)   level="INFO" ;;
-            7)     level="DEBUG" ;;
-        esac
-        
-        echo "$timestamp|localhost|$service||$level|$message"
-    done
+    set -o pipefail
+    journalctl "${unit_args[@]}" --since "$since" -o json --no-pager |
+        python3 -c '
+import datetime as dt,json,sys
+levels={"0":"CRIT","1":"CRIT","2":"CRIT","3":"ERROR","4":"WARN","5":"INFO","6":"INFO","7":"DEBUG"}
+for line in sys.stdin:
+    row=json.loads(line); micros=int(row["__REALTIME_TIMESTAMP"])
+    stamp=dt.datetime.fromtimestamp(micros/1e6,dt.timezone.utc).isoformat()
+    print(json.dumps({"timestamp":stamp,"host":row.get("_HOSTNAME"),"service":row.get("SYSLOG_IDENTIFIER",row.get("_SYSTEMD_UNIT")),
+      "level":levels.get(str(row.get("PRIORITY")),"UNKNOWN"),"priority":row.get("PRIORITY"),"message":row.get("MESSAGE"),"source_format":"journald"}))
+'
 }
 ```
 
@@ -407,31 +377,27 @@ check_alert_patterns() {
     done < "$ALERTS_FILE"
 }
 
-# Rate limiting for alerts
-declare -A ALERT_COUNTS
-declare -A ALERT_LAST
-
+# Sliding event window; notification throttling is independent.
+declare -A ALERT_TIMES=() ALERT_LAST_SENT=()
 check_rate_alert() {
-    local name="$1"
-    local threshold="$2"
-    local window="$3"  # seconds
-    
-    local now
-    now=$(date +%s)
-    
-    # Clean old entries
-    local last="${ALERT_LAST[$name]:-0}"
-    if ((now - last > window)); then
-        ALERT_COUNTS[$name]=0
+    local name="$1" threshold="$2" window="$3" now="${4:-$(date +%s)}"
+    [[ $threshold =~ ^[0-9]+$ && $window =~ ^[1-9][0-9]*$ && $now =~ ^[0-9]+$ ]] || return 2
+    local -a times=() kept=()
+    local item
+    IFS=' ' read -r -a times <<< "${ALERT_TIMES[$name]:-}"
+    for item in "${times[@]}"; do
+        ((item <= now)) || { echo "Event clock moved backwards" >&2; return 2; }
+        ((item > now-window)) && kept+=("$item")
+    done
+    kept+=("$now")
+    local IFS=' '
+    ALERT_TIMES[$name]="${kept[*]}"
+    # Requirement says > N, not >= N. Default delivery cooldown is one window.
+    if (( ${#kept[@]} > threshold && now-${ALERT_LAST_SENT[$name]:-0} >= window )); then
+        trigger_alert "rate_$name" "" "Rate exceeded: ${#kept[@]} in ${window}s" || return 1
+        ALERT_LAST_SENT[$name]=$now
     fi
-    
-    ((ALERT_COUNTS[$name]++))
-    ALERT_LAST[$name]=$now
-    
-    if ((ALERT_COUNTS[$name] >= threshold)); then
-        trigger_alert "rate_$name" "" "Rate exceeded: ${ALERT_COUNTS[$name]} in ${window}s"
-        ALERT_COUNTS[$name]=0
-    fi
+    return 0
 }
 ```
 

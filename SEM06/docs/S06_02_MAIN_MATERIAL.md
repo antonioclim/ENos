@@ -5,6 +5,8 @@
 
 ---
 
+> Read the [teaching contract](TEACHING_CONTRACT.md) for supported local behaviour, current evidence limits and unresolved author choices.
+
 ## About This Document
 
 CAPSTONE differs from previous seminars. Instead of a single linear topic, you're building *systems*. This document serves as your navigation hub.
@@ -47,7 +49,7 @@ CAPSTONE differs from previous seminars. Instead of a single linear topic, you'r
 
 ## 2. Shared Architecture
 
-All three projects share a common structure. Learn it once, apply it everywhere.
+All three projects use a similar directory pattern but maintain separate libraries. A proposed common integrated library is not already installed.
 
 ### 2.1 Directory Layout
 
@@ -88,16 +90,17 @@ These apply to *all* projects. Master them before diving into specifics.
 
 Your scripts *will* fail. The question is: do they fail gracefully?
 
-> ⚠️ *Confession: In my early sysadmin days, I once wrote a cleanup script without `set -e` that silently failed halfway through and deleted the wrong directory. Cost me a weekend. The "holy trinity" below is non-negotiable in production scripts.*
+> **Historical author anecdote, evidence not supplied:** the draft recalled an incorrect deletion after a silent failure. Ownership validation and explicit status handling matter; enabling strict mode alone does not establish safety.
 
 ```bash
-set -euo pipefail  # The holy trinity
-
-cleanup() {
-    # Always runs, even on Ctrl+C
-    rm -f "$TEMP_FILE"
-}
+set -euo pipefail # Conditional/list/pipeline exceptions still apply.
+TEMP_FILE=
+cleanup() { [[ -z ${TEMP_FILE:-} ]] || rm -f -- "$TEMP_FILE"; }
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+TEMP_FILE=$(mktemp)
+# EXIT does not run after SIGKILL or host failure.
 ```
 
 **Deep dive:** [Error Handling](projects/S06_P06_Error_Handling.md)
@@ -121,8 +124,8 @@ If you can't test it, you can't trust it.
 ```bash
 test_cpu_usage_returns_number() {
     local result
-    result=$(get_cpu_usage)
-    [[ "$result" =~ ^[0-9]+$ ]] || fail "Expected number, got: $result"
+    result=$(get_cpu_usage) || { printf 'CPU unavailable\n' >&2; return 1; }
+    [[ "$result" =~ ^[0-9]+$ && $result -le 100 ]] || { printf 'Invalid CPU value: %s\n' "$result" >&2; return 1; }
 }
 ```
 
@@ -145,7 +148,7 @@ test_cpu_usage_returns_number() {
 | Document | Covers |
 |----------|--------|
 | [Monitor Implementation](projects/S06_P02_Monitor_Implementation.md) | /proc parsing, metrics collection, alerting |
-| [Backup Implementation](projects/S06_P03_Backup_Implementation.md) | tar, find -newer, checksums, rotation |
+| [Backup Implementation](projects/S06_P03_Backup_Implementation.md) | GNU tar chains, checksums, ancestor-aware retention |
 | [Deployer Implementation](projects/S06_P04_Deployer_Implementation.md) | Deployment strategies, health checks, rollback |
 
 ### 4.4 Cross-Cutting Concerns
@@ -163,7 +166,7 @@ test_cpu_usage_returns_number() {
 
 ### 5.1 Cheat Sheet
 
-One-page reference for common patterns: [Bash Cheat Sheet](S06_09_VISUAL_CHEAT_SHEET.md)
+Multi-section reference for common patterns: [Bash Cheat Sheet](S06_09_VISUAL_CHEAT_SHEET.md)
 
 ### 5.2 Self-Assessment
 
@@ -173,7 +176,7 @@ Check your understanding: [Self-Assessment](S06_10_SELF_ASSESSMENT_REFLECTION.md
 
 ## 6. Working Code
 
-The `scripts/projects/` directory contains working implementations:
+The `scripts/projects/` directory contains maintained teaching implementations with the documented contracts. External adapters, student TODOs and proposed integration features are not implied complete:
 
 ```
 scripts/projects/

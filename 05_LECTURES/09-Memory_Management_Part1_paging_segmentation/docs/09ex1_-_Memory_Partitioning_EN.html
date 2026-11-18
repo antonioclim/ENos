@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulator Memory Partitioning | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Memory Partitioning Simulator | Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -89,7 +89,84 @@
         .memory-block:hover .tooltip {
             opacity: 1;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -100,8 +177,8 @@
                     <i class="fas fa-memory text-white text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-stone-800">Simulator Memory Partitioning</h1>
-                    <p class="text-xs text-stone-500">Alocare Contigua</p>
+                    <h1 class="text-xl font-bold text-stone-800">Memory Partitioning Simulator</h1>
+                    <p class="text-xs text-stone-500">Contiguous Allocation</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium">
@@ -119,11 +196,11 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-microchip text-blue-500"></i>
-                            Harta Memoriei
+                            Memory Map
                         </h2>
                         <div class="flex items-center gap-4 text-sm">
                             <span>Total: <strong id="totalMemory">1024</strong> KB</span>
-                            <span>Folosit: <strong id="usedMemory">0</strong> KB</span>
+                            <span>Used: <strong id="usedMemory">0</strong> KB</span>
                             <span>Free: <strong id="freeMemory">1024</strong> KB</span>
                         </div>
                     </div>
@@ -152,15 +229,15 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-6 h-4 bg-blue-500 rounded"></div>
-                            <span>Proces Alocat</span>
+                            <span>Allocated Process</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-6 h-4 hole-pattern rounded border border-stone-300"></div>
-                            <span>Hole (Hole)</span>
+                            <span>Free Hole</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-6 h-4 bg-amber-200 rounded border border-amber-400"></div>
-                            <span>Fragmentare Interna</span>
+                            <span>Internal Fragmentation</span>
                         </div>
                     </div>
                 </div>
@@ -169,25 +246,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-stone-500">Fragmentare Externa</span>
+                            <span class="text-xs text-stone-500">External Fragmentation</span>
                             <i class="fas fa-puzzle-piece text-red-500"></i>
                         </div>
                         <div id="externalFrag" class="text-2xl font-bold text-red-600">0%</div>
                         <div class="text-xs text-stone-500 mt-1">
-                            <span id="holeCount">0</span> gauri, <span id="totalHoleSize">0</span> KB total
+                            <span id="holeCount">0</span> holes, <span id="totalHoleSize">0</span> KB total
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-stone-500">Fragmentare Interna</span>
+                            <span class="text-xs text-stone-500">Internal Fragmentation</span>
                             <i class="fas fa-expand text-amber-500"></i>
                         </div>
                         <div id="internalFrag" class="text-2xl font-bold text-amber-600">0 KB</div>
-                        <div class="text-xs text-stone-500 mt-1">Spatiu neutilizat in partitii</div>
+                        <div class="text-xs text-stone-500 mt-1">Unused space within allocated partitions</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-stone-500">Utilizare Memorie</span>
+                            <span class="text-xs text-stone-500">Memory Utilisation</span>
                             <i class="fas fa-chart-pie text-green-500"></i>
                         </div>
                         <div id="memoryUtilization" class="text-2xl font-bold text-green-600">0%</div>
@@ -201,10 +278,10 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-list text-purple-500"></i>
-                        Procese in Memorie
+                        Processes in Memory
                     </h3>
                     <div id="processList" class="space-y-2">
-                        <div class="text-sm text-stone-400 italic">Niciun proces loaded</div>
+                        <div class="text-sm text-stone-400 italic">No process loaded</div>
                     </div>
                 </div>
 
@@ -214,7 +291,7 @@
                         <i class="fas fa-terminal"></i> Event Log
                     </h3>
                     <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// Simulator gata. Alege un algoritm and add procese.</div>
+                        <div class="text-stone-500">// Simulator ready. Choose an algorithm and add processes.</div>
                     </div>
                 </div>
             </div>
@@ -224,21 +301,21 @@
                 <!-- Partitioning Mode -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-th-large text-blue-500 mr-2"></i>Mod Partitionare
+                        <i class="fas fa-th-large text-blue-500 mr-2"></i>Partitioning Mode
                     </h3>
                     <div class="space-y-2">
                         <label class="flex items-center gap-2 p-2 rounded border border-stone-200 cursor-pointer hover:bg-stone-50">
                             <input type="radio" name="partitionMode" value="dynamic" checked onchange="setPartitionMode('dynamic')" class="text-blue-500">
                             <div>
-                                <span class="font-medium text-sm">Dinamica (Variable)</span>
-                                <p class="text-xs text-stone-500">Partitii create la cerere</p>
+                                <span class="font-medium text-sm">Dynamic (Variable)</span>
+                                <p class="text-xs text-stone-500">Partitions created on demand</p>
                             </div>
                         </label>
                         <label class="flex items-center gap-2 p-2 rounded border border-stone-200 cursor-pointer hover:bg-stone-50">
                             <input type="radio" name="partitionMode" value="fixed" onchange="setPartitionMode('fixed')" class="text-blue-500">
                             <div>
-                                <span class="font-medium text-sm">Fixa</span>
-                                <p class="text-xs text-stone-500">Partitii predefinite</p>
+                                <span class="font-medium text-sm">Fixed</span>
+                                <p class="text-xs text-stone-500">Predefined partitions</p>
                             </div>
                         </label>
                     </div>
@@ -247,7 +324,7 @@
                 <!-- Algorithm Selection -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-cogs text-green-500 mr-2"></i>Algoritm Plasare
+                        <i class="fas fa-cogs text-green-500 mr-2"></i>Placement Algorithm
                     </h3>
                     <select id="placementAlgorithm" class="w-full p-3 border border-stone-300 rounded-lg text-sm">
                         <option value="first-fit">First Fit</option>
@@ -256,7 +333,7 @@
                         <option value="next-fit">Next Fit</option>
                     </select>
                     <div id="algorithmDesc" class="mt-2 text-xs text-stone-500 p-2 bg-stone-50 rounded">
-                        <strong>First Fit:</strong> Aloca in first hole suficient de mare.
+                        <strong>First Fit:</strong> Use the first sufficiently large hole.
                     </div>
                 </div>
 
@@ -267,7 +344,7 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Memorie Totala (KB)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Total Memory (KB)</label>
                             <input type="number" id="totalMemoryInput" value="1024" min="256" max="4096" step="128" class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <div>
@@ -275,19 +352,19 @@
                             <input type="number" id="osSize" value="128" min="64" max="512" step="64" class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <button onclick="initializeMemory()" class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitialise
                         </button>
                     </div>
                 </div>
 
-                <!-- Add Process -->
+                <!-- Add Processs -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Proces
+                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Process
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Nume Proces</label>
+                            <label class="text-xs text-stone-500 block mb-1">Process Name</label>
                             <input type="text" id="processName" placeholder="P1" class="w-full p-2 border border-stone-300 rounded text-sm">
                         </div>
                         <div>
@@ -295,7 +372,7 @@
                             <input type="number" id="processSize" value="100" min="10" max="512" class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <button onclick="allocateProcess()" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-plus mr-1"></i> Aloca Proces
+                            <i class="fas fa-plus mr-1"></i> Allocate Process
                         </button>
                     </div>
                 </div>
@@ -310,10 +387,10 @@
                             <i class="fas fa-compress-alt mr-1"></i> Memory Compaction
                         </button>
                         <button onclick="randomAllocations()" class="btn-action w-full p-2 bg-amber-500 hover:bg-amber-600 text-white rounded text-sm transition-colors">
-                            <i class="fas fa-random mr-1"></i> Alocari Random
+                            <i class="fas fa-random mr-1"></i> Random Allocations
                         </button>
                         <button onclick="deallocateRandom()" class="btn-action w-full p-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm transition-colors">
-                            <i class="fas fa-trash mr-1"></i> Dealoca Random
+                            <i class="fas fa-trash mr-1"></i> Random Deallocation
                         </button>
                     </div>
                 </div>
@@ -321,17 +398,17 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-pink-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-pink-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('fragmented')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-puzzle-piece text-red-500 mr-2"></i>Memorie Fragmentata
+                            <i class="fas fa-puzzle-piece text-red-500 mr-2"></i>Fragmented Memory
                         </button>
                         <button onclick="loadScenario('full')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-box text-blue-500 mr-2"></i>Memorie Plina
+                            <i class="fas fa-box text-blue-500 mr-2"></i>Full Memory
                         </button>
                         <button onclick="loadScenario('fixed')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-th text-green-500 mr-2"></i>Partitii Fixe
+                            <i class="fas fa-th text-green-500 mr-2"></i>Fixed Partitions
                         </button>
                     </div>
                 </div>
@@ -342,24 +419,24 @@
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-stone-200 p-6">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-book-open text-indigo-500"></i>
-                Algoritmi de Plasare
+                Placement Algorithms
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                     <h4 class="font-semibold text-blue-800 mb-2">First Fit</h4>
-                    <p class="text-blue-700 text-xs">Aloca in first hole suficient de mare. Rapid, dar may fragmenta inceputul memoriei.</p>
+                    <p class="text-blue-700 text-xs">Use the first sufficiently large hole. Search may be short, but repeated placement can fragment the beginning of memory.</p>
                 </div>
                 <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
                     <h4 class="font-semibold text-green-800 mb-2">Best Fit</h4>
-                    <p class="text-green-700 text-xs">Aloca in cea mai mica hole potrivita. Minimizeaza fragmentarea, dar lent and create gauri small.</p>
+                    <p class="text-green-700 text-xs">Use the smallest suitable hole. This minimises immediate leftover space, but can create small holes; it does not minimise total fragmentation in general.</p>
                 </div>
                 <div class="p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
                     <h4 class="font-semibold text-amber-800 mb-2">Worst Fit</h4>
-                    <p class="text-amber-700 text-xs">Aloca in cea mai mare hole. Lasa gauri mari, dar ele pot fi inutile if sunt prea mari.</p>
+                    <p class="text-amber-700 text-xs">Use the largest suitable hole. It leaves a larger remainder, but may consume a hole needed for a later large request.</p>
                 </div>
                 <div class="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
                     <h4 class="font-semibold text-purple-800 mb-2">Next Fit</h4>
-                    <p class="text-purple-700 text-xs">Like First Fit but continues from where it left off. Distribuie alocarile uniform in memorie.</p>
+                    <p class="text-purple-700 text-xs">Like First Fit, but resume searching from the previous position. It does not guarantee uniform placement.</p>
                 </div>
             </div>
         </div>
@@ -373,6 +450,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         const PROCESS_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
         
@@ -402,6 +515,7 @@
 
         // ==================== Initialization ====================
         function initializeMemory() {
+            enosTimers.cancel();
             totalMemory = parseInt(document.getElementById('totalMemoryInput').value);
             osSize = parseInt(document.getElementById('osSize').value);
             
@@ -419,23 +533,18 @@
             }
             
             render();
-            log('Memorie initializata: ' + totalMemory + ' KB total, ' + osSize + ' KB OS');
+            log('Memory initialised: ' + totalMemory + ' KB total, ' + osSize + ' KB OS');
         }
 
         function createFixedPartitions() {
-            const userMemory = totalMemory - osSize;
-            const partitionSizes = [64, 128, 128, 256, userMemory - 576];
-            
-            memoryBlocks = [new MemoryBlock(0, osSize, 'os')];
-            let currentAddr = osSize;
-            
-            partitionSizes.forEach((size, idx) => {
-                memoryBlocks.push(new MemoryBlock(currentAddr, size, 'hole'));
-                currentAddr += size;
-            });
-            
-            fixedPartitions = partitionSizes;
-        }
+ const userMemory=totalMemory-osSize;
+ if(!Number.isFinite(userMemory)||userMemory<5) throw new Error('Memory must leave at least five user units.');
+ const weights=[1,2,2,4,3],sum=12;let remaining=userMemory;
+ const partitionSizes=weights.map((w,i)=>{const size=i===weights.length-1?remaining:Math.floor(userMemory*w/sum);remaining-=size;return size;});
+ memoryBlocks=[new MemoryBlock(0,osSize,'os')];let currentAddr=osSize;
+ partitionSizes.forEach(size=>{memoryBlocks.push(new MemoryBlock(currentAddr,size,'hole'));currentAddr+=size;});
+ fixedPartitions=partitionSizes;
+}
 
         function setPartitionMode(mode) {
             partitionMode = mode;
@@ -482,15 +591,15 @@
             const size = parseInt(document.getElementById('processSize').value);
             
             if (size <= 0) {
-                alert('Size invalida!');
+                alert('Invalid size.');
                 return;
             }
             
             const hole = findHole(size);
             
             if (!hole) {
-                log(`❌ Nu exists hole suficienta for ${name} (${size} KB)`);
-                alert('Nu exists spatiu suficient! Incearca compactarea.');
+                log(`❌ No suitable hole for ${name} (${size} KB)`);
+                alert('No sufficiently large free region is available. Consider compaction in variable-partition mode.');
                 return;
             }
             
@@ -520,7 +629,7 @@
             }
             
             const algo = document.getElementById('placementAlgorithm').value;
-            log(`✓ ${name} (${size} KB) alocat la adresa ${hole.start} folosind ${algo}`);
+            log(`✓ ${name} (${size} KB) allocated at address ${hole.start} using ${algo}`);
             
             // Clear inputs
             document.getElementById('processName').value = '';
@@ -548,7 +657,7 @@
                 mergeAdjacentHoles();
             }
             
-            log(`🗑️ ${processName} dealocat de la adresa ${block.start}`);
+            log(`🗑️ ${processName} deallocated from address ${block.start}`);
             render();
         }
 
@@ -566,7 +675,7 @@
 
         function compactMemory() {
             if (partitionMode === 'fixed') {
-                log('⚠️ Compactarea nu este disponibila in modul partitii fixe');
+                log('⚠️ Compaction is unavailable in fixed-partition mode.');
                 return;
             }
             
@@ -575,7 +684,7 @@
             const totalHoleSize = memoryBlocks.filter(b => b.type === 'hole').reduce((sum, b) => sum + b.size, 0);
             
             if (totalHoleSize === 0) {
-                log('ℹ️ Nu exists gauri de compactat');
+                log('ℹ️ There are no separate free holes to compact.');
                 return;
             }
             
@@ -594,7 +703,7 @@
                 memoryBlocks.push(new MemoryBlock(currentAddr, totalMemory - currentAddr, 'hole'));
             }
             
-            log(`🔄 Memorie compactata. ${totalHoleSize} KB eliberati intr-o singura hole`);
+            log(`🔄 Memory compacted: ${totalHoleSize} KB collected into one free hole.`);
             render();
         }
 
@@ -611,7 +720,7 @@
         function deallocateRandom() {
             const allocated = memoryBlocks.filter(b => b.type === 'process');
             if (allocated.length === 0) {
-                log('ℹ️ Nu exists procese de dealocat');
+                log('ℹ️ There are no processes to deallocate.');
                 return;
             }
             const random = allocated[Math.floor(Math.random() * allocated.length)];
@@ -671,7 +780,7 @@
                         </div>
                         <div class="tooltip -top-10 left-1/2 transform -translate-x-1/2">
                             ${block.process.name}: ${block.start}-${block.end} (${block.size} KB)
-                            ${block.internalFragmentation > 0 ? '<br>Frag intern: ' + block.internalFragmentation + ' KB' : ''}
+                            ${block.internalFragmentation > 0 ? '<br>Internal fragmentation: ' + block.internalFragmentation + ' KB' : ''}
                         </div>
                     `;
                     
@@ -711,7 +820,7 @@
             const container = document.getElementById('processList');
             
             if (processes.length === 0) {
-                container.innerHTML = '<div class="text-sm text-stone-400 italic">Niciun proces loaded</div>';
+                container.innerHTML = '<div class="text-sm text-stone-400 italic">No process loaded</div>';
                 return;
             }
             
@@ -841,16 +950,37 @@
         // ==================== Algorithm Description ====================
         document.getElementById('placementAlgorithm').addEventListener('change', function() {
             const descriptions = {
-                'first-fit': '<strong>First Fit:</strong> Aloca in first hole suficient de mare. Rapid, dar may fragmenta inceputul memoriei.',
-                'best-fit': '<strong>Best Fit:</strong> Aloca in cea mai mica hole potrivita. Minimizeaza risipa, dar lent and create gauri small.',
-                'worst-fit': '<strong>Worst Fit:</strong> Aloca in cea mai mare hole. Lasa gauri mari care pot fi utile ulterior.',
-                'next-fit': '<strong>Next Fit:</strong> Ca First Fit, dar continue cautarea de where a ramas. Distribuie alocarile uniform.'
+                'first-fit': '<strong>First Fit:</strong> Use the first sufficiently large hole. Search may be short, but repeated placement can fragment the beginning of memory.',
+                'best-fit': '<strong>Best Fit:</strong> Choose the smallest suitable hole; it minimises this allocation’s remainder, not total future fragmentation.',
+                'worst-fit': '<strong>Worst Fit:</strong> Choose the largest suitable hole, leaving a large remainder that may help later requests.',
+                'next-fit': '<strong>Next Fit:</strong> Like First Fit, but resume from the previous position; this does not guarantee uniform allocation.'
             };
             document.getElementById('algorithmDesc').innerHTML = descriptions[this.value];
         });
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', initializeMemory);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Journaling & Crash Recovery Demo - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+        
         
         body {
             font-family: 'Outfit', sans-serif;
@@ -126,7 +126,84 @@
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
             border-color: rgba(34, 197, 94, 0.5);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -146,7 +223,7 @@
             </button>
             <button onclick="setMode('journal')" id="mode-journal" class="mode-tab activee px-6 py-3 rounded-xl border border-gray-700 transition flex items-center gap-2">
                 <i class="fas fa-check-circle text-green-400"></i>
-                <span class="font-semibold">Cu Journaling</span>
+                <span class="font-semibold">With Journaling</span>
             </button>
         </div>
 
@@ -182,13 +259,13 @@
                         <div class="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center text-purple-400 font-bold shrink-0">2</div>
                         <div>
                             <div class="font-semibold">Create Inode</div>
-                            <div class="text-sm text-gray-400">Scrie metadata the file</div>
+                            <div class="text-sm text-gray-400">Write file metadata</div>
                         </div>
                     </div>
                     <div id="nj-step-3" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-amber-600/30 flex items-center justify-center text-amber-400 font-bold shrink-0">3</div>
                         <div>
-                            <div class="font-semibold">Update Directoryy</div>
+                            <div class="font-semibold">Update Directory</div>
                             <div class="text-sm text-gray-400">Add entry in directory</div>
                         </div>
                     </div>
@@ -206,50 +283,50 @@
                     <div id="j-step-1" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-green-600/30 flex items-center justify-center text-green-400 font-bold shrink-0">1</div>
                         <div>
-                            <div class="font-semibold">Journal: TXN BEGIN</div>
-                            <div class="text-sm text-gray-400">Begin transaction in journal</div>
+                            <div class="font-semibold">Begin transaction</div>
+                            <div class="text-sm text-gray-400">Journal transaction identifier</div>
                         </div>
                     </div>
                     <div id="j-step-2" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-green-600/30 flex items-center justify-center text-green-400 font-bold shrink-0">2</div>
                         <div>
-                            <div class="font-semibold">Journal: Write Intent</div>
-                            <div class="text-sm text-gray-400">Log all planned modifications</div>
+                            <div class="font-semibold">Write complete redo payload (durable)</div>
+                            <div class="text-sm text-gray-400">Persist all after-images before a commit can become durable</div>
                         </div>
                     </div>
                     <div id="j-step-3" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-400 font-bold shrink-0">3</div>
                         <div>
-                            <div class="font-semibold">Update Bitmap</div>
-                            <div class="text-sm text-gray-400">Marks blocks as occupied</div>
+                            <div class="font-semibold">Write commit record (durable)</div>
+                            <div class="text-sm text-gray-400">The complete durable transaction becomes replayable</div>
                         </div>
                     </div>
                     <div id="j-step-4" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center text-purple-400 font-bold shrink-0">4</div>
                         <div>
-                            <div class="font-semibold">Create Inode</div>
-                            <div class="text-sm text-gray-400">Scrie metadata the file</div>
+                            <div class="font-semibold">Checkpoint bitmap</div>
+                            <div class="text-sm text-gray-400">Write the committed allocation bitmap to its home location</div>
                         </div>
                     </div>
                     <div id="j-step-5" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-amber-600/30 flex items-center justify-center text-amber-400 font-bold shrink-0">5</div>
                         <div>
-                            <div class="font-semibold">Update Directoryy</div>
-                            <div class="text-sm text-gray-400">Add entry in directory</div>
+                            <div class="font-semibold">Checkpoint inode</div>
+                            <div class="text-sm text-gray-400">Write committed inode metadata to its home location</div>
                         </div>
                     </div>
                     <div id="j-step-6" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-cyan-600/30 flex items-center justify-center text-cyan-400 font-bold shrink-0">6</div>
                         <div>
-                            <div class="font-semibold">Write Data</div>
-                            <div class="text-sm text-gray-400">Write file content</div>
+                            <div class="font-semibold">Checkpoint directory</div>
+                            <div class="text-sm text-gray-400">Write the committed directory entry to its home location</div>
                         </div>
                     </div>
                     <div id="j-step-7" class="step-item p-3 rounded-xl border border-gray-700 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-full bg-green-600/30 flex items-center justify-center text-green-400 font-bold shrink-0">7</div>
                         <div>
-                            <div class="font-semibold">Journal: TXN COMMIT</div>
-                            <div class="text-sm text-gray-400">Mark transaction as complete</div>
+                            <div class="font-semibold">Checkpoint data; checkpoint complete</div>
+                            <div class="text-sm text-gray-400">Write committed file contents to their home blocks</div>
                         </div>
                     </div>
                 </div>
@@ -275,7 +352,7 @@
                     
                     <div class="grid grid-cols-2 gap-3">
                         <div id="disk-bitmap" class="bg-gray-800/50 rounded-xl p-3">
-                            <div class="text-xs text-gray-400 mb-1">Blockk Bitmap</div>
+                            <div class="text-xs text-gray-400 mb-1">Block Bitmap</div>
                             <div class="mono text-sm" id="bitmap-value">0000000000</div>
                             <div class="text-xs text-gray-500 mt-1" id="bitmap-status">Not updated</div>
                         </div>
@@ -285,12 +362,12 @@
                             <div class="text-xs text-gray-500 mt-1" id="inode-status">No inode</div>
                         </div>
                         <div id="disk-directory" class="bg-gray-800/50 rounded-xl p-3">
-                            <div class="text-xs text-gray-400 mb-1">Directoryy Entry</div>
+                            <div class="text-xs text-gray-400 mb-1">Directory Entry</div>
                             <div class="mono text-sm" id="directory-value">-</div>
                             <div class="text-xs text-gray-500 mt-1" id="directory-status">No entry</div>
                         </div>
                         <div id="disk-data" class="bg-gray-800/50 rounded-xl p-3">
-                            <div class="text-xs text-gray-400 mb-1">Data Blockks</div>
+                            <div class="text-xs text-gray-400 mb-1">Data Blocks</div>
                             <div class="mono text-sm" id="data-value">-</div>
                             <div class="text-xs text-gray-500 mt-1" id="data-status">No data</div>
                         </div>
@@ -307,15 +384,15 @@
                 </button>
                 
                 <div class="flex items-center gap-2">
-                    <span class="text-gray-400 text-sm">Crash after pasul:</span>
+                    <span class="text-gray-400 text-sm">Crash after step:</span>
                     <select id="crash-after" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
                         <option value="0">Without crash</option>
-                        <option value="1">Stepul 1</option>
-                        <option value="2" selected>Stepul 2</option>
-                        <option value="3">Stepul 3</option>
-                        <option value="4">Stepul 4</option>
-                        <option value="5">Stepul 5</option>
-                        <option value="6">Stepul 6</option>
+                        <option value="1">Step 1</option>
+                        <option value="2" selected>Step 2</option>
+                        <option value="3">Step 3</option>
+                        <option value="4">Step 4</option>
+                        <option value="5">Step 5</option>
+                        <option value="6">Step 6</option>
                     </select>
                 </div>
                 
@@ -336,7 +413,7 @@
         <!-- Result Panel -->
         <div id="result-panel" class="glass-card rounded-2xl p-5 mb-6 hidden">
             <h3 class="text-xl font-bold mb-4 flex items-center" id="result-title">
-                <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Result Crash
+                <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Crash Result
             </h3>
             <div id="result-content" class="text-gray-300">
                 <!-- Set by JS -->
@@ -346,21 +423,21 @@
         <!-- Explanation -->
         <div class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-info-circle mr-2 text-blue-400"></i>how works Journaling-ul?
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i>How Does Journaling Work?
             </h3>
             
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-gray-800/30 rounded-xl p-4">
                     <div class="text-green-400 font-bold mb-2"><i class="fas fa-pencil-alt mr-2"></i>1. Write-Ahead Logging</div>
-                    <p class="text-sm text-gray-400">Before modifying the disk, we write ALL intentions to the journal. The journal is persistent on disk.</p>
+                    <p class="text-sm text-gray-400">Before overwriting home blocks, persist a complete redo record with the transaction’s after-images in the journal.</p>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4">
-                    <div class="text-amber-400 font-bold mb-2"><i class="fas fa-sync mr-2"></i>2. Apply Changes</div>
-                    <p class="text-sm text-gray-400">After the journal is written, we apply the changes to the main disk. Now we have redundancy.</p>
+                    <div class="text-amber-400 font-bold mb-2"><i class="fas fa-sync mr-2"></i>2. Persist the Commit</div>
+                    <p class="text-sm text-gray-400">Persist the commit record only after the complete redo payload is durable. The transaction is now eligible for replay.</p>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4">
-                    <div class="text-blue-400 font-bold mb-2"><i class="fas fa-check-circle mr-2"></i>3. Commit/Cleanup</div>
-                    <p class="text-sm text-gray-400">Mark the transaction as complete. On recovery, we verify and re-apply incomplete transactions.</p>
+                    <div class="text-blue-400 font-bold mb-2"><i class="fas fa-check-circle mr-2"></i>3. Checkpoint and Reclaim</div>
+                    <p class="text-sm text-gray-400">Checkpoint committed data to home locations, then reclaim the log. Recover committed transactions; discard incomplete uncommitted records.</p>
                 </div>
             </div>
         </div>
@@ -368,7 +445,7 @@
         <!-- Journaling Types -->
         <div class="glass-card rounded-2xl p-5">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-layer-group mr-2 text-purple-400"></i>Typeuri de Journaling
+                <i class="fas fa-layer-group mr-2 text-purple-400"></i>Journaling Modes
             </h3>
             
             <div class="overflow-x-auto">
@@ -379,7 +456,7 @@
                             <th class="text-center py-3 px-4">What it logs</th>
                             <th class="text-center py-3 px-4">Performance</th>
                             <th class="text-center py-3 px-4">Protection</th>
-                            <th class="text-center py-3 px-4">Exemplu</th>
+                            <th class="text-center py-3 px-4">Example</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -387,20 +464,20 @@
                             <td class="py-3 px-4 font-medium text-amber-400">Metadata Only</td>
                             <td class="text-center py-3 px-4">only metadata (inode, dir)</td>
                             <td class="text-center py-3 px-4"><span class="text-green-400">Fast</span></td>
-                            <td class="text-center py-3 px-4"><span class="text-yellow-400">FS consistent, date posibil corupte</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-yellow-400">Metadata consistency; file-data durability needs separate handling</span></td>
                             <td class="text-center py-3 px-4">ext3 ordered</td>
                         </tr>
                         <tr class="border-b border-gray-800">
                             <td class="py-3 px-4 font-medium text-green-400">Full Journal</td>
-                            <td class="text-center py-3 px-4">Metadata + Date</td>
-                            <td class="text-center py-3 px-4"><span class="text-red-400">Slow (2x write)</span></td>
+                            <td class="text-center py-3 px-4">Metadata + Data</td>
+                            <td class="text-center py-3 px-4"><span class="text-red-400">Additional journal writes; workload-dependent cost</span></td>
                             <td class="text-center py-3 px-4"><span class="text-green-400">Complete</span></td>
                             <td class="text-center py-3 px-4">ext3 journal</td>
                         </tr>
                         <tr>
                             <td class="py-3 px-4 font-medium text-blue-400">Writeback</td>
                             <td class="text-center py-3 px-4">only metadata (without ordering)</td>
-                            <td class="text-center py-3 px-4"><span class="text-green-400">Fastest</span></td>
+                            <td class="text-center py-3 px-4"><span class="text-green-400">Less ordering; cost varies</span></td>
                             <td class="text-center py-3 px-4"><span class="text-red-400">Minimal</span></td>
                             <td class="text-center py-3 px-4">ext3 writeback</td>
                         </tr>
@@ -415,7 +492,53 @@
         </footer>
     </div>
 
-    <script>
+    <script>let journalBefore=null;
+function journalRenderHome() {
+ updateDiskDisplay('bitmap',diskState.bitmap,'Durable allocation bitmap');
+ for(const key of ['inode','directory','data']) {
+  const value=diskState[key];document.getElementById(key+'-value').textContent=value===null?'-':typeof value==='string'?value:JSON.stringify(value);
+  document.getElementById(key+'-status').textContent=value===null?'Absent':'Durable home value';
+ }
+}
+function journalPayload() {const entry=journalEntries.find(e=>e.type==='REDO');return entry?JSON.parse(entry.content):null;}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         let currentMode = 'journal';
         let currentStep = 0;
@@ -455,7 +578,7 @@
             const crashSelect = document.getElementById('crash-after');
             crashSelect.innerHTML = '<option value="0">Without crash</option>';
             for (let i = 1; i <= totalSteps; i++) {
-                crashSelect.innerHTML += `<option value="${i}" ${i === 2 ? 'selected' : ''}>Stepul ${i}</option>`;
+                crashSelect.innerHTML += `<option value="${i}" ${i === 2 ? 'selected' : ''}>Step ${i}</option>`;
             }
             
             resetSimulation();
@@ -479,13 +602,11 @@
             operationInterval = setInterval(() => {
                 currentStep++;
                 
-                if (crashAfter > 0 && currentStep > crashAfter) {
-                    simulateCrash();
-                    return;
-                }
+                
                 
                 executeStep(currentStep);
                 updateProgress();
+                if(crashAfter>0 && currentStep===crashAfter){simulateCrash();return;}
                 
                 if (currentStep >= totalSteps) {
                     clearInterval(operationInterval);
@@ -524,44 +645,19 @@
         
         // Execute journal mode step
         function executeJournalStep(step) {
-            switch(step) {
-                case 1: // TXN BEGIN
-                    addJournalEntry('TXN_BEGIN', '#001');
-                    break;
-                case 2: // Write Intent
-                    addJournalEntry('INTENT', 'bitmap: 1111000000');
-                    addJournalEntry('INTENT', 'inode: #42, test.txt');
-                    addJournalEntry('INTENT', 'dir: test.txt -> #42');
-                    addJournalEntry('INTENT', 'data: blocks 0-3');
-                    break;
-                case 3: // Update bitmap
-                    diskState.bitmap = '1111000000';
-                    updateDiskDisplay('bitmap', '1111000000', 'Blockks allocated');
-                    break;
-                case 4: // Create inode
-                    diskState.inode = { num: 42, name: 'test.txt', blocks: [0,1,2,3] };
-                    updateDiskDisplay('inode', 'Inode #42', 'test.txt, 4 blocks');
-                    break;
-                case 5: // Update directory
-                    diskState.directory = { name: 'test.txt', inode: 42 };
-                    updateDiskDisplay('directory', 'test.txt', '-> inode #42');
-                    break;
-                case 6: // Write data
-                    diskState.data = 'Hello World!';
-                    updateDiskDisplay('data', 'Blockks 0-3', 'Hello World!');
-                    break;
-                case 7: // TXN COMMIT
-                    addJournalEntry('TXN_COMMIT', '#001 ✓');
-                    break;
-            }
-        }
+ if(step===1){journalBefore=JSON.parse(JSON.stringify(diskState));addJournalEntry('TXN_BEGIN','#001');}
+ if(step===2){const after={bitmap:'1111000000',inode:{num:42,name:'test.txt',blocks:[0,1,2,3]},directory:{name:'test.txt',inode:42},data:'Hello World!'};addJournalEntry('REDO',JSON.stringify(after));}
+ if(step===3)addJournalEntry('TXN_COMMIT','#001 durable');
+ if(step>=4&&step<=7){const after=journalPayload();if(!after||!journalEntries.some(e=>e.type==='TXN_COMMIT'))throw new Error('Checkpoint requires durable redo and commit');const field=['bitmap','inode','directory','data'][step-4];diskState[field]=JSON.parse(JSON.stringify(after[field]));journalRenderHome();}
+ if(step===7)addJournalEntry('CHECKPOINT','#001 home blocks durable');
+}
         
         // Execute no-journal mode step
         function executeNoJournalStep(step) {
             switch(step) {
                 case 1: // Update bitmap
                     diskState.bitmap = '1111000000';
-                    updateDiskDisplay('bitmap', '1111000000', 'Blockks allocated');
+                    updateDiskDisplay('bitmap', '1111000000', 'Blocks allocated');
                     break;
                 case 2: // Create inode
                     diskState.inode = { num: 42, name: 'test.txt', blocks: [0,1,2,3] };
@@ -573,7 +669,7 @@
                     break;
                 case 4: // Write data
                     diskState.data = 'Hello World!';
-                    updateDiskDisplay('data', 'Blockks 0-3', 'Hello World!');
+                    updateDiskDisplay('data', 'Blocks 0-3', 'Hello World!');
                     break;
             }
         }
@@ -603,7 +699,7 @@
                 'TXN_COMMIT': 'text-cyan-400'
             };
             
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = `journal-entry p-2 rounded bg-gray-800/50 ${colors[type] || 'text-gray-300'}`;
             entry.innerHTML = `<span class="text-gray-500">[${type}]</span> ${content}`;
             container.appendChild(entry);
@@ -668,155 +764,41 @@
         
         // Show crash result
         function showCrashResult() {
-            const panel = document.getElementById('result-panel');
-            const title = document.getElementById('result-title');
-            const content = document.getElementById('result-content');
-            
-            panel.classList.remove('hidden');
-            
-            if (currentMode === 'journal') {
-                if (currentStep < 7) {
-                    title.innerHTML = '<i class="fas fa-exclamation-triangle mr-2 text-amber-400"></i>Crash Detected - Incomplete Transaction';
-                    content.innerHTML = `
-                        <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-4 mb-4">
-                            <p class="mb-2">The system a thatzut la <strong>pasul ${currentStep}</strong>.</p>
-                            <p>The journal contains a transaction <strong>without COMMIT</strong>.</p>
-                        </div>
-                        <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-4">
-                            <div class="text-green-400 font-bold mb-2"><i class="fas fa-check-circle mr-2"></i>La Recovery:</div>
-                            <p>The system will detect the incomplete transaction and perform <strong>rollback</strong> or <strong>redo</strong> (depends on what is in the journal).</p>
-                            <p class="mt-2">Result: <strong>Filesystem CONSISTENT</strong> - either the operation is complete or it does not exist at all.</p>
-                        </div>
-                    `;
-                }
-            } else {
-                title.innerHTML = '<i class="fas fa-times-circle mr-2 text-red-400"></i>Crash Detectat - INCONSISTENTA!';
-                
-                let issues = [];
-                if (diskState.bitmap.includes('1') && !diskState.directory) {
-                    issues.push('Blocks marked occupied but no file references them (space leak)');
-                }
-                if (diskState.inode && !diskState.directory) {
-                    issues.push('Orphan inode - exists but not in any directory');
-                }
-                if (diskState.directory && !diskState.data) {
-                    issues.push('Fiander in directory dar without date');
-                }
-                
-                content.innerHTML = `
-                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-4 mb-4">
-                        <p class="mb-2">The system a thatzut la <strong>pasul ${currentStep}</strong>.</p>
-                        <p class="font-bold text-red-400">Probleme detectate:</p>
-                        <ul class="list-disc list-inside mt-2 text-sm">
-                            ${issues.map(i => `<li>${i}</li>`).join('')}
-                        </ul>
-                    </div>
-                    <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-4">
-                        <div class="text-amber-400 font-bold mb-2"><i class="fas fa-tools mr-2"></i>La Recovery:</div>
-                        <p>You will need to run <code class="bg-gray-800 px-1 rounded">fsck</code> to detect and repair inconsistencies.</p>
-                        <p class="mt-2 text-red-400">⚠️ Possible data loss!</p>
-                    </div>
-                `;
-            }
-        }
+ document.getElementById('result-panel').classList.remove('hidden');
+ document.getElementById('result-title').textContent=`Crash after durable step ${currentStep}`;
+ const committed=journalEntries.some(e=>e.type==='TXN_COMMIT');
+ document.getElementById('result-content').textContent=currentMode==='journal'?(committed?'Committed transaction: replay the durable redo payload, including any home blocks already checkpointed.':'No durable commit: discard the incomplete redo record. Home blocks have not been modified.'):'No journal: inspect the actual bitmap, inode, directory and data before attempting repair. Recovery cannot reconstruct missing file contents.';
+}
         
         // Simulate recovery
         function simulateRecovery() {
-            document.getElementById('btn-recover').disabled = true;
-            
-            const panel = document.getElementById('result-panel');
-            const title = document.getElementById('result-title');
-            const content = document.getElementById('result-content');
-            
-            if (currentMode === 'journal') {
-                // Journal recovery - replay or rollback
-                title.innerHTML = '<i class="fas fa-sync mr-2 text-green-400"></i>Recovery Complete';
-                
-                // Check if we have commit
-                const hasCommit = journalEntries.some(e => e.type === 'TXN_COMMIT');
-                
-                if (hasCommit) {
-                    content.innerHTML = `
-                        <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-4">
-                            <div class="text-green-400 font-bold mb-2"><i class="fas fa-redo mr-2"></i>Replay Transaction</div>
-                            <p>The transaction had COMMIT in the journal. The system re-applied all operations from the journal.</p>
-                            <p class="mt-2"><strong>Result:</strong> File test.txt exists and is complete ✓</p>
-                        </div>
-                    `;
-                    // Complete the operation
-                    completeAfterRecovery();
-                } else {
-                    content.innerHTML = `
-                        <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-4">
-                            <div class="text-amber-400 font-bold mb-2"><i class="fas fa-undo mr-2"></i>Rollback Transaction</div>
-                            <p>The transaction did NOT have COMMIT. The system ignores partial modifications and reverts to the previous state.</p>
-                            <p class="mt-2"><strong>Result:</strong> File test.txt does NOT exist (as if the operation never happened) ✓</p>
-                        </div>
-                    `;
-                    // Rollback
-                    rollbackAfterRecovery();
-                }
-                
-                // Clear journal
-                setTimeout(() => {
-                    journalEntries = [];
-                    document.getElementById('journal-content').innerHTML = '<div class="text-gray-500 text-center py-2">Journal cleared after recovery</div>';
-                }, 1000);
-                
-            } else {
-                // No journal - run fsck
-                title.innerHTML = '<i class="fas fa-tools mr-2 text-amber-400"></i>fsck Recovery';
-                content.innerHTML = `
-                    <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-4 mb-4">
-                        <div class="text-amber-400 font-bold mb-2"><i class="fas fa-search mr-2"></i>Scanning filesystem...</div>
-                        <p>fsck detects inconsistencies and attempts repair.</p>
-                    </div>
-                    <div class="bg-gray-800/50 rounded-xl p-4 mono text-sm">
-                        <div class="text-amber-400">$ fsck /dev/sda1</div>
-                        <div class="text-gray-400 mt-1">Checking filesystem...</div>
-                        <div class="text-red-400 mt-1">Found orphaned inode #42</div>
-                        <div class="text-green-400 mt-1">Moving to lost+found</div>
-                        <div class="text-amber-400 mt-1">Free blocks count wrong (fixing)</div>
-                        <div class="text-green-400 mt-1">Filesystem cleaned.</div>
-                    </div>
-                    <div class="mt-4 text-sm text-red-400">
-                        ⚠️ The file test.txt may fi pierdut or corupt!
-                    </div>
-                `;
-                
-                // Remove inconsistency markers
-                document.querySelectorAll('.inconsistent').forEach(el => el.classList.remove('inconsistent'));
-            }
-        }
+ document.getElementById('btn-recover').disabled=true;
+ const content=document.getElementById('result-content');
+ if(currentMode==='journal') {
+  if(journalEntries.some(e=>e.type==='TXN_COMMIT')){completeAfterRecovery();content.textContent='Replayed committed durable REDO contents idempotently; checkpoint is complete.';}
+  else {rollbackAfterRecovery();content.textContent='Discarded uncommitted redo records. Durable home state is unchanged.';}
+  journalEntries=[];document.getElementById('journal-content').textContent='Journal cleared after recovery';
+ } else {
+  const issues=[];
+  if(diskState.inode&&!diskState.directory)issues.push('An orphan inode remains; this toy checker does not reconstruct its name.');
+  if(diskState.directory&&!diskState.data)issues.push('Directory entry exists but file data are missing.');
+  if(diskState.bitmap.includes('1')&&!diskState.inode){diskState.bitmap='0000000000';issues.push('Released bitmap allocations with no inode.');}
+  journalRenderHome();content.textContent=issues.length?issues.join(' '):'No inconsistency found in the four displayed structures. No stronger filesystem repair guarantee is claimed.';
+ }
+ document.getElementById('result-title').textContent='Recovery result';
+}
         
         // Complete operation after journal recovery
         function completeAfterRecovery() {
-            diskState.bitmap = '1111000000';
-            diskState.inode = { num: 42, name: 'test.txt', blocks: [0,1,2,3] };
-            diskState.directory = { name: 'test.txt', inode: 42 };
-            diskState.data = 'Hello World!';
-            
-            updateDiskDisplay('bitmap', '1111000000', 'Blockks allocated');
-            updateDiskDisplay('inode', 'Inode #42', 'test.txt, 4 blocks');
-            updateDiskDisplay('directory', 'test.txt', '-> inode #42');
-            updateDiskDisplay('data', 'Blockks 0-3', 'Hello World!');
-        }
+ const after=journalPayload();if(!after || !journalEntries.some(e=>e.type==='TXN_COMMIT'))throw new Error('No committed redo transaction');
+ diskState=JSON.parse(JSON.stringify(after));journalRenderHome();
+}
         
         // Rollback after journal recovery
         function rollbackAfterRecovery() {
-            diskState.bitmap = '0000000000';
-            diskState.inode = null;
-            diskState.directory = null;
-            diskState.data = null;
-            
-            updateDiskDisplay('bitmap', '0000000000', 'All free');
-            document.getElementById('inode-value').textContent = '-';
-            document.getElementById('inode-status').textContent = 'No inode';
-            document.getElementById('directory-value').textContent = '-';
-            document.getElementById('directory-status').textContent = 'No entry';
-            document.getElementById('data-value').textContent = '-';
-            document.getElementById('data-status').textContent = 'No data';
-        }
+ // A redo-only transaction never modified home blocks before commit.
+ journalRenderHome();
+}
         
         // Finish operation normally
         function finishOperation() {
@@ -832,14 +814,15 @@
             title.innerHTML = '<i class="fas fa-check-circle mr-2 text-green-400"></i>Operation Complete';
             content.innerHTML = `
                 <div class="bg-green-900/20 border border-green-500/30 rounded-xl p-4">
-                    <p>The file <strong>test.txt</strong> a fost created cu succes!</p>
-                    <p class="mt-2 text-sm text-gray-400">Toate structurile de date sunt consistente.</p>
+                    <p>The file <strong>test.txt</strong> was created successfully in the model.</p>
+                    <p class="mt-2 text-sm text-gray-400">All model data structures are consistent.</p>
                 </div>
             `;
         }
         
         // Reset simulation
         function resetSimulation() {
+            enosTimers.cancel();
             clearInterval(operationInterval);
             isRunning = false;
             hasCrashed = false;
@@ -897,6 +880,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             setMode('journal');
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

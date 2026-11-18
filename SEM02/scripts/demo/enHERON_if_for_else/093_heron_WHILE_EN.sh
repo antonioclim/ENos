@@ -1,4 +1,17 @@
 #!/bin/bash
+set -euo pipefail
+command -v bc >/dev/null 2>&1 || { echo 'Error: bc is required.' >&2; exit 2; }
+calculate() {
+    local result
+    if ! result=$(printf '%s\n' "$1" | bc 2>&1); then
+        echo "Calculator failed: $result" >&2; return 2
+    fi
+    if [[ ! $result =~ ^-?([0-9]+([.][0-9]*)?|[.][0-9]+)$ ]]; then
+        echo "Calculator returned an invalid scalar: $result" >&2; return 2
+    fi
+    printf '%s\n' "$result"
+}
+
 # =============================================================================
 # heron_WHILE.sh
 # Heron's Method (Babylonian) for computing the square root
@@ -13,9 +26,9 @@
 # Why WHILE here?
 #   WHILE repeats AS LONG AS a condition holds true.
 #   We do not know in advance how many iterations are needed — it depends on N.
-#   For N=4 it converges in ~4 steps; for N=1000000 it may take 20+.
-#   WHILE detects convergence and stops at precisely the right moment.
-#   This is the most algorithmically correct variant of the three.
+#   At scale=8 with x0=N/2: N=4 takes 1 step, N=1000000 takes 14.
+#   The explicit test stops when the truncated update difference is below the threshold.
+#   This demonstrates an adaptive stopping policy with a finite iteration limit.
 # =============================================================================
 
 
@@ -40,7 +53,7 @@ if ! [[ "$N" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
-if [ "$N" -eq 0 ]; then
+if [[ $N =~ ^0+$ ]]; then
     echo "sqrt(0) = 0"
     exit 0
 fi
@@ -52,7 +65,7 @@ fi
 
 # Initial estimate: x = N/2
 # scale=8 = 8 decimal places for adequate precision
-x=$(echo "scale=8; $N / 2" | bc)
+x=$(calculate "scale=8; $N / 2")
 
 # Iteration counter — not required by the algorithm,
 # but displayed at the end so we can see how many iterations WHILE performed
@@ -93,10 +106,13 @@ echo "--------------------------------------"
 # -----------------------------------------------------------------------------
 
 while true; do
+    if (( step >= 1000 )); then
+        echo 'Iteration limit reached without the requested update threshold.' >&2; exit 2
+    fi
 
     # Compute the new value of x according to Heron's formula
     # Store in x_new so we can compare it with the old x (for the diff)
-    x_new=$(echo "scale=8; ($x + $N / $x) / 2" | bc)
+    x_new=$(calculate "scale=8; ($x + $N / $x) / 2")
 
     # Increment the step counter
     # $(( expression )) = integer arithmetic in Bash (no bc, no decimals)
@@ -106,12 +122,13 @@ while true; do
 
     # Compute the absolute difference between the current and previous iteration
     # When this difference is close to zero, we have converged
-    diff=$(echo "scale=8; $x_new - $x" | bc)
+    diff=$(calculate "scale=8; $x_new - $x")
 
     # bc may return a negative number if x_new < x
     # We want the absolute value (the distance, regardless of sign)
-    if [ $(echo "$diff < 0" | bc) -eq 1 ]; then
-        diff=$(echo "scale=8; -1 * $diff" | bc)
+    negative=$(calculate "$diff < 0")
+    if (( negative == 1 )); then
+        diff=$(calculate "scale=8; -1 * $diff")
     fi
 
     # Update x with the new value BEFORE the convergence test
@@ -124,7 +141,8 @@ while true; do
     #
     # break = exits the while (or for) loop immediately
     # continue = skips to the next iteration (not used here)
-    if [ $(echo "$diff < 0.0000001" | bc) -eq 1 ]; then
+    converged=$(calculate "$diff < 0.0000001")
+    if (( converged == 1 )); then
         break
     fi
 
@@ -148,7 +166,7 @@ echo "--------------------------------------"
 #   N=999983  → sqrt≈999.99... (~18 steps)
 #
 # FOR would always run 10 iterations, regardless of N.
-# WHILE runs exactly as many as needed — no more and no fewer.
+# The stopping criterion and finite-precision arithmetic determine this trace; it is not an error bound proof.
 #
 # Question for students:
 #   What happens if you replace "while true" with "while [ $step -lt 3 ]"?

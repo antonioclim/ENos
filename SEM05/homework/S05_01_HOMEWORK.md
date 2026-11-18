@@ -1,5 +1,8 @@
 # S05_01 — Homework: Advanced Bash Scripting
 
+> **Author decision pending:** The assessment rules below are retained proposals. They conflict across the brief, rubric and oral guide, so no combined final-grade formula, penalty order, remote-proctoring rule or integrity inference is enacted. See [the exact alternatives, consequences and recommendation](../docs/TEACHING_CONTRACT.md). Technical exercises remain usable. Historical success rates and classroom claims are not independently verified.
+
+
 > **Operating Systems** | ASE Bucharest — CSIE  
 > **Seminar 5:** Advanced Bash Scripting  
 > **Submission deadline:** Check Moodle for exact date  
@@ -64,7 +67,7 @@ homework_S05_YourName/
 └── screenshots/
     ├── log_analyzer_output.png
     ├── config_manager_output.png
-    └── shellcheck_clean.png  # Proof of zero shellcheck errors
+    └── shellcheck_clean.png  # Captured lint result for the tested revision
 ```
 
 **Archive as:** `homework_S05_YourName_GroupNumber.zip`
@@ -130,7 +133,7 @@ Top 3 Messages:
 
 **Script:** `config_manager.sh`
 
-Create a configuration file manager that handles `key=value` files.
+Create a configuration file manager that handles literal `key=value` data: identifiers match `[A-Za-z_][A-Za-z0-9_]*`; outer spaces around key/`=` are ignored; values are not evaluated as shell code. Document duplicate-key handling, blank values and whether trailing spaces are retained. The generated starter uses `test_files/app.conf`.
 
 #### Commands to Implement
 
@@ -145,7 +148,7 @@ Create a configuration file manager that handles `key=value` files.
 
 #### Expected Behaviour
 
-```bash
+```console
 $ ./config_manager.sh list
 HOST=localhost
 PORT=8080
@@ -196,7 +199,7 @@ You are given a broken script with **10 intentional problems**. Fix all of them.
 #### Submission Format
 
 For each fix, add a comment explaining:
-```bash
+```text
 # FIX #3: Added quotes around array expansion
 # BEFORE: for f in ${files[@]}
 # AFTER:  for f in "${files[@]}"
@@ -230,7 +233,7 @@ for f in "${files[@]}"; do
 
 ### Documentation
 - [ ] README.md explains how to run each script
-- [ ] Screenshots prove the code works
+- [ ] Screenshots illustrate selected runs; include commands, statuses and repeatable test data
 - [ ] Refactoring fixes are documented with comments
 
 ---
@@ -240,7 +243,7 @@ for f in "${files[@]}"; do
 ### General
 
 **Q: Can I use AI tools like ChatGPT?**
-> Yes, but you must (1) document exactly what you used, (2) explain what you modified and (3) be able to explain every line in the oral defence. Submitting AI output verbatim without understanding it will be obvious during the viva.
+> Yes, but you must (1) document exactly what you used, (2) explain what you modified and (3) be able to explain every line in the oral defence. A viva can assess demonstrated understanding; it does not by itself prove authorship or identify AI use.
 
 **Q: What if shellcheck gives warnings I don't understand?**
 > Google the SC code (e.g., "SC2086 shellcheck"). The wiki explains every warning. If still stuck, ask in the course forum — but show you tried first.
@@ -264,7 +267,7 @@ for f in "${files[@]}"; do
 > With quotes: `"${arr[@]}"` preserves element boundaries, `"${arr[*]}"` joins into one string. Always use `"${arr[@]}"` in `for` loops.
 
 **Q: How do I make `set -e` not exit on grep finding nothing?**
-> `grep "pattern" file || true` — the `|| true` prevents the non-zero exit from triggering errexit.
+> Distinguish no match (status 1) from an operational error (status >1): `if grep "pattern" file; then :; else status=$?; (( status == 1 )) || exit "$status"; fi`. Do not suppress every error with `|| true`.
 
 ### Submission
 

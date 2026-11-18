@@ -106,7 +106,7 @@ questions:
 |-------|------|----------|-------------|
 | `metadata.course` | int | Yes | Lecture number (1-18) |
 | `metadata.subject` | string | Yes | Lecture title |
-| `metadata.version` | string | Yes | Quiz version (semver) |
+| `metadata.version` | string | Yes | Bank version identifier |
 | `metadata.number_of_questions` | int | Yes | Total question count |
 | `metadata.estimated_time_minutes` | int | Yes | Suggested completion time |
 | `metadata.bloom_distribution` | object | Yes | Question counts per level |
@@ -122,36 +122,34 @@ questions:
 
 ## How to Use
 
-### Option 1: With Quiz Runner (Recommended)
+### Option 1: dedicated lecture runner
+
+From the repository root (Python with PyYAML):
 
 ```bash
-# From any SEM folder
-cd ../SEM01/formative/
-
-# Run specific lecture quiz
-python3 quiz_runner.py --file ../../05_LECTURES/05-Execution_Threads/docs/C05_05_FORMATIVE_ASSESSMENT.yaml
-
-# With options
-python3 quiz_runner.py --file <path> --questions 10 --shuffle
+python3 05_LECTURES/quiz_runner.py "05_LECTURES/05-Execution_Threads/docs/C05_05_FORMATIVE_ASSESSMENT.yaml" --validate
+python3 05_LECTURES/quiz_runner.py "05_LECTURES/05-Execution_Threads/docs/C05_05_FORMATIVE_ASSESSMENT.yaml" --limit 10 --shuffle --seed 42
 ```
 
-### Option 2: Manual Review
+`--shuffle` permutes both the questions and each question’s options, remapping the zero-based correct index together. The same bank and seed reproduce the order. The source bank remains unchanged. This prevents the source banks' concentrated B positions from acting as a session answer cue. Scores are formative feedback and do not establish a course grading policy.
 
-Open the YAML file in any text/code editor. Work through questions manually, checking your answers against the `correct` field and reading explanations.
+### Option 2: manual review
 
-### Option 3: LMS Import
+Open the YAML file, answer each question, then inspect its zero-based `correct` index and explanation. The physical C04/L04 and C08 named variants remain compatible copies with the same canonical key schema.
 
-Convert to LMS format for Moodle/Canvas:
+### Option 3: local Moodle XML export
 
 ```bash
-python3 quiz_generator.py --input <yaml_file> --output quiz_lms.json --format moodle
+python3 05_LECTURES/quiz_runner.py "05_LECTURES/05-Execution_Threads/docs/C05_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42 --export-moodle quiz_lms.xml
 ```
+
+The command creates a UTF-8 Moodle XML bank of single-answer multiple-choice questions. It does not upload to an LMS. Local XML syntax and answer/text mapping can be verified independently; importing into a particular Moodle course and its assessment settings remains a separate author-authorised acceptance step. The exporter follows the [Moodle XML format](https://docs.moodle.org/en/Moodle_XML_format). A Moodle XML file is not a Canvas JSON import.
 
 ---
 
 ## Bloom's Taxonomy Distribution
 
-Each quiz follows recommended distribution:
+The following proportions are a teaching-design target, not a claim that every existing bank has exactly this distribution:
 
 | Level | Cognitive Process | Typical Verbs | Target % |
 |-------|-------------------|---------------|----------|
@@ -210,7 +208,7 @@ When adding or modifying questions:
 2. Include clear explanations
 3. Ensure 4 options per question
 4. Use 0-indexed `correct` field
-5. Test with `quiz_runner.py`
+5. Validate with `05_LECTURES/quiz_runner.py <bank> --validate`; test shuffled option/key agreement
 
 ---
 

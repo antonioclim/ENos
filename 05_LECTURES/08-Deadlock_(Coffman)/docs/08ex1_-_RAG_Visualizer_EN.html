@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafuri de Alocare Resources (RAG) | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Resource Allocation Graphs (RAG) | Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -70,7 +70,85 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    .node.visiting { filter: drop-shadow(0 0 6px #2563eb); }
+:focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -82,7 +160,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Resource Allocation Graph (RAG)</h1>
-                    <p class="text-xs text-stone-500">Vizualizare and Detectare Cicluri</p>
+                    <p class="text-xs text-stone-500">Visualisation and Cycle Detection</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
@@ -96,8 +174,8 @@
         <div id="deadlockBanner" class="hidden mb-6 deadlock-banner bg-red-100 border-2 border-red-400 rounded-xl p-4 flex items-center gap-4">
             <div class="text-5xl">🔒</div>
             <div>
-                <h3 class="font-bold text-red-800 text-lg">DEADLOCK DETECTAT!</h3>
-                <p id="deadlockInfo" class="text-sm text-red-700">Ciclu gasit in graf.</p>
+                <h3 class="font-bold text-red-800 text-lg">DEADLOCK DETECTED</h3>
+                <p id="deadlockInfo" class="text-sm text-red-700">A cycle was found in the graph.</p>
             </div>
             <button onclick="hideBanner()" class="ml-auto text-red-500 hover:text-red-700">
                 <i class="fas fa-times text-xl"></i>
@@ -112,7 +190,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-diagram-project text-blue-500"></i>
-                            Graf RAG
+                            RAG Diagram
                         </h2>
                         <div class="flex items-center gap-2">
                             <span id="graphStatus" class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
@@ -142,8 +220,8 @@
                         <div id="instructionsOverlay" class="absolute inset-0 flex items-center justify-center bg-stone-100/80 text-stone-500 text-sm">
                             <div class="text-center">
                                 <i class="fas fa-mouse-pointer text-3xl mb-2"></i>
-                                <p>Add procese and resurse din panoul din dreapta</p>
-                                <p class="text-xs mt-1">or incarca un scenariu predefinit</p>
+                                <p>Add processes and resources from the panel on the right</p>
+                                <p class="text-xs mt-1">or load a predefined scenario</p>
                             </div>
                         </div>
                     </div>
@@ -168,7 +246,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-1 bg-red-500"></div>
-                            <span>Ciclu (Deadlock)</span>
+                            <span>Cycle (Deadlock)</span>
                         </div>
                     </div>
                 </div>
@@ -176,20 +254,20 @@
                 <!-- Detection Algorithm Visualization -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-search text-purple-500 mr-2"></i>Algoritm Detectare Cicluri (DFS)
+                        <i class="fas fa-search text-purple-500 mr-2"></i>Cycle Detection Algorithm (DFS)
                     </h3>
                     <div id="detectionSteps" class="text-xs mono space-y-1 max-h-40 overflow-y-auto bg-stone-50 rounded p-3">
-                        <div class="text-stone-400">// Apasa "Detect Deadlock" for a vedea pasii algoritmului</div>
+                        <div class="text-stone-400">// Press "Detect Deadlock" to view the algorithm steps</div>
                     </div>
                 </div>
 
                 <!-- Adjacency Matrix -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-th text-indigo-500 mr-2"></i>Matrice de Adiacenta
+                        <i class="fas fa-th text-indigo-500 mr-2"></i>Adjacency Matrix
                     </h3>
                     <div id="adjacencyMatrix" class="overflow-x-auto">
-                        <div class="text-xs text-stone-400 text-center py-4">Matricea va aparea after adaugarea nodurilor</div>
+                        <div class="text-xs text-stone-400 text-center py-4">The matrix appears after nodes are added</div>
                     </div>
                 </div>
             </div>
@@ -199,7 +277,7 @@
                 <!-- Add Nodes -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Noduri
+                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Add Nodes
                     </h3>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="addProcesss()" class="btn-action p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium">
@@ -214,7 +292,7 @@
                 <!-- Add Edges -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-arrow-right text-blue-500 mr-2"></i>Add Muchii
+                        <i class="fas fa-arrow-right text-blue-500 mr-2"></i>Add Edges
                     </h3>
                     <div class="space-y-3">
                         <div>
@@ -260,10 +338,10 @@
                             <i class="fas fa-exclamation-triangle mr-1"></i> Detect Deadlock
                         </button>
                         <button onclick="detectDeadlockAnimated()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-play mr-1"></i> Detectare Animata
+                            <i class="fas fa-play mr-1"></i> Animated Detection
                         </button>
                         <button onclick="clearCycleHighlight()" class="w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm transition-colors">
-                            <i class="fas fa-eraser mr-1"></i> delete Evidentiere
+                            <i class="fas fa-eraser mr-1"></i> Clear Highlighting
                         </button>
                     </div>
                 </div>
@@ -275,16 +353,16 @@
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('simple')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>No Deadlock (simplu)
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>No Deadlock (simple)
                         </button>
                         <button onclick="loadScenario('deadlock')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-times-circle text-red-500 mr-2"></i>With Deadlock (ciclu)
+                            <i class="fas fa-times-circle text-red-500 mr-2"></i>Deadlock (cycle)
                         </button>
                         <button onclick="loadScenario('complex')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-project-diagram text-blue-500 mr-2"></i>Complex (multiple cicluri)
+                            <i class="fas fa-project-diagram text-blue-500 mr-2"></i>Complex (one cycle with an incoming path)
                         </button>
                         <button onclick="clearGraph()" class="w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition-colors">
-                            <i class="fas fa-trash mr-1"></i> delete Tot
+                            <i class="fas fa-trash mr-1"></i> Clear All
                         </button>
                     </div>
                 </div>
@@ -292,14 +370,14 @@
                 <!-- RAG Rules -->
                 <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-sm border border-red-200 p-4">
                     <h3 class="text-sm font-semibold text-red-800 mb-3">
-                        <i class="fas fa-book text-red-500 mr-2"></i>Reguli RAG
+                        <i class="fas fa-book text-red-500 mr-2"></i>RAG Rules
                     </h3>
                     <ul class="text-xs text-red-700 space-y-2">
-                        <li><strong>Request Edge (P→R):</strong> Processul P cere resursa R</li>
-                        <li><strong>Assignment Edge (R→P):</strong> Resursa R este alocata lui P</li>
-                        <li><strong>Ciclu in graf</strong> = Potential Deadlock</li>
-                        <li><strong>Resources single-instance:</strong> Ciclu ⟹ Deadlock</li>
-                        <li><strong>Resources multi-instance:</strong> Ciclu ⟹ <em>posibil</em> Deadlock</li>
+                        <li><strong>Request Edge (P→R):</strong> Process P requests resource R</li>
+                        <li><strong>Assignment Edge (R→P):</strong> Resource R is allocated to process P</li>
+                        <li><strong>Cycle in the graph</strong> = Potential Deadlock</li>
+                        <li><strong>Resources single-instance:</strong> Cycle ⟹ Deadlock</li>
+                        <li><strong>Resources multi-instance:</strong> Cycle ⟹ <em>possible</em> Deadlock</li>
                     </ul>
                 </div>
             </div>
@@ -309,26 +387,26 @@
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-stone-200 p-6">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-book-open text-indigo-500"></i>
-                Intelegerea Deadlock-ului prin RAG
+                Understanding Deadlock through a RAG
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-stone-600">
                 <div>
-                    <h4 class="font-semibold text-stone-800 mb-2">Conditii Necesare (Coffman)</h4>
+                    <h4 class="font-semibold text-stone-800 mb-2">Necessary Conditions (Coffman)</h4>
                     <ol class="list-decimal list-inside space-y-1">
-                        <li><strong>Mutual Exclusion:</strong> Resursa may fi detinuta de un singur proces</li>
-                        <li><strong>Hold & Wait:</strong> Processul detine resurse and waits altele</li>
-                        <li><strong>No Preemption:</strong> Resourcesle nu pot fi luate fortat</li>
-                        <li><strong>Circular Wait:</strong> Lant circular de procese care waits</li>
+                        <li><strong>Mutual Exclusion:</strong> A resource instance is held exclusively by one process</li>
+                        <li><strong>Hold & Wait:</strong> A process holds resources while requesting others</li>
+                        <li><strong>No Preemption:</strong> Resources cannot be forcibly taken away</li>
+                        <li><strong>Circular Wait:</strong> A circular chain of processes waiting for resources</li>
                     </ol>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-stone-800 mb-2">Algoritm de Detectare (DFS)</h4>
+                    <h4 class="font-semibold text-stone-800 mb-2">Detection Algorithm (DFS)</h4>
                     <ol class="list-decimal list-inside space-y-1">
-                        <li>for fiecare nod nevizitat, start DFS</li>
-                        <li>Marcheaza nodul ca "in course de vizitare"</li>
-                        <li>Viziteaza recursiv vecinii</li>
-                        <li>If intalnesti un nod "in course" → CICLU!</li>
-                        <li>Marcheaza nodul ca "vizitat complet"</li>
+                        <li>Start DFS from each unvisited node</li>
+                        <li>Mark the node as currently being visited</li>
+                        <li>Visit neighbours recursively</li>
+                        <li>A back edge to a currently visiting node identifies a cycle</li>
+                        <li>Mark the node as fully visited</li>
                     </ol>
                 </div>
             </div>
@@ -343,6 +421,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let nodes = [];
         let edges = [];
@@ -384,10 +498,11 @@
         }
 
         function addRequestEdge() {
+enosTimers.cancel(); hideBanner(); clearCycleHighlight();
             const from = document.getElementById('requestFrom').value;
             const to = document.getElementById('requestTo').value;
-            if (!from || !to) { alert('Select ambele noduri!'); return; }
-            if (edges.some(e => e.from === from && e.to === to)) { alert('Muchia exists deja!'); return; }
+            if (!from || !to) { alert('Select both nodes.'); return; }
+            if (edges.some(e => e.from === from && e.to === to)) { alert('The edge already exists.'); return; }
             
             edges.push({ from, to, type: 'request' });
             render();
@@ -397,9 +512,11 @@
         function addAssignEdge() {
             const from = document.getElementById('assignFrom').value;
             const to = document.getElementById('assignTo').value;
-            if (!from || !to) { alert('Select ambele noduri!'); return; }
-            if (edges.some(e => e.from === from && e.to === to)) { alert('Muchia exists deja!'); return; }
+            if (!from || !to) { alert('Select both nodes.'); return; }
+            if (edges.some(e => e.from === from && e.to === to)) { alert('The edge already exists.'); return; }
             
+            if(edges.some(e=>e.from===from && e.type==='assignment')) { alert('This model has one instance per resource; release the existing assignment first.');return; }
+            enosTimers.cancel(); hideBanner();clearCycleHighlight();
             edges.push({ from, to, type: 'assignment' });
             render();
             log(`Assignment: ${from} → ${to}`);
@@ -446,7 +563,7 @@
                 
                 const dx = toNode.x - fromNode.x;
                 const dy = toNode.y - fromNode.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
                 
                 const startX = fromNode.x + (dx / dist) * fromRadius;
                 const startY = fromNode.y + (dy / dist) * fromRadius;
@@ -469,7 +586,7 @@
             // Draw nodes
             nodes.forEach(node => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.setAttribute('class', `node ${node.inCycle ? 'in-cycle' : ''} ${selectedNode === node.id ? 'selected' : ''}`);
+                g.setAttribute('class', `node ${node.inCycle ? 'in-cycle' : ''} ${selectedNode === node.id ? 'selected' : ''} ${node.visiting ? 'visiting' : ''}`);
                 g.setAttribute('data-id', node.id);
                 g.setAttribute('transform', `translate(${node.x}, ${node.y})`);
                 
@@ -501,6 +618,8 @@
                 text.textContent = node.label;
                 g.appendChild(text);
                 
+                g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',`${node.label}; arrow keys move this node`);
+                g.addEventListener('keydown', e=>{ const d={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key]; if(d){e.preventDefault();node.x=Math.max(25,Math.min(575,node.x+d[0]));node.y=Math.max(25,Math.min(375,node.y+d[1]));selectedNode=node.id;render();document.querySelector('[data-id="'+node.id+'"]')?.focus();}else if(e.key==='Enter'||e.key===' '){e.preventDefault();selectedNode=node.id;render();document.querySelector('[data-id="'+node.id+'"]')?.focus();} });
                 // Drag handlers
                 g.addEventListener('mousedown', (e) => startDrag(e, node));
                 
@@ -568,7 +687,7 @@
                         const cycleStart = path.indexOf(neighbor);
                         cyclePath = path.slice(cycleStart);
                         cyclePath.push(neighbor);
-                        log(`🔴 CICLU GASIT: [${cyclePath.join(' → ')}]`);
+                        log(`🔴 CYCLE FOUND: [${cyclePath.join(' → ')}]`);
                         return true;
                     }
                 }
@@ -579,7 +698,7 @@
             
             for (const node of nodes) {
                 if (!visited[node.id]) {
-                    log(`Start DFS de la ${node.id}`);
+                    log(`Start DFS from ${node.id}`);
                     if (dfs(node.id, [])) {
                         cycleFound = true;
                         break;
@@ -591,7 +710,7 @@
                 highlightCycle(cyclePath);
                 showDeadlockBanner(cyclePath);
             } else {
-                log('✅ Nu s-a gasit niciun ciclu - without deadlock!');
+                log('✅ No cycle found: no deadlock in this single-instance model.');
                 updateStatus(false);
             }
         }
@@ -632,7 +751,7 @@
                         const cycleStart = path.indexOf(neighbor);
                         cyclePath = path.slice(cycleStart);
                         cyclePath.push(neighbor);
-                        await logAnimated(`🔴 CICLU GASIT: [${cyclePath.join(' → ')}]`);
+                        await logAnimated(`🔴 CYCLE FOUND: [${cyclePath.join(' → ')}]`);
                         return true;
                     }
                 }
@@ -645,7 +764,7 @@
             
             for (const node of nodes) {
                 if (!visited[node.id]) {
-                    await logAnimated(`Start DFS de la ${node.id}`);
+                    await logAnimated(`Start DFS from ${node.id}`);
                     if (await dfs(node.id, [])) {
                         cycleFound = true;
                         break;
@@ -657,7 +776,7 @@
                 highlightCycle(cyclePath);
                 showDeadlockBanner(cyclePath);
             } else {
-                await logAnimated('✅ Nu s-a gasit niciun ciclu - without deadlock!');
+                await logAnimated('✅ No cycle found: no deadlock in this single-instance model.');
                 updateStatus(false);
             }
         }
@@ -713,7 +832,7 @@
         function renderMatrix() {
             const container = document.getElementById('adjacencyMatrix');
             if (nodes.length === 0) {
-                container.innerHTML = '<div class="text-xs text-stone-400 text-center py-4">Matricea va aparea after adaugarea nodurilor</div>';
+                container.innerHTML = '<div class="text-xs text-stone-400 text-center py-4">The matrix appears after nodes are added</div>';
                 return;
             }
             
@@ -781,7 +900,7 @@
                     break;
                     
                 case 'complex':
-                    // Multiple potential cycles
+                    // One directed cycle plus an incoming path
                     nodes = [
                         { id: 'P1', type: 'process', x: 80, y: 100, label: 'P1' },
                         { id: 'P2', type: 'process', x: 250, y: 50, label: 'P2' },
@@ -808,10 +927,11 @@
             render();
             updateDropdowns();
             hideOverlay();
-            log(`Scenariu loaded: ${type}`);
+            log(`Scenario loaded: ${type}`);
         }
 
         function clearGraph() {
+            enosTimers.cancel();
             nodes = [];
             edges = [];
             processCount = 0;
@@ -822,7 +942,7 @@
             hideBanner();
             updateStatus(false);
             document.getElementById('instructionsOverlay').classList.remove('hidden');
-            document.getElementById('detectionSteps').innerHTML = '<div class="text-stone-400">// Apasa "Detect Deadlock" for a vedea pasii algoritmului</div>';
+            document.getElementById('detectionSteps').innerHTML = '<div class="text-stone-400">// Press "Detect Deadlock" to view the algorithm steps</div>';
         }
 
         function hideOverlay() {
@@ -850,6 +970,27 @@
 
         // ==================== Initialize ====================
         render();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

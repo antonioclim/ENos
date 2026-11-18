@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pointer Indirection Visualizer - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Pointer Indirection Visualiser - Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Poppins', sans-serif;
@@ -104,23 +104,100 @@
             transform: scale(1.1);
             box-shadow: 0 0 20px currentColor;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-amber-400 to-green-400 bg-clip-text text-transparent">
-                <i class="fas fa-project-diagram mr-3"></i>Pointer Indirection Visualizer
+                <i class="fas fa-project-diagram mr-3"></i>Pointer Indirection Visualiser
             </h1>
-            <p class="text-gray-400 text-lg">Visualisationa the systemui de pointeri din inodes</p>
-        </header>
+            <p class="text-gray-400 text-lg">Visualisation of the inode pointer-tree model</p>
+        </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Classical inode model</h2><p>This is a classical direct/indirect pointer model, not a universal ext4 on-disk layout. Valid byte offsets are strictly below the represented capacity. The fixed 10 ms per read is an illustrative input; caching, device and workload determine real latency.</p></section>
 
         <!-- Configuration -->
         <div class="glass-card rounded-2xl p-4 mb-6">
             <div class="grid md:grid-cols-4 gap-4 items-end">
                 <div class="slider-container">
-                    <label class="text-sm text-gray-400 mb-2 block">Blockk Size</label>
+                    <label class="text-sm text-gray-400 mb-2 block">Block Size</label>
                     <select id="block-size" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2" onchange="updateCalculations()">
                         <option value="1024">1 KB</option>
                         <option value="2048">2 KB</option>
@@ -138,7 +215,7 @@
                 </div>
                 
                 <div class="bg-gray-800/50 rounded-lg p-3 text-center">
-                    <div class="text-xs text-gray-400">Pointeri per Blockk</div>
+                    <div class="text-xs text-gray-400">Pointers per Block</div>
                     <div class="text-2xl font-bold text-purple-400 mono" id="pointers-per-block">1024</div>
                 </div>
                 
@@ -168,7 +245,7 @@
                             <!-- Inode -->
                             <div class="inode-node absolute rounded-xl p-3 text-center" style="left: 50%; top: 10px; transform: translateX(-50%); width: 120px;">
                                 <div class="text-xs text-blue-300">INODE</div>
-                                <div class="text-sm font-bold">Blockk Pointers</div>
+                                <div class="text-sm font-bold">Block Pointers</div>
                             </div>
                             
                             <!-- Direct -->
@@ -197,19 +274,19 @@
                             
                             <!-- Single -> Data -->
                             <div id="node-single-data" class="data-block absolute rounded-lg p-2 text-center" style="left: 30%; top: 220px; width: 100px;">
-                                <div class="text-xs text-green-300">Data Blockks</div>
+                                <div class="text-xs text-green-300">Data Blocks</div>
                                 <div class="text-xs mono" id="single-count">1024</div>
                             </div>
                             
                             <!-- Double -> Index -->
                             <div id="node-double-idx" class="index-block absolute rounded-lg p-2 text-center" style="left: 50%; top: 220px; width: 100px;">
-                                <div class="text-xs text-amber-300">Index Blockks</div>
+                                <div class="text-xs text-amber-300">Index Blocks</div>
                                 <div class="text-xs mono" id="double-idx-count">1024</div>
                             </div>
                             
                             <!-- Double -> Data -->
                             <div id="node-double-data" class="data-block absolute rounded-lg p-2 text-center" style="left: 50%; top: 310px; width: 100px;">
-                                <div class="text-xs text-green-300">Data Blockks</div>
+                                <div class="text-xs text-green-300">Data Blocks</div>
                                 <div class="text-xs mono" id="double-data-count">1M</div>
                             </div>
                             
@@ -241,11 +318,11 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded bg-amber-700 border border-amber-500"></div>
-                            <span class="text-gray-400">Index Blockk</span>
+                            <span class="text-gray-400">Index Block</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded bg-green-700 border border-green-500"></div>
-                            <span class="text-gray-400">Data Blockk</span>
+                            <span class="text-gray-400">Data Block</span>
                         </div>
                     </div>
                 </div>
@@ -253,7 +330,7 @@
                 <!-- Fetch Simulation -->
                 <div class="glass-card rounded-2xl p-5 mt-6">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-search mr-2 text-amber-400"></i>Simulare: Fetch Byte din Fiander
+                        <i class="fas fa-search mr-2 text-amber-400"></i>Simulation: Fetch a File Byte
                     </h3>
                     
                     <div class="grid md:grid-cols-2 gap-4 mb-4">
@@ -269,7 +346,7 @@
                         
                         <div class="flex items-end">
                             <button onclick="simulateFetch()" class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 rounded-xl font-semibold transition">
-                                <i class="fas fa-play mr-2"></i>Fetch Blockk
+                                <i class="fas fa-play mr-2"></i>Fetch Block
                             </button>
                         </div>
                     </div>
@@ -277,7 +354,7 @@
                     <!-- Fetch Results -->
                     <div class="grid md:grid-cols-4 gap-3">
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center">
-                            <div class="text-xs text-gray-400">Blockk Number</div>
+                            <div class="text-xs text-gray-400">Block Number</div>
                             <div class="text-xl font-bold text-cyan-400 mono" id="fetch-block">#12</div>
                         </div>
                         <div class="bg-gray-800/50 rounded-lg p-3 text-center">
@@ -306,7 +383,7 @@
                 <!-- Size Calculator -->
                 <div class="glass-card rounded-2xl p-5">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-calculator mr-2 text-green-400"></i>Calculator Size Max
+                        <i class="fas fa-calculator mr-2 text-green-400"></i>Maximum Addressability Calculator
                     </h3>
                     
                     <!-- Formula -->
@@ -319,7 +396,7 @@
                             <div><span class="text-red-400">Triple:</span> (B/P)³ × B</div>
                         </div>
                         <div class="text-xs text-gray-400 mt-2">
-                            B = Blockk Size, P = Pointer Size
+                            B = Block Size, P = Pointer Size
                         </div>
                     </div>
                     
@@ -352,7 +429,7 @@
                 <!-- File Size Slider -->
                 <div class="glass-card rounded-2xl p-5">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-sliders-h mr-2 text-cyan-400"></i>Visualisation Utilizare
+                        <i class="fas fa-sliders-h mr-2 text-cyan-400"></i>Usage Visualisation
                     </h3>
                     
                     <div class="slider-container mb-4">
@@ -405,11 +482,56 @@
     </div>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Configuration state
         let config = {
             blockSize: 4096,
             pointerSize: 4,
-            pointersPerBlockk: 1024
+            pointersPerBlock: 1024
         };
 
         // Calculated sizes
@@ -435,16 +557,16 @@
         function updateCalculations() {
             config.blockSize = parseInt(document.getElementById('block-size').value);
             config.pointerSize = parseInt(document.getElementById('pointer-size').value);
-            config.pointersPerBlockk = Math.floor(config.blockSize / config.pointerSize);
+            config.pointersPerBlock = Math.floor(config.blockSize / config.pointerSize);
             
             // Update display
-            document.getElementById('pointers-per-block').textContent = config.pointersPerBlockk.toLocaleString();
+            document.getElementById('pointers-per-block').textContent = config.pointersPerBlock.toLocaleString();
             
             // Calculate sizes
             sizes.direct = 12 * config.blockSize;
-            sizes.single = config.pointersPerBlockk * config.blockSize;
-            sizes.double = Math.pow(config.pointersPerBlockk, 2) * config.blockSize;
-            sizes.triple = Math.pow(config.pointersPerBlockk, 3) * config.blockSize;
+            sizes.single = config.pointersPerBlock * config.blockSize;
+            sizes.double = Math.pow(config.pointersPerBlock, 2) * config.blockSize;
+            sizes.triple = Math.pow(config.pointersPerBlock, 3) * config.blockSize;
             sizes.total = sizes.direct + sizes.single + sizes.double + sizes.triple;
             
             // Update calculator display
@@ -456,15 +578,16 @@
             document.getElementById('max-file-size').textContent = '~' + formatSize(sizes.total);
             
             // Update tree node counts
-            document.getElementById('single-count').textContent = config.pointersPerBlockk.toLocaleString();
-            document.getElementById('double-idx-count').textContent = config.pointersPerBlockk.toLocaleString();
-            document.getElementById('double-data-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 2));
-            document.getElementById('triple-idx1-count').textContent = config.pointersPerBlockk.toLocaleString();
-            document.getElementById('triple-idx2-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 2));
-            document.getElementById('triple-data-count').textContent = formatCount(Math.pow(config.pointersPerBlockk, 3));
+            document.getElementById('single-count').textContent = config.pointersPerBlock.toLocaleString();
+            document.getElementById('double-idx-count').textContent = config.pointersPerBlock.toLocaleString();
+            document.getElementById('double-data-count').textContent = formatCount(Math.pow(config.pointersPerBlock, 2));
+            document.getElementById('triple-idx1-count').textContent = config.pointersPerBlock.toLocaleString();
+            document.getElementById('triple-idx2-count').textContent = formatCount(Math.pow(config.pointersPerBlock, 2));
+            document.getElementById('triple-data-count').textContent = formatCount(Math.pow(config.pointersPerBlock, 3));
             
             // Update slider max
-            document.getElementById('fetch-offset').max = sizes.total;
+            document.getElementById('fetch-offset').max = sizes.total-1;
+            if(Number(document.getElementById('fetch-offset').value)>=sizes.total)document.getElementById('fetch-offset').value=sizes.total-1;
             
             updateUsageVisualization();
             updateFetchPreview();
@@ -478,7 +601,7 @@
 
         // Simulate fetch operation
         function simulateFetch() {
-            const offset = parseInt(document.getElementById('fetch-offset').value);
+            const offset=enosInteger(document.getElementById('fetch-offset').value,0,sizes.total-1,'Byte offset');if(offset===null)return;
             const blockNum = Math.floor(offset / config.blockSize);
             
             let type, reads, color;
@@ -488,12 +611,12 @@
                 reads = 1;
                 color = 'text-green-400';
                 highlightPath('direct');
-            } else if (blockNum < 12 + config.pointersPerBlockk) {
+            } else if (blockNum < 12 + config.pointersPerBlock) {
                 type = 'Single Indirect';
                 reads = 2;
                 color = 'text-amber-400';
                 highlightPath('single');
-            } else if (blockNum < 12 + config.pointersPerBlockk + Math.pow(config.pointersPerBlockk, 2)) {
+            } else if (blockNum < 12 + config.pointersPerBlock + Math.pow(config.pointersPerBlock, 2)) {
                 type = 'Double Indirect';
                 reads = 3;
                 color = 'text-orange-400';
@@ -520,17 +643,17 @@
             pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
             
             if (type === 'Direct') {
-                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk #${blockNum}</div>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Block #${blockNum}</div>`);
             } else if (type === 'Single Indirect') {
-                pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Index Blockk</div>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Index Block</div>`);
                 pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
-                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk</div>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Block</div>`);
             } else if (type === 'Double Indirect') {
                 pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Index L1</div>`);
                 pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
                 pathElements.push(`<div class="px-3 py-1 rounded bg-orange-600 text-sm">Index L2</div>`);
                 pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
-                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Blockk</div>`);
+                pathElements.push(`<div class="px-3 py-1 rounded bg-green-600 text-sm">Data Block</div>`);
             } else {
                 pathElements.push(`<div class="px-3 py-1 rounded bg-amber-600 text-sm">Idx L1</div>`);
                 pathElements.push(`<i class="fas fa-arrow-right text-gray-500"></i>`);
@@ -702,6 +825,27 @@
             if (num < 1000000000) return (num / 1000000).toFixed(0) + 'M';
             return (num / 1000000000).toFixed(0) + 'G';
         }
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

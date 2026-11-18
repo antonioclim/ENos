@@ -5,9 +5,13 @@
 
 ---
 
+## Current status
+
+The tools produce local evidence and pending review reports. Authentication/key custody, accepted recording envelopes, participation, late-work rules, project subweights, confidential distribution and publication remain explicit author decisions. The historical numerical rules below are retained as proposals; they are not applied by default. See [the exact contract](homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
+
 ## Overview
 
-This toolkit provides comprehensive infrastructure for the final evaluation of the Operating Systems course. It integrates assessment of all three graded components: homeworks, projects and tests.
+This toolkit provides local diagnostic and review infrastructure for the final evaluation of the Operating Systems course. It integrates assessment of all three graded components: homeworks, projects and tests.
 
 ---
 
@@ -70,13 +74,9 @@ SEM07/
 │   ├── run_auto_eval_EN.sh            # Automated evaluation orchestrator
 │   ├── manual_eval_checklist_EN.md    # Manual evaluation criteria
 │   ├── oral_defence_questions_EN.md   # Question bank for defence
-│   ├── project_score_calculator_EN.py # Score aggregation
 │   └── Docker/
 │       └── Dockerfile                 # Sandbox for safe execution
 ├── final_test/                        # Test generation and grading
-│   ├── generate_test_EN.py            # Randomised test generator
-│   ├── TEST_TEMPLATE.md               # Test format template
-│   ├── answer_key_generator_EN.py     # Answer key generation
 │   └── test_bank/
 │       └── questions_pool.yaml        # Question database
 ├── grade_aggregation/                 # Final grade calculation
@@ -87,7 +87,8 @@ SEM07/
 │       ├── project_grades_template.csv
 │       └── test_grades_template.csv
 └── docs/
-    └── EVALUATION_TIMELINE.md         # Evaluation schedule
+    ├── S07_00_PEDAGOGICAL_ANALYSIS_PLAN.md
+    └── S07_01_INSTRUCTOR_GUIDE.md
 ```
 
 ---
@@ -109,17 +110,17 @@ cd project_evaluation/
 ### 3. Generate Final Test
 ```bash
 cd final_test/
-python3 generate_test_EN.py --students 30 --seed 2025
+python3 test_bank/test_generator.py --help
 ```
 
 ### 4. Calculate Final Grades
 ```bash
 cd grade_aggregation/
 python3 final_grade_calculator_EN.py \
-    --homework ../templates/homework_grades.csv \
-    --project ../templates/project_grades.csv \
-    --tests ../templates/test_grades.csv \
-    --output final_grades.csv
+    --homework /path/to/reviewed_homework.csv \
+    --project /path/to/reviewed_project.csv \
+    --tests /path/to/reviewed_tests.csv \
+    --output component_review
 ```
 
 ---
@@ -139,10 +140,10 @@ python3 final_grade_calculator_EN.py \
 ## Component Details
 
 ### Homework Evaluation
-- Automated signature verification prevents tampering
-- Each assignment graded against specific rubric
+- Format, metadata and authentication are reported separately; current recorder compatibility remains unresolved
+- Human-reviewed assignment scores are joined to exact file hashes and rubric observations
 - Cumulative score calculated as average of all submitted assignments
-- Late submissions: -20% penalty per day (max 3 days)
+- Historical late penalties below require explicit reconciliation; no silent deduction is applied
 
 ### Project Evaluation
 - **Automatic evaluation (85%):** Functional tests, code quality, documentation
@@ -159,11 +160,10 @@ python3 final_grade_calculator_EN.py \
 ## Dependencies
 
 ```bash
-# Python packages
-pip install rich questionary pyyaml pandas --break-system-packages
-
-# System tools
-apt install shellcheck docker.io
+# Inspect local prerequisites; installation is a separate environment action.
+python3 --version
+bash --version
+command -v openssl shellcheck bc docker || true
 ```
 
 ---

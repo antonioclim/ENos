@@ -166,7 +166,7 @@ cat file.txt | grep "pattern" | wc -l
 ps aux | sort -k4 -rn | head -10
 
 # Complex pipeline
-find . -name "*.log" | xargs grep "ERROR" | sort | uniq -c | sort -rn
+find . -type f -name "*.log" -print0 | xargs -0 -r grep -h -- "ERROR" | sort | uniq -c | sort -rn
 ```
 
 ### 4.1 Named Pipes (FIFO)
@@ -213,16 +213,16 @@ Constructs arguments from stdin.
 
 ```bash
 # Basic
-find . -name "*.txt" | xargs cat
+find . -type f -name "*.txt" -print0 | xargs -0 -r cat --
 
 # With placeholder
-find . -name "*.txt" | xargs -I{} cp {} backup/
+find . -maxdepth 1 -type f -name "*.txt" -print0 | xargs -0 -r -I{} cp -- "{}" backup/
 
 # Limit arguments
 echo "1 2 3 4 5" | xargs -n 2 echo
 
 # Parallel execution
-find . -name "*.jpg" | xargs -P 4 -I{} convert {} {}.png
+find . -type f -name "*.jpg" -print0 | xargs -0 -r -P 4 -I{} convert "{}" "{}.png"
 ```
 
 ---
@@ -319,14 +319,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

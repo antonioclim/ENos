@@ -1,3 +1,24 @@
+# Lecture 16supp — Advanced Containerisation
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C16_01_COURSE_PLAN.md)
+- [Concept Map](docs/C16_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C16_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C16_04_STUDY_GUIDE.md)
+- [16ex1 - Namespaces Visualizer](docs/16ex1_-_Namespaces_Visualizer.html)
+- [16ex2 - Cgroups Limiter](docs/16ex2_-_Cgroups_Limiter.html)
+- [16ex3 - Overlay FS Layers](docs/16ex3_-_Overlay_FS_Layers.html)
+- [Formative question bank](docs/C16_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demo Scripts — Lecture 16 Supplementary: Advanced Containerisation
 
@@ -15,14 +36,14 @@
 
 ### Shared Scripts (from Lecture 15)
 
-The following scripts are used for testing network isolation and are shared with **Lecture 15 Supplementary: Connecting to the Network**. You can find them in the directory `../15supp-Conectarea_la_Retea/scripts/`:
+The following scripts are used for testing network isolation and are shared with **Lecture 15 Supplementary: Connecting to the Network**. You can find them in the directory `../../15supp-Network_Connection/scripts/`:
 
 | Script | Location | Purpose in containerisation context |
 |--------|---------|-------------------------------|
-| `echo_server.py` | `../15supp-Conectarea_la_Retea/scripts/` | TCP server for network isolation tests |
-| `echo_client.py` | `../15supp-Conectarea_la_Retea/scripts/` | TCP client for connectivity tests |
-| `network_diag.sh` | `../15supp-Conectarea_la_Retea/scripts/` | Network diagnostics from within container |
-| `firewall_basic.sh` | `../15supp-Conectarea_la_Retea/scripts/` | iptables rules for containers |
+| `echo_server.py` | `../../15supp-Network_Connection/scripts/` | TCP server for network isolation tests |
+| `echo_client.py` | `../../15supp-Network_Connection/scripts/` | TCP client for connectivity tests |
+| `network_diag.sh` | `../../15supp-Network_Connection/scripts/` | Network diagnostics from within container |
+| `firewall_basic.sh` | `../../15supp-Network_Connection/scripts/` | iptables rules for containers |
 
 > **Note**: These scripts are functionally identical. Sharing eliminates duplication and ensures consistency between lectures.
 
@@ -30,63 +51,39 @@ The following scripts are used for testing network isolation and are shared with
 
 ## Quick Usage
 
-### cgroups v2 Monitor
+### cgroups v2 monitor
+
+From `scripts/` (read-only access depends on the selected cgroup):
 
 ```bash
-# Monitor all cgroups
-python3 cgroup_monitor.py
-
-# Monitor a specific Docker container (by ID or name)
-python3 cgroup_monitor.py --docker <container_id>
-python3 cgroup_monitor.py --docker nginx
-
-# Monitor a specific cgroup path
-python3 cgroup_monitor.py /sys/fs/cgroup/user.slice/
-
-# Refresh every 2 seconds
-python3 cgroup_monitor.py --interval 2
-
-# JSON output for further processing
-python3 cgroup_monitor.py --json > metrics.json
+python3 cgroup_monitor.py --help
+python3 cgroup_monitor.py /sys/fs/cgroup/user.slice/ --interval 2
+python3 cgroup_monitor.py --docker CONTAINER_ID
 ```
 
-### Mini-Container (requires root)
+Use an actual container ID; names and `--json` are not implemented. The monitor reads existing cgroups and does not create limits or move processes.
+
+### Mini-container demonstration
 
 ```bash
-# Minimal container with complete isolation
-sudo ./mini_container.sh
-
-# With memory limit (100MB)
-sudo ./mini_container.sh --memory 100M
-
-# With CPU limit (50% of one core)
-sudo ./mini_container.sh --cpu 0.5
-
-# With network isolation (separate network namespace)
-sudo ./mini_container.sh --net-isolate
-
-# With custom root filesystem
-sudo ./mini_container.sh --rootfs /path/to/rootfs
-
-# Combination: limited container with interactive bash
-sudo ./mini_container.sh --memory 50M --cpu 0.25 --net-isolate -- /bin/bash
+bash mini_container.sh --help
+# The following lifecycle is for an explicitly authorised, disposable root lab:
+# sudo bash mini_container.sh prepare
+# sudo bash mini_container.sh run
+# sudo bash mini_container.sh clean
 ```
 
-### Network Isolation Tests (using shared scripts from Lecture 15)
+The implemented commands are `prepare`, `run`/`shell`, `advanced`, `info`, `clean` and `help`. The `run` path uses PID, mount, UTS and IPC namespaces with a prepared chroot. It does **not** add a network namespace, user mapping, cgroups, capabilities reduction or seccomp policy. `advanced` uses `pivot_root`. A plain mount namespace changes mount views; it does not create a new root filesystem by itself. This is an educational mechanism demonstration with host kernel sharing, not a complete security boundary.
+
+### Network isolation exercise
+
+The shared scripts are in `../../15supp-Network_Connection/scripts/` relative to this lecture's `scripts/` directory. The echo client accepts positional host and port:
 
 ```bash
-# Path to shared scripts
-SHARED_SCRIPTS="../15supp-Conectarea_la_Retea/scripts"
-
-# In container: start server
-sudo ./mini_container.sh --net-isolate -- python3 $SHARED_SCRIPTS/echo_server.py --port 8080
-
-# From host: test that you CANNOT connect (isolated)
-python3 $SHARED_SCRIPTS/echo_client.py --host 127.0.0.1 --port 8080  # Should fail
-
-# Network diagnostics from inside the container
-sudo ./mini_container.sh --net-isolate -- bash $SHARED_SCRIPTS/network_diag.sh
+python3 ../../15supp-Network_Connection/scripts/echo_client.py 127.0.0.1 8080
 ```
+
+Run that connection command only against an authorised server. The supplied mini-container shares the host network, so it cannot demonstrate network isolation. A separate owned lab must explicitly create/configure a network namespace, bring up loopback and provide the needed binaries before comparing host and container reachability. Neither the old `--net-isolate` nor `--memory`/`--cpu` options exist in this script.
 
 ---
 
@@ -187,7 +184,9 @@ Path: /sys/fs/cgroup/system.slice/docker-a1b2c3d4e5f6.scope
 [Refresh: 1s] [Press Ctrl+C to exit]
 ```
 
-### mini_container.sh
+### mini_container.sh — historical schematic (not output of the current script)
+
+The following retained narrative illustrates a fuller runtime. Its flags and cgroup/network features are not implemented by `mini_container.sh`; use the command reference above.
 
 ```
 $ sudo ./mini_container.sh --memory 100M --net-isolate
@@ -243,7 +242,7 @@ root@container-a1b2c3:/# ip addr
 - Ubuntu 24.04 with kernel 5.15+ (for complete cgroups v2)
 - Python 3.8+ with standard modules (`pathlib`, `dataclasses`)
 - cgroups v2 enabled (unified hierarchy)
-- Root privileges for `mini_container.sh` and Docker monitoring
+- Root privileges for the mutating mini-container lifecycle; monitoring needs read permission on the selected cgroup, not inherently root
 
 ### cgroups v2 Verification
 
@@ -279,23 +278,23 @@ sudo usermod -aG docker $USER  # Logout/login required
 | Problem | Cause | Solution |
 |----------|-------|---------|
 | "Cgroup does not exist" | Wrong path or container stopped | Check with `docker ps` and use correct ID |
-| "Permission denied" | No root access | Run with `sudo` |
+| "Permission denied" | Missing read access or cgroup delegation | Identify the required access; use an authorised delegated lab rather than assuming root solves the configuration |
 | "cgroups v1 detected" | Legacy system | Add `systemd.unified_cgroup_hierarchy=1` to kernel cmdline |
 | "unshare: operation not permitted" | Restricted kernel | Check `sysctl kernel.unprivileged_userns_clone` |
 | Memory not limited | Controller not activated | `echo "+memory" > /sys/fs/cgroup/cgroup.subtree_control` |
-| Shared scripts missing | Wrong path | Verify existence of `../15supp-Conectarea_la_Retea/scripts/` |
+| Shared scripts missing | Wrong path | Verify existence of `../../15supp-Network_Connection/scripts/` |
 
 ---
 
 ## Proposed Exercises
 
-1. **Observing limits**: Start `mini_container.sh --memory 50M` and run `stress --vm 1 --vm-bytes 100M`. What happens?
+1. **Observing limits**: In a separately authorised cgroup lab, establish delegation, enable the memory controller and attach the owned workload before observing a limit. The mini-container script does not configure memory limits.
 
 2. **PID isolation**: Inside the container, run `ps aux`. Why do you only see your own processes?
 
 3. **Docker comparison**: Compare the output of `cgroup_monitor.py --docker <id>` with `docker stats <id>`.
 
-4. **Network namespace**: Create two containers with `mini_container.sh --net-isolate`. Can they communicate with each other? Why?
+4. **Network namespace**: Compare the shared network of this script with a separately configured network namespace in an owned lab. State which interfaces and routes are available.
 
 5. **Network isolation tests**: Using the shared scripts from Lecture 15, test connectivity between host and container with `echo_server.py`/`echo_client.py`.
 

@@ -38,6 +38,7 @@ DEMO_DIR="$HOME/permissions_demo"
 INTERACTIVE=false
 RUN_SECTION=""
 TOOL_NAME=""
+AUDIT_DIR="."
 
 # Colours
 RED='\033[0;31m'
@@ -136,6 +137,7 @@ OPTIONS:
   -s, --section NUM   Run only the specified section (1-8)
   -c, --cleanup       Delete demo directories
   -t, --tool NAME     Run a specific tool
+  -d, --directory DIR Directory for the read-only audit (default: current directory)
 
 SECTIONS:
   1 - Permissions fundamentals (rwx)
@@ -558,12 +560,12 @@ section_5_umask() {
 ║     Final permissions = Default - umask                                       ║
 ║                                                                               ║
 ║   EXAMPLE with umask 022:                                                     ║
-║     File:      666 - 022 = 644 (rw-r--r--)                                    ║
-║     Directory: 777 - 022 = 755 (rwxr-xr-x)                                    ║
+║     File:      0666 & ~0022 = 0644 (rw-r--r--)                                    ║
+║     Directory: 0777 & ~0022 = 0755 (rwxr-xr-x)                                    ║
 ║                                                                               ║
 ║   EXAMPLE with umask 077:                                                     ║
-║     File:      666 - 077 = 600 (rw-------)                                    ║
-║     Directory: 777 - 077 = 700 (rwx------)                                    ║
+║     File:      0666 & ~0077 = 0600 (rw-------)                                    ║
+║     Directory: 0777 & ~0077 = 0700 (rwx------)                                    ║
 ║                                                                               ║
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║   umask 022  → Removes w for group and others (standard)                      ║
@@ -901,11 +903,23 @@ tool_calculator() {
     
     while true; do
         echo -n -e "${CYAN}Permissions> ${NC}"
-        read -r input
+        read -r input || break
         
         [[ "$input" == "q" || "$input" == "quit" ]] && break
         [[ -z "$input" ]] && continue
         
+        # Complete u=,g=,o= assignments only; no relative chmod operations.
+        if [[ "$input" =~ ^u=([rwx]*),g=([rwx]*),o=([rwx]*)$ ]]; then
+            local digits="" permissions digit
+            for permissions in "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"; do
+                digit=0
+                [[ "$permissions" == *r* ]] && digit=$((digit | 4))
+                [[ "$permissions" == *w* ]] && digit=$((digit | 2))
+                [[ "$permissions" == *x* ]] && digit=$((digit | 1))
+                digits+="$digit"
+            done
+            input="$digits"
+        fi
         # Check if octal (3-4 digits)
         if [[ "$input" =~ ^[0-7]{3,4}$ ]]; then
             # Octal to symbolic
@@ -951,7 +965,7 @@ tool_calculator() {
             
             [[ "$special" != "0" ]] && echo "  Special bits: $special"
             
-        elif [[ "$input" =~ ^[rwx-]{9}$ ]]; then
+        elif [[ "$input" =~ ^[r-][w-][xsS-][r-][w-][xsS-][r-][w-][xtT-]$ ]]; then
             # Simple symbolic to octal
             symbolic_to_octal() {
                 local sym="$1"
@@ -1062,80 +1076,36 @@ tool_visualizer() {
 #
 
 tool_audit() {
-    local target="${1:-.}"
-    
-    print_header "🔍 Security Audit: $target"
-    
-    echo ""
-    echo -e "${WHITE}Scanning for security issues...${NC}"
-    echo ""
-    
-    local issues=0
-    
-    # World-writable files
-    echo -e "${YELLOW}► World-writable files:${NC}"
-    local ww_files=$(find "$target" -type f -perm -o=w 2>/dev/null)
-    if [[ -n "$ww_files" ]]; then
-        echo "$ww_files" | while read f; do
-            echo -e "  ${RED}⚠${NC} $f"
-            ((issues++))
-        done
-    else
-        echo -e "  ${GREEN}✓ None found${NC}"
+    local target="${1:-.}" issues=0 scan_errors=0 kind file
+    local scan_dir
+    scan_dir="$(mktemp -d)" || return 1
+    print_header "Permission observations: $target"
+    for kind in world_files world_dirs suid full; do
+        local -a predicates
+        case "$kind" in
+            world_files) predicates=(-type f -perm -o=w) ;;
+            world_dirs) predicates=(-type d -perm -o=w ! -perm -1000) ;;
+            suid) predicates=(-type f -perm -4000) ;;
+            full) predicates=(-type f -perm 777) ;;
+        esac
+        echo "$kind:"
+        if find "$target" "${predicates[@]}" -print0 > "$scan_dir/paths" 2> "$scan_dir/errors"; then
+            while IFS= read -r -d '' file; do
+                printf '  Review: %q\n' "$file"
+                issues=$((issues + 1))
+            done < "$scan_dir/paths"
+        else
+            scan_errors=$((scan_errors + 1))
+            cat "$scan_dir/errors" >&2
+        fi
+    done
+    rm -rf -- "$scan_dir"
+    echo "Potential permission observations: $issues (categories can overlap)."
+    if [[ $scan_errors -gt 0 ]]; then
+        echo "INCOMPLETE: $scan_errors scan(s) failed; no clean result can be inferred." >&2
+        return 1
     fi
-    
-    echo ""
-    
-    # World-writable directories without sticky
-    echo -e "${YELLOW}► World-writable directories without sticky bit:${NC}"
-    local ww_dirs=$(find "$target" -type d -perm -o=w ! -perm -1000 2>/dev/null)
-    if [[ -n "$ww_dirs" ]]; then
-        echo "$ww_dirs" | while read d; do
-            echo -e "  ${RED}⚠${NC} $d"
-            ((issues++))
-        done
-    else
-        echo -e "  ${GREEN}✓ None found${NC}"
-    fi
-    
-    echo ""
-    
-    # SUID files (outside standard locations)
-    echo -e "${YELLOW}► SUID files:${NC}"
-    local suid_files=$(find "$target" -type f -perm -4000 2>/dev/null | grep -v "^/usr\|^/bin\|^/sbin")
-    if [[ -n "$suid_files" ]]; then
-        echo "$suid_files" | while read f; do
-            echo -e "  ${YELLOW}!${NC} $f (verify if necessary)"
-            ((issues++))
-        done
-    else
-        echo -e "  ${GREEN}✓ None in non-standard locations${NC}"
-    fi
-    
-    echo ""
-    
-    # Files with 777
-    echo -e "${YELLOW}► Files with 777 permissions:${NC}"
-    local full_perm=$(find "$target" -type f -perm 777 2>/dev/null)
-    if [[ -n "$full_perm" ]]; then
-        echo "$full_perm" | while read f; do
-            echo -e "  ${RED}☠${NC} $f - CRITICAL!"
-            ((issues++))
-        done
-    else
-        echo -e "  ${GREEN}✓ None found${NC}"
-    fi
-    
-    echo ""
-    echo "════════════════════════════════════════════════════════════════════════"
-    
-    if [[ $issues -eq 0 ]]; then
-        echo -e "${GREEN}✓ Audit complete. No issues identified.${NC}"
-    else
-        echo -e "${YELLOW}⚠ Audit complete. Potential issues found.${NC}"
-    fi
-    
-    echo ""
+    echo "Read-only scan complete; review permissions in their intended context."
 }
 
 #
@@ -1216,6 +1186,11 @@ parse_args() {
                 cleanup_demo
                 exit 0
                 ;;
+            -d|--directory)
+                [[ $# -ge 2 && -n "$2" ]] || { echo 'Missing audit directory' >&2; exit 2; }
+                AUDIT_DIR="$2"
+                shift 2
+                ;;
             -t|--tool)
                 TOOL_NAME="$2"
                 shift 2
@@ -1237,7 +1212,7 @@ main() {
         case "$TOOL_NAME" in
             calculator|calc) tool_calculator ;;
             visualizer|viz) tool_visualizer ;;
-            audit) tool_audit "${DEMO_DIR:-.}" ;;
+            audit) tool_audit "$AUDIT_DIR" ;;
             *)
                 echo -e "${RED}Unknown tool: $TOOL_NAME${NC}"
                 exit 1
@@ -1246,6 +1221,11 @@ main() {
         exit 0
     fi
     
+    # Each standalone section has its own complete disposable fixture.
+    DEMO_DIR="$(mktemp -d "${TMPDIR:-/tmp}/enos-permissions.XXXXXXXX")"
+    trap 'rm -rf -- "$DEMO_DIR"' EXIT
+    setup_demo_environment
+
     # Run specific section
     if [[ -n "$RUN_SECTION" ]]; then
         case "$RUN_SECTION" in

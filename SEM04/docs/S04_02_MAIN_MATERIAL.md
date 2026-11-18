@@ -49,8 +49,8 @@ Upon completion of studying this material, you will be able to:
 3. [Module 3: SED - Stream Editor](#module-3-sed---stream-editor)
 4. [Module 4: AWK - Structured Processing](#module-4-awk---structured-processing)
 5. [Module 5: NANO - Simple Text Editor](#module-5-nano---simple-text-editor)
-6. [Extended Cheat Sheet](#-extended-cheat-sheet)
-7. [Frequent Combinations](#-frequent-combinations)
+6. [Extended Cheat Sheet](#extended-cheat-sheet)
+7. [Frequent Combinations](#frequent-combinations-1)
 
 ---
 
@@ -126,7 +126,7 @@ Meaning: Matches the end of the line (anchor).
 # Matches lines that END with "end"
 
 echo -e "The end\nendless\nFriend" | grep 'end$'
-# Output: The end
+# Output (two lines): The end; Friend
 ```
 
 ### The `\` (backslash) Character
@@ -183,7 +183,10 @@ Character classes allow specifying a set of possible characters.
 
 ### POSIX Classes
 
-POSIX classes are locale-independent and more expressive:
+POSIX class names are portable; their membership depends on the locale. The
+ASCII equivalences below assume `LC_ALL=C`. Run Unicode examples in an explicitly
+identified UTF-8 locale. A line-oriented grep invocation does not match its record
+separator as an ordinary character.
 
 ```bash
 [[:alpha:]]     # Letters [a-zA-Z]
@@ -254,7 +257,8 @@ echo -e "12\n123\n1234\n12345" | grep -E '[0-9]{4}'
 
 # {n,m} = between n and m repetitions
 echo -e "ab\nabb\nabbb\nabbbb" | grep -E 'ab{2,3}'
-# Output: abb, abbb (2 or 3 b's)
+# Output: abb, abbb, abbbb (a matching substring is sufficient)
+# Use ^ab{2,3}$ to require exactly 2 or 3 b characters in the whole line.
 ```
 
 ### Greedy vs Lazy (Advanced - PCRE)
@@ -270,7 +274,8 @@ grep -oP '<div>.*</div>' <<< '<div>Hello</div><div>World</div>'
 
 # Lazy: .*?
 grep -oP '<div>.*?</div>' <<< '<div>Hello</div><div>World</div>'
-# Output: <div>Hello</div> (minimum necessary)
+# Output (two lines): <div>Hello</div>; <div>World</div>
+# -o prints every non-overlapping match, not only the first one.
 ```
 
 > 🔮 **PREDICTION:** What would happen if you used `grep -oE` instead of `grep -oP`? (Hint: ERE does not support `?` for lazy matching)
@@ -315,7 +320,7 @@ Backreferences allow reusing captured groups:
 # \1 = first captured group, \2 = second, etc.
 
 # Find duplicate words
-echo "the the quick fox" | grep -E '\b(\w+)\s+\1\b'
+echo "the the quick fox" | grep -oE '\b(\w+)\s+\1\b'
 # Output: the the
 
 # Reverse order (first name last name → last name, first name)
@@ -536,13 +541,16 @@ grep 'ERROR' app.log | cut -d' ' -f1 | uniq -c
 # Exit codes:
 # 0 - found matches
 # 1 - did not find matches
-# 2 - error (non-existent file, etc.)
+# 2 (or another >1 value) - search error; with -q, an earlier match can hide a later read error
 
 # Usage in if
-if grep -q 'error' log.txt; then
-    echo "Errors found!"
-    exit 1
-fi
+grep -q 'error' log.txt
+rc=$?
+case $rc in
+    0) echo "Matching error text found" ;;
+    1) echo "No matching error text" ;;
+    *) printf 'Cannot complete search (status %s)\n' "$rc" >&2; exit "$rc" ;;
+esac
 
 # Usage with &&
 grep -q 'pattern' file.txt && echo "Found"
@@ -551,6 +559,23 @@ grep -q 'pattern' file.txt && echo "Found"
 ---
 
 # MODULE 3: SED - STREAM EDITOR
+
+### Tool and Dialect Contract
+
+Examples target the GNU tools supplied in the course environment. Test with the
+actual executable; a web tester for PCRE/JavaScript does not establish GNU BRE,
+GNU ERE or AWK behaviour.
+
+| Target | Groups/repetition | Extensions and limits |
+|--------|-------------------|-----------------------|
+| GNU grep BRE / GNU sed BRE | `\(…\)`, `\{n,m\}` | `\+`, `\?`, `\|` are GNU extensions, not portable POSIX BRE |
+| GNU grep ERE (`-E`) | `(…)`, `+`, `?`, `{n,m}` | GNU grep supports backreferences, `\w`, `\s` and `\b`; not all ERE consumers do |
+| GNU grep PCRE (`-P`, if built in) | PCRE syntax | Lazy quantifiers and `\d` are available here; availability must be checked |
+| GNU sed ERE (`-E`) | `(…)`, `+`, `?`, `{n,m}` | Backreferences in replacement refer to captured groups; it is not a PCRE engine |
+| POSIX awk / gawk ERE patterns | `(…)`, `+`, `?`, `{n,m}` on the selected implementation | Do not transplant GNU grep ERE backreferences or `\w`/`\s` into portable AWK patterns |
+
+A `.bak` suffix protects one pre-edit version only when that backup name does not
+already exist. Use a fresh exercise fixture or an explicit collision check.
 
 ## 3.1 Operating Model
 
@@ -591,10 +616,12 @@ sed -e 'cmd1' -e 'cmd2' file    # Multiple commands
 sed -f script.sed file          # Commands from file
 sed -i 'command' file           # In-place editing (modifies the file!)
 
-> 💡 I have had students who learnt Bash in two weeks starting from zero — so it is possible, with consistent practice.
 
 sed -i.bak 'command' file       # In-place with backup
 ```
+
+> 💡 I have had students who learnt Bash in two weeks starting from zero — so it is possible, with consistent practice.
+
 
 ---
 
@@ -706,9 +733,11 @@ sed '/^$/d' file.txt           # Empty lines
 sed '/^#/d' file.txt           # Comments (start with #)
 sed '1d;$d' file.txt           # First and last line
 
-> 💡 Over the years, I have found that practical examples beat theory every time.
 
 ```
+
+> 💡 Over the years, I have found that practical examples beat theory every time.
+
 
 ### Printing (p)
 
@@ -837,13 +866,18 @@ awk -f script.awk file
 
 ---
 
+The examples using `-F,` require a simple comma-delimited fixture: one record per
+line, no quoted commas or embedded newlines and numeric salary fields. They are
+not general CSV parsers. Validate those conditions before using arbitrary input;
+use a CSV-aware parser when quoted fields are part of the data contract.
+
 ## 4.2 Fields and Built-in Variables
 
 ### SUBGOAL 4.2.1: Access structured data
 
 ### Fields
 
-```bash
+```text
 $0      # The ENTIRE line
 $1      # First field
 $2      # Second field
@@ -933,7 +967,7 @@ awk 'BEGIN { print "=== REPORT ===" }
 awk 'END { print "Total:", NR, "lines" }' file.txt
 
 # Calculate average
-awk '{ sum += $1 } END { print "Average:", sum/NR }' numbers.txt
+awk '{ sum += $1 } END { if (NR) print "Average:", sum/NR; else print "Average: undefined (0 records)" }' numbers.txt
 ```
 
 ---
@@ -1001,7 +1035,7 @@ awk -v name="John" '$1 == name' file.txt
 
 ### Operators
 
-```bash
+```text
 # Arithmetic
 +  -  *  /  %  ^
 
@@ -1095,7 +1129,7 @@ awk '{ count[$1]++ }
 
 ### String Functions
 
-```bash
+```text
 length(s)              # String length
 substr(s, start, len)  # Substring (1-indexed!)
 index(s, target)       # Position of target in s (0 if not found)
@@ -1109,7 +1143,7 @@ sprintf(fmt, ...)      # Format into string
 
 ### Mathematical Functions
 
-```bash
+```text
 int(x)                 # Integer part
 sqrt(x)                # Square root
 sin(x), cos(x)         # Trigonometry
@@ -1145,10 +1179,10 @@ awk '{ n = split($0, arr, ":"); print arr[1], arr[n] }' /etc/passwd
 
 | Characteristic | Nano | Vim |
 |----------------|------|-----|
-| Learning curve | Zero | Steep |
+| Initial interaction | Visible shortcut hints | Modal commands require explicit introduction |
 | Visible commands | Yes, in footer | No, must be memorised |
 | Modes | No | Yes (normal, insert, visual) |
-| Time to productivity | < 1 minute | > 1 hour |
+| Learning time | Depends on learner and task | Depends on learner and task |
 
 Nano is ideal for:
 
@@ -1192,15 +1226,19 @@ Specifically: Quick editing of configurations. Small modifications in scripts. A
 | `^U` | Paste |
 | `^\` | Replace |
 | `^J` | Justify (paragraph alignment) |
-| `^T` | Spell check (if installed) |
+| `^T` | Execute command menu in Nano 7.x; inspect the displayed menu/help |
+| `^S` | Save in Nano 7.x |
 
 ---
 
-## 5.3 Configuration ~/.nanorc
+## 5.3 Configuration in an Owned Exercise Directory
 
 ```bash
-# Create or edit ~/.nanorc
-nano ~/.nanorc
+# Nano is an optional installed dependency; check `nano --version` and its help.
+NANO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-nano.XXXXXX") || exit 1
+# Save the configuration below in this owned file; it does not replace ~/.nanorc.
+nano "$NANO_DIR/nanorc"
+nano --rcfile "$NANO_DIR/nanorc" "$NANO_DIR/script.sh"
 ```
 
 Useful configurations:
@@ -1222,7 +1260,7 @@ set mouse
 set softwrap
 
 # Syntax highlighting (if available)
-include /usr/share/nano/*.nanorc
+include "/usr/share/nano/*.nanorc"
 ```
 
 ---
@@ -1262,8 +1300,8 @@ $           End of line
 \           Escape
 \b          Word boundary
 \d          Digit (PCRE only)
-\w          Word char (PCRE only)
-\s          Whitespace (PCRE only)
+\w          Word character (GNU grep BRE/ERE extension and PCRE)
+\s          Whitespace (GNU grep BRE/ERE extension and PCRE)
 
 CHARACTER CLASSES
 ─────────────────────────────────────────
@@ -1403,14 +1441,16 @@ sed '/^#/d; /^$/d' config.txt
 # Calculate total from CSV
 awk -F',' 'NR>1 { sum += $4 } END { print sum }' data.csv
 
-# Find and replace in all files
-grep -rl 'old' . | xargs sed -i 's/old/new/g'
+# Within a fresh, owned fixture: preserve filename boundaries.
+# Precondition: no matching file already has a .bak companion; a rerun could overwrite it.
+# GNU grep status 1 means an empty selection; >1 is an error to inspect.
+grep -rlZ -- 'old' . | xargs -0 -r sed -i.bak 's/old/new/g' --
 
 # Employee report per department
 awk -F',' 'NR>1 { dept[$3]++; sal[$3]+=$4 } 
     END { for(d in dept) printf "%s: %d employees, average $%.0f\n", d, dept[d], sal[d]/dept[d] }' employees.csv
 
-# Extract unique emails from file
+# Extract unique email-shaped substrings (a teaching subset, not RFC validation)
 grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' doc.txt | sort -u
 
 # Source code statistics

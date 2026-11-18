@@ -109,7 +109,7 @@ test-validator:
 test-unit:
 	@echo "$(CYAN)═══ Running Unit Tests ═══$(RESET)"
 	@if [ -f "$(TESTS)/test_autograder.py" ]; then \
-		python3 -m pytest $(TESTS)/test_autograder.py -v || python3 $(TESTS)/test_autograder.py; \
+		python3 -m pytest --import-mode=importlib $(TESTS)/test_autograder.py -v; \
 	else \
 		echo "$(YELLOW)No unit tests found.$(RESET)"; \
 	fi
@@ -139,25 +139,8 @@ lint-bash:
 	fi
 
 lint-python:
-	@echo "$(CYAN)═══ Python Linting ═══$(RESET)"
-	@echo "Checking Python syntax..."
-	@for pyfile in $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py; do \
-		if [ -f "$$pyfile" ]; then \
-			python3 -m py_compile "$$pyfile" 2>/dev/null && \
-				echo "  $(GREEN)✓$(RESET) $$pyfile" || \
-				echo "  $(RED)✗$(RESET) $$pyfile"; \
-		fi; \
-	done
-	@if command -v ruff > /dev/null 2>&1; then \
-		echo "Running ruff..."; \
-		ruff check $(SCRIPTS_PYTHON)/ $(FORMATIVE)/ 2>/dev/null || true; \
-	elif command -v flake8 > /dev/null 2>&1; then \
-		echo "Running flake8..."; \
-		flake8 --max-line-length=100 $(SCRIPTS_PYTHON)/ $(FORMATIVE)/ 2>/dev/null || true; \
-	else \
-		echo "$(YELLOW)Note: ruff/flake8 not installed (optional).$(RESET)"; \
-	fi
-	@echo "$(GREEN)Python linting complete.$(RESET)"
+	@command -v ruff >/dev/null 2>&1 || { echo "Ruff unavailable; Python lint not performed"; exit 2; }
+	@ruff check --config ci/ruff.toml $(SCRIPTS_PYTHON)/ $(FORMATIVE)/
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # TARGET: validate - Package structure validation

@@ -1,7 +1,7 @@
 # CAPSTONE: Integrated System Administration Projects
 
 > Lab observation: don't wait for "the end" to deploy. An ugly but functional deployment in week 1–2 usually beats a perfect deployment attempted the last evening. Do it early and iterate.
-## Operating Systems - Seminars 11-12
+## Operating Systems — Seminar 6 CAPSTONE
 
 ### Bucharest University of Economic Studies
 ### CSIE Faculty - Cybernetics, Statistics and Economic Informatics
@@ -13,8 +13,7 @@
 The CAPSTONE project represents the culminating point of the Operating Systems course, 
 synthesising competencies accumulated throughout the semester into an integrated practical 
 experience. Unlike the isolated exercises from previous seminars, CAPSTONE requires 
-students to build complete, functional software systems suitable for real production 
-contexts.
+students to build complete, functional software systems that model production concerns in an owned laboratory environment. Production suitability requires independent operational and security acceptance.
 
 ### 1.1 The Fundamental Problem
 
@@ -42,7 +41,7 @@ problems occur.
 
 Choosing Bash as the primary language for CAPSTONE is deliberate and pedagogical:
 
-Ubiquity - Bash exists on virtually any Unix-like system, from enterprise servers to 
+Availability — Bash is widely available on Unix-like systems but must be installed and version-checked, from enterprise servers to 
 embedded devices. The competencies gained transfer directly to any professional 
 environment.
 
@@ -166,7 +165,7 @@ configuration files, not hardcoded in scripts. This allows adjusting behaviour
 without modifying source code.
 
 Fail-fast with cleanup - Errors are detected as early as possible, and 
-allocated resources are guaranteed to be released through EXIT traps.
+owned resources are registered immediately and released through EXIT traps on ordinary exits and explicitly handled signals. SIGKILL and system failure cannot run a shell trap.
 
 ### 3.3 Standard Execution Flow
 
@@ -216,6 +215,8 @@ allocated resources are guaranteed to be released through EXIT traps.
 
 ## 4. Project Presentation
 
+The lists describe the teaching design space. The implemented command and format contract is the adjacent project `--help`; advanced adapters in the chapters are explicit dependencies. Examples do not authorise live deployment, messages, administrative installation or external access.
+
 ### 4.1 System Monitor
 
 Purpose: Collecting and reporting system performance metrics in real time, 
@@ -248,7 +249,7 @@ Main functionalities:
 - Statistics reporting (size, duration, rates)
 
 Key concepts: tar archives, compression algorithms, checksums, 
-incremental backup via find, file pattern matching, rotation policies.
+change-only file selection via find versus GNU tar incremental chains with deletion records, file pattern matching and complete-chain retention.
 
 ### 4.3 Application Deployer
 
@@ -323,12 +324,12 @@ Integration scenarios:
 
 Projects are designed for incremental development:
 
-Phase 1 - Functional prototype (week 11)
+Phase 1 — Functional prototype (first agreed CAPSTONE work period)
 - Basic functionality implementation
 - Directory and file structure
 - Initial tests
 
-Phase 2 - Consolidation (week 12)
+Phase 2 — Consolidation (second agreed CAPSTONE work period)
 - Complete error handling
 - Logging and configuration
 - Complete tests
@@ -343,14 +344,11 @@ Phase 3 - Refinement (individual)
 The integrated testing framework allows progress verification:
 
 ```bash
-# Run all tests for a project
-./test_runner.sh --project monitor
-
-# Run only unit tests
-./test_runner.sh --project backup --type unit
-
-# Run with verbose output
-./test_runner.sh --project deployer --verbose
+# Working directory: SEM06. These tests use the actual bundled interfaces.
+python3 -m pytest -q tests/test_capstone.py
+python3 -m pytest -q tests/test_capstone.py::TestMonitorCore
+python3 -m pytest -q tests/test_capstone.py::TestBackupCore
+python3 -m unittest discover -s tests -p test_teaching_examples.py -v
 ```
 
 ### 6.3 Versioning and Collaboration
@@ -359,7 +357,7 @@ Although not mandatory for the seminar, Git usage is recommended:
 
 ```bash
 # Initialise repository
-cd SEM11-12_COMPLETE
+cd SEM06
 git init
 git add .
 git commit -m "Initial CAPSTONE structure"
@@ -374,6 +372,8 @@ git commit -m "feat(monitor): add CPU monitoring"
 ## 7. Evaluation
 
 ### 7.1 Evaluation Criteria
+
+The following inherited weights and achievement bands are a local design proposal. They are retained for author review, not adopted as the canonical institutional assessment policy; consult the explicitly approved course rubric before grading.
 
 | Criterion                 | Weight  | Description                                  |
 |---------------------------|---------|----------------------------------------------|

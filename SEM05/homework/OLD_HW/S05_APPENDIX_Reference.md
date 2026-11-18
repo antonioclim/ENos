@@ -1,5 +1,8 @@
 # S05_APPENDIX - Seminar 5 Reference (Redistributed)
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Supplementary material - Advanced Scripting
 
@@ -263,8 +266,8 @@ log_error() { _log "ERROR" "$*"; }
 
 # === ROTATION ===
 _log_rotate() {
-    [[ -z "$_LOG_FILE" || "$_LOG_FILE" == "/dev/null" ]] && return
-    [[ ! -f "$_LOG_FILE" ]] && return
+    [[ -z "$_LOG_FILE" || "$_LOG_FILE" == "/dev/null" ]] && return 0
+    [[ ! -f "$_LOG_FILE" ]] && return 0
     
     local size=$(stat -f%z "$_LOG_FILE" 2>/dev/null || stat -c%s "$_LOG_FILE" 2>/dev/null || echo 0)
     
@@ -280,7 +283,8 @@ _log_rotate() {
 
 # === EXPORT FOR USE AS MODULE ===
 # If sourced, exports functions. If executed, does nothing.
-[[ "${BASH_SOURCE[0]}" == "${0}" ]] && echo "This file should be sourced, not executed."
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then echo "This file should be sourced, not executed."; fi
+true  # Sourcing the complete module is a successful operation.
 ```
 
 ### Exercise 2: System Monitor with Alerts
@@ -342,20 +346,23 @@ EOF
 # === HELPER FUNCTIONS ===
 log() {
     local msg="[$(date '+%H:%M:%S')] $*"
-    [[ -n "$LOG_FILE" ]] && echo "$msg" >> "$LOG_FILE"
+    if [[ -n "$LOG_FILE" ]]; then printf '%s\n' "$msg" >> "$LOG_FILE" || return 1; fi
+    return 0
 }
 
 send_alert() {
     local message="$1"
-    [[ -z "$ALERT_CMD" ]] && return
-    eval "$ALERT_CMD \"$message\"" || true
+    [[ -z "$ALERT_CMD" ]] && return 0 0
+    bash -c 'exec "$1" "$2"' _ "$ALERT_CMD" "$message"
 }
 
 # === MONITORING FUNCTIONS ===
 get_cpu_usage() {
-    # Average over last seconds
-    local idle=$(top -bn2 -d0.5 | grep "Cpu(s)" | tail -1 | awk -F',' '{print $4}' | awk '{print $1}')
-    echo "scale=0; 100 - $idle" | bc
+    local first second
+    first=$(awk '/^cpu / {for(i=2;i<=9;i++)s+=$i; print s, $5+$6; exit}' /proc/stat) || return 1
+    sleep 0.2
+    second=$(awk '/^cpu / {for(i=2;i<=9;i++)s+=$i; print s, $5+$6; exit}' /proc/stat) || return 1
+    awk -v a="$first" -v b="$second" 'BEGIN {split(a,x);split(b,y); t=y[1]-x[1]; idle=y[2]-x[2]; if(t<=0 || idle<0 || idle>t)exit 1; printf "%.0f\n",100*(t-idle)/t}' 
 }
 
 get_memory_usage() {
@@ -449,7 +456,7 @@ monitor_once() {
         *)    output_text "$cpu" "$mem" "$disk" "$load" "$procs" ;;
     esac
     
-    check_alerts "$cpu" "$mem" "$disk" || true
+    if check_alerts "$cpu" "$mem" "$disk"; then return 0; else return 2; fi
 }
 
 # === ARGUMENT PARSING ===
@@ -458,13 +465,13 @@ ONCE=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help) usage; exit 0 ;;
-        -i|--interval) INTERVAL="$2"; shift 2 ;;
-        -c|--cpu) THRESHOLD_CPU="$2"; shift 2 ;;
-        -m|--memory) THRESHOLD_MEM="$2"; shift 2 ;;
-        -d|--disk) THRESHOLD_DISK="$2"; shift 2 ;;
-        -f|--format) OUTPUT_FORMAT="$2"; shift 2 ;;
-        -a|--alert) ALERT_CMD="$2"; shift 2 ;;
-        -l|--log) LOG_FILE="$2"; shift 2 ;;
+        -i|--interval) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; INTERVAL="$2"; shift 2 ;;
+        -c|--cpu) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; THRESHOLD_CPU="$2"; shift 2 ;;
+        -m|--memory) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; THRESHOLD_MEM="$2"; shift 2 ;;
+        -d|--disk) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; THRESHOLD_DISK="$2"; shift 2 ;;
+        -f|--format) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; OUTPUT_FORMAT="$2"; shift 2 ;;
+        -a|--alert) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; ALERT_CMD="$2"; shift 2 ;;
+        -l|--log) [[ $# -ge 2 ]] || { echo "Option requires a value" >&2; exit 2; }; LOG_FILE="$2"; shift 2 ;;
         -1|--once) ONCE=true; shift ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
@@ -476,7 +483,7 @@ if $ONCE; then
 else
     log "Starting monitor (interval: ${INTERVAL}s)"
     while true; do
-        monitor_once
+        if monitor_once; then :; else printf 'Monitor cycle status: %s\n' "$?" >&2; fi
         sleep "$INTERVAL"
     done
 fi

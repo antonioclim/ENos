@@ -1,11 +1,17 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
-title Client-Server Model: TCP Socket Flow
-participant "Client" as C
-participant "Server" as S
+title Client-Server Model: One Established TCP Connection
+participant "Client process" as C
+participant "Server process" as S
 S -> S: socket() -> bind() -> listen()
 C -> C: socket()
-C -> S: connect() / accept()
-C <-> S: read/write
-C -> S: close()
+C -> S: connect(): initiate connection establishment
+S -> S: accept(): obtain a connected socket\nfrom the listening socket's queue
+C <-> S: byte stream via read()/write()\napplications define message boundaries
+C -> C: close(): release this descriptor
+C -> S: TCP termination when applicable\n(not the close() system call itself)
+S -> S: read() may return 0 after peer EOF;\nclose connected socket when finished
+note over S
+Listening socket remains separate and can accept other connections.
+Errors, partial I/O, buffering and half-close are omitted here.
+end note
 @enduml

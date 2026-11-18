@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>06ex1 - Race Condition Demo | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
@@ -117,7 +117,84 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -133,7 +210,7 @@
                             <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
                                 Race Condition Demo
                             </h1>
-                            <p class="text-slate-400 text-sm">course 06 • Sincronizare Part 1 • Interleaving Visualisation</p>
+                            <p class="text-slate-400 text-sm">Course 06 • Synchronisation Part 1 • Interleaving Visualisation</p>
                         </div>
                     </div>
                 </div>
@@ -152,18 +229,18 @@
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-red-400 flex items-center gap-2">
-                        <i class="fas fa-database"></i> variable Partajata
+                        <i class="fas fa-database"></i> Shared Variable
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">Ambele thread-uri execute: <coof class="bg-slate-800 px-2 py-0.5 rounded">counter++</code></p>
+                    <p class="text-sm text-slate-400 mt-1">Both threads execute: <code class="bg-slate-800 px-2 py-0.5 rounded">counter++</code></p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-center">
-                        <div class="text-xs text-slate-500 mb-1">value Initiala</div>
+                        <div class="text-xs text-slate-500 mb-1">Initial Value</div>
                         <div class="mono text-lg text-slate-400">0</div>
                     </div>
                     <div class="text-4xl text-slate-600">→</div>
                     <div class="text-center">
-                        <div class="text-xs text-slate-500 mb-1">value Curenta</div>
+                        <div class="text-xs text-slate-500 mb-1">Current Value</div>
                         <div id="counterValue" class="mono text-4xl font-bold text-amber-400">0</div>
                     </div>
                     <div class="text-4xl text-slate-600">→</div>
@@ -176,7 +253,7 @@
             
             <!-- Result Indicator -->
             <div id="resultIndicator" class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 text-center">
-                <span class="text-slate-400">Execute simulationa for a vedea rezultatul...</span>
+                <span class="text-slate-400">Run the simulation to view the result...</span>
             </div>
         </section>
 
@@ -190,7 +267,7 @@
                         Thread A
                     </h3>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">Registru:</span>
+                        <span class="text-xs text-slate-500">Register:</span>
                         <div id="regA" class="register-box mono text-sm px-3 py-1 rounded bg-slate-800 border border-slate-700">
                             R<sub>A</sub> = <span class="text-blue-400">?</span>
                         </div>
@@ -201,22 +278,22 @@
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A1">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">1</span>
-                            <coof class="text-sm flex-1">LOAD R<sub>A</sub>, counter</code>
-                            <span class="text-xs text-slate-500">citeste from memorie</span>
+                            <code class="text-sm flex-1">LOAD R<sub>A</sub>, counter</code>
+                            <span class="text-xs text-slate-500">read from memory</span>
                         </div>
                     </div>
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A2">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">2</span>
-                            <coof class="text-sm flex-1">ADD R<sub>A</sub>, 1</code>
-                            <span class="text-xs text-slate-500">incrementeaza</span>
+                            <code class="text-sm flex-1">ADD R<sub>A</sub>, 1</code>
+                            <span class="text-xs text-slate-500">increment</span>
                         </div>
                     </div>
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="A3">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold">3</span>
-                            <coof class="text-sm flex-1">STORE counter, R<sub>A</sub></code>
-                            <span class="text-xs text-slate-500">scrie in memorie</span>
+                            <code class="text-sm flex-1">STORE counter, R<sub>A</sub></code>
+                            <span class="text-xs text-slate-500">write to memory</span>
                         </div>
                     </div>
                 </div>
@@ -230,7 +307,7 @@
                         Thread B
                     </h3>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">Registru:</span>
+                        <span class="text-xs text-slate-500">Register:</span>
                         <div id="regB" class="register-box mono text-sm px-3 py-1 rounded bg-slate-800 border border-slate-700">
                             R<sub>B</sub> = <span class="text-purple-400">?</span>
                         </div>
@@ -241,22 +318,22 @@
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B1">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">1</span>
-                            <coof class="text-sm flex-1">LOAD R<sub>B</sub>, counter</code>
-                            <span class="text-xs text-slate-500">citeste from memorie</span>
+                            <code class="text-sm flex-1">LOAD R<sub>B</sub>, counter</code>
+                            <span class="text-xs text-slate-500">read from memory</span>
                         </div>
                     </div>
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B2">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">2</span>
-                            <coof class="text-sm flex-1">ADD R<sub>B</sub>, 1</code>
-                            <span class="text-xs text-slate-500">incrementeaza</span>
+                            <code class="text-sm flex-1">ADD R<sub>B</sub>, 1</code>
+                            <span class="text-xs text-slate-500">increment</span>
                         </div>
                     </div>
                     <div class="instruction-step pending p-3 rounded-lg bg-slate-800/50 border border-slate-700" data-step="B3">
                         <div class="flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center text-xs font-bold">3</span>
-                            <coof class="text-sm flex-1">STORE counter, R<sub>B</sub></code>
-                            <span class="text-xs text-slate-500">scrie in memorie</span>
+                            <code class="text-sm flex-1">STORE counter, R<sub>B</sub></code>
+                            <span class="text-xs text-slate-500">write to memory</span>
                         </div>
                     </div>
                 </div>
@@ -266,7 +343,7 @@
         <!-- Controls -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-sliders-h text-amber-400"></i> Controale Simulation
+                <i class="fas fa-sliders-h text-amber-400"></i> Simulation Controls
             </h3>
             
             <div class="grid md:grid-cols-2 gap-6">
@@ -274,17 +351,17 @@
                 <div>
                     <label class="block text-sm text-slate-400 mb-2">Select Interleaving:</label>
                     <select id="interleavingSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-amber-500 focus:outline-none">
-                        <option value="correct">Corect: A1→A2→A3→B1→B2→B3 (result: 2)</option>
+                        <option value="correct">Correct: A1→A2→A3→B1→B2→B3 (result: 2)</option>
                         <option value="race1" selected>Race #1: A1→B1→A2→B2→A3→B3 (result: 1)</option>
                         <option value="race2">Race #2: A1→A2→B1→B2→B3→A3 (result: 1)</option>
                         <option value="race3">Race #3: B1→A1→B2→A2→A3→B3 (result: 1)</option>
-                        <option value="random">Random (alege aleator)</option>
+                        <option value="random">Random interleaving</option>
                     </select>
                 </div>
                 
                 <!-- Speed Control -->
                 <div>
-                    <label class="block text-sm text-slate-400 mb-2">Speed Animatie:</label>
+                    <label class="block text-sm text-slate-400 mb-2">Animation Speed:</label>
                     <div class="flex items-center gap-4">
                         <input type="range" id="speedSlider" min="200" max="2000" value="800" class="flex-1 accent-amber-500">
                         <span id="speedValue" class="mono text-sm text-amber-400 w-16 text-right">800ms</span>
@@ -294,13 +371,13 @@
             
             <div class="flex flex-wrap gap-3 mt-6">
                 <button id="btnStep" class="btn-control px-5 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium text-sm flex items-center gap-2">
-                    <i class="fas fa-step-forward"></i> Pas with Pas
+                    <i class="fas fa-step-forward"></i> Step by Step
                 </button>
                 <button id="btnAuto" class="btn-control px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium text-sm flex items-center gap-2">
                     <i class="fas fa-play"></i> Auto Run
                 </button>
                 <button id="btnPause" class="btn-control px-5 py-2.5 bg-amber-600 hover:bg-amber-500 rounded-lg font-medium text-sm flex items-center gap-2" disabled>
-                    <i class="fas fa-pause"></i> Pauza
+                    <i class="fas fa-pause"></i> Pause
                 </button>
                 <button id="btnReset" class="btn-control px-5 py-2.5 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium text-sm flex items-center gap-2">
                     <i class="fas fa-redo"></i> Reset
@@ -314,15 +391,15 @@
         <!-- Execution Timeline -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-stream text-cyan-400"></i> Timeline Executie
+                <i class="fas fa-stream text-cyan-400"></i> Execution Timeline
             </h3>
             
             <div id="timeline" class="flex items-center gap-2 p-4 bg-slate-800/50 rounded-xl overflow-x-auto">
-                <span class="text-slate-500 text-sm">Execute simulationa...</span>
+                <span class="text-slate-500 text-sm">Run the simulation...</span>
             </div>
             
             <div id="executionLog" class="mt-4 p-4 bg-slate-900 rounded-xl max-h-48 overflow-y-auto mono text-xs space-y-1">
-                <div class="text-slate-500">// Log executie...</div>
+                <div class="text-slate-500">// Execution log...</div>
             </div>
         </section>
 
@@ -343,7 +420,7 @@
                             <span id="statTotal" class="mono text-lg font-bold text-slate-200">0</span>
                         </div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm text-emerald-400">Result Corect (2):</span>
+                            <span class="text-sm text-emerald-400">Correct Result (2):</span>
                             <span id="statCorrect" class="mono text-lg font-bold text-emerald-400">0</span>
                         </div>
                         <div class="flex items-center justify-between">
@@ -354,7 +431,7 @@
                     <div class="bg-red-900/30 rounded-xl p-4 border border-red-500/30">
                         <p class="text-sm text-red-300">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
-                            <strong>Race Condition:</strong> When thread-urile citesc/scriu without sincronizare, rezultatul depinof of ordinea executiei (non-deterministic)!
+                            <strong>Race Condition:</strong> In this split-load/store model, the final value depends on the interleaving when the increment is not protected as one operation.
                         </p>
                     </div>
                 </div>
@@ -364,21 +441,21 @@
         <!-- Theory Box -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-book text-blue-400"></i> Concepte Cheie
+                <i class="fas fa-book text-blue-400"></i> Key Concepts
             </h3>
             
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                     <h4 class="font-semibold text-amber-400 mb-2">Race Condition</h4>
-                    <p class="text-xs text-slate-400">Situatie in care rezultatul depinof of ordinea relativa a executiei thread-urilor - comportament non-deterministic.</p>
+                    <p class="text-xs text-slate-400">A result depends on the relative ordering of thread operations. Different permitted interleavings can produce different outcomes.</p>
                 </div>
                 <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                     <h4 class="font-semibold text-red-400 mb-2">Critical Section</h4>
-                    <p class="text-xs text-slate-400">Sectiona of cod care acceseaza resurse partajate. must executata atomic or protejata prin sincronizare.</p>
+                    <p class="text-xs text-slate-400">A code region that accesses shared state and requires the appropriate synchronisation to preserve its invariant.</p>
                 </div>
                 <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                     <h4 class="font-semibold text-emerald-400 mb-2">Mutual Exclusion</h4>
-                    <p class="text-xs text-slate-400">solution: only un thread can fi in sectiunea critical at un moment dat. Implementare: mutex, semafoare, etc.</p>
+                    <p class="text-xs text-slate-400">Permit only one thread in the protected critical section at a time, using an appropriate mutex, binary semaphore or other proven protocol.</p>
                 </div>
             </div>
         </section>
@@ -392,6 +469,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             counter: 0,
@@ -429,9 +551,9 @@
         const histogramChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Result = 1 (Race)', 'Result = 2 (Corect)'],
+                labels: ['Result = 1 (Race)', 'Result = 2 (Correct)'],
                 datasets: [{
-                    label: 'Number Rulari',
+                    label: 'Run Count',
                     data: [0, 0],
                     backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(34, 197, 94, 0.7)'],
                     borderColor: ['#ef4444', '#22c55e'],
@@ -564,7 +686,7 @@
             }
             
             const color = step[0] === 'A' ? 'bg-blue-500 text-blue-500' : 'bg-purple-500 text-purple-500';
-            const marker = document.createdeElement('div');
+            const marker = document.createElement('div');
             marker.className = `flex flex-col items-center`;
             marker.innerHTML = `
                 <div class="timeline-marker ${color.split(' ')[0]}"></div>
@@ -573,7 +695,7 @@
             timelineEl.appendChild(marker);
             
             if (state.currentStepIndex < state.sequence.length - 1) {
-                const arrow = document.createdeElement('div');
+                const arrow = document.createElement('div');
                 arrow.className = 'text-slate-600 interleave-arrow';
                 arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
                 timelineEl.appendChild(arrow);
@@ -591,10 +713,11 @@
             resultIndicatorEl.className = `p-4 rounded-xl text-center ${isCorrect ? 'bg-emerald-900/50 border border-emerald-500' : 'bg-red-900/50 border border-red-500 conflict-flash'}`;
             resultIndicatorEl.innerHTML = isCorrect 
                 ? `<i class="fas fa-check-circle text-emerald-400 text-2xl mb-2"></i><br><span class="text-emerald-400 font-bold">Correct Result!</span> counter = 2`
-                : `<i class="fas fa-times-circle text-red-400 text-2xl mb-2"></i><br><span class="text-red-400 font-bold">Race Condition!</span> counter = ${state.counter} (asteptat: 2)`;
+                : `<i class="fas fa-times-circle text-red-400 text-2xl mb-2"></i><br><span class="text-red-400 font-bold">Race Condition!</span> counter = ${state.counter} (expected: 2)`;
         }
 
         function reset() {
+            enosTimers.cancel();
             state.counter = 0;
             state.regA = null;
             state.regB = null;
@@ -615,10 +738,10 @@
                 el.classList.add('pending');
             });
             
-            timelineEl.innerHTML = '<span class="text-slate-500 text-sm">Execute simulationa...</span>';
-            executionLogEl.innerHTML = '<div class="text-slate-500">// Log executie...</div>';
+            timelineEl.innerHTML = '<span class="text-slate-500 text-sm">Run the simulation...</span>';
+            executionLogEl.innerHTML = '<div class="text-slate-500">// Execution log...</div>';
             resultIndicatorEl.className = 'p-4 rounded-xl bg-slate-800/50 border border-slate-700 text-center';
-            resultIndicatorEl.innerHTML = '<span class="text-slate-400">Execute simulationa for a vedea rezultatul...</span>';
+            resultIndicatorEl.innerHTML = '<span class="text-slate-400">Run the simulation to view the result...</span>';
             
             updateButtons(false);
         }
@@ -662,8 +785,7 @@
         function autoRun() {
             if (state.isRunning) return;
             
-            reset();
-            loadSequence();
+            if(state.currentStepIndex===0||state.currentStepIndex>=state.sequence.length){reset();loadSequence();}
             state.isRunning = true;
             updateButtons(true);
             
@@ -744,10 +866,32 @@
         speedSlider.addEventListener('input', (e) => {
             state.speed = parseInt(e.target.value);
             speedValueEl.textContent = `${state.speed}ms`;
+            if(state.isRunning){clearInterval(state.autoInterval);state.autoInterval=setInterval(()=>{if(!stepForward()){clearInterval(state.autoInterval);state.autoInterval=null;}},state.speed);}
         });
 
         // Init
         loadSequence();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

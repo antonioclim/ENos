@@ -5,6 +5,8 @@
 
 ---
 
+> **Status:** design plan and historical author observations, not measured local outcomes. See [TEACHING_CONTRACT.md](TEACHING_CONTRACT.md) for the explicit workload, evaluation, privacy and provenance choices.
+
 ## Document Purpose
 
 This document maps the pedagogical strategy for the CAPSTONE seminar. Unlike previous weeks where students tackled isolated concepts, SEM06 throws everything together—and that's precisely the point.
@@ -29,9 +31,9 @@ Students arriving at CAPSTONE should have:
 
 ### 1.2 Common Gaps
 
-From previous cohorts, watch for:
+Historical cohort observations without supplied counts/data; use as hypotheses to watch for:
 
-- **Quoting discipline** — Still the #1 source of bugs. Students know the rules but forget under pressure.
+- **Quoting discipline** — The draft ranked this first without supporting local counts. Students know the rules but forget under pressure.
 - **Exit code awareness** — Many students still ignore `$?` and wonder why their scripts "randomly fail."
 - **Path handling** — Hardcoded paths work on their machine, break everywhere else.
 
@@ -43,7 +45,7 @@ From previous cohorts, watch for:
 
 ### 2.1 Bloom Taxonomy Distribution
 
-CAPSTONE deliberately shifts towards higher-order thinking:
+Historical proposed aggregate percentages (denominator/coding method not supplied):
 
 ```
 Remember    ████░░░░░░░░░░░░░░░░  18%  (foundation recall)
@@ -54,7 +56,7 @@ Evaluate    ██░░░░░░░░░░░░░░░░░░   8%  (
 Create      █░░░░░░░░░░░░░░░░░░░   2%  (novel solutions)
 ```
 
-This matches capstone expectations: students *apply* what they learned while beginning to *analyse* and *evaluate* design choices.
+These percentages are an unverified design proposal, not the actual formative distribution. Current source counts are documented in lo_traceability.md; no local attainment is measured here.
 
 ### 2.2 Learning Outcomes
 
@@ -64,7 +66,7 @@ This matches capstone expectations: students *apply* what they learned while beg
 | LO6.2 | Implements error handling with trap and exit codes | Apply | Yes |
 | LO6.3 | Builds logging system with severity levels | Apply | Yes |
 | LO6.4 | Reads and interprets data from /proc | Understand | Yes |
-| LO6.5 | Implements incremental backup with find -newer | Apply | Yes |
+| LO6.5 | Implements and restores an explicit incremental backup chain | Apply | Yes |
 | LO6.6 | Verifies data integrity with checksums | Apply | Yes |
 | LO6.7 | Applies deployment strategies (rolling, blue-green) | Apply | Yes |
 | LO6.8 | Implements health checks with retry and backoff | Apply | Yes |
@@ -82,7 +84,7 @@ This matches capstone expectations: students *apply* what they learned while beg
 | Phase | Duration | Activity | Purpose |
 |-------|----------|----------|---------|
 | Hook | 8 min | "3 AM Server Crash" scenario | Engagement, relevance |
-| Peer Instruction | 12 min | PI-01, PI-02 (variables, quotes) | Misconception surfacing |
+| Peer Instruction | 12 min | PI-01, PI-02 (see current linked activity titles) | Misconception surfacing |
 | Live Coding | 20 min | Monitor skeleton build | Worked example |
 | Sprint | 10 min | Trap cleanup (pairs) | Active practice |
 | Break | 5 min | — | Cognitive reset |
@@ -98,7 +100,7 @@ This matches capstone expectations: students *apply* what they learned while beg
 - **After break:** Switch to discussion and problem-solving. Attention spans flag.
 - **Final 15 minutes:** Don't introduce new concepts. Consolidate.
 
-> **War story:** I once tried to explain blue-green deployment in the last 5 minutes. Half the class left confused. Now it's firmly in the "before break" slot.
+> **Historical author recollection, provenance not supplied:** I once tried to explain blue-green deployment in the last 5 minutes. Half the class left confused. The recollection suggested moving it before the break, whereas the preserved timetable places discussion after the break; the author must choose the actual session sequence.
 
 ---
 
@@ -112,7 +114,7 @@ This matches capstone expectations: students *apply* what they learned while beg
 4. Re-vote (30 sec)
 5. Instructor explanation (2 min)
 
-Target: 35-70% correct on first vote. Below 35%? Concept needs re-teaching. Above 70%? Move faster.
+Historical design target, not measured here: 35–70% correct on first vote. Below 35%? Concept needs re-teaching. Above 70%? Move faster.
 
 ### 4.2 Sprint Exercise Protocol
 
@@ -139,7 +141,7 @@ Why they work for Bash:
 |------------|------|--------|-------------|
 | Variable assignment | 0:15 | Cold call | LO6.2 |
 | Trap syntax | 0:35 | Thumbs up/down | LO6.2 |
-| find -newer usage | 1:05 | Quick poll | LO6.5 |
+| Incremental chain and restore semantics | 1:05 | Quick poll | LO6.5 |
 | Strategy comparison | 1:25 | Discussion | LO6.7, LO6.12 |
 
 ### 5.2 Summative (Homework + Presentation)
@@ -175,7 +177,7 @@ Before session:
 - [ ] Ubuntu terminal accessible (WSL2 or VM)
 - [ ] `shellcheck` installed
 - [ ] Project files extracted to `/home/student/SEM06`
-- [ ] `/proc/stat` readable (should always be)
+- [ ] `/proc/stat` readable, or unavailable explicitly identified
 - [ ] Projector for live coding
 - [ ] Timer visible for Peer Instruction
 

@@ -4,14 +4,19 @@
 
 ---
 
+> **Assessment pending:** bonus caps, penalties, submission evidence and the
+> public/instructor release strategy conflict across historical documents. See
+> [assessment status](ASSESSMENT_STATUS.md). The counts below describe the retained
+> proposals, not an adopted final-grade calculation.
+
 ## About the Assignment Structure
 
 Seminar 04 (Text Processing) uses an extended structure due to the complexity and volume of material:
 
 | Standard Structure (SEM01-03, SEM05) | SEM04 Structure |
 |--------------------------------------|-----------------|
-| `S0X_01_TEMA.md` | `S04_01_HOMEWORK.md` |
-| `S0X_02_creeaza_tema.sh` | `S04_02_TEMA_BONUS.md` |
+| `S0X_01_HOMEWORK.md` | `S04_01_HOMEWORK.md` |
+| `S0X_02_creeaza_tema.sh` | `S04_02_HOMEWORK_BONUS.md` |
 | `S0X_03_EVALUATION_RUBRIC.md` | `S04_03_EVALUATION_RUBRIC.md` |
 | - | `S04_04_SUBMISSION_TEMPLATE.md` |
 
@@ -47,7 +52,7 @@ Due to the complexity (4 scripts + multiple outputs), a separate document was ad
 |------|---------|----------|
 | `S04_00_README.md` | This explanatory document | Instructors |
 | `S04_01_HOMEWORK.md` | 4 mandatory exercises (100%) | Students |
-| `S04_02_TEMA_BONUS.md` | 5 bonus exercises (+20p max) | Students |
+| `S04_02_HOMEWORK_BONUS.md` | 5 bonus exercises (+20p max) | Students |
 | `S04_03_EVALUATION_RUBRIC.md` | Detailed evaluation criteria | Instructors |
 | `S04_04_SUBMISSION_TEMPLATE.md` | Archive submission guide | Students |
 
@@ -89,8 +94,8 @@ Bonus Assignment (max +20p)
 |--------|-----------------|-------|
 | Number of mandatory exercises | 4-5 | 4 |
 | Bonus exercises | Integrated in assignment | Separate file |
-| Submission template | In TEMA.md | Separate file |
-| Generation script | Yes | No (complexity too high) |
+| Submission template | In HOMEWORK.md | Separate file |
+| Data generation | Seminar-specific | `S04_04_personalized_data_generator.py`; exact schema documented |
 | Complexity | Medium | High |
 
 ---
@@ -100,7 +105,7 @@ Bonus Assignment (max +20p)
 1. **Differentiated evaluation**: Students can submit only the mandatory assignment for a passing grade
 2. **Extended bonus deadline**: The bonus assignment has a deadline one week later
 3. **Plagiarism checking**: Special attention to bonus exercises (more complex code)
-4. **Support**: Exercises use files from `../resources/sample_data/`
+4. **Support**: Main homework uses the personalised student_ID files; sample_data serves the separate deterministic regression suite
 
 ---
 
@@ -108,7 +113,7 @@ Bonus Assignment (max +20p)
 
 - `../docs/S04_*` - Documentation materials
 - `../presentations/S04_*` - Presentation slides
-- `../resources/sample_data/` - Test files for assignments
+- `../resources/sample_data/` - Unit-test fixtures with a distinct schema
 - `../scripts/` - Examples and solutions
 
 ---

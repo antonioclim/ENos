@@ -35,7 +35,7 @@ find_deployer() {
     )
     
     for loc in "${locations[@]}"; do
-        if [[ -f "$loc" && -x "$loc" ]]; then
+        if [[ -f "$loc" && -r "$loc" ]]; then
             echo "$loc"
             return 0
         fi
@@ -68,7 +68,7 @@ find_config() {
 main() {
     local deployer_script
     local config_file
-    local config_arg=""
+    local config_args=()
     
     # Find deployer.sh
     if ! deployer_script=$(find_deployer); then
@@ -89,16 +89,11 @@ main() {
     # If --config not specified, search automatically
     if ! $has_config; then
         if config_file=$(find_config); then
-            config_arg="--config $config_file"
+            config_args=(--config "$config_file")
         fi
     fi
     
-    # Execute deployer with arguments
-    if [[ -n "$config_arg" ]]; then
-        exec "$deployer_script" $config_arg "$@"
-    else
-        exec "$deployer_script" "$@"
-    fi
+    exec bash "$deployer_script" "${config_args[@]}" "$@"
 }
 
 main "$@"

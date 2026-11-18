@@ -1,15 +1,15 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 # C04_05_FORMATIVE_ASSESSMENT.yaml
 # Lecture 4: Process Scheduling
 # Formative Assessment — Conceptual Quiz
 
 metadata:
-  lecture: 4
+  course: 4
   subject: "Process Scheduling"
   version: "2.0"
   creation_date: "2026-01-28"
   author: "by Revolvix"
-  question_count: 12
+  number_of_questions: 12
   estimated_time_minutes: 15
   bloom_distribution:
     remember: 3

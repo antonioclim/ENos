@@ -18,6 +18,17 @@
 
 ---
 
+## Evidence and Historical Status
+
+The January 2025 planning tables, classroom anecdotes, numerical frequencies and
+claimed improvements are retained as author-supplied historical material. The kit
+contains no sampling frame, raw cohort data or reproducible benchmark establishing
+those numerical claims, model-authorship attributions or previous acceptance ticks.
+They must not be cited as newly demonstrated outcomes. Current runnable regressions
+cover only their stated fixtures; full Ubuntu/browser/classroom acceptance is separate.
+The original timing is 100 minutes of contact plus a 10-minute break, or 110 elapsed;
+a 100-minute total slot needs an author-approved revised allocation.
+
 ## 1. EVALUATION OF CURRENT MATERIALS
 
 ### 1.1 Existing Structure
@@ -148,11 +159,11 @@ I've been tracking these since 2019. The percentages come from exit quizzes and 
 | M4.1 | "Cron inherits my environment" | 75% | Jobs fail silently | Minimal PATH demo |
 | M4.2 | "*/5 means 5 min after script starts" | 30% | Timing confusion | Visual timeline |
 | M4.3 | "crontab -r removes one job" | 45% | **Deletes everything** | Warning in red |
-| M4.4 | "Cron emails me automatically" | 40% | MAILTO not configured | Full setup guide |
-| M4.5 | "~ works in crontab" | 55% | HOME often unset | Absolute paths rule |
+| M4.4 | "Cron mail needs no local delivery setup" | 40% (historical) | Output is mailed only if delivery is configured; empty MAILTO disables it | Inspect output routing |
+| M4.5 | "Cron inherits my shell session" | 55% (historical) | HOME is normally set; PATH and cwd can differ from the session | Explicit paths and environment |
 | M4.6 | "0 0 31 * * is monthly" | 35% | Runs only in long months | Debugging exercise |
 | M4.7 | "crontab -e edits /etc/crontab" | 40% | User vs system confusion | Diagram |
-| M4.8 | "Cron output appears somewhere" | 60% | Goes to /dev/null | Logging setup |
+| M4.8 | "Unredirected output is always discarded" | 60% (historical) | Cron normally attempts mail when configured | Explain logging, mail and MAILTO |
 
 ---
 
@@ -161,7 +172,7 @@ I've been tracking these since 2019. The percentages come from exit quizzes and 
 ### 3.1 New Session Structure
 
 ```
-SEMINAR 03 (100 minutes)
+SEMINAR 03 (100 contact minutes + 10-minute break = 110 elapsed)
 │
 ├── PART 1 (50 min) — UTILITIES AND SCRIPTS
 │   ├── [0:00-0:05] Hook: "Find the 10 largest files on your system"
@@ -214,7 +225,10 @@ SEMINAR 03 (100 minutes)
 - **Relevant:** AI literacy is mandatory now
 - **Time-bound:** 10 minutes
 
-### 3.3 Materials Status
+### 3.3 Historical Materials Status
+
+The counts and completion labels below are the retained January 2025 planning
+snapshot. They are not a generated inventory or current acceptance evidence.
 
 | Material | Lines | Status | Notes |
 |----------|-------|--------|-------|
@@ -316,22 +330,24 @@ These go into the exercises:
 - [x] `S03_05_demo_cron.sh`
 
 **Python:**
-- [x] `S03_01_autograder.py` — with AI pattern detection (v1.3)
+- [x] `S03_01_autograder.py` — diagnostic assessment; final grade/penalty policy pending
 - [x] `S03_02_quiz_generator.py`
 - [x] `S03_03_report_generator.py`
 - [x] `quiz_runner.py`
 
 ### 5.3 Quality Gates
 
-**Must pass before semester:**
-- [x] All bash scripts run on Ubuntu 24.04
-- [x] ShellCheck clean (with documented exceptions)
-- [x] Python 3.10+ compatible
-- [x] HTML renders in Chrome, Firefox, Safari
-- [x] British English throughout
-- [x] No vim references (nano/pico only)
-- [x] No `chmod 777` suggestions anywhere
-- [x] All `find -exec rm` has confirmation
+Historical ticks are not portable verification evidence. Re-establish these gates
+on the intended environment before the next release; the following are not claimed
+as executed by the present source corrections:
+- [ ] All bash scripts run on Ubuntu 24.04
+- [ ] ShellCheck clean (with documented exceptions)
+- [ ] Python 3.10+ compatible
+- [ ] HTML renders in Chrome, Firefox, Safari
+- [ ] British English throughout
+- [ ] No vim references (nano/pico only)
+- [ ] No `chmod 777` suggestions anywhere
+- [ ] All `find -exec rm` has confirmation
 
 ---
 

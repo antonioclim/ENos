@@ -1,169 +1,22 @@
-# 📁 External Tools — Plagiarism Detection
+# Local review and external adapters
 
-> **Location:** `SEM07/external_tools/`  
-> **Purpose:** Integration with external plagiarism detection services  
-> **Audience:** Instructors only
-
-## Contents
-
-| Script | Service | Purpose |
-|--------|---------|---------|
-| `run_moss.sh` | Stanford MOSS | Code similarity detection |
-| `run_plagiarism_check.sh` | Combined pipeline | Orchestrates all checks |
-
----
-
-## MOSS Integration
-
-### Prerequisites
-
-1. **Register for MOSS:**
-   - Visit: http://theory.stanford.edu/~aiken/moss/
-   - Request a user ID via email
-   - Save your ID: `echo "YOUR_ID" > ~/.moss_userid`
-
-2. **Install MOSS client:**
-   ```bash
-   # Usually bundled, or download from MOSS website
-   chmod +x moss.pl
-   ```
-
-### Usage
+The local pipeline runs the shipped SEM01 `.sh` similarity and lexical-style tools. It records input hashes, current-run reports, process status and coverage. It does not infer authorship, impose sanctions or contact external services.
 
 ```bash
-./run_moss.sh <submissions_dir> [options]
-
-Options:
-  -l LANG       Language: bash, python, c, java, etc.
-  -d            Directory mode (one submission per folder)
-  -b FILE       Base file (template code to ignore)
-  -m N          Maximum matches to show (default: 250)
-  -n N          Maximum files in a match (default: 2)
+bash run_plagiarism_check.sh --help
+bash run_plagiarism_check.sh SEM05
+bash run_plagiarism_check.sh --submissions /path/to/ROOT --output ./review_reports
 ```
 
-### Examples
+Layout is `ROOT/STUDENT/.../*.sh`. The optional `--threshold 0.85` changes a descriptive display cutoff, not an academic policy. Each run creates a new `review-*` directory. `review_summary.json` has separate `COMPLETE`, `INCOMPLETE` or `EMPTY` coverage and per-tool states. Exit0 means complete local analysis, even if it finds similarities; exit2 means incomplete/empty coverage, and operational failure returns1. Logs retain tool errors. A missing report is never an all-clear. Lexical-style labels in the underlying legacy schema are observations, not probabilities of AI authorship.
+
+## MOSS plan
 
 ```bash
-# Check Bash scripts
-./run_moss.sh submissions/ -l bash
-
-# With base file (ignore template code)
-./run_moss.sh submissions/ -l bash -b template.sh
-
-# Multiple languages
-./run_moss.sh submissions/ -l bash -l python
+bash run_moss.sh --help
+bash run_moss.sh SEM05 python py --submissions /path/to/ROOT
 ```
 
-### Output
+This prints an argument-safe plan only. The adapter supports a bounded set of the official languages (`c`, `cc`, `java`, `python`, `perl`, `javascript`); `bash` is rejected. It does not silently route Bash to another language. `--base DIR` adds each base file with its own `-b`. `--client FILE` selects the account-configured official client. An explicit `--send` invokes an external upload and is reserved for separately authorised use after the institutional disclosure/data-handling decision. No registration or upload was performed during source verification.
 
-MOSS returns a URL to view results:
-```
-Results available at: http://moss.stanford.edu/results/XXXXX
-```
-
----
-
-## Combined Plagiarism Check
-
-### Usage
-
-```bash
-./run_plagiarism_check.sh <submissions_dir> [options]
-
-Options:
-  --threshold N     Similarity threshold (0.0-1.0, default: 0.7)
-  --report FILE     Output report file
-  --format FMT      Report format: html, csv, json
-  --include-moss    Include MOSS analysis
-  --local-only      Skip external services
-```
-
-### What It Checks
-
-| Check | Method | Detects |
-|-------|--------|---------|
-| Exact matches | Hash comparison | Copy-paste plagiarism |
-| Near matches | Diff analysis | Minor modifications |
-| Structural similarity | AST comparison | Refactored code |
-| MOSS analysis | External service | Sophisticated plagiarism |
-
-### Example Workflow
-
-```bash
-# Quick local check
-./run_plagiarism_check.sh submissions/ --local-only --threshold 0.8
-
-# Full analysis with report
-./run_plagiarism_check.sh submissions/ --include-moss --report plagiarism_report.html
-
-# CSV for spreadsheet analysis
-./run_plagiarism_check.sh submissions/ --format csv --report results.csv
-```
-
----
-
-## Output Interpretation
-
-### Similarity Scores
-
-| Score | Interpretation | Action |
-|-------|----------------|--------|
-| < 30% | Normal | No action needed |
-| 30-50% | Elevated | Review manually |
-| 50-70% | High | Likely collaboration |
-| > 70% | Very high | Probable plagiarism |
-
-### Report Format
-
-```
-═══════════════════════════════════════════════════════════════
- PLAGIARISM ANALYSIS REPORT
-═══════════════════════════════════════════════════════════════
-
-Submissions analysed: 45
-Pairs checked: 990
-Flagged pairs: 12
-
-HIGH SIMILARITY (>70%):
-  student_A ↔ student_B: 85% (MOSS: 82%)
-  student_C ↔ student_D: 78% (MOSS: 75%)
-
-ELEVATED (50-70%):
-  student_E ↔ student_F: 62% (MOSS: 58%)
-  ...
-
-Full MOSS report: http://moss.stanford.edu/results/XXXXX
-═══════════════════════════════════════════════════════════════
-```
-
----
-
-## Best Practices
-
-### Before Running
-
-- Remove template/starter code from analysis
-- Exclude common library imports
-- Set appropriate threshold for assignment type
-
-### Interpreting Results
-
-- **Always review manually** — false positives are common
-- Consider assignment constraints (limited solutions possible)
-- Check submission timestamps
-- Interview suspected students
-
-### Documentation
-
-Keep records for academic integrity proceedings:
-- Screenshot of MOSS results
-- Local analysis report
-- Student submission timestamps
-- Interview notes
-
----
-
-*See also: [`MOSS_JPLAG_GUIDE.md`](MOSS_JPLAG_GUIDE.md) for detailed documentation*  
-*See also: [`../homework_evaluation/`](../homework_evaluation/) for grading*
-
-*Last updated: January 2026*
+See [MOSS_JPLAG_GUIDE.md](MOSS_JPLAG_GUIDE.md) for the primary references, a pinned JPlag example and interpretation limits. Decide whether to keep student code local or use an approved external service; the recommendation is to use local descriptive evidence until that choice is resolved.

@@ -3,10 +3,10 @@
 # Formative Assessment — Conceptual Quiz
 
 metadata:
-  lecture: 6
+  course: 6
   subject: "Synchronisation (Part 1 - Peterson, locks, mutex)"
   version: "2.0"
-  date_created: "2026-01-28"
+  creation_date: "2026-01-28"
   author: "by Revolvix"
   number_of_questions: 12
   estimated_time_minutes: 15

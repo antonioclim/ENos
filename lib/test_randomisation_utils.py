@@ -17,7 +17,7 @@ from dataclasses import fields
 import pytest
 
 # Import the module under test
-from randomisation_utils import (
+from lib.randomisation_utils import (
     generate_student_seed,
     randomise_test_parameters,
     get_student_test_data,

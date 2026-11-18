@@ -20,6 +20,7 @@ demo_indexed_arrays() {
     echo "═══════════════════════════════════════════════════════════════"
     
     # Declaration and initialisation
+    local fruit
     local -a fruits=("apple" "pear" "banana" "orange")
     
     echo "1. Initial array: ${fruits[*]}"
@@ -48,6 +49,7 @@ demo_associative_arrays() {
     echo "═══════════════════════════════════════════════════════════════"
     
     # MANDATORY: declare -A
+    local key
     declare -A config
     config[host]="localhost"
     config[port]="8080"
@@ -69,13 +71,14 @@ demo_files_with_spaces() {
     echo "  FILES WITH SPACES (importance of quotes)"
     echo "═══════════════════════════════════════════════════════════════"
     
+    local f
     local -a files=("document one.txt" "report two.pdf" "data three.csv")
     
     echo "WRONG (without quotes) - would be ${#files[@]} * 2 iterations"
     echo "CORRECT (with quotes):"
     local count=0
     for f in "${files[@]}"; do
-        ((count++))
+        count=$((count + 1))
         echo "   $count: '$f'"
     done
     echo "Total correct iterations: $count"

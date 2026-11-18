@@ -27,16 +27,16 @@ Rate your confidence (1 = not confident, 5 = very confident):
 
 | Concept | Before Seminar | After Seminar | Action if < 3 |
 |---------|----------------|---------------|---------------|
-| Difference between shell and terminal | [ ] | [ ] | Review section 2.1 |
+| Difference between shell and terminal | [ ] | [ ] | Review MAIN_MATERIAL: Mental Model |
 | Absolute vs relative paths | [ ] | [ ] | Practice with cd |
-| Purpose of shebang line | [ ] | [ ] | Read MAIN_MATERIAL 3.1 |
+| Purpose of shebang line | [ ] | [ ] | Review PARSONS_PROBLEMS P11 |
 | What exit code 0 means | [ ] | [ ] | Test with echo $? |
 
 ### Section 2: Variables
 
 | Concept | Before Seminar | After Seminar | Action if < 3 |
 |---------|----------------|---------------|---------------|
-| Local vs exported variables | [ ] | [ ] | Run export demo |
+| Unexported vs exported variables | [ ] | [ ] | Run export demo |
 | Correct variable assignment (no spaces) | [ ] | [ ] | Practice in terminal |
 | When to use quotes around $VAR | [ ] | [ ] | Review quoting section |
 | Purpose of .bashrc | [ ] | [ ] | Edit your own .bashrc |
@@ -48,7 +48,7 @@ Rate your confidence (1 = not confident, 5 = very confident):
 | What * matches | [ ] | [ ] | Try ls *.txt |
 | What ? matches | [ ] | [ ] | Try ls file?.txt |
 | Character classes [abc] | [ ] | [ ] | Create test files |
-| Why * does not match hidden files | [ ] | [ ] | Test ls * vs ls .* |
+| Why * does not match hidden files | [ ] | [ ] | Compare ls -d -- * with ls -A under declared shell options |
 
 ---
 
@@ -73,7 +73,7 @@ Can you do these without looking at notes?
 # Create a variable MY_NAME with your name
 # Display it with echo
 # Export it
-# Verify it exists in a subshell
+# Verify it in a newly executed bash -c and contrast with ( ... )
 ```
 
 [ ] Yes, I can do this confidently
@@ -187,7 +187,7 @@ Choose 2 tasks to practice before next seminar:
 If you have a study partner, discuss:
 
 1. **Compare approaches**: "How did you solve the directory structure task?"
-2. **Teach each other**: "Can you explain export vs local variables to me?"
+2. **Teach each other**: "Can you explain exported vs unexported shell variables to me?"
 3. **Debug together**: "Let's find the bug in this script"
 4. **Challenge each other**: "What does this command do?" (without running it)
 

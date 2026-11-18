@@ -40,11 +40,15 @@
 │                              │                                       │
 │                              ▼                                       │
 │  ┌────────────────────────────────────────────────────────────────┐ │
-│  │ RESULT: ["brown", "fox", "over", "dog"]                       │ │
+│  │ RESULT: ["brown", "fox", "dog"]                       │ │
 │  └────────────────────────────────────────────────────────────────┘ │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
+
+The internal-o pattern needs at least one word character on both sides of `o`;
+`over` starts with it and therefore does not match. Slash delimiters and `g` are
+diagram notation; GNU grep invocation is `grep -oP '\b\w+o\w+\b'`.
 
 ### Quantifiers - Greedy vs Lazy Behaviour
 
@@ -89,6 +93,9 @@
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
+
+The lazy diagram shows the **first** match. A global search such as GNU
+`grep -oP` emits both `<div>Hello</div>` and `<div>World</div>`, on separate lines.
 
 ### AWK - Processing Flow
 
@@ -202,7 +209,7 @@
 │  │   1: # Configuration file   ✗ │ start range                    │ │
 │  │   2: host = localhost       ✗ │                                │ │
 │  │   3: port = 8080            ✗ │                                │ │
-│  │   4: # Database settings    ✗ │ start new range                │ │
+│  │   4: # Database settings    ✗ │ still inside range                │ │
 │  │   5: db_host = 127.0.0.1    ✗ │ end range (^db match)          │ │
 │  │   6: db_port = 5432          ✓ kept (after range)              │ │
 │  └────────────────────────────────────────────────────────────────┘ │
@@ -229,9 +236,15 @@
 
 ### Exercise 1: Extracting Data from Apache Log
 
+The exact fixture has ten whitespace-separated fields: status `$9`, bytes `$10`
+and path `$7`. This is not a general Apache parser. Only syntactically valid
+status records enter the status denominator; malformed records are counted and
+reported separately, never silently treated as a normal code.
+
 ```bash
-# Create test log
-cat > /tmp/access.log << 'EOF'
+# Create a uniquely owned test file
+fixture=$(mktemp "${TMPDIR:-/tmp}/enos-access.log.XXXXXX") || exit 1
+cat > "$fixture" << 'EOF'
 192.168.1.100 - - [10/Jan/2025:10:15:32 +0200] "GET /index.html HTTP/1.1" 200 1234
 192.168.1.101 - - [10/Jan/2025:10:15:33 +0200] "POST /api/users HTTP/1.1" 201 567
 10.0.0.50 - - [10/Jan/2025:10:15:34 +0200] "GET /images/logo.png HTTP/1.1" 200 45678
@@ -243,7 +256,7 @@ EOF
 
 # === EXERCISE A: Top IPs ===
 echo "=== Top IPs ==="
-awk '{ count[$1]++ } END { for (ip in count) print count[ip], ip }' /tmp/access.log | sort -rn
+awk '{ count[$1]++ } END { for (ip in count) print count[ip], ip }' "$fixture" | sort -rn
 # Output:
 # 3 192.168.1.100
 # 1 192.168.1.102
@@ -254,17 +267,15 @@ awk '{ count[$1]++ } END { for (ip in count) print count[ip], ip }' /tmp/access.
 # === EXERCISE B: Status Code Distribution ===
 echo ""
 echo "=== Status Codes ==="
-awk '{ 
-    match($0, /" [0-9]{3} /)
-    status = substr($0, RSTART+2, 3)
-    codes[status]++ 
-} 
-END { 
-    for (code in codes) 
-        printf "%s: %d (%.1f%%)\n", code, codes[code], codes[code]*100/NR 
-}' /tmp/access.log
+awk 'NF==10 && $9 ~ /^[1-5][0-9][0-9]$/ {codes[$9]++; valid++; next}
+{invalid++}
+END {
+    for (code in codes) printf "%s: %d (%.1f%%)\n", code, codes[code], codes[code]*100/valid
+    if (!valid) print "No valid status records; percentages undefined"
+    if (invalid) printf "Excluded malformed records: %d\n", invalid > "/dev/stderr"
+}' "$fixture" | sort
 # Output:
-# 200: 5 (71.4%)
+# 200: 4 (57.1%)
 # 201: 1 (14.3%)
 # 404: 1 (14.3%)
 # 500: 1 (14.3%)
@@ -272,52 +283,42 @@ END {
 # === EXERCISE C: Bytes transferred per resource ===
 echo ""
 echo "=== Bytes per resource ==="
-awk '{
-    # Extract URL and bytes
-    match($0, /"[A-Z]+ ([^ ]+)/, arr)
-    url = arr[1]
-    bytes = $(NF)
-    total[url] += bytes
-}
-END {
-    for (url in total)
-        printf "%-30s %d bytes\n", url, total[url]
-}' /tmp/access.log | sort -t$'\t' -k2 -rn
+awk 'NF==10 && $10 ~ /^[0-9]+$/ {total[$7]+=$10}
+END {for (url in total) printf "%-30s %d bytes\n", url, total[url]}' "$fixture" |
+    sort -k2,2nr -k1,1
 # /images/logo.png 45678 bytes
-# /css/style.css 2345 bytes
 # /index.html 2468 bytes
+# /css/style.css 2345 bytes
 # ...
 
 # === EXERCISE D: Requests per hour ===
 echo ""
 echo "=== Requests per hour ==="
-awk -F'[\\[:]' '{ hours[$3]++ } END { for (h in hours) print h":00 -", hours[h], "requests" }' /tmp/access.log
+awk -F'[\\[:]' '{ hours[$3]++ } END { for (h in hours) print h":00 -", hours[h], "requests" }' "$fixture"
 
 # === EXERCISE E: Only errors (4xx, 5xx) with details ===
 echo ""
 echo "=== Errors ==="
-awk '/ (4[0-9]{2}|5[0-9]{2}) / {
-    # Extract components
-    ip = $1
-    match($0, /\[([^\]]+)\]/, dt)
-    date = dt[1]
-    match($0, /"([^"]+)"/, req)
-    request = req[1]
-    match($0, /" ([0-9]{3}) /, st)
-    status = st[1]
-    
-    printf "[%s] %s - %s - %s\n", status, ip, date, request
-}' /tmp/access.log
+awk 'NF==10 && $9 ~ /^[45][0-9][0-9]$/ {
+    date=$4 " " $5; sub(/^\[/,"",date); sub(/\]$/,"",date)
+    request=$6 " " $7 " " $8; sub(/^"/,"",request); sub(/"$/,"",request)
+    printf "[%s] %s - %s - %s\n", $9, $1, date, request
+}' "$fixture"
 
 # Cleanup
-rm /tmp/access.log
+rm "$fixture"
 ```
 
 ### Exercise 2: CSV Processing with AWK
 
+The supplied CSV has unquoted fields, one header, integer quantities and decimal
+prices. General quoted CSV requires a CSV parser. Array iteration order is not
+guaranteed; compare record sets or explicitly sort for a stable display.
+
 ```bash
-# Create test CSV
-cat > /tmp/sales.csv << 'EOF'
+# Create a uniquely owned test file
+fixture=$(mktemp "${TMPDIR:-/tmp}/enos-sales.csv.XXXXXX") || exit 1
+cat > "$fixture" << 'EOF'
 Date,Product,Quantity,Price,Region
 2025-01-01,Laptop,5,1200,North
 2025-01-01,Phone,10,800,South
@@ -339,7 +340,7 @@ END {
     printf "%-10s %8s %12s\n", "-------", "---", "-------"
     for (p in qty) 
         printf "%-10s %8d $%11.2f\n", p, qty[p], revenue[p]
-}' /tmp/sales.csv
+}' "$fixture"
 
 # === B: Total per region ===
 echo ""
@@ -350,7 +351,7 @@ awk -F',' 'NR>1 {
 END { 
     for (r in region) 
         printf "%s: $%.2f\n", r, region[r]
-}' /tmp/sales.csv | sort -t'$' -k2 -rn
+}' "$fixture" | sort -t'$' -k2 -rn
 
 # === C: Daily average ===
 echo ""
@@ -364,14 +365,15 @@ END {
     for (d in daily) total += daily[d]
     print "Total:", total
     print "Days:", length(days)
-    print "Average/day:", total/length(days)
-}' /tmp/sales.csv
+    if(length(days)) print "Average/day:", total/length(days)
+    else print "Average/day: undefined (0 days)"
+}' "$fixture"
 
 # === D: Pivot table - Product x Region ===
 echo ""
 echo "=== Pivot: Product x Region ==="
 awk -F',' 'NR>1 { 
-    pivot[$2][$5] += $3 * $4
+    pivot[$2,$5] += $3 * $4
     products[$2] = 1
     regions[$5] = 1
 }
@@ -386,73 +388,56 @@ END {
         printf "%-10s", p
         for (r in regions) {
             if ((p,r) in pivot)
-                printf "%10.0f", pivot[p][r]
+                printf "%10.0f", pivot[p,r]
             else
                 printf "%10s", "-"
         }
         print ""
     }
-}' /tmp/sales.csv
+}' "$fixture"
 
-rm /tmp/sales.csv
+rm "$fixture"
 ```
 
 ### Exercise 3: Complete Text Analysis Script
 
 ```bash
-#!/bin/bash
-# text_analyzer.sh - Analyses a text file
-
+#!/usr/bin/env bash
+# text_analyzer.sh - local text statistics, no file changes
 set -euo pipefail
-
-usage() {
-    echo "Usage: $0 <file>"
-    exit 1
-}
-
-[ $# -eq 1 ] || usage
-[ -f "$1" ] || { echo "File does not exist: $1"; exit 1; }
-
-FILE="$1"
-
-echo "=== Analysis: $FILE ==="
-echo ""
-
-# Basic statistics
-echo "--- Basic statistics ---"
-wc "$FILE" | awk '{ printf "Lines: %d\nWords: %d\nCharacters: %d\n", $1, $2, $3 }'
-
-# Non-empty lines
-echo "Non-empty lines: $(grep -c '.' "$FILE")"
-
-# Longest line
-echo "Longest line: $(wc -L < "$FILE") characters"
-
-echo ""
-echo "--- Top 10 words ---"
-tr -cs 'A-Za-z' '\n' < "$FILE" | tr 'A-Z' 'a-z' | sort | uniq -c | sort -rn | head -10
-
-echo ""
-echo "--- Word length distribution ---"
-tr -cs 'A-Za-z' '\n' < "$FILE" | awk '
-length > 0 {
-    len = length($0)
-    if (len <= 3) short++
-    else if (len <= 6) medium++
-    else long++
-}
+[[ $# == 1 && -f $1 && -r $1 ]] || { echo "Usage: $0 READABLE_FILE" >&2; exit 2; }
+FILE=$1
+printf '=== Analysis: %s ===\n' "$FILE"
+printf 'Lines: %s\n' "$(wc -l < "$FILE")"
+printf 'Words: %s\n' "$(wc -w < "$FILE")"
+printf 'Bytes: %s\n' "$(wc -c < "$FILE")"
+printf 'Characters in the active locale: %s\n' "$(wc -m < "$FILE")"
+printf 'Maximum display width (GNU wc -L): %s columns\n' "$(wc -L < "$FILE")"
+nonempty=$(grep -c '.' -- "$FILE") || { rc=$?; ((rc==1)) || exit "$rc"; }
+printf 'Non-empty lines: %s\n' "$nonempty"
+printf '\n--- Top 10 ASCII words ---\n'
+LC_ALL=C tr -cs 'A-Za-z' '\n' < "$FILE" | LC_ALL=C tr 'A-Z' 'a-z' |
+    sed '/^$/d' | LC_ALL=C sort | uniq -c | LC_ALL=C sort -rn | sed -n '1,10p'
+printf '\n--- ASCII word length distribution ---\n'
+LC_ALL=C tr -cs 'A-Za-z' '\n' < "$FILE" | awk '
+length>0 {len=length($0); if(len<=3) short++; else if(len<=6) medium++; else long++}
 END {
-    total = short + medium + long
-    printf "Short (1-3):   %5d (%.1f%%)\n", short, short*100/total
-    printf "Medium (4-6):  %5d (%.1f%%)\n", medium, medium*100/total
-    printf "Long (7+):     %5d (%.1f%%)\n", long, long*100/total
+    total=short+medium+long
+    if (!total) {print "No ASCII words; percentages undefined"; exit}
+    printf "Short (1-3): %d (%.1f%%)\n", short, short*100/total
+    printf "Medium (4-6): %d (%.1f%%)\n", medium, medium*100/total
+    printf "Long (7+): %d (%.1f%%)\n", long, long*100/total
 }'
-
-echo ""
-echo "--- Patterns found ---"
-echo "Emails: $(grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' "$FILE" 2>/dev/null | wc -l)"
-echo "URLs: $(grep -oE 'https?://[^ ]+' "$FILE" 2>/dev/null | wc -l)"
-echo "Numbers: $(grep -oE '\b[0-9]+\b' "$FILE" 2>/dev/null | wc -l)"
+count_pattern() {
+    local pattern=$1
+    { grep -oE -- "$pattern" "$FILE" || { rc=$?; ((rc==1)) || exit "$rc"; }; } | wc -l
+}
+# Lexical teaching patterns: counts do not establish RFC email/URL validity.
+email_count=$(count_pattern '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}') || exit 1
+url_count=$(count_pattern 'https?://[^[:space:]]+') || exit 1
+number_count=$(count_pattern '\b[0-9]+\b') || exit 1
+printf '\nEmail-shaped matches: %s\nURL-shaped matches: %s\nInteger words: %s\n' \
+    "$email_count" "$url_count" "$number_count"
 ```
 
 ---
@@ -477,7 +462,7 @@ echo "Numbers: $(grep -oE '\b[0-9]+\b' "$FILE" 2>/dev/null | wc -l)"
 
 ### AWK Quick Reference
 
-```bash
+```text
 # Fields
 $0, $1, $NF, NR, NF, FS, OFS
 
@@ -495,7 +480,7 @@ tolower(s), toupper(s), gsub(r,s,t)
 
 ### SED Quick Reference
 
-```bash
+```text
 # Substitution
 s/old/new/       # first
 s/old/new/g      # all
@@ -516,7 +501,6 @@ a\text           # append
 
 ---
 *Supplementary material for the Operating Systems course | ASE Bucharest - CSIE*
--e 
 
 ---
 

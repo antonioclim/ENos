@@ -1,112 +1,49 @@
-# 📁 Global Scripts — Kit Infrastructure
+# ENos repository utilities
 
-> **Location:** `/scripts/`  
-> **Purpose:** Kit-wide automation for quality assurance and maintenance
+Author: ing. dr. Antonio Clim · ENos v6 candidate, based on v5.5.0.
 
-## Contents
+Run these examples from the repository root. Python tools use the selected Python environment. The link checker requires `markdown-it-py` (also listed in the development dependencies); the print synchroniser and inventory use only the Python standard library.
 
-| Script | Purpose | Usage Context |
-|--------|---------|---------------|
-| `add_print_styles.sh` | Inject print-friendly CSS into HTML presentations | Build process |
-| `check_links.sh` | Comprehensive documentation link validator | CI/CD, pre-release |
-| `verify_links.sh` | Alternative link checker (lightweight) | Quick local checks |
-
-## Quick Start
+## Local links and anchors
 
 ```bash
-# Make scripts executable (once)
-chmod +x *.sh
-
-# Check all documentation links
-./check_links.sh
-
-# Add print styles to all HTML files
-./add_print_styles.sh ../05_LECTURES/
+bash scripts/check_links.sh
+bash scripts/check_links.sh --internal-only SEM03/docs
+bash scripts/verify_links.sh -v README.md
+bash scripts/check_links.sh --json --report links_report.json
 ```
 
-## Detailed Usage
+`check_links.sh` and `verify_links.sh` are two entry points to the same parser. It reads Markdown links/reference links/images and HTML `href`/`src`, resolves local paths and validates static heading or ID fragments. Markdown code examples are not treated as live links. The three intentional `url` citation slots in `04_PROJECTS/templates/README_template.md` are reported explicitly as template placeholders, not successful links; a completed project must replace them. It reports external destinations as `not_checked` by default and makes no network request.
 
-### add_print_styles.sh
+An explicitly requested network check is available with `--external`. An HTTP response establishes availability only, not source accuracy, credentials, application behaviour or browser rendering. Redirects, access restrictions and timeouts must be read in the report.
 
-Injects `@media print` CSS rules into HTML presentations for clean offline printing.
+Exit status is **0** when the selected checks pass, **1** for broken/unverified/error results and **2** for usage or dependency errors. It is a Boolean outcome, so 256 broken links cannot wrap to a successful exit status.
+
+## Managed print rules
 
 ```bash
-# Process single directory
-./add_print_styles.sh ../SEM01/presentations/
-
-# Process entire kit
-./add_print_styles.sh ../
-
-# Dry run (preview changes)
-./add_print_styles.sh --dry-run ../05_LECTURES/
+bash scripts/add_print_styles.sh --dry-run SEM01/presentations
+bash scripts/add_print_styles.sh SEM01/presentations
+bash scripts/add_print_styles.sh 03_GUIDES/STUDENT_GUIDE_EN.html
 ```
 
-**What it does:**
-- Adds page break rules before `<h1>` elements
-- Hides navigation elements in print
-- Optimises font sizes for paper
-- Preserves existing styles
+The selected file or directory defines the exact scope. With no path, the repository's own HTML files are selected; vendored upstream HTML and build/cache directories are excluded so pinned package bytes remain unchanged. The tool adds or replaces one `enos-print-styles` block from `assets/css/print.css`, preserves content-specific styles and file permissions and writes each changed file atomically. It validates the selected documents before writing; a missing `</head>`, unreadable input or failed replacement produces a non-zero exit. An existing unrelated `@media print` rule does not skip the common rules. A repeated run with unchanged CSS makes no change.
 
-### check_links.sh
+The common rules expose slides, tabs and collapsed instructions, allow long code/table content to flow and keep footers in the document flow. They do not certify a browser's pagination, visual layout or assistive technology behaviour. Inspect actual print output on supported browsers before acceptance.
 
-Validates all internal and external links in Markdown and HTML documentation.
+## Physical inventory
 
 ```bash
-# Full check (internal + external)
-./check_links.sh
-
-# Internal links only (faster)
-./check_links.sh --internal-only
-
-# Specific directory
-./check_links.sh ../SEM03/docs/
-
-# Generate report
-./check_links.sh --report links_report.txt
+python3 scripts/inventory.py --update-readme
 ```
 
-**Output codes:**
-- `[OK]` — Link valid
-- `[WARN]` — External link timeout (may still work)
-- `[FAIL]` — Broken link
+The JSON distinguishes file categories, all YAML from formative quiz banks and file counts from test coverage. It records hashes of the selected files. Its own hash and size are omitted to avoid self-reference.
 
-### verify_links.sh
-
-Lightweight alternative for quick local verification.
+## Verification and CI templates
 
 ```bash
-# Quick check
-./verify_links.sh ../README.md
-
-# Verbose mode
-./verify_links.sh -v ../05_LECTURES/
+python3 -m pytest
+bash 00_SUPPLEMENTARY/validate.sh
 ```
 
-## Integration with CI
-
-These scripts are called by GitHub Actions workflows. See individual `SEM*/ci/github_actions.yml` for integration examples.
-
-```yaml
-# Example CI step
-- name: Check documentation links
-  run: ./scripts/check_links.sh --internal-only
-```
-
-## Dependencies
-
-- `bash` ≥ 4.0
-- `curl` (for external link checks)
-- `grep`, `sed`, `awk` (standard Unix tools)
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| "Permission denied" | Run `chmod +x *.sh` |
-| External links timeout | Use `--internal-only` flag |
-| False positives on anchors | Check if target file has matching `id` attribute |
-
----
-
-*Maintainer: Kit infrastructure team*  
-*Last updated: January 2026*
+The root pytest configuration includes the shared library, global utility tests and seminar test directories. Some tests require optional local tools; read failures or explicit skips rather than treating collection as acceptance. Seminar `ci/github_actions.yml` files are examples, not evidence of an activated root workflow or a successful GitHub Actions run. [VERIFICATION.md](../VERIFICATION.md) records the distinction between syntax, local fixtures, synthetic UI checks and unexecuted host/service checks.

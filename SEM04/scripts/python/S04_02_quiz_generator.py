@@ -17,6 +17,7 @@ Options:
 """
 
 import random
+import copy
 import json
 import sys
 import html
@@ -91,7 +92,7 @@ QUESTIONS = [
         question="Why does grep 'ab+c' NOT find 'abc' but grep -E 'ab+c' does?",
         options=["Bug in grep", "In BRE, + e literal", "abc does not contain ++", "No difference"],
         correct=1,
-        explanation="In BRE (Basic RE), + is a literal character. You need \+ or -E for quantifier.",
+        explanation=r"In GNU BRE, + is a literal character. You need \+ or -E for quantifier.",
         misconception="Misunderstanding of diferenței BRE vs ERE"
     ),
     Question(
@@ -285,7 +286,7 @@ QUESTIONS = [
         question="sed 's/\\(.*\\)/[\\1]/' face ce?",
         options=["Error", "Pune text între []", "Șterge text", "Duplică text"],
         correct=1,
-        explanation="\(.*\) captures everything, \1 refers to the capture, result: [original text].",
+        explanation=r"\(.*\) captures everything, \1 refers to the capture, result: [original text].",
         misconception="Misunderstanding of backreferences"
     ),
     
@@ -388,10 +389,12 @@ def generate_quiz(
     shuffle_options: bool = True
 ) -> List[Question]:
     """Generează un quiz randomizat."""
+    if count < 1:
+        raise ValueError('count must be positive')
     questions = get_questions_by_category(category)
     random.shuffle(questions)
     
-    selected = questions[:min(count, len(questions))]
+    selected = copy.deepcopy(questions[:min(count, len(questions))])
     
     if shuffle_options:
         for q in selected:

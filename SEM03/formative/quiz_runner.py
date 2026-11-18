@@ -242,6 +242,8 @@ class QuizRunner:
         # Save to history
         self.answers.append({
             'question_id': q.get('id', f'q{index}'),
+            'section': q.get('section', 'General'),
+            'bloom': q.get('bloom', 'unknown'),
             'user_answer': answer_idx,
             'correct_answer': correct_idx,
             'is_correct': is_correct,
@@ -340,13 +342,10 @@ class QuizRunner:
         """Identify sections with the weakest results."""
         section_scores: Dict[str, List[bool]] = {}
         
-        for i, answer in enumerate(self.answers):
-            if i < len(self.questions):
-                section = self.questions[i].get('section', 'General')
-                if section not in section_scores:
-                    section_scores[section] = []
-                section_scores[section].append(answer['is_correct'])
-        
+        for answer in self.answers:
+            section = answer.get('section', 'General')
+            section_scores.setdefault(section, []).append(answer['is_correct'])
+
         weak = []
         for section, results in section_scores.items():
             accuracy = sum(results) / len(results) if results else 0

@@ -1,8 +1,10 @@
 # 🧭 Project Selection Guide
 
+> **Current status:** Numerical assessment, bonus and penalty rules below are historical proposals awaiting author reconciliation. Timings, anecdotes and experiential claims are retained with unverified provenance. See [ASSESSMENT_AND_EVIDENCE_CONTRACT.md](ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for the concrete choices, consequences and recommended resolution. No grade or publication policy is adopted by these examples.
+
 > **Purpose:** Help you choose the right project for your skills and available time  
 > **Author:** ing. dr. Antonio Clim  
-> **Based on:** 5 years of grading these projects
+> **Historical attribution:** “5 years of grading these projects”; supporting provenance not supplied
 
 ---
 
@@ -76,7 +78,7 @@
 | Interested in DevOps | M05, M09 | Deployment and automation |
 | Systems programming enthusiast | A01, A02 | Deep OS concepts, C integration |
 | Limited time (<20h available) | E01-E05 only | Be realistic about scope |
-| Want maximum challenge | A01 + K8s bonus | Full experience, impressive CV |
+| Want maximum challenge | A01; K8s as a learning extension pending bonus eligibility | Full experience, impressive CV |
 
 ### By Interest Area
 
@@ -94,7 +96,7 @@
 
 ## 🏆 My Personal Recommendations
 
-Based on grading hundreds of submissions, here are my honest opinions:
+The original author described these opinions as based on hundreds of submissions. That dataset is not supplied; retain the opinions as guidance, not verified comparative outcomes.
 
 ### Best "Bang for Buck"
 **M01 (Incremental Backup System)**
@@ -109,7 +111,7 @@ Why: You will spend hours exploring `/proc` and understanding how Linux actually
 ### Easiest to Test and Debug
 **E01 (File System Auditor)**
 
-Why: Deterministic outputs. You create test directories, run your script, check the output. No timing issues, no network problems, no race conditions.
+Why: Deterministic outputs. You create test directories, run your script, check the output. Owned static fixtures avoid network dependencies; concurrent filesystem changes and permissions still require explicit handling.
 
 ### Hardest to Debug (Fair Warning)
 **A03 (Distributed File Sync)**

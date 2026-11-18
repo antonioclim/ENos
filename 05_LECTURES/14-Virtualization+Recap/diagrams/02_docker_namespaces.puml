@@ -1,5 +1,5 @@
 @startuml docker_namespaces
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Docker and Linux Namespaces
 
 skinparam rectangle {
@@ -33,7 +33,7 @@ rectangle "**LINUX NAMESPACES** (Isolation)" as namespaces #FFF9C4 {
     
     rectangle "**mnt**\nFilesystem\nmounts" as mnt #FCE4EC
     
-    rectangle "**utilizator**\nUser/Group\nIDs" as utilizator #E1BEE7
+    rectangle "**user**\nUser/Group\nIDs" as user #E1BEE7
     
     rectangle "**uts**\nHostname\nseparate" as uts #FFCDD2
     
@@ -43,18 +43,19 @@ rectangle "**LINUX NAMESPACES** (Isolation)" as namespaces #FFF9C4 {
 rectangle "**CGROUPS** (Resource limiting)" as cgroups #C8E6C9 {
     note as cg_note
     • **cpu**: Limits CPU time
-    • **memorie**: Limits RAM
-    • **blkio**: Limits disk I/O
-    • **devices**: Device control
+    • **memory**: Limits RAM
+    • **io** (v2) / **blkio** (v1): I/O control
+    • Device filtering: mechanism depends on cgroup version
     end note
 }
 
 note bottom
-**Container = Isolated proces through:**
-1. **Namespaces**: Isolation (what the proces sees)
+**Container = Isolated process through:**
+1. **Namespaces**: Isolation (what the process sees)
 2. **cgroups**: Limiting (how much it can use)
-3. **Union FS**: Layered images (efficiency)
+3. Layered storage: e.g. OverlayFS; storage driver is configurable
 
+Namespace membership/configuration varies by runtime options.
 **Verification:** ls /proc/$$/ns/
 end note
 

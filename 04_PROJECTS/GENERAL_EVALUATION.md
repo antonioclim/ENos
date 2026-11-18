@@ -1,5 +1,7 @@
 # General Evaluation - Semester Projects
 
+> **Current status:** Numerical assessment, bonus and penalty rules below are historical proposals awaiting author reconciliation. Timings, anecdotes and experiential claims are retained with unverified provenance. See [ASSESSMENT_AND_EVIDENCE_CONTRACT.md](ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for the concrete choices, consequences and recommended resolution. No grade or publication policy is adopted by these examples.
+
 > **Document for Students and Instructors**  
 > **Operating Systems** | ASE Bucharest - CSIE
 
@@ -38,7 +40,7 @@ Project evaluation aims to verify **deep understanding** of operating systems co
 |--------|--------|----------|
 | Structure | 5% | Modularity, file organisation |
 | Clarity | 5% | Readable code, descriptive variables |
-| Best Practices | 5% | ShellCheck clean, `set -euo pipefail` |
+| Best Practices | 5% | ShellCheck review and tested explicit failure handling, including strict-mode exceptions |
 | Efficiency | 5% | No redundancies, reasonable algorithms |
 
 **Quality checklist:**
@@ -82,7 +84,7 @@ tree -L 2 .
 | < 20% | 20% |
 
 **Recommended test structure:**
-```bash
+```text
 tests/
 ├── test_main.sh          # Main functionality tests
 ├── test_edge_cases.sh    # Edge case tests

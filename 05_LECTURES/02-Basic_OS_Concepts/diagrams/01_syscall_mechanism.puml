@@ -1,8 +1,8 @@
 /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
 
 @startuml mecanismul_syscall
-!include ../../diagrams_common/skin.puml
-title System Call Mechanism - open()
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title System Call Mechanism — illustrative raw Linux x86-64 open syscall
 
 skinparam sequence {
     ParticipantPadding 20
@@ -11,7 +11,7 @@ skinparam sequence {
 
 box "User Space" #E3F2FD
     participant "Application\nC" as app
-    participant "glibc\nwrapper" as libc
+    participant "Illustrative raw\nsyscall wrapper" as libc
 end box
 
 box "Kernel Space" #FFCCBC
@@ -23,7 +23,7 @@ end box
 participant "Hardware\nCPU" as cpu
 
 == Call Initiation ==
-app -> libc : open("/tmp/file", O_RDONLY)
+app -> libc : raw_open("/tmp/file", O_RDONLY)
 activate libc #C8E6C9
 
 libc -> libc : Prepare registers:\n%rax = 2 (syscall nr)\n%rdi = path\n%rsi = flags
@@ -32,14 +32,14 @@ libc -> cpu : **syscall** instruction
 activate cpu #FFCDD2
 
 == User → Kernel Transition ==
-cpu -> cpu : Save RIP, RFLAGS\nSwitch Ring 3 → Ring 0\nLoad kernel stack
+cpu -> cpu : Save RIP, RFLAGS\nSwitch Ring 3 → Ring 0\nRSP is not changed by SYSCALL
 
 cpu -> entry : Jump to entry point
 deactivate cpu
 activate entry #FFE0B2
 
 == Kernel Processing ==
-entry -> entry : Save registers\non kernel stack
+entry -> entry : Linux entry code switches stack\nSave registers on kernel stack
 
 entry -> table : Lookup %rax in\nsys_call_table[2]
 activate table #FFF9C4
@@ -55,13 +55,13 @@ sysopen --> entry : fd = 3
 deactivate sysopen
 
 == Kernel → User Transition ==
-entry -> entry : Check pending signals\nRestore registers
+entry -> entry : Check pending signals\nRestore registers and user RSP
 
 entry -> cpu : **sysret** instruction
 deactivate entry
 activate cpu #FFCDD2
 
-cpu -> cpu : Switch Ring 0 → Ring 3\nRestore RIP, RSP
+cpu -> cpu : Switch Ring 0 → Ring 3\nRestore RIP and flags (RSP restored in software)
 
 cpu -> libc : Return with %rax = 3
 deactivate cpu
@@ -78,4 +78,8 @@ note right of app
   with fd = 3
 end note
 
+note over app,libc
+Illustrative ABI-level path. Modern glibc open commonly uses openat.
+Linux entry/exit code and dispatcher vary by kernel/ABI; this is not a pinned kernel trace.
+end note
 @enduml

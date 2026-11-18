@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 cgroup_monitor.py - Real-time cgroups v2 monitor
 Operating Systems | ASE Bucharest - CSIE | 2025-2026
@@ -54,8 +54,8 @@ class CgroupMonitor:
             cgroup_path: Path to the cgroup directory to monitor
         """
         self.cgroup_path = cgroup_path
-        self.prev_cpu_usage = 0
-        self.prev_time = time.time()
+        self.prev_cpu_usage = None
+        self.prev_time = time.monotonic()
         
         # Check existence
         if not self.cgroup_path.exists():
@@ -132,11 +132,11 @@ class CgroupMonitor:
     
     def get_cpu_percent(self, stats: CgroupStats) -> float:
         """Calculate CPU usage percentage."""
-        current_time = time.time()
+        current_time = time.monotonic()
         time_delta = current_time - self.prev_time
         
-        if time_delta > 0 and self.prev_cpu_usage > 0:
-            cpu_delta = stats.cpu_usage_usec - self.prev_cpu_usage
+        if time_delta > 0 and self.prev_cpu_usage is not None:
+            cpu_delta = max(0, stats.cpu_usage_usec - self.prev_cpu_usage)
             # Convert from microseconds to percentage
             cpu_percent = (cpu_delta / (time_delta * 1_000_000)) * 100
         else:

@@ -6,7 +6,7 @@
 
 ## Description
 
-Advanced tool for monitoring process lifecycle: complete tracking from start to termination, real-time resource monitoring (CPU, memory, I/O), process hierarchy visualisation and alerting on anomalies or critical events.
+Advanced tool for monitoring process lifecycle: observed tracking with explicitly stated sampling and event-source limits, real-time resource monitoring (CPU, memory, I/O), process hierarchy visualisation and alerting on anomalies or critical events.
 
 The system provides both interactive terminal monitoring (dashboard) and daemon mode for continuous logging and automatic alerting when monitored processes exceed thresholds or stop unexpectedly.
 
@@ -24,6 +24,14 @@ The system provides both interactive terminal monitoring (dashboard) and daemon 
 ---
 
 ## Functional Requirements
+
+**Evidence contract:** polling observes presence at sampling instants; it can miss
+short-lived processes, exec transitions and PID reuse. Attached arbitrary processes
+have `exit_cause=unknown` after disappearance. Exit status/signals require a supervised
+child (`wait`) or a documented event backend. Identify processes by boot ID, PID and
+`/proc/PID/stat` start time. The choice of assessed supervised/event-backed guarantees
+remains an author decision; the requirements below retain that open scope and must
+not be graded as complete crash detection from polling alone.
 
 ### Mandatory (for passing grade)
 
@@ -79,7 +87,7 @@ The system provides both interactive terminal monitoring (dashboard) and daemon 
 
 ## CLI Interface
 
-```bash
+```text
 ./procmon.sh <command> [options]
 
 Commands:
@@ -129,6 +137,8 @@ Examples:
 ---
 
 ## Output Examples
+
+Synthetic illustrations. Crash/restart causes require the named event backend; these are not polling results.
 
 ### Monitoring Dashboard
 
@@ -207,7 +217,7 @@ TREE SUMMARY
   Total threads:    23
   Total CPU:        6.3%
   Total Memory:     156.6 MB
-  Total FDs:        395
+  Total FDs:        410
   
   Deepest level:    2
   Widest level:     4 (level 1)
@@ -248,7 +258,8 @@ LIMITS
   Max FDs:          65536
   Max Memory:       unlimited
   Max CPU:          unlimited
-  OOM Score:        0 (protected)
+  OOM Score:        0 (current score; not proof of protection)
+  OOM adjustment:   0 (no explicit protection adjustment)
 
 HEALTH CHECK: ✓ HEALTHY
   All metrics within normal range
@@ -392,6 +403,7 @@ set -euo pipefail
 
 get_process_info() {
     local pid="$1"
+    [[ $pid =~ ^[1-9][0-9]*$ ]] || return 2
     local proc_dir="/proc/$pid"
     
     # Check if process exists
@@ -401,69 +413,69 @@ get_process_info() {
     local status_file="$proc_dir/status"
     local name state ppid uid threads vmrss
     
-    name=$(awk '/^Name:/ {print $2}' "$status_file")
-    state=$(awk '/^State:/ {print $2}' "$status_file")
-    ppid=$(awk '/^PPid:/ {print $2}' "$status_file")
-    uid=$(awk '/^Uid:/ {print $2}' "$status_file")
-    threads=$(awk '/^Threads:/ {print $2}' "$status_file")
-    vmrss=$(awk '/^VmRSS:/ {print $2}' "$status_file")  # in KB
+    name=$(awk '/^Name:/ {sub(/^Name:[[:space:]]*/, ""); print; found=1; exit} END {if(!found) exit 1}' "$status_file") || return 1
+    state=$(awk '/^State:/ {print $2}' "$status_file") || return 1
+    ppid=$(awk '/^PPid:/ {print $2}' "$status_file") || return 1
+    uid=$(awk '/^Uid:/ {print $2}' "$status_file") || return 1
+    threads=$(awk '/^Threads:/ {print $2}' "$status_file") || return 1
+    vmrss=$(awk '/^VmRSS:/ {print $2; found=1} END {if(!found) print "unavailable"}' "$status_file") || return 1
+    [[ -n $state && $ppid =~ ^[0-9]+$ && $uid =~ ^[0-9]+$ && $threads =~ ^[0-9]+$ ]] || return 1
+    [[ $vmrss == unavailable || $vmrss =~ ^[0-9]+$ ]] || return 1
     
     # CPU time from /proc/[pid]/stat
     local stat_fields
-    IFS=' ' read -ra stat_fields < "$proc_dir/stat"
-    local utime="${stat_fields[13]}"
-    local stime="${stat_fields[14]}"
-    local starttime="${stat_fields[21]}"
+    local stat_line
+    stat_line=$(<"$proc_dir/stat") || return 1
+    # comm is parenthesised and may contain spaces or ')'; strip through its final ') '.
+    IFS=' ' read -ra stat_fields <<< "${stat_line##*) }"
+    [[ ${#stat_fields[@]} -ge 20 ]] || return 1
+    local utime="${stat_fields[11]}" stime="${stat_fields[12]}"
+    local starttime="${stat_fields[19]}"
+    [[ $utime =~ ^[0-9]+$ && $stime =~ ^[0-9]+$ && $starttime =~ ^[0-9]+$ ]] || return 1
     
     # File descriptors
     local fd_count
-    fd_count=$(ls -1 "$proc_dir/fd" 2>/dev/null | wc -l)
+    fd_count=$(find "$proc_dir/fd" -mindepth 1 -maxdepth 1 -printf "." 2>/dev/null | wc -c) || return 1
     
     # Command line
     local cmdline
-    cmdline=$(tr '\0' ' ' < "$proc_dir/cmdline" 2>/dev/null)
+    cmdline=$(tr '\0' ' ' < "$proc_dir/cmdline" 2>/dev/null) || return 1
+    # Human display transport: escape delimiters/newlines, not a lossless process database.
+    name=${name//|/%7C}; name=${name//$'\n'/%0A}
+    cmdline=${cmdline//|/%7C}; cmdline=${cmdline//$'\n'/%0A}
     
     # Output
     printf "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n" \
         "$pid" "$name" "$state" "$ppid" "$uid" \
-        "$threads" "${vmrss:-0}" "$utime" "$stime" \
+        "$threads" "$vmrss" "$utime" "$stime" \
         "$fd_count" "$cmdline"
 }
 
 # Calculate CPU usage
+read_process_ticks() {
+    local pid="$1" line
+    [[ $pid =~ ^[1-9][0-9]*$ ]] || return 2
+    line=$(cat "/proc/$pid/stat") || return 1
+    local -a fields
+    IFS=' ' read -r -a fields <<< "${line##*) }"
+    [[ ${#fields[@]} -ge 20 && ${fields[19]} =~ ^[0-9]+$ ]] || return 1
+    printf '%s %s\n' "${fields[19]}" "$((${fields[11]} + ${fields[12]}))"
+}
+
 calculate_cpu_usage() {
-    local pid="$1"
-    local interval="${2:-1}"
-    
-    # First reading
-    local stat1
-    IFS=' ' read -ra stat1 < "/proc/$pid/stat"
-    local utime1="${stat1[13]}"
-    local stime1="${stat1[14]}"
-    
-    # Total CPU time
-    local total1
-    total1=$(awk '{sum=0; for(i=1;i<=NF;i++) sum+=$i; print sum}' /proc/stat | head -1)
-    
-    sleep "$interval"
-    
-    # Second reading
-    local stat2
-    IFS=' ' read -ra stat2 < "/proc/$pid/stat"
-    local utime2="${stat2[13]}"
-    local stime2="${stat2[14]}"
-    local total2
-    total2=$(awk '{sum=0; for(i=1;i<=NF;i++) sum+=$i; print sum}' /proc/stat | head -1)
-    
-    # Calculation
-    local proc_diff=$((utime2 - utime1 + stime2 - stime1))
-    local total_diff=$((total2 - total1))
-    
-    if ((total_diff > 0)); then
-        echo "scale=2; $proc_diff * 100 / $total_diff" | bc
-    else
-        echo "0"
-    fi
+    local pid="$1" interval="${2:-1}" before after start1 start2 ticks1 ticks2 total1 total2
+    [[ $interval =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    before=$(read_process_ticks "$pid") || return 1
+    IFS=' ' read -r start1 ticks1 <<< "$before"
+    total1=$(awk '$1=="cpu" {s=0; for(i=2;i<=9;i++) s+=$i; print s; exit}' /proc/stat) || return 1
+    sleep "$interval" || return 1
+    after=$(read_process_ticks "$pid") || return 1
+    IFS=' ' read -r start2 ticks2 <<< "$after"
+    total2=$(awk '$1=="cpu" {s=0; for(i=2;i<=9;i++) s+=$i; print s; exit}' /proc/stat) || return 1
+    [[ $start1 == "$start2" ]] || return 1  # PID reuse: samples are incomparable.
+    (( total2 > total1 && ticks2 >= ticks1 )) || return 1
+    # Percentage of total host CPU capacity, not one-core-normalised percent.
+    awk -v p="$((ticks2-ticks1))" -v t="$((total2-total1))" 'BEGIN {printf "%.2f\n", 100*p/t}'
 }
 ```
 
@@ -484,13 +496,14 @@ build_process_tree() {
         [[ -f "/proc/$pid/status" ]] || continue
         
         local ppid
-        ppid=$(awk '/^PPid:/ {print $2}' "/proc/$pid/status")
+        ppid=$(awk '/^PPid:/ {print $2}' "/proc/$pid/status") || continue
+        [[ $ppid =~ ^[0-9]+$ ]] || continue
         
         # Add to parent's children list
         children[$ppid]+="$pid "
         
         # Save process info
-        proc_info[$pid]=$(get_process_info "$pid")
+        proc_info[$pid]=$(get_process_info "$pid") || continue
     done
     
     # Recursive function for display
@@ -499,27 +512,29 @@ build_process_tree() {
         local prefix="$2"
         local is_last="$3"
         
-        local info="${proc_info[$pid]}"
-        [[ -n "$info" ]] || return
+        local info="${proc_info[$pid]:-}"
+        [[ -n "$info" ]] || return 0
         
-        local name state cpu mem
+        local name state cpu mem mem_mib=unavailable
         IFS='|' read -r _ name state _ _ _ mem _ _ _ _ <<< "$info"
+        [[ $mem =~ ^[0-9]+$ ]] && mem_mib=$((mem / 1024))
         
         # Display current node
         local connector="├──"
         [[ "$is_last" == "true" ]] && connector="└──"
         
-        printf "%s%s %s (%s) [%s] %s MB\n" \
-            "$prefix" "$connector" "$name" "$pid" "$state" "$((mem / 1024))"
+        printf "%s%s %s (%s) [%s] %s MiB\n" \
+            "$prefix" "$connector" "$name" "$pid" "$state" "$mem_mib"
         
         # Process children
-        local child_pids="${children[$pid]}"
-        local child_array=($child_pids)
+        local child_pids="${children[$pid]:-}"
+        local -a child_array=()
+        IFS=' ' read -r -a child_array <<< "$child_pids"
         local child_count=${#child_array[@]}
         local i=0
         
         for child in "${child_array[@]}"; do
-            ((i++))
+            i=$((i + 1))
             local child_prefix="$prefix"
             [[ "$is_last" == "true" ]] && child_prefix+="    " || child_prefix+="│   "
             
@@ -537,45 +552,56 @@ build_process_tree() {
 ### Event detection
 
 ```bash
-declare -A KNOWN_PROCESSES
+declare -A KNOWN_PROCESSES=()
+
+scan_process_events() {
+    local target_pattern="$1" current_pids status pid ticks ticks_after identity info key
+    local -A observed=() matched_pids=()
+    if current_pids=$(pgrep -f -- "$target_pattern"); then status=0; else status=$?; fi
+    [[ $status == 0 || $status == 1 ]] || return "$status"
+    while IFS= read -r pid; do
+        [[ $pid =~ ^[1-9][0-9]*$ ]] || continue
+        matched_pids[$pid]=1
+        ticks=$(read_process_ticks "$pid") || continue
+        identity="$pid:${ticks%% *}"
+        info=$(get_process_info "$pid") || continue
+        ticks_after=$(read_process_ticks "$pid") || continue
+        [[ ${ticks%% *} == "${ticks_after%% *}" ]] || continue
+        observed[$identity]=1
+        if [[ ! ${KNOWN_PROCESSES[$identity]+known} ]]; then
+            log_event OBSERVED_PRESENT "$pid" "identity=$identity $info" || return 1
+            KNOWN_PROCESSES[$identity]=$info
+        fi
+    done <<< "$current_pids"
+    for key in "${!KNOWN_PROCESSES[@]}"; do
+        [[ ${observed[$key]+seen} ]] && continue
+        pid=${key%%:*}
+        if ticks=$(read_process_ticks "$pid"); then
+            if [[ "$pid:${ticks%% *}" == "$key" ]]; then
+                if [[ ${matched_pids[$pid]+matched} ]]; then
+                    log_event UNAVAILABLE "$pid" "identity=$key reason=sample_read_failure" || return 1
+                    continue
+                fi
+                log_event NO_LONGER_MATCHING "$pid" "identity=$key exit_cause=unknown" || return 1
+            else
+                log_event DISAPPEARED "$pid" "identity=$key pid_reused=yes exit_cause=unknown" || return 1
+            fi
+        elif [[ -d /proc/$pid ]]; then
+            log_event UNAVAILABLE "$pid" "identity=$key reason=read_failure" || return 1
+            continue  # Unknown visibility is not a confirmed process exit.
+        else
+            log_event DISAPPEARED "$pid" "identity=$key exit_cause=unknown" || return 1
+        fi
+        unset 'KNOWN_PROCESSES[$key]'
+    done
+}
 
 monitor_events() {
-    local target_pattern="$1"
-    
+    local target_pattern="$1" interval="${2:-1}"
+    [[ $interval =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
     while true; do
-        # Find processes matching pattern
-        local current_pids
-        current_pids=$(pgrep -f "$target_pattern" 2>/dev/null || true)
-        
-        for pid in $current_pids; do
-            if [[ -z "${KNOWN_PROCESSES[$pid]:-}" ]]; then
-                # New process detected
-                local info
-                info=$(get_process_info "$pid")
-                KNOWN_PROCESSES[$pid]="$info"
-                log_event "START" "$pid" "$info"
-            fi
-        done
-        
-        # Check known processes
-        for pid in "${!KNOWN_PROCESSES[@]}"; do
-            if [[ ! -d "/proc/$pid" ]]; then
-                # Process has terminated
-                local exit_info
-                exit_info=$(get_exit_info "$pid")
-                log_event "EXIT" "$pid" "$exit_info"
-                
-                # Check if it was a crash
-                if is_crash "$exit_info"; then
-                    log_event "CRASH" "$pid" "$exit_info"
-                    handle_crash "$pid" "${KNOWN_PROCESSES[$pid]}"
-                fi
-                
-                unset "KNOWN_PROCESSES[$pid]"
-            fi
-        done
-        
-        sleep 1
+        scan_process_events "$target_pattern" || return "$?"
+        sleep "$interval" || return "$?"
     done
 }
 
@@ -584,6 +610,7 @@ is_crash() {
     # Signals indicating crash
     local crash_signals="SIGSEGV SIGABRT SIGBUS SIGFPE SIGILL"
     
+    local IFS=' '
     for sig in $crash_signals; do
         [[ "$exit_info" == *"$sig"* ]] && return 0
     done
@@ -607,7 +634,7 @@ draw_dashboard() {
     
     # Process table
     printf "%-8s %-8s %-10s %-6s %-6s %-10s %-8s %s\n" \
-        "PID" "PPID" "USER" "STATE" "CPU%" "MEM(MB)" "FDs" "CMD"
+        "PID" "PPID" "USER" "STATE" "CPU%" "MEM(MiB)" "FDs" "CMD"
     printf "%s\n" "$(printf '─%.0s' {1..78})"
     
     for pid in "${pids[@]}"; do
@@ -617,8 +644,9 @@ draw_dashboard() {
         IFS='|' read -r p_pid name state ppid uid threads mem utime stime fds cmd <<< "$info"
         
         local cpu
-        cpu=$(calculate_cpu_usage "$pid" 0.1)
-        local mem_mb=$((mem / 1024))
+        cpu=$(calculate_cpu_usage "$pid" 0.1) || cpu=unavailable
+        local mem_mb=unavailable
+        [[ $mem =~ ^[0-9]+$ ]] && mem_mb=$((mem / 1024))
         local user
         user=$(id -un "$uid" 2>/dev/null || echo "$uid")
         
@@ -628,7 +656,7 @@ draw_dashboard() {
     
     # Footer
     printf "\n%s\n" "$(printf '─%.0s' {1..78})"
-    printf "Refresh: %ds | Press 'q' to quit\n" "$INTERVAL"
+    printf "Refresh: %ds | Stop with the owning caller's signal handler\n" "$INTERVAL"
 }
 ```
 

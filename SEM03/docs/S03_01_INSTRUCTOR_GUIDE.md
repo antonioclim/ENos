@@ -2,23 +2,23 @@
 ## Operating Systems | Utilities, Scripts, Permissions, Automation
 
 > Bucharest University of Economic Studies - CSIE  
-> Total duration: 100 minutes (2 × 50 min + break)  
+> Timing: 100 contact minutes + 10-minute break = 110 elapsed. A 100-minute total slot needs a separately chosen reduced route.  
 > Seminar type: Language as Vehicle (Bash for system administration)  
-> Level: Intermediate (assumes SEM01-04 completed)
+> Level: Intermediate (assumes SEM01–02 completed)
 
 ---
 
 ## Contents
 
-1. [Session Objectives](#-session-objectives)
-2. [Special Warnings](#️-special-warnings)
-3. [Preparation Before Seminar](#-preparation-before-seminar)
-4. [First Part Timeline](#️-detailed-timeline---first-part-50-min)
-5. [Break](#-break-10-minutes)
-6. [Second Part Timeline](#️-detailed-timeline---second-part-50-min)
-7. [Common Troubleshooting](#-common-troubleshooting)
-8. [Required Materials](#-required-materials)
-9. [Post-Seminar Notes](#-post-seminar-notes)
+1. [Session Objectives](#session-objectives)
+2. [Special Warnings](#special-warnings)
+3. [Preparation Before Seminar](#preparation-before-seminar)
+4. [First Part Timeline](#detailed-timeline---first-part-50-min)
+5. [Break](#break-10-minutes)
+6. [Second Part Timeline](#detailed-timeline---second-part-50-min)
+7. [Common Troubleshooting](#common-troubleshooting)
+8. [Required Materials](#required-materials)
+9. [Post-Seminar Notes](#post-seminar-notes)
 
 ---
 
@@ -96,8 +96,10 @@ sudo -v  # only for preparation, not for seminar
 # - Projector resolution verified
 
 # Open tabs in terminal:
-# Tab 1: Working directory
-cd ~/demo_sem3 && clear
+# Tab 1: Create one fresh owned working directory for this session
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s03-instructor.XXXXXX") || exit 1
+export DEMO_DIR
+cd -- "$DEMO_DIR" && clear
 
 # Tab 2: Demo scripts
 cd ~/seminarii/SEM03/scripts/demo/
@@ -110,9 +112,9 @@ less ~/seminarii/SEM03/docs/S03_02_MAIN_MATERIAL.md
 
 ```bash
 # 1. Create sandbox for permissions exercises
-mkdir -p ~/demo_sem3/permissions_lab
-mkdir -p ~/demo_sem3/find_lab
-cd ~/demo_sem3
+mkdir -p "$DEMO_DIR"/permissions_lab
+mkdir -p "$DEMO_DIR"/find_lab
+cd "$DEMO_DIR"
 
 # 2. Create test files
 touch test_{1..10}.txt
@@ -133,10 +135,14 @@ locate --version 2>/dev/null || echo "locate is not installed"
 find /etc -maxdepth 1 -type f 2>/dev/null | head -5
 
 # 6. Check current permissions
-ls -la ~/demo_sem3/
+ls -la "$DEMO_DIR"/
 ```
 
 ### Room-Specific Setup Notes
+
+These room/cohort observations are retained author notes, not current measured
+conditions. No timestamped facilities verification or cohort dataset accompanies
+them. Check the actual teaching room before relying on those details.
 
 **Lab 2031 (Calea Dorobanților building):**
 - Projector has ~2 second lag after switching windows — pause before typing
@@ -216,7 +222,7 @@ Collect silently, sort into correct/incorrect piles while they take a breath. Ad
 
 Common wrong answers I see every semester:
 - `3 0 * * 0` — hour/minute reversed (explain field order again)
-- `0 3 * * SUN` — abbreviated days don't work everywhere
+- `0 3 * * SUN` is valid on the selected Debian/Ubuntu cron target; do not mark it wrong
 - `* 3 * * 0` — runs every minute of 3 AM hour
 
 ---
@@ -266,7 +272,8 @@ Display on screen or read:
 ║  🗳️ PEER INSTRUCTION #1                                          ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  You just created a file: touch ~/project/config.txt             ║
+║  Assume the new path was absent from the current database and no update intervenes.
+You just created a file: touch ~/project/config.txt             ║
 ║  Immediately after, you run: locate config.txt                   ║
 ║                                                                  ║
 ║  What happens?                                                   ║
@@ -291,21 +298,22 @@ Correct answer: B
 Demonstration:
 ```bash
 # Create new file
-touch ~/test_locate_demo_$(date +%s).txt
+LOCATE_FILE=$(mktemp "$HOME/enos-s03-locate.XXXXXX")
+printf 'Created %s\n' "$LOCATE_FILE"
 
 # Try locate
-locate test_locate_demo
+locate -- "${LOCATE_FILE##*/}"
 # Output: (nothing or old files)
 
 # Update the database
 sudo updatedb
 
-# Now it finds
-locate test_locate_demo
-# Output: /home/user/test_locate_demo_...
+# If the configured database indexes this location, it can now find it.
+locate -- "${LOCATE_FILE##*/}"
+# Otherwise inspect the configured database/pruning rules; absence is not a find defect.
 
 # Cleanup
-rm ~/test_locate_demo_*.txt
+rm -f -- "$LOCATE_FILE"
 ```
 
 Explanation: "locate uses a pre-indexed database that is updated periodically (usually at night). find searches in real time but is slower for large searches."
@@ -319,7 +327,7 @@ STRUCTURE for each segment: Announcement → Prediction → Execution → Explan
 #### Segment 1: Basic find (4 min)
 
 ```bash
-cd ~/demo_sem3
+cd "$DEMO_DIR"
 
 # Quick setup
 mkdir -p src docs tests
@@ -391,10 +399,10 @@ find . -name "*.txt" -exec echo "Found: {}" \;
 
 ```bash
 # -exec with + (batch)
-echo "📌 With + sends all files at once"
+echo "📌 With + sends files in size-bounded batches"
 find . -name "*.txt" -exec echo {} +
 
-# Difference: \; = multiple processes, + = single process (more efficient)
+# Difference: \; = one process per path; + = one or more bounded batches
 ```
 
 #### Segment 4: xargs (5 min)
@@ -444,8 +452,6 @@ Display on screen:
 ║     -mtime -7                                                    ║
 ║     find /var/log                                                ║
 
-*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*
-
 ║     -name "*.log"                                                ║
 ║     -exec rm -i {} \;                                            ║
 ║     -size +1M                                                    ║
@@ -482,11 +488,11 @@ Display instructions:
 ║  PAIR PROGRAMMING! Switch at minute 7!                           ║
 ║                                                                  ║
 ║  SETUP (run first):                                              ║
-║  mkdir -p ~/find_lab/{src,docs,tests,build}                      ║
-║  touch ~/find_lab/src/{main,utils,config}.{c,h}                  ║
-║  touch ~/find_lab/docs/{README.md,manual.txt,api.html}           ║
-║  touch ~/find_lab/tests/test_{1..5}.py                           ║
-║  dd if=/dev/zero of=~/find_lab/build/big.bin bs=1M count=5       ║
+║  mkdir -p "$DEMO_DIR/find_lab"/{src,docs,tests,build}                      ║
+║  touch "$DEMO_DIR/find_lab"/src/{main,utils,config}.{c,h}                  ║
+║  touch "$DEMO_DIR/find_lab"/docs/{README.md,manual.txt,api.html}           ║
+║  touch "$DEMO_DIR/find_lab"/tests/test_{1..5}.py                           ║
+║  dd if=/dev/zero of="$DEMO_DIR/find_lab"/build/big.bin bs=1M count=5       ║
 ║                                                                  ║
 ║  TASKS:                                                          ║
 ║  1. Find all .c files                                            ║
@@ -502,23 +508,23 @@ Display instructions:
 Solutions (for instructor):
 ```bash
 # 1
-find ~/find_lab -name "*.c"
+find "$DEMO_DIR/find_lab" -name "*.c"
 
 # 2
-find ~/find_lab -size +1M
+find "$DEMO_DIR/find_lab" -size +1M
 
 # 3
-find ~/find_lab -mmin -60
+find "$DEMO_DIR/find_lab" -mmin -60
 
 # 4
-find ~/find_lab -type f -exec ls -l {} \;
+find "$DEMO_DIR/find_lab" -type f -exec ls -l {} \;
 # or
-find ~/find_lab -type f -printf "%m %p\n"
+find "$DEMO_DIR/find_lab" -type f -printf "%m %p\n"
 
 # 5 BONUS
-find ~/find_lab -name "*.py" -exec tar -cvf tests.tar {} +
-# or
-find ~/find_lab -name "*.py" | xargs tar -cvf tests.tar
+find "$DEMO_DIR/find_lab" -type f -name "*.py" -print0 |
+    tar --null -T - -cvf "$DEMO_DIR/tests.tar"
+# One tar creation reads the entire NUL list; batching tar -c would lose earlier members.
 ```
 
 Circulate through the class and help pairs having difficulties.
@@ -554,7 +560,7 @@ Correct answer: A
 
 Live demonstration:
 ```bash
-cat << 'EOF' > /tmp/test_args.sh
+cat << 'EOF' > "$DEMO_DIR/test_args.sh"
 #!/bin/bash
 echo '=== With $@ ==='
 for arg in "$@"; do echo "[$arg]"; done
@@ -563,8 +569,8 @@ echo '=== With $* ==='
 for arg in "$*"; do echo "[$arg]"; done
 EOF
 
-chmod +x /tmp/test_args.sh
-/tmp/test_args.sh "hello world" test
+chmod +x "$DEMO_DIR/test_args.sh"
+"$DEMO_DIR/test_args.sh" "hello world" test
 ```
 
 Explanation: "$@" preserves argument separation, "$*" joins them into a single string with spaces.
@@ -621,7 +627,7 @@ What does umask 077 do?
 📌 QUESTION 3:
 Who can delete a file?
    a) One with w permission on the file
-   b) One with w permission on the DIRECTORY  ← CORRECT
+   b) One with write AND search on the directory, subject to sticky/ACL restrictions  ← CORRECT
    c) Only the file owner
 ```
 
@@ -634,7 +640,7 @@ After each question, briefly explain if there are confusions.
 #### Segment 1: Visualisation and octal chmod (5 min)
 
 ```bash
-cd ~/demo_sem3/permissions_lab
+cd "$DEMO_DIR"/permissions_lab
 
 # Create test files
 touch public.txt private.txt
@@ -708,13 +714,13 @@ umask
 # PREDICTION: "With umask 022, what permissions will a new file have?"
 touch test_umask.txt
 ls -l test_umask.txt
-# 644 (666 - 022 = 644)
+# 644 (0666 & ~0022 = 0644, no default ACL)
 
 # Change umask for private files
 umask 077
 touch very_private.txt
 ls -l very_private.txt
-# 600 (666 - 077 = 600)
+# 600 (0666 & ~0077 = 0600, no default ACL)
 
 # Restore
 umask 022
@@ -737,8 +743,8 @@ ls -ld shared_project
 ls -ld /tmp
 # drwxrwxrwt - notice the 't'
 
-# EXPLANATION: In /tmp, you can only delete YOUR files,
-# even though the directory is world-writable
+# EXPLANATION: Sticky adds an ownership condition: file owner, directory owner
+# or suitable privilege may remove entries; normal write/search checks still apply.
 ```
 
 #### Segment 5: DELIBERATE ERROR (2 min)
@@ -752,7 +758,7 @@ echo "📌 Correct pattern for recursive chmod:"
 # find ~/demo -type f -exec chmod 644 {} \;
 # find ~/demo -type d -exec chmod 755 {} \;
 
-# Or with X (execute only for directories)
+# X also affects regular files already executable by any class; different contract
 # chmod -R u=rwX,g=rX,o=rX ~/demo
 ```
 
@@ -885,7 +891,7 @@ done
 [ $# -eq 0 ] && usage
 
 for file in "$@"; do
-    [ ! -e "$file" ] && echo "Does not exist: $file" && continue
+    [[ -e $file || -L $file ]] || { echo "Does not exist: $file" >&2; exit 1; }
     
     type="file"
     [ -d "$file" ] && type="directory"
@@ -897,8 +903,9 @@ for file in "$@"; do
     $SHOW_SIZE && output+=", $(stat -c %s "$file") bytes"
     
     echo "$output"
-    $VERBOSE && ls -la "$file"
+    if "$VERBOSE"; then ls -ld -- "$file" || exit 1; fi
 done
+exit 0
 ```
 
 ---
@@ -925,23 +932,11 @@ done
 ```
 
 Instructor demonstration:
-```bash
-# Edit crontab
-crontab -e
-# Add:
-# * * * * * echo "Test $(date)" >> /tmp/cron_test.log
 
-# Verify
-crontab -l
-
-# Monitor
-tail -f /tmp/cron_test.log
-# Wait ~1 minute to see output
-
-# Delete after demo
-crontab -e
-# Remove the test line
-```
+Use the local logger/candidate procedure in the [Live Coding Guide](S03_05_LIVE_CODING_GUIDE.md#segment-2-prepare-a-job-and-inspect-the-result-2-minutes).
+A scheduled run is a separate authorised activity in a disposable account; the D3
+model requires explicit installation and unique-marker cleanup. A normal lesson
+run does not install a job or assume authority to change a scheduler.
 
 Checklist for LLM evaluation:
 - [ ] Correct cron syntax (5 fields)
@@ -970,7 +965,7 @@ Checklist for LLM evaluation:
 ║  3. ONE thing you want to practise at home:                      ║
 ║     _______________________________________________              ║
 ║                                                                  ║
-║  📝 ASSIGNMENT: Complete S03_01_ASSIGNMENT.md by next seminar    ║
+║  📝 ASSIGNMENT: Complete ../homework/S03_01_HOMEWORK.md by next seminar    ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
@@ -982,7 +977,7 @@ Checklist for LLM evaluation:
 | Problem | Symptom | Quick Solution |
 |---------|---------|----------------|
 | Permission denied on script | `bash: ./script.sh: Permission denied` | `chmod +x script.sh` |
-| find: permission denied | Many errors on /proc, /sys | Add `2>/dev/null` |
+| find: permission denied | Incomplete traversal | Restrict the owned root and retain errors; suppressing stderr does not make coverage complete |
 | getopts doesn't parse --help | Ignores long options | getopts is only for short options, use `case` |
 | Cron job doesn't run | Nothing in log | Check absolute paths, PATH, permissions, `systemctl status cron` |
 | umask doesn't persist | Reverts after logout | Add to `~/.bashrc` |
@@ -1119,7 +1114,7 @@ If you lose a lot of time at the beginning cut directly:
 stat -c "%a %n" file
 
 # How to check what a cron job does WITHOUT running it
-EDITOR=cat crontab -e
+crontab -l  # Read only; do not invoke an editing entry point to inspect a table
 
 # How to find files modified in the last hour
 find . -mmin -60 -type f
@@ -1156,3 +1151,8 @@ MIN  HOUR  DOM  MON  DOW  COMMAND
 *Guide created for Seminar 3 OS | Bucharest UES - CSIE*  
 *Maintained by ing. dr. Antonio Clim*  
 *Updated: January 2025 (v1.3 — added checkpoints, room notes, presentation path fix)*
+
+
+## Retained Author Notes
+
+*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*

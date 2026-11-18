@@ -43,8 +43,8 @@ jobs:
           shellcheck --severity=warning \
             ${{ env.SEMINAR_DIR }}/scripts/bash/*.sh \
             ${{ env.SEMINAR_DIR }}/scripts/demo/*.sh \
-            ${{ env.SEMINAR_DIR }}/teme/solutii/*.sh \
-            ${{ env.SEMINAR_DIR }}/teste/*.sh
+            ${{ env.SEMINAR_DIR }}/homework/solutions/*.sh \
+            ${{ env.SEMINAR_DIR }}/tests/*.sh
         continue-on-error: true
 
       - name: Check shebang and set -e
@@ -91,7 +91,7 @@ jobs:
         run: |
           ruff check ${{ env.SEMINAR_DIR }}/scripts/python/*.py \
                      ${{ env.SEMINAR_DIR }}/formative/*.py \
-            --config ${{ env.SEMINAR_DIR }}/ci/linting.toml || true
+            --config ${{ env.SEMINAR_DIR }}/ci/ruff.toml
 
       - name: Check Python syntax
         run: |
@@ -129,12 +129,12 @@ jobs:
           
           # Verificări de bază
           assert 'metadata' in data, 'Lipsește metadata'
-          assert 'intrebari' in data, 'Lipsesc întrebările'
-          assert len(data['intrebari']) >= 10, 'Prea puține întrebări'
+          assert 'questions' in data, 'Lipsesc întrebările'
+          assert len(data['questions']) >= 10, 'Prea puține întrebări'
           
           # Verifică distribuția Bloom
           bloom_counts = {}
-          for q in data['intrebari']:
+          for q in data['questions']:
               bloom = q.get('bloom', 'unknown')
               bloom_counts[bloom] = bloom_counts.get(bloom, 0) + 1
           
@@ -185,19 +185,13 @@ jobs:
         run: |
           pip install pyyaml
           
-      - name: Setup test environment
-        run: |
-          cd ${{ env.SEMINAR_DIR }}
-          mkdir -p ~/demo_sem4/data
-          # Creează date de test minimale
-          echo "192.168.1.1 - - [01/Jan/2025:10:00:00 +0000] \"GET / HTTP/1.1\" 200 1234" > ~/demo_sem4/data/access.log
-          echo "name,dept,salary" > ~/demo_sem4/data/employees.csv
-          echo "John,IT,50000" >> ~/demo_sem4/data/employees.csv
+      - name: Inspect deterministic test fixtures
+        run: test -f "${{ env.SEMINAR_DIR }}/resources/sample_data/README.md"
 
       - name: Run test suite
         run: |
           cd ${{ env.SEMINAR_DIR }}
-          bash teste/run_all_tests.sh || echo "Some tests may have failed"
+          bash tests/run_all_tests.sh
 
   # ═══════════════════════════════════════════════════════════════════════════
   # JOB 5: Verificare Structură
@@ -220,7 +214,7 @@ jobs:
             "${{ env.SEMINAR_DIR }}/formative/quiz.yaml"
             "${{ env.SEMINAR_DIR }}/formative/quiz_lms.json"
             "${{ env.SEMINAR_DIR }}/docs/lo_traceability.md"
-            "${{ env.SEMINAR_DIR }}/docs/S04_02_MATERIAL_PRINCIPAL.md"
+            "${{ env.SEMINAR_DIR }}/docs/S04_02_MAIN_MATERIAL.md"
           )
           
           missing=0

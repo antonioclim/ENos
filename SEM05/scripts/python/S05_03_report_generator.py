@@ -16,6 +16,8 @@ USAGE:
 """
 
 import json
+import math
+import re
 import sys
 import argparse
 from pathlib import Path
@@ -74,23 +76,28 @@ CATEGORIES = {
 #===============================================================================
 
 def load_grades_file(filepath: Path) -> List[Dict]:
-    """Load a JSON file with autograder results."""
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Accept both list and dict with 'results' key
-            if isinstance(data, list):
-                return data
-            elif isinstance(data, dict) and 'results' in data:
-                return data['results']
-            else:
-                return [data]
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}", file=sys.stderr)
-        return []
-    except FileNotFoundError:
-        print(f"File not found: {filepath}", file=sys.stderr)
-        return []
+    """Validate producer data; absent/unknown schemas are errors, not zero marks."""
+    with filepath.open(encoding='utf-8') as handle:
+        data = json.load(handle)
+    if isinstance(data, dict) and isinstance(data.get('results'), list):
+        data = data['results']
+    if not isinstance(data, list) or not data:
+        raise ValueError('Expected a non-empty list of diagnostic records')
+    for result in data:
+        if not isinstance(result, dict) or not ('score' in result or 'total_score' in result):
+            raise ValueError('Unknown score schema')
+        total = result.get('score', result.get('total_score'))
+        maximum = result.get('max_score')
+        if type(total) not in (int, float) or type(maximum) not in (int, float):
+            raise ValueError('Numeric score and explicit max_score are required')
+        if not math.isfinite(total) or not math.isfinite(maximum) or not 0 <= total <= maximum or maximum <= 0:
+            raise ValueError('Invalid score denominator/range')
+        checks = result.get('checks', result.get('exercises'))
+        if not isinstance(checks, (dict, list)):
+            raise ValueError('Structured checks are required')
+        if result.get('errors'):
+            raise ValueError(f"Producer reported errors for {result.get('script', '<unknown>')}")
+    return data
 
 def calculate_statistics(grades: List[Dict]) -> Dict[str, Any]:
     """Calculate statistics from autograder results."""
@@ -104,11 +111,14 @@ def calculate_statistics(grades: List[Dict]) -> Dict[str, Any]:
         "by_category": defaultdict(lambda: {"attempts": 0, "passed": 0, "total_score": 0, "max_score": 0}),
         "common_issues": defaultdict(int),
         "timestamps": [],
+        "exercise_info": dict(EXERCISE_INFO),
+        "records": grades,
+        "score_unit": "percentage",
     }
     
     for result in grades:
         # Extract total score
-        total = result.get("total_score", 0)
+        total = 100 * result.get("score", result.get("total_score")) / result["max_score"]
         stats["scores"].append(total)
         
         # Timestamp if exists
@@ -118,11 +128,24 @@ def calculate_statistics(grades: List[Dict]) -> Dict[str, Any]:
         # Process exercises
         exercises = result.get("exercises", result.get("checks", {}))
         
+        if isinstance(exercises, list):
+            adapted = {}
+            categories = {"Shebang":"robustness", "Strict Mode":"robustness",
+                          "Local Variables":"functions", "Associative Arrays":"arrays",
+                          "Quoted Array Expansion":"arrays", "Trap & Cleanup":"error_handling",
+                          "Usage Function":"best_practices", "ShellCheck":"best_practices"}
+            for check in exercises:
+                name = check['name']
+                ex_id = 'CHECK_' + re.sub(r'[^A-Z0-9]+', '_', name.upper()).strip('_')
+                if ex_id in adapted:
+                    raise ValueError(f'Duplicate check: {name}')
+                adapted[ex_id] = check
+                stats['exercise_info'][ex_id] = {'name':name, 'category':categories.get(name, 'functional_tests'), 'points':check['max_points']}
+            exercises = adapted
         for ex_id, ex_result in exercises.items():
-            if ex_id not in EXERCISE_INFO:
-                continue
-                
-            ex_info = EXERCISE_INFO[ex_id]
+            if ex_id not in stats['exercise_info']:
+                raise ValueError(f'Unknown exercise ID: {ex_id}')
+            ex_info = stats['exercise_info'][ex_id]
             category = ex_info["category"]
             
             # Statistics per exercise
@@ -175,7 +198,7 @@ def format_text_report(stats: Dict[str, Any]) -> str:
     lines = []
     
     lines.append("=" * 70)
-    lines.append("SEMINAR 9-10 REPORT: ADVANCED BASH SCRIPTING")
+    lines.append("SEMINAR 05 REPORT: ADVANCED BASH SCRIPTING")
     lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     lines.append("=" * 70)
     lines.append("")
@@ -188,10 +211,10 @@ def format_text_report(stats: Dict[str, Any]) -> str:
     lines.append("📊 GENERAL STATISTICS")
     lines.append("-" * 40)
     lines.append(f"  Total students evaluated: {stats.get('total_students', 0)}")
-    lines.append(f"  Average score: {stats.get('avg_score', 0):6.1f} points")
-    lines.append(f"  Maximum score: {stats.get('max_score', 0):6.1f} points")
-    lines.append(f"  Minimum score: {stats.get('min_score', 0):6.1f} points")
-    lines.append(f"  Median score:  {stats.get('median_score', 0):6.1f} points")
+    lines.append(f"  Average score: {stats.get('avg_score', 0):6.1f}%")
+    lines.append(f"  Maximum score: {stats.get('max_score', 0):6.1f}%")
+    lines.append(f"  Minimum score: {stats.get('min_score', 0):6.1f}%")
+    lines.append(f"  Median score:  {stats.get('median_score', 0):6.1f}%")
     lines.append(f"  Std deviation: {stats.get('std_dev', 0):6.2f}")
     lines.append("")
     
@@ -225,8 +248,8 @@ def format_text_report(stats: Dict[str, Any]) -> str:
     # By exercise
     lines.append("📋 BY EXERCISE")
     lines.append("-" * 40)
-    for ex_id in sorted(EXERCISE_INFO.keys()):
-        ex_info = EXERCISE_INFO[ex_id]
+    for ex_id in sorted(stats.get("exercise_info", EXERCISE_INFO)):
+        ex_info = stats.get("exercise_info", EXERCISE_INFO)[ex_id]
         ex_stats = stats.get("by_exercise", {}).get(ex_id, {})
         
         attempts = ex_stats.get("attempts", 0)
@@ -299,7 +322,7 @@ def format_text_report(stats: Dict[str, Any]) -> str:
     
     if weak_exercises:
         for ex_id, rate in sorted(weak_exercises, key=lambda x: x[1])[:5]:
-            ex_info = EXERCISE_INFO.get(ex_id, {"name": ex_id})
+            ex_info = stats.get("exercise_info", EXERCISE_INFO).get(ex_id, {"name": ex_id})
             lines.append(f"     • {ex_info['name']} ({rate:.0f}% success)")
     else:
         lines.append("     No exercise below 50% success!")
@@ -314,7 +337,7 @@ def format_json_report(stats: Dict[str, Any]) -> str:
     output = {
         "metadata": {
             "generated_at": datetime.now().isoformat(),
-            "seminar": "9-10",
+            "seminar": "05",
             "topic": "Advanced Bash Scripting"
         },
         "summary": {
@@ -325,6 +348,9 @@ def format_json_report(stats: Dict[str, Any]) -> str:
             "median_score": round(stats.get("median_score", 0), 2),
             "std_dev": round(stats.get("std_dev", 0), 2),
         },
+        "records": stats.get("records", []),
+        "score_unit": "percentage",
+        "exercise_info": stats.get("exercise_info", {}),
         "distribution": stats.get("distribution", {}),
         "by_category": {k: dict(v) for k, v in stats.get("by_category", {}).items()},
         "by_exercise": {k: dict(v) for k, v in stats.get("by_exercise", {}).items()},
@@ -336,7 +362,7 @@ def generate_summary() -> str:
     """Generate a summary of available exercises."""
     lines = []
     lines.append("=" * 70)
-    lines.append("SEMINAR 9-10: ADVANCED BASH SCRIPTING - AVAILABLE EXERCISES")
+    lines.append("SEMINAR 05: ADVANCED BASH SCRIPTING - AVAILABLE EXERCISES")
     lines.append("=" * 70)
     lines.append("")
     
@@ -410,8 +436,12 @@ Examples:
     if args.summary:
         output = generate_summary()
     elif args.grades:
-        grades = load_grades_file(args.grades)
-        stats = calculate_statistics(grades)
+        try:
+            grades = load_grades_file(args.grades)
+            stats = calculate_statistics(grades)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print(f"Cannot generate report: {exc}", file=sys.stderr)
+            return 1
         
         if args.format == "json":
             output = format_json_report(stats)

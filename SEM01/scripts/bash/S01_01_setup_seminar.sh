@@ -342,12 +342,16 @@ case "${1:-}" in
     --help|-h)
         show_help
         ;;
-    *)
+    "")
         # Default: minimal
         backup_bashrc
         create_structure
         create_test_files
         create_solutions
         verify_setup
+        ;;    *)
+        printf 'Unknown option: %s\n' "$1" >&2
+        show_help
+        exit 2
         ;;
 esac

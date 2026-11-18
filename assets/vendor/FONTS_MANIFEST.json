@@ -1,0 +1,3357 @@
+{
+  "scope": "Pinned Fontsource Latin/Latin-ext faces for the original lecture fonts and Reveal night theme fonts, including original Open Sans italic faces; package CSS/font/licence bytes preserved; CSS aggregation only rewrites relative URLs. css_order makes reconstruction deterministic.",
+  "packages": [
+    {
+      "npm_name": "@fontsource/jetbrains-mono",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/jetbrains-mono/-/jetbrains-mono-5.3.0.tgz",
+      "npm_integrity": "sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==",
+      "integrity_verified": true,
+      "tarball_sha256": "1bbea47d1387406da5b6ccc4184cc61eae6851cc0db5c1d9bbd088ea9daa0b4a",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "403581b69dac5cff4079205e01c6b467e56af449ecbd7247693ddb1baafa005b",
+          "bytes": 4524
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-300-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-300-normal.woff",
+          "sha256": "df5fb63c678dbbe0503cdb948892d30761e9dee19fb007e327154760493768ff",
+          "bytes": 28280
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-300-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-300-normal.woff2",
+          "sha256": "722972afda59a9739c5837279d0cc636d179240b3ec9d052b8ef147681874e61",
+          "bytes": 21956
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-400-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-400-normal.woff",
+          "sha256": "658b9ee07b0249cf910a8d6f3d812d46c962bae81d7379a0355b1db35c61586f",
+          "bytes": 27496
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-400-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-400-normal.woff2",
+          "sha256": "14425ba9c695763c1547f48a206b7aa60350a33ae23de09f0407877f3fcd89eb",
+          "bytes": 21168
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-500-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-500-normal.woff",
+          "sha256": "a270dd0bf13d91053b8999b7c120ffadb59680cfd63fe1a6b388a13bf2809fe1",
+          "bytes": 28208
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-500-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-500-normal.woff2",
+          "sha256": "cb182feeed4d798ff6961d3c79f7026279448fca0676438aaecb21f3fc39553a",
+          "bytes": 21832
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-600-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-600-normal.woff",
+          "sha256": "3f4ad0687bcb0edc596c7c85138c5140ba3a9c5a3ce2ee944f27608c0f18bab9",
+          "bytes": 28180
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-600-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-600-normal.woff2",
+          "sha256": "400c6bfda18d5d14acad1c15d6dcb9f8e13c015e7286317e0b9a482539bef147",
+          "bytes": 21860
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-700-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-700-normal.woff",
+          "sha256": "5e7319f25a5ef89d2c01c323029ef0bedefad204108e601455ff6f8ae12ca3ff",
+          "bytes": 28208
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-700-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-700-normal.woff2",
+          "sha256": "d0d4e818808f2a0ba39b2b09d1989366f63494e295f003c7ef436697378507e8",
+          "bytes": 21908
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-800-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-800-normal.woff",
+          "sha256": "81e7815969d34be9f582082e87e868fdaa5d07739925f5a0e759c4b947c966c4",
+          "bytes": 27388
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-800-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-800-normal.woff2",
+          "sha256": "237d0cbcf1aacd607e07f610d79cbc880edbffcc99ebcf417c502f8fa873ee53",
+          "bytes": 21236
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-300-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-300-normal.woff",
+          "sha256": "65b88cf73dc544aad6b4182211c367e90686a5701eac0c424b4c557bb9de4102",
+          "bytes": 10316
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-300-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-300-normal.woff2",
+          "sha256": "6eef50c7dd2b114b6486562e8fc2bc9bdefca629ccc42dfce337a943c72dfd8e",
+          "bytes": 7544
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-400-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-400-normal.woff",
+          "sha256": "e7131bbf591e1ed9b74e44e162f6a39affa00ac21654cb683585d085733f6355",
+          "bytes": 10128
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-400-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-400-normal.woff2",
+          "sha256": "505dfba8ecbe77e82765f36d317ed7ef4ac42719dc5f4ae68d1c483fd22d0d14",
+          "bytes": 7336
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-500-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-500-normal.woff",
+          "sha256": "8006c29f8ec53d12d281774d669a02a70b599590d110ff1a4b4a40a6fd975676",
+          "bytes": 10336
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-500-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-500-normal.woff2",
+          "sha256": "879df9319f1cbf633bee1dd489e376a9e1e8c458f4abddcfe381cb83b5e6b027",
+          "bytes": 7528
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-600-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-600-normal.woff",
+          "sha256": "7f5fbd7caf6fefa665e65015225fea76b59d425a7bc4645dfd77e6eb7db35ea2",
+          "bytes": 10316
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-600-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-600-normal.woff2",
+          "sha256": "90899aac1c15552c028fd205376bb537a2a5205164fe8626efabad77d7260c20",
+          "bytes": 7512
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-700-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-700-normal.woff",
+          "sha256": "bf9ae9dfc82904a59d601042056be8783288ef3d47a4fb5b0e628db57e6d271c",
+          "bytes": 10304
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-700-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-700-normal.woff2",
+          "sha256": "45a606d88f72bc0afae4d1a6988e3dba3a5e77ee51aa3b550e37c31c728f4d2d",
+          "bytes": 7472
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-800-normal.woff",
+          "package_path": "files/jetbrains-mono-latin-ext-800-normal.woff",
+          "sha256": "d2f7cfb57f323e1084ce83487df86e31889a7945ee1032498c4b2fa1111a8ade",
+          "bytes": 10064
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-800-normal.woff2",
+          "package_path": "files/jetbrains-mono-latin-ext-800-normal.woff2",
+          "sha256": "de6b2ce7d378a96e11eec82d3fe4531295701ee2e85edd1e014c2ea9d0c3551b",
+          "bytes": 7280
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "ce05b451c5786358795b181b3c5b9e7d370cc0eb87f597bda24d4d51859f4ce4",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "a06825aeb95c0cec3414f697ae55b88c9c2ee865ba640bde545156e1f9abbd49",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "3dfdfafaf53855fc1438b8d3159dd248a20c71f0a7015240dbb1bb13d9a1beae",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "f50124215ba0a66fac4dd719b0d1f63fa40128ca5ceffc42da49ab3f2871d672",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "7d05cf853f88310a1ddc81d9d6aaf939c7fb91b363b7a7429f239a3ff27f14dc",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "e5cddf8d16a30ffd30c39ea495f2fd2818f60db4393efeec136d976b7482f6cf",
+          "bytes": 290
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "3cce829381e292723e70e2fb4d7be17e44a86d40f7c4ddd65ba6f2d9d0b18ff8",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "0a0dc26658ed30f2e93a1a8826e03869dd5b822fee26d26f08b503e4406ba633",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "34885230b8d025862bd5fd4b06289807f2772f0dafd90092a22eb06ce9c1c0f5",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "5a213596f23241129e741f618483bc82a94829f374b83a9538384a5729699190",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "67169187c5f3e7bd7a44b260864ab8f7312b3141e4550f78520108209b98fa48",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/jetbrains-mono/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "6877e3842d75564d490c9050129382e482ae7d24836f0b4a6d84832ae2e291ff",
+          "bytes": 302
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/inter",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/inter/-/inter-5.3.0.tgz",
+      "npm_integrity": "sha512-RofMylZmjlJEfELXeNHFWBRcSs75rGU/6bV2S2jfnvv/3rPXPGe0LgUJTklcHZ9lM4OZmAVFhcJPnACfb91A3g==",
+      "integrity_verified": true,
+      "tarball_sha256": "02034af8d41dcc67ac8eab88f642e129bb8a2e8922abf30229c32725f54d8fd6",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "3b0a5fca3d17942cde889069889dedbbbd075e9b599968c82a95f4d944e9b345",
+          "bytes": 4477
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-300-normal.woff",
+          "package_path": "files/inter-latin-300-normal.woff",
+          "sha256": "635cf706b3a3528c1617ce8edaa4e767489c1c61320a97b4aa649495ee49ac2a",
+          "bytes": 31012
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-300-normal.woff2",
+          "package_path": "files/inter-latin-300-normal.woff2",
+          "sha256": "be0276550393a72b94d673505567dceba801511d5e1ca5a87793190dc5d5a6ca",
+          "bytes": 23916
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-400-normal.woff",
+          "package_path": "files/inter-latin-400-normal.woff",
+          "sha256": "e20fa0b4fd2dd26e4d14b3ac3cc922509c3a63fa5e910e90c614544aa042dd45",
+          "bytes": 30696
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-400-normal.woff2",
+          "package_path": "files/inter-latin-400-normal.woff2",
+          "sha256": "8909904ab6c872eb994093482a88a28eca2cd95912d7b6fecd72103b0dc07edc",
+          "bytes": 23664
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-500-normal.woff",
+          "package_path": "files/inter-latin-500-normal.woff",
+          "sha256": "9b42c108da48b5ed55a3072e815ffee2d271562e6c0dd6998910e8f9c09e0a3d",
+          "bytes": 31284
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-500-normal.woff2",
+          "package_path": "files/inter-latin-500-normal.woff2",
+          "sha256": "f3779f1efccc4bdcdf9c0a02ab95bf6bd092ed09c48c08cedc725889edd1d19f",
+          "bytes": 24272
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-600-normal.woff",
+          "package_path": "files/inter-latin-600-normal.woff",
+          "sha256": "6a9cb3a509b4eeaf12b7dda6c4aacac3e85d07f4201bf4dd716e332e692b87bd",
+          "bytes": 31260
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-600-normal.woff2",
+          "package_path": "files/inter-latin-600-normal.woff2",
+          "sha256": "f9a06e79cd3a2a20951c0f0e28f66dd0e6d3fda73911d640a2125c8fcb78f21a",
+          "bytes": 24452
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-700-normal.woff",
+          "package_path": "files/inter-latin-700-normal.woff",
+          "sha256": "7c5ed5655730de337704d3fc94628515cd7e3d8d32368871709bf56ac0397e7a",
+          "bytes": 31320
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-700-normal.woff2",
+          "package_path": "files/inter-latin-700-normal.woff2",
+          "sha256": "6f56409fd3d64bb85f7d070bce20749db2d66b6d63cec586cc22d1c761be2491",
+          "bytes": 24356
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-800-normal.woff",
+          "package_path": "files/inter-latin-800-normal.woff",
+          "sha256": "a2fdc5be8acd75fe8f3fd9de8179828d04fd884c155cd6b63fec23b33651ec88",
+          "bytes": 31296
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-800-normal.woff2",
+          "package_path": "files/inter-latin-800-normal.woff2",
+          "sha256": "a7d0a50f15d389cad679238466bdb5fc9787aa0715719064ce25abaff042820d",
+          "bytes": 24400
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-300-normal.woff",
+          "package_path": "files/inter-latin-ext-300-normal.woff",
+          "sha256": "0d9db034891287b2bd0c896a8e3cbf3f4594b385d95388c9841382cb3ef03bd6",
+          "bytes": 48608
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-300-normal.woff2",
+          "package_path": "files/inter-latin-ext-300-normal.woff2",
+          "sha256": "b11def546ac052fad7993e39c53801b55af99b0fd51a9ac0e72884b5c3fcaa3f",
+          "bytes": 35880
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-400-normal.woff",
+          "package_path": "files/inter-latin-ext-400-normal.woff",
+          "sha256": "22ae8360fbad24d2af7c6c9898a346c881774dc87f7cf94bd262c48ad58d7116",
+          "bytes": 47560
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-400-normal.woff2",
+          "package_path": "files/inter-latin-ext-400-normal.woff2",
+          "sha256": "6744a7f509ebc6ab220a6cd4ea77e898adf014f03d88dcda5d45d8a9feefb4e9",
+          "bytes": 35000
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-500-normal.woff",
+          "package_path": "files/inter-latin-ext-500-normal.woff",
+          "sha256": "30d2903ce97f8a89ea0e9c083b42cb8bf97e7bbb5607e7f00352815f19cb0d5b",
+          "bytes": 48492
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-500-normal.woff2",
+          "package_path": "files/inter-latin-ext-500-normal.woff2",
+          "sha256": "2c6fbc42d315528beb06c1096df45487bf4186c4b78b8111d12c9c951f8acca2",
+          "bytes": 36024
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-600-normal.woff",
+          "package_path": "files/inter-latin-ext-600-normal.woff",
+          "sha256": "22ff20a6170674fb9637c2a072227be86303bb6ec52b829b9d7077405f7196a6",
+          "bytes": 48668
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-600-normal.woff2",
+          "package_path": "files/inter-latin-ext-600-normal.woff2",
+          "sha256": "e4bdf67b0cd15ca9e184509275be95db942195d3cc2b17f6a0452f2adf75d0bf",
+          "bytes": 36260
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-700-normal.woff",
+          "package_path": "files/inter-latin-ext-700-normal.woff",
+          "sha256": "1761edba32014180deab3dbbe3f7156c64ef6f34bc76313ba31ce227fc9ff391",
+          "bytes": 48632
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-700-normal.woff2",
+          "package_path": "files/inter-latin-ext-700-normal.woff2",
+          "sha256": "143f9504f1377012aa3e39c90c4354ef429cb0494b9ac0e1437f1a81e5412236",
+          "bytes": 36244
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-800-normal.woff",
+          "package_path": "files/inter-latin-ext-800-normal.woff",
+          "sha256": "40c8e1bb3d3723f1c2fdb3be722cc42c03afaa4317935cdab9cf520cdf5a6ce8",
+          "bytes": 48592
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/files/inter-latin-ext-800-normal.woff2",
+          "package_path": "files/inter-latin-ext-800-normal.woff2",
+          "sha256": "eade55593308b9e4916dd7f47826929ce3e40cad85a2b338d56e5fd1e7bf8e5e",
+          "bytes": 36128
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "2e1f882f279a45ec2145cb66767262269787931a5ace02009cab6608c80fb264",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "eb41eb009167dd65cd4df39a1d7393a2dc6ad47902d0e7937308fefc220696a1",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "7479efd8b62c928da8479ddbfc16d91f03dc642bcf4efa352b33dd999c4a9dd2",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "c92c8c91f287e48c0d93b237e3d27f216b6cf8e643b54bc522f99751d7238fce",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "82667c4096262f9f05e920664afa9ae2d342fa1ac1fd9849cce7a64de66475b7",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "da4e803b3b260b961d6638495f381e723dd5b56e86a17ee0e531c99b8091ef34",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "6354a426a11a155f88f9d9c986f3669de7660ca2e8ee0cf3b5f3d16617be2d9d",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "1a61d7dbccd36f00ebd4bc7c0b82a1e60fd6d36a166c106edc2dd15033a32baf",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "81f9515f79905a12caaee977982d673c52810cfd2f6044b348aebca31aeb7525",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "b2276cbf904e0fd728fdfcfad0e98dcf6e20a709a28586d23b79ccdf91070a1b",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "046c8e29875981952f712a75e168d823a6a36f7363c96c597a4d4d52c745f750",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/inter/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "b92837f26d15559af76d1e73bbbf14bf3c1092265627bf911b292e31306b38fc",
+          "bytes": 266
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/exo-2",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/exo-2/-/exo-2-5.3.0.tgz",
+      "npm_integrity": "sha512-jVI6qXPPuV1Fne7m2Hpyc9rTt4O7ZIo+wsUZZzAW+u/iHem4CyWXXCGUoSw3utZUW82/bsGVQO9yO+hDsjZH8A==",
+      "integrity_verified": true,
+      "tarball_sha256": "82ef50ecfba884505fc37362224db4c453ffd81956354436aac491938dec83b5",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "7644b74e07215f62af4ebbfcf2b0f06a428d70d32c41e751fba93763a683c3f5",
+          "bytes": 4489
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-300-normal.woff",
+          "package_path": "files/exo-2-latin-300-normal.woff",
+          "sha256": "22796511c607b0e27e9d132ef31dde044436229aa85bd59688de5bd0e7ffd072",
+          "bytes": 21364
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-300-normal.woff2",
+          "package_path": "files/exo-2-latin-300-normal.woff2",
+          "sha256": "102d590154ecb7f2611cfd9b501d76bb257e6284e3c0f460dbdd5db202c0e101",
+          "bytes": 16848
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-400-normal.woff",
+          "package_path": "files/exo-2-latin-400-normal.woff",
+          "sha256": "a106df389572e4846a72f25508530756723ceab133cb1bcc3d1bb42934f10af0",
+          "bytes": 21216
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-400-normal.woff2",
+          "package_path": "files/exo-2-latin-400-normal.woff2",
+          "sha256": "49c9cd329161f5c5feed3ae80a788199f2dce127c00828e027a61261cf602491",
+          "bytes": 16720
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-500-normal.woff",
+          "package_path": "files/exo-2-latin-500-normal.woff",
+          "sha256": "2f159c3e91c15c47cd02621a3969b9133530fc8a070af943bdd7ef4251926b33",
+          "bytes": 21620
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-500-normal.woff2",
+          "package_path": "files/exo-2-latin-500-normal.woff2",
+          "sha256": "78b3f89f94236f0298cbb49ef6839627430f3aac63a00c75f468a60477742e03",
+          "bytes": 17192
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-600-normal.woff",
+          "package_path": "files/exo-2-latin-600-normal.woff",
+          "sha256": "6791efa86813f69203a637996d15b02199b4d59a38718c42bc08a3df7f7383c6",
+          "bytes": 21688
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-600-normal.woff2",
+          "package_path": "files/exo-2-latin-600-normal.woff2",
+          "sha256": "fd2112e53440975a4885179f3d09058787b97b711e7e141c55fcaecaf48fbcb6",
+          "bytes": 17264
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-700-normal.woff",
+          "package_path": "files/exo-2-latin-700-normal.woff",
+          "sha256": "306368c797dd0a3f6b251918422c13e5a508c03766fa842cd662244bad5fda6e",
+          "bytes": 21648
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-700-normal.woff2",
+          "package_path": "files/exo-2-latin-700-normal.woff2",
+          "sha256": "96c87b1597aed754e0ad45970883774e851a390788e7fba7b3f49f8d1f6e5a6b",
+          "bytes": 17220
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-800-normal.woff",
+          "package_path": "files/exo-2-latin-800-normal.woff",
+          "sha256": "4342b2a2ece5cc501c145b30e0e87cac86af8d7625f6885350a8067049d9ed79",
+          "bytes": 21480
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-800-normal.woff2",
+          "package_path": "files/exo-2-latin-800-normal.woff2",
+          "sha256": "d610f14745a7eb6b2fb5746431d28c189776152752eea5ff5c8f2da828bae823",
+          "bytes": 17280
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-300-normal.woff",
+          "package_path": "files/exo-2-latin-ext-300-normal.woff",
+          "sha256": "2bd4e8d46cff23fb440f9a364186b1ad23c43335e82381f2eaab01f4ee6f1227",
+          "bytes": 18740
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-300-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-300-normal.woff2",
+          "sha256": "74e53eff5754a35c2b8015948af77cc67e223611c72a67be74b54f58b01a0f0b",
+          "bytes": 13476
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-400-normal.woff",
+          "package_path": "files/exo-2-latin-ext-400-normal.woff",
+          "sha256": "c2afb81077dcb06a402cd2b7def33f320e3ef359589e3d6c19b033389bcc31dc",
+          "bytes": 18596
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-400-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-400-normal.woff2",
+          "sha256": "151e5e35844527fd849ea278bf738b032d59f8f2f377827b3674766497663440",
+          "bytes": 13336
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-500-normal.woff",
+          "package_path": "files/exo-2-latin-ext-500-normal.woff",
+          "sha256": "79fcf45b427ee217fc3766c7da84049edd8f8cc33c1cddf1c94f4102ca23676f",
+          "bytes": 19068
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-500-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-500-normal.woff2",
+          "sha256": "895280f078779d27197d03d656573f830bf26fccf5d4ddb495476f9229cfa4d7",
+          "bytes": 13852
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-600-normal.woff",
+          "package_path": "files/exo-2-latin-ext-600-normal.woff",
+          "sha256": "532f38cea9d9090d7a590c961c1b9048fab31eebde0fa85eee6ee89842665858",
+          "bytes": 19116
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-600-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-600-normal.woff2",
+          "sha256": "0400839c0abf86c44889cf26087d1f64e1514e1fb607a36bc11e76fbceb03688",
+          "bytes": 13964
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-700-normal.woff",
+          "package_path": "files/exo-2-latin-ext-700-normal.woff",
+          "sha256": "e42dc8c89b4d0d1856be8dc4f6b098d07e6ccded85a13a212eb21ac8d6beea09",
+          "bytes": 18976
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-700-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-700-normal.woff2",
+          "sha256": "eb2c0647850173e334ec39facd714cf994891b0b3b22d99b62e355c9a8ab0583",
+          "bytes": 13924
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-800-normal.woff",
+          "package_path": "files/exo-2-latin-ext-800-normal.woff",
+          "sha256": "666177dc21ebd9c22e1bad7811de146b0d162d6d0e7e469099d81d5d9f771ff8",
+          "bytes": 18952
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/files/exo-2-latin-ext-800-normal.woff2",
+          "package_path": "files/exo-2-latin-ext-800-normal.woff2",
+          "sha256": "9d3c73895bfb799326d74ecc4899ba8afc06254cf186689aafdd83a324c0b991",
+          "bytes": 13916
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "41556f74fe0d44d6231af037aae1dc9b6eec7a1ad8690f34fb19c39fc871fb14",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "586ecf1e390d694dbf2e4031ccd3eed33263ab8d2b268a8e0cb231aa140ef681",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "76f236ef4ac49654459805cbb2e6d6de9a3c6621b2571e9f69d37a14174017e3",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "7c2dd2a6d95715b1d8a4a9eb085471bde104d24a2c666bafeb9ffca4695dd988",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "2b8a78115708778760a3292eea70c288a3862e48a034afac4d8f35e8a5074bc1",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "ad62147fd06a65e45b125b02a6d414b13bcd8c7c7285f588c3272ce30f89db18",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "059888dff4eb79edde7378fa490b0033f5d65f39512a1b15b47f4faa9281ac23",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "184abba376b9b7c993f0b2ad153a35a191f3b1d32c48f5c10146a8d84d04222d",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "cd4146ab4ad5619d9c11f9bb319418788364bc8907bd1e47aa569294e50a9af5",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "822c55bf817518cc394334e7b2ee5e80d7780563925f0e61e4dfece68c68730a",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "68785ddecc6c849881a7be7170be5c23c66c2d96b5d69c27933d9b41fb995a21",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/exo-2/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "3e57100edebb3c9eff629b4a50485c6d6d4ad00e918d361f5190aea02616cf84",
+          "bytes": 266
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/nunito",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/nunito/-/nunito-5.3.0.tgz",
+      "npm_integrity": "sha512-vw9TaTQJ/zpEpKrsODuPmOvaVjXgdda6B+xXA4YqjrdeJ62MLgVoDerdRXFQHyBnSCt2yQ2nHKCHPP/Pv7Xq4Q==",
+      "integrity_verified": true,
+      "tarball_sha256": "4d8e1fb4f4a40c125c7a302b21e5c6810b86569b60bac0fa0405c04380f4c77b",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "40991bfa02ac620aae16dc527f3c47765a25e43f270d4c301ee6ab663a8d9015",
+          "bytes": 4491
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-300-normal.woff",
+          "package_path": "files/nunito-latin-300-normal.woff",
+          "sha256": "82c499ad344393c3763199011c757dd1dab8ba7aa0e02b3daefeda7f90259cbd",
+          "bytes": 20076
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-300-normal.woff2",
+          "package_path": "files/nunito-latin-300-normal.woff2",
+          "sha256": "f647da08cb60587172d1d427b21790b62aea0554a40c6f15df53bad889ea0c20",
+          "bytes": 16084
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-400-normal.woff",
+          "package_path": "files/nunito-latin-400-normal.woff",
+          "sha256": "b51e76356535ea73d5701b541f89a4f062a4d6c829c7d2d237ceb8a0a8f77123",
+          "bytes": 20332
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-400-normal.woff2",
+          "package_path": "files/nunito-latin-400-normal.woff2",
+          "sha256": "a5906e15ceb68f73d3b2c2076b4057c3f6ed401186d56283b45ce12944ca0735",
+          "bytes": 16316
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-500-normal.woff",
+          "package_path": "files/nunito-latin-500-normal.woff",
+          "sha256": "be14dbc6349bcb81f2dcac0994350588831919e4f8074da2031bac24d7f4121f",
+          "bytes": 20372
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-500-normal.woff2",
+          "package_path": "files/nunito-latin-500-normal.woff2",
+          "sha256": "23ae3083dbdaeabf3b9969a3947ddf5d5614683516e28ffa110ca4eb6192a9ff",
+          "bytes": 16428
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-600-normal.woff",
+          "package_path": "files/nunito-latin-600-normal.woff",
+          "sha256": "06a9c8b384b332423be9291e180dba15ec49c0c903303e03ea03e2ded06197e4",
+          "bytes": 20492
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-600-normal.woff2",
+          "package_path": "files/nunito-latin-600-normal.woff2",
+          "sha256": "45f437de32ff5973eb5616b43c1308bf9fe897442f3d78a603c4cd0a06d66573",
+          "bytes": 16556
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-700-normal.woff",
+          "package_path": "files/nunito-latin-700-normal.woff",
+          "sha256": "ce9107dc33f5d3bb8237776799400f28b96aed4b114773d4fd7fbacb3b218509",
+          "bytes": 19988
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-700-normal.woff2",
+          "package_path": "files/nunito-latin-700-normal.woff2",
+          "sha256": "fa89300b9bbb3bd0f60d6991aa055965d98e2ccca27bf8688fe0c39cdc796846",
+          "bytes": 16228
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-800-normal.woff",
+          "package_path": "files/nunito-latin-800-normal.woff",
+          "sha256": "0ca02785f0bf8aaabada9adc9b4e2bb4952e1c641fea02d12f34608ca89fe904",
+          "bytes": 20360
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-800-normal.woff2",
+          "package_path": "files/nunito-latin-800-normal.woff2",
+          "sha256": "2363d3ed037283ebb961e8c4b4917e40a8bc8853cf9965cf1ea7b4daa1df630a",
+          "bytes": 16520
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-300-normal.woff",
+          "package_path": "files/nunito-latin-ext-300-normal.woff",
+          "sha256": "f27fe8edb464a44df6a6c711f11bb0b94958289d97a308fee4860749fcdf8cc5",
+          "bytes": 21032
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-300-normal.woff2",
+          "package_path": "files/nunito-latin-ext-300-normal.woff2",
+          "sha256": "620a5d213289c09bfbb67bd59f0e12f178fee56dad19e0789f12cccd403b29ce",
+          "bytes": 15680
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-400-normal.woff",
+          "package_path": "files/nunito-latin-ext-400-normal.woff",
+          "sha256": "d7e2415e278145c408defb928138fb93ad5efe94969fe7c1f19864f882ba9253",
+          "bytes": 21288
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-400-normal.woff2",
+          "package_path": "files/nunito-latin-ext-400-normal.woff2",
+          "sha256": "67250a41de218bef49c04ea88c3d73c5756ad750a182209a560e1a521323a680",
+          "bytes": 15888
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-500-normal.woff",
+          "package_path": "files/nunito-latin-ext-500-normal.woff",
+          "sha256": "06f35d1c31e5946310d43ff4d997925120e1a1291a25c3f04920c201f301d149",
+          "bytes": 21224
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-500-normal.woff2",
+          "package_path": "files/nunito-latin-ext-500-normal.woff2",
+          "sha256": "343e7adc7b39f89e71c6dc53244eb7e5f70a3c972b93fa06e8f57ede6236405b",
+          "bytes": 15976
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-600-normal.woff",
+          "package_path": "files/nunito-latin-ext-600-normal.woff",
+          "sha256": "5a8efd1784a596203a4d9ca7874fc69bb91c6d129545437c517d4569d1100824",
+          "bytes": 21304
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-600-normal.woff2",
+          "package_path": "files/nunito-latin-ext-600-normal.woff2",
+          "sha256": "a7ba5f4fa4cb615374731c961569110f48550c36e628fc3bbe40a3f3f26a06a6",
+          "bytes": 16088
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-700-normal.woff",
+          "package_path": "files/nunito-latin-ext-700-normal.woff",
+          "sha256": "0c607961299b21de332782c43e6ccfd591ca98c5df4b439d39d9c247f613bb1c",
+          "bytes": 21008
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-700-normal.woff2",
+          "package_path": "files/nunito-latin-ext-700-normal.woff2",
+          "sha256": "0a4e4a02e13c6b36cf2a3ce236cc5ad8c0b93352fc5fb380860161557a9b199e",
+          "bytes": 15820
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-800-normal.woff",
+          "package_path": "files/nunito-latin-ext-800-normal.woff",
+          "sha256": "466d02116226ea4d5b3dd06ed52ca38bdde9ccdcfdfd9496c423c9abcfa3b08d",
+          "bytes": 21424
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/files/nunito-latin-ext-800-normal.woff2",
+          "package_path": "files/nunito-latin-ext-800-normal.woff2",
+          "sha256": "39f54b55b83547df294894bdf68d75c11e2ac626bc0c88b73ba8993422de2fe7",
+          "bytes": 16284
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "3a5a2aa64a314895c6b87334b21ce9cc366b02b2f3886d90edbcbc124da193f3",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "a007b1c3516575fa92fd34904b1eb42478750931e5b65984b042591c626d0893",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "fa88935e844bf8162f728b23d7ca6fa4db15432da4c31a8815bf594bc0180f4e",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "43677aafdbeb772e2b9a250528c4f987dacc9a085ab84c67e2ac7c85d576d53a",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "455e1eaede5531619a5e99c51d8fbeebfccf0485c17a5361aede7457f8a9357c",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "c00e3a7469e1747d9bdd155e91243f66553f8a74b0acbf2d103a5f0fa147bc1e",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "42d82c847b65ca6ff73aa2a2306f26069f64c69d130daa9576fba6a5fa593473",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "ecbff745225dd585a55138a65967f6201238bbd3fb09ae8a3c5b5acb4b203b67",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "8f76fdd4b99c173e75a8cc6fce531995c85cff065a7459dd7da82b6469f71ab6",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "6403da153dcd78ac459954cc509dd0e7594c4c9690ea117b9fe0bf08316a6ab1",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "5c5d331f2e611bbb1e25d62b04c023e5f9dd0baf3b5af7d7838456b46bf5626b",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/nunito/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "9a86f518897b8c0554544fcb7d4a9ada763bbe8725e8896c585c7ab4f6a029ba",
+          "bytes": 270
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/outfit",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/outfit/-/outfit-5.3.0.tgz",
+      "npm_integrity": "sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==",
+      "integrity_verified": true,
+      "tarball_sha256": "1060497f324868b0a2173b6834248d48859faac5664184ec4c15aee0586fad8d",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "0e5fcef5d93bfcae273c11c00f0bb453d3b5491860e1ac8b658767b7577c938f",
+          "bytes": 4387
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-300-normal.woff",
+          "package_path": "files/outfit-latin-300-normal.woff",
+          "sha256": "bcc41559359a3cb79105f71979b7e70f9bba8ee39460db790057d3f3c0cc77eb",
+          "bytes": 18196
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-300-normal.woff2",
+          "package_path": "files/outfit-latin-300-normal.woff2",
+          "sha256": "ef88e74f63ce75b54cce4d5a4087c6f180750b9ebae6ab6e5bf2a9939bf6958f",
+          "bytes": 13956
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-400-normal.woff",
+          "package_path": "files/outfit-latin-400-normal.woff",
+          "sha256": "f329dc36d2d9285431fb8322f5e951def9cac4a42c1cada679747f7c64b04916",
+          "bytes": 18232
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-400-normal.woff2",
+          "package_path": "files/outfit-latin-400-normal.woff2",
+          "sha256": "71f028fd2349990b3f8aa643abe767e82e0f596be407ae66f0004ff164121bdb",
+          "bytes": 14032
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-500-normal.woff",
+          "package_path": "files/outfit-latin-500-normal.woff",
+          "sha256": "40083be5d9c1935c562bfe9be662d5a2798910deee9e8049509142549a995626",
+          "bytes": 17688
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-500-normal.woff2",
+          "package_path": "files/outfit-latin-500-normal.woff2",
+          "sha256": "fc9bff941def6d924a71632bd8a93190528872eae6414844f3c367ff948d92fd",
+          "bytes": 13528
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-600-normal.woff",
+          "package_path": "files/outfit-latin-600-normal.woff",
+          "sha256": "3d1cd1b42cb525acde934764b2adec41dddf7932e1a965392d285efd56f2c148",
+          "bytes": 18412
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-600-normal.woff2",
+          "package_path": "files/outfit-latin-600-normal.woff2",
+          "sha256": "8cfe15c2c6de6ef8efff3eedbd52a383ac9ef23d6c23f6cd9f9b838f5f37dc36",
+          "bytes": 14140
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-700-normal.woff",
+          "package_path": "files/outfit-latin-700-normal.woff",
+          "sha256": "fb730df77799be655b0028de3ff2952a6ebcd3ca85d32cbf188c6f3ea66f82b7",
+          "bytes": 18344
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-700-normal.woff2",
+          "package_path": "files/outfit-latin-700-normal.woff2",
+          "sha256": "5d5e3734089a74707292ce8a3e186def34cd63e33879f9ac3689a8d8da9d0706",
+          "bytes": 14060
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-800-normal.woff",
+          "package_path": "files/outfit-latin-800-normal.woff",
+          "sha256": "f39dd1c80842af90da037b4ea7a7302cd0268a849e2173dbc5e3c5f7edcd6c3b",
+          "bytes": 18396
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-800-normal.woff2",
+          "package_path": "files/outfit-latin-800-normal.woff2",
+          "sha256": "eabf8cb2c01d0345e2eb19a49d04e8f8d0d520b74959b173d5ea6c2dcb95e4cd",
+          "bytes": 14048
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-300-normal.woff",
+          "package_path": "files/outfit-latin-ext-300-normal.woff",
+          "sha256": "5c78f172cf303e7df8fba666f3cc1d7003de656e6822b0f99bfc733e4a9aff38",
+          "bytes": 8548
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-300-normal.woff2",
+          "package_path": "files/outfit-latin-ext-300-normal.woff2",
+          "sha256": "463eec2e5944ce6534089376531a533eae99b6dfae1af87924756fa5af6ba1c0",
+          "bytes": 6384
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-400-normal.woff",
+          "package_path": "files/outfit-latin-ext-400-normal.woff",
+          "sha256": "a6697dab76ab8386fc4244f9f6d3ed8639fce59e3be228c146d6c4586c835022",
+          "bytes": 8640
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-400-normal.woff2",
+          "package_path": "files/outfit-latin-ext-400-normal.woff2",
+          "sha256": "e279fd5005b5936e4f4d20fd21e1fdd6a35d724ff576623d31e7c425c356b7ac",
+          "bytes": 6380
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-500-normal.woff",
+          "package_path": "files/outfit-latin-ext-500-normal.woff",
+          "sha256": "0bee549f28f292ac938f04ff97b235dc9fa0b42fbbd8b53a279355da59443cd2",
+          "bytes": 8492
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-500-normal.woff2",
+          "package_path": "files/outfit-latin-ext-500-normal.woff2",
+          "sha256": "89894a600bea0ec4724988d191ea32a0353bb1c9c130cbdf346654d356b1ba84",
+          "bytes": 6244
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-600-normal.woff",
+          "package_path": "files/outfit-latin-ext-600-normal.woff",
+          "sha256": "a0c20185e588d3dd8f6d5557c3499a0e3c95f463a555ebe1bf7e233263972749",
+          "bytes": 8752
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-600-normal.woff2",
+          "package_path": "files/outfit-latin-ext-600-normal.woff2",
+          "sha256": "a049363d2c3565ef5ea79725c71d23030c91f679cc7a0cf45e9726375bd58e7c",
+          "bytes": 6528
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-700-normal.woff",
+          "package_path": "files/outfit-latin-ext-700-normal.woff",
+          "sha256": "8c2539e9840ed06109ace086bda20c9985d69c2ff70f931c9a66cf459f3a617b",
+          "bytes": 8784
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-700-normal.woff2",
+          "package_path": "files/outfit-latin-ext-700-normal.woff2",
+          "sha256": "545d41d83230a139623b3ec2889b338bb3c5a19a8aefe9c23b203dbe72b2bbe4",
+          "bytes": 6484
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-800-normal.woff",
+          "package_path": "files/outfit-latin-ext-800-normal.woff",
+          "sha256": "99eb2a4847b3dce3374696c57f865fd05fbe4647380eb8b05134a50034c5127e",
+          "bytes": 8764
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/files/outfit-latin-ext-800-normal.woff2",
+          "package_path": "files/outfit-latin-ext-800-normal.woff2",
+          "sha256": "76bc5d459840a87367e894a2d0e648b43e5f546b726f9bb8ef4f801107cc2e30",
+          "bytes": 6472
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "565587a8068732826c04bb9ed1de8a6bd55e6a2c4f32de384831da1124ad79ba",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "7343a82ceac616a56bba3a15a26b0b793bd75efd0aacf996cb0e2e9beccac2e0",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "df65e1eb04cea4cbda1ffb6e9e36848dfd391d5b6899a4a224a2f8643884e766",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "1e33fbd59c45c039466740c03a6ff33775ef0e74ba7c532166387c06c3cd017b",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "28a887d4e729a5a424a566dbf4eee7a0c5c1e6f078f6ed0fc5d8a22c0b5dc13c",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "3da451042d5b4ac79d6ba56dfc96877a0ecdc9e40d799cee91ff1f4c34c741b8",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "2460b8e007c9e3f9cf095dd14ff7a37f8944b20f5e0dcbb467f60e8adbbfc982",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "6de90ffa3f935366d946821c81ca9e07309a3342b014d4b04ef32674ab4267a8",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "790de9a6e45a619789f89debebf5adc72ab3b96058476837a3c3ac7a4eff3658",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "545658482b9ccfa7bda82951d04eb1a32261788fece9c6f3fdff07510bd5a16f",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "680ccf57a73685084613ebda2ba9e5c0845bff0f5e269bbfacce9f44c70d8e1e",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/outfit/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "2b1734ff9160c38e57be3daa7a9134f311b0f7240b48f40f49d382ee9b301b5a",
+          "bytes": 270
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/plus-jakarta-sans",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/plus-jakarta-sans/-/plus-jakarta-sans-5.3.0.tgz",
+      "npm_integrity": "sha512-9WRw3G74Ve4cyPApAZSXLPY5DiLOZXDn7Q7dIBjFBpA0Pj56ljDItEdy2UUajjJxRuTg2HkMLO5C3K2nAQORWg==",
+      "integrity_verified": true,
+      "tarball_sha256": "2aa0e08c1f3091c6d7e9173415adbb210fe81f7bcbd2544d40892835002db428",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "e07fd1167c2aaaa6fb965dd66e1e73b13c9c95b76b2d648b6e938780f30b37af",
+          "bytes": 4534
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-300-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-300-normal.woff",
+          "sha256": "0238706d2036707a7d30f88b8ac9b8b2dff310c898b612b4154410c03d56bde0",
+          "bytes": 16192
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-300-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-300-normal.woff2",
+          "sha256": "740d9b0f5a33987e21acff7e20bbd4c02bf40e470cda58b761127d159c7941a7",
+          "bytes": 12200
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-400-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-400-normal.woff",
+          "sha256": "9709167175cee7dcd331a7ed95be1182a5d5f00715b67a02107ecc80a55f490d",
+          "bytes": 15728
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-400-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-400-normal.woff2",
+          "sha256": "221a4135d06a4b33abbd535e9a0da4e565d19545ddd9267c4e678a916d54d9b6",
+          "bytes": 11816
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-500-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-500-normal.woff",
+          "sha256": "a1b54d9fda75d8de13e283ef09668395160e23cbb7dd9ae1aec91d6199da85bb",
+          "bytes": 16124
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-500-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-500-normal.woff2",
+          "sha256": "bad081c8dbc15aed6c5e4cde5461914f7b3bdc295b7a7aed177e4beddb79bffa",
+          "bytes": 12312
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-600-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-600-normal.woff",
+          "sha256": "d9569c0aacc16c33c52e57e1e48c1b94f3b0a6be99e75479edc6438cc44c48e0",
+          "bytes": 16084
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-600-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-600-normal.woff2",
+          "sha256": "8872bb5c9111df9bd3162c2394aee6354d782b13408a4dd5bbf65c48207206e6",
+          "bytes": 12188
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-700-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-700-normal.woff",
+          "sha256": "6188f593f250aa25137865e8d07373fd0f585f5920a496c73ede84dbbdff7a92",
+          "bytes": 16136
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-700-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-700-normal.woff2",
+          "sha256": "2050755bf475817c96ac7d914c7f07cc3c2d11ff4b3fb4747b8d41de584aad17",
+          "bytes": 12244
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-800-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-800-normal.woff",
+          "sha256": "ba83c17d4fbe400449af7b6d7cc6fe5ea25e97bf64c9e77010101520ca83f0a5",
+          "bytes": 15784
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-800-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-800-normal.woff2",
+          "sha256": "5f301a8ef9c266c8b596e6793d3cc826daeff9849c5af035f5386439137955ad",
+          "bytes": 11896
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-300-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-300-normal.woff",
+          "sha256": "72549d580085c020d7ce6523176ba6b853aa8be19dc7da39f4da86d0bee5a89a",
+          "bytes": 15540
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-300-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-300-normal.woff2",
+          "sha256": "3bfbc7278a6723bc895a1c088f8c216a79c21a9c5c227c7b6ed194c58e12fb53",
+          "bytes": 10832
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-400-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-400-normal.woff",
+          "sha256": "d0a823b74d65410a8faaf5efb1232813197cdc898d9191e5997428b42aa4cafd",
+          "bytes": 15312
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-400-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-400-normal.woff2",
+          "sha256": "65b5680bf2ba9c6c42af74ddd2e8aadde93af7c523454ebb3d4e32fdba3f94db",
+          "bytes": 10592
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-500-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-500-normal.woff",
+          "sha256": "42793e2d60d4b62191fa9f1968002d76c1c7438e76b7c3bcc145af154803e9d5",
+          "bytes": 15620
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-500-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-500-normal.woff2",
+          "sha256": "d1584f50c388cae7e570bed35be331fa4a9afd6832ef45a32fa8bf81930e6db9",
+          "bytes": 10864
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-600-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-600-normal.woff",
+          "sha256": "ade6f23e14c20160f924f980f6610cd73979c03227541d8734b2c42563d11325",
+          "bytes": 15608
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-600-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-600-normal.woff2",
+          "sha256": "080a1fea8589c2bd4fa08750d0d99b3388be63df8c41a649de05cb2dda1ec007",
+          "bytes": 10896
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-700-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-700-normal.woff",
+          "sha256": "aaa9d5f7040bcf5ee2c9569f6c54aaf8327ee769fd2d02764a858f450a8fbf13",
+          "bytes": 15616
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-700-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-700-normal.woff2",
+          "sha256": "b202ec87899e78825db955e6ab43858b88c0cd444abe2dfac2e763f837b8f234",
+          "bytes": 11008
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-800-normal.woff",
+          "package_path": "files/plus-jakarta-sans-latin-ext-800-normal.woff",
+          "sha256": "0fb84e32f15bf5f6fc207c247fbce60c2643cebe9c6f645b54c29b133fe8c161",
+          "bytes": 15412
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-800-normal.woff2",
+          "package_path": "files/plus-jakarta-sans-latin-ext-800-normal.woff2",
+          "sha256": "7c27e3fd36e9c1d6a2f354943b32993b01dc0b1e64e8275bdd5122b260ca6a24",
+          "bytes": 10804
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "05a17c015659026b06e69657642b89bbdf7ca8fd5b3f2f922daa1757aaab23f9",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "78c4e4fc1cbabb377b9ed0982fef0de8fe1ea4deebfc5cc3029ba62e6e8dfe6e",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "63dcbf022922efb4321e8ef0f50efed80baeb74bd6aa3d0b35490f89fc8502a1",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "0decf8cff4ac20e924a24584eea1e1bc76ce99b0e49460bcfa073f70ac8de986",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "7ea806d7960ea1c7b35118cba7d268c76cc50d706d3af6e42d0b1e398fc805e2",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "0d9f93b6c5b514dfd474ce66ea654efa23a0514e2f01df75e88f092afb4f377b",
+          "bytes": 302
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "9c4eaa3987aa7afb5faac6150313df6487ef31ae79cbca9bc62ae19a345ba4f9",
+          "bytes": 314
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "c82286d85dfee13f3eab3e2bc3f617ec2858975ce594881b769f1762d00c46b5",
+          "bytes": 314
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "d085ce900020b58ff54e53a78b36ab8e800586c045418d2f4f7119a9035a5dd1",
+          "bytes": 314
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "ecb527815159d07bc522c6041a5f1ff2a0015d2a7fafc79e498a442ec17660c2",
+          "bytes": 314
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "5ffdcf4562bd35abc2cb21f0fdb494fd10fb68b56ff5628435b9df7841005f90",
+          "bytes": 314
+        },
+        {
+          "path": "assets/vendor/fontsource/plus-jakarta-sans/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "9fb6dc503f1687d9716a16b3d3786975806e57eb278116de462b9de85d095d9e",
+          "bytes": 314
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/rajdhani",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/rajdhani/-/rajdhani-5.3.0.tgz",
+      "npm_integrity": "sha512-oBJgSIibWJvVBKseme1JczqPLoDHN97LHti4uh0LjfcJqQoVmnQQlRKIpEjTJV559rmVQ6qbVZZwKwk2wkBTtw==",
+      "integrity_verified": true,
+      "tarball_sha256": "67d0bab8711edbefcb4a3f96f3ed7cd911c92063ab44b3b58317bed531f62154",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "078e327eb00525214cdce9780cfdf156141f137f1a095bec9798f470703d7d2d",
+          "bytes": 4727
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-300-normal.woff",
+          "package_path": "files/rajdhani-latin-300-normal.woff",
+          "sha256": "0597ca41bb459d3687a955c3db5c6fdb6204eed9371e9cb54cbecfb2f9ec53f3",
+          "bytes": 10644
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-300-normal.woff2",
+          "package_path": "files/rajdhani-latin-300-normal.woff2",
+          "sha256": "828d4d537471ba0717fec6f6aa717aa6b96dd7aeb35f7e7b6d206775b438982c",
+          "bytes": 14456
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-400-normal.woff",
+          "package_path": "files/rajdhani-latin-400-normal.woff",
+          "sha256": "452fcfb283b8392577e04845f12c6c6b06d67f256fb2da1b857b63dcbcc78dd4",
+          "bytes": 11764
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-400-normal.woff2",
+          "package_path": "files/rajdhani-latin-400-normal.woff2",
+          "sha256": "759a9000e47b028799d7a4ca602634a7ac7adf415775df070a335d18d9b66f38",
+          "bytes": 14976
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-500-normal.woff",
+          "package_path": "files/rajdhani-latin-500-normal.woff",
+          "sha256": "74c304eefe9b39d76d634d479f20a7332efddd120fb76ab92bbefe9eb4728625",
+          "bytes": 11760
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-500-normal.woff2",
+          "package_path": "files/rajdhani-latin-500-normal.woff2",
+          "sha256": "23afdb9b5b89b878fab04d80cc30bf41bb4f3f7e8be88e5f16a7cc7671cdb2dc",
+          "bytes": 15084
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-600-normal.woff",
+          "package_path": "files/rajdhani-latin-600-normal.woff",
+          "sha256": "9d9d900358819a2a710085a5630d9024a139ea57e9316499d6d9eb3281674f3a",
+          "bytes": 12092
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-600-normal.woff2",
+          "package_path": "files/rajdhani-latin-600-normal.woff2",
+          "sha256": "433a7007e4747a02a790167a6efa2625855f013970ba49b9b739a5d3db8b2601",
+          "bytes": 15732
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-700-normal.woff",
+          "package_path": "files/rajdhani-latin-700-normal.woff",
+          "sha256": "e4e5272051a3882943fa3bdf5cda8eca8c1853ac66c1572eb90fda8608d9bd31",
+          "bytes": 12060
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-700-normal.woff2",
+          "package_path": "files/rajdhani-latin-700-normal.woff2",
+          "sha256": "5b7e4a6f97163c2636724d4de90304fc895653dcfe64c67a7a22f26331ca5c5f",
+          "bytes": 15688
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-300-normal.woff",
+          "package_path": "files/rajdhani-latin-ext-300-normal.woff",
+          "sha256": "d85c0d88762808d7d0e6857f12ef43cc50552dc78d9dee69fc5275f611c2af7e",
+          "bytes": 8288
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-300-normal.woff2",
+          "package_path": "files/rajdhani-latin-ext-300-normal.woff2",
+          "sha256": "b692e196562481ec11d4ffed8def8ebdeac1648d9fba0e6304a63342e9485abb",
+          "bytes": 12300
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-400-normal.woff",
+          "package_path": "files/rajdhani-latin-ext-400-normal.woff",
+          "sha256": "f002b5bf7ea55fcc299257087738f24cb8582eebe27821c5f83e0b015cd4e72a",
+          "bytes": 9088
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-400-normal.woff2",
+          "package_path": "files/rajdhani-latin-ext-400-normal.woff2",
+          "sha256": "90721cae01bf677b419b28fec9896e50923c9e956817b85f4b6ab1e5ad028a56",
+          "bytes": 12388
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-500-normal.woff",
+          "package_path": "files/rajdhani-latin-ext-500-normal.woff",
+          "sha256": "30fb2b5f61ced47a4c60b0c6bfd98b4a75deead0e51fe9efe681ce7229339c42",
+          "bytes": 9028
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-500-normal.woff2",
+          "package_path": "files/rajdhani-latin-ext-500-normal.woff2",
+          "sha256": "16fd373954f7569ad294444531caa2e7e5ffd1a6798c6df3f56b9faf691190c2",
+          "bytes": 12380
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-600-normal.woff",
+          "package_path": "files/rajdhani-latin-ext-600-normal.woff",
+          "sha256": "73d2f45895b780e9fcb525d4b8e5cefdd8f0c155eb0f3e1ff9f5d0543535baaf",
+          "bytes": 9344
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-600-normal.woff2",
+          "package_path": "files/rajdhani-latin-ext-600-normal.woff2",
+          "sha256": "f57c2b379ba92460d25730ef1f7b8745afb4eadb401d652900f2059f8ee2f2b6",
+          "bytes": 13124
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-700-normal.woff",
+          "package_path": "files/rajdhani-latin-ext-700-normal.woff",
+          "sha256": "e6539b4ef36036a40a83179d7adb5a3388c48f92c358a158ae5c14b66a3d0803",
+          "bytes": 9148
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-700-normal.woff2",
+          "package_path": "files/rajdhani-latin-ext-700-normal.woff2",
+          "sha256": "c6b9df58743ccca1236e9521720b135138309bc4149d5d027a9bd10183cc8ed5",
+          "bytes": 12964
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "f67ce667d9de009c2fc995d0006769fca9837c37ed7ec639c903e33c40848444",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "cd50d52f13583ffd46d2fcb91b2b20c4aaff4fe3b2cbf36f48bcc23509d6df19",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "84a2e87974737c426b968d132e5f7070344b1c192bb4061aa1f954817bf41d55",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "46096f0b838410677b4e9e018744db761b2dc3aefa35b6e366eb4cd673e6d018",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "41e85c849dce58ab7b1b3c8ea63046bf8687394c821ba5242ad7138c230f1b4a",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "a68132640306e8e0d1c4108a712efe70e989cfbee656843ab0cfd904c0518a16",
+          "bytes": 278
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "3f667bbea31859b3ebec935b4dc4bbe9f75dc03e0aef79458808a80a8479acac",
+          "bytes": 278
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "a0d37f7e752c04b54d0dfcfcd2bde29718d4c4e16e3faaf21777e9cfe57153ed",
+          "bytes": 278
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "d75716eddcf64422f5b82c6e9537f9e8f1c127b30928f2aeac15a75ed2b5dfd1",
+          "bytes": 278
+        },
+        {
+          "path": "assets/vendor/fontsource/rajdhani/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "4dc1c75377d33af07cbd53fb5b4631ff0acb007daf8439e1f106db76114f34ea",
+          "bytes": 278
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/sora",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/sora/-/sora-5.3.0.tgz",
+      "npm_integrity": "sha512-SqW3OpKxxfKvxDLPlbdrWf2KooPfbd+W3jaYn483o+Y/JrmU87vjFPNptDqwP428c3vY+gnranLhjcbRaXB0Jw==",
+      "integrity_verified": true,
+      "tarball_sha256": "3bc31b2b3e2194d8a56c7188c7bf92fea053e684ad1d8ef2b518de2443138b36",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "1ec9623d38c445eb4dfe5fcc783e0f0ee728cc97ca157ce1f8cb2b3bf9d9b0d9",
+          "bytes": 4382
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-300-normal.woff",
+          "package_path": "files/sora-latin-300-normal.woff",
+          "sha256": "e23572697a0b586cdec29b1d3ae366b4638a1789953ffc22c83e244bd3d89271",
+          "bytes": 18848
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-300-normal.woff2",
+          "package_path": "files/sora-latin-300-normal.woff2",
+          "sha256": "3d1bb919fb7e9ff994c9d0792a3a12713869d88f6e9ec3df9209330f2f96a80e",
+          "bytes": 14940
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-400-normal.woff",
+          "package_path": "files/sora-latin-400-normal.woff",
+          "sha256": "1f37dad58662a5d5aba86a5bb8127e56726bebb0d7c17bf842634bcb2692eaca",
+          "bytes": 18540
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-400-normal.woff2",
+          "package_path": "files/sora-latin-400-normal.woff2",
+          "sha256": "98141d7eaa6e9ee35e0827d279018cd33c3e59c6650541ec7de1c692efd93942",
+          "bytes": 14724
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-500-normal.woff",
+          "package_path": "files/sora-latin-500-normal.woff",
+          "sha256": "bfa5c3aaceedffef41964862403f9924631aee1107f6bf7ea4f875bb8a71c554",
+          "bytes": 18880
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-500-normal.woff2",
+          "package_path": "files/sora-latin-500-normal.woff2",
+          "sha256": "edd010ebf2f4940b52d8b98296a499c0a783d838e427fa301c67f80959c1f441",
+          "bytes": 15056
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-600-normal.woff",
+          "package_path": "files/sora-latin-600-normal.woff",
+          "sha256": "0f54f64e7e937c760a41c40d4a8402eb3f5d93021b603fd1bab937f86dc53c42",
+          "bytes": 18856
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-600-normal.woff2",
+          "package_path": "files/sora-latin-600-normal.woff2",
+          "sha256": "fa9ab76f30510ad92153c6d6d72d0508884b85e9f0148abdfa963231b2a4845a",
+          "bytes": 15000
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-700-normal.woff",
+          "package_path": "files/sora-latin-700-normal.woff",
+          "sha256": "04a29da140ba5c977a4acdd6065d2673c74d65547324f37b4c97736f4a31fd05",
+          "bytes": 18860
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-700-normal.woff2",
+          "package_path": "files/sora-latin-700-normal.woff2",
+          "sha256": "c3337a673c9bbbfe433091d3831714dd9a257951f16f41eb3fc650ec593cfac2",
+          "bytes": 15128
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-800-normal.woff",
+          "package_path": "files/sora-latin-800-normal.woff",
+          "sha256": "0ca07cd14c5741c712465747fba809b6075b092a5d269031a9337704cd05a2c4",
+          "bytes": 18596
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-800-normal.woff2",
+          "package_path": "files/sora-latin-800-normal.woff2",
+          "sha256": "b3058cd014993defb5c446d9ccdeba7f994c4b7f0ff2b50b2b213944af0f176e",
+          "bytes": 14864
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-300-normal.woff",
+          "package_path": "files/sora-latin-ext-300-normal.woff",
+          "sha256": "40ad5f32eb63a462903241af713217793dd48d9d078ccaed495b4fdc993aab41",
+          "bytes": 9752
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-300-normal.woff2",
+          "package_path": "files/sora-latin-ext-300-normal.woff2",
+          "sha256": "f05f67070b579aaa67b66791964c34ff681af727ba390d4656f2c33234723ae1",
+          "bytes": 7448
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-400-normal.woff",
+          "package_path": "files/sora-latin-ext-400-normal.woff",
+          "sha256": "a04bdd5aebe003363f11159b94739f5924db41880698ea8542ad2d1742619dd7",
+          "bytes": 9672
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-400-normal.woff2",
+          "package_path": "files/sora-latin-ext-400-normal.woff2",
+          "sha256": "959432bc9e83bb9471e25d5f256ac1190bf5422043f25a97ff69dcf8d6b73463",
+          "bytes": 7340
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-500-normal.woff",
+          "package_path": "files/sora-latin-ext-500-normal.woff",
+          "sha256": "ff90eb01428950d8d26e7b4d0384ab3a6691aaf721ff7f67940d959db7b9ca1f",
+          "bytes": 9756
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-500-normal.woff2",
+          "package_path": "files/sora-latin-ext-500-normal.woff2",
+          "sha256": "0685d4dea03a9d6b26479cf5018cfcce9521278f946bba7935983f973539d75e",
+          "bytes": 7476
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-600-normal.woff",
+          "package_path": "files/sora-latin-ext-600-normal.woff",
+          "sha256": "b9acb1ebf7dc1bc83c46fa5a17204aa649f337e4c3bda9bcba5a6cf087ca6874",
+          "bytes": 9820
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-600-normal.woff2",
+          "package_path": "files/sora-latin-ext-600-normal.woff2",
+          "sha256": "2c17a94fef4242d1c33ffcc9bb43c7eb93ad88db53409c1067ac23cc914523e2",
+          "bytes": 7536
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-700-normal.woff",
+          "package_path": "files/sora-latin-ext-700-normal.woff",
+          "sha256": "b77876320abbf04549265e0b298fba9a15928a8a374f37d0a6af9cd9e2ff18e6",
+          "bytes": 9804
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-700-normal.woff2",
+          "package_path": "files/sora-latin-ext-700-normal.woff2",
+          "sha256": "d4d06da761976749e6f33a3640ae610301491d65bc3f1c56faa2489b520a7ac7",
+          "bytes": 7448
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-800-normal.woff",
+          "package_path": "files/sora-latin-ext-800-normal.woff",
+          "sha256": "e001ac72d6ff9d32634134d9ec3d6cb5b2ce5be24e48f01ac80546ede96f115e",
+          "bytes": 9760
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/files/sora-latin-ext-800-normal.woff2",
+          "package_path": "files/sora-latin-ext-800-normal.woff2",
+          "sha256": "ad60c66b26562add545450c8979fb23d755916d8fed90b0855d7bb45a5d944c5",
+          "bytes": 7428
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "f755fedb352f4b80b5f05c766df07021ba250a2432bab7252db54fa5266f533f",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "4a5a7eac67a8ec4cc84be09fe04f8d3e68301a705642313b47f78259016b6548",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "902be8cff3ffdb97785dd67a55007f6955bb9ca1447e28c165e9961e9c30034b",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "752842efb24cabc15fbe4dffccb867416ff7877b822295cbedf9e1406320ca4b",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "ecd70c904c4786ec155e3fde990b32787723053e355e50f8bf5a2c0f66a73dbf",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "4f538d3a62025fd18fcf494c45984ec14c15fb9295399fa53b0791d10c8f1b5c",
+          "bytes": 250
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "3a1d20de7a692a559112eb6e9ff2d7084cdeda4fcad301439aed96add6eaf469",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "7ae135276c9e930757ab5e9166ce27390b684a65a78ab00e16cd887c5fde2af0",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "d4ad1b776e72164e20e7c5a7e85cb6ec5d1c5366bb874df9602631e16006cd01",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "ed958844ece9c72da4425cf074055771588cef4f2417bf7717b052824517c59a",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "19c1b6a0db545c988dda231f96879ce9d25d5d272c89b47a3ba9cbbe4c6fa232",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/sora/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "f0956575708bb0b4211b83abe55f7c10eb83bd9514be159508bc54daf441b3bf",
+          "bytes": 262
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/space-grotesk",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/space-grotesk/-/space-grotesk-5.3.0.tgz",
+      "npm_integrity": "sha512-ksnGizDPXIDuvqcTYTSrmZ+evx9sDlS8rp7+42BQ7wU+spt3twEoXfbJz672C+5CLg6VeUQwRy5RXshWb67LcQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "2adb650694b6387b1862fee8b086a3a47ce9f32c10f20b8ec109aa1fcdfd07b7",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "18a4de52385f6b988782639d5d0cc1326e5a8c2de9a7f01d7b20d9aedcc60943",
+          "bytes": 4401
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-300-normal.woff",
+          "package_path": "files/space-grotesk-latin-300-normal.woff",
+          "sha256": "06843824046c174e32237af7ba1fe05a29258d64699eec5dcbc97949442b2f8f",
+          "bytes": 16652
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-300-normal.woff2",
+          "package_path": "files/space-grotesk-latin-300-normal.woff2",
+          "sha256": "a5de30e3b00eec05d96c3db37b9a90e36c6ed68f1bed5b38eb3e6871ff04a145",
+          "bytes": 12908
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-400-normal.woff",
+          "package_path": "files/space-grotesk-latin-400-normal.woff",
+          "sha256": "d3fcfce61e3792f35b7c95c2f7f4f26c8d19c93998c03ad77d7bf0cd6d334e35",
+          "bytes": 17004
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-400-normal.woff2",
+          "package_path": "files/space-grotesk-latin-400-normal.woff2",
+          "sha256": "65fd17fcbd2e2f522940b5f67ead3d23329e02891aa5495e74d11a499c0b0673",
+          "bytes": 13388
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-500-normal.woff",
+          "package_path": "files/space-grotesk-latin-500-normal.woff",
+          "sha256": "aa3f2941f6db6ca253c9f55bb173e1a1ade690dcc50e501119814a4414027df3",
+          "bytes": 16988
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-500-normal.woff2",
+          "package_path": "files/space-grotesk-latin-500-normal.woff2",
+          "sha256": "1b1a8131d9edf975d9decee81e2f2bf504812f7a4f498e5500f28a613e22e64c",
+          "bytes": 13312
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-600-normal.woff",
+          "package_path": "files/space-grotesk-latin-600-normal.woff",
+          "sha256": "1c7ffb357cef0950935783c5a50e140e092f05c814da5b196e67a64e69cb2991",
+          "bytes": 16884
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-600-normal.woff2",
+          "package_path": "files/space-grotesk-latin-600-normal.woff2",
+          "sha256": "685bbbf69fa616df1ef81847c85fc76be097ddfb3468ff2257be54511ab3130f",
+          "bytes": 13284
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-700-normal.woff",
+          "package_path": "files/space-grotesk-latin-700-normal.woff",
+          "sha256": "145016049aa47932e2d116f70151edc5a53df894cb367514c52ea2d11289bee7",
+          "bytes": 16416
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-700-normal.woff2",
+          "package_path": "files/space-grotesk-latin-700-normal.woff2",
+          "sha256": "35f8aec56cfd5cbfdb03cc68733a54a0b05bb3617ffcd5fd332badc0b045ca55",
+          "bytes": 12840
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-300-normal.woff",
+          "package_path": "files/space-grotesk-latin-ext-300-normal.woff",
+          "sha256": "63dbbee5156d284ff93baa8f29e1cc3fd79556c999d55d07d6513555fd1f9b1c",
+          "bytes": 16528
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-300-normal.woff2",
+          "package_path": "files/space-grotesk-latin-ext-300-normal.woff2",
+          "sha256": "18faaede6f5cfb5dbb352c7185169f7a9d420a49509ddf0334904226153077de",
+          "bytes": 11980
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-400-normal.woff",
+          "package_path": "files/space-grotesk-latin-ext-400-normal.woff",
+          "sha256": "41c5af675d526f6df3941159158f9eb6e75ac2903f0834e479205cbccccb6dfc",
+          "bytes": 16788
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-400-normal.woff2",
+          "package_path": "files/space-grotesk-latin-ext-400-normal.woff2",
+          "sha256": "a6658ce608a36f9ece7a65842725deebeb5f01df2debeb696b79c8536bf2ddc8",
+          "bytes": 12256
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-500-normal.woff",
+          "package_path": "files/space-grotesk-latin-ext-500-normal.woff",
+          "sha256": "b1faf7147e8b2fd11385c78412b2ba9d120645e68336ec9982d2e0f645accd7a",
+          "bytes": 16788
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-500-normal.woff2",
+          "package_path": "files/space-grotesk-latin-ext-500-normal.woff2",
+          "sha256": "ed7e064eda944f88ce2f40101ec20e214004decdf5c0b9ad9219ae21be2dbf13",
+          "bytes": 12272
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-600-normal.woff",
+          "package_path": "files/space-grotesk-latin-ext-600-normal.woff",
+          "sha256": "28cace551126b0ba507486a08717f42c69a3b709ac3a104c9cafca897af6fc45",
+          "bytes": 16728
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-600-normal.woff2",
+          "package_path": "files/space-grotesk-latin-ext-600-normal.woff2",
+          "sha256": "0bdc872e2806e0eb2ecca08221ea0b49d36efd9b9239a5744b81afbc0376e9cf",
+          "bytes": 12288
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-700-normal.woff",
+          "package_path": "files/space-grotesk-latin-ext-700-normal.woff",
+          "sha256": "215b0cac2778da21525aab1d204b59b4261099b64afd010864f73ec9613ec5ba",
+          "bytes": 16460
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-700-normal.woff2",
+          "package_path": "files/space-grotesk-latin-ext-700-normal.woff2",
+          "sha256": "7ce350b706d79c955ebf91314295f39fa82999f980b7e9beee743c2f3580a15e",
+          "bytes": 11992
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "c61abc85afbde8e3ef837e59faf52329915e41e3c61e00fe64e5a4c6b893ab35",
+          "bytes": 286
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "7ae777dbd1915d826b83988a0dc756987c30b2186c1774701765985cf04c0791",
+          "bytes": 286
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "efbbdf18e5fd24ca152e368b80dc29ad54720a5edccc4cd34cc5380ede3f56fa",
+          "bytes": 286
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "48296c1dfb3dec138949bcd7c0d63a9aee7bede6a6d79608c7b320287cb3c9e1",
+          "bytes": 286
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "5d26935f983227ab8a7ebb3a72ef5bd47b9dd5ee1c00fecd15e42ead21eb129d",
+          "bytes": 286
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "d6d24c81803de26fe4d6160a39974d22a414c57447a269077bd779878b126778",
+          "bytes": 298
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "b08f01e2635fb035a690109b2cb31f4318b5121cf9899e008d91f97937de9d53",
+          "bytes": 298
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "3c8ee27114dffe74af298bb13c43cf939c3578cee9bc5d8d3a45f029d57dd726",
+          "bytes": 298
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "cb1d12d0cf63b4ef03d2319e5f9281a97f5f9c7534d295956b5789f32e76206d",
+          "bytes": 298
+        },
+        {
+          "path": "assets/vendor/fontsource/space-grotesk/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "c79e1450c94f4b5a563e817215aa079607a3cf68b9ea7eca967369ea5e64f5ed",
+          "bytes": 298
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/dm-sans",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/dm-sans/-/dm-sans-5.3.0.tgz",
+      "npm_integrity": "sha512-lYJtMXXO28q1z+yz+z8XKd0s4hXaa9QdkETzkyD760sidCv5heI86weYA0sx0Nc4pAMAQTUuyf4gO44cYKKS9g==",
+      "integrity_verified": true,
+      "tarball_sha256": "48109b74c1a2758ce0274766b877132f023fde5325911f7172c43a5d4b5d8c7a",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7",
+          "bytes": 4502
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-300-normal.woff",
+          "package_path": "files/dm-sans-latin-300-normal.woff",
+          "sha256": "febc375e590e3021cdfa7377bed436a99abcd11205833ac3b22f3ac5353569fe",
+          "bytes": 17840
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-300-normal.woff2",
+          "package_path": "files/dm-sans-latin-300-normal.woff2",
+          "sha256": "80f13c410ec41f210a5553e7f420f8a51f459180019274df0b3faea314916f90",
+          "bytes": 13708
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-400-normal.woff",
+          "package_path": "files/dm-sans-latin-400-normal.woff",
+          "sha256": "38702875fe179437d200e7ba6f7fab4d497ffe48117ef332029b2081751186ad",
+          "bytes": 18356
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-400-normal.woff2",
+          "package_path": "files/dm-sans-latin-400-normal.woff2",
+          "sha256": "4ab51eb2cd7305d177187908d6397474d4520663f6c6e572feb0a64f4fa80006",
+          "bytes": 14200
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-500-normal.woff",
+          "package_path": "files/dm-sans-latin-500-normal.woff",
+          "sha256": "7deb957e430b780ee3272d801af4f9f2211b1330ec40a312a8f25309eacb4034",
+          "bytes": 18520
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-500-normal.woff2",
+          "package_path": "files/dm-sans-latin-500-normal.woff2",
+          "sha256": "19bf1984956517c35c2bd35b6cdedac12a21d6fcd3596c614ecdfb88b648909d",
+          "bytes": 14304
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-600-normal.woff",
+          "package_path": "files/dm-sans-latin-600-normal.woff",
+          "sha256": "e7351257e49400eff05aca30a2007289194a900860d30c30770d8b8732897564",
+          "bytes": 18320
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-600-normal.woff2",
+          "package_path": "files/dm-sans-latin-600-normal.woff2",
+          "sha256": "6bb2b2645ba5eeaecf56322c543fa3a75b87b927977b9c03b1dabc4205089120",
+          "bytes": 14144
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-700-normal.woff",
+          "package_path": "files/dm-sans-latin-700-normal.woff",
+          "sha256": "af422a448ac00679a8dbb13532db3616829c5a35b58d3eeea5903ce17ad2e36a",
+          "bytes": 18504
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-700-normal.woff2",
+          "package_path": "files/dm-sans-latin-700-normal.woff2",
+          "sha256": "35c5efa0e5daa52ee5c6500f5be354bf751fb65c4e49e1d6806c6eb5883e8fe9",
+          "bytes": 14348
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-800-normal.woff",
+          "package_path": "files/dm-sans-latin-800-normal.woff",
+          "sha256": "40d4bf46a28c3971f63fcf97ded5e5ffe7b23d9085e15c921c219a8ad365cbc8",
+          "bytes": 18476
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-800-normal.woff2",
+          "package_path": "files/dm-sans-latin-800-normal.woff2",
+          "sha256": "094c859b70f10e1e010d293381f5cd032ef9929380e2dca97d12a574c2ef5c0a",
+          "bytes": 14404
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-300-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-300-normal.woff",
+          "sha256": "182f079f9d10e83425f021c2b2607a32e66a08331d91e67a1a46cca3fa72ac7c",
+          "bytes": 9940
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-300-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-300-normal.woff2",
+          "sha256": "d45c7f5d73861db15ec16ba6c4a5e29fda548b32d382165a4afe3f9034ca13e2",
+          "bytes": 7188
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-400-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-400-normal.woff",
+          "sha256": "3d63423c3204f61bb196d1ae3729b7f2871d87abd4403d198f4810923888c016",
+          "bytes": 9976
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-400-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-400-normal.woff2",
+          "sha256": "962730c6ff7595f9499b0d963a3bccb2139d793f0fb31fbd87aed1881c020e0a",
+          "bytes": 7364
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-500-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-500-normal.woff",
+          "sha256": "e1f67472aa96c6f60969c696ba8a9d36ed8ea26c2ff5c3e27ee29c664911575d",
+          "bytes": 10068
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-500-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-500-normal.woff2",
+          "sha256": "e0a1d21584ba00798a3dbe90ef5f8a162741d454f52ab66630f9dc41da372b3d",
+          "bytes": 7432
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-600-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-600-normal.woff",
+          "sha256": "f70e6bb2170e2ab7bfc23a021af0663dce4df0b502173c9c5135015d7fed457a",
+          "bytes": 10024
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-600-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-600-normal.woff2",
+          "sha256": "6406eb05e2eb50779cb95ee8745c98ad23cce7e67d752822782453da7f6b4491",
+          "bytes": 7420
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-700-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-700-normal.woff",
+          "sha256": "56084e69490970432de58b4a2406ee4daa1f58d90f9600ae3fda0e895a6355e7",
+          "bytes": 10012
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-700-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-700-normal.woff2",
+          "sha256": "f6640907b94df0d227f26e2fcb6db2497d6c44c4b68f731ea1e06f5b45e2e91b",
+          "bytes": 7452
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-800-normal.woff",
+          "package_path": "files/dm-sans-latin-ext-800-normal.woff",
+          "sha256": "478dd0cb6c8dd7dc81bb33a9282f96c2ef1bf14abf6db356be19c21426cce072",
+          "bytes": 10012
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-800-normal.woff2",
+          "package_path": "files/dm-sans-latin-ext-800-normal.woff2",
+          "sha256": "099e8a6281645eb7b526b7896f8172498bc35f8acecdd9aa4f9678048abe2a1f",
+          "bytes": 7396
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "8c9ec3b81c16ede0f60bc86cab2098d3434fe68eea561115ecafa72afc2235cd",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "3ca10ee3bb473cc02ce53b938e3463262733f00cad85f5b60c4a35bd8e885437",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "3dce1736337b932f075bfb003ec44d05a0507e4bbb0cb9b694d4a5e021abbd2b",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "848519dcb78431dea244b76e3a3e68212449094c101cd5c6e2892b7f7f9864de",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "dffad79457aff9e40edca9e17bd19d1bfbc2ec1adb949138f3601ccacc32e2f5",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "00f3bd56c14a530fb81b58badb73db3e6c34281a34bf4692a24e5ad226f43348",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "df67a36d04e0deaedd565b1a22103f025550913d27d5d698784500ba6812a086",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "4d2528eeb4a9a0e59973b1fa7e263e2653ef786fbdf9a5c12e6f6f7dc258322f",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "6f73bddc0a5eefb2ae97b421679e55dc51b9fe591de1e783658ddf5e7af70327",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "2a5e2397430b5d24e05f7fd2f6ef92793f234b98ff632643c95a759707003602",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "129a58f91b70cfe7af0057ca85499dac96f33bac31c786ad8b8caeef01d30202",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/dm-sans/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "384e45e3962108bc267db588db511115b814d39f17cd6c65e220731c28057bbb",
+          "bytes": 274
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/lexend",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/lexend/-/lexend-5.3.0.tgz",
+      "npm_integrity": "sha512-4igbsooynC6xwfagkAW6eo9JMrw8ALFGkWn1YChYmYchufMJSPgWihD+cy5ruX5YX/gDk/gllcl1Oj7q6KUZmw==",
+      "integrity_verified": true,
+      "tarball_sha256": "177823a5ee0766cc0a258ebce0e439587b49552180760931b07c44be66517826",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "cdfed8f91b0660b004befb744757918b7c7d40dc2201b6c6d0a86b2fab9408f8",
+          "bytes": 4384
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-300-normal.woff",
+          "package_path": "files/lexend-latin-300-normal.woff",
+          "sha256": "4ad191bd8fffd6e9c8021c89fb43a3168e5f440efa48a13a329e1316ddc07248",
+          "bytes": 18596
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-300-normal.woff2",
+          "package_path": "files/lexend-latin-300-normal.woff2",
+          "sha256": "9340fe7288862e1716e5ac6a29bedd7faa2c3e3f943f7710ce54a3d732e63cf7",
+          "bytes": 14688
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-400-normal.woff",
+          "package_path": "files/lexend-latin-400-normal.woff",
+          "sha256": "58a869122f3728f254bbfc0dbbf5f5acaeac6c2d3fee6f97143a315883640344",
+          "bytes": 18336
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-400-normal.woff2",
+          "package_path": "files/lexend-latin-400-normal.woff2",
+          "sha256": "0601e0a909219a542cdd581e3f8f1ff8fb208978cbc9bca1c90df02fd8062bb1",
+          "bytes": 14476
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-500-normal.woff",
+          "package_path": "files/lexend-latin-500-normal.woff",
+          "sha256": "81b860115ff0daa308fbbeea131445163356e2edf2fe9756cefc9fd2cf0cf5c3",
+          "bytes": 18692
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-500-normal.woff2",
+          "package_path": "files/lexend-latin-500-normal.woff2",
+          "sha256": "27cf5288dd5129fb2f93d230e4e9df7684222d732767284b142801c274ce95b0",
+          "bytes": 14864
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-600-normal.woff",
+          "package_path": "files/lexend-latin-600-normal.woff",
+          "sha256": "d48c9618387d633580883d52438c047a2a63bef042ea5d4a235893bdf7526f63",
+          "bytes": 18652
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-600-normal.woff2",
+          "package_path": "files/lexend-latin-600-normal.woff2",
+          "sha256": "c3c291158a48c5172383ec8febb21ca64075b7c9d8413553683b254a247efdda",
+          "bytes": 14856
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-700-normal.woff",
+          "package_path": "files/lexend-latin-700-normal.woff",
+          "sha256": "8195ca0cce2b368e510f402e5d7b654be0a8f6706baebc40a6425c7ccb1ffbc2",
+          "bytes": 18580
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-700-normal.woff2",
+          "package_path": "files/lexend-latin-700-normal.woff2",
+          "sha256": "52dcdaa127bac4a5ea4c39ee17a3f454ceacc18d9f2a45cc453eeab68d378588",
+          "bytes": 14808
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-800-normal.woff",
+          "package_path": "files/lexend-latin-800-normal.woff",
+          "sha256": "7da8cb5fe624a31f149932adb4668c13ad2eee37300355f746f24d7931af2f64",
+          "bytes": 18512
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-800-normal.woff2",
+          "package_path": "files/lexend-latin-800-normal.woff2",
+          "sha256": "58852f8f2e4a84491f20efc4678035a0ac31be29c542772efe10e0d5b00677ab",
+          "bytes": 14920
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-300-normal.woff",
+          "package_path": "files/lexend-latin-ext-300-normal.woff",
+          "sha256": "176097e7ac9637c6b5998328683245d39c4aa8d76c9e03e83d1a5d049ad103e6",
+          "bytes": 18612
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-300-normal.woff2",
+          "package_path": "files/lexend-latin-ext-300-normal.woff2",
+          "sha256": "eaec0f8ae93ce0d346643a505d1f53f2eaa316e91e0ddb9a3867c7c150c96772",
+          "bytes": 13456
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-400-normal.woff",
+          "package_path": "files/lexend-latin-ext-400-normal.woff",
+          "sha256": "c3cfeb22d3697c514191164ce678ed662b186d08aad7bfbcb3ee3b0c1b1bfd83",
+          "bytes": 18248
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-400-normal.woff2",
+          "package_path": "files/lexend-latin-ext-400-normal.woff2",
+          "sha256": "b7289189cf6efefd520224a63a24bc02054f8566f33e39ce9d1a448ccd8a40a4",
+          "bytes": 13144
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-500-normal.woff",
+          "package_path": "files/lexend-latin-ext-500-normal.woff",
+          "sha256": "9a722e8d1ac3880b44c59c0f63617144461bc5478ac536d9a246a62dbd1d2a31",
+          "bytes": 18696
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-500-normal.woff2",
+          "package_path": "files/lexend-latin-ext-500-normal.woff2",
+          "sha256": "cc2b3fef0e07db64f6304c411f4feb5853202a17c9ef49e070310d993f0b6a9e",
+          "bytes": 13760
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-600-normal.woff",
+          "package_path": "files/lexend-latin-ext-600-normal.woff",
+          "sha256": "aef4974fbd9888658df5602e19c0ee7847014ca653a02184de0eefd0e830598a",
+          "bytes": 18688
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-600-normal.woff2",
+          "package_path": "files/lexend-latin-ext-600-normal.woff2",
+          "sha256": "eb0ab817ca8a063e048a4724b7b649738f31b9f9ef1cd384457639fbb6b42fd9",
+          "bytes": 13680
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-700-normal.woff",
+          "package_path": "files/lexend-latin-ext-700-normal.woff",
+          "sha256": "bb7b7b6dce187cf62e7e1e78461f25a4eae0bfe569ca3ff47d31fd2fac789356",
+          "bytes": 18648
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-700-normal.woff2",
+          "package_path": "files/lexend-latin-ext-700-normal.woff2",
+          "sha256": "5ae459b6dc29461eab9f02d0ff4395d3842d6bdf280e8224a79ab2667e65ee2f",
+          "bytes": 13708
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-800-normal.woff",
+          "package_path": "files/lexend-latin-ext-800-normal.woff",
+          "sha256": "4d6b496e7a65cf4a8bb93b32f7ed74029e467e3cf0e3b55d34535535e2751c86",
+          "bytes": 18612
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/files/lexend-latin-ext-800-normal.woff2",
+          "package_path": "files/lexend-latin-ext-800-normal.woff2",
+          "sha256": "fab1037f729d458c8652d44677b88b32b6931a35ae57d0ac56d1c7afc91fd9dd",
+          "bytes": 13692
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "ea6e30dc5ef2b6718e3822424038fede906d93affa55bbccf963ab76ec994fb8",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "c0a4e92d1b84adf9bf132b2b694b5a1c3e5772c2a47b63e57bd3bff328e4a259",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "e4bce618af4c6966a0c8830bd209f4a2db3018b21e42a8b604916e22b5643014",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "7c8b0b7351a69443c9aee35f4160296feba0afa333a1bf6cb04372565a1a803c",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "87b9495f2855e79fa1781f09039b8b129fbad3d7f77979dd4b931b16517bec49",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "5fca39cb3d53ae969edbbed21a62c16ff69f4fb7505a4e0f8fdc0b361b6c8b60",
+          "bytes": 258
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "bc684bb5d6aa2000620edb951824d64497366adc874a9dc69919c0bd2aa4f016",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "eee63dd9b6b98c60810860c1fdb40dcd3fbfa0df2938102d1267f9741ac480b5",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "85c791dda9f38222986f5268dd4a095f67199bbc8b26c7c71c2594d80fddf404",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "9bf804474d1ffa05db8e0922e7495c105da709c506da09ca1c0293abb8a03206",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "0c2e643ecaecd9b83f54c2eb47220583b49cf583fcbec736a65155316f88481f",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/lexend/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "73233022273693a02df1da14383781f6ed16223fdd7ce1dda27d6025e9e5dc42",
+          "bytes": 270
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/poppins",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/poppins/-/poppins-5.3.0.tgz",
+      "npm_integrity": "sha512-cms1nM7U6SN8epIV1WMVOV8VsA645aSm3wHfzIQnkk188U341ThbJGSl2Sv54V29gnDbT2arMPfLzvVIIVCceQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "f4779bb12acaaa07dc7dd8da82ab0f61515fea2f30664535f7a249eeb0dd5bcf",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "5c4a92c8f8ce0ab211f4c72889d82383c9644546115d9ba39a4f2d5b8f37014b",
+          "bytes": 6175
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-300-normal.woff",
+          "package_path": "files/poppins-latin-300-normal.woff",
+          "sha256": "fe7e50fee042f6e2066b388bccbb7bf73487efa160101b3cf1f6200c7d188fc4",
+          "bytes": 10496
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-300-normal.woff2",
+          "package_path": "files/poppins-latin-300-normal.woff2",
+          "sha256": "78bc3aa78faec288bbb3bf26c9a0fa4eb67b1e69da94a17233c5cab60525efdb",
+          "bytes": 7840
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-400-normal.woff",
+          "package_path": "files/poppins-latin-400-normal.woff",
+          "sha256": "6076b418803564833cde2aece96c51b29927ab0a98dfbe727774d1a6c6e6c445",
+          "bytes": 10532
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-400-normal.woff2",
+          "package_path": "files/poppins-latin-400-normal.woff2",
+          "sha256": "7d93459d86585bfcdbb7e0376056226adb25821ee54b96236fe2123e9560929f",
+          "bytes": 7884
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-500-normal.woff",
+          "package_path": "files/poppins-latin-500-normal.woff",
+          "sha256": "abdc91ec7e4438b1e1d7f808d388614789d69037059b74a9d6166d00eb9b8b04",
+          "bytes": 10372
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-500-normal.woff2",
+          "package_path": "files/poppins-latin-500-normal.woff2",
+          "sha256": "cd36de204aca2d5fa263a731f7c20009b5e3d754ba1f1e03c33e93a48f3e7446",
+          "bytes": 7748
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-600-normal.woff",
+          "package_path": "files/poppins-latin-600-normal.woff",
+          "sha256": "55fffef7b100460605349fa5215eb7dcd6e558e195d08e43eddc64c4b27d43b3",
+          "bytes": 10600
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-600-normal.woff2",
+          "package_path": "files/poppins-latin-600-normal.woff2",
+          "sha256": "f4e80d9dfd374d02989b87a27b5ed4cb78fbb177c27f1478e9a8b0afb7513149",
+          "bytes": 8000
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-700-normal.woff",
+          "package_path": "files/poppins-latin-700-normal.woff",
+          "sha256": "927ba66258ea405f06205be694080f1126d186633c3c69cb839cfd0cfc5ee8ff",
+          "bytes": 10432
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-700-normal.woff2",
+          "package_path": "files/poppins-latin-700-normal.woff2",
+          "sha256": "9338e65fc077355c7a87ae0d64cc101e23b9bf8ad78ae65f0f319c857311b526",
+          "bytes": 7816
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-800-normal.woff",
+          "package_path": "files/poppins-latin-800-normal.woff",
+          "sha256": "8b426242e956348365744cdf29dad1278d40e1070829e4af65a2d9443093aed4",
+          "bytes": 10436
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-800-normal.woff2",
+          "package_path": "files/poppins-latin-800-normal.woff2",
+          "sha256": "60bf0aba6526436f3930c58c12047687fbb6bff4dd180cce4613458ed3439ea2",
+          "bytes": 7824
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-300-normal.woff",
+          "package_path": "files/poppins-latin-ext-300-normal.woff",
+          "sha256": "7373715d28104ef3b8804e2ce6d0ae8b717df72c6b01fb6bfd458fcbe4ad0305",
+          "bytes": 7396
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-300-normal.woff2",
+          "package_path": "files/poppins-latin-ext-300-normal.woff2",
+          "sha256": "33ff412e573782b800c68bb81a6be6f987ad40c36b681aeeaf188e723a9fc46c",
+          "bytes": 5524
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-400-normal.woff",
+          "package_path": "files/poppins-latin-ext-400-normal.woff",
+          "sha256": "fd2179b8cd8fa95b866f0d6521c100bacac3b89e90e223125d750a57bef33b5f",
+          "bytes": 7460
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-400-normal.woff2",
+          "package_path": "files/poppins-latin-ext-400-normal.woff2",
+          "sha256": "0b1fcab42c18b69bcfe9ce4799fcbff5af1621c53ffcfdc4723c6f5ec4ee3ffb",
+          "bytes": 5644
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-500-normal.woff",
+          "package_path": "files/poppins-latin-ext-500-normal.woff",
+          "sha256": "034f61d8dde6851b59d915fafe887869144e05cc85bdb36ec65ca039e351f6cd",
+          "bytes": 7372
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-500-normal.woff2",
+          "package_path": "files/poppins-latin-ext-500-normal.woff2",
+          "sha256": "af5fda16a19169e029a132374616728e1bf326d90bef5a552395c5053e21cd0f",
+          "bytes": 5484
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-600-normal.woff",
+          "package_path": "files/poppins-latin-ext-600-normal.woff",
+          "sha256": "c90f6a00b43727786577d5e89cdd335b5946ae9325d9d1959e2fce39ecf78caf",
+          "bytes": 7432
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-600-normal.woff2",
+          "package_path": "files/poppins-latin-ext-600-normal.woff2",
+          "sha256": "bb1f2d582e7fba586ab70c91ef062d3becaf78b887654953863521b73665d171",
+          "bytes": 5524
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-700-normal.woff",
+          "package_path": "files/poppins-latin-ext-700-normal.woff",
+          "sha256": "df10ddaff3cb9285dbfadc8800916f0c855ca1b274e6aae73a9aed6bc775248b",
+          "bytes": 7328
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-700-normal.woff2",
+          "package_path": "files/poppins-latin-ext-700-normal.woff2",
+          "sha256": "ccfd87f69ef00d811da3d06488cec4e79ec99d289cfbcbe4be42031cecae775a",
+          "bytes": 5432
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-800-normal.woff",
+          "package_path": "files/poppins-latin-ext-800-normal.woff",
+          "sha256": "863f486e385f0694970b0b501f34db2e00e2d77010a8c81a1180441a9dc120d7",
+          "bytes": 7364
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/files/poppins-latin-ext-800-normal.woff2",
+          "package_path": "files/poppins-latin-ext-800-normal.woff2",
+          "sha256": "a72eccfa6cfa9c26b4004e98dbf8592ea0fb3704b2fc749e8bd60a996e2e5a7c",
+          "bytes": 5492
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "2fef5c617e267b1884e59f54e1a3959ee1d390b6af631cdf767639b33c9eb3bb",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "c010307b56dd5492d1a95416d7e6e8eb94fa79baf9473ab1cc54cea477c16cad",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "36fac0cc1bc865b88a90343d2ae49fabc3916c00d049f7e03074c301303f04dc",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "ab2ff8cbfa5c1dcb5ed7bb3812d463bb84e714c041cc9f53cfc0ee4cbd3c3203",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "7b2d87b94b58e05dbd119eeea965df49a098b24656a5eb1eca582617c6338014",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "78b272cd8c4907a4c396a9417bb8953b79e2ba452fb4f40655bf7e65aa553b59",
+          "bytes": 262
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "030355efc12f609773d3a63efa90f0dddac126b40758fe7e20c56d020c6f73cb",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "12887951ae8e2390cbd43127fe37d5d1e69bd9629cd8af7434138355ac978a97",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "e3daa566d66149c797778960f2724a88c90ce4b7b82a51e2b1f9d19e2482c8d3",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "3e7a26e01a8375652ce2f9a61703663d111ce5a0582c7a51c6eae8b7617abb72",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "ef4119fb041d72ea6f68561f4ecdb26a15c37413a9ea805114a0869e130ce3af",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/poppins/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "8690d2d6f35a4e3a68de977accc5abb7dd3730ac0bafd951236bb61b22f38a9b",
+          "bytes": 274
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/rubik",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/rubik/-/rubik-5.3.0.tgz",
+      "npm_integrity": "sha512-Nks2mn7vlE1jZVHuVgoKU2Ejqjvd+GJzLRdraCjo1xc79oo7O6vJ8pcvSfmKPGX3/Ln7nt09XWFzPeu2jWf0xQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "3f34e5588fcd07e01f1a5d667e5df1a6b287aeefba5b6e46f892131009a0db6a",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "46a250495a963b0b84f2736c0185d0e3af8df9d23427bd425b92a8ece020283c",
+          "bytes": 4486
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-300-normal.woff",
+          "package_path": "files/rubik-latin-300-normal.woff",
+          "sha256": "b8e11c31b609e70c40be379591715b4f942a4e93ee9df6ceac128bccab10f085",
+          "bytes": 22424
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-300-normal.woff2",
+          "package_path": "files/rubik-latin-300-normal.woff2",
+          "sha256": "0e5f00fa0d53d31d213370e03af3899e809f04a921760c94a1825a376d971864",
+          "bytes": 17556
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-400-normal.woff",
+          "package_path": "files/rubik-latin-400-normal.woff",
+          "sha256": "35b62884d9d020826e43a9f04af69a58939e58297dabe454e9bd54c0c852d19b",
+          "bytes": 23920
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-400-normal.woff2",
+          "package_path": "files/rubik-latin-400-normal.woff2",
+          "sha256": "82ac0e78285c43d0cd203427c57ab30fb07b18f8e6166045f729442eb1abfa26",
+          "bytes": 18936
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-500-normal.woff",
+          "package_path": "files/rubik-latin-500-normal.woff",
+          "sha256": "71bad6770031d8d390dd7245d4261a2325a170d8b878e3db5edc59636ddf1976",
+          "bytes": 24212
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-500-normal.woff2",
+          "package_path": "files/rubik-latin-500-normal.woff2",
+          "sha256": "54ad302324aa8000449efd8643186deb46777f0ca4d97f10deb9333536933613",
+          "bytes": 19036
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-600-normal.woff",
+          "package_path": "files/rubik-latin-600-normal.woff",
+          "sha256": "cebac15e3362a12b48f7f363cee13206a62a74267a93db66e2ca98709f42bfa0",
+          "bytes": 24212
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-600-normal.woff2",
+          "package_path": "files/rubik-latin-600-normal.woff2",
+          "sha256": "6182043a20faf3fe1a8f0e2c7c964009e11de5e09852617fef3517cbf3c35513",
+          "bytes": 19060
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-700-normal.woff",
+          "package_path": "files/rubik-latin-700-normal.woff",
+          "sha256": "a99b89b0e140bc0d2619f79993bf294acff8ccc844c80c082d1e900c7e8a2bed",
+          "bytes": 24284
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-700-normal.woff2",
+          "package_path": "files/rubik-latin-700-normal.woff2",
+          "sha256": "e423f8ae1668156addf5e32f1056d5b22b5b113a9a23afd364df84a6fa88602d",
+          "bytes": 19112
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-800-normal.woff",
+          "package_path": "files/rubik-latin-800-normal.woff",
+          "sha256": "d45ea46ab8634b63bf2571473045a319b57496baa955c7a294d97361f5150864",
+          "bytes": 24172
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-800-normal.woff2",
+          "package_path": "files/rubik-latin-800-normal.woff2",
+          "sha256": "8329d791ea5bc0ec67b2a01465a751e37f6699fc14ef45baac618c0b7c0789b3",
+          "bytes": 19060
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-300-normal.woff",
+          "package_path": "files/rubik-latin-ext-300-normal.woff",
+          "sha256": "4e191983f301b43334253b1f7190fb9575ad22cfd9b9a6d6fe91a0739a1a9573",
+          "bytes": 13144
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-300-normal.woff2",
+          "package_path": "files/rubik-latin-ext-300-normal.woff2",
+          "sha256": "204b06493019214c9bf71936b02ec9d9240ed0ff7e09178ad67e60d81e1deecd",
+          "bytes": 9988
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-400-normal.woff",
+          "package_path": "files/rubik-latin-ext-400-normal.woff",
+          "sha256": "046ce1202d15d4a8ca8dcd795b1182a45ec038016650d420fc4e21cb77705982",
+          "bytes": 13736
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-400-normal.woff2",
+          "package_path": "files/rubik-latin-ext-400-normal.woff2",
+          "sha256": "2dc903d8c5a354c71f7d2837627272f939eb10a5efdf74e1c981489fb8015cf3",
+          "bytes": 10632
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-500-normal.woff",
+          "package_path": "files/rubik-latin-ext-500-normal.woff",
+          "sha256": "acefa6e041135bb12c847bf5ed1b66f7e515daab6985f87856fd7e750161236c",
+          "bytes": 13932
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-500-normal.woff2",
+          "package_path": "files/rubik-latin-ext-500-normal.woff2",
+          "sha256": "33399a3bf300a51b73954b3dd5188a2967f20ac7b03f21c0450a033566b5630a",
+          "bytes": 10852
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-600-normal.woff",
+          "package_path": "files/rubik-latin-ext-600-normal.woff",
+          "sha256": "0d774adb2c621c6366de6fd2ca148d7d53c741f942ad4a1f71b66a4c64d597ec",
+          "bytes": 13924
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-600-normal.woff2",
+          "package_path": "files/rubik-latin-ext-600-normal.woff2",
+          "sha256": "d1268096a26d63303606d98f03135fba27dee8edb629b3ec152c5d3282a631b4",
+          "bytes": 10800
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-700-normal.woff",
+          "package_path": "files/rubik-latin-ext-700-normal.woff",
+          "sha256": "6b1f1560cfe2736e4e6684ed6da01c3fc18ae2d26ec76332a9f06f972b953849",
+          "bytes": 13896
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-700-normal.woff2",
+          "package_path": "files/rubik-latin-ext-700-normal.woff2",
+          "sha256": "c3bc69f5d30bb39b2afcb3201bcbf44f7ab94336603d44e7fdd48e625b09dac4",
+          "bytes": 10856
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-800-normal.woff",
+          "package_path": "files/rubik-latin-ext-800-normal.woff",
+          "sha256": "a7d499c36e01c9bd65bbf1832a9efabb1d42d57d8efe3294b7fbdd830c9ade79",
+          "bytes": 13868
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/files/rubik-latin-ext-800-normal.woff2",
+          "package_path": "files/rubik-latin-ext-800-normal.woff2",
+          "sha256": "e8d25f053b10f75bcffdafcd825a3364f514933adcd15f6956b090737f138b1c",
+          "bytes": 10792
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-300.css",
+          "package_path": "latin-300.css",
+          "sha256": "ba2833dcad8033811f3c6cd839066260688c73b9b4c30911c205e2f25a5eedef",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "d81f9f871c104c4f9ccfbb36280fcdbe7e5019d876ba95d5bb30669929385b82",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-500.css",
+          "package_path": "latin-500.css",
+          "sha256": "f7da38dfbdb9d57db30b4d593d61d4dc8901a310860dc9065781aea5feb6ec14",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-600.css",
+          "package_path": "latin-600.css",
+          "sha256": "11d1e9e7c05c13c4e2ebd987e22706911c53dbc7ab5b6ddfaeadb7b29431c474",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "a1b3791867e757233a4274d1078b4e477ff6e0cb095470185409c4aa47a10129",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-800.css",
+          "package_path": "latin-800.css",
+          "sha256": "f87e842cbf896ea19ebe8ac034d950d1a9fad3e6604b48df5308e66eb7372252",
+          "bytes": 254
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-300.css",
+          "package_path": "latin-ext-300.css",
+          "sha256": "eed58b27345833d03c1fd3371189f498157e0406a2bd3efacacc213c8fa360e2",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "3fa6ef4623089b0b7f89b5b743855fc148cc848edab790332d437289cb4a6a19",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-500.css",
+          "package_path": "latin-ext-500.css",
+          "sha256": "70ed583dcb89ec8d3fa440fb675876e6f79faf84881de15fe30ec176b16daa4e",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-600.css",
+          "package_path": "latin-ext-600.css",
+          "sha256": "ff4abcd9b232c77058f2149d1cff9a39db47cf632383406c7670d69db8493327",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "c951f991b7e59cb6b68b8f963e31b97808d417e68a4a0cbba7ae16eac85c15d9",
+          "bytes": 266
+        },
+        {
+          "path": "assets/vendor/fontsource/rubik/5.3.0/latin-ext-800.css",
+          "package_path": "latin-ext-800.css",
+          "sha256": "538da6a9bca7cd590a3036d696bd2e7c702a7b31a34828fcfa1a403b72d12306",
+          "bytes": 266
+        }
+      ],
+      "css_order": [
+        "latin-300.css",
+        "latin-ext-300.css",
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-500.css",
+        "latin-ext-500.css",
+        "latin-600.css",
+        "latin-ext-600.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-800.css",
+        "latin-ext-800.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/montserrat",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/montserrat/-/montserrat-5.3.0.tgz",
+      "npm_integrity": "sha512-iQPDtZOnmM5ih4JBGaMSXisRap0ixb9bAUw2hDtY7EjVfaqiiNlKtVuJl9XclxUwtwMMHNcWXfQR6zI9x05+Tg==",
+      "integrity_verified": true,
+      "tarball_sha256": "919dce59bbe45ace8a517c1e9de5076282bfeb97e8aa8f5f2dc989451c14c7cb",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "f429f739351287574c0c3175a9222bb3e49c7cad3f568a04f2c08d74c107724e",
+          "bytes": 4509
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/files/montserrat-latin-700-normal.woff",
+          "package_path": "files/montserrat-latin-700-normal.woff",
+          "sha256": "ff51c769e51acaa5ffbb8091441ff4e365e41ff21f7e4c05d1cd5650514d6fd3",
+          "bytes": 20672
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/files/montserrat-latin-700-normal.woff2",
+          "package_path": "files/montserrat-latin-700-normal.woff2",
+          "sha256": "f9d9e65b15372cebcafc3acd1e664a564c5c4b23278de4d5760de9a13c530371",
+          "bytes": 18824
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/files/montserrat-latin-ext-700-normal.woff",
+          "package_path": "files/montserrat-latin-ext-700-normal.woff",
+          "sha256": "9829177ccd843b997deb7f5e5458a435bdb5fa79f0ae327976c119bacde570fd",
+          "bytes": 41344
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/files/montserrat-latin-ext-700-normal.woff2",
+          "package_path": "files/montserrat-latin-ext-700-normal.woff2",
+          "sha256": "a59fcc944a712e213a2f3bd994367129217c75f24a9155a5a3c1a0f5fd2cc9a7",
+          "bytes": 33532
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "a499afd2448fe80982bcf3bc261d86224ef5b14e8ac3138e9a8a88011d9b3b7c",
+          "bytes": 274
+        },
+        {
+          "path": "assets/vendor/fontsource/montserrat/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "4ed5191c3a4c38ab5ed94b836d8c0e9efcf6a568be5927c6bc9342dc1b992174",
+          "bytes": 286
+        }
+      ],
+      "css_order": [
+        "latin-700.css",
+        "latin-ext-700.css"
+      ]
+    },
+    {
+      "npm_name": "@fontsource/open-sans",
+      "version": "5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource/open-sans/-/open-sans-5.3.0.tgz",
+      "npm_integrity": "sha512-V1bdMlGNyZrJwzrdusshMOw2YR0aqYDL7kOo9dkxUEKl8dFv66A9HLckOOXl572sG/7ohhDQrCrTFGSn9LZcSw==",
+      "integrity_verified": true,
+      "tarball_sha256": "95e6dd90f5860d0de22f791b6d802598743762c62e4894bfa26f80b1ea0cf3f5",
+      "files": [
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "9e7f12fafee50a9b4f7b3004c0fa58990805620d9debb0daf7f75de0d3ad5548",
+          "bytes": 4508
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-400-italic.woff",
+          "package_path": "files/open-sans-latin-400-italic.woff",
+          "sha256": "fa8383f26e60a89f4eb956d2997b416d22023427100151438b42372718ca8231",
+          "bytes": 17944
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-400-italic.woff2",
+          "package_path": "files/open-sans-latin-400-italic.woff2",
+          "sha256": "3b50909a098195a8a3fda73fe29c260724e6f9ca624dd750cb8af7cb0c9198e2",
+          "bytes": 19304
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-400-normal.woff",
+          "package_path": "files/open-sans-latin-400-normal.woff",
+          "sha256": "8b3c81a3240d7c8cc9877cf5233d97051aa07730947217db840e500470a4d44a",
+          "bytes": 17252
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-400-normal.woff2",
+          "package_path": "files/open-sans-latin-400-normal.woff2",
+          "sha256": "0e44026ad31376af1b56593cd4acb4f353f8e8789c51759e18f64578e4ef296a",
+          "bytes": 18640
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-700-italic.woff",
+          "package_path": "files/open-sans-latin-700-italic.woff",
+          "sha256": "9ca16c53500cb95d285e231560c7b0ffea942871250010c691d6e3c7738b8a72",
+          "bytes": 17372
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-700-italic.woff2",
+          "package_path": "files/open-sans-latin-700-italic.woff2",
+          "sha256": "f3e06f32b559ebe1a870bbe5a2c03ccbcd65986d125158870ccb9805b124011c",
+          "bytes": 18872
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-700-normal.woff",
+          "package_path": "files/open-sans-latin-700-normal.woff",
+          "sha256": "397ccaf840827f6c84ebadf664b6494338d4ea39440ab22811829868014c43f5",
+          "bytes": 16684
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-700-normal.woff2",
+          "package_path": "files/open-sans-latin-700-normal.woff2",
+          "sha256": "594a622208d1dad5d1dd58aef74f212ce7132d8f0aa5bacea6cfeb86d308c17a",
+          "bytes": 18204
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-italic.woff",
+          "package_path": "files/open-sans-latin-ext-400-italic.woff",
+          "sha256": "401f0843a23cca7cfed4957540dfc155d38cd4dc4a4b1d8346d6d667e6419b9c",
+          "bytes": 14764
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-italic.woff2",
+          "package_path": "files/open-sans-latin-ext-400-italic.woff2",
+          "sha256": "3d170f2d0c2e691f9631ca0f4c25149b13ec57fdaa62120867f9f41bd2492b50",
+          "bytes": 15808
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-normal.woff",
+          "package_path": "files/open-sans-latin-ext-400-normal.woff",
+          "sha256": "36901611b06b72e4e8731415db3b82a9f6dd60d4ec6000158bd500daa71e50a7",
+          "bytes": 14012
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-normal.woff2",
+          "package_path": "files/open-sans-latin-ext-400-normal.woff2",
+          "sha256": "c260ffc9d1acb022e1037cb8ffc8baa8fe8c44c2ae74429d3231c7ce6d2b7f21",
+          "bytes": 15380
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-italic.woff",
+          "package_path": "files/open-sans-latin-ext-700-italic.woff",
+          "sha256": "eb5bc3d310dd7462c4f818446b01a61924700880c1ec90ba1fc193f8737b88b0",
+          "bytes": 14016
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-italic.woff2",
+          "package_path": "files/open-sans-latin-ext-700-italic.woff2",
+          "sha256": "9c79f4de0107619bf8ec2fa7cae11b88417605e977404318ede77469f3bb0ac9",
+          "bytes": 15376
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-normal.woff",
+          "package_path": "files/open-sans-latin-ext-700-normal.woff",
+          "sha256": "6115db834325cfe31f52da435fd54aeda703e376c5819961dcaa1a1c6de5a4be",
+          "bytes": 13552
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-normal.woff2",
+          "package_path": "files/open-sans-latin-ext-700-normal.woff2",
+          "sha256": "3f959194168b9c2f90b70f7a2a548d3bac2a4328df65b1656fd848bfdeb7efe7",
+          "bytes": 15072
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-400-italic.css",
+          "package_path": "latin-400-italic.css",
+          "sha256": "3549eed4d917b420e8f15b0efd243cc1f12a4eb8b3e346443a83d3e4af0d08b1",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-400.css",
+          "package_path": "latin-400.css",
+          "sha256": "0089a6308eb565f116ce4ec792e78f7f36315c5667183fe32d3398deab4f7b25",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-700-italic.css",
+          "package_path": "latin-700-italic.css",
+          "sha256": "fc36a3d1daf3aa319e57a0180133e980cf5284e732fe9d5da5547a94c553c7b0",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-700.css",
+          "package_path": "latin-700.css",
+          "sha256": "b6ec6a5da4ffe1053d9d77a16433a1ca68b082ef9c8bbbc9616969c29f179c2b",
+          "bytes": 270
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-ext-400-italic.css",
+          "package_path": "latin-ext-400-italic.css",
+          "sha256": "49687524b3bf8c244d1c29d7441ffc6dd2e55359c4a0a5e803364f1d4ee39493",
+          "bytes": 282
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-ext-400.css",
+          "package_path": "latin-ext-400.css",
+          "sha256": "a568e9116ecf6fc823016314f81fa2bc0c0d6d451572ab45d25f8cb500c471ec",
+          "bytes": 282
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-ext-700-italic.css",
+          "package_path": "latin-ext-700-italic.css",
+          "sha256": "d3bc28427b3fb4effc06ab76d76cf42a8755730b7974bc3e933a03ef357afb9a",
+          "bytes": 282
+        },
+        {
+          "path": "assets/vendor/fontsource/open-sans/5.3.0/latin-ext-700.css",
+          "package_path": "latin-ext-700.css",
+          "sha256": "4dcc69a220c79a45469788a5dda9282f2f56624aafe97b6d887fc5befdfa28ff",
+          "bytes": 282
+        }
+      ],
+      "css_order": [
+        "latin-400.css",
+        "latin-ext-400.css",
+        "latin-700.css",
+        "latin-ext-700.css",
+        "latin-400-italic.css",
+        "latin-ext-400-italic.css",
+        "latin-700-italic.css",
+        "latin-ext-700-italic.css"
+      ]
+    }
+  ],
+  "generated_css": {
+    "path": "assets/vendor/fonts.css",
+    "sha256": "9bc283a504593a5de358316f5da1deaf99aeec1a767249ee3dbad64f5c3bb7b2"
+  }
+}

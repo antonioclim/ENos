@@ -36,9 +36,9 @@ FORM PAIRS!
 ───────────────────────────────────────────────────────────────
 1. Display the current user
 2. Display the home directory
-3. Display the shell being used
+3. Display the preferred/login-shell value and distinguish it from the current interpreter
 
-✓ CHECKPOINT: You have 3 pieces of information: user, home path, shell name
+✓ CHECKPOINT: You have 3 pieces of information: user, home path, preferred shell value
 ───────────────────────────────────────────────────────────────
 
 ───────────────────────────────────────────────────────────────
@@ -81,12 +81,12 @@ Choose one challenge:
 
 1. **One-liner Challenge:** Display user, home and shell in ONE command
    ```bash
-   # Hint: echo "User: $(whoami), Home: $HOME, Shell: $SHELL"
+   # Hint: echo "User: $(whoami), Home: $HOME, Login shell: $SHELL"
    ```
 
 2. **Data Analysis:** Find how many users have bash shell in /etc/passwd
    ```bash
-   # Hint: grep bash /etc/passwd | wc -l
+   # Hint: awk -F: '$7 ~ /(^|\/)bash$/ {n++} END {print n+0}' /etc/passwd
    ```
 
 3. **Peer Teaching:** Explain to another pair what each field in 
@@ -131,7 +131,7 @@ echo "2. /home has user directories" >> exploration.txt
 echo "3. passwd has user information" >> exploration.txt
 
 # Extension
-grep bash /etc/passwd | wc -l
+awk -F: '$7 ~ /(^|\/)bash$/ {n++} END {print n+0}' /etc/passwd
 ```
 
 ---
@@ -172,7 +172,7 @@ REQUIRED FINAL STRUCTURE:
 Create the directory structure (no files yet).
 HINT: mkdir -p can create hierarchies!
 
-✓ CHECKPOINT: tree webapp shows all directories
+✓ CHECKPOINT: tree -a webapp shows all directories
 ───────────────────────────────────────────────────────────────
 
 ───────────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@ test_app.py:
     def test_hello():
         pass
 
-✓ CHECKPOINT: cat backend/src/app.py works
+✓ CHECKPOINT: cat webapp/backend/src/app.py works from the workspace root
 ───────────────────────────────────────────────────────────────
 
 🔄 SWITCH ROLES NOW!
@@ -230,7 +230,7 @@ README.md:
     *.pyc
     .env
 
-✓ FINAL CHECKPOINT: tree webapp shows EXACTLY the required structure
+✓ FINAL CHECKPOINT: tree -a webapp shows EXACTLY the required structure
 ───────────────────────────────────────────────────────────────
 
 🚀 EXTENSION:
@@ -264,7 +264,7 @@ Choose one challenge:
 ### ✅ Success Criteria — Sprint 2
 
 You have successfully completed this sprint when:
-- [ ] `tree webapp` output matches the required structure EXACTLY
+- [ ] `tree -a webapp` output matches the required structure EXACTLY
 - [ ] `cat webapp/backend/src/app.py` shows Python content
 - [ ] `cat webapp/.gitignore` includes `__pycache__/`
 - [ ] All files contain non-empty content
@@ -307,7 +307,7 @@ echo '__pycache__/
 .env' > webapp/.gitignore
 
 # Verification
-tree webapp
+tree -a webapp
 ```
 
 ---
@@ -331,7 +331,7 @@ PAIR PROGRAMMING:
 ───────────────────────────────────────────────────────────────
 📍 MILESTONE 1 (3 min): Backup and variables
 ───────────────────────────────────────────────────────────────
-1. Create backup: cp ~/.bashrc ~/.bashrc.backup
+1. Create a unique backup: BASHRC_BACKUP=$(mktemp "$HOME/.bashrc.backup.XXXXXX") && cp -- "$HOME/.bashrc" "$BASHRC_BACKUP"
 2. Verify it exists: ls -la ~/.bashrc*
 3. Set variables in session:
    - PROJECT="OS_Seminar"
@@ -380,6 +380,7 @@ extract() {
     esac
 }
 
+Before this checkpoint, run bash -n "$HOME/.bashrc" and, if successful, source "$HOME/.bashrc" in the interactive lab shell.
 ✓ CHECKPOINT: type mkcd shows the function definition
 ───────────────────────────────────────────────────────────────
 
@@ -435,7 +436,7 @@ Choose one challenge:
 ### ✅ Success Criteria — Sprint 3
 
 You have successfully completed this sprint when:
-- [ ] `ls -la ~/.bashrc*` shows both `.bashrc` and `.bashrc.backup`
+- [ ] `ls -la ~/.bashrc*` shows both `.bashrc` and the uniquely named backup saved in `$BASHRC_BACKUP`
 - [ ] After `source ~/.bashrc`, running `ll` works as `ls -alF`
 - [ ] Running `mkcd test_sprint3` creates AND enters the directory
 - [ ] Your prompt shows coloured username, hostname and path
@@ -453,8 +454,9 @@ You have successfully completed this sprint when:
 
 SETUP (run BEFORE the sprint):
 ───────────────────────────────────────────────────────────────
-mkdir -p ~/detective_test
-cd ~/detective_test
+DETECTIVE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-detective.XXXXXX") || exit 1
+cd -- "$DETECTIVE_DIR" || exit 1
+# Keep this owned directory until the report is reviewed; remove only it afterwards.
 touch file{1..5}.txt image{1..3}.jpg doc{1..2}.pdf
 touch .hidden_config .secret_key
 echo "Important data" > important.txt
@@ -472,7 +474,7 @@ PAIR PROGRAMMING: Switch at 6 minutes!
 2. What are the hidden files?
 3. Which is the oldest file?
 
-✓ CHECKPOINT: Answers: 6 txt, 2 hidden, old_file.txt
+✓ CHECKPOINT: Answers before creating report.txt: 7 txt, 2 hidden regular files, old_file.txt
 ───────────────────────────────────────────────────────────────
 
 ───────────────────────────────────────────────────────────────
@@ -482,7 +484,7 @@ PAIR PROGRAMMING: Switch at 6 minutes!
 5. Find files older than 7 days
 6. Find files containing "data" in content
 
-✓ CHECKPOINT: find finds 13 elements, grep finds 2 files
+✓ CHECKPOINT: find . -type f lists 14 regular files; find . lists 16 entries including . and archive/; grep finds 2 files
 ───────────────────────────────────────────────────────────────
 
 🔄 SWITCH!
@@ -540,7 +542,7 @@ Choose one challenge:
 ### ✅ Success Criteria — Sprint 4
 
 You have successfully completed this sprint when:
-- [ ] `ls *.txt | wc -l` returns 6
+- [ ] before report.txt, `printf '%s\n' *.txt | wc -l` returns 7 (the controlled names contain no newlines)
 - [ ] `find . -type f -mtime +7` returns at least one result
 - [ ] `ls archive/` shows 5 files (3 jpg + 2 pdf)
 - [ ] `cat report.txt` contains three statistics
@@ -549,8 +551,8 @@ You have successfully completed this sprint when:
 ### Solutions:
 ```bash
 # M1
-ls *.txt | wc -l           # 6
-ls -la .* 2>/dev/null      # .hidden_config, .secret_key
+printf '%s\n' *.txt | wc -l # 7 before report.txt, 8 afterwards
+find . -maxdepth 1 -type f -name ".*" -print # .hidden_config, .secret_key
 ls -lt | tail -1           # old_file.txt
 
 # M2
@@ -564,7 +566,9 @@ mv *.pdf archive/
 tree
 
 # M4
-echo "Files remaining: $(find . -maxdepth 1 -type f | wc -l)" > report.txt
+remaining=$(find . -maxdepth 1 -type f ! -name report.txt -printf . | wc -c)
+printf 'Other regular files remaining: %s\n' "$remaining" > report.txt
+# 9 other regular files; 10 including this report.
 echo "In archive: $(ls archive/)" >> report.txt
 echo "Space: $(du -sh .)" >> report.txt
 ```
@@ -621,7 +625,7 @@ HINT: Use ${VAR%pattern}, ${VAR##pattern}, etc.
 ───────────────────────────────────────────────────────────────
 Create var_demo.sh that:
 1. Receives an argument or uses "default"
-2. Checks if environment variable DEMO_VAR exists
+2. Distinguishes an unset DEMO_VAR from an exported empty value
 3. Displays the length of a given string
 
 Structure:
@@ -629,7 +633,7 @@ Structure:
     NAME=${1:-"default_name"}
     echo "Name: $NAME (length: ${#NAME})"
     
-    if [ -z "$DEMO_VAR" ]; then
+    if [[ ! -v DEMO_VAR ]]; then
         echo "DEMO_VAR is not set"
     else
         echo "DEMO_VAR = $DEMO_VAR"
@@ -646,7 +650,7 @@ Choose one challenge:
 
 1. **Strict Mode:** Use `${VAR:?error}` to force variable existence
    ```bash
-   # This will exit with error if MY_VAR is not set
+   # This exits if MY_VAR is unset OR empty; the colon makes the empty case fail too
    echo "${MY_VAR:?MY_VAR must be set!}"
    ```
 

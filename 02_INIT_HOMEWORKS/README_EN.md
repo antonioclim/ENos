@@ -1,5 +1,9 @@
 # Homework Recording System with Asciinema
 
+This recording workflow requires **asciinema CLI 2.x**, which writes asciicast v2. The recorder checks `asciinema --version` before starting. CLI 3.x writes an incompatible v3 format and is rejected with an explanation; the scripts do not install or downgrade packages. See the [official v2](https://docs.asciinema.org/manual/asciicast/v2/) and [v3](https://docs.asciinema.org/manual/asciicast/v3/) specifications. Version detection has local regression coverage; native terminal recording remains a separate acceptance check.
+
+> **v6 candidate correction:** Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+
 ## Operating Systems 2023-2027 - Revolvix/github.com
 
 **Version:** 1.1.0 | **Date:** January 2025
@@ -35,12 +39,12 @@ The new Matrix-style Python version includes:
 - 🎨 **Beautiful Matrix theme** (green digital rain effect)
 - ✨ **Animated spinners and progress bars**
 - 🖥️ **Interactive menus** with arrow key navigation
-- 🔄 **Auto-installation** of all dependencies
+- 🔄 **Dependency checks** with explicit installation guidance
 - 🎬 **Typing effects and visual transitions**
 
 ### Download Python TUI version:
 
-**Google Drive Link:** https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link
+**Historical distribution link (not verified as the corrected candidate):** https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link
 
 ### Running:
 
@@ -49,12 +53,12 @@ The new Matrix-style Python version includes:
 chmod +x record_homework_tui_EN.py
 
 # Run
-./record_homework_tui_EN.py
+python record_homework_tui_EN.py --offline
 # or
-python3 record_homework_tui_EN.py
+python record_homework_tui_EN.py --offline
 ```
 
-The script automatically installs: `rich`, `questionary` (Python) + `asciinema`, `openssl`, `sshpass` (system)
+The script checks dependencies. Install system commands explicitly and use the virtual environment in the current contract.
 
 ---
 
@@ -62,7 +66,7 @@ The script automatically installs: `rich`, `questionary` (Python) + `asciinema`,
 
 ### Download (Bash version - alternative)
 
-**Google Drive Link:** https://drive.google.com/file/d/1dLXPEtGjLo4f9G0Uojd-YXzY7c3ku1Ez/view?usp=drive_link
+**Historical distribution link (not verified as the corrected candidate):** https://drive.google.com/file/d/1dLXPEtGjLo4f9G0Uojd-YXzY7c3ku1Ez/view?usp=drive_link
 
 ### Installation
 
@@ -74,16 +78,16 @@ chmod +x record_homework_EN.sh
 ### Usage
 
 ```bash
-./record_homework_EN.sh
+bash record_homework_EN.sh --offline
 ```
 
 The script will:
-1. ✅ Automatically install required packages (asciinema, openssl, sshpass)
+1. ✅ Check required commands; report missing packages without installing them
 2. 📝 Request your details (surname, first name, group, specialisation, homework number)
 3. 🎬 Start terminal recording
 4. 🛑 Stop when you type `STOP_homework`
-5. 🔐 Generate a cryptographic signature
-6. 📤 Automatically upload to server
+5. 🔐 In online mode, generate the legacy token (not a content signature)
+6. 📤 Upload only in online mode with an explicitly confirmed port
 
 ### Requested Data Format
 
@@ -92,7 +96,7 @@ The script will:
 | Surname | Letters, hyphen (becomes UPPERCASE) | `SMITH-JONES` |
 | First name | Letters, hyphen (becomes Title Case) | `John-Paul` |
 | Group | Exactly 4 digits | `1029` |
-| Specialisation | 1=eninfo, 2=grupeid, 3=roinfo | `1` |
+| Specialisation | 1=eninfo, 2=grupeid | `1` |
 | Homework number | 01-07 + letter | `03b` |
 
 ### Generated File Name
@@ -119,20 +123,19 @@ See [CHANGELOG_EN.md](CHANGELOG_EN.md) for the complete list of changes.
 
 ## For Instructors
 
-> **Note:** Verification scripts (`verify_homework.sh`) and RSA keys 
-> (`homework_private.pem`, `homework_public.pem`) are distributed separately through the secure channel.
+> **Historical deployment note:** the earlier edition referred to a separate `verify_homework.sh` and RSA keys. Their current deployment, custody and distribution channel are not established by this repository. Use the bundled [verification contract](../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); no key distribution has been performed here.
 
 ### System Requirements
 
 - Ubuntu 22.04+ or WSL2 with Ubuntu
 - Python 3.8+
-- Packages: asciinema, openssl, sshpass (installed automatically)
+- Packages: asciinema, openssl, sshpass (install explicitly before recording)
 
 ### Server Configuration
 
 The destination server must have:
-- SSH on port 1001
-- Directories: `/home/HOMEWORKS/{eninfo,grupeid,roinfo}/`
+- SSH port confirmed by the service owner (historical copies disagree: 1001/1002)
+- Directories: `/home/HOMEWORKS/{eninfo,grupeid}/`
 - User: `stud-id` with password `stud`
 
 ---

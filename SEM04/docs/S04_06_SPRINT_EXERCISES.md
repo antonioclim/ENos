@@ -1,7 +1,7 @@
 # Sprint Exercises: Text Processing
 ## Timed Challenges - Regex, GREP, SED, AWK
 
-> *Laboratory observation: I have seen students who solve exercises faster when they read their command aloud before pressing Enter. It sounds strange, but it helps catch syntax errors.*
+> *Retained author observation (no measured cohort dataset accompanies this note): I have seen students who solve exercises faster when they read their command aloud before pressing Enter. It sounds strange, but it helps catch syntax errors.*
 
 > Operating Systems | Bucharest University of Economic Studies - CSIE  
 > Seminar 4 | Timed Sprints  
@@ -36,15 +36,24 @@
 ### Initial Setup
 
 ```bash
-# Make sure you are in the correct directory
-cd ~/demo_sem4/data
-
-# Check available files
-ls -la
-
-# If missing, run the setup
-# ./scripts/bash/S04_01_setup_seminar.sh
+# Start from the repository root. Keep these paths for the entire session.
+SEM04_DIR=$(cd SEM04 && pwd) || exit 1
+SPRINT_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-sprint.XXXXXX") || exit 1
+export SEM04_DIR SPRINT_ROOT
+ENOS_SEM04_DATA_DIR="$SPRINT_ROOT/data" \
+ENOS_SEM04_RESOURCE_DIR="$SPRINT_ROOT/generated" \
+    bash "$SEM04_DIR/scripts/bash/S04_01_setup_seminar.sh" || exit 1
+cd -- "$SPRINT_ROOT/data" || exit 1
 ```
+
+The generator's employee/configuration records are fixed; `access.log` is
+synthetic and varies, so count checkpoints must be computed from the current
+fixture. The committed `resources/sample_data` has a different contract and must
+not be substituted silently. CSV exercises here use unquoted comma-separated
+fields, one header and numeric salaries; reject malformed rows before extending
+the models to arbitrary data. In grep examples, status 1 means no matches; status
+>1 is an error, not evidence that the count is zero. Email/IP patterns below
+extract a limited lexical shape and do not establish full protocol validity.
 
 ---
 
@@ -77,7 +86,7 @@ grep ' 404 ' access.log
 ```
 </details>
 
-> ✅ **Checkpoint:** You should see several lines containing " 404 " — typically 3-10 lines depending on the generated data.
+> ✅ **Checkpoint:** You should see several lines containing " 404 " ; compare against `awk '$9==404{n++}END{print n+0}' access.log` for the current fixture.
 
 ---
 
@@ -100,12 +109,11 @@ Use grep -c for counting
 
 ```bash
 grep -c '"POST' access.log
-# or
-grep -c 'POST' access.log
+# The unanchored string POST could also occur in a URL; it is not an equivalent method filter.
 ```
 </details>
 
-> ✅ **Checkpoint:** You should see a number (e.g., 150-300). If you see 0, check that access.log exists in your current directory.
+> ✅ **Checkpoint:** The count is fixture-dependent. A genuine zero is valid; distinguish that from a missing/unreadable input using the exit status.
 
 ---
 
@@ -153,12 +161,13 @@ Combine: grep -oE for IP, then sort -u for unique
 ```bash
 grep -oE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' access.log | sort -u
 
-# or more precise:
+# Unanchored shape extraction may also find addresses in URLs; use the leading-field form for client IPs.
+# Octet ranges are not validated by either pattern:
 grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort -u
 ```
 </details>
 
-> ✅ **Checkpoint:** You should see 10-15 unique IPs. Each line contains only an IP address (e.g., 192.168.1.100).
+> ✅ **Checkpoint:** Compare the count to the current fixture; no fixed count is guaranteed. Each line contains only an IP address (e.g., 192.168.1.100).
 
 ---
 
@@ -268,12 +277,12 @@ grep ',IT,' employees.csv | awk -F',' '$4 > 5500'
 ---
 
 ### G2.4 (3 min)
-Extract all valid emails from emails.txt
+Extract email-shaped substrings from emails.txt (the declared teaching subset)
 
 ```bash
 # Write your command here:
 
-# Expected output: only valid emails, one per line
+# Expected output: matching substrings, one per line; not RFC validation
 ```
 
 <details>
@@ -338,7 +347,7 @@ sed 's/localhost/192.168.1.100/g' config.txt
 ```
 </details>
 
-> ✅ **Checkpoint:** Lines like `server.host=localhost` should now show `server.host=192.168.1.100`. Count should be 2-3 replacements.
+> ✅ **Checkpoint:** Lines like `server.host=localhost` should now show `server.host=192.168.1.100`. The fixed generated config has two localhost values; inspect both lines.
 
 ---
 
@@ -380,7 +389,7 @@ sed -E '/^(#|$)/d' config.txt
 ```
 </details>
 
-> ✅ **Checkpoint:** Output should be ~20 lines of pure key=value pairs with no blank lines and no comments.
+> ✅ **Checkpoint:** The fixed generated config has 28 key=value records. This task removes only comments starting at column 1 and truly empty lines.
 
 ---
 
@@ -409,7 +418,7 @@ sed '/^#/!s/=/ = /' config.txt
 ---
 
 ### S1.5 (2 min)
-Put all values in quotes: key=value → key="value"
+Display values inside quotes: key=value → key="value" (text formatting only)
 
 ```bash
 # Write your command here:
@@ -434,6 +443,9 @@ sed -E 's/=(.*)/="\1"/' config.txt
 
 ---
 
+The S1.5 substitution assumes values contain no quotes or escapes; it is not a
+shell serializer. Use the next exercise for literal Bash assignments.
+
 ### S1.6 BONUS
 Create a script to generate export statements for bash:
 `key=value` → `export KEY="value"`
@@ -451,11 +463,12 @@ Create a script to generate export statements for bash:
 <summary>✅ Solution</summary>
 
 ```bash
-sed '/^#/d; /^$/d' config.txt | \
-sed 's/\([a-z.]*\)=\(.*\)/export \U\1\E="\2"/' | \
-sed 's/\./_/g'
+bash "$SEM04_DIR/scripts/bash/S04_config_to_env.sh" --exports config.txt
 ```
-Note: This solution is complex and requires GNU sed for \U (uppercase).
+
+The helper normalises dots/case in the key only, preserves the complete value
+including further equals signs and uses Bash `%q` for quotes/escapes. Invalid or
+colliding keys fail before any assignments are printed. Never `eval` the raw input.
 </details>
 
 ---
@@ -571,7 +584,7 @@ Calculate the average salary
 <summary>✅ Solution</summary>
 
 ```bash
-awk -F',' 'NR > 1 { sum += $4; count++ } END { print "Average:", sum/count }' employees.csv
+awk -F',' 'NR > 1 { sum += $4; count++ } END { if(count) printf "Average: %.2f\n", sum/count; else print "Average: undefined (0 records)" }' employees.csv
 ```
 </details>
 
@@ -590,7 +603,7 @@ Find the employee with the highest salary and display their name and salary
 <summary>✅ Solution</summary>
 
 ```bash
-awk -F',' 'NR > 1 && $4 > max { max = $4; name = $2 } END { print "Name:", name, "Salary:", max }' employees.csv
+awk -F',' 'NR>1 {if(!seen || $4>max){max=$4; names=$2; seen=1} else if($4==max) names=names "; " $2} END {if(seen) print "Name(s):", names, "Salary:", max; else print "No employees"}' employees.csv
 ```
 </details>
 
@@ -737,7 +750,7 @@ awk '{ printf "%d. %-20s %d requests\n", NR, $2, $1 }'
 ---
 
 ### C2 (5 min)
-Process config.txt to generate a valid .env file:
+Process config.txt to generate a Bash assignment file (not a universal dotenv format):
 - Remove comments
 - Remove empty lines
 - Transform into format: UPPER_CASE_KEY="value"
@@ -755,10 +768,12 @@ Process config.txt to generate a valid .env file:
 <summary>✅ Solution</summary>
 
 ```bash
-grep -v '^#' config.txt | grep -v '^$' | \
-sed 's/\./_/g' | \
-awk -F'=' '{ print toupper($1) "=\"" $2 "\"" }'
+bash "$SEM04_DIR/scripts/bash/S04_config_to_env.sh" --assignments config.txt
 ```
+
+Values are literal data, keys alone are normalised and collisions are errors.
+The output uses Bash quoting; a particular application dotenv parser may require
+a different serializer and must be selected explicitly.
 </details>
 
 ---
@@ -782,27 +797,33 @@ Complete analysis of employees.csv:
 ```bash
 awk -F',' '
 NR > 1 {
-    total++
-    sum += $4
-    dept[$3]++
-    if ($4 > maxSal) { maxSal = $4; maxName = $2 }
+    total++; sum += $4; dept[$3]++
+    if (total==1 || $4>maxSal) {maxSal=$4; maxNames=$2}
+    else if ($4==maxSal) maxNames=maxNames "; " $2
 }
 END {
     print "=== EMPLOYEE REPORT ==="
-    print "Total employees:", total
-    print "Average salary: $" sum/total
-    print "Highest paid:", maxName, "($" maxSal ")"
-    
-    maxDept = ""; maxCount = 0
-    for (d in dept) if (dept[d] > maxCount) { maxCount = dept[d]; maxDept = d }
-    print "Largest department:", maxDept, "(" maxCount " employees)"
+    print "Total employees:", total+0
+    if (!total) {print "Average salary: undefined (0 records)"; exit}
+    printf "Average salary: $%.2f\n", sum/total
+    print "Highest paid:", maxNames, "($" maxSal ")"
+    for (d in dept) if (dept[d]>maxCount) maxCount=dept[d]
+    for (d in dept) if (dept[d]==maxCount) print "Largest department:", d, "(" maxCount " employees)"
 }' employees.csv
 ```
+
+All ties are included; AWK array iteration order is unspecified. Sort records if
+stable ordering is part of a subsequent machine-readable contract.
 </details>
 
 ---
 
-## Grading Guide
+## Retained Grading Proposal — Pending Author Policy
+
+The following points, thresholds and bonus rules are historical proposals, not
+an adopted final-grade contract. In particular, 60% of 12 is 7.2, so a threshold
+of 7 requires an explicit rounding rule. No automatic pass/fail is asserted.
+See [assessment status](../homework/ASSESSMENT_STATUS.md).
 
 | Sprint | Total Points | Time | Pass (60%) |
 |--------|--------------|------|------------|

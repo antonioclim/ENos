@@ -28,8 +28,11 @@ readonly SCRIPT_VERSION="1.0.0"
 
 # === CONFIGURATION ===
 readonly LOG_FILE="${LOG_FILE:-/var/log/${SCRIPT_NAME%.sh}.log}"
-readonly CONFIG_FILE="${CONFIG_FILE:-${SCRIPT_DIR}/config/${SCRIPT_NAME%.sh}.conf}"
-readonly TEMP_DIR="${TEMP_DIR:-/tmp/${SCRIPT_NAME%.sh}.$$}"
+CONFIG_FILE="${CONFIG_FILE:-${SCRIPT_DIR}/config/${SCRIPT_NAME%.sh}.conf}"
+TEMP_BASE="${TEMP_DIR:-${TMPDIR:-/tmp}}"
+TEMP_DIR=""
+TEMP_OWNED=false
+LOG_ENABLED=false
 
 # === COLOURS (optional) ===
 if [[ -t 1 ]]; then
@@ -65,7 +68,9 @@ log() {
     
     # Output to stdout and log file
     printf "${color}[%s] [%-5s] %s${NC}\n" "$timestamp" "$level" "$message"
-    printf "[%s] [%-5s] %s\n" "$timestamp" "$level" "$message" >> "$LOG_FILE" 2>/dev/null || true
+    if [[ "$LOG_ENABLED" == true ]]; then
+        printf "[%s] [%-5s] %s\n" "$timestamp" "$level" "$message" >> "$LOG_FILE" || return 1
+    fi
 }
 
 debug() { [[ "${DEBUG:-false}" == "true" ]] && log "DEBUG" "$@" || true; }
@@ -81,7 +86,7 @@ cleanup() {
     debug "Cleanup started (exit code: $exit_code)"
     
     # Cleanup temp files
-    if [[ -d "$TEMP_DIR" ]]; then
+    if [[ "$TEMP_OWNED" == true && -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
         rm -rf "$TEMP_DIR"
         debug "Removed temp directory: $TEMP_DIR"
     fi
@@ -93,7 +98,9 @@ cleanup() {
     exit $exit_code
 }
 
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 # === UTILITY FUNCTIONS ===
 require_root() {
@@ -123,6 +130,8 @@ confirm() {
 # === CONFIGURATION ===
 load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
+        # This template intentionally loads a trusted local Bash configuration.
+        # Do not source untrusted data; use a literal parser for that case.
         # shellcheck source=/dev/null
         source "$CONFIG_FILE"
         debug "Config loaded from $CONFIG_FILE"
@@ -176,14 +185,15 @@ version() {
 parse_args() {
     # Defaults
     CONFIG_FILE_ARG=""
-    VERBOSE=false
-    DRY_RUN=false
-    FORCE=false
+    VERBOSE=${VERBOSE:-false}
+    DRY_RUN=${DRY_RUN:-false}
+    FORCE=${FORCE:-false}
     POSITIONAL_ARGS=()
     
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
+                [[ $# -ge 2 && -n "$2" ]] || { echo "Missing config path" >&2; exit 2; }
                 CONFIG_FILE_ARG="$2"
                 shift 2
                 ;;
@@ -261,20 +271,36 @@ do_work() {
     
     # TODO: Implement main logic
     
-    info "Operation completed successfully"
+    warn "Template only: main logic is not implemented (TODO)"
+    return 3
 }
 
 # === MAIN ===
 main() {
-    # Create temp directory
-    mkdir -p "$TEMP_DIR"
-    
-    # Parse command line arguments
-    parse_args "$@"
-    
-    # Load configuration
+    # Handle help/version before configuration, logging or temporary directories.
+    for item in "$@"; do
+        case "$item" in -h|--help) usage;; -V|--version) version;; esac
+    done
+    # Select the trusted file first, then apply CLI overrides after loading it.
+    local -a original_args=("$@")
+    while [[ $# -gt 0 ]]; do
+        if [[ "$1" == -c || "$1" == --config ]]; then
+            [[ $# -ge 2 && -n "$2" ]] || { echo "Missing config path" >&2; return 2; }
+            CONFIG_FILE=$2
+            shift 2
+        else
+            shift
+        fi
+    done
     load_config
-    
+    parse_args "${original_args[@]}"
+    if [[ "$DRY_RUN" != true ]]; then
+        TEMP_DIR=$(mktemp -d "$TEMP_BASE/${SCRIPT_NAME%.sh}.XXXXXX") || return 3
+        TEMP_OWNED=true
+        : >> "$LOG_FILE" || { echo "Cannot open log: $LOG_FILE" >&2; return 3; }
+        LOG_ENABLED=true
+    fi
+
     # Validate inputs
     validate
     

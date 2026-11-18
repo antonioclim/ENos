@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Tree Builder - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Inter', sans-serif;
@@ -126,7 +126,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -138,7 +215,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Process Tree Builder</h1>
-                    <p class="text-xs text-stone-500">Vizualizare Ierarhie Procese (pstree)</p>
+                    <p class="text-xs text-stone-500">Process Hierarchy Visualisation (pstree)</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
@@ -151,7 +228,7 @@
         <!-- Stats Bar -->
         <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
-                <div class="text-xs text-stone-500 mb-1">Total Procese</div>
+                <div class="text-xs text-stone-500 mb-1">Total Processes</div>
                 <div id="statTotal" class="text-2xl font-bold text-blue-600">1</div>
             </div>
             <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 relative">
@@ -166,7 +243,7 @@
                 <div id="statDepth" class="text-2xl font-bold text-purple-600">1</div>
             </div>
             <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
-                <div class="text-xs text-stone-500 mb-1">Memorie Totala</div>
+                <div class="text-xs text-stone-500 mb-1">Total Memory</div>
                 <div id="statMemory" class="text-2xl font-bold text-green-600">64 MB</div>
             </div>
         </div>
@@ -178,7 +255,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-project-diagram text-green-500"></i>
-                            Arborele de Procese
+                            Process Tree
                         </h2>
                         <div class="flex gap-2 text-xs">
                             <span class="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded">
@@ -217,21 +294,21 @@
                 <!-- Create Process -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Creation Proces
+                        <i class="fas fa-plus-circle text-green-500 mr-2"></i>Process Creation
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Nume Proces</label>
+                            <label class="text-xs text-stone-500 block mb-1">Process Name</label>
                             <input type="text" id="processName" placeholder="proc_X" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Parinte</label>
+                            <label class="text-xs text-stone-500 block mb-1">Parent</label>
                             <select id="parentSelect" class="w-full p-2 border border-stone-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-green-500">
                                 <!-- Will be populated dynamically -->
                             </select>
                         </div>
                         <button id="btnFork" class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2">
-                            <i class="fas fa-code-branch"></i> Fork Proces Nou
+                            <i class="fas fa-code-branch"></i> Fork New Process
                         </button>
                     </div>
                 </div>
@@ -239,11 +316,11 @@
                 <!-- Actions on Selected -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-cog text-blue-500 mr-2"></i>Actions pe Proces Selectat
+                        <i class="fas fa-cog text-blue-500 mr-2"></i>Actions on Selected Process
                     </h3>
                     <div id="selectedInfo" class="mb-3 p-3 bg-stone-50 rounded-lg text-sm hidden">
                         <div class="flex items-center justify-between">
-                            <span class="font-medium">Selectat:</span>
+                            <span class="font-medium">Selected:</span>
                             <span id="selectedName" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-mono">-</span>
                         </div>
                     </div>
@@ -255,7 +332,7 @@
                             <i class="fas fa-skull"></i> Kill -9
                         </button>
                         <button id="btnWait" class="btn-action w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2" disabled>
-                            <i class="fas fa-hourglass-half"></i> wait() de la parent
+                            <i class="fas fa-hourglass-half"></i> wait() from parent
                         </button>
                     </div>
                 </div>
@@ -263,20 +340,20 @@
                 <!-- Predefined Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii Predefinite
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Predefined Scenarios
                     </h3>
                     <div class="grid grid-cols-1 gap-2">
                         <button id="btnScenarioZombie" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
-                            <i class="fas fa-skull-crossbones text-stone-500"></i> create Zombie
+                            <i class="fas fa-skull-crossbones text-stone-500"></i> Create Zombie
                         </button>
                         <button id="btnScenarioOrphan" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
-                            <i class="fas fa-user-slash text-orange-500"></i> create Orfan
+                            <i class="fas fa-user-slash text-orange-500"></i> Create Orphan
                         </button>
                         <button id="btnScenarioForkBomb" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
-                            <i class="fas fa-bomb text-red-500"></i> Fork Bomb (limitat)
+                            <i class="fas fa-bomb text-red-500"></i> Fork Bomb (bounded model)
                         </button>
                         <button id="btnScenarioReal" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium text-left flex items-center gap-2">
-                            <i class="fas fa-linux text-stone-700"></i> Simulare Reala Linux
+                            <i class="fas fa-linux text-stone-700"></i> Illustrative Linux Process Tree
                         </button>
                     </div>
                 </div>
@@ -284,19 +361,19 @@
                 <!-- Settings -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-sliders-h text-stone-500 mr-2"></i>Setari
+                        <i class="fas fa-sliders-h text-stone-500 mr-2"></i>Settings
                     </h3>
                     <div class="space-y-3">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="showFullPID" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <span class="text-sm text-stone-600">display PID-uri complete</span>
+                            <span class="text-sm text-stone-600">Show PID and parent details</span>
                         </label>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Viteza animatiei</label>
+                            <label class="text-xs text-stone-500 block mb-1">Animation Speed</label>
                             <input type="range" id="animSpeed" min="100" max="1000" value="400" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                         <button id="btnReset" class="btn-action w-full p-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-lg text-xs font-medium flex items-center justify-center gap-2">
-                            <i class="fas fa-redo"></i> Reset Complet
+                            <i class="fas fa-redo"></i> Full Reset
                         </button>
                     </div>
                 </div>
@@ -304,7 +381,7 @@
                 <!-- Process Details -->
                 <div id="processDetails" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 hidden">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>Detalii Proces
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>Process Details
                     </h3>
                     <div class="space-y-2 text-xs">
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
@@ -320,7 +397,7 @@
                             <span id="detailPGID" class="font-mono">-</span>
                         </div>
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
-                            <span class="text-stone-500">Stare:</span>
+                            <span class="text-stone-500">State:</span>
                             <span id="detailState" class="font-bold">-</span>
                         </div>
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
@@ -345,45 +422,45 @@
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
                     <i class="fas fa-skull text-stone-500"></i>
-                    Ce este un Zombie?
+                    What is a Zombie?
                 </h3>
                 <p class="text-sm text-stone-600 leading-relaxed">
-                    Un proces <strong>zombie</strong> (defunct) este un proces care s-a finished dar the parent or nu a apelat inca <code class="mono bg-stone-100 px-1 rounded">wait()</code>. 
-                    PCB-ul ramane in sistem for a pastra exit status-ul.
+                    A <strong>zombie</strong> (defunct) process has exited but its parent has not yet collected its status with <code class="mono bg-stone-100 px-1 rounded">wait()</code>. 
+                    A kernel process record remains to preserve the exit status.
                 </p>
                 <div class="mt-3 p-2 bg-amber-50 rounded border-l-4 border-amber-400 text-xs text-amber-800">
                     <i class="fas fa-exclamation-triangle mr-1"></i>
-                    Zombie-urile consuma slot-uri in tabela de procese dar nu consuma CPU or memorie.
+                    Zombies retain process-table/kernel metadata and exit status, but do not execute or retain the exited user address space.
                 </div>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
                     <i class="fas fa-user-slash text-orange-500"></i>
-                    Ce este un Orfan?
+                    What is an Orphan?
                 </h3>
                 <p class="text-sm text-stone-600 leading-relaxed">
-                    Un proces <strong>orfan</strong> este un proces al carui parent s-a finished. 
-                    Sistemul il "adopta" automat — devine copilul lui <code class="mono bg-stone-100 px-1 rounded">init (PID 1)</code>.
+                    An <strong>orphan</strong> is a process whose parent has exited. 
+                    In this init-only model it is adopted by <code class="mono bg-stone-100 px-1 rounded">init (PID 1)</code>.
                 </p>
                 <div class="mt-3 p-2 bg-blue-50 rounded border-l-4 border-blue-400 text-xs text-blue-800">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Procesul init face automat wait() pe copiii adoptati, prevenind zombie-urile.
+                    The designated reaper collects adopted children after they exit; a brief zombie interval can still occur before collection.
                 </div>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
                     <i class="fas fa-question-circle text-red-500"></i>
-                    De ce conteaza?
+                    Why Does It Matter?
                 </h3>
                 <p class="text-sm text-stone-600 leading-relaxed">
-                    Prea multe <strong>zombie-uri</strong> pot epuiza slot-urile din tabela de procese (de obicei ~32000). 
-                    Sistemul nu may elibera complet resursele pana when the parent nu face <code class="mono bg-stone-100 px-1 rounded">wait()</code>.
+                    Too many <strong>zombies</strong> can exhaust configured process limits. A limit of 32,000 is an illustrative assumption, not a universal Linux default. 
+                    The system retains the exit-status record until the parent or designated reaper calls <code class="mono bg-stone-100 px-1 rounded">wait()</code>.
                 </p>
                 <div class="mt-3 p-2 bg-red-50 rounded border-l-4 border-red-400 text-xs text-red-800">
                     <i class="fas fa-bug mr-1"></i>
-                    Un program care nu face wait() pe copiii sai este considerat buggy!
+                    A programme that creates children must arrange for their exit status to be collected or explicitly use an appropriate automatic-reaping policy.
                 </div>
             </div>
         </div>
@@ -397,6 +474,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State Management ====================
         let processes = new Map();
         let pidCounter = 1;
@@ -428,6 +541,7 @@
 
         // Initialize with init process
         function initSystem() {
+            enosTimers.cancel();
             processes.clear();
             pidCounter = 1;
             selectedPID = null;
@@ -438,7 +552,7 @@
             renderTree();
             updateStats();
             updateParentSelect();
-            log('System initialized. Init process (PID 1) running.');
+            log('System initialised. Init process (PID 1) running.');
         }
 
         // ==================== Tree Rendering ====================
@@ -478,7 +592,7 @@
             const isSelected = selectedPID === pid;
             
             let cardClasses = `process-card p-3 rounded-lg border-2 cursor-pointer transition-all`;
-            cardClasses += ` state-${stateInfo.color}`;
+            cardClasses += ` state-${process.state.toLowerCase()}`;
             if (isZombie) cardClasses += ' zombie';
             if (isOrphan) cardClasses += ' orphan';
             if (isSelected) cardClasses += ' selected';
@@ -487,11 +601,11 @@
                 <div class="flex flex-col items-center">
                     <div class="${cardClasses}" data-pid="${pid}" style="min-width: 120px;">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-lg font-bold">${pid === 1 ? 'init' : process.name}</span>
+                            <span class="text-lg font-bold">${pid === 1 ? 'init' : enosEscape(process.name)}</span>
                             <i class="fas ${stateInfo.icon} text-${stateInfo.color}-500"></i>
                         </div>
                         <div class="text-xs text-stone-500 mono">PID: ${process.pid}</div>
-                        <div class="text-xs text-stone-400 mono">PPID: ${process.ppid}</div>
+                        ${document.getElementById('showFullPID').checked?`<div class="text-xs text-stone-400 mono">PPID: ${process.ppid}</div>`:''}
                         <div class="flex items-center gap-1 mt-1">
                             <span class="w-2 h-2 rounded-full bg-${stateInfo.color}-500"></span>
                             <span class="text-xs text-${stateInfo.color}-600">${stateInfo.name}</span>
@@ -532,7 +646,7 @@
             }
             
             const child = createProcess(name, parentPID, 'RUNNING', parent.user);
-            log(`[${parent.pid}] Forked new process ${child.pid} (${child.name})`);
+            log(`[${parent.pid}] Forked new process ${child.pid} (${enosEscape(child.name)})`);
             
             renderTree();
             updateStats();
@@ -551,7 +665,7 @@
             // First, handle children (they become orphans)
             const children = getChildren(pid);
             children.forEach(child => {
-                if (child.state !== 'ZOMBIE') {
+                {
                     child.ppid = 1;
                     child.isOrphan = true;
                     log(`[init] Adopted orphan process ${child.pid}`);
@@ -560,6 +674,7 @@
             
             // Process becomes zombie (waiting for parent to reap)
             process.state = 'ZOMBIE';
+            process.memory = 0; // Address space released; the kernel exit record remains.
             process.exitStatus = status;
             log(`[${pid}] Process exited with status ${status}, became zombie`);
             
@@ -585,7 +700,7 @@
             const parent = processes.get(parentPID);
             const child = processes.get(childPID);
             
-            if (!parent || !child || child.state !== 'ZOMBIE' || child.ppid !== parentPID) {
+            if (!parent || parent.state === 'ZOMBIE' || !child || child.state !== 'ZOMBIE' || child.ppid !== parentPID) {
                 log(`ERROR: Invalid wait operation`);
                 return;
             }
@@ -686,15 +801,16 @@
         }
 
         // ==================== Scenarios ====================
-        function scenarioZombie() {
+        function treeDelay(ms){return ms*Number(document.getElementById('animSpeed').value)/400;}
+function scenarioZombie() {
             const parent = forkProcess(1, 'parent');
             setTimeout(() => {
                 const child = forkProcess(parent.pid, 'child');
                 setTimeout(() => {
                     exitProcess(child.pid);
                     log('SCENARIO: Zombie created - parent has not called wait()');
-                }, 500);
-            }, 300);
+                }, treeDelay(500));
+            }, treeDelay(300));
         }
 
         function scenarioOrphan() {
@@ -704,8 +820,8 @@
                 setTimeout(() => {
                     exitProcess(parent.pid);
                     log('SCENARIO: Orphan created - child adopted by init');
-                }, 500);
-            }, 300);
+                }, treeDelay(500));
+            }, treeDelay(300));
         }
 
         function scenarioForkBomb() {
@@ -727,7 +843,7 @@
         }
 
         function scenarioRealLinux() {
-            log('SCENARIO: Simulating typical Linux process tree');
+            log('SCENARIO: Illustrative Linux process tree');
             
             // Create systemd children
             setTimeout(() => forkProcess(1, 'systemd-journald'), 100);
@@ -739,13 +855,13 @@
                     setTimeout(() => {
                         const bash = forkProcess(session.pid, 'bash');
                         setTimeout(() => forkProcess(bash.pid, 'vim'), 200);
-                    }, 200);
-                }, 200);
-            }, 300);
+                    }, treeDelay(200));
+                }, treeDelay(200));
+            }, treeDelay(300));
             setTimeout(() => {
                 const cron = forkProcess(1, 'cron');
                 setTimeout(() => forkProcess(cron.pid, 'backup.sh'), 300);
-            }, 400);
+            }, treeDelay(400));
             setTimeout(() => forkProcess(1, 'NetworkManager'), 500);
         }
 
@@ -776,12 +892,34 @@
             });
             
             document.getElementById('btnReset').addEventListener('click', initSystem);
+            document.getElementById('showFullPID').addEventListener('change',renderTree);
             
             document.getElementById('btnScenarioZombie').addEventListener('click', scenarioZombie);
             document.getElementById('btnScenarioOrphan').addEventListener('click', scenarioOrphan);
             document.getElementById('btnScenarioForkBomb').addEventListener('click', scenarioForkBomb);
             document.getElementById('btnScenarioReal').addEventListener('click', scenarioRealLinux);
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

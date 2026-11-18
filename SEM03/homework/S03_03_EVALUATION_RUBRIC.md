@@ -1,6 +1,8 @@
 # Evaluation Rubric - Seminar 3 Assignment
 
-> **Instructor document** | Do not distribute to students before evaluation
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
+> **Instructor-oriented historical rubric, publicly present in this repository.** Its label provides no confidentiality; release strategy and adoption of the conflicting assessment criteria remain pending.
 
 ---
 

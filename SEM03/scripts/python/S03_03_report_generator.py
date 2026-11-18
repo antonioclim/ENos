@@ -146,8 +146,8 @@ class AutograderResult:
         return cls(
             submission_id=submission_id,
             timestamp=datetime.fromisoformat(data.get('timestamp', datetime.now().isoformat())),
-            total_points=data.get('total_points', 0),
-            max_points=data.get('max_points', 100),
+            total_points=data.get('total_earned', data.get('total_points', 0)),
+            max_points=data.get('total_max', data.get('max_points', 0)),
             percentage=data.get('percentage', 0),
             grade=data.get('grade', 'N/A'),
             categories=data.get('categories', {}),
@@ -194,15 +194,15 @@ class StudentProgress:
             for cat, data in quiz.categories_breakdown.items():
                 total = data.get('correct', 0) + data.get('wrong', 0) + data.get('skipped', 0)
                 if total > 0:
-                    scores[cat].append(data.get('correct', 0) / total * 100)
+                    scores.setdefault(cat, []).append(data.get('correct', 0) / total * 100)
         
-        return {cat: statistics.mean(s) if s else 0 for cat, s in scores.items()}
+        return {cat: statistics.mean(s) for cat, s in scores.items() if s}
     
     @property
     def weakest_category(self) -> Optional[str]:
         """Category with the weakest results."""
         strengths = self.category_strengths
-        if not any(strengths.values()):
+        if not strengths:
             return None
         return min(strengths, key=strengths.get)
     
@@ -210,27 +210,21 @@ class StudentProgress:
     def strongest_category(self) -> Optional[str]:
         """Category with the best results."""
         strengths = self.category_strengths
-        if not any(strengths.values()):
+        if not strengths:
             return None
         return max(strengths, key=strengths.get)
     
-    def calculate_final_grade(self) -> Tuple[float, str]:
-        """Calculate estimated final grade."""
-        quiz_weight = 0.3
-        homework_weight = 0.7
-        
-        quiz_score = self.average_quiz_score if self.quiz_results else 50
-        hw_score = self.average_homework_score if self.autograder_results else 50
-        
-        final = quiz_score * quiz_weight + hw_score * homework_weight
-        
-        grade = '4'
-        for g, threshold in sorted(GRADE_THRESHOLDS.items(), reverse=True):
-            if final >= threshold:
-                grade = str(g)
-                break
-        
-        return final, grade
+    def calculate_final_grade(self) -> Tuple[Optional[float], str]:
+        """No final grade until the author resolves the assessment contract.
+
+        The historical 30/70 weighting and invented 50-point values for missing
+        evidence are not applied. Their exact prior form remains in the baseline.
+        """
+        return None, "PENDING_POLICY"
+
+
+def display_metric(value: Optional[float]) -> str:
+    return "not calculated (policy pending)" if value is None else f"{value:.1f}%"
 
 @dataclass
 class ClassStatistics:
@@ -351,13 +345,13 @@ class DataAnalyser:
         
         for student in students:
             score, grade = student.calculate_final_grade()
-            scores.append(score)
+            if score is not None:
+                scores.append(score)
             grades.append(grade)
             
             # Categories
             for cat, cat_score in student.category_strengths.items():
-                if cat_score > 0:
-                    category_scores[cat].append(cat_score)
+                category_scores.setdefault(cat, []).append(cat_score)
             
             # Common mistakes from quizzes
             for quiz in student.quiz_results:
@@ -381,14 +375,13 @@ class DataAnalyser:
             total_students=len(students),
             students_with_submissions=len([s for s in students 
                                           if s.quiz_results or s.autograder_results]),
-            average_score=statistics.mean(scores) if scores else 0,
-            median_score=statistics.median(scores) if scores else 0,
-            std_deviation=statistics.stdev(scores) if len(scores) > 1 else 0,
-            min_score=min(scores) if scores else 0,
-            max_score=max(scores) if scores else 0,
+            average_score=statistics.mean(scores) if scores else None,
+            median_score=statistics.median(scores) if scores else None,
+            std_deviation=statistics.stdev(scores) if len(scores) > 1 else None,
+            min_score=min(scores) if scores else None,
+            max_score=max(scores) if scores else None,
             grade_distribution=grade_dist,
-            category_averages={cat: statistics.mean(s) if s else 0 
-                             for cat, s in category_scores.items()},
+            category_averages={cat: statistics.mean(s) for cat, s in category_scores.items() if s},
             common_mistakes=common_mistakes,
             security_issues_count=security_count
         )
@@ -396,22 +389,14 @@ class DataAnalyser:
     @staticmethod
     def identify_struggling_students(students: List[StudentProgress], 
                                     threshold: float = 50.0) -> List[StudentProgress]:
-        """Identify students with difficulties."""
-        struggling = []
-        for student in students:
-            score, _ = student.calculate_final_grade()
-            if score < threshold:
-                struggling.append(student)
-        return sorted(struggling, key=lambda s: s.calculate_final_grade()[0])
-    
+        """Ranking needs an approved comparable assessment policy."""
+        return []
+
     @staticmethod
-    def identify_top_performers(students: List[StudentProgress], 
-                               top_n: int = 5) -> List[StudentProgress]:
-        """Identify the best performing students."""
-        return sorted(students, 
-                     key=lambda s: s.calculate_final_grade()[0], 
-                     reverse=True)[:top_n]
-    
+    def identify_top_performers(students: List[StudentProgress], top_n: int = 5) -> List[StudentProgress]:
+        """No ranking is inferred from the unresolved aggregate policy."""
+        return []
+
     @staticmethod
     def get_improvement_suggestions(student: StudentProgress) -> List[str]:
         """Generate personalised improvement suggestions."""
@@ -438,7 +423,10 @@ class DataAnalyser:
         
         # Check time spent on quizzes
         for quiz in student.quiz_results:
-            avg_time = quiz.time_seconds / (quiz.correct + quiz.wrong + quiz.skipped)
+            answered = quiz.correct + quiz.wrong + quiz.skipped
+            if not answered:
+                continue
+            avg_time = quiz.time_seconds / answered
             if avg_time < 15:  # less than 15 seconds per question
                 suggestions.append(
                     "⏱️ You spend very little time on each question. "
@@ -491,13 +479,14 @@ class ReportGenerator:
         lines.append(color(f"  📊 PROGRESS REPORT - {student.name.upper()}", 
                           Colours.BOLD + Colours.CYAN, self.use_color))
         lines.append(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        lines.append('Assessment status: PENDING_POLICY; category and submitted-component observations remain descriptive.')
         lines.append("═" * 70)
         
         # Estimated final grade
         final_score, grade = student.calculate_final_grade()
-        grade_color = Colours.GREEN if int(grade) >= 5 else Colours.RED
-        lines.append(f"\n  📝 ESTIMATED FINAL GRADE: {color(grade, grade_color + Colours.BOLD, self.use_color)}")
-        lines.append(f"  📈 Overall score: {final_score:.1f}%")
+        grade_color = Colours.YELLOW
+        lines.append(f"\n  📝 ASSESSMENT STATUS: {color(grade, grade_color + Colours.BOLD, self.use_color)}")
+        lines.append(f"  📈 Aggregate: {display_metric(final_score)}")
         
         # Quiz statistics
         lines.append(color("\n  🎯 QUIZZES", Colours.YELLOW, self.use_color))
@@ -584,8 +573,8 @@ class ReportGenerator:
 
 | Metric | Value |
 |--------|-------|
-| **Estimated Final Grade** | **{grade}** |
-| Overall Score | {final_score:.1f}% |
+| **Assessment Status** | **{grade}** |
+| Aggregate | {display_metric(final_score)} |
 | Quizzes Completed | {len(student.quiz_results)} |
 | Assignments Submitted | {len(student.autograder_results)} |
 
@@ -655,9 +644,9 @@ class ReportGenerator:
         weakest = student.weakest_category
         
         if strongest:
-            md += f"\n**Strength**: {CATEGORIES[strongest]['emoji']} {CATEGORIES[strongest]['name']}\n"
+            md += f"\n**Strength**: {CATEGORIES.get(strongest, {}).get('emoji', '📋')} {CATEGORIES.get(strongest, {}).get('name', strongest)}\n"
         if weakest:
-            md += f"**To improve**: {CATEGORIES[weakest]['emoji']} {CATEGORIES[weakest]['name']}\n"
+            md += f"**To improve**: {CATEGORIES.get(weakest, {}).get('emoji', '📋')} {CATEGORIES.get(weakest, {}).get('name', weakest)}\n"
         
         md += """
 ---
@@ -686,12 +675,12 @@ class ReportGenerator:
         quiz_scores = [q.score_percentage for q in student.quiz_results[-10:]]
         
         strengths = student.category_strengths
-        cat_labels = [CATEGORIES[c]['name'] for c in strengths]
+        cat_labels = [CATEGORIES.get(c, {}).get('name', c) for c in strengths]
         cat_scores = list(strengths.values())
         
         suggestions = DataAnalyser.get_improvement_suggestions(student)
         
-        grade_color = '#27ae60' if int(grade) >= 5 else '#e74c3c'
+        grade_color = '#856404'
         
         return f'''<!DOCTYPE html>
 <html lang="en">
@@ -777,7 +766,7 @@ class ReportGenerator:
             <h1>📊 Progress Report</h1>
             <p>{student.name}</p>
             <div class="grade-badge">{grade}</div>
-            <p>Estimated final grade • Score: {final_score:.1f}%</p>
+            <p>Assessment status • Aggregate: {display_metric(final_score)}</p>
         </div>
         
         <div class="cards">
@@ -806,7 +795,7 @@ class ReportGenerator:
             <h2>📊 Performance by Category</h2>
             {''.join(f"""
             <div class="category-bar">
-                <span class="category-name">{CATEGORIES[cat]["emoji"]} {CATEGORIES[cat]["name"]}</span>
+                <span class="category-name">{CATEGORIES.get(cat, {}).get('emoji', '📋')} {CATEGORIES.get(cat, {}).get('name', cat)}</span>
                 <div class="category-progress">
                     <div class="category-fill" style="width: {score}%; background: {'#27ae60' if score >= 70 else '#f39c12' if score >= 50 else '#e74c3c'};"></div>
                 </div>
@@ -862,8 +851,9 @@ class ReportGenerator:
         lines = []
         
         lines.append("═" * 70)
-        lines.append(color("  📊 CLASS REPORT - SEMINAR 5-6", Colours.BOLD + Colours.CYAN, self.use_color))
+        lines.append(color("  📊 CLASS REPORT - SEMINAR 3", Colours.BOLD + Colours.CYAN, self.use_color))
         lines.append(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        lines.append('Assessment status: PENDING_POLICY; category and submitted-component observations remain descriptive.')
         lines.append("═" * 70)
         
         # General statistics
@@ -871,19 +861,19 @@ class ReportGenerator:
         lines.append("  " + "─" * 40)
         lines.append(f"  Total students:        {stats.total_students}")
         lines.append(f"  With submissions:      {stats.students_with_submissions}")
-        lines.append(f"  Class average:         {stats.average_score:.1f}%")
-        lines.append(f"  Median:                {stats.median_score:.1f}%")
-        lines.append(f"  Standard deviation:    {stats.std_deviation:.1f}%")
-        lines.append(f"  Minimum score:         {stats.min_score:.1f}%")
-        lines.append(f"  Maximum score:         {stats.max_score:.1f}%")
+        lines.append(f"  Class average:         {display_metric(stats.average_score)}")
+        lines.append(f"  Median:                {display_metric(stats.median_score)}")
+        lines.append(f"  Standard deviation:    {display_metric(stats.std_deviation)}")
+        lines.append(f"  Minimum score:         {display_metric(stats.min_score)}")
+        lines.append(f"  Maximum score:         {display_metric(stats.max_score)}")
         
         # Grade distribution
-        lines.append(color("\n  📊 GRADE DISTRIBUTION", Colours.YELLOW, self.use_color))
+        lines.append(color("\n  📊 ASSESSMENT STATUS", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
-        for grade in ['10', '9', '8', '7', '6', '5', '4']:
+        for grade in ['PENDING_POLICY']:
             count = stats.grade_distribution.get(grade, 0)
             bar = "█" * count
-            lines.append(f"  Grade {grade}: {bar} ({count})")
+            lines.append(f"  Status {grade}: {bar} ({count})")
         
         # Category averages
         lines.append(color("\n  📚 AVERAGES BY CATEGORY", Colours.YELLOW, self.use_color))
@@ -897,12 +887,12 @@ class ReportGenerator:
             lines.append(f"  {emoji} {name:20} [{bar}] {avg:.0f}%")
         
         # Top 5 students
-        lines.append(color("\n  🏆 TOP 5 STUDENTS", Colours.YELLOW, self.use_color))
+        lines.append(color("\n  🏆 RANKING NOT CALCULATED — POLICY PENDING", Colours.YELLOW, self.use_color))
         lines.append("  " + "─" * 40)
         top = DataAnalyser.identify_top_performers(students, 5)
         for i, s in enumerate(top, 1):
             score, grade = s.calculate_final_grade()
-            lines.append(f"  {i}. {s.name:20} - {score:.1f}% (grade {grade})")
+            lines.append(f"  {i}. {s.name:20} - {display_metric(score)} (grade {grade})")
         
         # Students with difficulties
         struggling = DataAnalyser.identify_struggling_students(students)
@@ -913,7 +903,7 @@ class ReportGenerator:
                 score, _ = s.calculate_final_grade()
                 weak = s.weakest_category
                 weak_name = CATEGORIES.get(weak, {}).get('name', weak) if weak else 'N/A'
-                lines.append(f"  • {s.name:20} - {score:.1f}% (weak at: {weak_name})")
+                lines.append(f"  • {s.name:20} - {display_metric(score)} (weak at: {weak_name})")
         
         # Security issues
         if stats.security_issues_count > 0:
@@ -947,21 +937,21 @@ class ReportGenerator:
 |--------|-------|
 | Total students | {stats.total_students} |
 | With submissions | {stats.students_with_submissions} |
-| Class average | {stats.average_score:.1f}% |
-| Median | {stats.median_score:.1f}% |
-| Standard deviation | {stats.std_deviation:.1f}% |
-| Minimum score | {stats.min_score:.1f}% |
-| Maximum score | {stats.max_score:.1f}% |
+| Class average | {display_metric(stats.average_score)} |
+| Median | {display_metric(stats.median_score)} |
+| Standard deviation | {display_metric(stats.std_deviation)} |
+| Minimum score | {display_metric(stats.min_score)} |
+| Maximum score | {display_metric(stats.max_score)} |
 
 ---
 
-##  Grade Distribution
+##  Assessment Status
 
 | Grade | Students | Percentage |
 |-------|----------|------------|
 """
         total = stats.total_students or 1
-        for grade in ['10', '9', '8', '7', '6', '5', '4']:
+        for grade in ['PENDING_POLICY']:
             count = stats.grade_distribution.get(grade, 0)
             pct = count / total * 100
             md += f"| {grade} | {count} | {pct:.1f}% |\n"
@@ -987,7 +977,7 @@ class ReportGenerator:
         md += """
 ---
 
-##  Top 5 Students
+##  Ranking not calculated — policy pending
 
 | Rank | Student | Score | Grade |
 |------|---------|-------|-------|
@@ -995,7 +985,7 @@ class ReportGenerator:
         top = DataAnalyser.identify_top_performers(students, 5)
         for i, s in enumerate(top, 1):
             score, grade = s.calculate_final_grade()
-            md += f"| {i} | {s.name} | {score:.1f}% | {grade} |\n"
+            md += f"| {i} | {s.name} | {display_metric(score)} | {grade} |\n"
         
         struggling = DataAnalyser.identify_struggling_students(students)
         if struggling:
@@ -1011,7 +1001,7 @@ class ReportGenerator:
                 score, _ = s.calculate_final_grade()
                 weak = s.weakest_category
                 weak_name = CATEGORIES.get(weak, {}).get('name', weak) if weak else 'N/A'
-                md += f"| {s.name} | {score:.1f}% | {weak_name} |\n"
+                md += f"| {s.name} | {display_metric(score)} | {weak_name} |\n"
         
         if stats.common_mistakes:
             md += """
@@ -1269,10 +1259,16 @@ Examples:
             ext = os.path.splitext(args.output)[1].lower()
             if ext == '.md':
                 fmt = 'markdown'
-        
+            elif ext == '.html':
+                fmt = 'html'
+
         # Generate report
         if fmt == 'markdown':
             report = generator.generate_class_report_markdown(students)
+        elif fmt == 'html':
+            from html import escape
+            plain = ReportGenerator(False).generate_class_report_console(students)
+            report = '<!doctype html><html lang="en"><meta charset="utf-8"><title>Class report</title><h1>Class report: policy pending</h1><pre>' + escape(plain) + '</pre></html>'
         else:
             report = generator.generate_class_report_console(students)
         

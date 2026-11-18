@@ -97,20 +97,21 @@ log() {
         if [[ "$level" == "ERROR" ]] || [[ "$level" == "FATAL" ]]; then
             echo -e "$formatted_msg" >&2
         else
-            echo -e "$formatted_msg"
+            echo -e "$formatted_msg" >&2
         fi
     fi
     
-    if [[ -n "$LOG_FILE" ]]; then
-        echo "[${timestamp}] [${level}] ${message}" >> "$LOG_FILE"
+    if [[ -n "$LOG_FILE" && -d "$(dirname "$LOG_FILE")" ]]; then
+        printf '%s\n' "[${timestamp}] [${level}] ${message}" >> "$LOG_FILE"
     fi
+    return 0
 }
 
 log_debug() { log DEBUG "$@"; }
 log_info()  { log INFO "$@"; }
 log_warn()  { log WARN "$@"; }
-log_error() { log ERROR "$@"; ((BACKUP_ERRORS++)); }
-log_fatal() { log FATAL "$@"; ((BACKUP_ERRORS++)); }
+log_error() { log ERROR "$@"; BACKUP_ERRORS=$((BACKUP_ERRORS + 1)); }
+log_fatal() { log FATAL "$@"; BACKUP_ERRORS=$((BACKUP_ERRORS + 1)); }
 
 #------------------------------------------------------------------------------
 # PROGRESS FUNCTIONS
@@ -209,7 +210,7 @@ run_with_retry() {
         
         log_warn "Attempt $attempt/$max_attempts failed. Waiting ${delay}s..."
         sleep "$delay"
-        ((attempt++))
+        attempt=$((attempt + 1))
     done
     
     log_error "All $max_attempts attempts failed"
@@ -289,40 +290,27 @@ in_range() {
 #------------------------------------------------------------------------------
 
 acquire_lock() {
-    local lock_file="$1"
-    
-    if [[ -f "$lock_file" ]]; then
-        local existing_pid
-        existing_pid=$(cat "$lock_file" 2>/dev/null)
-        
-        if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
-            log_error "Backup already running (PID: $existing_pid)"
-            return 1
-        fi
-        
-        log_warn "Stale lock file found, removing it"
-        rm -f "$lock_file"
+    local lock_file="$1" wait_seconds="${2:-0}"
+    command -v flock >/dev/null || { log_error "flock is required"; return 1; }
+    mkdir -p -- "$(dirname "$lock_file")" || return 1
+    exec {BACKUP_LOCK_FD}>"$lock_file" || return 1
+    if ! flock -w "$wait_seconds" "$BACKUP_LOCK_FD"; then
+        exec {BACKUP_LOCK_FD}>&-
+        unset BACKUP_LOCK_FD
+        return 1
     fi
-    
-    mkdir -p "$(dirname "$lock_file")" 2>/dev/null
-    echo $$ > "$lock_file" || die "Cannot create lock file: $lock_file"
-    
-    log_debug "Lock acquired: $lock_file"
+    printf '%s\n' "$$" >&"$BACKUP_LOCK_FD"
     return 0
 }
 
 release_lock() {
-    local lock_file="$1"
-    
-    if [[ -f "$lock_file" ]]; then
-        local stored_pid
-        stored_pid=$(cat "$lock_file" 2>/dev/null)
-        
-        if [[ "$stored_pid" == "$$" ]]; then
-            rm -f "$lock_file"
-            log_debug "Lock released: $lock_file"
-        fi
+    if [[ -n "${BACKUP_LOCK_FD:-}" ]]; then
+        flock -u "$BACKUP_LOCK_FD" || return 1
+        exec {BACKUP_LOCK_FD}>&-
+        unset BACKUP_LOCK_FD
     fi
+    # Keep the inode: unlinking would permit another independent lock.
+    return 0
 }
 
 #------------------------------------------------------------------------------
@@ -337,7 +325,7 @@ format_bytes() {
     
     while [[ $(echo "$size >= 1024" | bc -l 2>/dev/null || echo 0) -eq 1 ]] && [[ $unit -lt 4 ]]; do
         size=$(echo "scale=2; $size / 1024" | bc -l 2>/dev/null || echo "$size")
-        ((unit++))
+        unit=$((unit + 1))
     done
     
     printf "%.2f %s" "$size" "${units[$unit]}"
@@ -399,7 +387,7 @@ verify_archive() {
             ;;
         *)
             log_warn "Unknown archive type for verification: $type"
-            return 0
+            return 1
             ;;
     esac
 }
@@ -419,3 +407,9 @@ setup_traps() {
 #------------------------------------------------------------------------------
 
 log_debug "core.sh v${CORE_VERSION} loaded (backup)"
+
+# Logging setup is intentionally separate from read-only configuration validation.
+setup_logging() {
+    [[ "${DRY_RUN:-false}" != true ]] || return 0
+    [[ -z "${LOG_FILE:-}" ]] || mkdir -p -- "$(dirname "$LOG_FILE")"
+}

@@ -5,6 +5,8 @@
 > **Estimated time**: 40-60 hours total  
 > **Submission**: GitHub/GitLab Repository + Demonstration
 
+> **Assessment status — author decision pending:** this file preserves the original requirements and point tables as proposals. They conflict with other SEM06/SEM07 documents and do not define an adopted grading policy. Read [the decision table](../docs/TEACHING_CONTRACT.md#author-decisions) before assigning grades, collecting machine identifiers or activating external integrations. Technical examples and TODO exercises can be practised locally meanwhile.
+
 ---
 
 ## Table of Contents
@@ -18,12 +20,14 @@
 
 ---
 
-## Assignment 1: Monitor - Feature Extension {#assignment-1-monitor}
+<a id="assignment-1-monitor"></a>
+
+## Assignment 1: Monitor - Feature Extension
 
 ### Objective
 Extend the Monitor project with new advanced monitoring features.
 
-### Mandatory Requirements (60%)
+### Mandatory Requirements in the historical proposal (60%)
 
 #### 1.1 Network Monitoring (20%)
 Implement network traffic monitoring.
@@ -57,7 +61,7 @@ get_network_stats() {
 **Hints:**
 - `/proc/net/dev` contains statistics per interface
 - For rates, take two readings at 1 second interval
-- Convert bytes to Mbps: `(bytes_diff * 8) / 1000000`
+- Convert bytes to Mbps: `(bytes_diff * 8) / (elapsed_seconds * 1000000)`; use a monotonic elapsed interval and reject non-positive duration or counter resets
 
 #### 1.2 Service Monitoring (20%)
 Implement systemd service monitoring.
@@ -166,12 +170,14 @@ Implement notifications via email or Slack.
 
 ---
 
-## Assignment 2: Backup - Complete System {#assignment-2-backup}
+<a id="assignment-2-backup"></a>
+
+## Assignment 2: Backup - Complete System
 
 ### Objective
 Extend the backup system with enterprise features.
 
-### Mandatory Requirements (60%)
+### Mandatory Requirements in the historical proposal (60%)
 
 #### 2.1 Encrypted Backup (20%)
 Add GPG encryption support.
@@ -199,6 +205,8 @@ restore_encrypted_backup() {
 }
 ```
 
+**Execution scope:** remote transfer, mail/webhooks, containers and publication are extension designs. Verify with local mocks first; a project brief does not itself authorise acting on a real endpoint. Encryption recipient identity and signature/key trust must be specified separately.
+
 **Hints:**
 - `gpg --encrypt --recipient user@email.com`
 - `gpg --decrypt`
@@ -221,11 +229,15 @@ backup_to_remote() {
 
 # rsync variant (recommended)
 rsync_backup() {
+    [[ $# == 3 ]] || return 2
+    local source=$1 remote_host=$2 remote_path=$3
+    [[ -e $source && $remote_host =~ ^[A-Za-z0-9][A-Za-z0-9.@_-]*$ && $remote_path == /* ]] || return 2
+    : "${EXCLUDE_FILE:?Set an explicit exclude file}"
     rsync -avz --progress \
         --exclude-from="$EXCLUDE_FILE" \
         --partial \
         --bwlimit="${BANDWIDTH_LIMIT:-0}" \
-        "$source" "${remote_host}:${remote_path}"
+        -- "$source" "${remote_host}:${remote_path}"
 }
 ```
 
@@ -274,12 +286,14 @@ Generate HTML report with backup statistics.
 
 ---
 
-## Assignment 3: Deployer - CI/CD Pipeline {#assignment-3-deployer}
+<a id="assignment-3-deployer"></a>
+
+## Assignment 3: Deployer - CI/CD Pipeline
 
 ### Objective
 Build a complete deployment pipeline.
 
-### Mandatory Requirements (60%)
+### Mandatory Requirements in the historical proposal (60%)
 
 #### 3.1 Docker Deployment (20%)
 Implement deployment for Docker containers.
@@ -319,7 +333,7 @@ deploy_pipeline() {
     
     # 2. Deploy to Staging
     log_info "Deploying to STAGING..."
-    ENVIRONMENT="staging" deploy_to_environment "$app" "$version"
+    ENVIRONMENT="staging" deploy_to_environment "$app" "$version" || return 1
     
     # 3. Integration Tests
     run_integration_tests "$app" "staging" || {
@@ -328,8 +342,8 @@ deploy_pipeline() {
     }
     
     # 4. Approval Gate
-    if [[ "$REQUIRE_APPROVAL" == "true" ]]; then
-        request_approval "Deploy $app v$version to production?"
+    if [[ "${REQUIRE_APPROVAL:-true}" == "true" ]]; then
+        request_approval "Deploy $app v$version to production?" || return 1
     fi
     
     # 5. Deploy to Production (canary)
@@ -354,7 +368,9 @@ Implement secure secrets management.
 
 ---
 
-## Assignment 4: Integrated Project {#assignment-4-integrated-project}
+<a id="assignment-4-integrated-project"></a>
+
+## Assignment 4: Integrated Project
 
 ### Objective
 Integrate all three projects into a coherent system.
@@ -368,24 +384,25 @@ Create a unified interface for all projects.
 #!/bin/bash
 # capstone.sh - Unified CLI
 
-case "$1" in
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd) || exit 1
+case "${1:-}" in
     monitor)
         shift
-        ./monitor/monitor.sh "$@"
+        bash "$SCRIPT_DIR/monitor/monitor.sh" "$@"
         ;;
     backup)
         shift
-        ./backup/backup.sh "$@"
+        bash "$SCRIPT_DIR/backup/backup.sh" "$@"
         ;;
     deploy)
         shift
-        ./deployer/deployer.sh "$@"
+        bash "$SCRIPT_DIR/deployer/deployer.sh" "$@"
         ;;
     status)
-        show_system_status
+        printf 'TODO: implement integrated status aggregation\n' >&2; exit 3
         ;;
     *)
-        show_help
+        printf 'Usage: capstone.sh {monitor|backup|deploy|status} [options]\n' >&2; exit 2
         ;;
 esac
 ```
@@ -404,7 +421,9 @@ Create a simple web dashboard for status visualisation.
 
 ---
 
-## Evaluation Criteria {#evaluation-criteria}
+<a id="evaluation-criteria"></a>
+
+## Evaluation Criteria
 
 ### General Scoring
 
@@ -437,11 +456,13 @@ Create a simple web dashboard for status visualisation.
 
 ---
 
-## Anti-Plagiarism Verification {#anti-plagiarism-verification}
+<a id="anti-plagiarism-verification"></a>
 
-### Mandatory Live Demonstration (20% of final grade)
+## Anti-Plagiarism Verification
 
-Each student must demonstrate their project LIVE during the seminar session. I've seen too many "perfect" submissions that students couldn't explain. Don't be that person.
+### Historical live demonstration proposal (20% of final grade; conflicts with rubric 40%)
+
+The draft proposes a live demonstration. Its 20% weighting conflicts with the rubric's 40%; the author must select one allocation and align all documents. The historical anecdote about unexplained “perfect” submissions has no supplied empirical record and establishes no detection rule.
 
 #### 1. Code Walkthrough (5 minutes)
 
@@ -469,7 +490,7 @@ The instructor introduces a bug into your code. You must:
 
 ### Verification Signals
 
-What we look for to distinguish authentic work:
+Historical heuristic table, retained for review. Generic names, polished comments, hesitation, navigation and commit size do not establish AI use or misconduct; none should independently trigger a penalty:
 
 | Signal | Authentic Work | Suspicious |
 |--------|----------------|------------|
@@ -482,9 +503,7 @@ What we look for to distinguish authentic work:
 
 ### Signature Script Requirement
 
-Your submission MUST include a `signature.sh` that generates unique system fingerprints. See Exercise 8 in LLM-Aware Exercises for details.
-
-Run it three times at 1-minute intervals and include output in your submission. This proves YOU ran the code on YOUR machine.
+The historical draft required `signature.sh` and three runs at one-minute intervals. This collection proposal is pending an explicit author decision on fields, minimisation, retention, recipients and consequences. The corrected Exercise 8 explains why those identifiers and local timestamps do not prove execution or authorship, and supplies a synthetic byte-checksum exercise. No new signature or data-collection protocol is adopted here.
 
 ---
 
@@ -500,7 +519,7 @@ Run it three times at 1-minute intervals and include output in your submission. 
 1. GitHub/GitLab repository
 2. README with instructions
 3. Working installation script
-4. signature.txt with three consecutive outputs
+4. Historical signature.txt proposal: pending the decision above; do not infer a current requirement
 5. Video demonstration (2-3 minutes) - optional for bonus
 
 ---

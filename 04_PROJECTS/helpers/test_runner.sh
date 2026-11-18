@@ -67,9 +67,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help) usage; exit 0 ;;
         -v|--verbose) VERBOSE=true; shift ;;
-        -s|--stop) STOP_ON_FAIL=true; shift ;;
-        -p|--pattern) PATTERN="$2"; shift 2 ;;
-        *) TESTS_DIR="$1"; shift ;;
+        -s|--stop|--stop-on-fail) STOP_ON_FAIL=true; shift ;;
+        -p|--pattern) [[ $# -ge 2 && -n "$2" ]] || { echo "Missing pattern" >&2; exit 2; }; PATTERN="$2"; shift 2 ;;
+        -*) echo "Unknown option: $1" >&2; exit 2 ;;
+        *) [[ -z "${TESTS_DIR:-}" ]] || { echo "Only one tests directory is accepted" >&2; exit 2; }; TESTS_DIR="$1"; shift ;;
     esac
 done
 
@@ -86,11 +87,14 @@ echo ""
 echo "════════════════════════════════════════"
 
 # Find and run tests
-while IFS= read -r test_file; do
+PLAN=$(mktemp)
+trap 'rm -f -- "$PLAN"' EXIT
+find "$TESTS_DIR" -name "$PATTERN" -type f -print0 | sort -z > "$PLAN" || { echo "Test discovery failed" >&2; exit 1; }
+while IFS= read -r -d '' test_file; do
     [[ -z "$test_file" ]] && continue
     
     test_name=$(basename "$test_file")
-    ((TOTAL++))
+    TOTAL=$((TOTAL + 1))
     
     echo -ne "${CYAN}Running:${NC} $test_name ... "
     
@@ -109,10 +113,10 @@ while IFS= read -r test_file; do
     
     if [[ $exit_code -eq 0 ]]; then
         echo -e "${GREEN}PASSED${NC}"
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     else
         echo -e "${RED}FAILED${NC}"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
         if ! $VERBOSE; then
             echo "  Output: ${output:0:100}..."
         fi
@@ -122,7 +126,7 @@ while IFS= read -r test_file; do
             break
         fi
     fi
-done < <(find "$TESTS_DIR" -name "$PATTERN" -type f | sort)
+done < "$PLAN"
 
 # Summary
 echo ""
@@ -141,4 +145,5 @@ fi
 echo "════════════════════════════════════════"
 
 # Exit code based on results
+[[ $TOTAL -gt 0 ]] || { echo "NOT_RUN: no matching tests" >&2; exit 2; }
 [[ $FAILED -eq 0 ]] && exit 0 || exit 1

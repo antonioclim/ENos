@@ -1,5 +1,11 @@
 # Deployer Project - Detailed Implementation
 
+## Implementation boundary
+
+The maintained CLI is `SEM06/scripts/projects/deployer/deployer.sh`; inspect `--help` before invocation. Its modules are `lib/core.sh`, `lib/utils.sh` and `lib/config.sh`. This chapter teaches a separate extracted filesystem release implementation plus deployment algorithms. Save named modules before combining the examples. They require Bash 4.4 or later, Python 3 and GNU utilities; YAML additionally requires PyYAML. `python3` alone is not evidence that PyYAML exists.
+
+The filesystem routines operate on an explicitly owned application root. No example here establishes zero downtime: rename atomicity covers one namespace, whilst service health, requests in flight, routing and database compatibility require separate evidence. Service, routing, notification and remote execution adapters are supplied explicitly for the operator's chosen topology. A missing adapter fails before deployment instead of silently succeeding or probing `/etc` to choose infrastructure.
+
 ## Contents
 
 1. [General Overview](#1-general-overview)
@@ -177,7 +183,7 @@ projects/deployer/
 │   100% v2.0                                                             │
 │                                                                          │
 │   Advantages:              Disadvantages:                               │
-│   + Zero downtime          - Mixed versions temporarily                 │
+│   + Availability target          - Mixed versions temporarily                 │
 │   + Gradual rollback       - Higher complexity                          │
 │   + Production testing     - Requires backward compatibility            │
 │                                                                          │
@@ -215,8 +221,8 @@ projects/deployer/
 │   └─────────────────┘                                                   │
 │                                                                          │
 │   Advantages:              Disadvantages:                               │
-│   + Instant rollback       - Resource duplication                       │
-│   + Zero downtime          - Higher cost                                │
+│   + Rapid route rollback       - Resource duplication                       │
+│   + Availability target          - Higher cost                                │
 │   + Testing before         - Complex DB synchronisation                 │
 │     switch                                                              │
 │                                                                          │
@@ -276,152 +282,197 @@ projects/deployer/
 
 ### 4.1 The prepare_release() Function
 
+Save the following module as `lib/release_teaching.py`. It copies dotfiles, stages a unique immutable release, encodes metadata as JSON and refuses incomplete targets. Local source symlinks must stay within the source tree; archive imports in this teaching implementation accept regular files and directories only. Directory trees, tar archives and ZIP archives remain supported. The caller retains ownership; no implicit `chown` or permission policy is imposed.
+
+```python
+#!/usr/bin/env python3
+"""Owned local release filesystem operations; no service/network actions.
+
+Atomic replacement is limited to one filesystem namespace. It does not establish
+zero downtime, database compatibility or a crash-durable deployment transaction.
+"""
+import argparse
+import datetime
+import fcntl
+import getpass
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import shutil
+import socket
+import stat
+import subprocess
+import sys
+import tarfile
+import tempfile
+import uuid
+import zipfile
+
+
+def identifier(value):
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*',value) or value in ('.','..'):
+        raise ValueError('Invalid release identifier')
+    return value
+
+
+def relative(value):
+    path=PurePosixPath(value)
+    if path.is_absolute() or '..' in path.parts or not path.parts: raise ValueError('Unsafe member name')
+    return str(path)
+
+
+def write_json(path,data):
+    fd,temporary=tempfile.mkstemp(prefix='.state.',dir=path.parent)
+    try:
+        with os.fdopen(fd,'w') as output: json.dump(data,output,ensure_ascii=False); output.write('\n'); output.flush(); os.fsync(output.fileno())
+        os.replace(temporary,path)
+    finally:
+        if os.path.exists(temporary): os.unlink(temporary)
+
+
+def copy_payload(source,destination):
+    if source.is_dir():
+        source=source.resolve()
+        for path in source.rglob('*'):
+            if path.is_symlink():
+                target=path.resolve()
+                if source!=target and source not in target.parents: raise ValueError('Source symlink escapes source tree')
+            elif not (path.is_file() or path.is_dir()): raise ValueError('Unsupported source object')
+        shutil.copytree(source,destination,dirs_exist_ok=True,symlinks=True)
+    elif zipfile.is_zipfile(source):
+        with zipfile.ZipFile(source) as archive:
+            names=set(); total=0
+            for item in archive.infolist():
+                name=relative(item.filename); mode=item.external_attr>>16
+                if name in names or stat.S_ISLNK(mode): raise ValueError('Duplicate or symlink ZIP member')
+                names.add(name); total+=item.file_size
+                if len(names)>100000 or total>2*1024**3: raise ValueError('Teaching archive limit exceeded')
+            for item in archive.infolist():
+                target=destination/relative(item.filename)
+                if item.is_dir(): target.mkdir(parents=True,exist_ok=True)
+                else:
+                    target.parent.mkdir(parents=True,exist_ok=True)
+                    with archive.open(item) as data,target.open('xb') as output: shutil.copyfileobj(data,output)
+    else:
+        with tarfile.open(source,'r:*') as archive:
+            members=archive.getmembers(); names=set(); total=0
+            for item in members:
+                if item.name in ('.','./') and item.isdir(): continue
+                name=relative(item.name)
+                if name in names or not (item.isfile() or item.isdir()): raise ValueError('Unsupported/duplicate archive member')
+                names.add(name); total+=item.size
+                if len(names)>100000 or total>2*1024**3: raise ValueError('Teaching archive limit exceeded')
+            for item in members:
+                if item.name in ('.','./') and item.isdir(): continue
+                target=destination/relative(item.name)
+                if item.isdir(): target.mkdir(parents=True,exist_ok=True)
+                else:
+                    target.parent.mkdir(parents=True,exist_ok=True)
+                    with archive.extractfile(item) as data,target.open('xb') as output: shutil.copyfileobj(data,output)
+                    target.chmod(item.mode & 0o777)
+
+
+def prepare(source,root,shared_dirs=(),shared_files=()):
+    source=source.resolve(strict=True); root=root.resolve()
+    if source==root or source in root.parents: raise ValueError('Release root must be outside source')
+    (root/'releases').mkdir(parents=True,exist_ok=True); (root/'.deploy_state').mkdir(exist_ok=True)
+    release_id=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S_')+uuid.uuid4().hex[:12]
+    stage=Path(tempfile.mkdtemp(prefix='.prepare.',dir=root/'releases'))
+    try:
+        copy_payload(source,stage)
+        for name in (*shared_dirs,*shared_files):
+            name=relative(name); target=root/'shared'/name; link=stage/name
+            if name in shared_dirs: target.mkdir(parents=True,exist_ok=True)
+            elif not target.is_file(): raise ValueError('Shared file must already exist: '+name)
+            if link.is_symlink() or link.is_file(): link.unlink()
+            elif link.is_dir(): shutil.rmtree(link)
+            link.parent.mkdir(parents=True,exist_ok=True); link.symlink_to(target)
+        meta={'release_id':release_id,'timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'source':str(source),'deployed_by':getpass.getuser(),'hostname':socket.gethostname(),
+              'git_commit':None,'git_branch':None}
+        if source.is_dir() and (source/'.git').exists():
+            for field,args in [('git_commit',['rev-parse','HEAD']),('git_branch',['rev-parse','--abbrev-ref','HEAD'])]:
+                result=subprocess.run(['git','-C',str(source),*args],capture_output=True,text=True)
+                if result.returncode==0: meta[field]=result.stdout.strip()
+        write_json(stage/'.release_meta',meta)
+        (stage/'.complete').touch()
+        stage.rename(root/'releases'/release_id)
+    finally:
+        if stage.exists(): shutil.rmtree(stage)
+    return release_id
+
+
+def switch(link,target):
+    if not target.is_dir(): raise ValueError('Target directory missing')
+    if link.exists() and not link.is_symlink(): raise ValueError('Refuse replacing a non-symlink live path')
+    temporary=Path(tempfile.mkdtemp(prefix='.switch.',dir=link.parent))
+    try:
+        (temporary/'link').symlink_to(target.resolve())
+        os.replace(temporary/'link',link)
+    finally: shutil.rmtree(temporary)
+
+
+def activate(root,release_id):
+    release=root/'releases'/identifier(release_id)
+    if release.is_symlink() or not (release/'.complete').is_file(): raise ValueError('Incomplete/unsafe release')
+    state=root/'.deploy_state'; state.mkdir(parents=True,exist_ok=True)
+    with (state/'deploy.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX)
+        current=root/'current'; previous=current.resolve().name if current.is_symlink() else None
+        write_json(state/'transition.json',{'previous':previous,'target':release_id})
+        switch(current,release)
+        write_json(state/'rollback_point.json',{'release_id':previous})
+
+
+def prune(root,keep):
+    if keep<1: raise ValueError('Keep at least one release')
+    protected=set()
+    if (root/'current').is_symlink(): protected.add((root/'current').resolve().name)
+    point=root/'.deploy_state/rollback_point.json'
+    if point.exists(): protected.add(json.loads(point.read_text()).get('release_id'))
+    releases=sorted((p for p in (root/'releases').iterdir() if p.is_dir() and not p.is_symlink() and (p/'.complete').is_file()),
+                    key=lambda p:json.loads((p/'.release_meta').read_text())['timestamp'],reverse=True)
+    protected.update(p.name for p in releases[:keep])
+    for path in releases:
+        if path.name not in protected and not (path/'.protected').exists(): shutil.rmtree(path)
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__); sub=parser.add_subparsers(dest='action',required=True)
+    p=sub.add_parser('prepare'); p.add_argument('source',type=Path); p.add_argument('root',type=Path)
+    p.add_argument('--shared-dir',action='append',default=[]); p.add_argument('--shared-file',action='append',default=[])
+    p=sub.add_parser('activate'); p.add_argument('root',type=Path); p.add_argument('release_id')
+    p=sub.add_parser('switch'); p.add_argument('link',type=Path); p.add_argument('target',type=Path)
+    p=sub.add_parser('prune'); p.add_argument('root',type=Path); p.add_argument('keep',type=int)
+    args=parser.parse_args()
+    if args.action=='prepare': print(prepare(args.source,args.root,args.shared_dir,args.shared_file))
+    elif args.action=='activate': activate(args.root,args.release_id)
+    elif args.action=='switch': switch(args.link,args.target)
+    else: prune(args.root,args.keep)
+
+
+if __name__=='__main__':
+    try: main()
+    except (OSError,ValueError,KeyError,tarfile.TarError,zipfile.BadZipFile) as error:
+        print(error,file=sys.stderr); raise SystemExit(1)
+```
+
+The stdout contract of `prepare_release` is exactly one release identifier. Setup and metadata errors propagate; diagnostic messages belong on stderr.
+
+
 ```bash
+release_engine() {
+    python3 "${RELEASE_ENGINE_PATH:-${LIB_DIR:?Set LIB_DIR}/release_teaching.py}" "$@"
+}
 prepare_release() {
-    local source_path="$1"
-    local app_root="$2"
-    
-    # Generate unique ID for release
-    local release_id
-    release_id=$(generate_release_id)
-    
-    local release_dir="${app_root}/releases/${release_id}"
-    
-    log_info "Preparing release: $release_id"
-    
-    # Create release directory
-    mkdir -p "$release_dir" || {
-        log_error "Cannot create release directory: $release_dir"
-        return 1
-    }
-    
-    # Copy or extract files
-    if [[ -d "$source_path" ]]; then
-        # Source = directory
-        log_info "Copying files from: $source_path"
-        rsync -av --progress "$source_path/" "$release_dir/" || {
-            log_error "Error copying files"
-            rm -rf "$release_dir"
-            return 1
-        }
-    elif [[ -f "$source_path" ]]; then
-        # Source = archive
-        log_info "Extracting archive: $source_path"
-        
-        case "$source_path" in
-            *.tar.gz|*.tgz)
-                tar -xzf "$source_path" -C "$release_dir" || return 1
-                ;;
-            *.tar.bz2)
-                tar -xjf "$source_path" -C "$release_dir" || return 1
-                ;;
-            *.zip)
-                unzip -q "$source_path" -d "$release_dir" || return 1
-                ;;
-            *)
-                log_error "Unknown archive format: $source_path"
-                return 1
-                ;;
-        esac
-    else
-        log_error "Source does not exist: $source_path"
-        return 1
-    fi
-    
-    # Create symlinks to shared directories
-    setup_shared_links "$release_dir" "$app_root"
-    
-    # Generate release metadata
-    create_release_metadata "$release_dir" "$release_id" "$source_path"
-    
-    # Set permissions
-    local app_user app_group
-    app_user=$(get_config "app_user" "www-data")
-    app_group=$(get_config "app_group" "www-data")
-    
-    chown -R "${app_user}:${app_group}" "$release_dir" 2>/dev/null || \
-        log_warning "Cannot change owner for release"
-    
-    echo "$release_id"
-    return 0
-}
-
-generate_release_id() {
-    date '+%Y%m%d_%H%M%S'
-}
-
-setup_shared_links() {
-    local release_dir="$1"
-    local app_root="$2"
-    local shared_dir="${app_root}/shared"
-    
-    # List of shared directories and files
-    local -a shared_dirs
-    IFS=',' read -ra shared_dirs <<< "$(get_config 'shared_dirs' 'logs,uploads,cache')"
-    
-    local -a shared_files
-    IFS=',' read -ra shared_files <<< "$(get_config 'shared_files' '')"
-    
-    # Create symlinks for shared directories
-    for dir in "${shared_dirs[@]}"; do
-        [[ -z "$dir" ]] && continue
-        
-        local target="${shared_dir}/${dir}"
-        local link="${release_dir}/${dir}"
-        
-        # Create shared directory if it doesn't exist
-        mkdir -p "$target"
-        
-        # Delete directory from release if it exists
-        [[ -d "$link" ]] && rm -rf "$link"
-        
-        # Create symlink
-        ln -sf "$target" "$link"
-        log_debug "Symlink: $link -> $target"
-    done
-    
-    # Symlinks for files
-    for file in "${shared_files[@]}"; do
-        [[ -z "$file" ]] && continue
-        
-        local target="${shared_dir}/${file}"
-        local link="${release_dir}/${file}"
-        
-        if [[ -f "$target" ]]; then
-            mkdir -p "$(dirname "$link")"
-            ln -sf "$target" "$link"
-        fi
-    done
-}
-
-create_release_metadata() {
-    local release_dir="$1"
-    local release_id="$2"
-    local source="$3"
-    
-    local meta_file="${release_dir}/.release_meta"
-    
-    cat > "$meta_file" <<EOF
-{
-    "release_id": "$release_id",
-    "timestamp": "$(date -Iseconds)",
-    "source": "$source",
-    "deployed_by": "$(whoami)",
-    "hostname": "$(hostname -f 2>/dev/null || hostname)",
-    "git_commit": "$(get_git_commit "$source" 2>/dev/null || echo "N/A")",
-    "git_branch": "$(get_git_branch "$source" 2>/dev/null || echo "N/A")"
-}
-EOF
-}
-
-get_git_commit() {
-    local dir="$1"
-    [[ -d "${dir}/.git" ]] && git -C "$dir" rev-parse --short HEAD
-}
-
-get_git_branch() {
-    local dir="$1"
-    [[ -d "${dir}/.git" ]] && git -C "$dir" rev-parse --abbrev-ref HEAD
+    local source_path=$1 app_root=$2 item
+    local -a command=(prepare "$source_path" "$app_root") shared_dirs=() shared_files=()
+    IFS=',' read -ra shared_dirs <<< "$(get_config shared_dirs '')"
+    IFS=',' read -ra shared_files <<< "$(get_config shared_files '')"
+    for item in "${shared_dirs[@]}"; do [[ -z $item ]] || command+=(--shared-dir "$item"); done
+    for item in "${shared_files[@]}"; do [[ -z $item ]] || command+=(--shared-file "$item"); done
+    release_engine "${command[@]}"
 }
 ```
 
@@ -429,392 +480,197 @@ get_git_branch() {
 
 ```bash
 activate_release() {
-    local release_id="$1"
-    local app_root="$2"
-    
-    local release_dir="${app_root}/releases/${release_id}"
-    local current_link="${app_root}/current"
-    
-    # Verify that release exists
-    if [[ ! -d "$release_dir" ]]; then
-        log_error "Release does not exist: $release_id"
-        return 1
-    fi
-    
-    log_info "Activating release: $release_id"
-    
-    # Save current release for rollback
-    if [[ -L "$current_link" ]]; then
-        local previous_release
-        previous_release=$(readlink -f "$current_link")
-        
-        echo "$(basename "$previous_release")" > "${app_root}/.deploy_state/rollback_point"
-        log_info "Rollback point saved: $(basename "$previous_release")"
-    fi
-    
-    # Execute pre_activate hook
-    run_hook "pre_activate" "$release_dir" || {
-        log_error "Pre-activate hook failed!"
-        return 1
-    }
-    
-    # Perform atomic switch using temporary symlink
-    local temp_link="${current_link}.new"
-    
-    # Create temporary symlink
-    ln -sf "$release_dir" "$temp_link" || {
-        log_error "Cannot create temporary symlink"
-        return 1
-    }
-    
-    # Atomic rename (this is the critical operation)
-    mv -Tf "$temp_link" "$current_link" || {
-        log_error "Cannot activate release (atomic switch failed)"
-        rm -f "$temp_link"
-        return 1
-    }
-    
-    log_info "Symlink updated: current -> $release_id"
-    
-    # Execute post_activate hook
-    run_hook "post_activate" "$release_dir"
-    
-    # Reload/restart service if needed
-    local restart_service
-    restart_service=$(get_config "restart_service" "")
-    
-    if [[ -n "$restart_service" ]]; then
-        restart_application_service "$restart_service"
-    fi
-    
-    # Update deployment state
-    update_deploy_state "$app_root" "$release_id" "deployed"
-    
-    return 0
+    local release_id=$1 app_root=$2 release_dir service
+    release_dir=$app_root/releases/$release_id
+    [[ -f $release_dir/.complete ]] || return 1
+    run_hook pre_activate "$release_dir" || return 1
+    release_engine activate "$app_root" "$release_id" || return 1
+    run_hook post_activate "$release_dir" || return 1
+    service=$(get_config restart_service '')
+    if [[ -n $service ]]; then restart_application_service "$service" || return 1; fi
+    update_deploy_state "$app_root" "$release_id" deployed || return 1
 }
-
 restart_application_service() {
-    local service="$1"
-    local method
-    method=$(get_config "service_manager" "systemd")
-    
-    log_info "Restart service: $service (via $method)"
-    
-    case "$method" in
-        systemd)
-            systemctl restart "$service" || {
-                log_warning "Systemd restart failed, trying reload"
-                systemctl reload "$service" || return 1
-            }
-            ;;
-        docker)
-            local container
-            container=$(get_config "docker_container" "$service")
-            docker restart "$container" || return 1
-            ;;
-        supervisor)
-            supervisorctl restart "$service" || return 1
-            ;;
-        script)
-            local restart_script
-            restart_script=$(get_config "restart_script" "")
-            [[ -x "$restart_script" ]] && "$restart_script" || return 1
-            ;;
-        signal)
-            local pid_file signal
-            pid_file=$(get_config "pid_file" "")
-            signal=$(get_config "reload_signal" "HUP")
-            
-            if [[ -f "$pid_file" ]]; then
-                kill -"$signal" "$(cat "$pid_file")" || return 1
-            fi
-            ;;
-        *)
-            log_warning "Unknown restart method: $method"
-            return 0
-            ;;
+    local service=$1 method script container
+    method=$(get_config service_manager systemd)
+    case $method in
+        systemd) systemctl restart -- "$service";;
+        docker) container=$(get_config docker_container "$service"); docker restart -- "$container";;
+        supervisor) supervisorctl restart "$service";;
+        script) script=$(get_config restart_script ''); [[ -n $script && -x $script ]] || return 2; "$script";;
+        *) printf 'Unsupported service manager: %s\n' "$method" >&2; return 2;;
     esac
-    
-    log_info "Service restarted successfully"
-    return 0
+}
+update_deploy_state() {
+    python3 - "$1" "$2" "$3" <<'PY'
+import datetime,json,os,pathlib,sys,tempfile
+root,release,status=sys.argv[1:]; directory=pathlib.Path(root)/'.deploy_state'
+directory.mkdir(parents=True,exist_ok=True)
+fd,temporary=tempfile.mkstemp(prefix='.last.',dir=directory)
+try:
+    with os.fdopen(fd,'w') as output: json.dump({'release_id':release,'status':status,'timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat()},output)
+    os.replace(temporary,directory/'last_deploy.json')
+finally:
+    if os.path.exists(temporary): os.unlink(temporary)
+PY
 }
 ```
 
 ### 4.3 Deployment Strategies Implementation
 
+Save this source-only module as `strategy_reference.sh` together with the health-check functions in Section 5. Each strategy accepts a **prepared release path**; rolling additionally accepts explicit instance names. Chapter P07 supplies filesystem/routing examples and the adapter contract. Configurations such as `(5 25 50 75 100)` are illustrative stage choices, not a measured optimal policy. Initialise `CANARY_STAGES` as an array and provide thresholds explicitly. Status 1 means a failed deployment with recovery acknowledged; status 3 means recovery/routing outcome requires operator resolution, so both candidate pools must remain available.
+
+
 ```bash
+#!/usr/bin/env bash
+# Source-only algorithm module. Adapters are supplied explicitly; no auto-detected
+# /etc, service, SSH, cluster or load-balancer target is ever selected here.
+
+require_adapter() { declare -F "$1" >/dev/null || { printf 'Missing adapter: %s\n' "$1" >&2; return 2; }; }
+positive_integer() { [[ ${1:-} =~ ^[1-9][0-9]{0,5}$ ]]; }
+nonnegative_integer() { [[ ${1:-} =~ ^[0-9]{1,5}$ ]]; }
+
 deploy_rolling() {
-    local source_path="$1"
-    local app_root="$2"
-    local -a instances=("${@:3}")
-    
-    local total="${#instances[@]}"
-    local batch_size
-    batch_size=$(get_config "rolling_batch_size" "1")
-    
-    log_info "Rolling deployment: $total instances, batch size: $batch_size"
-    
-    local deployed=0
-    local failed=0
-    
-    for ((i=0; i<total; i+=batch_size)); do
-        local batch=("${instances[@]:i:batch_size}")
-        
-        log_info "Processing batch $((i/batch_size + 1)): ${batch[*]}"
-        
-        for instance in "${batch[@]}"; do
-            log_info "Deploy on instance: $instance"
-            
-            # Deploy on this instance
-            if deploy_to_instance "$source_path" "$instance"; then
-                ((deployed++))
-                
-                # Health check
-                if ! health_check_instance "$instance"; then
-                    log_error "Health check failed for: $instance"
-                    
-                    # Rollback on this instance
-                    rollback_instance "$instance"
-                    ((failed++))
-                    
-                    # Check if we should stop
-                    local max_failures
-                    max_failures=$(get_config "max_rolling_failures" "1")
-                    
-                    if [[ $failed -ge $max_failures ]]; then
-                        log_error "Too many failures ($failed), stopping deployment"
-                        return 1
-                    fi
-                fi
+    local release=$1; shift
+    local -a instances=("$@")
+    local total=${#instances[@]} batch=${BATCH_SIZE:-1} limit=${MAX_UNAVAILABLE:-1}
+    local delay=${HEALTH_CHECK_INTERVAL:-10} i j end instance adapter
+    positive_integer "$batch" && positive_integer "$limit" && nonnegative_integer "$delay" || return 2
+    ((total > 0 && batch <= limit && limit <= total)) || return 2
+    for adapter in drain_instance wait_for_drain stop_application sync_release start_application wait_for_healthy enable_instance restore_previous_version; do
+        require_adapter "$adapter" || return 2
+    done
+    for ((i=0; i<total; i+=batch)); do
+        end=$((i+batch)); ((end <= total)) || end=$total
+        for ((j=i; j<end; j++)); do
+            instance=${instances[j]}
+            # A batch is a scheduling group; this reference updates instances sequentially.
+            if drain_instance "$instance" && wait_for_drain "$instance" "${DRAIN_TIMEOUT:-30}" &&
+               stop_application "$instance" && sync_release "$instance" "$release" &&
+               start_application "$instance" && wait_for_healthy "$instance" "${HEALTH_CHECK_RETRIES:-3}" "$delay" &&
+               enable_instance "$instance"; then :
             else
-                log_error "Deploy failed on: $instance"
-                ((failed++))
+                # A successful recovery does not turn a failed deployment into success.
+                if restore_previous_version "$instance" && start_application "$instance" &&
+                   wait_for_healthy "$instance" "${HEALTH_CHECK_RETRIES:-3}" "$delay" && enable_instance "$instance"; then return 1
+                else return 3; fi
             fi
         done
-        
-        # Pause between batches
-        local batch_delay
-        batch_delay=$(get_config "rolling_batch_delay" "5")
-        
-        if [[ $i + $batch_size -lt $total ]]; then
-            log_info "Waiting $batch_delay seconds before next batch..."
-            sleep "$batch_delay"
-        fi
+        if ((i+batch < total)); then sleep "$delay" || return 1; fi
     done
-    
-    log_info "Rolling deployment complete: $deployed success, $failed failures"
-    
-    [[ $failed -eq 0 ]]
+    return 0
+}
+
+wait_for_drain() {
+    local instance=$1 duration=$2 deadline connections pause
+    positive_integer "$duration" || return 2
+    require_adapter get_active_connections || return 2
+    deadline=$((SECONDS+duration))
+    while ((SECONDS < deadline)); do
+        connections=$(get_active_connections "$instance") || return 1
+        nonnegative_integer "$connections" || return 1
+        ((10#$connections != 0)) || return 0
+        pause=$((deadline-SECONDS)); ((pause <= 2)) || pause=2
+        ((pause > 0)) && sleep "$pause"
+    done
+    return 1  # A timed-out drain is not permission to stop active requests.
 }
 
 deploy_blue_green() {
-    local source_path="$1"
-    local app_root="$2"
-    
-    local blue_dir="${app_root}/blue"
-    local green_dir="${app_root}/green"
-    local active_link="${app_root}/active"
-    
-    # Determine which is active and which is standby
-    local active standby
-    if [[ -L "$active_link" ]]; then
-        active=$(readlink -f "$active_link")
-        if [[ "$active" == "$blue_dir" ]]; then
-            standby="$green_dir"
+    local release=$1 active target adapter
+    for adapter in get_active_env prepare_environment deploy_release start_environment run_smoke_tests warmup_application switch_traffic set_active_env is_environment_healthy; do
+        require_adapter "$adapter" || return 2
+    done
+    active=$(get_active_env) || return 1
+    case $active in blue) target=green;; green) target=blue;; *) return 2;; esac
+    prepare_environment "$target" || return 1
+    deploy_release "$release" "$target" || return 1
+    start_environment "$target" || return 1
+    run_smoke_tests "$target" || return 1
+    warmup_application "$target" "${WARMUP_REQUESTS:-100}" || return 1
+    # Keep both pools running until route/state acknowledgement is complete.
+    switch_traffic "$target" || return 3
+    if is_environment_healthy "$target" && set_active_env "$target"; then return 0; fi
+    if start_environment "$active" && is_environment_healthy "$active" && switch_traffic "$active"; then return 1; fi
+    return 3
+}
+
+rollback_blue_green() {
+    local active previous
+    active=$(get_active_env) || return 1
+    case $active in blue) previous=green;; green) previous=blue;; *) return 2;; esac
+    # A stopped standby must start before probing it.
+    start_environment "$previous" || return 1
+    is_environment_healthy "$previous" || return 1
+    switch_traffic "$previous" || return 3
+    set_active_env "$previous" || return 3
+    return 0  # Stopping the failed pool is a separate, explicitly requested action.
+}
+
+canary_values_valid() {
+    python3 - "$@" <<'PY'
+import math,sys
+try:
+    error,latency,error_limit,latency_limit=map(float,sys.argv[1:])
+    assert all(map(math.isfinite,(error,latency,error_limit,latency_limit)))
+    assert 0<=error<=100 and 0<=error_limit<=100 and latency>=0 and latency_limit>=0
+except (ValueError,AssertionError): raise SystemExit(2)
+raise SystemExit(0 if error<=error_limit and latency<=latency_limit else 1)
+PY
+}
+
+monitor_canary_stage() {
+    local percentage=$1 duration=$2 interval=${METRICS_CHECK_INTERVAL:-10}
+    local deadline error latency rc bad=0 pause
+    positive_integer "$duration" && positive_integer "$interval" || return 2
+    deadline=$((SECONDS+duration))
+    while :; do
+        error=$(get_canary_error_rate) || return 1
+        latency=$(get_canary_latency) || return 1
+        if canary_values_valid "$error" "$latency" "${ERROR_THRESHOLD:?Set an explicit error threshold}" "${LATENCY_THRESHOLD:?Set an explicit latency threshold}"; then
+            bad=0
         else
-            standby="$blue_dir"
+            rc=$?; ((rc != 2)) || return 1  # No data/NaN is unavailable, not healthy.
+            bad=$((bad+1))                # One bad observation, even if both metrics fail.
+            ((bad < ${CONSECUTIVE_FAILURE_LIMIT:-3})) || return 1
         fi
-    else
-        # First installation
-        active=""
-        standby="$blue_dir"
-    fi
-    
-    log_info "Blue-Green deployment"
-    log_info "  Active: ${active:-none}"
-    log_info "  Standby (target): $standby"
-    
-    # Prepare new release in standby
-    log_info "Preparing release in standby environment..."
-    
-    # Clean standby
-    rm -rf "${standby:?}/"*
-    
-    # Copy new release
-    if [[ -d "$source_path" ]]; then
-        rsync -av "$source_path/" "$standby/"
-    else
-        tar -xzf "$source_path" -C "$standby/"
-    fi
-    
-    # Setup shared links
-    setup_shared_links "$standby" "$app_root"
-    
-    # Execute hooks and build
-    run_hook "pre_deploy" "$standby"
-    
-    # Health check on standby (before switch)
-    log_info "Verifying health check on standby..."
-    
-    local standby_port
-    standby_port=$(get_config "standby_port" "8081")
-    
-    # Temporarily start application on standby for test
-    start_standby_instance "$standby" "$standby_port"
-    
-    if ! health_check "http://localhost:${standby_port}" "30"; then
-        log_error "Health check failed on standby!"
-        stop_standby_instance "$standby"
-        return 1
-    fi
-    
-    stop_standby_instance "$standby"
-    log_info "Health check OK on standby"
-    
-    # The actual switch
-    log_info "Performing blue-green switch..."
-    
-    # Atomic symlink switch
-    local temp_link="${active_link}.new"
-    ln -sf "$standby" "$temp_link"
-    mv -Tf "$temp_link" "$active_link"
-    
-    # Reload load balancer or reverse proxy
-    reload_load_balancer
-    
-    # Health check post-switch
-    if ! health_check "$(get_config 'app_url' 'http://localhost')" "60"; then
-        log_error "Health check post-switch failed! Rollback..."
-        
-        # Quick rollback
-        ln -sf "$active" "$temp_link"
-        mv -Tf "$temp_link" "$active_link"
-        reload_load_balancer
-        
-        return 1
-    fi
-    
-    run_hook "post_deploy" "$standby"
-    
-    log_info "Blue-Green deployment complete!"
-    log_info "New active: $standby"
-    
-    return 0
+        ((SECONDS < deadline)) || break
+        pause=$((deadline-SECONDS)); ((pause <= interval)) || pause=$interval
+        sleep "$pause" || return 1
+    done
+    # An unfinished bad streak at the end is not a stable stage ready for promotion.
+    ((bad == 0))
 }
 
 deploy_canary() {
-    local source_path="$1"
-    local app_root="$2"
-    
-    log_info "Canary deployment"
-    
-    # Canary configuration
-    local canary_percent_start canary_percent_end canary_step canary_interval
-    canary_percent_start=$(get_config "canary_initial_percent" "5")
-    canary_percent_end=$(get_config "canary_final_percent" "100")
-    canary_step=$(get_config "canary_step_percent" "10")
-    canary_interval=$(get_config "canary_step_interval" "60")
-    
-    # Prepare canary release
-    local release_id
-    release_id=$(prepare_release "$source_path" "$app_root")
-    
-    if [[ -z "$release_id" ]]; then
-        log_error "Release preparation failed"
-        return 1
-    fi
-    
-    local release_dir="${app_root}/releases/${release_id}"
-    
-    # Start canary instance
-    log_info "Starting canary instance..."
-    start_canary_instance "$release_dir"
-    
-    # Configure initial traffic
-    set_canary_weight "$canary_percent_start"
-    
-    log_info "Canary deployment started with ${canary_percent_start}% traffic"
-    
-    local current_percent=$canary_percent_start
-    
-    while [[ $current_percent -lt $canary_percent_end ]]; do
-        log_info "Canary at ${current_percent}%, monitoring..."
-        
-        # Monitor for canary_interval seconds
-        if ! monitor_canary "$canary_interval"; then
-            log_error "Anomalies detected in canary! Rollback..."
-            
-            set_canary_weight 0
-            stop_canary_instance
-            cleanup_failed_release "$release_dir"
-            
-            return 1
-        fi
-        
-        # Increase percentage
-        current_percent=$((current_percent + canary_step))
-        if [[ $current_percent -gt $canary_percent_end ]]; then
-            current_percent=$canary_percent_end
-        fi
-        
-        log_info "Increasing canary to ${current_percent}%"
-        set_canary_weight "$current_percent"
+    local release=$1 percentage previous=0 adapter
+    local -a stages=("${CANARY_STAGES[@]:-5 25 50 75 100}")
+    # The array must be explicitly initialised by the caller; no word-splitting fallback.
+    declare -p CANARY_STAGES &>/dev/null || return 2
+    stages=("${CANARY_STAGES[@]}")
+    ((${#stages[@]} > 0)) || return 2
+    for percentage in "${stages[@]}"; do
+        positive_integer "$percentage" || return 2
+        ((percentage > previous && percentage <= 100)) || return 2
+        previous=$percentage
     done
-    
-    # Finalisation - canary becomes production
-    log_info "Canary promoted to production"
-    
-    promote_canary_to_production "$release_id" "$app_root"
-    
-    run_hook "post_deploy" "$release_dir"
-    
-    log_info "Canary deployment complete!"
-    return 0
-}
-
-monitor_canary() {
-    local duration="${1:-60}"
-    local check_interval="${2:-10}"
-    local error_threshold
-    error_threshold=$(get_config "canary_error_threshold" "5")
-    
-    local start_time end_time errors=0
-    start_time=$(date +%s)
-    end_time=$((start_time + duration))
-    
-    while [[ $(date +%s) -lt $end_time ]]; do
-        # Collect metrics
-        local error_rate latency_p99
-        
-        error_rate=$(get_canary_error_rate)
-        latency_p99=$(get_canary_latency)
-        
-        log_debug "Canary metrics: errors=${error_rate}%, latency_p99=${latency_p99}ms"
-        
-        # Verify thresholds
-        if (( $(echo "$error_rate > $error_threshold" | bc -l) )); then
-            log_warning "High error rate: ${error_rate}%"
-            ((errors++))
-        fi
-        
-        local latency_threshold
-        latency_threshold=$(get_config "canary_latency_threshold" "500")
-        
-        if [[ $latency_p99 -gt $latency_threshold ]]; then
-            log_warning "High latency: ${latency_p99}ms"
-            ((errors++))
-        fi
-        
-        # If we have consecutive errors, abort
-        if [[ $errors -ge 3 ]]; then
-            log_error "Too many consecutive errors in canary"
-            return 1
-        fi
-        
-        sleep "$check_interval"
+    ((previous == 100)) || return 2
+    positive_integer "${STAGE_DURATION:-}" && positive_integer "${CONSECUTIVE_FAILURE_LIMIT:-3}" || return 2
+    canary_values_valid 0 0 "${ERROR_THRESHOLD:-}" "${LATENCY_THRESHOLD:-}" || return 2
+    for adapter in deploy_canary_instances set_canary_weight get_canary_error_rate get_canary_latency rollback_canary finalize_canary_deployment; do
+        require_adapter "$adapter" || return 2
     done
-    
-    return 0
+    deploy_canary_instances "$release" || return 1
+    for percentage in "${stages[@]}"; do
+        if set_canary_weight "$percentage" && monitor_canary_stage "$percentage" "$STAGE_DURATION"; then :
+        else rollback_canary || return 3; return 1; fi
+        if ((percentage < 100)) && [[ ${AUTO_PROMOTE:-false} != true ]]; then
+            require_adapter wait_for_promotion || { rollback_canary || return 3; return 2; }
+            wait_for_promotion "$percentage" || { rollback_canary || return 3; return 1; }
+        fi
+    done
+    # 100% receives the same observation window before promotion.
+    finalize_canary_deployment || return 3
 }
 ```
 
@@ -825,194 +681,85 @@ monitor_canary() {
 ### 5.1 Health Checks Implementation
 
 ```bash
-health_check() {
-    local target="$1"
-    local timeout="${2:-30}"
-    local method="${3:-auto}"
-    
-    log_info "Health check: $target (timeout: ${timeout}s)"
-    
-    # Auto-detect method
-    if [[ "$method" == "auto" ]]; then
-        case "$target" in
-            http://*|https://*)  method="http" ;;
-            tcp://*)             method="tcp" ;;
-            pid://*)             method="process" ;;
-            cmd://*)             method="command" ;;
-            *)                   method="http" ;;
-        esac
-    fi
-    
-    local start_time elapsed result=1
-    start_time=$(date +%s)
-    
-    while [[ $(($(date +%s) - start_time)) -lt $timeout ]]; do
-        case "$method" in
-            http)
-                check_http "$target" && result=0 && break
-                ;;
-            tcp)
-                check_tcp "$target" && result=0 && break
-                ;;
-            process)
-                check_process "$target" && result=0 && break
-                ;;
-            command)
-                check_command "$target" && result=0 && break
-                ;;
-        esac
-        
-        elapsed=$(($(date +%s) - start_time))
-        log_debug "Health check attempt failed, elapsed: ${elapsed}s"
-        
-        sleep 2
-    done
-    
-    if [[ $result -eq 0 ]]; then
-        log_info "Health check OK (${elapsed}s)"
-    else
-        log_error "Health check FAILED (timeout: ${timeout}s)"
-    fi
-    
-    return $result
-}
-
 check_http() {
-    local url="$1"
-    local expected_code="${2:-200}"
-    local timeout="${3:-5}"
-    
-    # Remove http:// prefix for logging
-    local display_url="${url#http://}"
-    display_url="${display_url#https://}"
-    
-    log_debug "HTTP check: $display_url"
-    
-    local response_code
-    response_code=$(curl -s -o /dev/null -w "%{http_code}" \
-        --connect-timeout "$timeout" \
-        --max-time "$((timeout * 2))" \
-        "$url" 2>/dev/null)
-    
-    log_debug "HTTP response: $response_code (expected: $expected_code)"
-    
-    # Verify response code
-    if [[ "$response_code" == "$expected_code" ]]; then
-        return 0
+    local url=$1 expected=${2:-200} duration=${3:-5} response
+    positive_integer "$duration" && [[ $expected =~ ^[1-5][0-9][0-9]$ ]] || return 2
+    [[ $url == http://* || $url == https://* ]] || return 2
+    response=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+        --connect-timeout "$duration" --max-time "$duration" -- "$url") || return 1
+    [[ $response == "$expected" ]]
+}
+check_tcp() {
+    local target=${1#tcp://} duration=${2:-5} host port
+    positive_integer "$duration" || return 2
+    # Explicit hostname/IPv4 subset; bracketed IPv6 requires a chosen nc adapter.
+    [[ $target =~ ^([A-Za-z0-9._-]+):([0-9]{1,5})$ ]] || return 2
+    host=${BASH_REMATCH[1]}; port=${BASH_REMATCH[2]}
+    ((10#$port > 0 && 10#$port <= 65535)) || return 2
+    timeout --kill-after=1 "$duration" bash -c 'exec 3<>"/dev/tcp/$1/$2"' _ "$host" "$port"
+}
+check_process() {
+    local target=${1#pid://}
+    if [[ $target =~ ^[1-9][0-9]*$ ]]; then kill -0 "$target" 2>/dev/null
+    elif [[ $target == name:* && -n ${target#name:} ]]; then pgrep -x -- "${target#name:}" >/dev/null
+    else return 2; fi
+}
+check_command() {
+    local duration=$1; shift
+    positive_integer "$duration" && (($# > 0)) || return 2
+    timeout --kill-after=1 "$duration" "$@" >/dev/null 2>&1  # argv, never bash -c from a manifest string.
+}
+health_check() {
+    local target=$1 duration=${2:-30} method=${3:-auto} deadline remaining attempt pause
+    positive_integer "$duration" || return 2
+    if [[ $method == auto ]]; then
+        case $target in http://*|https://*) method=http;; tcp://*) method=tcp;; pid://*) method=process;; *) return 2;; esac
     fi
-    
-    # Also accept other success codes
-    case "$response_code" in
-        200|201|202|204|301|302)
-            return 0
-            ;;
-    esac
-    
+    case $method in http|tcp|process) :;; *) return 2;; esac
+    deadline=$((SECONDS+duration))
+    while ((SECONDS < deadline)); do
+        remaining=$((deadline-SECONDS)); attempt=$remaining; ((attempt <= 5)) || attempt=5
+        case $method in
+            http) if check_http "$target" 200 "$attempt"; then return 0; fi;;
+            tcp) if check_tcp "$target" "$attempt"; then return 0; fi;;
+            process) if check_process "$target"; then return 0; fi;;
+        esac
+        pause=$((deadline-SECONDS)); ((pause <= 2)) || pause=2
+        ((pause > 0)) || break
+        sleep "$pause" || return 1
+    done
     return 1
 }
 
-check_tcp() {
-    local target="$1"
-    local timeout="${2:-5}"
-    
-    # Parse target: tcp://host:port or just host:port
-    target="${target#tcp://}"
-    
-    local host port
-    host="${target%:*}"
-    port="${target#*:}"
-    
-    log_debug "TCP check: $host:$port"
-    
-    # Use nc or /dev/tcp
-    if command -v nc &>/dev/null; then
-        nc -z -w "$timeout" "$host" "$port" 2>/dev/null
-    else
-        # Fallback to /dev/tcp (bash built-in)
-        timeout "$timeout" bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null
-    fi
-}
-
-check_process() {
-    local target="$1"
-    
-    # Parse target: pid://1234 or pid://name:nginx
-    target="${target#pid://}"
-    
-    if [[ "$target" =~ ^[0-9]+$ ]]; then
-        # Numeric PID
-        log_debug "Process check: PID $target"
-        kill -0 "$target" 2>/dev/null
-    else
-        # Process name
-        local process_name="${target#name:}"
-        log_debug "Process check: name=$process_name"
-        pgrep -x "$process_name" >/dev/null 2>&1
-    fi
-}
-
-check_command() {
-    local target="$1"
-    local timeout="${2:-10}"
-    
-    # Parse target: cmd://command args
-    local command="${target#cmd://}"
-    
-    log_debug "Command check: $command"
-    
-    timeout "$timeout" bash -c "$command" >/dev/null 2>&1
-}
-
-# Complex health check with retry and logging
 advanced_health_check() {
-    local -a checks=("$@")
-    local all_passed=true
-    
-    log_info "Executing ${#checks[@]} health check(s)"
-    
-    for check in "${checks[@]}"; do
-        # Format: type:target:timeout
-        IFS=':' read -r type target check_timeout <<< "$check"
-        
-        check_timeout="${check_timeout:-30}"
-        
-        case "$type" in
-            http)
-                if check_http "$target" 200 "$check_timeout"; then
-                    log_info "  ✓ HTTP $target"
-                else
-                    log_error "  ✗ HTTP $target"
-                    all_passed=false
-                fi
-                ;;
-            tcp)
-                if check_tcp "$target" "$check_timeout"; then
-                    log_info "  ✓ TCP $target"
-                else
-                    log_error "  ✗ TCP $target"
-                    all_passed=false
-                fi
-                ;;
-            process)
-                if check_process "pid://$target"; then
-                    log_info "  ✓ Process $target"
-                else
-                    log_error "  ✗ Process $target"
-                    all_passed=false
-                fi
-                ;;
-            command)
-                if check_command "cmd://$target" "$check_timeout"; then
-                    log_info "  ✓ Command: $target"
-                else
-                    log_error "  ✗ Command: $target"
-                    all_passed=false
-                fi
-                ;;
+    # One JSON object per argument: targets containing colons stay intact.
+    local row temporary type target duration expected item rc=0
+    temporary=$(mktemp) || return 1
+    for row in "$@"; do
+        if ! python3 - "$row" > "$temporary" <<'PY'
+import json,sys
+try:
+    d=json.loads(sys.argv[1]); kind=d['type']; timeout=d.get('timeout',30)
+    assert kind in ('http','tcp','process','command') and isinstance(timeout,int) and 1<=timeout<=9999
+    target=d.get('target',''); expected=str(d.get('expected_code',200))
+    argv=d.get('argv',[])
+    assert isinstance(target,str) and isinstance(argv,list) and all(isinstance(x,str) and '\0' not in x for x in argv)
+    assert '\0' not in target and (kind!='command' or argv)
+    for x in (kind,target,str(timeout),expected,*argv): sys.stdout.buffer.write(x.encode()+b'\0')
+except (ValueError,KeyError,AssertionError): raise SystemExit(2)
+PY
+        then rm -f -- "$temporary"; return 2; fi
+        local -a fields=(); mapfile -d '' -t fields < "$temporary"
+        type=${fields[0]}; target=${fields[1]}; duration=${fields[2]}; expected=${fields[3]}
+        case $type in
+            http) check_http "$target" "$expected" "$duration" || rc=1;;
+            tcp) check_tcp "$target" "$duration" || rc=1;;
+            process) check_process "$target" || rc=1;;
+            command) check_command "$duration" "${fields[@]:4}" || rc=1;;
         esac
     done
-    
-    $all_passed
+    rm -f -- "$temporary"
+    return "$rc"
 }
 ```
 
@@ -1074,8 +821,8 @@ run_hook() {
     local start_time exit_code output
     start_time=$(date +%s)
     
-    output=$(timeout "$hook_timeout" "$hook_script" "${hook_args[@]}" 2>&1)
-    exit_code=$?
+    if output=$(timeout --kill-after=1 "$hook_timeout" "$hook_script" "${hook_args[@]}" 2>&1); then exit_code=0
+    else exit_code=$?; fi
     
     local duration=$(($(date +%s) - start_time))
     
@@ -1114,7 +861,7 @@ run_deploy_hooks_sequence() {
         for hook in "${pre_hooks[@]}"; do
             if ! run_hook "$hook" "$release_dir"; then
                 log_error "Pre-deployment hook failed: $hook"
-                ((hooks_failed++))
+                hooks_failed=$((hooks_failed + 1))
                 
                 # Abort if critical hook fails
                 if [[ "$hook" == "pre_deploy" ]]; then
@@ -1143,7 +890,7 @@ run_deploy_hooks_sequence() {
         for hook in "${post_hooks[@]}"; do
             run_hook "$hook" "$release_dir" || {
                 log_warning "Post-deployment hook failed: $hook"
-                ((hooks_failed++))
+                hooks_failed=$((hooks_failed + 1))
             }
         done
     fi
@@ -1175,9 +922,9 @@ done
 
 # Verify permissions
 echo "Checking permissions..."
-chmod -R 755 "${DEPLOY_RELEASE_DIR}"
-chmod -R 777 "${DEPLOY_RELEASE_DIR}/storage" 2>/dev/null || true
-chmod -R 777 "${DEPLOY_RELEASE_DIR}/cache" 2>/dev/null || true
+# Apply the explicitly supplied application permission adapter; no world-writable defaults.
+: "${DEPLOY_PERMISSION_PROGRAM:?Provide the owned application permission adapter}"
+"$DEPLOY_PERMISSION_PROGRAM" "$DEPLOY_RELEASE_DIR"
 
 echo "Pre-deploy OK"
 exit 0
@@ -1244,10 +991,10 @@ if [[ -d "cache" ]]; then
 fi
 
 # Notify external services
-if [[ -n "$SLACK_WEBHOOK" ]]; then
-    curl -s -X POST "$SLACK_WEBHOOK" \
-        -H "Content-Type: application/json" \
-        -d "{\"text\": \"Deployment complete: $DEPLOY_RELEASE_ID\"}"
+if [[ -n "${SLACK_WEBHOOK:-}" ]]; then
+    payload=$(python3 -c 'import json,sys; print(json.dumps({"text":"Deployment complete: "+sys.argv[1]}))' "$DEPLOY_RELEASE_ID")
+    curl --fail --silent --show-error --connect-timeout 5 --max-time 10 -X POST \
+        -H 'Content-Type: application/json' --data "$payload" -- "$SLACK_WEBHOOK"
 fi
 
 echo "Post-deploy completed"
@@ -1262,241 +1009,57 @@ exit 0
 
 ```bash
 rollback() {
-    local app_root="$1"
-    local target="${2:-}"  # Specific Release ID or empty for last
-    
-    log_info "Initiating rollback..."
-    
-    local current_link="${app_root}/current"
-    local state_dir="${app_root}/.deploy_state"
-    
-    # Determine release for rollback
-    local rollback_release
-    
-    if [[ -n "$target" ]]; then
-        # Specific target
-        rollback_release="$target"
-        
-        if [[ ! -d "${app_root}/releases/${rollback_release}" ]]; then
-            log_error "Rollback release does not exist: $rollback_release"
-            return 1
-        fi
-    else
-        # Use saved rollback point
-        if [[ -f "${state_dir}/rollback_point" ]]; then
-            rollback_release=$(cat "${state_dir}/rollback_point")
-        else
-            # Find second-to-last release
-            rollback_release=$(ls -1 "${app_root}/releases" | sort -r | sed -n '2p')
-        fi
+    local app_root=$1 target=${2:-} directory service
+    if [[ -z $target ]]; then
+        target=$(python3 - "$app_root/.deploy_state/rollback_point.json" <<'PY'
+import json,sys
+try:
+    value=json.load(open(sys.argv[1]))['release_id']
+    if not isinstance(value,str) or not value: raise ValueError()
+    print(value)
+except (OSError,ValueError,KeyError): raise SystemExit(1)
+PY
+        ) || return 1
     fi
-    
-    if [[ -z "$rollback_release" ]]; then
-        log_error "No release available for rollback!"
-        return 1
-    fi
-    
-    local rollback_dir="${app_root}/releases/${rollback_release}"
-    
-    if [[ ! -d "$rollback_dir" ]]; then
-        log_error "Rollback directory does not exist: $rollback_dir"
-        return 1
-    fi
-    
-    log_info "Rolling back to: $rollback_release"
-    
-    # Execute pre_rollback hook
-    run_hook "pre_rollback" "$rollback_dir" || {
-        log_warning "Pre-rollback hook failed, continuing..."
-    }
-    
-    # Save current release (for a possible roll-forward)
-    local current_release
-    if [[ -L "$current_link" ]]; then
-        current_release=$(basename "$(readlink -f "$current_link")")
-        echo "$current_release" > "${state_dir}/pre_rollback_release"
-    fi
-    
-    # Perform the switch
-    local temp_link="${current_link}.rollback"
-    ln -sf "$rollback_dir" "$temp_link"
-    mv -Tf "$temp_link" "$current_link"
-    
-    log_info "Symlink updated for rollback"
-    
-    # Restart service
-    local restart_service
-    restart_service=$(get_config "restart_service" "")
-    
-    if [[ -n "$restart_service" ]]; then
-        restart_application_service "$restart_service" || {
-            log_error "Service restart failed after rollback!"
-        }
-    fi
-    
-    # Health check post-rollback
-    local app_url
-    app_url=$(get_config "app_url" "http://localhost")
-    
-    if ! health_check "$app_url" "60"; then
-        log_critical "Health check failed after rollback!"
-        log_critical "Manual intervention required!"
-        
-        run_hook "on_failure" "$rollback_dir"
-        
-        return 1
-    fi
-    
-    # Execute post_rollback hook
-    run_hook "post_rollback" "$rollback_dir"
-    run_hook "on_rollback" "$rollback_dir" "$current_release" "$rollback_release"
-    
-    # Update state
-    update_deploy_state "$app_root" "$rollback_release" "rolled_back"
-    
-    log_info "Rollback complete to: $rollback_release"
-    
-    return 0
+    [[ $target =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && $target != . && $target != .. ]] || return 2
+    directory=$app_root/releases/$target
+    [[ -f $directory/.complete ]] || return 1
+    run_hook pre_rollback "$directory" || return 1
+    release_engine activate "$app_root" "$target" || return 1
+    service=$(get_config restart_service '')
+    if [[ -n $service ]]; then restart_application_service "$service" || return 1; fi
+    health_check "$(get_config app_url http://localhost)" 60 || return 1
+    run_hook post_rollback "$directory" || return 1
+    run_hook on_rollback "$directory" || return 1
+    update_deploy_state "$app_root" "$target" rolled_back
 }
-
-# Automatic rollback on failure
 auto_rollback_on_failure() {
-    local app_root="$1"
-    local failed_release="$2"
-    
-    log_warning "Auto-rollback activated for: $failed_release"
-    
-    # Check if auto-rollback is enabled
-    if [[ "$(get_config 'auto_rollback' 'true')" != "true" ]]; then
-        log_info "Auto-rollback disabled, ignoring"
-        return 0
-    fi
-    
-    # Execute rollback
-    if rollback "$app_root"; then
-        log_info "Auto-rollback successful"
-        
-        # Notification
-        send_notification "warning" "Auto-rollback executed for $failed_release"
-        
-        return 0
-    else
-        log_critical "Auto-rollback FAILED!"
-        
-        send_notification "critical" "Auto-rollback failed! Intervention required!"
-        
-        return 1
-    fi
+    local app_root=$1 failed_release=$2
+    [[ $(get_config auto_rollback false) == true ]] || return 1
+    rollback "$app_root" || return 3
+    # The deployment remains failed even after successful recovery.
+    return 1
 }
-
-# Cleanup failed release
 cleanup_failed_release() {
-    local release_dir="$1"
-    local keep_for_debug="${2:-false}"
-    
-    if [[ "$keep_for_debug" == "true" ]]; then
-        local failed_dir="${release_dir}.failed"
-        mv "$release_dir" "$failed_dir"
-        log_info "Failed release saved for debug: $failed_dir"
-    else
-        rm -rf "$release_dir"
-        log_info "Failed release deleted: $release_dir"
-    fi
+    local app_root=$1 release_id=$2 keep_for_debug=${3:-false}
+    [[ $release_id =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && $release_id != . && $release_id != .. ]] || return 2
+    local directory=$app_root/releases/$release_id active=''
+    [[ ! -L $app_root/current ]] || active=$(readlink -f -- "$app_root/current")
+    [[ -f $directory/.complete && ! -L $directory && $active != "$(realpath -- "$directory")" ]] || return 1
+    if [[ $keep_for_debug == true ]]; then touch -- "$directory/.protected"; else rm -rf -- "$directory"; fi
 }
 ```
 
 ### 7.2 Cleanup and Maintenance
 
 ```bash
-cleanup_old_releases() {
-    local app_root="$1"
-    local keep="${2:-5}"
-    
-    local releases_dir="${app_root}/releases"
-    
-    [[ ! -d "$releases_dir" ]] && return 0
-    
-    log_info "Cleanup: keeping last $keep releases"
-    
-    # Get current release
-    local current_release=""
-    if [[ -L "${app_root}/current" ]]; then
-        current_release=$(basename "$(readlink -f "${app_root}/current")")
-    fi
-    
-    # List and sort releases (oldest first)
-    local -a all_releases
-    mapfile -t all_releases < <(ls -1 "$releases_dir" | sort)
-    
-    local total="${#all_releases[@]}"
-    
-    if [[ $total -le $keep ]]; then
-        log_info "Only $total releases, nothing to delete"
-        return 0
-    fi
-    
-    local to_delete=$((total - keep))
-    local deleted=0
-    
-    for release in "${all_releases[@]}"; do
-        [[ $deleted -ge $to_delete ]] && break
-        
-        # Don't delete current release
-        if [[ "$release" == "$current_release" ]]; then
-            log_debug "Keeping current release: $release"
-            continue
-        fi
-        
-        # Don't delete if marked as protected
-        if [[ -f "${releases_dir}/${release}/.protected" ]]; then
-            log_debug "Keeping protected release: $release"
-            continue
-        fi
-        
-        log_info "Deleting old release: $release"
-        rm -rf "${releases_dir:?}/${release}"
-        ((deleted++))
-    done
-    
-    log_info "Cleanup complete: $deleted releases deleted"
-}
-
-# Verify and repair state
+cleanup_old_releases() { release_engine prune "$1" "${2:-5}"; }
 verify_deployment_state() {
-    local app_root="$1"
-    
-    local issues=0
-    
-    # Verify current symlink
-    if [[ ! -L "${app_root}/current" ]]; then
-        log_error "Symlink 'current' missing!"
-        ((issues++))
-    elif [[ ! -d "$(readlink -f "${app_root}/current")" ]]; then
-        log_error "Symlink 'current' points to non-existent directory!"
-        ((issues++))
-    fi
-    
-    # Verify releases directory
-    if [[ ! -d "${app_root}/releases" ]]; then
-        log_error "Directory 'releases' missing!"
-        ((issues++))
-    fi
-    
-    # Verify shared directory
-    if [[ ! -d "${app_root}/shared" ]]; then
-        log_warning "Directory 'shared' missing"
-        mkdir -p "${app_root}/shared"
-    fi
-    
-    # Verify permissions
-    local app_user
-    app_user=$(get_config "app_user" "www-data")
-    
-    if ! stat -c %U "${app_root}/current" 2>/dev/null | grep -q "$app_user"; then
-        log_warning "Incorrect permissions for current directory"
-    fi
-    
-    echo "$issues"
+    local root=$1 issues=0
+    [[ -d $root/releases ]] || issues=$((issues+1))
+    [[ -L $root/current && -f $root/current/.complete ]] || issues=$((issues+1))
+    printf '%s\n' "$issues"
+    ((issues == 0))
 }
 ```
 
@@ -1507,72 +1070,53 @@ verify_deployment_state() {
 ### 8.1 YAML Manifest Structure
 
 ```yaml
-# deploy.yml - Deployment manifest
+# deploy.yml — data, not shell source. Values below are illustrative topology inputs.
 name: my-application
 version: "1.2.3"
-
-# Code source
 source:
-  type: git
-  url: git@github.com:org/repo.git
-  branch: main
-  # or for archive:
-  # type: archive
-  # url: https://releases.example.com/app-1.2.3.tar.gz
-
-# Deployment configuration
+  type: local
+  url: /owned/artifacts/my-application
+  # Alternatives: type: git with url/branch, or type: archive with an approved URL.
 deployment:
-  strategy: rolling  # rolling, blue-green, canary
-  app_root: /var/www/myapp
+  strategy: rolling
+  app_root: /owned/apps/my-application
   keep_releases: 5
-  
-  # For rolling
+  instances: [instance-1, instance-2]
   rolling:
     batch_size: 1
     batch_delay: 10
-    
-  # For canary
+    max_unavailable: 1
   canary:
-    initial_percent: 5
-    step_percent: 10
-    step_interval: 60
-
-# Health checks
+    stages: [5, 25, 50, 75, 100]
+    stage_duration: 60
+    error_threshold: 1.0
+    latency_threshold: 500
+    auto_promote: false
 health_checks:
-
-- `type: http`
-- `type: tcp`
-- `type: command`
-
-
-# Hooks
+  - type: http
+    target: http://localhost:8080/health
+    expected_code: 200
+    timeout: 10
+  - type: tcp
+    target: tcp://localhost:8080
+    timeout: 5
+  - type: command
+    argv: ["./bin/health-check", "--local"]
+    timeout: 10
 hooks:
-  pre_deploy:
-    - chmod -R 755 $RELEASE_DIR
-    - composer install --no-dev
-  build:
-    - npm ci
-    - npm run build
-  post_deploy:
-    - php artisan migrate --force
-    - php artisan config:cache
-
-# Services
+  pre_deploy: [["./bin/check-dependencies"]]
+  build: [["npm", "ci"], ["npm", "run", "build"]]
+  post_deploy: [["./bin/check-release"]]
 service:
   manager: systemd
   name: myapp
-  reload_command: "systemctl reload nginx"
-
-# Notifications
+  reload_argv: ["systemctl", "reload", "nginx"]
 notifications:
   slack:
-    webhook: ${SLACK_WEBHOOK}
+    webhook_env: SLACK_WEBHOOK
     channel: "#deployments"
   email:
-    recipients:
-      - devops@example.com
-
-# Environment
+    recipients: ["devops@example.com"]
 environment:
   APP_ENV: production
   LOG_LEVEL: warning
@@ -1580,154 +1124,216 @@ environment:
 
 ### 8.2 Manifest Parser and Executor
 
-```bash
-parse_manifest() {
-    local manifest_file="$1"
-    
-    if [[ ! -f "$manifest_file" ]]; then
-        log_error "Manifest does not exist: $manifest_file"
-        return 1
-    fi
-    
-    log_info "Parsing manifest: $manifest_file"
-    
-    # Verify we have YAML parser
-    local yaml_parser=""
-    if command -v yq &>/dev/null; then
-        yaml_parser="yq"
-    elif command -v python3 &>/dev/null; then
-        yaml_parser="python"
-    else
-        log_error "No YAML parser found (yq or python)"
-        return 1
-    fi
-    
-    # Extract configuration into variables
-    case "$yaml_parser" in
-        yq)
-            MANIFEST_NAME=$(yq -r '.name // "app"' "$manifest_file")
-            MANIFEST_VERSION=$(yq -r '.version // "0.0.0"' "$manifest_file")
-            MANIFEST_STRATEGY=$(yq -r '.deployment.strategy // "rolling"' "$manifest_file")
-            MANIFEST_APP_ROOT=$(yq -r '.deployment.app_root // "/var/www/app"' "$manifest_file")
-            MANIFEST_KEEP_RELEASES=$(yq -r '.deployment.keep_releases // 5' "$manifest_file")
-            
-            # Source
-            MANIFEST_SOURCE_TYPE=$(yq -r '.source.type // "git"' "$manifest_file")
-            MANIFEST_SOURCE_URL=$(yq -r '.source.url // ""' "$manifest_file")
-            MANIFEST_SOURCE_BRANCH=$(yq -r '.source.branch // "main"' "$manifest_file")
-            
-            # Health checks (array)
-            MANIFEST_HEALTH_CHECKS=$(yq -r '.health_checks | length' "$manifest_file")
-            ;;
-            
-        python)
-            eval "$(python3 - "$manifest_file" <<'PYTHON'
+Save the validator below as `lib/manifest_reference.py`. It validates mappings and nested fields, rejects unknown keys, preserves quotes and apostrophes as data and emits JSON without shell assignments. Hook and command-check arguments are arrays: no `eval`, interpolation or implicit shell is used. Environment values are literal. Notification credentials refer to an explicit environment-variable name; choosing recipients, enabling notifications or selecting remote authentication remains an operator action.
+
+```python
+#!/usr/bin/env python3
+"""Validate the chapter manifest as data. PyYAML is an explicit dependency."""
+import json
+import os
+from pathlib import Path
+import subprocess
 import sys
-import yaml
 
-with open(sys.argv[1]) as f:
-    m = yaml.safe_load(f)
 
-print(f"MANIFEST_NAME='{m.get('name', 'app')}'")
-print(f"MANIFEST_VERSION='{m.get('version', '0.0.0')}'")
-print(f"MANIFEST_STRATEGY='{m.get('deployment', {}).get('strategy', 'rolling')}'")
-print(f"MANIFEST_APP_ROOT='{m.get('deployment', {}).get('app_root', '/var/www/app')}'")
-print(f"MANIFEST_KEEP_RELEASES={m.get('deployment', {}).get('keep_releases', 5)}")
-print(f"MANIFEST_SOURCE_TYPE='{m.get('source', {}).get('type', 'git')}'")
-print(f"MANIFEST_SOURCE_URL='{m.get('source', {}).get('url', '')}'")
-print(f"MANIFEST_SOURCE_BRANCH='{m.get('source', {}).get('branch', 'main')}'")
-PYTHON
-            )"
-            ;;
-    esac
-    
-    log_info "Manifest parsed:"
-    log_info "  Name: $MANIFEST_NAME"
-    log_info "  Version: $MANIFEST_VERSION"
-    log_info "  Strategy: $MANIFEST_STRATEGY"
-    log_info "  App Root: $MANIFEST_APP_ROOT"
-    
-    return 0
-}
+def keys(value,allowed,required=()):
+    if not isinstance(value,dict) or set(value)-set(allowed) or not set(required)<=set(value):
+        raise ValueError('Unknown, missing or invalid mapping fields')
 
-execute_manifest_deployment() {
-    local manifest_file="$1"
-    
-    # Parse manifest
-    parse_manifest "$manifest_file" || return 1
-    
-    # Obtain source
-    local source_path
-    source_path=$(fetch_source) || return 1
-    
-    # Execute deployment based on strategy
-    case "$MANIFEST_STRATEGY" in
-        rolling)
-            deploy_rolling "$source_path" "$MANIFEST_APP_ROOT"
-            ;;
-        blue-green)
-            deploy_blue_green "$source_path" "$MANIFEST_APP_ROOT"
-            ;;
-        canary)
-            deploy_canary "$source_path" "$MANIFEST_APP_ROOT"
-            ;;
-        *)
-            log_error "Unknown strategy: $MANIFEST_STRATEGY"
-            return 1
-            ;;
-    esac
-    
-    local result=$?
-    
-    # Cleanup temporary source
-    [[ -d "$source_path" && "$source_path" == /tmp/* ]] && rm -rf "$source_path"
-    
-    return $result
-}
 
+def string(value):
+    if not isinstance(value,str) or '\0' in value: raise ValueError('Expected NUL-free string')
+    return value
+
+
+def integer(value,low,high):
+    if type(value)!=int or not low<=value<=high: raise ValueError('Integer outside schema bounds')
+
+
+def validate(data):
+    keys(data,('name','version','source','deployment','health_checks','hooks','service','notifications','environment'),('name','version','source','deployment'))
+    for key in ('name','version'): string(data[key])
+    keys(data['source'],('type','url','branch'),('type','url'))
+    if data['source']['type'] not in ('local','archive','git'): raise ValueError('Unknown source type')
+    string(data['source']['url']); string(data['source'].get('branch','main'))
+    deployment=data['deployment']
+    keys(deployment,('strategy','app_root','keep_releases','instances','rolling','canary'),('strategy','app_root'))
+    if deployment['strategy'] not in ('rolling','blue-green','canary'): raise ValueError('Unknown strategy')
+    root=Path(string(deployment['app_root']))
+    if not root.is_absolute() or root==Path('/'): raise ValueError('Explicit absolute app_root required')
+    integer(deployment.get('keep_releases',5),1,10000)
+    instances=deployment.get('instances',[])
+    if not isinstance(instances,list) or not all(isinstance(v,str) and v and '\0' not in v for v in instances): raise ValueError('Invalid instances')
+    if deployment['strategy']=='rolling' and not instances: raise ValueError('Rolling needs explicit instances')
+    rolling=deployment.get('rolling',{})
+    keys(rolling,('batch_size','batch_delay','max_unavailable'))
+    for k,default,low in [('batch_size',1,1),('batch_delay',10,0),('max_unavailable',1,1)]: integer(rolling.get(k,default),low,10000)
+    canary=deployment.get('canary',{})
+    keys(canary,('stages','stage_duration','error_threshold','latency_threshold','auto_promote'))
+    if deployment['strategy']=='canary':
+        stages=canary.get('stages')
+        if not isinstance(stages,list) or not stages: raise ValueError('Explicit canary stages required')
+        previous=0
+        for item in stages: integer(item,previous+1,100); previous=item
+        if previous!=100: raise ValueError('Final canary stage must be 100')
+        integer(canary.get('stage_duration'),1,86400)
+        import math
+        for key,maximum in [('error_threshold',100),('latency_threshold',1e9)]:
+            value=canary.get(key)
+            if type(value) not in (int,float) or not math.isfinite(value) or not 0<=value<=maximum: raise ValueError('Explicit valid metric threshold required')
+        if type(canary.get('auto_promote',False)) is not bool: raise ValueError('auto_promote is boolean')
+    checks=data.get('health_checks',[])
+    if not isinstance(checks,list): raise ValueError('health_checks is a list')
+    for check in checks:
+        keys(check,('type','target','timeout','expected_code','argv'),('type',))
+        if check['type'] not in ('http','tcp','process','command'): raise ValueError('Unknown health check')
+        integer(check.get('timeout',30),1,9999)
+        if check['type']=='command':
+            argv=check.get('argv')
+            if not isinstance(argv,list) or not argv: raise ValueError('Command health check requires argv')
+            for item in argv: string(item)
+        else: string(check.get('target'))
+        if 'expected_code' in check: integer(check['expected_code'],100,599)
+    hooks=data.get('hooks',{})
+    keys(hooks,('pre_deploy','build','post_deploy','on_failure','on_rollback'))
+    for commands in hooks.values():
+        if not isinstance(commands,list): raise ValueError('Hook phase is a list of argv arrays')
+        for argv in commands:
+            if not isinstance(argv,list) or not argv: raise ValueError('Hook command requires an argv array')
+            for item in argv: string(item)
+    service=data.get('service',{})
+    keys(service,('manager','name','reload_argv'))
+    if service:
+        if service.get('manager') not in ('systemd','docker','supervisor','script'): raise ValueError('Unsupported service adapter')
+        string(service.get('name'))
+        if 'reload_argv' in service:
+            if not isinstance(service['reload_argv'],list) or not service['reload_argv']: raise ValueError('reload_argv required')
+            for item in service['reload_argv']: string(item)
+    environment=data.get('environment',{})
+    if not isinstance(environment,dict): raise ValueError('Environment mapping required')
+    import re
+    for name,value in environment.items():
+        if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*',name): raise ValueError('Invalid environment name')
+        string(value)
+    notifications=data.get('notifications',{})
+    keys(notifications,('slack','email'))
+    if 'slack' in notifications:
+        keys(notifications['slack'],('webhook_env','channel'),('webhook_env',))
+        string(notifications['slack']['webhook_env'])
+        if 'channel' in notifications['slack']: string(notifications['slack']['channel'])
+    if 'email' in notifications:
+        keys(notifications['email'],('recipients',),('recipients',))
+        recipients=notifications['email']['recipients']
+        if not isinstance(recipients,list) or not recipients: raise ValueError('Recipients list required')
+        for recipient in recipients: string(recipient)
+    return data
+
+
+def main():
+    action=sys.argv[1]
+    if action=='validate':
+        try: import yaml
+        except ImportError: raise ValueError('PyYAML must be installed explicitly; python3 alone is not a YAML parser')
+        source=Path(sys.argv[2])
+        if source.stat().st_size>1024*1024: raise ValueError('Manifest exceeds the teaching limit')
+        print(json.dumps(validate(yaml.safe_load(source.read_text())),ensure_ascii=False))
+    elif action=='get':
+        value=json.loads(sys.argv[2])
+        for key in sys.argv[3].split('.'):
+            if not isinstance(value,dict) or key not in value: print(sys.argv[4]); return
+            value=value[key]
+        if isinstance(value,(dict,list)): print(json.dumps(value))
+        elif isinstance(value,bool): print(str(value).lower())
+        else: print(value)
+    elif action=='hooks':
+        data=validate(json.loads(sys.argv[2])); phase=sys.argv[3]; directory=sys.argv[4]
+        env=os.environ.copy(); env.update(data.get('environment',{})); env['DEPLOY_RELEASE_DIR']=directory
+        for argv in data.get('hooks',{}).get(phase,[]): subprocess.run(argv,cwd=directory,env=env,check=True,timeout=300,stdout=sys.stderr)
+    else: raise ValueError('Unknown manifest operation')
+
+
+if __name__=='__main__':
+    try: main()
+    except (OSError,ValueError,TypeError,subprocess.SubprocessError) as error:
+        print(error,file=sys.stderr); raise SystemExit(2)
+```
+
+The executor consumes the complete validated plan. Before fetching any source, `configure_manifest_adapters` must acknowledge every configured service, route, health and notification capability or return nonzero; no accepted field may be silently ignored. It is an explicit topology adapter from `DEPLOY_ADAPTERS_FILE`, not a hidden default. Tests supply harmless adapters. That boundary is necessary because a repository cannot infer service names, remote authentication, database rollback or notification authorisation from an example manifest.
+
+
+```bash
+manifest_engine() { python3 "${MANIFEST_ENGINE_PATH:-${LIB_DIR:?}/manifest_reference.py}" "$@"; }
+declare -g MANIFEST_JSON='' OWNED_SOURCE_DIR=''
+parse_manifest() { MANIFEST_JSON=$(manifest_engine validate "$1"); }
+manifest_get() { manifest_engine get "$MANIFEST_JSON" "$1" "${2:-}"; }
 fetch_source() {
-    local temp_dir
-    temp_dir=$(mktemp -d)
-    
-    case "$MANIFEST_SOURCE_TYPE" in
-        git)
-            log_info "Cloning Git repository..."
-            git clone --depth 1 --branch "$MANIFEST_SOURCE_BRANCH" \
-                "$MANIFEST_SOURCE_URL" "$temp_dir" || {
-                log_error "Git clone failed"
-                rm -rf "$temp_dir"
-                return 1
-            }
-            ;;
-            
-        archive)
-            log_info "Downloading archive..."
-            local archive_file="${temp_dir}/source.tar.gz"
-            
-            curl -sL "$MANIFEST_SOURCE_URL" -o "$archive_file" || {
-                log_error "Archive download failed"
-                rm -rf "$temp_dir"
-                return 1
-            }
-            
-            tar -xzf "$archive_file" -C "$temp_dir"
-            rm "$archive_file"
-            ;;
-            
+    local -n result=$1
+    local kind url branch target
+    kind=$(manifest_get source.type); url=$(manifest_get source.url); branch=$(manifest_get source.branch main)
+    OWNED_SOURCE_DIR=$(mktemp -d) || return 1
+    case $kind in
         local)
-            log_info "Copying from local path..."
-            cp -r "$MANIFEST_SOURCE_URL"/* "$temp_dir/"
-            ;;
-            
-        *)
-            log_error "Unknown source type: $MANIFEST_SOURCE_TYPE"
-            rm -rf "$temp_dir"
-            return 1
-            ;;
+            [[ -d $url ]] || return 1
+            cp -a -- "$url/." "$OWNED_SOURCE_DIR/" || return 1
+            result=$OWNED_SOURCE_DIR;;
+        git)
+            git clone --depth 1 --branch "$branch" -- "$url" "$OWNED_SOURCE_DIR" >&2 || return 1
+            result=$OWNED_SOURCE_DIR;;
+        archive)
+            target=$OWNED_SOURCE_DIR/artifact.tar.gz
+            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 300 --output "$target" -- "$url" || return 1
+            result=$target;;
+        *) return 2;;
     esac
-    
-    echo "$temp_dir"
 }
+execute_manifest_deployment() (
+    local manifest=$1 source_path release_id release_dir root strategy rc=0 rows
+    parse_manifest "$manifest" || return 2
+    : "${DEPLOY_ADAPTERS_FILE:?Provide the explicitly approved topology adapter module}"
+    source "$DEPLOY_ADAPTERS_FILE" || return 2
+    require_adapter configure_manifest_adapters || return 2
+    configure_manifest_adapters "$MANIFEST_JSON" || return 2
+    trap '[[ -z $OWNED_SOURCE_DIR ]] || rm -rf -- "$OWNED_SOURCE_DIR"' EXIT
+    fetch_source source_path || return 1
+    root=$(manifest_get deployment.app_root)
+    strategy=$(manifest_get deployment.strategy)
+    release_id=$(prepare_release "$source_path" "$root") || return 1
+    release_dir=$root/releases/$release_id
+    manifest_engine hooks "$MANIFEST_JSON" pre_deploy "$release_dir" || return 1
+    manifest_engine hooks "$MANIFEST_JSON" build "$release_dir" || return 1
+    BATCH_SIZE=$(manifest_get deployment.rolling.batch_size 1)
+    MAX_UNAVAILABLE=$(manifest_get deployment.rolling.max_unavailable 1)
+    HEALTH_CHECK_INTERVAL=$(manifest_get deployment.rolling.batch_delay 10)
+    STAGE_DURATION=$(manifest_get deployment.canary.stage_duration 60)
+    ERROR_THRESHOLD=$(manifest_get deployment.canary.error_threshold '')
+    LATENCY_THRESHOLD=$(manifest_get deployment.canary.latency_threshold '')
+    AUTO_PROMOTE=$(manifest_get deployment.canary.auto_promote false)
+    local -a instances=() stages=() checks=()
+    rows=$OWNED_SOURCE_DIR/plan.fields
+    python3 - "$MANIFEST_JSON" > "$rows" <<'PY'
+import json,sys
+d=json.loads(sys.argv[1]); groups=[d['deployment'].get('instances',[]),d['deployment'].get('canary',{}).get('stages',[]),d.get('health_checks',[])]
+for group in groups:
+    print(json.dumps(group))
+PY
+    local instances_json stages_json checks_json
+    { IFS= read -r instances_json; IFS= read -r stages_json; IFS= read -r checks_json; } < "$rows"
+    mapfile -d '' -t instances < <(python3 -c 'import json,sys; [sys.stdout.buffer.write(str(x).encode()+b"\0") for x in json.loads(sys.argv[1])]' "$instances_json")
+    mapfile -d '' -t CANARY_STAGES < <(python3 -c 'import json,sys; [sys.stdout.buffer.write(str(x).encode()+b"\0") for x in json.loads(sys.argv[1])]' "$stages_json")
+    mapfile -t checks < <(python3 -c 'import json,sys; [print(json.dumps(x)) for x in json.loads(sys.argv[1])]' "$checks_json")
+    case $strategy in
+        rolling) if deploy_rolling "$release_dir" "${instances[@]}"; then :; else rc=$?; fi;;
+        blue-green) if deploy_blue_green "$release_dir"; then :; else rc=$?; fi;;
+        canary) if deploy_canary "$release_dir"; then :; else rc=$?; fi;;
+    esac
+    if ((rc != 0)); then manifest_engine hooks "$MANIFEST_JSON" on_failure "$release_dir" || :; return "$rc"; fi
+    (cd -- "$release_dir" && advanced_health_check "${checks[@]}") || return 1
+    manifest_engine hooks "$MANIFEST_JSON" post_deploy "$release_dir" || return 1
+    cleanup_old_releases "$root" "$(manifest_get deployment.keep_releases 5)" || return 1
+    # Adapter receives validated service/notification/environment fields, never executable assignments.
+    require_adapter finish_manifest_adapters || return 2
+    finish_manifest_adapters "$MANIFEST_JSON" "$release_dir"
+)
 ```
 
 ---
@@ -1825,7 +1431,7 @@ collect_deployment_metrics() {
 
 ## Conclusions
 
-The Deployer project demonstrates the implementation of a complete automated deployment system. Key points:
+The Deployer project demonstrates the implementation of explicit deployment algorithms and local release transactions. Key points:
 
 1. **Multiple Strategies** - support for different deployment scenarios
 2. **Safety** - health checks and automatic rollback

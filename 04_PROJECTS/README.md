@@ -1,5 +1,7 @@
 # SEM-PROJ: Semester Projects - Operating Systems
 
+> **Current status:** Numerical assessment, bonus and penalty rules below are historical proposals awaiting author reconciliation. Timings, anecdotes and experiential claims are retained with unverified provenance. See [ASSESSMENT_AND_EVIDENCE_CONTRACT.md](ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for the concrete choices, consequences and recommended resolution. No grade or publication policy is adopted by these examples.
+
 > Operating Systems | ASE Bucharest - CSIE  
 > Author: ing. dr. Antonio Clim  
 > Version: 2.0 | January 2025

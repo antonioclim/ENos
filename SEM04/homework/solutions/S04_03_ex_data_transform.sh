@@ -1,183 +1,41 @@
-#!/bin/bash
-# ============================================================================
+#!/usr/bin/env bash
 # ex3_data_transform.sh - Model Solution
-# CSV data transformation: tabular report, statistics, update
-#
-# Author: [Instructor]
-# Version: 1.0
-# ============================================================================
+# Author: [Instructor] | Version: 1.1 (personalised schema, portable AWK)
 set -euo pipefail
-
-# Colours
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-# ============================================================================
-# Argument verification
-# ============================================================================
-if [[ $# -lt 1 ]]; then
-    echo -e "${RED}Usage: $0 <csv_file>${NC}"
-    exit 1
-fi
-
-CSV_FILE="$1"
-OUTPUT_DIR="./output"
-
-if [[ ! -f "$CSV_FILE" ]]; then
-    echo -e "${RED}Error: File '$CSV_FILE' does not exist!${NC}"
-    exit 1
-fi
-
-mkdir -p "$OUTPUT_DIR"
-
-# ============================================================================
-# Function: Format number with thousands separator
-# ============================================================================
-format_currency() {
-    printf "$%'d" "$1"
+export LC_ALL=C
+if [[ ${1-} == --help && $# == 1 ]]; then echo "Usage: $0 EMPLOYEES_CSV (ENOS_OUTPUT_DIR defaults to ./output)"; exit 0; fi
+[[ $# == 1 && -f $1 && -r $1 ]] || { echo "Usage: $0 READABLE_EMPLOYEES_CSV" >&2; exit 2; }
+CSV_FILE=$1
+# Strict teaching subset: exact header, 7 unquoted fields, numeric salary, date shape.
+awk -F, '
+NR==1 {if($0!="ID,Name,Department,Salary,Email,HireDate,Status") bad=1; next}
+NF!=7 || /["\r]/ || $4 !~ /^[0-9]+$/ || $6 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ {bad=1}
+END {if(NR==0 || bad) {print "Invalid personalised employee CSV schema" > "/dev/stderr"; exit 2}}
+' "$CSV_FILE"
+REFERENCE_YEAR=${ENOS_REFERENCE_YEAR:-$(date -u +%Y)}
+[[ $REFERENCE_YEAR =~ ^[0-9]{4}$ ]] || { echo 'ENOS_REFERENCE_YEAR must be four decimal digits' >&2; exit 2; }
+OUTPUT_DIR=${ENOS_OUTPUT_DIR:-./output}
+[[ ! -L $OUTPUT_DIR ]] || { echo 'Output directory must not be a symlink' >&2; exit 2; }
+mkdir -p -- "$OUTPUT_DIR"
+OUTPUT_FILE="$OUTPUT_DIR/employees_updated.csv"
+[[ ! -e $OUTPUT_FILE && ! -L $OUTPUT_FILE ]] || { echo "Refusing existing output: $OUTPUT_FILE" >&2; exit 2; }
+tmp=$(mktemp "$OUTPUT_DIR/.employees.XXXXXX") || exit 1
+trap 'rm -f -- "$tmp"' EXIT
+printf '=== EMPLOYEE TABLE ===\n'
+awk -F, '
+function currency(value,s,out) {
+    s=sprintf("%.0f",value);out=""
+    while(length(s)>3){out="," substr(s,length(s)-2) out;s=substr(s,1,length(s)-3)}
+    return "$" s out
 }
-
-# ============================================================================
-# Function: Tabular Report
-# ============================================================================
-generate_table_report() {
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                       TECHCORP EMPLOYEE REPORT                             ║${NC}"
-    echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════════════════╣${NC}"
-    printf "${CYAN}║${NC} %-6s │ %-20s │ %-12s │ %10s │ %-8s ${CYAN}║${NC}\n" \
-        "ID" "Name" "Department" "Salary" "Status"
-    echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════════════════╣${NC}"
-    
-    # Process CSV and format
-    awk -F',' 'NR > 1 {
-        id = $1
-        name = $2
-        dept = $4
-        salary = $5
-        status = $7
-        
-        # Format salary with thousands separator
-        sal_fmt = sprintf("$%\047d", salary)
-        
-        # Status colour
-        if(status == "active") 
-            status_color = "\033[0;32m"  # green
-        else 
-            status_color = "\033[0;31m"  # red
-        
-        printf "\033[0;36m║\033[0m %-6s │ %-20s │ %-12s │ %10s │ %s%-8s\033[0m \033[0;36m║\033[0m\n", 
-            id, name, dept, sal_fmt, status_color, status
-    }' "$CSV_FILE"
-    
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-}
-
-# ============================================================================
-# Function: Department Statistics
-# ============================================================================
-department_stats() {
-    echo -e "${CYAN}📊 DEPARTMENT STATISTICS:${NC}"
-    echo ""
-    echo "┌──────────────┬──────────┬────────────┬────────────┬────────────┐"
-    echo "│ Department   │ Employees│ Avg Salary │ Min Salary │ Max Salary │"
-    echo "├──────────────┼──────────┼────────────┼────────────┼────────────┤"
-    
-    awk -F',' '
-    NR > 1 {
-        dept = $4
-        salary = $5
-        
-        count[dept]++
-        sum[dept] += salary
-        
-        if(!(dept in min) || salary < min[dept]) min[dept] = salary
-        if(salary > max[dept]) max[dept] = salary
-    }
-    END {
-        # Sort departments
-        n = asorti(count, sorted)
-        for(i=1; i<=n; i++) {
-            d = sorted[i]
-            avg = sum[d] / count[d]
-            printf "│ %-12s │ %8d │ $%9.0f │ $%9d │ $%9d │\n", 
-                d, count[d], avg, min[d], max[d]
-        }
-    }' "$CSV_FILE"
-    
-    echo "└──────────────┴──────────┴────────────┴────────────┴────────────┘"
-    echo ""
-}
-
-# ============================================================================
-# Function: Generate Updated File
-# ============================================================================
-generate_updated_csv() {
-    local output_file="$OUTPUT_DIR/employees_updated.csv"
-    local current_year
-    current_year=$(date +%Y)
-    
-    echo -e "${CYAN}📁 Generating updated file: $output_file${NC}"
-    echo ""
-    
-    awk -F',' -v year="$current_year" '
-    BEGIN {
-        OFS = ","
-    }
-    NR == 1 {
-        # Header - add new column
-        print $0 ",years_employed"
-        next
-    }
-    {
-        # Lowercase for email
-        email = tolower($3)
-        
-        # Change status
-        status = $7
-        if(status == "inactive") status = "on_leave"
-        
-        # Calculate years employed
-        # hire_date is in YYYY-MM-DD format
-        split($6, date_parts, "-")
-        hire_year = date_parts[1]
-        years = year - hire_year
-        
-        # Reconstruct line
-        printf "%s,%s,%s,%s,%s,%s,%s,%d\n", 
-            $1, $2, email, $4, $5, $6, status, years
-    }' "$CSV_FILE" > "$output_file"
-    
-    echo -e "  ${GREEN}✅ File created successfully!${NC}"
-    echo "  Modifications applied:"
-    echo "    - Emails normalised to lowercase"
-    echo "    - Status 'inactive' → 'on_leave'"
-    echo "    - Added 'years_employed' column"
-    echo ""
-    
-    # Show first lines
-    echo "  Preview (first 5 lines):"
-    head -5 "$output_file" | while IFS= read -r line; do
-        echo "    $line"
-    done
-    echo ""
-}
-
-# ============================================================================
-# Main
-# ============================================================================
-echo ""
-echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║           DATA TRANSFORMATION - EMPLOYEES CSV              ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-
-generate_table_report
-department_stats
-generate_updated_csv
-
-echo -e "${GREEN}✅ Transformation complete!${NC}"
+BEGIN {printf "%-6s %-24s %-14s %12s %s\n","ID","Name","Department","Salary","Status"}
+NR>1 {printf "%-6s %-24s %-14s %12s %s\n",$1,$2,$3,currency($4),$7}
+' "$CSV_FILE"
+printf '\n=== DEPARTMENT STATISTICS (count, average, min, max) ===\n'
+awk -F, 'NR>1 {d=$3;s=$4;count[d]++;sum[d]+=s;if(!(d in min)||s<min[d])min[d]=s;if(!(d in max)||s>max[d])max[d]=s}
+END {for(d in count) printf "%s\t%d\t%.2f\t%.0f\t%.0f\n",d,count[d],sum[d]/count[d],min[d],max[d]}' "$CSV_FILE" | sort
+awk -F, -v year="$REFERENCE_YEAR" 'BEGIN{OFS=","} NR==1{print $0 ",years_employed";next}
+{split($6,parts,"-");$5=tolower($5);if($7=="inactive")$7="on_leave";print $0,year-parts[1]}' "$CSV_FILE" > "$tmp"
+# Publish a new file atomically; do not overwrite a prior run or symlink target.
+ln -- "$tmp" "$OUTPUT_FILE"
+printf '\nCreated: %s\nyears_employed = calendar-year difference from %s (not completed-anniversary tenure).\nTransformation complete.\n' "$OUTPUT_FILE" "$REFERENCE_YEAR"

@@ -2,6 +2,15 @@
 
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Step-by-step guide for interactive demonstrations
+>
+> Run the file-mutating examples in a fresh owned workspace. Navigation examples
+> can leave it; return before creating or removing files. Configuration editing
+> is a separate, deliberate exercise in a disposable lab account.
+
+```bash
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-live01.XXXXXX") || exit 1
+# Keep until the demonstration is reviewed; cleanup is limited to this new path.
+```
 
 ---
 
@@ -37,7 +46,6 @@
 
 ```bash
 
-*Personal note: Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.*
 
 # [INSTRUCTOR]: "Welcome! Before any theory, let's see
 # what the shell can do..."
@@ -61,6 +69,9 @@ cowsay -f tux "Welcome to OS!" | lolcat
 # [INSTRUCTOR]: "In the next 2 hours, you will learn to control
 # this environment. Let's begin!"
 ```
+
+*Personal note: Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.*
+
 
 ### Fallback (if tools are missing)
 
@@ -102,7 +113,7 @@ pwd
 
 ```bash
 
-*(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
+# Author note follows this example.
 
 # [INSTRUCTOR]: "OK, now I'm going somewhere else..."
 cd /etc
@@ -114,6 +125,8 @@ cd /etc
 pwd
 # [OUTPUT]: /etc
 ```
+
+*(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
 
 ## 2.2 Navigation with cd
 
@@ -224,10 +237,10 @@ ls -lh /var/log
 ```bash
 # [INSTRUCTOR]: "Let's create a project from scratch!"
 
-# Create workspace
-cd ~
+# Create a new workspace child
+cd -- "$DEMO_DIR" || exit 1
 mkdir laboratory
-cd laboratory
+cd laboratory || exit 1
 
 # [INSTRUCTOR]: "What do you think the following command does?"
 mkdir -p project/{src,docs,tests}
@@ -336,7 +349,7 @@ rm -r test_dir
 # rm -rf /
 # rm -rf $EMPTY_VARIABLE/
 
-# [INSTRUCTOR]: "If the variable is empty, it deletes everything from root!"
+# [INSTRUCTOR]: "An empty prefix can denote /. GNU rm normally protects /, but that is not protection for every unintended path."
 # [INSTRUCTOR]: "ALWAYS check with echo before rm -rf"
 ```
 
@@ -344,7 +357,7 @@ rm -r test_dir
 
 # SECTION 4: LIVE CODING - VARIABLES (15 minutes)
 
-## 4.1 Local Variables
+## 4.1 Shell Variables
 
 ### Script
 
@@ -399,8 +412,9 @@ echo "$MESSAGE in 2024"
 ### Script
 
 ```bash
-# [INSTRUCTOR]: "Local variables are not visible in subprocesses!"
+# [INSTRUCTOR]: "Unexported variables are not passed to a newly invoked bash -c. A parenthesised group inherits them."
 
+unset LOCAL
 LOCAL="local value"
 bash -c 'echo "Local: $LOCAL"'
 # [OUTPUT]: Local: (empty!)
@@ -420,7 +434,7 @@ bash -c 'echo "Global: $GLOBAL"'
 
 echo "User: $USER"
 echo "Home: $HOME"
-echo "Shell: $SHELL"
+echo "Preferred/login shell: $SHELL"
 echo "PATH: $PATH"
 
 # [INSTRUCTOR]: "PATH is special - this is where Bash looks for commands!"
@@ -502,6 +516,8 @@ echo Hello    $NAME
 ### INTENTIONAL MISTAKE #4
 
 ```bash
+# Return to the owned fixture before file operations.
+cd -- "$DEMO_DIR" || exit 1
 # Create a file with spaces in the name
 touch "Important Document.txt"
 ls
@@ -509,14 +525,15 @@ ls
 
 # [INSTRUCTOR]: "How do you think we delete it?"
 
-FILE=Important Document.txt
-rm $FILE
-# [OUTPUT]: rm: cannot remove 'Important': No such file or directory
+FILE="Important Document.txt"
+printf '<%s>\n' $FILE
+# [OUTPUT]: <Important> and <Document.txt> on two lines
+# The bad expansion is demonstrated without deleting anything.
 
 # [INSTRUCTOR]: "Bash saw TWO arguments! The solution?"
 
 FILE="Important Document.txt"
-rm "$FILE"
+rm -- "$FILE"
 ls
 # [Gone correctly]
 
@@ -537,10 +554,10 @@ cd ~
 # [INSTRUCTOR]: "The magic file that personalises the shell:"
 cat ~/.bashrc | head -30
 
-# [INSTRUCTOR]: "It's run every time you open a new terminal"
+# [INSTRUCTOR]: "Interactive non-login Bash reads .bashrc; login profiles may source it. Terminal configuration determines the mode."
 
 # [INSTRUCTOR]: "Let's modify it! But FIRST - backup!"
-cp ~/.bashrc ~/.bashrc.backup
+BASHRC_BACKUP=$(mktemp "$HOME/.bashrc.backup.XXXXXX") && cp -- "$HOME/.bashrc" "$BASHRC_BACKUP"
 
 # [INSTRUCTOR]: "ALWAYS backup before editing configurations!"
 ```
@@ -583,7 +600,7 @@ ll
 ### mkcd - mkdir + cd
 
 ```bash
-# [INSTRUCTOR]: "Aliases cannot receive arguments. For that we have functions!"
+# [INSTRUCTOR]: "Functions have their own positional parameters. Aliases substitute text; additional words remain command arguments."
 
 # [IN ~/.bashrc add]:
 # mkcd() {
@@ -632,7 +649,7 @@ PS1="$OLD_PS1"
 ## 7.1 Test Data Setup
 
 ```bash
-cd ~
+cd -- "$DEMO_DIR" || exit 1
 mkdir glob_demo && cd glob_demo
 
 # Create test files
@@ -715,8 +732,8 @@ ls file[!1-3].txt
 ls *
 # [Does NOT show .hidden_file]
 
-ls .*
-# [ONLY hidden files]
+find . -maxdepth 1 -mindepth 1 -name ".*" -print
+# Hidden entries themselves; ls .* could traverse a hidden directory.
 
 ls -a
 # [All]
@@ -751,8 +768,8 @@ echo "=== MEMORY ===" && \
 free -h && echo && \
 echo "=== DISK ===" && \
 df -h / && echo && \
-echo "=== ACTIVE PROCESSES ===" && \
-ps aux | wc -l
+echo "=== PROCESS SNAPSHOT (header excluded) ===" && \
+ps -e -o pid= | wc -l
 
 # [INSTRUCTOR]: "In the following seminars you will learn to do
 # even more with these commands!"
@@ -798,7 +815,7 @@ echo ""
 echo "=== Configuration Check ==="
 echo "User: $USER"
 echo "Home: $HOME"
-echo "Shell: $SHELL"
+echo "Preferred/login shell: $SHELL"
 
 echo ""
 echo "=== Demo Files Check ==="

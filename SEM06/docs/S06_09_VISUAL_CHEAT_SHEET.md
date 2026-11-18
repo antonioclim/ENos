@@ -5,68 +5,38 @@
 
 ---
 
+> **Scope:** Bash 4.4+ / GNU/Linux. Reference fragments with placeholders are syntax illustrations, not complete programs. Only explicitly owned fixtures may be modified. See [TEACHING_CONTRACT.md](TEACHING_CONTRACT.md).
+
 ## Professional Script Structure
 
 ```bash
 #!/usr/bin/env bash
-#
-# script_name.sh - Short description
-# Author: Name | Date: YYYY-MM-DD
-#
-
+# script_name.sh — scaffold; implement main before using it for real work.
 set -euo pipefail
 IFS=$'\n\t'
-
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_NAME="$(basename "$0")"
-
-# === CONFIGURATION ===
-readonly LOG_FILE="${LOG_FILE:-/var/log/${SCRIPT_NAME%.sh}.log}"
-readonly CONFIG_FILE="${CONFIG_FILE:-/etc/${SCRIPT_NAME%.sh}.conf}"
-
-# === UTILITY FUNCTIONS ===
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd) || exit 1
+readonly SCRIPT_DIR
+SCRIPT_NAME=${0##*/}
+TEMP_FILE=
+LOG_FILE=${LOG_FILE:-} # Optional explicit path; stderr is the default.
 log() {
-    local level="${1:-INFO}"
-    shift
-    printf '[%s] [%-5s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$level" "$*" | tee -a "$LOG_FILE"
+    [[ $# -ge 1 ]] || return 2
+    local level=$1 line; shift
+    printf -v line '[%s] [%s] %s' "$(date -u +%FT%TZ)" "$level" "$*"
+    printf '%s\n' "$line" >&2 || return 1
+    [[ -z $LOG_FILE ]] || printf '%s\n' "$line" >> "$LOG_FILE" || return 1
+    return 0
 }
-
-die() {
-    log "FATAL" "$*"
-    exit 1
-}
-
-cleanup() {
-    # Release resources
-    rm -f "$TEMP_FILE" 2>/dev/null || true
-}
-
-trap cleanup EXIT INT TERM
-
-usage() {
-    cat << EOF
-Usage: $SCRIPT_NAME [OPTIONS] <arguments>
-
-Description...
-
-Options:
-    -h, --help      Display this message
-    -v, --verbose   Verbose mode
-    -c FILE         Configuration file
-
-Examples:
-    $SCRIPT_NAME -v /path/to/dir
-    $SCRIPT_NAME --help
-EOF
-}
-
+cleanup() { [[ -z ${TEMP_FILE:-} ]] || rm -f -- "$TEMP_FILE"; }
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+usage() { printf 'Usage: %s --help | application_arguments\n' "$SCRIPT_NAME"; }
 main() {
-    # Parse arguments
-    # Validate
-    # Main logic
-    :
+    if [[ ${1:-} == --help ]]; then usage; return 0; fi
+    printf 'TODO: implement argument validation and application logic\n' >&2
+    return 3
 }
-
 main "$@"
 ```
 
@@ -78,14 +48,14 @@ main "$@"
 ```bash
 var="value"                # No spaces around =
 readonly CONST="fixed"     # Constant (cannot be modified)
-local var="only in function" # Only in functions
+example_local() { local var="only in function"; printf '%s\n' "$var"; }
 declare -i num=10          # Integer
 declare -a arr=()          # Indexed array
 declare -A map=()          # Associative array
 ```
 
 ### Expansion
-```bash
+```text
 ${var}                     # Value (safe in strings)
 ${var:-default}            # Default if unset/null
 ${var:=default}            # Set default if unset/null
@@ -107,14 +77,15 @@ ${var,,}                   # All lowercase
 ```
 
 ### Special Variables
-```bash
+```text
 $0                         # Script name
 $1, $2, ..., ${10}         # Positional arguments
 $#                         # Number of arguments
 $@                         # All arguments (separate)
 $*                         # All arguments (one string)
 "$@"                       # CORRECT: preserves quoting
-$$                         # Current process PID
+$$                         # Main shell PID; unchanged in a Bash subshell
+$BASHPID                   # PID of this Bash process
 $!                         # Last background process PID
 $?                         # Exit code of last command
 $_                         # Last argument of previous command
@@ -154,7 +125,7 @@ fi
 # Arithmetic (prefer (( )) for numbers)
 (( a == b ))
 (( a < b ))
-(( a++ ))
+(( a++ ))                  # Returns 1 when the old value is zero; consider a=$((a+1))
 (( total = a + b * c ))
 
 # Files
@@ -198,7 +169,7 @@ while [[ condition ]]; do
 done
 
 # While read (reading file/output)
-while IFS= read -r line; do
+while IFS= read -r line || [[ -n $line ]]; do
     echo "Line: $line"
 done < "$file"
 
@@ -329,7 +300,8 @@ command1 |& command2       # Stdout + stderr -> stdin
 
 # Process substitution
 diff <(command1) <(command2)
-while read line; do ... done < <(command)
+while IFS= read -r line; do printf '%s\n' "$line"; done < <(command)
+# Consumer success does not prove the process-substitution producer succeeded.
 
 # Here-doc
 cat << 'EOF'
@@ -424,15 +396,16 @@ uniq -d file               # Only duplicates
 
 ```bash
 # Set options
-set -e                     # Exit on first error
+set -e                     # Exit for eligible failures; conditional/list/pipeline exceptions apply
 set -u                     # Error for undefined variables
-set -o pipefail            # Propagate errors from pipe
+set -o pipefail            # Pipeline status = rightmost nonzero status, or 0
 set -x                     # Debug mode (display commands)
 
 # Trap
-trap 'cleanup' EXIT        # On normal exit
-trap 'cleanup' INT TERM    # On SIGINT (Ctrl+C), SIGTERM
-trap 'echo "Error line $LINENO"' ERR  # On error
+trap cleanup EXIT         # On shell exit; not SIGKILL or host loss
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'echo "Error line $LINENO" >&2' ERR  # Eligible failures, with the same exceptions as -e
 
 # Error handling pattern
 command || {
@@ -446,26 +419,10 @@ if ! command; then
     exit 1
 fi
 
-# Retry pattern
-retry() {
-    local max_attempts="${1:-3}"
-    local delay="${2:-5}"
-    local attempt=1
-    shift 2
-    
-    until "$@"; do
-        if ((attempt >= max_attempts)); then
-            log "ERROR" "Failed after $max_attempts attempts"
-            return 1
-        fi
-        log "WARN" "Attempt $attempt failed, retrying in ${delay}s..."
-        sleep "$delay"
-        ((attempt++))
-    done
-}
-
-# Usage
-retry 5 10 curl -f "$url"
+# Validated retry helper: attempts, delay seconds, backoff, executable argv.
+source SEM06/scripts/examples/retry.sh
+# A harmless example: two unsuccessful attempts, preserve the final status 7.
+if retry 2 0 1 bash -c 'exit 7'; then :; else printf 'Final status: %s\n' "$?"; fi
 ```
 
 ---
@@ -476,7 +433,6 @@ retry 5 10 curl -f "$url"
 ```bash
 usage() {
     echo "Usage: $0 [-v] [-c config] [-n num] file..."
-    exit 1
 }
 
 verbose=false
@@ -488,9 +444,9 @@ while getopts ":vc:n:h" opt; do
         v) verbose=true ;;
         c) config="$OPTARG" ;;
         n) num="$OPTARG" ;;
-        h) usage ;;
-        :) echo "Option -$OPTARG requires argument" >&2; usage ;;
-        \?) echo "Invalid option: -$OPTARG" >&2; usage ;;
+        h) usage; exit 0 ;;
+        :) echo "Option -$OPTARG requires argument" >&2; usage; exit 2 ;;
+        \?) echo "Invalid option: -$OPTARG" >&2; usage; exit 2 ;;
     esac
 done
 
@@ -507,15 +463,17 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -c|--config)
+            [[ $# -ge 2 && -n $2 ]] || { usage >&2; exit 2; }
             config="$2"
             shift 2
             ;;
         -n|--number)
-            num="$2"
+            [[ $# -ge 2 && $2 =~ ^[0-9]{1,6}$ ]] || { usage >&2; exit 2; }
+            num=$((10#$2))
             shift 2
             ;;
         -h|--help)
-            usage
+            usage; exit 0
             ;;
         --)
             shift
@@ -523,7 +481,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -*)
             echo "Unknown option: $1" >&2
-            usage
+            usage; exit 2
             ;;
         *)
             break
@@ -549,30 +507,26 @@ bash -v script.sh          # Display lines before execution
 
 # Selective debug
 debug() {
-    [[ "$DEBUG" == "true" ]] && echo "DEBUG: $*" >&2
+    if [[ ${DEBUG:-false} == true ]]; then printf 'DEBUG: %s\n' "$*" >&2; fi
+    return 0
 }
 
 # Trace functions
-set -o functrace           # Traps are inherited in functions
+set -o functrace           # Inherit DEBUG and RETURN traps; ERR uses errtrace (-E)
 
 # Detailed logging
 PS4='+ ${BASH_SOURCE}:${LINENO}:${FUNCNAME[0]:-main}: '
 set -x
 
-# Assert
+# Assert a predicate argv; do not evaluate a caller-supplied shell program.
 assert() {
-    local condition="$1"
-    local message="${2:-Assertion failed}"
-    
-    if ! eval "$condition"; then
-        echo "ASSERT FAILED: $message" >&2
-        echo "  Condition: $condition" >&2
-        echo "  Location: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" >&2
-        exit 1
-    fi
+    [[ $# -ge 2 ]] || return 2
+    local message=$1; shift
+    if "$@"; then return 0; fi
+    printf 'ASSERT FAILED: %s\n' "$message" >&2
+    return 1
 }
-
-assert '[[ -f "$config_file" ]]' "Config file must exist"
+assert "Config file must exist" test -f "${config_file:?Set a fixture path}"
 ```
 
 ---
@@ -607,19 +561,20 @@ wget -c "$url"             # Continue interrupted download
 
 ```bash
 # 1. Quoting - ALWAYS quote variables
-rm "$file"                 # CORRECT
-rm $file                   # WRONG - word splitting
+printf 'Planned argument: <%s>\n' "$file" # One exact path
+printf 'Split argument: <%s>\n' $file    # Intentionally WRONG demonstration; no deletion
 
 # 2. Validate input
 [[ "$input" =~ ^[a-zA-Z0-9_]+$ ]] || die "Invalid input"
 
 # 3. Secure temp files
+temp_file=
+trap '[[ -z ${temp_file:-} ]] || rm -f -- "$temp_file"' EXIT
 temp_file=$(mktemp)
-trap 'rm -f "$temp_file"' EXIT
 
 # 4. Avoid eval
 # WRONG
-eval "$user_input"
+# eval "$user_input" # Intentionally WRONG: executes untrusted shell syntax
 
 # 5. Use arrays for commands with arguments
 cmd=("command" "--arg1" "--arg2" "$variable")
@@ -643,7 +598,8 @@ read -s -p "Password: " password
 # CPU
 cat /proc/cpuinfo
 cat /proc/stat             # CPU times
-grep "cpu " /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; print u/t*100"%"}'
+source SEM06/scripts/examples/monitor_examples.sh
+if cpu=$(get_cpu_usage 0.2); then printf '%s%%\n' "$cpu"; else printf 'unavailable\n'; fi
 
 # Memory
 cat /proc/meminfo
@@ -671,7 +627,7 @@ cat /proc/mounts
 ## Cron & Systemd
 
 ### Cron
-```bash
+```cron
 # Format: min hour day month weekday command
 # Edit: crontab -e
 
@@ -684,7 +640,7 @@ cat /proc/mounts
 # Best practices
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
-MAILTO=admin@example.com
+MAILTO="" # No mail in the local teaching example
 
 0 3 * * * /path/script.sh >> /var/log/script.log 2>&1
 ```
@@ -697,13 +653,11 @@ Description=My Service
 After=network.target
 
 [Service]
-Type=simple
+Type=oneshot
 User=myuser
 WorkingDirectory=/opt/myapp
 ExecStart=/opt/myapp/start.sh
-ExecStop=/opt/myapp/stop.sh
-Restart=on-failure
-RestartSec=10
+# A timer starts a bounded job that exits; a continuous service needs a separate unit.
 
 [Install]
 WantedBy=multi-user.target
@@ -716,18 +670,19 @@ WantedBy=multi-user.target
 Description=Run My Service Daily
 
 [Timer]
-OnCalendar=daily
 OnCalendar=*-*-* 03:00:00
+# Alternative: OnCalendar=daily. Multiple active directives are combined, not overridden.
 Persistent=true
 
 [Install]
 WantedBy=timers.target
 ```
 
+The timer example requires a separately configured, bounded oneshot service. Paths and user names above are placeholders. Installation/activation is a distinct host action; this reference does not perform it.
+
 ```bash
-systemctl daemon-reload
-systemctl enable myservice.timer
-systemctl start myservice.timer
+systemd-analyze calendar '*-*-* 03:00:00'
+# Read-only inspection on a host with a systemd manager:
 systemctl list-timers
 ```
 
@@ -735,7 +690,9 @@ systemctl list-timers
 
 ## Quick Reference - Frequently Used Commands
 
-```bash
+The following is a non-executable syntax reference. Deletion, permission changes, signals, downloads and privileged commands require explicitly selected owned targets or an authorised host operation.
+
+```text
 # Files and directories
 find . -name "*.log" -mtime +7 -delete
 find . -type f -exec chmod 644 {} \;

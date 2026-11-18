@@ -1,5 +1,7 @@
 # S03_TC06 - CRON - Automation and Task Scheduling
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (Redistributed)
 
@@ -35,6 +37,12 @@ At the end of this laboratory, the student will be able to:
 
 ## 2. Crontab Format
 
+Target: Debian/Ubuntu cron. HOME is normally set from the account; jobs do not inherit
+an interactive session. Unredirected output is normally mailed if mail delivery is
+configured. Empty MAILTO disables that automatic mail in these examples. Paths and
+installation commands are deployment examples, not instructions to run against a
+production machine as part of this worksheet.
+
 ### 2.1 Crontab Line Structure
 
 ```
@@ -59,7 +67,7 @@ At the end of this laboratory, the student will be able to:
 
 ### 2.3 Special Strings
 
-```bash
+```cron
 @reboot     # At system startup
 @yearly     # 0 0 1 1 * (1st January)
 @annually   # Equivalent to @yearly
@@ -76,7 +84,7 @@ At the end of this laboratory, the student will be able to:
 
 ### 3.1 Basic Examples
 
-```bash
+```cron
 # Every minute
 * * * * * /path/to/script.sh
 
@@ -104,8 +112,8 @@ At the end of this laboratory, the student will be able to:
 
 ### 3.2 Advanced Examples
 
-```bash
-# Every 15 minutes during working hours
+```cron
+# Every 15 minutes from 09:00 through 17:45 (inclusive)
 */15 9-17 * * 1-5 /path/to/check.sh
 
 # On days 1 and 15 of the month
@@ -115,7 +123,7 @@ At the end of this laboratory, the student will be able to:
 0 */2 * * * /path/to/every2hours.sh
 
 # First Sunday of month (combination)
-0 0 1-7 * 0 /path/to/first_sunday.sh
+0 0 * * 0 [ "$(date +\%d)" -le 7 ] && /path/to/first_sunday.sh
 ```
 
 ---
@@ -143,7 +151,7 @@ sudo crontab -u username -l
 
 ### 4.2 Crontab Locations
 
-```bash
+```text
 # User crontabs
 /var/spool/cron/crontabs/username
 
@@ -160,11 +168,11 @@ sudo crontab -u username -l
 
 ### 4.3 /etc/crontab Format
 
-```bash
+```cron
 # /etc/crontab includes USER field
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=Issues: Open an issue in GitHub
+MAILTO=""
 
 # min hour day month dow user command
 0 3 * * * root /usr/local/bin/backup.sh
@@ -177,12 +185,13 @@ MAILTO=Issues: Open an issue in GitHub
 
 ### 5.1 Environment Configuration
 
-```bash
+```cron
 # In crontab, set environment variables
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
 HOME=/home/user
-MAILTO=user@example.com
+MAILTO=""
+# Configure any real recipient explicitly; none is selected here.
 
 # Jobs with full environment
 * * * * * /bin/bash -l -c '/path/to/script.sh'
@@ -190,7 +199,7 @@ MAILTO=user@example.com
 
 ### 5.2 Logging and Debugging
 
-```bash
+```cron
 # Output redirection
 0 3 * * * /path/to/script.sh >> /var/log/myscript.log 2>&1
 
@@ -204,28 +213,22 @@ MAILTO=user@example.com
 0 3 * * * /path/to/script.sh > /dev/null 2>&1
 ```
 
+Redirection of both streams to a file leaves no output for automatic cron mail.
+Only crontab command text needs escaped `%`: `date +\%F`. An ordinary script
+uses `date +%F`; adding the backslash there changes the literal output. POSIX sh
+supports `$(...)`. Restricted day-of-month and weekday fields combine by OR, so
+the first-Sunday example uses a weekday schedule plus an explicit date guard.
+
 ### 5.3 Locking (Prevent Multiple Executions)
 
 ```bash
 #!/bin/bash
-# Script with lock file
-
-LOCKFILE="/tmp/myscript.lock"
-
-# Check and create lock
-if [ -f "$LOCKFILE" ]; then
-    echo "Script already running"
-    exit 1
-fi
-
-# Create lock
-echo $$ > "$LOCKFILE"
-
-# Cleanup on exit
-trap "rm -f $LOCKFILE" EXIT
-
-# Main logic
-# ...
+: "${WORK_DIR:?Choose an existing private owned workspace}"
+[[ -d $WORK_DIR && -O $WORK_DIR && ! -L $WORK_DIR/job.lock ]] || exit 1
+exec 9>"$WORK_DIR/job.lock" || exit 1
+flock -n 9 || { echo 'Another process holds the lock' >&2; exit 2; }
+# Main logic here. Descriptor release on exit releases the lock.
+# Do not unlink the file; mere existence is not evidence of a held lock.
 ```
 
 ### 5.4 Absolute Paths
@@ -248,7 +251,7 @@ PATH=/usr/local/bin:/usr/bin:/bin
 
 ### 6.1 at Syntax
 
-```bash
+```text
 # Execute command at specified time
 at 15:30
 at> /path/to/script.sh
@@ -282,7 +285,7 @@ at -d job_number
 
 ### 6.3 batch - Execute when system is idle
 
-```bash
+```text
 # Execute when load average drops below 1.5
 batch
 at> /path/to/heavy_script.sh
@@ -305,7 +308,7 @@ crontab -e
 ### Exercise 2: Monitoring
 ```bash
 # Check disk space every hour
-0 * * * * df -h | mail -s "Disk Report" Issues: Open an issue in GitHub
+0 * * * * df -h >> /home/user/disk_report.log 2>&1
 ```
 
 ### Exercise 3: Log Cleanup
@@ -337,13 +340,13 @@ echo "sudo systemctl restart nginx" | at 3:00 AM tomorrow
    > crontab -e is per user; /etc/crontab is system-wide and includes the user field.
 
 5. **How do you prevent simultaneous executions of the same job?**
-   > Use a lock file or flock.
+   > Use an atomic locking protocol, such as flock on a descriptor in a private directory; test-then-touch is racy.
 
 ---
 
 ## Cheat Sheet
 
-```bash
+```text
 # CRONTAB FORMAT
 # min hour day month dow command
 * * * * *           # every minute
@@ -389,14 +392,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

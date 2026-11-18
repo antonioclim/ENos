@@ -1,13 +1,15 @@
-# Instructor Guide: Seminar 9-10
+# Instructor Guide: Seminar 5
 ## Operating Systems | Advanced Bash Scripting
 
 > Laboratory observation: jot down key commands and relevant output (2–3 lines) as you work. It helps with debugging and, honestly, at the end you get a good README without extra effort.
 > Document: Complete step-by-step guide for instructor  
-> Total duration: 100 minutes (2 × 50 min + break)  
+> Total duration: 100 teaching minutes plus a 10-minute break (110 elapsed minutes)  
 > Seminar type: Advanced Scripting - Best Practices  
-> Level: Advanced (assumes SEM01-08 completed)
+> Level: Advanced (assumes SEM01–04 completed; Bash 4.4+)
 
 ---
+
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
 
 ## SESSION OBJECTIVES
 
@@ -39,7 +41,7 @@ At the end of this seminar, students will be able to:
 | Global vs local variables | DEMONSTRATE with concrete example - do not just say it |
 | `declare -A` for hash | Repeat 3 times in different contexts - it is MANDATORY |
 | `set -e` magic thinking | Show cases when it does NOT work |
-| trap in subshells | Demonstrate that it is NOT inherited |
+| trap inheritance | Compare ERR with/without `set -E`; distinguish ordinary subshells from command substitution |
 | `${arr[@]}` without quotes | Show word splitting in action |
 
 ### Deliberate Errors to Introduce
@@ -54,7 +56,7 @@ In live coding, INTENTIONALLY introduce these errors and fix them:
 
 ## WAR STORIES FROM THE TRENCHES
 
-> *Real incidents from teaching this material. Share these with students — they remember stories better than rules.*
+> *Historical author-supplied anecdotes. Their provenance has not been established by this repository review; do not cite them as verified incidents or evidence of learning effects.*
 
 ### The Midnight Debugging Session (December 2023)
 
@@ -94,7 +96,7 @@ They're shocked when the script continues. The `set -e` in `if` context gotcha c
 
 After teaching this course for several years, I've observed:
 
-1. **Variable naming:** Students instinctively use `numar`, `lista`, `rezultat` — which actually helps identify authentic work during AI detection (AI defaults to English)
+1. **Variable naming:** Students instinctively use `numar`, `lista`, `rezultat` — which is a language preference, not evidence of authorship or a valid AI-detection rule
 
 2. **Error messages:** They write `"Eroare: fisierul nu exista"` then remember to translate — sometimes leaving mixed language comments
 
@@ -109,7 +111,7 @@ After teaching this course for several years, I've observed:
 ```bash
 # On demo machine
 bash --version
-# Must be >= 4.0 for associative arrays
+# Must be >= 4.4 for the complete seminar, including nameref exercises
 
 # Quick functionality check
 declare -A test_hash
@@ -121,8 +123,11 @@ echo "${test_hash[key]}"  # Must display "value"
 
 ```bash
 # Create working structure
-mkdir -p ~/demo_sem5/{functions,arrays,robust,logs}
-cd ~/demo_sem5
+SEMINAR_DIR=$PWD  # Begin in the repository SEM05 directory.
+DEMO_ROOT=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$DEMO_ROOT"' EXIT
+mkdir -p "$DEMO_ROOT"/{functions,arrays,robust,logs}
+cd -- "$DEMO_ROOT" || exit 1
 
 # Prepare test files
 echo "test content" > test.txt
@@ -136,13 +141,13 @@ shellcheck --version || sudo apt install shellcheck
 
 ```bash
 # Open HTML presentation
-firefox ../presentations/S05_01_presentation.html &
+firefox "$SEMINAR_DIR"/presentations/S05_01_presentation.html &
 
 # Open cheat sheet
-firefox ../presentations/S05_02_cheat_sheet.html &
+firefox "$SEMINAR_DIR"/presentations/S05_02_cheat_sheet.html &
 
 # Keep template handy
-cat ../scripts/templates/professional_script.sh
+cat "$SEMINAR_DIR"/scripts/templates/professional_script.sh
 ```
 
 ---
@@ -155,8 +160,8 @@ Purpose: Emotional impact - show the difference DRAMATICALLY
 
 Setup (before seminar):
 ```bash
-mkdir -p /tmp/fragile_demo
-echo "precious data" > /tmp/fragile_demo/important.txt
+mkdir -- "$DEMO_ROOT/fragile_demo"
+printf '%s\n' "precious data" > "$DEMO_ROOT/fragile_demo/important.txt"
 ```
 
 In-class demonstration:
@@ -166,8 +171,8 @@ In-class demonstration:
 # FRAGILE script (do not run on real system!)
 
 cd /tmp/nonexistent_dir    # What if it does not exist?
-rm -rf *                    # DISASTER if cd failed!
-process_file $1             # What if $1 is empty?
+printf 'Would remove entries in: %s\n' "$PWD"  # Observe only; no deletion
+printf 'Argument supplied: <%s>\n' "${1-}"  # Empty input remains visible
 ```
 
 Ask the class: "What happens if /tmp/nonexistent_dir does not exist?"
@@ -178,13 +183,15 @@ Show the solid version:
 
 ```bash
 #!/bin/bash
-# Solid script
 set -euo pipefail
-
-cd /tmp/some_dir || { echo "ERROR: Cannot cd"; exit 1; }
-[[ -n "${1:-}" ]] || { echo "Usage: $0 <file>"; exit 1; }
-rm -rf ./*                  # ./* does not delete everything / if cd failed
-process_file "$1"
+owned=
+trap '[[ -z ${owned:-} ]] || rm -rf -- "$owned"' EXIT
+owned=$(mktemp -d) || exit 1
+printf '%s\n' 'owned disposable file' > "$owned/sample.txt"
+cd -- "$owned" || exit 1
+# This run owns the directory; ./* does not protect a wrong working directory.
+rm -f -- ./*
+printf '%s\n' 'Owned fixture cleaned'
 ```
 
 Punch line: "Which script do you run on the production server at 3 AM?"
@@ -195,11 +202,10 @@ Punch line: "Which script do you run on the production server at 3 AM?"
 
 #### Segment 1: Basic Functions (5 min)
 
-File: `~/demo_sem5/functions/01_basics.sh`
+File: `$DEMO_ROOT/functions/01_basics.sh`
 
 ```bash
 
-*Personal note: I prefer Bash scripts for simple automations and Python when logic becomes complex. It is a matter of pragmatism.*
 
 #!/bin/bash
 set -euo pipefail
@@ -224,7 +230,11 @@ greet_name() {
 }
 
 greet_name "World"        # Hello, World!
-greet_name                # Hello, !  (PROBLEM!)
+set +e
+( greet_name )            # Child exits for missing $1 under nounset
+name_status=$?
+set -e
+printf 'Missing argument status: %s\n' "$name_status"
 
 # === WITH VERIFICATION ===
 greet_safe() {
@@ -232,9 +242,15 @@ greet_safe() {
     echo "Hello, $name!"
 }
 
-greet_safe                # Explicit error!
+set +e
+( greet_safe )            # Isolate the intentional parameter-expansion failure
+safe_status=$?
+set -e
+printf 'Required-name status: %s\n' "$safe_status"
 greet_safe "Student"      # OK: Hello, Student!
 ```
+
+*Personal note: I prefer Bash scripts for simple automations and Python when logic becomes complex. It is a matter of pragmatism.*
 
 Discussion points:
 - What happens when we call `greet_name` without an argument?
@@ -244,7 +260,7 @@ Discussion points:
 
 #### Segment 2: Local Variables and Scope (5 min) CRITICAL!
 
-File: `~/demo_sem5/functions/02_scope.sh`
+File: `$DEMO_ROOT/functions/02_scope.sh`
 
 ```bash
 #!/bin/bash
@@ -289,12 +305,11 @@ Key lesson: Variables are GLOBAL by default! Use `local` ALWAYS in functions!
 
 #### Segment 3: Return Values (5 min)
 
-File: `~/demo_sem5/functions/03_return.sh`
+File: `$DEMO_ROOT/functions/03_return.sh`
 
 ```bash
 #!/bin/bash
 
-*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
 set -euo pipefail
 
@@ -325,8 +340,8 @@ get_large_number() {
     return 1000    # WRONG! Truncates to 1000 % 256 = 232
 }
 
-get_large_number
-echo "Exit code: $?"    # 232, NOT 1000!
+if get_large_number; then large_status=0; else large_status=$?; fi
+printf 'Exit code: %s\n' "$large_status"  # 232, not 1000
 
 # === METHOD 3: Global variable (avoid if possible) ===
 calculate_and_store() {
@@ -344,6 +359,8 @@ declare output
 store_in output
 echo "Via nameref: $output"
 ```
+
+*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
 Key points:
 
@@ -372,7 +389,6 @@ Display on screen:
 ║  echo "Outside: $X"                                            ║
 ║                                                                ║
 
-> 💡 When I first taught this concept, half the group made exactly the same mistake — and that is perfectly normal.
 
 ║  ────────────────────────────────────────────────────────────  ║
 ║                                                                ║
@@ -383,6 +399,8 @@ Display on screen:
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
+
+> 💡 When I first taught this concept, half the group made exactly the same mistake — and that is perfectly normal.
 
 Protocol:
 1. [1 min] Individual voting (target: 40-60% correct)
@@ -410,7 +428,7 @@ Targeted misconceptions:
 
 #### Segment 1: Indexed Arrays (7 min)
 
-File: `~/demo_sem5/arrays/01_indexed.sh`
+File: `$DEMO_ROOT/arrays/01_indexed.sh`
 
 ```bash
 #!/bin/bash
@@ -472,7 +490,7 @@ Key points:
 
 #### Segment 2: Associative Arrays (8 min) CRITICAL!
 
-File: `~/demo_sem5/arrays/02_associative.sh`
+File: `$DEMO_ROOT/arrays/02_associative.sh`
 
 ```bash
 #!/bin/bash
@@ -580,13 +598,15 @@ Solution (for instructor):
 
 ```bash
 count_extensions() {
-    declare -A counts
+    local file base ext
+    declare -A counts=()
     for file in "$@"; do
-        ext="${file##*.}"
-        (( counts[$ext]++ )) || true
+        base=${file##*/}
+        case "$base" in .*|*.) ext=no_extension ;; *.*) ext=${base##*.} ;; *) ext=no_extension ;; esac
+        counts["$ext"]=$(( ${counts[$ext]:-0} + 1 ))
     done
     for ext in "${!counts[@]}"; do
-        echo "$ext: ${counts[$ext]}"
+        printf '%s: %s\n' "$ext" "${counts[$ext]}"
     done
 }
 ```
@@ -608,7 +628,6 @@ Display on screen:
 ║  done                                                          ║
 ║                                                                ║
 
-> 💡 Experience shows that debugging is 80% reading carefully and 20% writing new code.
 
 ║  ────────────────────────────────────────────────────────────  ║
 ║                                                                ║
@@ -619,6 +638,8 @@ Display on screen:
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
+
+> 💡 Experience shows that debugging is 80% reading carefully and 20% writing new code.
 
 Correct answer: B
 
@@ -660,7 +681,7 @@ Quick questions (30 sec each):
 
 #### Segment 1: set -euo pipefail (7 min)
 
-File: `~/demo_sem5/robust/01_set_options.sh`
+File: `$DEMO_ROOT/robust/01_set_options.sh`
 
 ```bash
 #!/bin/bash
@@ -699,53 +720,44 @@ Detailed explanation:
 
 | Option | Effect | Example |
 |--------|--------|---------|
-| `set -e` | Exit on first error | `false` stops the script |
+| `set -e` | Exit on eligible non-zero status; tested contexts are exempt | `false` stops the script |
 | `set -u` | Error on undefined variables | `$UNDEFINED` = error |
-| `set -o pipefail` | Error if anything in pipe fails | `false \| true` = error |
+| `set -o pipefail` | Rightmost non-zero pipeline status, or zero if all succeed | `false \| true` = error |
 
 When set -e does NOT work:
 
-```bash
+```text
 # set -e does NOT work in these contexts:
 cmd || handle_error      # Intentionally allows failure
 if cmd; then ...         # Explicitly testsd
 while cmd; do ...        # Loop condition
-$(cmd)                   # Command substitution
+value=$(cmd)             # Normally clears -e inside; final status still reaches assignment
 ```
 
 ---
 
 #### Segment 2: trap and cleanup (8 min)
 
-File: `~/demo_sem5/robust/02_trap.sh`
+File: `$DEMO_ROOT/robust/02_trap.sh`
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 
-# === CREATE TEMPORARY FILES ===
-TEMP_FILE=$(mktemp)
-TEMP_DIR=$(mktemp -d)
-echo "Created: $TEMP_FILE"
-echo "Created: $TEMP_DIR"
-
-# === CLEANUP FUNCTION ===
+# Register cleanup before allocation; remove only this run's resources.
+TEMP_FILE= TEMP_DIR=
 cleanup() {
     local exit_code=$?
-    echo ""
-    echo "=== CLEANUP RUNNING ==="
-    echo "Exit code was: $exit_code"
-    echo "Removing: $TEMP_FILE"
-    rm -f "$TEMP_FILE"
-    echo "Removing: $TEMP_DIR"
-    rm -rf "$TEMP_DIR"
-    echo "Cleanup complete!"
-    exit $exit_code    # Preserve original exit code
+    [[ -z ${TEMP_FILE:-} ]] || rm -f -- "$TEMP_FILE"
+    [[ -z ${TEMP_DIR:-} ]] || rm -rf -- "$TEMP_DIR"
+    exit "$exit_code"
 }
-
-# === SET TRAP ===
-# Executes on EXIT (normal or error)
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+TEMP_FILE=$(mktemp) || exit 1
+TEMP_DIR=$(mktemp -d) || exit 1
+printf 'Created: %s\n' "$TEMP_FILE" "$TEMP_DIR"
 
 # === SIMULATE WORK ===
 echo ""
@@ -767,10 +779,10 @@ Demonstration:
 
 Trap signals:
 
-| Signal | Trigger | Usage |
+| Event or signal | Trigger | Usage |
 |--------|---------|-------|
-| EXIT | Any exit (normal or error) | Cleanup files |
-| ERR | Error (with set -e) | Error logging |
+| EXIT (Bash event) | Shell exit; not SIGKILL or power loss | Owned-resource cleanup |
+| ERR (Bash event) | Eligible failure; does not require `set -e` | Error logging; inheritance via `set -E` |
 | INT | Ctrl+C | Cleanup on interrupt |
 | TERM | kill (default) | Graceful shutdown |
 
@@ -778,14 +790,16 @@ Trap signals:
 
 ### [0:20-0:30] LIVE CODING: Logging
 
-File: `~/demo_sem5/logs/logging.sh`
+File: `$DEMO_ROOT/logs/logging.sh`
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 
 # === LOGGING SYSTEM ===
-LOG_FILE="/tmp/script_$$.log"
+LOG_FILE=
+trap '[[ -z ${LOG_FILE:-} ]] || rm -f -- "$LOG_FILE"' EXIT
+LOG_FILE=$(mktemp) || exit 1
 declare -A LOG_LEVELS=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3)
 LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
@@ -795,19 +809,22 @@ log() {
     local message="$*"
     
     # Skip if below current level
-    [[ ${LOG_LEVELS[$level]} -lt ${LOG_LEVELS[$LOG_LEVEL]} ]] && return
+    [[ -v LOG_LEVELS[$level] && -v LOG_LEVELS[$LOG_LEVEL] ]] || return 2
+    [[ ${LOG_LEVELS[$level]} -lt ${LOG_LEVELS[$LOG_LEVEL]} ]] && return 0
     
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S') || return 1
     local caller="${FUNCNAME[1]:-main}"
     local log_line="[$timestamp] [$level] [$caller] $message"
     
     # Write to file
-    echo "$log_line" >> "$LOG_FILE"
+    printf '%s\n' "$log_line" >> "$LOG_FILE" || return 1
     
     # On screen for WARN+
     if [[ ${LOG_LEVELS[$level]} -ge ${LOG_LEVELS[WARN]} ]]; then
-        echo "$log_line" >&2
+        printf '%s\n' "$log_line" >&2 || return 1
     fi
+    return 0
 }
 
 # Helper functions
@@ -860,7 +877,7 @@ Go through EACH section and explain WHY it exists:
 set -euo pipefail
 IFS=$'\n\t'
 ```
-→ `Safety net`: Script stops on errors
+→ `Shell options`: Expose eligible failures; explicit checks remain necessary.
 
 ```bash
 readonly SCRIPT_NAME=$(basename "$0")
@@ -875,18 +892,18 @@ OUTPUT="${OUTPUT:-}"
 ```
 → `Config with defaults`: Flexibility without errors
 
-```bash
+```text
 usage() { ... }
 die() { ... }
 log() { ... }
 ```
 → `Helpers`: Standard reusable functions
 
-```bash
+```text
 cleanup() { ... }
 trap cleanup EXIT
 ```
-→ `Guaranteed cleanup`: Regardless of how it ends
+→ `Owned cleanup`: Runs on handled shell exit; cannot cover SIGKILL or machine failure.
 
 ```bash
 main() {
@@ -1037,7 +1054,9 @@ During a brainstorming session with Andrei Toma at The Dose (our usual spot near
 
 ---
 
-## Remote Examination Protocol
+## Historical Remote Examination Proposal — Not an Adopted Policy
+
+These proposed controls require the author/institution to choose a proportionate process, permitted data, consent/alternative route, retention and access. No recording, webcam requirement or history collection is activated by this material. Prefer a synthetic task and criterion-based explanation over collecting private history. The original proposal is retained below for decision.
 
 > *Added after the pandemic forced us all online — but useful even for hybrid scenarios.*
 
@@ -1060,8 +1079,8 @@ During a brainstorming session with Andrei Toma at The Dose (our usual spot near
 
 1. **Handwritten pseudocode** — before coding, student photographs hand-drawn logic. Difficult to fake in real-time.
 2. **Language switching** — "Explain this in Romanian, now show me the English code." Reveals true understanding vs memorisation.
-3. **Terminal history audit** — at end: `cat ~/.bash_history | tail -50`. Shows recent activity.
-4. **Deliberate error trap** — "I see a bug on line 47" (when there isn't one). Authentic students look and say "I don't see it." Fakers scramble to "fix" it.
+3. **Terminal history audit** — at end: a synthetic session history limited to the assessment task. A private shell history can expose unrelated data and does not establish authorship.
+4. **Deliberate error trap** — "I see a bug on line 47" (when there isn't one). This reaction is not validated evidence of authorship; prefer an explicit, reproducible debugging question and recorded assessment criteria.
 
 ### Post-Session Checklist
 

@@ -1,4 +1,4 @@
-student_id,student_name,student_group,seminar,homework_id,score,late_days,signature_valid
+student_id,student_name,student_group,seminar,homework_id,final_score,late_days,signature_valid
 123001,Ion Popescu,1234A,SEM01,S01b,9.5,0,yes
 123001,Ion Popescu,1234A,SEM01,S01c,8.0,0,yes
 123001,Ion Popescu,1234A,SEM01,S01d,9.0,0,yes

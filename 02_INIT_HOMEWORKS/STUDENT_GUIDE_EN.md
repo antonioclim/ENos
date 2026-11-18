@@ -1,5 +1,20 @@
 # User Guide - Homework Recording
 
+This recording workflow requires **asciinema CLI 2.x**, which writes asciicast v2. The recorder checks `asciinema --version` before starting. CLI 3.x writes an incompatible v3 format and is rejected with an explanation; the scripts do not install or downgrade packages. See the [official v2](https://docs.asciinema.org/manual/asciicast/v2/) and [v3](https://docs.asciinema.org/manual/asciicast/v3/) specifications. Version detection has local regression coverage; native terminal recording remains a separate acceptance check.
+
+> **v6 candidate correction:** Follow the [current recording contract](../03_GUIDES/RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+
+For an authorised online run, first obtain the host, account, port and host-key fingerprint from the service owner through a trusted channel. The supplied clients target `sop.ase.ro`; if the confirmed destination differs, the client configuration must be reconciled before use. Install only the verified host-key entry in `known_hosts`. The clients use `StrictHostKeyChecking=yes`.
+
+After the configuration and use of the existing workflow have been confirmed, use the current client interface:
+
+```bash
+read -r -p 'SSH port confirmed by the service owner: ' ENOS_CONFIRMED_PORT
+python record_homework_tui_EN.py --port "$ENOS_CONFIRMED_PORT"
+```
+
+The Bash alternative is `bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"`. Both clients validate the supplied port; neither historical port is selected by this guide. For local practice, continue to use `--offline`.
+
 ## Operating Systems 2023-2027
 
 **Version:** 1.1.0 | **Last updated:** January 2025
@@ -9,83 +24,26 @@
 ## 🎯 Before You Begin
 
 **Don't panic!** This process looks complicated at first glance, but:
-- The script does almost everything automatically
-- The most common error (typo in STOP_homework) is fixed in 2 seconds
-- You can re-record as many times as you need
+- The script records the session and reports the outcome; install dependencies and choose the mode explicitly
+- A typo in `STOP_homework` can be corrected; Ctrl+D also closes the recorded shell. The historical “most common / 2 seconds” claim is unverified
+- Local practice can be repeated after preserving the existing file; institutional resubmission rules remain pending
 
 💪 **85% of students from previous years succeeded on their first attempt.**
+
+> **Provenance pending author review:** The percentage is retained from the source; no denominator, cohort or measurement record is established here.
 
 ---
 
 ## 🔄 Recording Process Diagram
 
-```
-┌─────────────────┐
-│  🚀 Start       │
-│    Script       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐     No       ┌─────────────────┐
-│  Dependencies   ├─────────────►│ 📦 Automatic    │
-│  installed?     │              │ install pip,    │
-└────────┬────────┘              │ asciinema, etc. │
-         │ Yes                   └────────┬────────┘
-         │◄──────────────────────────────┘
-         ▼
-┌─────────────────┐
-│ 📝 Enter        │◄───┐
-│ student data    │    │ Invalid data
-└────────┬────────┘    │
-         │ Data OK     │
-         ▼             │
-┌─────────────────┐    │
-│  Validate       ├────┘
-│  data format    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 💾 Save         │
-│ local config    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 🎬 START        │
-│ Recording       │
-│ asciinema       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 👨‍💻 Execute      │◄───┐
-│ homework cmds   │    │
-└────────┬────────┘    │ No
-         │             │
-         ▼             │
-┌─────────────────┐    │
-│ STOP_homework?  ├────┘
-└────────┬────────┘
-         │ Yes
-         ▼
-┌─────────────────┐
-│ 🔐 Generate     │
-│ RSA signature   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐     Failed   ┌─────────────────┐
-│ 📤 SCP Upload   ├─────────────►│ Retry (max 3x)  │
-│ to server       │◄─────────────┤ or saved        │
-└────────┬────────┘              │ LOCALLY         │
-         │ Success               └─────────────────┘
-         ▼
-┌─────────────────┐
-│ ✅ SUCCESS!     │
-│ Homework sent   │
-└─────────────────┘
-```
+1. Check prerequisites; report missing commands without installing them.
+2. Enter and validate student data. Save TUI preferences locally.
+3. Start the terminal recording and execute the homework commands.
+4. Stop the recorded shell with `STOP_homework` or Ctrl+D.
+5. Save self-declared identity fields in the asciicast header.
+6. In `--offline` mode, retain the local file and stop without networking.
+7. In online mode with a confirmed port, attempt the existing legacy metadata token; retain the file on failure.
+8. Attempt upload up to three times. Report transfer success or failure separately from institutional acceptance.
 
 ---
 
@@ -95,14 +53,14 @@
 
 On Ubuntu/WSL, open a terminal.
 
-*(WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*
+*(Historical author statement, retained for review: WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)*
 
 
 > 🚨 **WARNING!** Use YOUR OWN terminal, installed and configured as your instructor has directed!
 >
 > DO NOT connect to sop.ase.ro!
 >
-> ⚠️ Errors caused by not following this instruction are your responsibility, and homework that is not posted and generated from your personal server will NOT be considered!
+> ⚠️ Errors caused by not following this instruction are your responsibility, the original eligibility rule requires author confirmation; the tools do not decide eligibility automatically.
 
 ---
 
@@ -135,7 +93,9 @@ Observation: `~` represents your home directory (`/home/{username}/`).
 
 ### Step 3: Download the script
 
-**Option A: Download from Google Drive (recommended for beginners)**
+**Current source:** use the recorder supplied with this checkout.
+
+**Historical Option A: Google Drive distribution (not verified as this candidate)**
 
 1. Open the link in your browser:
    - Python TUI (recommended): https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link
@@ -147,7 +107,7 @@ Observation: `~` represents your home directory (`/home/{username}/`).
 
 ---
 
-**Option B: Download directly with wget in terminal**
+**Historical Option B: old download example, retained for provenance; use the current checkout**
 
 ```bash
 cd ~/HOMEWORKS
@@ -260,7 +220,7 @@ cd ~/HOMEWORKS
 ### Step 2: Run the script
 
 ```bash
-python3 record_homework_tui_EN.py
+python record_homework_tui_EN.py --offline
 ```
 
 **You should see:** The "Matrix rain" effect followed by the programme banner.
@@ -271,29 +231,17 @@ python3 record_homework_tui_EN.py
 
 ---
 
-## First Use (Takes Longer!)
+## First Use: Explicit Dependency Setup
 
-On the first run, the script will:
+Install system packages explicitly in the lab environment, then create one Python virtual environment:
 
-1. ✅ Check and install `pip` (if missing)
-2. ✅ Install Python libraries: `rich`, `questionary`
-3. ✅ Install system utilities: `asciinema`, `openssl`, `sshpass`
-
-This process may take 1-3 minutes depending on your internet connection.
-
-**You should see messages similar to:**
-```
-⚡ Installing pip...
-✓ pip has been installed!
-
-⚡ Installing Python packages: rich, questionary...
-✓ Python packages have been installed!
-
-⚡ Installing system packages: asciinema, openssl, sshpass...
-✓ System packages have been installed!
+```bash
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
 ```
 
-Subsequent runs will be instant - nothing more needs to be installed.
+Run with `python record_homework_tui_EN.py --offline` while that environment is active. The recorder only checks dependencies; it does not modify the OS or install into system Python.
 
 ---
 
@@ -384,9 +332,9 @@ or press `Ctrl+D`
 
 After stopping the recording:
 
-1. ✅ The script generates the cryptographic signature
-2. ✅ Automatically uploads to server (3 attempts)
-3. ✅ Displays the final summary
+1. Save the local recording and self-declared header metadata.
+2. In offline mode, stop with no connection or token generation.
+3. In online mode with a confirmed port, generate the legacy token and attempt transfer up to three times. Keep the recording on failure.
 
 ### If the upload succeeds:
 
@@ -417,7 +365,7 @@ The file is saved locally and you will see a message with the command for manual
 ║                                                                         ║
 ║   Try later (when you restore connection) using:                        ║
 ║                                                                         ║
-║   scp -P 1002 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
+║   scp -P "$ENOS_CONFIRMED_PORT" 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
 ║                                                                         ║
 ║   ⚠️  DO NOT modify the .cast file before submission!                   ║
 ║                                                                         ║
@@ -425,9 +373,9 @@ The file is saved locally and you will see a message with the command for manual
 ```
 
 Remember:
-- ⚠️ DO NOT modify the `.cast` file - the signature becomes invalid!
-- 📋 Copy the displayed command and run it when you have internet
-- 🔄 You can try as many times as needed
+- ⚠️ Preserve the original `.cast` as evidence; the legacy token does not detect every modification.
+- 📋 The screen above is an illustration with a truncated destination. Use only the actual file, account and destination confirmed for your submission, the confirmed port and `-o StrictHostKeyChecking=yes`; retain the local recording if verification or transfer fails
+- 🔄 You can repeat local practice after preserving the previous recording; this does not establish an institutional resubmission right
 
 ---
 
@@ -452,7 +400,7 @@ Example: `1029_SMITH_John_HW03b.cast`
 ### Contents:
 
 - The complete recording of the terminal session
-- The cryptographic signature (for authenticity verification)
+- The legacy metadata token in online mode (authenticity remains unverified)
 
 ---
 
@@ -462,7 +410,7 @@ Example: `1029_SMITH_John_HW03b.cast`
 
 **Q: Why must I use my own terminal and not the sop.ase.ro server?**
 
-A: The asciinema recording captures ALL terminal activity. On the server, your activity would mix with other students' and the resulting file would be unusable. Additionally, the cryptographic signature is based on the LOCAL user.
+A: Asciicast v2 records its associated pseudoterminal stream and timing. Ordinary text recording does not capture unrelated sessions or ambient audio. Use your own configured lab environment so that commands and files belong to the intended exercise; the metadata labels do not authenticate the user.
 
 ---
 
@@ -486,13 +434,13 @@ A: The recording stops automatically and the partial file is saved. You can:
 
 **Q: Can I edit the .cast file after recording?**
 
-A: **NO!** Any modification invalidates the cryptographic signature and the homework will be automatically rejected. If you made a mistake, delete the file and re-record.
+A: The existing public-key-encrypted metadata token is not a digital signature and does not bind the recording content. It cannot establish authorship, non-repudiation or detect every edit. Preserve the original recording; the institutional verification and resubmission contract remains pending author decision.
 
 ---
 
 **Q: How can I verify that the signature is valid?**
 
-A: You cannot verify it yourself - only the instructor has the private key. But you can verify that the signature EXISTS:
+A: The current format is public-key encryption of metadata, not a digital signature. A syntax check cannot authenticate it; the replacement protocol remains an author decision. You may inspect the footer:
 ```bash
 tail -5 ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast
 # The last line should start with "## " followed by Base64
@@ -510,11 +458,11 @@ tail -5 ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast
 # Make sure you are in the HOMEWORKS directory
 cd ~/HOMEWORKS
 
-# Run with sudo the first time (for installing dependencies)
-sudo python3 record_homework_tui_EN.py
+
+python record_homework_tui_EN.py --offline
 ```
 
-**You should see:** The dependency installation process, followed by the normal interface.
+**You should see:** Dependency checks followed by the interface, if all prerequisites are available.
 
 ---
 
@@ -541,10 +489,12 @@ sudo apt install asciinema
 #### 3. pip install fails with "externally-managed-environment"
 
 On Ubuntu 23.04+ and Debian 12+, the system protects Python packages.
-Our script handles this case automatically, but if you install manually:
+Use a dedicated virtual environment:
 
 ```bash
-pip install --user --break-system-packages rich questionary
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
 ```
 
 ---
@@ -571,14 +521,8 @@ sudo pacman -S asciinema openssl sshpass
 
 **Solution:**
 ```bash
-# Check if it exists under another name:
-python --version
-
-# If it works, create a symlink:
-sudo ln -s $(which python) /usr/local/bin/python3
-
-# If it does not exist at all:
-sudo apt install python3
+sudo apt install python3 python3-venv
+python3 --version
 ```
 
 ---
@@ -610,14 +554,10 @@ ls -la
 
 **Solution:**
 ```bash
-# Check where it was installed:
-python3 -m pip show rich | grep Location
-
-# Add to PYTHONPATH (temporary):
-export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
-
-# Or reinstall globally (requires sudo):
-sudo pip3 install rich questionary
+python3 -m venv ~/.venvs/enos-recorder
+source ~/.venvs/enos-recorder/bin/activate
+python -m pip install rich questionary
+python -c "import rich, questionary; print('OK')"
 ```
 
 ---
@@ -632,7 +572,7 @@ sudo pip3 install rich questionary
 
 Alternatively, use the Bash version (without Matrix effects):
 ```bash
-./record_homework_EN.sh
+bash record_homework_EN.sh --offline
 ```
 
 ---
@@ -692,7 +632,7 @@ cat ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast | head -20
 1. Press up arrow to edit the previous command
 2. Or type the correct command
 
-⚠️ **DO NOT use `clear`** — it erases the visual history needed for evaluation.
+⚠️ **DO NOT use `clear`** — it clears the current display but leaves earlier recording events intact; keep the demonstration easy to follow.
 
 ---
 
@@ -722,34 +662,32 @@ cat ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast | head -20
 
 #### 15. "Connection timed out"
 
-**Cause:** The sop.ase.ro server uses port 1002 (not standard 22). 
+**Configuration pending:** Historical copies use 1001 and 1002. Confirm the port through the service owner; neither number is established as the current service configuration.
 
 Possible causes:
-1. Firewall blocks port 1002 (common in corporate networks)
+1. The confirmed service port is unreachable on the approved network route
 2. Active VPN that does not route correctly
 3. Server temporarily unavailable
 
 **Solution:**
 ```bash
-# Test connectivity:
-nc -zv sop.ase.ro 1002
+# Only when a service-owner-authorised connectivity check is appropriate:
+: "${ENOS_CONFIRMED_PORT:?Set the SSH port confirmed by the service owner}"
+nc -zv sop.ase.ro "$ENOS_CONFIRMED_PORT"
 
-# If you are on VPN, disconnect temporarily
-# If you are on a restricted network, use mobile hotspot
+# Use the approved network route; do not disable protective controls to bypass a restriction.
 ```
 
 ---
 
 #### 16. "Host key verification failed"
 
-**Cause:** The server's SSH key has changed or it is the first connection.
+**Meaning:** The client cannot match the server key to a trusted entry, or the presented key differs from the stored entry. The current clients use `StrictHostKeyChecking=yes`; a first connection or changed key can therefore stop the transfer.
 
-**Note:** The script uses `-o StrictHostKeyChecking=no` so you should NOT see this error. If it still appears:
-
-```bash
-ssh-keygen -R sop.ase.ro
-# Then run the script again
-```
+1. Retain the local recording and stop the online attempt.
+2. Confirm the exact host, port and host-key fingerprint with the service owner through a trusted channel, independent of the failing connection.
+3. Add or replace only the specifically verified `known_hosts` entry using the service owner's procedure. Do not disable host-key checking or delete entries merely to suppress the warning.
+4. Retry only after the entry and destination have been verified. Use `--offline` for further local practice while this remains unresolved.
 
 ---
 
@@ -760,7 +698,7 @@ ssh-keygen -R sop.ase.ro
 **Solution:** This is a server problem. Contact the instructor with:
 - Selected specialisation: [eninfo/grupeid]
 - The exact error message
-- Output of the command: `sshpass -p stud ssh -p 1002 stud-id@sop.ase.ro "ls -la /home/HOMEWORKS/"`
+- The confirmed host, port, account and destination, with passwords, private keys and other credentials omitted. A remote diagnostic command requires the service owner's instructions; the historical shared password and fixed-port command are not a current diagnostic procedure
 
 ---
 
@@ -781,26 +719,26 @@ ls -l ~/HOMEWORKS/record_homework_tui_EN.py
 
 #### 19. I entered the wrong data
 
-Run the script again and enter the correct data. The previous file will be overwritten.
+Run the script again and enter the correct data. Keep the previous file as evidence and move it aside deliberately before reusing the same name.
 
 ---
 
 #### 20. The recording includes the script prompt too (not just my commands)
 
-**Note:** This is all intentional! The instructor sees the complete context. Asciinema captures everything that happens in the terminal, including script messages. This helps verify authenticity.
+**Note:** This is all intentional! The instructor sees the complete context. Asciinema captures the recorded pseudoterminal stream during the session. Prompts can aid interpretation but do not prove authenticity.
 
 ---
 
-## About the Cryptographic Signature
+## About the Legacy Metadata Token
 
-Each recording is digitally signed with RSA. This guarantees:
+Online mode retains public-key encryption of metadata. The following intended properties are **not** established:
 
-- ✅ **Authenticity** - the instructor can verify that you created the file
-- ✅ **Integrity** - the file cannot be modified after signing
-- ✅ **Non-repudiation** - you cannot deny that you sent the homework
+- **Authenticity:** self-declared labels do not prove who created the file
+- **Integrity:** the legacy payload is not bound to the event content
+- **Non-repudiation:** no supported proof is established by this token
 - Always check the result before continuing
 
-**You CANNOT forge another student's signature!**
+**This legacy format does not prove authenticity or prevent forgery.**
 
 ---
 

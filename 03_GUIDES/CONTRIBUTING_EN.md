@@ -1,5 +1,7 @@
 # 🤝 Contribution Guide
 
+> **v6 candidate correction:** Follow the [current recording contract](RECORDING_CONTRACT.md). Practice requires `--offline`; online configuration and the replacement verification protocol remain unresolved. Historical version labels below identify the source edition, not a new release.
+
 ## For Instructors Who Wish to Adapt the System
 
 This document explains how to customise the homework recording system for your own course.
@@ -10,7 +12,7 @@ This document explains how to customise the homework recording system for your o
 
 ### 1. Generating RSA Keys
 
-Each course should have its own key pair for signatures:
+The following key-generation example is historical. A new submission protocol and key-custody model require author approval; public-key metadata encryption is not signing:
 
 ```bash
 # Generate private key (keep SECRET!)
@@ -31,7 +33,7 @@ openssl rsa -in homework_private.pem -check
 
 ### 2. Server Configuration
 
-Modify the constants in both scripts:
+The following historical adaptation sketch shows which fields an authorised service owner would need to specify. It is not the active ENos service configuration. The current client still requires an explicit `--port`; changing a source default does not confirm a service or authorise a connection:
 
 **Python (record_homework_tui_EN.py):**
 ```python
@@ -44,7 +46,7 @@ SCP_BASE_PATH: str = "/path/to/homeworks"
 **Bash (record_homework_EN.sh):**
 ```bash
 readonly SCP_SERVER="server.university.ac.uk"
-readonly SCP_PORT="22"
+SCP_PORT="22"  # illustrative value; invocation still requires --port
 readonly SCP_PASSWORD="course_password"
 readonly SCP_BASE_PATH="/path/to/homeworks"
 ```
@@ -101,48 +103,52 @@ YOUR_KEY_CONTENTS_HERE
 
 ---
 
-## Signature Verification Script
+## Historical Raw-Metadata Decoder
 
-For verifying submitted homework, create a `verify_homework.sh` script:
+The following historical raw-metadata decoder is a teaching example for the 03 footer only. It does not verify recording content, authorship or the 02/SEM07 formats:
 
 ```bash
 #!/bin/bash
-# verify_homework.sh - Verify homework signature
-# Usage: ./verify_homework.sh homework.cast
+# decoder.sh — decode one legacy 03 metadata token; no authenticity claim
+# Usage: bash decoder.sh homework.cast
 
 set -euo pipefail
 
+if [[ $# -ne 1 ]]; then echo "Usage: bash decoder.sh recording.cast" >&2; exit 2; fi
 PRIVATE_KEY="homework_private.pem"
 CAST_FILE="$1"
 
-# Extract signature (last line starting with ##)
-SIGNATURE=$(grep "^## " "$CAST_FILE" | tail -1 | cut -d' ' -f2)
+# Extract only the legacy 03 raw-token shape, excluding SIG/META and arbitrary text.
+TOKEN=$(sed -n 's/^## \([A-Za-z0-9+/=][A-Za-z0-9+/=]*\)$/\1/p' "$CAST_FILE" | tail -n 1)
 
-if [[ -z "$SIGNATURE" ]]; then
-    echo "❌ Missing signature in file!"
+if [[ -z "$TOKEN" ]]; then
+    echo "❌ No supported legacy 03 token found; manual review required."
     exit 1
 fi
 
 # Decode and decrypt
-DECRYPTED=$(echo "$SIGNATURE" | base64 -d | openssl pkeyutl -decrypt -inkey "$PRIVATE_KEY")
+if ! DECRYPTED=$(printf '%s' "$TOKEN" | base64 -d | openssl pkeyutl -decrypt -inkey "$PRIVATE_KEY" -pkeyopt rsa_padding_mode:pkcs1); then
+    echo "Legacy token could not be decoded; no authenticity conclusion." >&2
+    exit 1
+fi
 
-echo "✅ Valid signature!"
-echo "📋 Signed data:"
+echo "Legacy metadata decrypted; content and identity remain UNVERIFIED."
+echo "📋 Decrypted metadata labels:"
 echo "$DECRYPTED"
 
 # Parse components
-IFS=' ' read -r STUDENT GROUP SIZE DATE TIME USER PATH <<< "$DECRYPTED"
+IFS=' ' read -r STUDENT GROUP SIZE DATE TIME RECORDED_USER RECORDED_PATH <<< "$DECRYPTED"
 
 echo ""
 echo "   Student: $STUDENT"
 echo "   Group: $GROUP"
 echo "   Size: $SIZE bytes"
 echo "   Date: $DATE $TIME"
-echo "   User: $USER"
+echo "   User label: $RECORDED_USER"
 
-# Verify file size
-ACTUAL_SIZE=$(stat -c%s "$CAST_FILE")
-# Note: size includes the added signature, so it will be slightly larger
+# Observe current file size; this does not authenticate the recorded bytes
+ACTUAL_SIZE=$(stat -c%s -- "$CAST_FILE")
+# The current file includes the footer; the encrypted size label predates it.
 echo ""
 echo "   Actual size: $ACTUAL_SIZE bytes"
 ```
@@ -151,36 +157,41 @@ echo "   Actual size: $ACTUAL_SIZE bytes"
 
 ## Local Testing
 
-### Without real upload (dry-run)
+### Without any upload (offline practice)
 
-Comment out the upload section for testing:
-
-```python
-# In main():
-# upload_success = upload_homework(filepath, data)
-upload_success = False  # Simulate failure for local testing
-```
-
-### With local SFTP server (Docker)
+Use the supported offline option without editing the source:
 
 ```bash
-# Start an SFTP container for testing
-docker run -d \
-    --name sftp-test \
-    -p 2222:22 \
-    -v $(pwd)/test_uploads:/home/stud/HOMEWORKS \
-    atmoz/sftp stud:stud:::HOMEWORKS
-
-# Temporarily modify port in script to 2222
-# and server to localhost
+bash record_homework_EN.sh --offline
+# Or, in the documented virtual environment:
+python record_homework_tui_EN.py --offline
 ```
+
+Neither path generates a legacy token or attempts a connection/upload. The local regressions use disposable files and transport fixtures; they do not establish live service interoperability.
+
+### Historical local SFTP integration sketch (not executed)
+
+An isolated integration test requires a chosen image version/digest, disposable test credentials and directories, a verified host key and a client configured for that fixture. The historical container example is retained in bounded form below; it is not a recommendation to deploy an institutional service. Set the two required variables deliberately before executing it:
+
+```bash
+: "${TEST_SFTP_IMAGE:?Set an explicitly selected atmoz/sftp image tag or digest}"
+: "${TEST_SFTP_PASSWORD:?Set a unique disposable test password}"
+mkdir -p -- "$PWD/test_uploads"
+docker run -d \
+    --name enos-sftp-test \
+    -p 127.0.0.1:2222:22 \
+    -v "$PWD/test_uploads:/home/stud/HOMEWORKS" \
+    "$TEST_SFTP_IMAGE" "stud:${TEST_SFTP_PASSWORD}:::HOMEWORKS"
+```
+
+Use an isolated test client copy with the fixture hostname/account/path and `--port 2222`, after checking its host key. Preserve the canonical ENos configuration. Container startup, bind-mount ownership, SSH interoperability and cleanup are separate integration checks; none was inferred from the local control-flow fixtures.
 
 ---
 
 ## Project Structure
 
 ```
-02_INIT_TEME_EN/
+03_GUIDES/
 ├── README_EN.md              # Main documentation
 ├── STUDENT_GUIDE_EN.md       # Detailed student guide
 ├── STUDENT_GUIDE_EN.html     # HTML version (generated)
@@ -193,18 +204,15 @@ docker run -d \
 
 ---
 
-## Generating HTML from Markdown
+## Generating the static student HTML
 
-If you modify `STUDENT_GUIDE_EN.md`, regenerate the HTML:
+From this directory, after editing `STUDENT_GUIDE_EN.md`:
 
 ```bash
-# With pandoc
-pandoc STUDENT_GUIDE_EN.md -o STUDENT_GUIDE_EN.html --standalone --toc
-
-# With grip (GitHub style preview)
-pip install grip
-grip STUDENT_GUIDE_EN.md --export STUDENT_GUIDE_EN.html
+python3 build_student_guide.py
 ```
+
+The builder requires Pandoc and uses the current Markdown, preserved theme CSS and shared print rules. It records the Markdown hash and produces proper lists and clickable bare links. Do not replace this controlled export with an unrelated generic renderer. The separate `02_INIT_HOMEWORKS` interactive edition is maintained independently.
 
 ---
 
@@ -218,7 +226,7 @@ For bugs or suggestions:
 
 ## Licence
 
-The code is proprietary and intended exclusively for use within the Operating Systems course at ASE Bucharest.
+The historical text describes proprietary course use. It conflicts with the former MIT package declaration; the canonical grant remains an [author decision](../AUTHOR_DECISIONS.md). This candidate does not resolve that conflict.
 
 Modifications for personal use are permitted. Public redistribution requires approval.
 

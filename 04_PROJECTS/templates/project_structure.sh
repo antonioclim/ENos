@@ -44,10 +44,13 @@ Generated structure:
 EOF
 }
 
-[[ $# -lt 1 ]] && { usage; exit 1; }
+[[ ${1:-} != --help && ${1:-} != -h ]] || { usage; exit 0; }
+[[ $# -ge 1 && $# -le 2 ]] || { usage >&2; exit 2; }
 
 PROJECT_NAME="$1"
 PROJECT_ID="${2:-}"
+[[ $PROJECT_NAME =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] || { echo 'Project name must be a simple directory name' >&2; exit 2; }
+[[ -z $PROJECT_ID || $PROJECT_ID =~ ^(E0[1-5]|M(0[1-9]|1[0-5])|A0[1-3])$ ]] || { echo 'Invalid project ID' >&2; exit 2; }
 
 [[ -e "$PROJECT_NAME" ]] && { echo "Error: '$PROJECT_NAME' already exists"; exit 1; }
 
@@ -83,7 +86,7 @@ make install
 ## Usage
 
 \`\`\`bash
-./$PROJECT_NAME [options] <arguments>
+bash src/main.sh [options] <arguments>
 \`\`\`
 
 ### Options
@@ -121,45 +124,12 @@ make test
 
 ## Licence
 
-Educational project - ASE CSIE OS
+[Author decision required: insert the project licence only after approval.]
 EOF
 
 # Makefile
-cat > "$PROJECT_NAME/Makefile" << 'MAKEFILE_CONTENT'
-.PHONY: all test lint install clean help
-
-SHELL := /bin/bash
-NAME := $(shell basename $(CURDIR))
-
-all: lint test
-
-test:
-	@echo "═══ Running tests ═══"
-	@./tests/test_main.sh
-
-lint:
-	@echo "═══ ShellCheck verification ═══"
-	@shellcheck -x src/*.sh src/lib/*.sh 2>/dev/null || true
-
-install:
-	@echo "═══ Installation ═══"
-	@mkdir -p ~/.local/bin
-	@cp src/main.sh ~/.local/bin/$(NAME)
-	@chmod +x ~/.local/bin/$(NAME)
-	@echo "Installed to ~/.local/bin/$(NAME)"
-
-clean:
-	@echo "═══ Cleanup ═══"
-	@rm -rf /tmp/$(NAME)_*
-	@find . -name "*.tmp" -delete
-
-help:
-	@echo "Available commands:"
-	@echo "  make test    - Run tests"
-	@echo "  make lint    - Run ShellCheck"
-	@echo "  make install - Install locally"
-	@echo "  make clean   - Clean temporary files"
-MAKEFILE_CONTENT
+template_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+cp -- "$template_dir/Makefile_template" "$PROJECT_NAME/Makefile"
 
 # .gitignore
 cat > "$PROJECT_NAME/.gitignore" << 'GITIGNORE_CONTENT'
@@ -225,7 +195,7 @@ Options:
 
 Examples:
     ${SCRIPT_NAME} input.txt
-    ${SCRIPT_NAME} -v --option value
+    ${SCRIPT_NAME} -v input.txt
 EOF
 }
 
@@ -256,9 +226,9 @@ done
 main() {
     log_info "Start ${SCRIPT_NAME}"
     
-    # Implementation here
-    
-    log_info "Done"
+    # TODO: implement the project behaviour and its semantic tests.
+    log_warn "NOT_IMPLEMENTED: this generated scaffold performs no project operation"
+    return 3
 }
 
 main "$@"
@@ -277,7 +247,7 @@ readonly YELLOW='\033[1;33m'
 readonly NC='\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $*"
+    printf '%b[INFO]%b %s\n' "$GREEN" "$NC" "$*" >&2
 }
 
 log_warn() {
@@ -322,12 +292,12 @@ PASSED=0
 assert_exit_code() {
     local expected=$1
     shift
-    "$@" >/dev/null 2>&1
-    local actual=$?
-    ((TESTS++))
+    local actual
+    if "$@" >/dev/null 2>&1; then actual=0; else actual=$?; fi
+    TESTS=$((TESTS+1))
     if [[ $actual -eq $expected ]]; then
         echo "✓ PASS: exit code $expected"
-        ((PASSED++))
+        PASSED=$((PASSED+1))
     else
         echo "✗ FAIL: expected $expected, got $actual"
     fi
@@ -336,10 +306,11 @@ assert_exit_code() {
 echo "═══ Tests main.sh ═══"
 
 # Test help
-assert_exit_code 0 "$MAIN" --help
+assert_exit_code 0 bash "$MAIN" --help
 
 # Test version
-assert_exit_code 0 "$MAIN" --version
+assert_exit_code 0 bash "$MAIN" --version
+assert_exit_code 3 bash "$MAIN" input.txt
 
 # Add more tests
 

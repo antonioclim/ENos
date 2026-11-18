@@ -1,54 +1,31 @@
-# Systemd Service Template for Monitor
-# Save as: /etc/systemd/system/monitor.service
-#
-# Installation:
-#   sudo cp monitor.service /etc/systemd/system/
-#   sudo systemctl daemon-reload
-#   sudo systemctl enable monitor.service
-#   sudo systemctl start monitor.service
-#
-
+# Example unit; provision user, paths and literal configuration before activation.
+# Copying/starting a unit is an explicit host operation, not part of local checks.
 [Unit]
-Description=System Monitor Service
-Documentation=man:monitor(1)
-After=network.target
-Wants=network.target
+Description=ENos CAPSTONE Monitor example
+After=local-fs.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
-User=root
-Group=root
-
-# Working directory
-WorkingDirectory=/opt/capstone/monitor
-
-# Main script
-ExecStart=/opt/capstone/monitor/monitor.sh --continuous --interval=60
-
-# Restart policy
+User=capstone
+Group=capstone
+WorkingDirectory=/opt/ENos/SEM06/scripts/projects/monitor
+ExecStart=/bin/bash /opt/ENos/SEM06/scripts/projects/monitor/monitor.sh --config /etc/capstone/monitor.conf --daemon --interval 60 --output json --log-file /dev/stderr
 Restart=on-failure
 RestartSec=30
-StartLimitInterval=300
-StartLimitBurst=5
-
-# Logging
-StandardOutput=append:/var/log/monitor/monitor.log
-StandardError=append:/var/log/monitor/monitor_error.log
-
-# Security hardening
+RuntimeDirectory=capstone-monitor
+Environment="RUN_DIR=/run/capstone-monitor"
+Environment="LOCK_FILE=/run/capstone-monitor/monitor.lock"
+Environment="NOTIFY_EMAIL=" "NOTIFY_SLACK_WEBHOOK="
+Environment="LOG_LEVEL=INFO" "THRESHOLD_CPU=80" "THRESHOLD_MEM=85" "THRESHOLD_DISK=90"
+StandardOutput=journal
+StandardError=journal
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/log/monitor
-
-# Environment
-Environment="LOG_LEVEL=INFO"
-Environment="THRESHOLD_CPU=80"
-Environment="THRESHOLD_MEM=85"
-Environment="THRESHOLD_DISK=90"
-
-# Resource limits
+ReadWritePaths=/run/capstone-monitor
 MemoryMax=100M
 CPUQuota=10%
 

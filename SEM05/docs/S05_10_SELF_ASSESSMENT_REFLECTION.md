@@ -62,7 +62,7 @@ Evaluate yourself honestly on a scale of 1-5:
 |------------|---|---|---|---|---|
 | I implement cleanup with `trap EXIT` | ○ | ○ | ○ | ○ | ○ |
 | I manage temporary files safely | ○ | ○ | ○ | ○ | ○ |
-| I understand different signals (INT, ERR) | ○ | ○ | ○ | ○ | ○ |
+| I distinguish OS signals (INT/TERM) from Bash events (ERR/EXIT) | ○ | ○ | ○ | ○ | ○ |
 
 ---
 
@@ -174,11 +174,11 @@ _____________________________________________
 **2. declare -A:**
 - Without it, Bash treats the array as indexed
 - Text keys are evaluated as variables (undefined = 0)
-- All assignments write to index 0
+- If the arithmetic names are unset and nounset is off, these examples use index 0; other bindings can produce different indices/errors.
 
 **3. set -e does not work in:**
 - if/while/until conditions
-- Commands with || or &&
+- Non-final tested commands in || / && lists
 - Commands negated with !
 - Functions called in test context
 
@@ -193,10 +193,10 @@ trap cleanup EXIT
 ```
 
 **5. Correct iteration:**
-```bash
+```text
 for item in "${arr[@]}"; do
 ```
-With quotes! Without quotes, word splitting corrupts the elements.
+With quotes! Without quotes, word splitting/pathname expansion changes loop arguments; the stored array is not mutated.
 
 </details>
 

@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seminar 5: Advanced Bash Scripting | ASE Bucharest - CSIE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.5.0/reveal.css">
+    <link rel="stylesheet" href="../../assets/css/reveal-night-4.5.0.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/11.7.0/monokai.css">
     <style>
         :root {
             --r-heading-color: #58a6ff;
@@ -61,7 +61,87 @@
             .fragment { opacity: 1 !important; visibility: visible !important; }
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
-    </style>
+    @media screen and (max-width: 700px) {
+ .two-column,.two-columns,.three-columns,.cols { flex-direction: column; }
+ pre,code { overflow-wrap: anywhere; } table { display: block; overflow-x: auto; }
+}
+</style>
+<link rel="stylesheet" data-enos-presentation-fallback href="../../assets/css/presentation_fallback.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
 <div class="reveal">
@@ -76,7 +156,8 @@
 
     <h3>Functions • Arrays • Robustness</h3>
     <p>Operating Systems | ASE Bucharest - CSIE</p>
-    <p class="small">Seminar 5</p>
+    <p class="small">Seminar 5 • Bash 4.4+; commands are for an owned disposable workspace.</p>
+<p class="small">Historical misconception percentages are retained as unverified author claims: no cohort, denominator or measurement method is established. They are not course statistics.</p>
 </section>
 
 <!-- ============================================================ -->
@@ -113,22 +194,23 @@ rm -rf *
 tar -czf backup.tar.gz /data
 echo "Done!"</code></pre>
         <p class="fragment">What happens if <code>$BACKUP_DIR</code> is empty?</p>
-        <p class="fragment bad">💀 <code>rm -rf /*</code> - RIP system!</p>
+        <p class="fragment bad">An empty unquoted variable leaves <code>cd</code> without an argument: it targets the home directory. The wildcard still applies to the current directory. Do not execute this WRONG example.</p>
     </section>
     
     <section>
         <h3 class="good">Robust Script</h3>
         <pre><code class="bash">#!/bin/bash
 set -euo pipefail
-
-BACKUP_DIR="${BACKUP_DIR:?Error: BACKUP_DIR not set}"
-[[ -d "$BACKUP_DIR" ]] || { echo "Dir not found"; exit 1; }
-
-cd "$BACKUP_DIR"
-rm -rf ./*
-tar -czf backup.tar.gz /data
-echo "Done!"</code></pre>
-        <p class="fragment good">✓ Stops at the first problem</p>
+# The demonstration owns every path that it removes.
+workspace=$(mktemp -d) || exit 1
+trap 'rc=$?; rm -rf -- "$workspace"; exit "$rc"' EXIT
+mkdir -- "$workspace/source" "$workspace/backup"
+printf 'fixture\n' &gt; "$workspace/source/example.txt"
+tar -czf "$workspace/backup/backup.tar.gz" -C "$workspace/source" .
+tar -tzf "$workspace/backup/backup.tar.gz" &gt;/dev/null
+printf 'Fixture archive verified\n'
+# Quoting and ./ do not establish ownership of arbitrary destinations.</code></pre>
+        <p class="fragment good">✓ Checks the archive and removes only its own temporary workspace</p>
     </section>
 </section>
 
@@ -174,7 +256,7 @@ increment() {
 
 increment
 echo "After function: $count"    # 10 (unchanged!)</code></pre>
-        <p class="fragment">🔑 <strong>Rule:</strong> ALWAYS use <code>local</code> in functions!</p>
+        <p class="fragment">🔑 <strong>Rule:</strong> Use <code>local</code> for internal state; document deliberate output/global state!</p>
     </section>
     
     <section>
@@ -244,7 +326,7 @@ echo ${arr[1]}  # second (NOT first!)</code></pre>
 
 # WRONG - word splitting!
 for f in ${files[@]}; do echo "$f"; done
-# Output: my / file.txt / doc.pdf (4 iterations!)
+# Output: my / file.txt / doc.pdf (3 iterations!)
 
 # CORRECT - with quotes
 for f in "${files[@]}"; do echo "$f"; done
@@ -268,15 +350,16 @@ echo ${config[@]}        # localhost 8080 (the values)</code></pre>
     
     <section>
         <h3>Misconception #5: declare -A</h3>
-        <pre><code class="bash"># WRONG - without declare -A
+        <pre><code class="bash"># WRONG example, isolated from previous demonstrations:
+unset config host port
 config[host]="localhost"
 config[port]="8080"
-echo ${!config[@]}  # Output: 0 (treated as indexed array!)
+printf '%s\n' "${!config[@]}"  # 0; unset arithmetic indices evaluate as 0
 
-# CORRECT - with declare -A
-declare -A config
-config[host]="localhost"
-echo ${!config[@]}  # Output: host port</code></pre>
+# Reset the indexed variable before declaring an associative array.
+unset config
+declare -A config=([host]=localhost [port]=8080)
+printf '%s\n' "${!config[@]}"  # host and port; order is unspecified</code></pre>
         <p class="fragment bad">70% forget <code>declare -A</code>!</p>
     </section>
     
@@ -298,9 +381,9 @@ for i in ${arr[@]}; do echo "[$i]"; done</code></pre>
     </section>
     
     <section>
-        <h3>The Holy Triad</h3>
+        <h3>Three Bash Options, Explicit Failure Checks</h3>
         <pre><code class="bash">#!/bin/bash
-set -e          # Exit on first error
+set -e          # Exit on eligible unhandled nonzero statuses
 set -u          # Error for undefined variables
 set -o pipefail # Propagate errors in pipes
 
@@ -331,13 +414,13 @@ echo "Never reaches"
         <h3>Misconception #6: Limitations of set -e</h3>
         <div class="highlight-box">
             <p><strong>75%</strong> believe set -e catches ANY error.</p>
-            <p>FALSE! It doesn't work in:</p>
+            <p>Its exceptions include:</p>
         </div>
         <ul>
             <li>Conditions <code>if/while/until</code></li>
-            <li>After <code>||</code> or <code>&&</code></li>
+            <li>Non-final commands of <code>&amp;&amp;</code>/<code>||</code> lists; a final failure can exit</li>
             <li>Functions in test context</li>
-            <li>Subshells (without shopt)</li>
+            <li>Command substitution normally clears <code>-e</code>; <code>inherit_errexit</code> changes this. Parenthesised subshells inherit it.</li>
         </ul>
     </section>
     
@@ -390,7 +473,7 @@ echo "continued"</code></pre>
     </section>
     
     <section>
-        <h3>trap EXIT - Guaranteed Cleanup</h3>
+        <h3>trap EXIT - Best-Effort Owned Cleanup</h3>
         <pre><code class="bash">#!/bin/bash
 set -euo pipefail
 
@@ -399,11 +482,11 @@ TEMP_FILE=""
 cleanup() {
     local exit_code=$?
     echo "Cleanup..."
-    [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+    [[ -f "$TEMP_FILE" ]] &amp;&amp; rm -f "$TEMP_FILE"
     exit $exit_code
 }
 
-trap cleanup EXIT  # ALWAYS executes on exit!
+trap cleanup EXIT  # Not on SIGKILL, power loss or abrupt process destruction
 
 TEMP_FILE=$(mktemp)
 # ... processing ...
@@ -415,9 +498,12 @@ TEMP_FILE=$(mktemp)
         <pre><code class="bash">#!/bin/bash
 
 # Catch Ctrl+C
-trap 'echo "Interrupted!"; exit 130' INT TERM
+trap 'echo "Interrupted!" &gt;&amp;2; exit 130' INT
+trap 'echo "Terminated!" &gt;&amp;2; exit 143' TERM
 
-# Catch errors with context
+# ERR does not require -e; -E controls inheritance into functions/subshells.
+# Its test-context exceptions resemble those of errexit.
+# Catch eligible failures with context
 trap 'echo "Error at line $LINENO"' ERR
 
 echo "Working..."
@@ -427,15 +513,15 @@ sleep 100
     
     <section>
         <h3>Pattern: die()</h3>
-        <pre><code class="bash">die() {
-    echo "FATAL: $*" >&2
+        <pre><code class="language-text">die() {
+    echo "FATAL: $*" &gt;&amp;2
     exit 1
 }
 
 # Usage
-[[ $# -ge 1 ]] || die "Usage: $0 <file>"
+[[ $# -ge 1 ]] || die "Usage: $0 &lt;file&gt;"
 [[ -f "$1" ]] || die "File not found: $1"
-command -v jq &>/dev/null || die "jq not installed"</code></pre>
+command -v jq &amp;&gt;/dev/null || die "jq not installed"</code></pre>
     </section>
 </section>
 
@@ -449,15 +535,15 @@ command -v jq &>/dev/null || die "jq not installed"</code></pre>
     
     <section>
         <h3>Template Structure</h3>
-        <pre><code class="bash" style="font-size: 0.45em;">#!/bin/bash
+        <pre><code class="language-text" style="font-size: 0.45em;">#!/bin/bash
 set -euo pipefail
-IFS=$'\n\t'
+# Set IFS locally for a particular parser; quoting is still necessary.
 
 readonly SCRIPT_NAME=$(basename "$0")
 readonly VERSION="1.0.0"
 
 usage() { ... }
-die() { echo "FATAL: $*" >&2; exit 1; }
+die() { echo "FATAL: $*" &gt;&amp;2; exit 1; }
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
 cleanup() {
@@ -482,7 +568,7 @@ main "$@"</code></pre>
         <h3>Pre-Commit Checklist</h3>
         <table>
             <tr><td>☐</td><td><code>set -euo pipefail</code></td></tr>
-            <tr><td>☐</td><td>All variables in functions have <code>local</code></td></tr>
+            <tr><td>☐</td><td>Internal variables use <code>local</code>; output/global state is explicit</td></tr>
             <tr><td>☐</td><td><code>declare -A</code> for associative arrays</td></tr>
             <tr><td>☐</td><td>Quotes in <code>"${arr[@]}"</code></td></tr>
             <tr><td>☐</td><td><code>trap cleanup EXIT</code></td></tr>
@@ -510,7 +596,7 @@ main "$@"</code></pre>
 }
 
 # Test
-validate_email "test@example.com" && echo "Valid"
+validate_email "test@example.com" &amp;&amp; echo "Valid"
 validate_email "invalid" || echo "Invalid"</code></pre>
     </section>
     
@@ -539,11 +625,11 @@ done</code></pre>
     <h2>Recap: Key Takeaways</h2>
     <div class="highlight-box">
         <ol>
-            <li><strong>local</strong> - ALWAYS in functions</li>
+            <li><strong>local</strong> - Internal function state; document shared state</li>
             <li><strong>declare -A</strong> - MANDATORY for hash</li>
             <li><strong>"${arr[@]}"</strong> - ALWAYS with quotes</li>
             <li><strong>set -euo pipefail</strong> - At the start of the script</li>
-            <li><strong>trap EXIT</strong> - For guaranteed cleanup</li>
+            <li><strong>trap EXIT</strong> - For best-effort owned cleanup; SIGKILL cannot be trapped</li>
         </ol>
     </div>
 </section>
@@ -555,11 +641,11 @@ done</code></pre>
     <h2>Homework</h2>
     <div class="highlight-box">
         <p><strong>Log Analyser + Config Manager</strong></p>
-        <p>Details in: <code>teme/S05_01_TEMA.md</code></p>
+        <p>Details in: <code>homework/S05_01_HOMEWORK.md</code></p>
     </div>
     <p>Resources:</p>
     <ul>
-        <li><code>docs/S05_02_MATERIAL_PRINCIPAL.md</code></li>
+        <li><code>docs/S05_02_MAIN_MATERIAL.md</code></li>
         <li><code>scripts/templates/professional_script.sh</code></li>
         <li><code>scripts/bash/S05_03_validator.sh</code></li>
     </ul>
@@ -576,8 +662,8 @@ done</code></pre>
 </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script src="../../assets/vendor/reveal.js/4.5.0/reveal.js"></script>
+<script src="../../assets/vendor/reveal.js/4.5.0/plugin/highlight/highlight.js"></script>
 <script>
     Reveal.initialize({
         hash: true,
@@ -585,8 +671,10 @@ done</code></pre>
         progress: true,
         center: true,
         transition: 'slide',
+        keyboardCondition: event => !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(event.target.tagName) && !event.target.isContentEditable,
         plugins: [ RevealHighlight ]
     });
 </script>
+<script src="../../assets/js/presentation_fallback.js"></script>
 </body>
 </html>

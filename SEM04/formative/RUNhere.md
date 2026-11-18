@@ -1,111 +1,35 @@
-# 📁 Formative Assessment — SEM04
+# Formative questions — Seminar 4
 
-> **Location:** `SEM04/formative/`  
-> **Purpose:** Self-assessment quiz system for seminar concepts
+`quiz.yaml` is canonical; `quiz_lms.json` is its project JSON view. Native LMS import is not verified. Answer keys and rubrics are formative, with final assessment policy [pending](../homework/ASSESSMENT_STATUS.md).
 
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `quiz.yaml` | Question bank (12+ questions, Bloom-distributed) |
-| `quiz_runner.py` | Interactive CLI quiz runner |
-| `quiz_lms.json` | LMS-compatible export (Moodle/Canvas) |
-
-## Quick Start
+Run from this directory:
 
 ```bash
-# Run interactive quiz
-python3 quiz_runner.py
-
-# Run with specific number of questions
-python3 quiz_runner.py --questions 10
-
-# Shuffle question order
-python3 quiz_runner.py --shuffle
-
-# Show answers immediately after each question
-python3 quiz_runner.py --show-answers
+python3 quiz_runner.py quiz.yaml
+python3 quiz_runner.py quiz.yaml --shuffle --category understand
+python3 quiz_runner.py --self-test
 ```
 
-## quiz_runner.py Options
+## Actual interface
 
-```bash
-python3 quiz_runner.py [options]
+```text
+usage: quiz_runner.py [-h] [--shuffle]
+                      [--category {remember,understand,apply,analyse,evaluate,create}]
+                      [--self-test]
+                      [quiz_file]
 
-Options:
-  --questions N     Number of questions to ask (default: all)
-  --shuffle         Randomize question order
-  --show-answers    Show correct answer after each question
-  --timed SEC       Time limit per question in seconds
-  --file PATH       Use alternative quiz file
-  --validate        Validate quiz.yaml structure without running
-  --export FORMAT   Export to format: json, csv, moodle
+Interactive formative quiz; open tasks require manual review.
+
+positional arguments:
+  quiz_file
+
+options:
+  -h, --help            show this help message and exit
+  --shuffle             Shuffle questions
+  --category {remember,understand,apply,analyse,evaluate,create}
+  --self-test
 ```
 
-## Quiz Format (quiz.yaml)
+Question content uses `questions[]`, `options`, `correct` (zero-based index), `explanation` and Bloom/score metadata. Open tasks retain their manual rubric. Shuffle changes question order. The tool does not implement the old generic --questions, --timed, --show-answers, --validate or --export interfaces.
 
-```yaml
-metadata:
-  seminar: 4
-  subject: "Text Processing (grep/sed/awk)"
-  version: "2.0"
-  creation_date: "2026-01-XX"
-  number_of_questions: 12
-  estimated_time_minutes: 15
-  bloom_distribution:
-    remember: 3      # Knowledge recall
-    understand: 5    # Comprehension  
-    apply: 2         # Practical usage
-    analyse: 2       # Problem solving
-
-questions:
-  - id: q01
-    bloom: remember
-    difficulty: easy
-    text: "Question text here?"
-    options:
-      - "Option A"
-      - "Option B"  
-      - "Option C"
-      - "Option D"
-    correct: 1       # 0-indexed (Option B is correct)
-    explanation: "Explanation of why B is correct"
-```
-
-## Adding Questions
-
-1. Edit `quiz.yaml`
-2. Follow Bloom taxonomy distribution guidelines
-3. Validate: `python3 quiz_runner.py --validate`
-4. Test: `python3 quiz_runner.py --questions 5`
-
-## LMS Integration
-
-### Export for Moodle
-
-```bash
-python3 quiz_runner.py --export moodle > quiz_moodle.xml
-```
-
-### Export for Canvas
-
-Use the pre-generated `quiz_lms.json` or:
-```bash
-python3 quiz_runner.py --export canvas > quiz_canvas.qti
-```
-
-## Bloom's Taxonomy Reference
-
-| Level | Cognitive Process | Question Types |
-|-------|-------------------|----------------|
-| Remember | Recall facts | Definitions, lists, terminology |
-| Understand | Explain meaning | Comparisons, descriptions |
-| Apply | Use knowledge | Code completion, command usage |
-| Analyse | Break down | Debugging, output prediction |
-
----
-
-*See also: [`../docs/`](../docs/) for study materials*  
-*See also: [`../tests/`](../tests/) for automated testing*
-
-*Last updated: January 2026*
+Update the YAML and regenerate the JSON view together; check both answer text and keyed positions. Do not claim that renaming JSON to .qti or .xml creates an LMS import package.

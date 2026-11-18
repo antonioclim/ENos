@@ -62,7 +62,7 @@ System for collecting, storing and historical analysis of resource usage (CPU, R
 
 ## CLI Interface
 
-```bash
+```text
 ./historian.sh <command> [options]
 
 Commands:
@@ -97,7 +97,7 @@ Examples:
   ./historian.sh show cpu -p 7d
   ./historian.sh show memory --width 120
   ./historian.sh report week -f csv > report.csv
-  ./historian.sh query "SELECT * FROM metrics WHERE cpu > 90"
+  ./historian.sh query "SELECT * FROM metrics WHERE cpu_percent > 90"
 ```
 
 ---
@@ -200,7 +200,7 @@ TOP PROCESSES (by average CPU)
 
 ```sql
 -- Main metrics table
-CREATE TABLE metrics (
+CREATE TABLE IF NOT EXISTS metrics (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     cpu_percent REAL,
@@ -210,7 +210,7 @@ CREATE TABLE metrics (
     load_1m REAL,
     load_5m REAL,
     load_15m REAL,
-    mem_total INTEGER,
+    mem_total INTEGER, -- memory fields are KiB; I/O and network counters below are bytes
     mem_used INTEGER,
     mem_free INTEGER,
     mem_cached INTEGER,
@@ -221,11 +221,22 @@ CREATE TABLE metrics (
     net_tx_bytes INTEGER
 );
 
+-- Per-core/partition/interface identity is represented separately from host aggregates.
+CREATE TABLE IF NOT EXISTS resource_metrics (
+    timestamp DATETIME NOT NULL,
+    kind TEXT NOT NULL CHECK(kind IN ('cpu','disk','network')),
+    resource TEXT NOT NULL,  -- cpu0, /dev/sda1, eth0 etc.
+    metric TEXT NOT NULL,
+    value REAL,             -- NULL means unavailable, not zero
+    unit TEXT NOT NULL,
+    PRIMARY KEY(timestamp,kind,resource,metric)
+);
+
 -- Index for fast queries
-CREATE INDEX idx_metrics_timestamp ON metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics(timestamp);
 
 -- Table for generated alerts
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     metric TEXT,
@@ -276,21 +287,24 @@ M06_Resource_Usage_Historian/
 ### CPU metrics collection
 
 ```bash
-get_cpu_usage() {
-    # Method 1: from /proc/stat
-    local cpu_line
-    cpu_line=$(head -1 /proc/stat)
-    
-    read -r _ user nice system idle iowait irq softirq <<< "$cpu_line"
-    
-    local total=$((user + nice + system + idle + iowait + irq + softirq))
-    local used=$((total - idle - iowait))
-    
-    echo "scale=2; $used * 100 / $total" | bc
-    
-    # Method 2: top one-shot
-    # top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}'
-}
+get_cpu_usage() (
+    local interval="${1:-1}" snapshots
+    [[ $interval =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    snapshots=$(mktemp -d) || return 1
+    trap 'rm -rf -- "$snapshots"' EXIT
+    awk '/^cpu([0-9]+)? /' /proc/stat > "$snapshots/before" || return 1
+    sleep "$interval" || return 1
+    awk '/^cpu([0-9]+)? /' /proc/stat > "$snapshots/after" || return 1
+    awk '
+    function total( i,s) {s=0; for(i=2;i<=9;i++) s+=$i; return s}
+    NR==FNR {previous[$1]=total(); idle[$1]=$5+$6; next}
+    {delta=total()-previous[$1]; idle_delta=$5+$6-idle[$1]
+     if(!($1 in previous) || delta<=0 || idle_delta<0 || idle_delta>delta)
+         printf "%s unavailable\n",$1
+     else printf "%s %.2f\n",$1,100*(delta-idle_delta)/delta}
+    ' "$snapshots/before" "$snapshots/after"
+    # aggregate 'cpu' and each 'cpuN'; guest/guest_nice are already included in user/nice.
+)
 
 get_load_average() {
     cat /proc/loadavg | awk '{print $1, $2, $3}'
@@ -325,19 +339,21 @@ draw_ascii_graph() {
     local max_height=10
     local width=${#values[@]}
     
-    # Find max for scaling
-    local max=0
+    [[ $width -gt 0 ]] || { echo "No samples"; return 2; }
+    local v
     for v in "${values[@]}"; do
-        ((v > max)) && max=$v
+        [[ $v =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+        awk -v v="$v" 'BEGIN {exit !(v>=0 && v<=100)}' || return 2
     done
-    
+    # Fixed 0–100 percent scale; zero remains an empty column.
+
     # Draw from top to bottom
     for ((row = max_height; row >= 1; row--)); do
-        local threshold=$((max * row / max_height))
+        local threshold=$((100 * row / max_height))
         printf "%3d%% │" "$((row * 100 / max_height))"
         
         for v in "${values[@]}"; do
-            if ((v >= threshold)); then
+            if awk -v v="$v" -v t="$threshold" 'BEGIN {exit !(v>=t)}'; then
                 printf "█"
             else
                 printf " "
@@ -357,38 +373,36 @@ draw_ascii_graph() {
 
 ```bash
 init_database() {
-    local db="$1"
-    sqlite3 "$db" << 'SQL'
-CREATE TABLE IF NOT EXISTS metrics (
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    cpu_percent REAL,
-    mem_used_kb INTEGER,
-    disk_read_kb INTEGER,
-    disk_write_kb INTEGER,
-    net_rx_kb INTEGER,
-    net_tx_kb INTEGER
-);
-CREATE INDEX IF NOT EXISTS idx_ts ON metrics(timestamp);
-SQL
+    local db="$1" schema="${2:?Path to canonical sql/schema.sql is required}"
+    [[ -r "$schema" ]] || return 1
+    sqlite3 "$db" < "$schema"
 }
 
 store_metrics() {
     local db="$1"
-    local cpu="$2" mem="$3" disk_r="$4" disk_w="$5" net_rx="$6" net_tx="$7"
-    
-    sqlite3 "$db" "INSERT INTO metrics (cpu_percent, mem_used_kb, disk_read_kb, disk_write_kb, net_rx_kb, net_tx_kb) VALUES ($cpu, $mem, $disk_r, $disk_w, $net_rx, $net_tx);"
+    shift
+    # CPU percent, memory KiB, then disk read/write and network RX/TX bytes.
+    python3 - "$db" "$@" <<'PYSTORE'
+import math, sqlite3, sys
+values = [float(value) for value in sys.argv[2:]]
+if len(values) != 6 or not all(math.isfinite(v) and v >= 0 for v in values) or values[0] > 100:
+    raise SystemExit("Invalid metric values")
+with sqlite3.connect(sys.argv[1]) as db:
+    db.execute("INSERT INTO metrics(cpu_percent,mem_used,disk_read_bytes,disk_write_bytes,net_rx_bytes,net_tx_bytes) VALUES(?,?,?,?,?,?)", values)
+PYSTORE
 }
 
 query_metrics() {
-    local db="$1"
-    local period="$2"  # e.g.: "-24 hours"
-    
-    sqlite3 -separator ',' "$db" \
-        "SELECT strftime('%H:%M', timestamp), cpu_percent, mem_used_kb 
-         FROM metrics 
-         WHERE timestamp > datetime('now', '$period')
-         ORDER BY timestamp;"
+    local db="$1" period="$2"  # e.g. '-24 hours'
+    python3 - "$db" "$period" <<'PYQUERY'
+import csv, sqlite3, sys
+with sqlite3.connect(sys.argv[1]) as db:
+    cursor = db.execute("SELECT timestamp,cpu_percent,mem_used FROM metrics WHERE timestamp>datetime('now',?) ORDER BY timestamp", (sys.argv[2],))
+    csv.writer(sys.stdout).writerows(cursor)
+PYQUERY
 }
+# Direct SQL querying is a SQLite-backend capability; the CSV backend must report
+# it as unsupported or implement an explicitly documented query adapter.
 ```
 
 ---

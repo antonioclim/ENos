@@ -1,385 +1,129 @@
 #!/usr/bin/env python3
+"""Semantic regression tests: every assertion calls the maintained implementation.
+
+Fixtures are generated locally. These diagnostics do not certify institutional
+assessment policy or exhaustive Bash static analysis.
 """
-Unit tests for S05_01_autograder.py
-
-Operating Systems | ASE Bucharest - CSIE
-Seminar 5: Advanced Bash Scripting
-
-These tests validate the autograder's checking functions to ensure
-consistent and fair grading of student submissions.
-
-Run with: python3 -m pytest test_autograder.py -v
-Or simply: python3 test_autograder.py
-"""
-
-import unittest
+import contextlib
+import importlib.util
+import io
+import json
+from pathlib import Path
+import subprocess
 import sys
-import os
 import tempfile
-import shutil
+import unittest
+from unittest.mock import patch
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts', 'python'))
-
-# Try to import the autograder module
-try:
-    from S05_01_autograder import BashAutograder, CheckResult
-except ImportError:
-    # Create mock classes for standalone testing
-    class CheckResult:
-        def __init__(self, passed: bool, message: str, points: float):
-            self.passed = passed
-            self.message = message
-            self.points = points
-    
-    class BashAutograder:
-        """Mock autograder for testing when real module unavailable."""
-        pass
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT/'scripts/python'))
+from S05_01_autograder import BashAutograder
+from S05_03_report_generator import load_grades_file, calculate_statistics
 
 
-class TestShebangCheck(unittest.TestCase):
-    """Tests for shebang line validation."""
-    
+class TestAutograderSemantics(unittest.TestCase):
     def setUp(self):
-        """Set up test fixtures."""
-        self.temp_dir = tempfile.mkdtemp()
-    
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-    
-    def _create_script(self, content: str) -> str:
-        """Helper to create a temporary script file."""
-        path = os.path.join(self.temp_dir, 'test_script.sh')
-        with open(path, 'w') as f:
-            f.write(content)
-        return path
-    
-    def test_valid_shebang_bin_bash(self):
-        """Test that #!/bin/bash is accepted."""
-        content = "#!/bin/bash\necho 'hello'"
-        # Check for shebang presence
-        self.assertTrue(content.startswith('#!/bin/bash'))
-    
-    def test_valid_shebang_env_bash(self):
-        """Test that #!/usr/bin/env bash is accepted."""
-        content = "#!/usr/bin/env bash\necho 'hello'"
-        self.assertTrue(content.startswith('#!/usr/bin/env bash'))
-    
-    def test_invalid_shebang_sh(self):
-        """Test that #!/bin/sh is rejected (no arrays support)."""
-        content = "#!/bin/sh\necho 'hello'"
-        # This should be flagged as invalid for advanced Bash scripts
-        self.assertFalse(content.startswith('#!/bin/bash'))
-    
-    def test_missing_shebang(self):
-        """Test that missing shebang is detected."""
-        content = "echo 'hello'\necho 'world'"
-        self.assertFalse(content.startswith('#!'))
-    
-    def test_shebang_with_flags(self):
-        """Test that shebang with flags is accepted."""
-        content = "#!/bin/bash -e\necho 'hello'"
-        self.assertTrue('#!/bin/bash' in content)
+        self.grader = BashAutograder()
 
+    def test_shebangs(self):
+        for text in ('#!/bin/bash', '#!/usr/bin/env bash', '#!/bin/bash -e'):
+            with self.subTest(text=text):
+                self.assertTrue(self.grader.check_shebang(text+'\necho ok').passed)
+        for text in ('#!/bin/sh', '', '#!/bin/bashnotreal', '# comment'):
+            with self.subTest(text=text):
+                self.assertFalse(self.grader.check_shebang(text).passed)
 
-class TestStrictModeCheck(unittest.TestCase):
-    """Tests for strict mode (set -euo pipefail) validation."""
-    
-    def test_full_strict_mode(self):
-        """Test detection of complete strict mode."""
-        content = "#!/bin/bash\nset -euo pipefail\necho 'hello'"
-        self.assertIn('set -euo pipefail', content)
-    
-    def test_partial_strict_mode_e_only(self):
-        """Test detection of partial strict mode (only -e)."""
-        content = "#!/bin/bash\nset -e\necho 'hello'"
-        self.assertIn('set -e', content)
-        self.assertNotIn('set -euo pipefail', content)
-    
-    def test_strict_mode_separate_flags(self):
-        """Test detection of strict mode with separate set commands."""
-        content = "#!/bin/bash\nset -e\nset -u\nset -o pipefail\necho 'hello'"
-        has_e = 'set -e' in content
-        has_u = 'set -u' in content
-        has_pipefail = 'set -o pipefail' in content
-        self.assertTrue(has_e and has_u and has_pipefail)
-    
-    def test_missing_strict_mode(self):
-        """Test detection of missing strict mode."""
-        content = "#!/bin/bash\necho 'hello'"
-        self.assertNotIn('set -e', content)
-        self.assertNotIn('set -u', content)
+    def test_combined_separate_and_disabled_strict_options(self):
+        for text in ('set -euo pipefail', 'set -e\nset -u\nset -o pipefail', 'set -o errexit\nset -o nounset\nset -o pipefail'):
+            self.assertEqual(self.grader.check_strict_mode(text).points, 3)
+        self.assertEqual(self.grader.check_strict_mode('set -e').points, 1)
+        self.assertEqual(self.grader.check_strict_mode('set -euo pipefail\nset +u').points, 2)
+        self.assertEqual(self.grader.check_strict_mode('# set -euo pipefail\necho "set -euo pipefail"').points, 0)
 
+    def test_local_and_global_variable_diagnostics(self):
+        self.assertTrue(self.grader.check_local_variables('f() {\nlocal x=1\necho "$x"\n}').passed)
+        self.assertFalse(self.grader.check_local_variables('f() {\nx=1\necho "$x"\n}').passed)
 
-class TestLocalVariableCheck(unittest.TestCase):
-    """Tests for local variable usage in functions."""
-    
-    def test_function_with_local(self):
-        """Test that functions using local are detected."""
-        content = '''#!/bin/bash
-my_func() {
-    local var="value"
-    echo "$var"
-}
-'''
-        self.assertIn('local ', content)
-    
-    def test_function_without_local(self):
-        """Test that functions without local are flagged."""
-        content = '''#!/bin/bash
-my_func() {
-    var="value"
-    echo "$var"
-}
-'''
-        # Check that 'local' is NOT used
-        lines_in_func = content.split('my_func')[1].split('}')[0]
-        self.assertNotIn('local ', lines_in_func)
-    
-    def test_multiple_local_declarations(self):
-        """Test detection of multiple local variables."""
-        content = '''#!/bin/bash
-process() {
-    local input="$1"
-    local output=""
-    local count=0
-    # processing
-}
-'''
-        local_count = content.count('local ')
-        self.assertEqual(local_count, 3)
+    def test_associative_array_declaration(self):
+        self.assertTrue(self.grader.check_associative_arrays('declare -A config\nconfig[host]=local').passed)
+        self.assertFalse(self.grader.check_associative_arrays('config[host]=local').passed)
 
+    def test_quoted_array_loop(self):
+        self.assertTrue(self.grader.check_quoted_arrays('for x in "${arr[@]}"; do echo "$x"; done').passed)
+        self.assertFalse(self.grader.check_quoted_arrays('for x in ${arr[@]}; do echo "$x"; done').passed)
 
-class TestAssociativeArrayCheck(unittest.TestCase):
-    """Tests for associative array declaration validation."""
-    
-    def test_proper_declare_A(self):
-        """Test that declare -A is detected."""
-        content = '''#!/bin/bash
-declare -A config
-config[host]="localhost"
-config[port]="8080"
-'''
-        self.assertIn('declare -A', content)
-    
-    def test_missing_declare_A(self):
-        """Test that missing declare -A is flagged."""
-        content = '''#!/bin/bash
-config[host]="localhost"
-config[port]="8080"
-'''
-        self.assertNotIn('declare -A', content)
-    
-    def test_declare_A_with_initialization(self):
-        """Test declare -A with inline initialization."""
-        content = '''#!/bin/bash
-declare -A config=(
-    [host]="localhost"
-    [port]="8080"
-)
-'''
-        self.assertIn('declare -A', content)
+    def test_cleanup_and_usage(self):
+        self.assertTrue(self.grader.check_trap_cleanup('cleanup() { :; }\ntrap cleanup EXIT').passed)
+        self.assertFalse(self.grader.check_trap_cleanup('echo no-cleanup').passed)
+        for name in ('usage', 'show_help', 'print_help'):
+            self.assertTrue(self.grader.check_usage_function(name+'() { :; }').passed)
 
+    def test_unavailable_shellcheck_does_not_pass(self):
+        with patch('subprocess.run', side_effect=FileNotFoundError):
+            result, _ = self.grader.run_shellcheck('fixture.sh')
+        self.assertFalse(result.passed)
+        self.assertEqual(result.points, 0)
+        self.assertIn('NOT_RUN', result.message)
 
-class TestArrayQuotingCheck(unittest.TestCase):
-    """Tests for proper array quoting in iterations."""
-    
-    def test_properly_quoted_array(self):
-        """Test that properly quoted arrays are accepted."""
-        content = '''#!/bin/bash
-arr=("one" "two" "three")
-for item in "${arr[@]}"; do
-    echo "$item"
-done
-'''
-        self.assertIn('"${arr[@]}"', content)
-    
-    def test_unquoted_array(self):
-        """Test that unquoted arrays are flagged."""
-        content = '''#!/bin/bash
-arr=("one" "two" "three")
-for item in ${arr[@]}; do
-    echo "$item"
-done
-'''
-        # Check for unquoted array expansion
-        self.assertIn('${arr[@]}', content)
-        self.assertNotIn('"${arr[@]}"', content)
+    def test_relative_script_path_with_spaces(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td)/'dir with spaces'/'script.sh';path.parent.mkdir()
+            path.write_text('printf "%s" "$1"\n')
+            import os
+            relative = os.path.relpath(path)
+            self.assertEqual(self.grader.run_script(relative, ['literal argument']), (True, 'literal argument', 0))
 
+    def test_exact_json_stdout_round_trips(self):
+        with tempfile.TemporaryDirectory() as td:
+            script = Path(td)/'student.sh';script.write_text('#!/bin/bash\nset -euo pipefail\n')
+            process = subprocess.run([sys.executable, str(ROOT/'scripts/python/S05_01_autograder.py'), str(script), '--json', '--verbose'], capture_output=True, text=True)
+            data = json.loads(process.stdout)
+            self.assertEqual(data[0]['script'], str(script))
+            source = Path(td)/'report.json';source.write_text(process.stdout)
+            statistics = calculate_statistics(load_grades_file(source))
+            self.assertAlmostEqual(statistics['avg_score'], data[0]['percentage'])
+            self.assertEqual(statistics['records'][0]['script'], str(script))
 
-class TestTrapCleanupCheck(unittest.TestCase):
-    """Tests for trap EXIT cleanup detection."""
-    
-    def test_trap_exit_present(self):
-        """Test that trap EXIT is detected."""
-        content = '''#!/bin/bash
-cleanup() {
-    rm -f "$TEMP_FILE"
-}
-trap cleanup EXIT
-'''
-        self.assertIn('trap', content)
-        self.assertIn('EXIT', content)
-    
-    def test_trap_with_inline_command(self):
-        """Test trap with inline cleanup command."""
-        content = '''#!/bin/bash
-TEMP_FILE=$(mktemp)
-trap 'rm -f "$TEMP_FILE"' EXIT
-'''
-        self.assertIn("trap '", content)
-        self.assertIn('EXIT', content)
-    
-    def test_missing_trap(self):
-        """Test detection of missing trap."""
-        content = '''#!/bin/bash
-TEMP_FILE=$(mktemp)
-# No cleanup!
-'''
-        self.assertNotIn('trap', content)
+    def test_report_80_percent_and_invalid_input(self):
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td)/'report.json'
+            source.write_text(json.dumps([{'script':'fixture.sh','score':8,'max_score':10,'checks':[{'name':'Example diagnostic','points':8,'max_points':10,'passed':False,'message':'gap'}]}]))
+            result = calculate_statistics(load_grades_file(source))
+            self.assertEqual(result['avg_score'], 80)
+            source.write_text('{"unrecognised": 80}')
+            with self.assertRaises(ValueError):load_grades_file(source)
 
+    def test_shell_validator_continues_after_failed_check(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'weak.sh';path.write_text('#!/bin/bash\nf() { x=1; }\n')
+            result=subprocess.run(['bash',str(ROOT/'scripts/bash/S05_03_validator.sh'),str(path)],capture_output=True,text=True)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('RESULT', result.stdout)
+            self.assertNotIn('syntax error', result.stderr)
 
-class TestUsageFunctionCheck(unittest.TestCase):
-    """Tests for usage/help function detection."""
-    
-    def test_usage_function_present(self):
-        """Test that usage() function is detected."""
-        content = '''#!/bin/bash
-usage() {
-    echo "Usage: $0 [options]"
-    exit 1
-}
-'''
-        self.assertIn('usage()', content)
-    
-    def test_show_help_function(self):
-        """Test alternative help function names."""
-        content = '''#!/bin/bash
-show_help() {
-    cat << EOF
-Usage: $0 [options]
-EOF
-}
-'''
-        self.assertIn('show_help()', content)
-    
-    def test_missing_usage(self):
-        """Test detection of missing usage function."""
-        content = '''#!/bin/bash
-main() {
-    echo "Hello"
-}
-main "$@"
-'''
-        self.assertNotIn('usage', content)
-        self.assertNotIn('help', content)
+    def test_template_preserves_text_bytes_and_verbose(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'input';path.write_bytes(b'-n\n-e\nlast')
+            result=subprocess.run(['bash',str(ROOT/'scripts/templates/professional_script.sh'),'-v','--log',str(Path(td)/'log'),str(path)],capture_output=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(result.stdout,path.read_bytes())
 
+    def test_quiz_prompt_hides_distractor_explanations(self):
+        spec=importlib.util.spec_from_file_location('s05_quiz_under_test',ROOT/'formative/quiz_runner.py')
+        mod=importlib.util.module_from_spec(spec);sys.modules[spec.name]=mod;spec.loader.exec_module(mod)
+        runner=mod.QuizRunner(str(ROOT/'formative/quiz.yaml'),use_rich=False)
+        buffer=io.StringIO()
+        with contextlib.redirect_stdout(buffer):runner._display_question(runner.quiz_data['questions'][0],1,1)
+        text=buffer.getvalue()
+        self.assertIn('What does the last line display?',text)
+        self.assertNotIn('CORRECT -',text)
+        self.assertNotIn("'explanation':",text)
 
-class TestIntegration(unittest.TestCase):
-    """Integration tests for complete script validation."""
-    
-    def test_professional_template_compliance(self):
-        """Test that a professional template passes all checks."""
-        content = '''#!/bin/bash
-#
-# Script: example.sh
-# Description: Example script
-# Author: Test
-# Version: 1.0.0
-#
-
-set -euo pipefail
-
-readonly SCRIPT_NAME=$(basename "$0")
-
-usage() {
-    echo "Usage: $SCRIPT_NAME [options]"
-    exit 1
-}
-
-cleanup() {
-    rm -f "${TEMP_FILE:-}"
-}
-trap cleanup EXIT
-
-process_data() {
-    local input="$1"
-    local result=""
-    declare -A counts
-    
-    for item in "${input[@]}"; do
-        ((counts[$item]++)) || true
-    done
-    
-    echo "${counts[@]}"
-}
-
-main() {
-    local TEMP_FILE
-    TEMP_FILE=$(mktemp)
-    
-    process_data "$@"
-}
-
-main "$@"
-'''
-        # Check all required elements
-        checks = {
-            'shebang': content.startswith('#!/bin/bash'),
-            'strict_mode': 'set -euo pipefail' in content,
-            'local_vars': 'local ' in content,
-            'declare_A': 'declare -A' in content,
-            'trap_exit': 'trap' in content and 'EXIT' in content,
-            'usage': 'usage()' in content,
-            'quoted_arrays': '"${' in content,
-        }
-        
-        for check_name, passed in checks.items():
-            self.assertTrue(passed, f"Failed check: {check_name}")
-
-
-class TestEdgeCases(unittest.TestCase):
-    """Tests for edge cases and unusual patterns."""
-    
-    def test_empty_script(self):
-        """Test handling of empty script."""
-        content = ""
-        self.assertEqual(len(content), 0)
-    
-    def test_comments_only(self):
-        """Test script with only comments."""
-        content = '''# This is a comment
-# Another comment
-# No actual code
-'''
-        self.assertFalse(content.strip().replace('#', '').replace('\n', '').replace(' ', '') != '')
-    
-    def test_heredoc_not_confused_with_function(self):
-        """Test that heredocs are not confused with functions."""
-        content = '''#!/bin/bash
-cat << 'EOF'
-This looks like() {
-    a function but is not
-}
-EOF
-'''
-        # Should not detect this as a real function
-        # Real function detection would need proper parsing
-        self.assertIn('EOF', content)
-    
-    def test_subshell_local_scope(self):
-        """Test understanding of subshell scope."""
-        content = '''#!/bin/bash
-(
-    # Variables here are automatically local to subshell
-    var="value"
-)
-# var is not accessible here
-'''
-        self.assertIn('(', content)
+    def test_bash_quiz_completes_first_and_subsequent_answers(self):
+        result=subprocess.run(['bash',str(ROOT/'scripts/bash/S05_02_interactive_quiz.sh'),'--quick'],input='B\nC\nB\n',capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('3 / 3',result.stdout)
 
 
 if __name__ == '__main__':
-    # Run tests with verbosity
-    unittest.main(verbosity=2)
+    unittest.main()

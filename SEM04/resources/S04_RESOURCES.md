@@ -3,7 +3,7 @@
 
 > Operating Systems | ASE Bucharest - CSIE  
 > Collection of resources for further learning  
-> Updated: January 2025
+> Historical collection: January 2025; corrected candidate: 17 November 2026
 
 ---
 
@@ -19,7 +19,7 @@ The most useful tool for learning and testing regular expressions.
 - Save and share patterns
 - Integrated quick reference
 
-**Recommendation:** Test ANY regex here before using it in scripts.
+**Recommendation:** Use the site to explore a supported dialect, then test the exact expression with the target tool and fixtures. PCRE, Python and JavaScript behaviour does not certify GNU grep BRE/ERE, sed or awk semantics.
 
 **Link:** https://regex101.com
 
@@ -89,9 +89,9 @@ One A4 page with all metacharacters and quantifiers.
 **Link:** https://cheatography.com/davechild/cheat-sheets/regular-expressions/
 
 ### Sed One-Liners
-Collection of useful sed one-liners.
+Historical collection compiled by Eric Pement (version 5.5, 29 December 2005). Check GNU/BSD sed differences before reusing a command.
 
-**Link:** https://sed.sourceforge.io/sed1line.txt
+**Link:** https://www.pement.org/sed/sed1line.txt
 
 ### AWK One-Liners
 Collection of awk one-liners for common tasks.

@@ -534,8 +534,9 @@ DIAGRAM
     echo ""
     echo -e "${GREEN}With error suppression:${RESET}"
     print_code "ls /nonexistent 2>/dev/null"
-    ls /nonexistent 2>/dev/null
-    echo "(nothing displayed)"
+    local suppressed_status=0
+    ls /nonexistent 2>/dev/null || suppressed_status=$?
+    echo "(nothing displayed; exit status remains $suppressed_status)"
     
     wait_for_user
     

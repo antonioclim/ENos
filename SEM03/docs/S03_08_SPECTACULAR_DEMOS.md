@@ -50,9 +50,7 @@ cat << "EOF"
     ╔═══════════════════════════════════════════════════════════╗
     ║     🔍 FILE SYSTEM EXPLORER - Powered by FIND 🔍         ║
 
-*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*
-
-    ╚═══════════════════════════════════════════════════════════╝
+╚═══════════════════════════════════════════════════════════╝
 EOF
 echo -e "${NC}"
 sleep 1
@@ -113,7 +111,6 @@ find /usr/share -type f -name "*.*" 2>/dev/null | \
         bar=$(printf '▓%.0s' $(seq 1 $bar_len))
         printf "   ${GREEN}%-6s${NC} │ %5d │ ${BLUE}%s${NC}\n" ".$ext" "$count" "$bar"
 
-> 💡 *I've had students who learned Bash in two weeks starting from zero — it's possible, with consistent practice.*
 
         sleep 0.05
     done
@@ -128,6 +125,9 @@ cat << "EOF"
 EOF
 echo -e "${NC}"
 ```
+
+> 💡 *I've had students who learned Bash in two weeks starting from zero — it's possible, with consistent practice.*
+
 
 ### Expected Output
 
@@ -254,9 +254,10 @@ visualize_perm() {
     echo -e "   ${DIM}Octal: ${NC}${BOLD}$octal${NC} ${DIM}| String: $perms${NC}"
     
     # Explain octal
-    owner_oct=$((0${octal:0:1}))
-    group_oct=$((0${octal:1:1}))
-    other_oct=$((0${octal:2:1}))
+    ordinary=${octal: -3}
+    owner_oct=$((8#${ordinary:0:1}))
+    group_oct=$((8#${ordinary:1:1}))
+    other_oct=$((8#${ordinary:2:1}))
     
     echo -e "\n   ${DIM}Octal breakdown:${NC}"
     printf "   Owner: %d = " $owner_oct
@@ -270,21 +271,22 @@ visualize_perm() {
 echo -e "${CYAN}Demo: Different permission patterns${NC}"
 
 # Create test files
-mkdir -p /tmp/perm_demo
-touch /tmp/perm_demo/normal.txt
-chmod 644 /tmp/perm_demo/normal.txt
+PERM_DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-perm.XXXXXX") || exit 1
+trap 'rm -rf -- "$PERM_DEMO_DIR"' EXIT
+touch "$PERM_DEMO_DIR"/normal.txt
+chmod 644 "$PERM_DEMO_DIR"/normal.txt
 
-touch /tmp/perm_demo/script.sh
-chmod 755 /tmp/perm_demo/script.sh
+touch "$PERM_DEMO_DIR"/script.sh
+chmod 755 "$PERM_DEMO_DIR"/script.sh
 
-touch /tmp/perm_demo/private.key
-chmod 600 /tmp/perm_demo/private.key
+touch "$PERM_DEMO_DIR"/private.key
+chmod 600 "$PERM_DEMO_DIR"/private.key
 
-mkdir /tmp/perm_demo/shared
-chmod 2775 /tmp/perm_demo/shared
+mkdir "$PERM_DEMO_DIR"/shared
+chmod 2775 "$PERM_DEMO_DIR"/shared
 
 # Visualise
-for file in /tmp/perm_demo/*; do
+for file in "$PERM_DEMO_DIR"/*; do
     visualize_perm "$file"
     sleep 0.5
 done
@@ -299,7 +301,7 @@ for sysfile in /etc/passwd /etc/shadow /usr/bin/passwd /tmp; do
 done
 
 # Cleanup
-rm -rf /tmp/perm_demo
+rm -rf "$PERM_DEMO_DIR"
 
 echo -e "\n${GREEN}✨ Notice the patterns:${NC}"
 echo "   • Config files: 644 (owner writes, everyone reads)"
@@ -321,6 +323,31 @@ Demonstrates cron in action with real-time visual feedback.
 ```bash
 #!/bin/bash
 # S03_05_demo_cron.sh - Live Cron Monitor
+set -euo pipefail
+# Running this example installs a temporary user crontab entry only with --install.
+if [[ ${1:-} != --install || $# -ne 1 ]]; then
+    echo "Usage: $0 --install (explicitly installs a temporary user cron job)"
+    exit 2
+fi
+DEMO_CRON=$(mktemp -d "${TMPDIR:-/tmp}/enos-cron.XXXXXX") || exit 1
+[[ $DEMO_CRON =~ ^/[A-Za-z0-9_./-]+$ ]] || { echo 'Unsupported cron path' >&2; exit 2; }
+CRON_TAG="ENOS_DEMO_${DEMO_CRON##*/}"
+installed=false
+cleanup() {
+    [[ -z ${TAIL_PID:-} ]] || kill "$TAIL_PID" 2>/dev/null || true
+    if $installed; then
+        if ! crontab -l > "$DEMO_CRON/current.crontab"; then
+            echo "Cannot read crontab for cleanup; retained $DEMO_CRON for recovery." >&2
+            return 1
+        fi
+        awk -v tag="# $CRON_TAG" '! (length($0) >= length(tag) && substr($0, length($0)-length(tag)+1) == tag)' \
+            "$DEMO_CRON/current.crontab" > "$DEMO_CRON/after.crontab" || return 1
+        crontab "$DEMO_CRON/after.crontab" || return 1
+        installed=false
+    fi
+    rm -rf -- "$DEMO_CRON"
+}
+trap cleanup EXIT
 
 clear
 
@@ -341,17 +368,26 @@ EOF
 echo -e "${NC}"
 
 # Create a test job
-TEST_LOG="/tmp/cron_demo_$$.log"
-TEST_SCRIPT="/tmp/cron_demo_$$.sh"
+TEST_LOG="$DEMO_CRON/cron.log"
+TEST_SCRIPT="$DEMO_CRON/cron.sh"
 
 cat > "$TEST_SCRIPT" << 'SCRIPT'
 #!/bin/bash
-echo "$(date '+%H:%M:%S') - ⚡ CRON JOB EXECUTED!" >> /tmp/cron_demo_*.log
+LOG_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+echo "$(date '+%H:%M:%S') - ⚡ CRON JOB EXECUTED!" >> "$LOG_DIR/cron.log"
 SCRIPT
 chmod +x "$TEST_SCRIPT"
 
 # Install temporary job
-(crontab -l 2>/dev/null; echo "* * * * * $TEST_SCRIPT") | crontab -
+# Require a readable existing user crontab (which may be empty). Do not confuse
+# a read/permission failure with an absent table and replace it with one demo job.
+if ! crontab -l > "$DEMO_CRON/before.crontab"; then
+    echo 'This demonstration requires a readable existing user crontab in a disposable lab account.' >&2
+    exit 1
+fi
+{ cat "$DEMO_CRON/before.crontab"; printf '* * * * * "%s" # %s\n' "$TEST_SCRIPT" "$CRON_TAG"; } > "$DEMO_CRON/install.crontab"
+crontab "$DEMO_CRON/install.crontab" || exit 1
+installed=true
 
 echo -e "${YELLOW}📋 Current crontab:${NC}"
 crontab -l | tail -3
@@ -364,7 +400,7 @@ echo ""
 # Show countdown until next minute
 show_countdown() {
     local now=$(date +%S)
-    local remaining=$((60 - now))
+    local remaining=$((60 - 10#$now))
     
     echo -e "${CYAN}Next cron tick in:${NC}"
     while [ $remaining -gt 0 ]; do
@@ -405,9 +441,8 @@ show_countdown
 sleep 2
 
 # Cleanup
-kill $TAIL_PID 2>/dev/null
-crontab -l 2>/dev/null | grep -v "cron_demo" | crontab -
-rm -f "$TEST_SCRIPT" "$TEST_LOG"
+cleanup || exit 1
+trap - EXIT
 
 echo ""
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -420,6 +455,14 @@ echo "  • Log your cron job output for debugging"
 ```
 
 ---
+
+This user-crontab example is not run by repository tests. Cleanup selects only the
+unique marker created by this invocation; it preserves unrelated lines of every length.
+A read failure aborts installation or cleanup rather than replacing the current table.
+An existing readable user crontab and a simple absolute temporary path are preconditions.
+Reading and replacing a crontab is not an
+atomic concurrent-edit protocol: use a disposable lab account without simultaneous
+crontab edits, and do not treat this as a production scheduler-management design.
 
 ## D4: DISK SPACE ANALYZER
 
@@ -700,3 +743,8 @@ done
 ---
 
 *Document generated for UES Bucharest - CSIE | Operating Systems | Seminar 3*
+
+
+## Retained Author Notes
+
+*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*

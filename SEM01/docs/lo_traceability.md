@@ -38,28 +38,37 @@
 
 ## Traceability Matrix
 
-| LO | Parsons | Quiz | Sprint | Live Coding | LLM Exercise | Oral | External Tools |
-|----|---------|------|--------|-------------|--------------|------|----------------|
-| LO1.1 | - | Q01 | S1 | - | - | - | - |
-| LO1.2 | - | Q02 | S1 | - | - | - | - |
-| LO2.1 | - | Q03 | - | LC1 | - | V1 | - |
-| LO2.2 | PP-A | Q04 | S2 | - | - | - | - |
-| LO3.1 | PP-B | Q05 | - | LC2 | LLM1 | V2 | - |
-| LO4.1 | PP-C | Q06 | S3 | - | - | - | - |
-| LO4.2 | - | Q07 | - | LC3 | - | - | - |
-| LO4.3 | - | Q11 | S4 | - | - | - | - |
-| LO5.1 | PP-D | Q08 | S4 | - | LLM2 | - | - |
-| LO6.1 | PP-E | Q09 | - | LC4 | - | V3 | - |
-| LO6.2 | - | Q10 | S5 | - | - | - | - |
-| LO6.3 | PP-F | Q12 | - | - | LLM3 | V4 | - |
-| LO7.1 | - | Q13 | - | - | LLM4 | V5 | S01_11 |
-| LO8.1 | - | Q14 | S6 | LC5 | - | V4 | - |
+Activity IDs below are the numbered headings in their respective files: `P` in
+S01_04, `S` in S01_06 and section numbers in S01_05. `PP-A` through `PP-F` refer to
+the additional puzzles later in this document. A dash means that no direct
+assessment mapping is asserted. The quiz bank is the canonical item source.
+
+| LO | Parsons | Quiz | Sprint | Live coding section | Oral |
+|----|---------|------|--------|---------------------|------|
+| LO1.1 | P1 | q01 | S1 | 2.1–2.2 | — |
+| LO1.2 | — | q02 | S1 | 2.2 | — |
+| LO2.1 | — | q03 | — | 1 | V1 |
+| LO2.2 | P1 | q04 | S1 | 2.2 | — |
+| LO3.1 | P6, PP-B | q05 | — | 4.2 | V2 |
+| LO4.1 | P2, P4 | q06 | S2 | 3.1 | — |
+| LO4.2 | P7 | q07 | S3 | 6.2–6.3 | — |
+| LO4.3 | P10, PP-D | q11 | S4 | 7 | — |
+| LO5.1 | P4 | q08 | S2 | 3.1 | — |
+| LO6.1 | P5 | q09 | S5 M1 | 5 | V3 |
+| LO6.2 | P9 | q10 | — | 4.3 | — |
+| LO6.3 | P8, PP-F | q12 | — | 3.3 (expansion warning) | V4 |
+| LO7.1 | — | q13 | — | — | V5 |
+| LO8.1 | P7, PP-E | q14 (manual) | S3 | 6.2–6.3 | — |
+
+The external similarity tools support comparisons for human review; they do not
+assess a learning outcome or establish authorship by themselves. Misconception
+IDs are defined in [the catalogue](MISCONCEPTION_CATALOGUE.md).
 
 ### Anti-Plagiarism Infrastructure
 
 | Tool | Document | Purpose |
 |------|----------|---------|
-| Internal Detector | scripts/python/S01_05 | Fast similarity + AI pattern detection |
+| Internal Detector | scripts/python/S01_05 | Text/code similarity and lexical observations for human review |
 | Oral Verification Log | homework/S01_04 | Understanding confirmation documentation |
 | MOSS/JPlag Guide | docs/S01_11 | External tool integration |
 
@@ -67,10 +76,10 @@
 
 | Level | Target | Actual | Status |
 |-------|--------|--------|--------|
-| Remember | 10-15% | 14% (2/14) | OK |
-| Understand | 20-25% | 21% (3/14) | OK |
-| Apply | 25-30% | 29% (4/14) | OK |
-| Analyse | 15-20% | 22% (3/14) | OK |
+| Remember | 10-15% | 14.3% (2/14) | Within target |
+| Understand | 20-25% | 21.4% (3/14) | Within target |
+| Apply | 25-30% | 28.6% (4/14) | Within target |
+| Analyse | 15-20% | 21.4% (3/14) | Outside target; curriculum decision open |
 | Evaluate | 5-10% | 7% (1/14) | OK |
 | Create | 5-10% | 7% (1/14) | OK |
 
@@ -92,7 +101,7 @@
 if [ -d "$1" ]; then
 if [ -d "$1" ]               # DISTRACTOR: missing ; then
     echo "Directory exists"
-    echo Directory exists    # DISTRACTOR: missing quotes
+    echo Directory exists    # VALID ALTERNATIVE for these two literal words
 else
     echo "Directory does NOT exist"
 fi
@@ -120,9 +129,9 @@ fi
 
 ---
 
-### PP-B: Export Variable in Subshell
+### PP-B: Export Variable to a New Interpreter
 
-**Objective:** Set a variable and make it available in a subshell.
+**Objective:** Set a variable and make it available in a newly executed `bash -c`. A parenthesised group already inherits ordinary shell variables.
 
 **Code lines (scrambled + distractors):**
 
@@ -163,11 +172,11 @@ bash -c 'echo "Hello $NAME"'
 
 ```
 #!/bin/bash
-TIMESTAMP=`date +%Y%m%d`     # DISTRACTOR: backticks deprecated
+TIMESTAMP=`date +%Y%m%d`     # VALID ALTERNATIVE: supported backtick syntax
 TIMESTAMP = $(date +%Y%m%d)  # DISTRACTOR: spaces at =
 TIMESTAMP=$(date +%Y%m%d)
 FILE="document.txt"
-BACKUP=${FILE}.${TIMESTAMP}.bak
+BACKUP="${FILE}.${TIMESTAMP}.bak"
 cp "$FILE" "$BACKUP"
 cp $FILE $BACKUP             # DISTRACTOR: missing quotes
 echo "Backup created: $BACKUP"
@@ -186,7 +195,7 @@ echo "Backup created: $BACKUP"
 ```
 
 **Distractor explanations:**
-- `` `date +%Y%m%d` `` — backticks work but are deprecated; use `$(...)`
+- `` `date +%Y%m%d` `` — backticks remain supported; `$(...)` is usually easier to quote and nest
 - `TIMESTAMP = $(...)` — spaces cause Bash to interpret incorrectly
 - `cp $FILE $BACKUP` — works but unsafe with files containing spaces in names
 
@@ -208,7 +217,7 @@ for $file in *.sh *.py; do   # DISTRACTOR: $ in loop variable
 for file in *.sh,py; do      # DISTRACTOR: comma not valid
     if [ -f "$file" ]; then
         echo "Found: $file"
-        ((counter++))
+        counter=$((counter+1))
         counter++             # DISTRACTOR: missing $((...))
     fi
 done
@@ -224,7 +233,7 @@ counter=0
 for file in *.sh *.py; do
     if [ -f "$file" ]; then
         echo "Found: $file"
-        ((counter++))
+        counter=$((counter+1))
     fi
 done
 echo "Total: $counter files"
@@ -233,7 +242,7 @@ echo "Total: $counter files"
 **Distractor explanations:**
 - `for $file` — we do not use $ when declaring the iteration variable
 - `*.sh,py` — comma does not work for multiple patterns; use space
-- `counter++` — in Bash, incrementing requires `((counter++))` or `counter=$((counter+1))`
+- `counter++` — in Bash, incrementing requires `counter=$((counter+1))` or `counter=$((counter+1))`
 
 </details>
 
@@ -247,9 +256,9 @@ echo "Total: $counter files"
 
 ```
 #!/bin/bash
-function greet {             # DISTRACTOR: missing ()
+function greet {             # VALID BASH ALTERNATIVE (not POSIX sh)
 greet() {
-    if [ -z "$1" ]; then
+    if [ -z "${1-}" ]; then
     if [ -z $1 ]; then       # DISTRACTOR: missing quotes
         echo "Error: Specify a name"
         exit 1               # DISTRACTOR: exit closes script
@@ -267,7 +276,7 @@ greet                        # Test the error
 ```bash
 #!/bin/bash
 greet() {
-    if [ -z "$1" ]; then
+    if [ -z "${1-}" ]; then
         echo "Error: Specify a name"
         return 1
     fi
@@ -279,7 +288,7 @@ greet                        # Test the error
 
 **Distractor explanations:**
 - `function greet {` — valid syntax but non-POSIX; prefer `greet() {`
-- `[ -z $1 ]` — without quotes, if $1 is empty, command becomes `[ -z ]` which is an error
+- `[ -z $1 ]` — without quotes, if $1 is empty, the command becomes `[ -z ]`: a one-argument nonempty-string test that succeeds; this accidental result is not a reliable validation contract
 - `exit 1` — closes the entire script; in functions use `return`
 
 </details>
@@ -288,22 +297,21 @@ greet                        # Test the error
 
 ### PP-F: Safe File Deletion with Confirmation
 
-**Objective:** Delete files matching a pattern but only after user confirmation.
+**Objective:** Within a newly created owned workspace, preview and delete the same regular-file predicate after confirmation. This is not atomic: concurrent pathname changes remain possible.
 
 **Code lines (scrambled + distractors):**
 
 ```
 #!/bin/bash
 FILES=$(ls *.tmp)            # DISTRACTOR: parsing ls is unsafe
-FILES=$(find . -name "*.tmp" -maxdepth 1)
-echo "Will delete: $FILES"
+find . -maxdepth 1 -type f -name "*.tmp" -print
+# Review the regular-file candidates above (including dotfiles).
 read -p "Continue? (y/n) " CONFIRM
 if [ $CONFIRM = "y" ]; then  # DISTRACTOR: missing quotes
 if [[ "$CONFIRM" == "y" ]]; then
     rm $FILES                # DISTRACTOR: missing quotes, wrong for multiple
     rm "$FILES"              # DISTRACTOR: treats list as one filename
-    rm -f *.tmp
-    echo "Deleted."
+    find . -maxdepth 1 -type f -name "*.tmp" -delete && echo "Deletion completed."
 fi
 ```
 
@@ -312,12 +320,11 @@ fi
 
 ```bash
 #!/bin/bash
-FILES=$(find . -name "*.tmp" -maxdepth 1)
-echo "Will delete: $FILES"
+find . -maxdepth 1 -type f -name "*.tmp" -print
+# Review the regular-file candidates above (including dotfiles).
 read -p "Continue? (y/n) " CONFIRM
 if [[ "$CONFIRM" == "y" ]]; then
-    rm -f *.tmp
-    echo "Deleted."
+    find . -maxdepth 1 -type f -name "*.tmp" -delete && echo "Deletion completed."
 fi
 ```
 
@@ -333,14 +340,14 @@ fi
 
 ## Methodological Note
 
-Distractors are selected based on frequently observed errors in students:
+The following historical frequencies are retained from the authored plan; the repository does not supply the cohort, observations or method required to validate them:
 - 70% — spaces at assignment (VAR = "val")
 - 60% — missing quotes on variables
 - 45% — single/double quotes confusion
 - 40% — backticks instead of $()
 - 35% — $ on the left at assignment
 
-Each distractor represents a real syntax error or unexpected behaviour.
+Some candidates represent real errors; explicitly marked alternatives are valid Bash with different style or context. Do not classify backticks, `function name { ...; }` or literal unquoted words as inherently invalid.
 
 ---
 
@@ -349,9 +356,9 @@ Each distractor represents a real syntax error or unexpected behaviour.
 | ID | Question | Tests LO | Difficulty |
 |----|----------|----------|------------|
 | V1 | What is the difference between shell and terminal? | LO2.1 | Easy |
-| V2 | What happens to a variable without export in a subshell? | LO3.1 | Medium |
+| V2 | Compare an unexported variable in `( ... )` and a new `bash -c`. | LO3.1 | Medium |
 | V3 | What will this echo display: NAME='test'; echo 'Hello $NAME' | LO6.1 | Medium |
-| V4 | Why is rm -rf $DIR dangerous if DIR is empty? | LO6.3 | Hard |
+| V4 | Why does both `$DIR/temp` and `"$DIR/temp"` denote `/temp` when DIR is empty? | LO6.3 | Hard |
 | V5 | What security issue do you see in this script? [show script] | LO7.1 | Hard |
 
 ---

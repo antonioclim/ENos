@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Assignment Generator - Generates unique assignment variants per student
+Assignment Generator - Generates deterministic assignment variants per identifier
 Operating Systems | ASE Bucharest - CSIE
 
-Purpose: Prevent copying through randomised requirements per student
+Purpose: Vary requirements; personalisation alone does not prevent copying or prove authorship.
 Usage: python3 S01_04_assignment_generator.py <student_id> [--output dir]
 
 Each student receives:
@@ -13,6 +13,8 @@ Each student receives:
 - Different glob patterns to demonstrate
 """
 
+import argparse
+import re
 import hashlib
 import random
 import sys
@@ -25,7 +27,7 @@ from dataclasses import dataclass, asdict
 
 @dataclass
 class AssignmentVariant:
-    """Represents a unique assignment variant."""
+    """Represents a deterministic assignment variant; different identifiers can collide."""
     student_id: str
     generated_at: str
     seed: int
@@ -196,6 +198,9 @@ def render_assignment_md(variant: AssignmentVariant) -> str:
 
 > **Variant ID:** {variant.seed}  
 > **Generated:** {variant.generated_at}
+> **Assessment:** PENDING_POLICY. The historical weights below are preserved for
+> author review, not an adopted marking rule. The 32-bit seed is a variant
+> identifier, not evidence of identity, authenticity or unique assignment content.
 
 ---
 
@@ -242,7 +247,7 @@ The script must:
 
 ### 3. Configure .bashrc (25%)
 
-Add to `.bashrc`:
+Write an exercise-owned `bashrc_snippet.sh`; inspect and test it in a disposable Bash session before any deliberate personal-shell installation:
 
 **Required aliases:**
 - `{variant.required_aliases[0]}` - for detailed listing
@@ -276,13 +281,13 @@ Display system information in a pleasant format.
 
 ---
 
-## Oral Verification (MANDATORY)
+## Oral Verification — policy pending
 
-At submission you will answer 2 questions about your code:
+Historical proposal: two questions about the submitted code:
 - Explain what a specific line does
 - Modify something live at the instructor's request
 
-**Without oral verification = maximum grade 5.**
+**PENDING_POLICY:** the historical maximum-grade-5 rule is not applied automatically. The author must settle oral-assessment weight, eligibility and equivalent accommodations; explanation alone is not proof of authorship.
 
 ---
 
@@ -334,46 +339,35 @@ def render_validator_config(variant: AssignmentVariant) -> dict:
 
 
 def main():
-    """Entry point."""
-    if len(sys.argv) < 2:
-        print("Usage: python3 S01_04_assignment_generator.py <student_id> [--output dir]")
-        print("\nExample:")
-        print("  python3 S01_04_assignment_generator.py PopescuIon")
-        print("  python3 S01_04_assignment_generator.py maria.ionescu@stud.ase.ro --output ./homework/")
-        sys.exit(1)
-    
-    student_id = sys.argv[1]
-    
-    # Parse output directory
-    output_dir = Path('.')
-    if '--output' in sys.argv:
-        idx = sys.argv.index('--output')
-        if idx + 1 < len(sys.argv):
-            output_dir = Path(sys.argv[idx + 1])
-            output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Generate variant
+    """Generate files without overwriting an existing variant."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('student_id', help='Identifier, name or email; no path separators/control characters')
+    parser.add_argument('--output', type=Path, default=Path('.'))
+    args = parser.parse_args()
+    student_id = args.student_id
+    if not 1 <= len(student_id) <= 128 or any(ord(c) < 32 for c in student_id) or any(c in student_id for c in '/\\'):
+        parser.error('student_id must be 1–128 characters without path separators or control characters')
     variant = generate_variant(student_id)
-    
-    # Save assignment in Markdown
-    md_path = output_dir / f"HOMEWORK_{student_id.replace('@', '_').replace('.', '_')}.md"
-    md_path.write_text(render_assignment_md(variant), encoding='utf-8')
-    print(f"[OK] Assignment generated: {md_path}")
-    
-    # Save config for validator
-    config_path = output_dir / f"config_{variant.seed}.json"
-    config_path.write_text(json.dumps(render_validator_config(variant), indent=2), encoding='utf-8')
-    print(f"[OK] Validator config: {config_path}")
-    
-    # Display summary
-    print(f"\n{'='*50}")
-    print(f"Student: {student_id}")
-    print(f"Seed: {variant.seed}")
-    print(f"Root directory: {variant.root_dir}/")
-    print(f"Function: {variant.function_name}()")
-    print(f"Aliases: {', '.join(variant.required_aliases)}")
-    print(f"{'='*50}")
+    slug = re.sub(r'[^A-Za-z0-9_-]', '_', student_id)
+    md_path = args.output / f'HOMEWORK_{slug}.md'
+    config_path = args.output / f'config_{variant.seed}.json'
+    if any(p.exists() or p.is_symlink() for p in (md_path, config_path)):
+        parser.error('Refusing to overwrite an existing assignment/configuration; use a fresh output directory')
+    args.output.mkdir(parents=True, exist_ok=True)
+    try:
+        with md_path.open('x', encoding='utf-8') as handle:
+            handle.write(render_assignment_md(variant))
+        with config_path.open('x', encoding='utf-8') as handle:
+            json.dump(render_validator_config(variant), handle, indent=2)
+            handle.write('\n')
+    except OSError as exc:
+        print(f'Generation incomplete; inspect the owned output directory: {exc}', file=sys.stderr)
+        return 1
+    print(f'[OK] Assignment generated: {md_path}')
+    print(f'[OK] Validator config: {config_path}')
+    print(f'Student identifier: {student_id}; seed: {variant.seed}; assessment: PENDING_POLICY')
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

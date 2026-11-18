@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPU vs GPU vs NPU Comparator | Lecture 18 - NPU Integration</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #030508;
@@ -231,7 +231,84 @@
             transform: translateX(-50%);
             transition: left 0.5s ease;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
@@ -244,7 +321,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold">CPU vs GPU vs NPU Comparator</h1>
-                        <p class="text-sm text-gray-400">Lecture 18 • Benchmark & Performance Analysis</p>
+                        <p class="text-sm text-gray-400">Lecture 18 • Illustrative Performance Arithmetic</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -252,12 +329,12 @@
                         <i class="fas fa-redo"></i> Reset
                     </button>
                     <button id="btnRunAll" class="px-5 py-2 bg-gradient-to-r from-blue-500 via-emerald-500 to-amber-500 hover:from-blue-400 hover:via-emerald-400 hover:to-amber-400 rounded-lg transition flex items-center gap-2 font-semibold">
-                        <i class="fas fa-play"></i> Run All Benchmarks
+                        <i class="fas fa-play"></i> Run All Fixed-Input Scenarios
                     </button>
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Evidence and dimensional limits</h2><p>This page evaluates fixed source constants and performs no CPU/GPU/NPU benchmark. Their empirical provenance is unresolved; the author must choose whether to retain a fully specified illustrative dataset or replace it with reproducible measurements. N/A means unsupported or not dimensionally comparable, not zero cost. Nominal device specifications and workload power inputs are different quantities. Intel Core Ultra 7 165H: NPU peak INT8 11 TOPS, overall peak INT8 34 TOPS (<a href="https://www.intel.com/content/www/us/en/products/sku/236851/intel-core-ultra-7-processor-165h-24m-cache-up-to-5-00-ghz/specifications.html">official specification</a>). The original 15 W NPU value is not a verified component measurement. Intel lists the i9-13900K at 125 W base power and 253 W maximum turbo power, while NVIDIA lists RTX 4090 total graphics power as 450 W; these are different specification boundaries, not the measured workload watts. <a href="https://www.intel.com/content/www/us/en/products/sku/230496/intel-core-i913900k-processor-36m-cache-up-to-5-80-ghz/specifications.html">Intel power specification</a> · <a href="https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4090/">NVIDIA power specification</a>.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Processor Specs Overview -->
@@ -284,8 +361,8 @@
                         <p class="font-bold text-blue-400">5.8 GHz</p>
                     </div>
                     <div class="p-2 bg-blue-500/10 rounded-lg">
-                        <p class="text-gray-500 text-xs">TDP</p>
-                        <p class="font-bold text-blue-400">253W</p>
+                        <p class="text-gray-500 text-xs">Maximum Turbo Power</p>
+                        <p class="font-bold text-blue-400">253 W (125 W base power)</p>
                     </div>
                     <div class="p-2 bg-blue-500/10 rounded-lg">
                         <p class="text-gray-500 text-xs">FLOPS</p>
@@ -316,8 +393,8 @@
                         <p class="font-bold text-emerald-400">2.52 GHz</p>
                     </div>
                     <div class="p-2 bg-emerald-500/10 rounded-lg">
-                        <p class="text-gray-500 text-xs">TDP</p>
-                        <p class="font-bold text-emerald-400">450W</p>
+                        <p class="text-gray-500 text-xs">Total Graphics Power</p>
+                        <p class="font-bold text-emerald-400">450 W (nominal specification)</p>
                     </div>
                     <div class="p-2 bg-emerald-500/10 rounded-lg">
                         <p class="text-gray-500 text-xs">FLOPS</p>
@@ -334,7 +411,7 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-xl text-amber-400">NPU</h3>
-                        <p class="text-sm text-gray-500">Intel Meteor Lake NPU</p>
+                        <p class="text-sm text-gray-500">Intel Core Ultra 7 165H NPU</p>
                     </div>
                 </div>
                 
@@ -345,15 +422,15 @@
                     </div>
                     <div class="p-2 bg-amber-500/10 rounded-lg">
                         <p class="text-gray-500 text-xs">INT8 Perf</p>
-                        <p class="font-bold text-amber-400">34 TOPS</p>
+                        <p class="font-bold text-amber-400">11 TOPS (NPU peak INT8; 34 overall)</p>
                     </div>
                     <div class="p-2 bg-amber-500/10 rounded-lg">
-                        <p class="text-gray-500 text-xs">TDP</p>
-                        <p class="font-bold text-amber-400">~15W</p>
+                        <p class="text-gray-500 text-xs">Unverified Power Input</p>
+                        <p class="font-bold text-amber-400">~15 W (illustrative)</p>
                     </div>
                     <div class="p-2 bg-amber-500/10 rounded-lg">
                         <p class="text-gray-500 text-xs">Efficiency</p>
-                        <p class="font-bold text-amber-400">2.3 TOPS/W</p>
+                        <p class="font-bold text-amber-400">N/A — compatible measured power unavailable</p>
                     </div>
                 </div>
             </div>
@@ -523,7 +600,7 @@
                         <div class="p-4 bg-blue-500/10 rounded-xl border border-blue-500/30 text-center">
                             <i class="fas fa-microchip text-blue-400 text-2xl mb-2"></i>
                             <p id="cpuPower" class="text-2xl font-bold text-blue-400">0W</p>
-                            <p class="text-xs text-gray-500">CPU (TDP: 253W)</p>
+                            <p class="text-xs text-gray-500">CPU (253 W maximum turbo specification)</p>
                             <div class="mt-2 power-indicator">
                                 <div id="cpuPowerMarker" class="power-marker border-blue-400" style="left: 0%"></div>
                             </div>
@@ -532,7 +609,7 @@
                         <div class="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-center">
                             <i class="fas fa-th text-emerald-400 text-2xl mb-2"></i>
                             <p id="gpuPower" class="text-2xl font-bold text-emerald-400">0W</p>
-                            <p class="text-xs text-gray-500">GPU (TDP: 450W)</p>
+                            <p class="text-xs text-gray-500">GPU (450 W total graphics specification)</p>
                             <div class="mt-2 power-indicator">
                                 <div id="gpuPowerMarker" class="power-marker border-emerald-400" style="left: 0%"></div>
                             </div>
@@ -541,7 +618,7 @@
                         <div class="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30 text-center">
                             <i class="fas fa-brain text-amber-400 text-2xl mb-2"></i>
                             <p id="npuPower" class="text-2xl font-bold text-amber-400">0W</p>
-                            <p class="text-xs text-gray-500">NPU (TDP: 15W)</p>
+                            <p class="text-xs text-gray-500">NPU (15 W unverified model input)</p>
                             <div class="mt-2 power-indicator">
                                 <div id="npuPowerMarker" class="power-marker border-amber-400" style="left: 0%"></div>
                             </div>
@@ -577,7 +654,7 @@
                             </div>
                             <div>
                                 <p class="font-bold text-emerald-400">Use GPU</p>
-                                <p class="text-sm text-gray-400">Best for this workload</p>
+                                <p class="text-sm text-gray-400">Highest throughput per input watt; no empirical recommendation</p>
                             </div>
                         </div>
                         <p id="recommendationText" class="text-sm text-gray-300">
@@ -612,6 +689,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Workload data
         const workloads = {
             matmul: {
@@ -630,7 +752,7 @@
                 gpu: { throughput: 850, latency: 1.2, efficiency: 2.4, power: 280 },
                 npu: { throughput: 520, latency: 1.8, efficiency: 34.7, power: 14 },
                 winner: 'npu',
-                recommendation: 'NPU provides the best efficiency for inference. While GPU is faster, NPU achieves 90% of the speed at 1/20th the power - ideal for edge deployment.',
+                recommendation: 'For these fixed inference inputs, compare the displayed throughput, power and derived ratio. They do not establish a measured device ranking or an edge-deployment recommendation.',
                 throughputUnit: 'FPS',
                 efficiencyUnit: 'FPS/W'
             },
@@ -640,7 +762,7 @@
                 gpu: { throughput: 185, latency: 95, efficiency: 0.41, power: 420 },
                 npu: { throughput: 12, latency: 1400, efficiency: 0.8, power: 15 },
                 winner: 'gpu',
-                recommendation: 'GPU is essential for ML training. The massive memory bandwidth (1 TB/s) and Tensor Cores make it 90x faster than CPU for backpropagation.',
+                recommendation: 'This workload supplies CPU/GPU model values and no supported NPU implementation. Any speed ratio is arithmetic on those inputs, not a demonstrated training result.',
                 throughputUnit: 'samples/s',
                 efficiencyUnit: 'samples/W'
             },
@@ -650,7 +772,7 @@
                 gpu: { throughput: 120, latency: 8.3, efficiency: 0.27, power: 400 },
                 npu: { throughput: 0, latency: 0, efficiency: 0, power: 0 },
                 winner: 'gpu',
-                recommendation: 'GPU with RT Cores is purpose-built for ray tracing. NPU cannot perform this task - it lacks floating-point precision needed for graphics.',
+                recommendation: 'This example assigns no ray-tracing implementation to the NPU. Support depends on the accelerator and software; lack of floating-point capability is not a general property of every NPU.',
                 throughputUnit: 'FPS',
                 efficiencyUnit: 'FPS/W'
             },
@@ -660,7 +782,7 @@
                 gpu: { throughput: 12, latency: 1400, efficiency: 0.04, power: 150 },
                 npu: { throughput: 0, latency: 0, efficiency: 0, power: 0 },
                 winner: 'cpu',
-                recommendation: 'CPU dominates compilation due to complex branching and sequential dependencies. GPU/NPU cannot efficiently handle compiler logic.',
+                recommendation: 'Compilation includes irregular control flow and dependencies. This example supplies a CPU model and marks unsupported accelerator paths N/A; it does not prove a universal hardware limit.',
                 throughputUnit: 'files/s',
                 efficiencyUnit: 'files/W'
             },
@@ -670,7 +792,7 @@
                 gpu: { throughput: 180, latency: 5.5, efficiency: 0.5, power: 280 },
                 npu: { throughput: 95, latency: 10, efficiency: 6.3, power: 14 },
                 winner: 'gpu',
-                recommendation: 'GPU NVENC is fastest for video encoding. NPU offers excellent efficiency for real-time streaming where power matters more than speed.',
+                recommendation: 'Video-codec blocks, GPU compute and neural accelerators are different execution paths. These supplied values have no verified encoder implementation or benchmark provenance.',
                 throughputUnit: 'FPS',
                 efficiencyUnit: 'FPS/W'
             }
@@ -784,90 +906,31 @@
         }
 
         function runBenchmark() {
-            const data = workloads[currentWorkload];
-            
-            elements.workloadTitle.textContent = data.title;
-            
-            // Calculate max values for normalization
-            const maxThroughput = Math.max(data.cpu.throughput, data.gpu.throughput, data.npu.throughput);
-            const maxLatency = Math.max(data.cpu.latency, data.gpu.latency, data.npu.latency);
-            const maxEfficiency = Math.max(data.cpu.efficiency, data.gpu.efficiency, data.npu.efficiency);
-            
-            // Throughput bars
-            setTimeout(() => {
-                elements.cpuThroughput.style.width = (data.cpu.throughput / maxThroughput * 100) + '%';
-                elements.gpuThroughput.style.width = (data.gpu.throughput / maxThroughput * 100) + '%';
-                elements.npuThroughput.style.width = (data.npu.throughput / maxThroughput * 100) + '%';
-                
-                elements.cpuThroughputVal.textContent = data.cpu.throughput + ' ' + data.throughputUnit;
-                elements.gpuThroughputVal.textContent = data.gpu.throughput + ' ' + data.throughputUnit;
-                elements.npuThroughputVal.textContent = data.npu.throughput + ' ' + (currentWorkload === 'matmul' ? 'TOPS' : data.throughputUnit);
-            }, 100);
-            
-            // Latency bars (inverted - lower is better, so higher bar = worse)
-            setTimeout(() => {
-                elements.cpuLatency.style.width = (data.cpu.latency / maxLatency * 100) + '%';
-                elements.gpuLatency.style.width = (data.gpu.latency / maxLatency * 100) + '%';
-                elements.npuLatency.style.width = (data.npu.latency / maxLatency * 100) + '%';
-                
-                elements.cpuLatencyVal.textContent = data.cpu.latency + ' ms';
-                elements.gpuLatencyVal.textContent = data.gpu.latency + ' ms';
-                elements.npuLatencyVal.textContent = data.npu.latency + ' ms';
-            }, 200);
-            
-            // Efficiency bars
-            setTimeout(() => {
-                elements.cpuEfficiency.style.width = (data.cpu.efficiency / maxEfficiency * 100) + '%';
-                elements.gpuEfficiency.style.width = (data.gpu.efficiency / maxEfficiency * 100) + '%';
-                elements.npuEfficiency.style.width = (data.npu.efficiency / maxEfficiency * 100) + '%';
-                
-                elements.cpuEfficiencyVal.textContent = data.cpu.efficiency.toFixed(2) + ' ' + data.efficiencyUnit;
-                elements.gpuEfficiencyVal.textContent = data.gpu.efficiency.toFixed(2) + ' ' + data.efficiencyUnit;
-                elements.npuEfficiencyVal.textContent = data.npu.efficiency.toFixed(2) + ' ' + (currentWorkload === 'matmul' ? 'TOPS/W' : data.efficiencyUnit);
-            }, 300);
-            
-            // Power consumption
-            elements.cpuPower.textContent = data.cpu.power + 'W';
-            elements.gpuPower.textContent = data.gpu.power + 'W';
-            elements.npuPower.textContent = data.npu.power + 'W';
-            
-            elements.cpuPowerMarker.style.left = (data.cpu.power / 253 * 100) + '%';
-            elements.gpuPowerMarker.style.left = (data.gpu.power / 450 * 100) + '%';
-            elements.npuPowerMarker.style.left = (data.npu.power / 15 * 100) + '%';
-            
-            // Winner badges
-            const throughputWinner = [
-                { name: 'cpu', val: data.cpu.throughput },
-                { name: 'gpu', val: data.gpu.throughput },
-                { name: 'npu', val: data.npu.throughput }
-            ].sort((a, b) => b.val - a.val)[0].name;
-            
-            const latencyWinner = [
-                { name: 'cpu', val: data.cpu.latency || Infinity },
-                { name: 'gpu', val: data.gpu.latency || Infinity },
-                { name: 'npu', val: data.npu.latency || Infinity }
-            ].sort((a, b) => a.val - b.val)[0].name;
-            
-            const efficiencyWinner = [
-                { name: 'cpu', val: data.cpu.efficiency },
-                { name: 'gpu', val: data.gpu.efficiency },
-                { name: 'npu', val: data.npu.efficiency }
-            ].sort((a, b) => b.val - a.val)[0].name;
-            
-            updateWinnerBadge(elements.throughputWinner, throughputWinner);
-            updateWinnerBadge(elements.latencyWinner, latencyWinner);
-            updateWinnerBadge(elements.efficiencyWinner, efficiencyWinner);
-            
-            // Recommendation
-            updateRecommendation(data.winner, data.recommendation);
-            
-            // Update radar chart
-            updateRadarChart(data);
+    const data=workloads[currentWorkload],names=['cpu','gpu','npu'];
+    const valid=names.filter(k=>data[k].throughput>0&&data[k].power>0&&!(currentWorkload==='matmul'&&k==='npu'));
+    elements.workloadTitle.textContent=data.title+' — fixed inputs, unverified provenance';
+    valid.forEach(k=>data[k].efficiency=data[k].throughput/data[k].power);
+    const maxT=Math.max(...valid.map(k=>data[k].throughput)),maxL=Math.max(...valid.map(k=>data[k].latency)),maxE=Math.max(...valid.map(k=>data[k].efficiency)),maxP=Math.max(...valid.map(k=>data[k].power));
+    names.forEach(k=>{
+        const ok=valid.includes(k),d=data[k];
+        for(const [metric,value,max,unit] of [['Throughput',d.throughput,maxT,data.throughputUnit],['Latency',d.latency,maxL,'ms'],['Efficiency',d.efficiency,maxE,data.throughputUnit+'/W']]){
+            elements[k+metric].style.width=ok?(value/max*100)+'%':'0%';
+            elements[k+metric+'Val'].textContent=ok?Number(value.toFixed(3))+' '+unit:'N/A';
         }
+        elements[k+'Power'].textContent=ok?d.power+' W (input)':'N/A';
+        elements[k+'PowerMarker'].style.left=ok?(d.power/maxP*100)+'%':'0%';
+    });
+    const best=(metric,descending)=>[...valid].sort((a,b)=>descending?data[b][metric]-data[a][metric]:data[a][metric]-data[b][metric])[0];
+    updateWinnerBadge(elements.throughputWinner,best('throughput',true));updateWinnerBadge(elements.latencyWinner,best('latency',false));updateWinnerBadge(elements.efficiencyWinner,best('efficiency',true));
+    let message='Ranking uses only the displayed compatible fixed inputs, not hardware measurements. Efficiency = throughput / displayed workload watts. Precision, workload implementation and power boundary require author-supplied evidence.';
+    if(currentWorkload==='inference')message+=` NPU/GPU throughput = ${(100*data.npu.throughput/data.gpu.throughput).toFixed(2)}%; power = ${(100*data.npu.power/data.gpu.power).toFixed(2)}%.`;
+    if(currentWorkload==='matmul')message+=' Original NPU input: 2800 labelled TOPS, alongside CPU/GPU GFLOPS. Precision and operation counting are unspecified; no conversion is assumed and NPU is excluded from this comparison.';
+    updateRecommendation(best('efficiency',true),message);updateRadarChart(data);
+}
 
         function updateWinnerBadge(element, winner) {
             element.className = `winner-badge ${winner}`;
-            element.textContent = winner.toUpperCase() + ' Wins';
+            element.textContent = winner.toUpperCase() + ' (fixed-input maximum/minimum)';
         }
 
         function updateRecommendation(winner, text) {
@@ -887,8 +950,8 @@
                         <i class="fas ${icons[winner]} ${c.icon} text-xl"></i>
                     </div>
                     <div>
-                        <p class="font-bold ${c.text}">Use ${winner.toUpperCase()}</p>
-                        <p class="text-sm text-gray-400">Best for this workload</p>
+                        <p class="font-bold ${c.text}">Input arithmetic: ${winner.toUpperCase()}</p>
+                        <p class="text-sm text-gray-400">Highest throughput per input watt; no empirical recommendation</p>
                     </div>
                 </div>
                 <p class="text-sm text-gray-300">${text}</p>
@@ -896,37 +959,12 @@
         }
 
         function updateRadarChart(data) {
-            // Normalize data for radar (0-100 scale)
-            const maxT = Math.max(data.cpu.throughput, data.gpu.throughput, data.npu.throughput) || 1;
-            const maxL = Math.max(data.cpu.latency, data.gpu.latency, data.npu.latency) || 1;
-            const maxE = Math.max(data.cpu.efficiency, data.gpu.efficiency, data.npu.efficiency) || 1;
-            
-            radarChart.data.datasets[0].data = [
-                data.cpu.throughput / maxT * 100,
-                100 - (data.cpu.latency / maxL * 100),
-                data.cpu.efficiency / maxE * 100,
-                95, // CPU versatility
-                100 - (data.cpu.power / 450 * 100)
-            ];
-            
-            radarChart.data.datasets[1].data = [
-                data.gpu.throughput / maxT * 100,
-                100 - (data.gpu.latency / maxL * 100),
-                data.gpu.efficiency / maxE * 100,
-                70, // GPU versatility
-                100 - (data.gpu.power / 450 * 100)
-            ];
-            
-            radarChart.data.datasets[2].data = [
-                data.npu.throughput / maxT * 100,
-                data.npu.latency ? 100 - (data.npu.latency / maxL * 100) : 0,
-                data.npu.efficiency / maxE * 100,
-                30, // NPU versatility
-                100 - (data.npu.power / 450 * 100)
-            ];
-            
-            radarChart.update();
-        }
+    const names=['cpu','gpu','npu'],valid=names.filter(k=>data[k].throughput>0&&data[k].power>0&&!(currentWorkload==='matmul'&&k==='npu'));
+    const maxT=Math.max(...valid.map(k=>data[k].throughput)),minL=Math.min(...valid.map(k=>data[k].latency)),maxE=Math.max(...valid.map(k=>data[k].efficiency)),minP=Math.min(...valid.map(k=>data[k].power));
+    radarChart.data.labels=['Throughput / maximum','Minimum latency / latency','Efficiency / maximum','Minimum watts / watts'];
+    names.forEach((k,i)=>{const d=data[k];radarChart.data.datasets[i].data=valid.includes(k)?[100*d.throughput/maxT,100*minL/d.latency,100*d.efficiency/maxE,100*minP/d.power]:[null,null,null,null];});
+    radarChart.update();
+}
 
         async function runAllBenchmarks() {
             elements.btnRunAll.disabled = true;
@@ -940,10 +978,11 @@
             }
             
             elements.btnRunAll.disabled = false;
-            elements.btnRunAll.innerHTML = '<i class="fas fa-play"></i> Run All Benchmarks';
+            elements.btnRunAll.innerHTML = '<i class="fas fa-play"></i> Run All Fixed-Input Scenarios';
         }
 
         function reset() {
+            enosTimers.cancel();elements.btnRunAll.disabled=false;elements.btnRunAll.textContent='Run all fixed-input scenarios';
             // Reset bars
             document.querySelectorAll('.bar-fill').forEach(bar => {
                 bar.style.width = '0%';
@@ -981,6 +1020,27 @@
         // Initialize
         initRadarChart();
         runBenchmark();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

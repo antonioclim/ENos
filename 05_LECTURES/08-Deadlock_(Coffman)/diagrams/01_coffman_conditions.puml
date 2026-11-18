@@ -1,13 +1,13 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml conditiile_coffman
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title The 4 Coffman Conditions for Deadlock
 
 skinparam rectangle {
     roundCorner 10
 }
 
-rectangle "**DEADLOCK** occurs only when\n**ALL 4** conditions are present!" as title #FFCDD2
+rectangle "**DEADLOCK** occurs only when\n**ALL 4** conditions are present!" as deadlock_conditions #FFCDD2
 
 rectangle "**1. MUTUAL EXCLUSION**" as me #E3F2FD {
     note as me_note
@@ -45,10 +45,10 @@ rectangle "**4. CIRCULAR WAIT**" as cw #FCE4EC {
     end note
 }
 
-title -down-> me
-title -down-> hw
-title -down-> np
-title -down-> cw
+deadlock_conditions -down-> me
+deadlock_conditions -down-> hw
+deadlock_conditions -down-> np
+deadlock_conditions -down-> cw
 
 note bottom
 **Deadlock Prevention**: Eliminate at least **one** condition!

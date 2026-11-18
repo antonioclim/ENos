@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Architecture | CAPSTONE SO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.5.0/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.5.0/reveal.css">
+    <link rel="stylesheet" href="../../assets/css/reveal-night-4.5.0.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/11.8.0/monokai.css">
     <style>
         :root { --r-main-font-size: 32px; --r-code-font: 'JetBrains Mono', 'Fira Code', monospace; }
         .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
@@ -59,7 +59,87 @@
             .fragment { opacity: 1 !important; visibility: visible !important; }
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
-    </style>
+    @media screen and (max-width: 700px) {
+ .two-column,.two-columns,.three-columns,.cols { flex-direction: column; }
+ pre,code { overflow-wrap: anywhere; } table { display: block; overflow-x: auto; }
+}
+</style>
+<link rel="stylesheet" data-enos-presentation-fallback href="../../assets/css/presentation_fallback.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
 <div class="reveal">
@@ -94,7 +174,7 @@
 cpu=$(cat /proc/stat | ...)
 if [ $cpu -gt 80 ]; then
     echo "Alert!"
-    # ...mai mult cod
+    # ...more code
 fi
 
 # Backup logic mixed in
@@ -142,7 +222,7 @@ main "$@"</code></pre>
             <div class="pattern-card fragment">
                 <div class="pattern-icon">🔧</div>
                 <h4>Maintainability</h4>
-                <p style="font-size: 0.7em;">Local changes without side effects</p>
+                <p style="font-size: 0.7em;">Localised changes with explicit side effects</p>
             </div>
             <div class="pattern-card fragment">
                 <div class="pattern-icon">🧪</div>
@@ -169,7 +249,7 @@ main "$@"</code></pre>
             <div class="pattern-card fragment">
                 <div class="pattern-icon">📖</div>
                 <h4>Documentation</h4>
-                <p style="font-size: 0.7em;">Structure = implicit documentation</p>
+                <p style="font-size: 0.7em;">Structure supports explicit API documentation</p>
             </div>
         </div>
     </section>
@@ -202,7 +282,7 @@ main "$@"</code></pre>
             </div>
             <div>
                 <h4 class="good">Correct</h4>
-                <pre><code class="language-bash"># Separate files
+                <pre><code class="language-text"># Separate files
 # validation.sh
 validate_backup_input() { ... }
 
@@ -239,11 +319,12 @@ compress_file() {
     local file=$1 algorithm=$2
     
     # Load plugin dynamically
-    if [[ -f "compressors/${algorithm}.sh" ]]; then
+    if [[ $algorithm =~ ^[A-Za-z0-9_]+$ &amp;&amp; -f "compressors/${algorithm}.sh" ]]; then
         source "compressors/${algorithm}.sh"
         "compress_${algorithm}" "$file"
     else
         log_error "Unknown compressor: $algorithm"
+        return 2
     fi
 }</code></pre>
     </section>
@@ -263,11 +344,16 @@ notify() {
 
 # Concrete implementations
 notify_stdout() { echo "[$1] $2"; }
-notify_email()  { mail -s "[$1] Alert" "$ADMIN_EMAIL" <<< "$2"; }
-notify_slack()  { curl -X POST "$SLACK_WEBHOOK" -d "{\"text\":\"[$1] $2\"}"; }
+notify_email()  { mail -s "[$1] Alert" "$ADMIN_EMAIL" &lt;&lt;&lt; "$2"; }
+notify_slack() {
+    local payload
+    payload=$(python3 -c 'import json,sys; print(json.dumps({"text":"["+sys.argv[1]+"] "+sys.argv[2]}))' "$1" "$2") || return 1
+    curl --fail --silent --show-error --max-time 15 -H 'Content-Type: application/json' \
+        --data "$payload" "${SLACK_WEBHOOK:?Configure an authorised endpoint}"
+}
 
 # Configuration - choose implementation
-export NOTIFIER_IMPL="notify_slack"
+export NOTIFIER_IMPL="notify_stdout"  # local demonstration; remote adapters require authorisation
 
 # Usage - code doesn't know which notifier it uses
 notify "ERROR" "Disk space critical!"</code></pre>
@@ -282,7 +368,7 @@ notify "ERROR" "Disk space critical!"</code></pre>
     </section>
     
     <section>
-        <h3>Standard CAPSTONE Layout</h3>
+        <h3>Design Layout Example</h3><p style="font-size:0.65em">This is a refactoring target. The delivered projects currently use their own lib/, etc/, bin/ and tests/ directories.</p>
         <div class="file-tree">
 <pre>
 project_name/
@@ -305,10 +391,10 @@ project_name/
 │   └── project.conf.example      #    Config template
 │
 ├── 📁 tests/                     # 🧪 Tests
-│   ├── unit/                     #    Tests unitare
+│   ├── unit/                     #    Unit tests
 │   │   ├── test_core.sh
 │   │   └── test_utils.sh
-│   ├── integration/              #    Tests integrare
+│   ├── integration/              #    Integration tests
 │   └── fixtures/                 #    Test data
 │
 ├── 📁 docs/                      # 📖 Documentation
@@ -324,7 +410,7 @@ project_name/
         <table class="vs-table">
             <thead>
                 <tr>
-                    <th>Director</th>
+                    <th>Directory</th>
                     <th>Responsibility</th>
                     <th>Example Content</th>
                 </tr>
@@ -332,7 +418,7 @@ project_name/
             <tbody>
                 <tr class="fragment">
                     <td><code>core/</code></td>
-                    <td>Logica specifică proiectului</td>
+                    <td>Project-specific logic</td>
                     <td>Backup, monitoring algorithms</td>
                 </tr>
                 <tr class="fragment">
@@ -402,7 +488,7 @@ project_name/
     </section>
     
     <section>
-        <h3>Source Chain Implementation</h3>
+        <h3>Source Chain Implementation</h3><p style="font-size:0.65em">A module sourced inside a function must use <code>declare -g</code> for public globals. Its final command must return success when loading succeeds.</p>
         <pre><code class="language-bash">#!/bin/bash
 # main.sh - Entry point with robust source chain
 
@@ -410,7 +496,7 @@ project_name/
 set -euo pipefail
 
 # 2. Determine absolute location
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &amp;&amp; pwd)"
 readonly SCRIPT_DIR
 
 # 3. Helper for source with verification
@@ -419,7 +505,7 @@ source_module() {
     local path="${SCRIPT_DIR}/${module}"
     
     if [[ ! -f "$path" ]]; then
-        echo "FATAL: Module not found: $path" >&2
+        echo "FATAL: Module not found: $path" &gt;&amp;2
         exit 1
     fi
     
@@ -446,12 +532,12 @@ main "$@"</code></pre>
 # lib/logging.sh
 
 # Guard - prevents loading multiple times
-[[ -n "${_LOGGING_SH_LOADED:-}" ]] && return 0
+[[ -n "${_LOGGING_SH_LOADED:-}" ]] &amp;&amp; return 0
 readonly _LOGGING_SH_LOADED=1
 
 # Check dependencies
 if [[ -z "${_COMMON_SH_LOADED:-}" ]]; then
-    echo "ERROR: logging.sh requires common.sh" >&2
+    echo "ERROR: logging.sh requires common.sh" &gt;&amp;2
     exit 1
 fi
 
@@ -465,10 +551,10 @@ log() {
     local level="${1:-INFO}"
     shift
     local message="$*"
-    # ...implementare
+    # ...implementation
 }</code></pre>
         <div class="highlight-box" style="font-size: 0.8em; margin-top: 1em;">
-            <strong>Guard Pattern:</strong> Variabila <code>_MODULE_SH_LOADED</code> previne 
+            <strong>Guard Pattern:</strong> The variable <code>_MODULE_SH_LOADED</code> prevents 
             re-execution of code if the file is sourced multiple times.
         </div>
     </section>
@@ -483,29 +569,20 @@ log() {
     
     <section>
         <h3>1. Factory Pattern</h3>
-        <pre><code class="language-bash"># Create objects (associative arrays) dynamically
-create_backup_job() {
-    local name=$1 source=$2 dest=$3
-    
-    # "Constructor" - returnează referință
-    local -n job="BACKUP_JOB_${name}"
-    
-    job=(
-        [name]="$name"
-        [source]="$source"
-        [destination]="$dest"
-        [created_at]="$(date -Iseconds)"
-        [status]="pending"
-        [type]="full"
-    )
-    
-    echo "BACKUP_JOB_${name}"
+        <pre><code class="language-bash">create_backup_job() {
+    local target=$1 name=$2 source=$3 destination=$4
+    [[ $target =~ ^job_[A-Za-z0-9_]+$ ]] || return 2
+    [[ $(declare -p "$target" 2&gt;/dev/null) == 'declare -A '* ]] || return 2
+    local -n output_job=$target
+    output_job=([name]="$name" [source]="$source" [destination]="$destination"
+                [created_at]="$(date -Iseconds)" [status]=pending [type]=full)
 }
 
-# Usage
-job_ref=$(create_backup_job "daily" "/var/www" "/backup")
-declare -n job="$job_ref"
-echo "Created job: ${job[name]} at ${job[created_at]}"</code></pre>
+declare -A job_daily=() job_weekly=()
+create_backup_job job_daily daily /owned/source /owned/backups
+create_backup_job job_weekly weekly /owned/source /owned/backups
+printf 'Created job: %s at %s\n' "${job_daily[name]}" "${job_daily[created_at]}"
+# Direct calls mutate the caller's arrays; $(...) would lose those mutations.</code></pre>
     </section>
     
     <section>
@@ -513,8 +590,8 @@ echo "Created job: ${job[name]} at ${job[created_at]}"</code></pre>
         <pre><code class="language-bash"># Interchangeable algorithms for the same operation
 
 # Compression strategies
-strategy_gzip()  { gzip -c "$1" > "$2"; }
-strategy_bzip2() { bzip2 -c "$1" > "$2"; }
+strategy_gzip()  { gzip -c "$1" &gt; "$2"; }
+strategy_bzip2() { bzip2 -c "$1" &gt; "$2"; }
 strategy_zstd()  { zstd -q -c "$1" -o "$2"; }
 strategy_none()  { cp "$1" "$2"; }
 
@@ -525,7 +602,7 @@ compress_with_strategy() {
     # Select and execute strategy
     local strategy_func="strategy_${strategy}"
     
-    if declare -f "$strategy_func" > /dev/null; then
+    if declare -f "$strategy_func" &gt; /dev/null; then
         "$strategy_func" "$input" "$output"
     else
         log_error "Unknown compression strategy: $strategy"
@@ -539,84 +616,59 @@ compress_with_strategy "data.tar" "data.tar.zst" "zstd"</code></pre>
     
     <section>
         <h3>3. Observer Pattern</h3>
-        <pre><code class="language-bash"># Event system for notifications
-
-declare -a EVENT_HANDLERS=()
-
-# Register handler
+        <pre><code class="language-bash">declare -a EVENT_NAMES=() EVENT_CALLBACKS=()
 on_event() {
-    local event=$1 handler=$2
-    EVENT_HANDLERS+=("${event}:${handler}")
+    [[ $# == 2 &amp;&amp; -n $1 &amp;&amp; $2 =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+    declare -F "$2" &gt;/dev/null || return 2
+    EVENT_NAMES+=("$1"); EVENT_CALLBACKS+=("$2")
 }
-
-# Emit event
 emit_event() {
-    local event=$1; shift
-    local data="$*"
-    
-    for registration in "${EVENT_HANDLERS[@]}"; do
-        local registered_event="${registration%%:*}"
-        local handler="${registration#*:}"
-        
-        if [[ "$registered_event" == "$event" ]]; then
-            "$handler" "$data"
+    local event=$1 i failures=0; shift
+    # Capture the boundary: registrations added by handlers run on the next event.
+    local end=${#EVENT_NAMES[@]}
+    for ((i=0; i&lt;end; i++)); do
+        if [[ ${EVENT_NAMES[i]} == "$event" ]]; then
+            "${EVENT_CALLBACKS[i]}" "$@" || failures=$((failures + 1))
         fi
     done
+    ((failures == 0))
 }
-
-# Handlers
-on_backup_complete() { log_info "Backup finished: $1"; }
-on_backup_complete() { send_notification "Backup done: $1"; }
-
-# Setup
-on_event "backup:complete" "on_backup_complete"
-
-# Trigger
-emit_event "backup:complete" "/backup/daily_20240115.tar.gz"</code></pre>
+record_backup() { printf 'Recorded: %s\n' "$1"; }
+describe_backup() { printf 'Notification fixture: %s\n' "$1"; }
+on_event 'backup:complete' record_backup
+on_event 'backup:complete' describe_backup
+emit_event 'backup:complete' '/owned/backups/daily.tar.gz'</code></pre>
     </section>
     
     <section>
         <h3>4. Command Pattern</h3>
-        <pre><code class="language-bash"># Encapsulate commands for undo/redo/queue
-
-declare -a COMMAND_HISTORY=()
-
-# Wrapper for commands with history
+        <pre><code class="language-bash">declare -a COMMAND_START=() COMMAND_LENGTH=() COMMAND_ARGS=()
 execute_command() {
-    local cmd="$*"
-    
-    # Log for audit
-    log_debug "Executing: $cmd"
-    
-    # Save to history
-    COMMAND_HISTORY+=("$cmd")
-    
-    # Execute
-    eval "$cmd"
-    local status=$?
-    
-    if [[ $status -ne 0 ]]; then
-        log_error "Command failed (exit: $status): $cmd"
-    fi
-    
-    return $status
+    (($# &gt; 0)) || return 2
+    COMMAND_START+=("${#COMMAND_ARGS[@]}"); COMMAND_LENGTH+=("$#")
+    COMMAND_ARGS+=("$@")
+    "$@"
 }
-
-# Replay last N commands
 replay_commands() {
-    local count=${1:-${#COMMAND_HISTORY[@]}}
-    
-    for ((i=${#COMMAND_HISTORY[@]}-count; i<${#COMMAND_HISTORY[@]}; i++)); do
-        execute_command "${COMMAND_HISTORY[$i]}"
+    local count=${1:-${#COMMAND_START[@]}} i start length rc=0
+    [[ $count =~ ^[0-9]+$ &amp;&amp; ${#count} -le 8 ]] || return 2
+    count=$((10#$count))
+    local end=${#COMMAND_START[@]}
+    ((count &lt;= end)) || return 2
+    for ((i=end-count; i&lt;end; i++)); do
+        start=${COMMAND_START[i]}; length=${COMMAND_LENGTH[i]}
+        if "${COMMAND_ARGS[@]:start:length}"; then :; else rc=$?; return "$rc"; fi
     done
-}</code></pre>
+}
+execute_command printf '%s\n' 'literal space; $(not executed)'
+replay_commands 1  # exactly one replay; history does not grow</code></pre>
     </section>
 </section>
 
 <!-- ============== MODULARITATE ============== -->
 <section>
     <section data-background-color="#2d1a3d">
-        <h2>Modularity Practică</h2>
+        <h2>Practical Modularity</h2>
         <p>How we divide code into cohesive modules</p>
     </section>
     
@@ -628,7 +680,7 @@ replay_commands() {
                 <p style="font-size: 0.75em;">
                     All functions in the module serve the same purpose
                 </p>
-                <pre><code class="language-bash" style="font-size: 0.8em;"># logging.sh - ONLY logging
+                <pre><code class="language-text" style="font-size: 0.8em;"># logging.sh - ONLY logging
 log_info() { ... }
 log_error() { ... }
 log_debug() { ... }
@@ -642,7 +694,7 @@ set_log_level() { ... }</code></pre>
                 <pre><code class="language-bash" style="font-size: 0.8em;"># validation.sh
 # Uses only common.sh
 validate_path() {
-    is_empty "$1" && return 1
+    is_empty "$1" &amp;&amp; return 1
     [[ -e "$1" ]]
 }</code></pre>
             </div>
@@ -651,7 +703,7 @@ validate_path() {
                 <p style="font-size: 0.75em;">
                     Hide internal details
                 </p>
-                <pre><code class="language-bash" style="font-size: 0.8em;"># Public API
+                <pre><code class="language-text" style="font-size: 0.8em;"># Public API
 get_cpu_usage() { ... }
 
 # Private (prefix _)
@@ -664,9 +716,9 @@ _calculate_diff() { ... }</code></pre>
     <section>
         <h3>Example: Module logging.sh</h3>
         <pre><code class="language-bash">#!/bin/bash
-# lib/logging.sh - Complete logging framework
+# lib/logging.sh - Logging module excerpt: implement _should_log/_format_message before use
 
-[[ -n "${_LOGGING_SH_LOADED:-}" ]] && return 0
+[[ -n "${_LOGGING_SH_LOADED:-}" ]] &amp;&amp; return 0
 readonly _LOGGING_SH_LOADED=1
 
 # ═══════════════════════════════════════════════════════════
@@ -697,8 +749,9 @@ _log() {
     _should_log "$level" || return 0
     
     local msg="$(_format_message "$level" "$*")"
-    echo -e "$msg" >&2
-    [[ -n "$LOG_FILE" ]] && echo "$msg" >> "$LOG_FILE"
+    printf '%s\n' "$msg" &gt;&amp;2 || return 1
+    if [[ -n "$LOG_FILE" ]]; then printf '%s\n' "$msg" &gt;&gt; "$LOG_FILE" || return 1; fi
+    return 0
 }</code></pre>
     </section>
 </section>
@@ -715,7 +768,7 @@ _log() {
         <div class="two-columns">
             <div>
                 <h4>Naming</h4>
-                <pre><code class="language-bash"># Descriptive verbs
+                <pre><code class="language-text"># Descriptive verbs
 get_cpu_usage()
 set_log_level()
 is_file_readable()
@@ -733,8 +786,8 @@ file_write()
 _internal_helper()</code></pre>
             </div>
             <div>
-                <h4>Parameters Parametri & Return Return</h4>
-                <pre><code class="language-bash"># Documentation parametri
+                <h4>Parameters and Return Values</h4>
+                <pre><code class="language-bash"># Parameter documentation
 # @param $1 - source path
 # @param $2 - destination path  
 # @param $3 - (optional) compression
@@ -778,7 +831,8 @@ create_backup() {
     log_info "Creating $type backup: $source → $dest"
     log_debug "Options: compress=$compress, keep=$keep, notify=$notify"
     
-    # Implementation...
+    # TODO: implement the requested backup operation.
+    return 3  # unfinished scaffold, not a successful backup
 }
 
 # Usage - much clearer than 6 positional parameters
@@ -814,7 +868,7 @@ create_backup backup_opts</code></pre>
                     <li>Explicit dependencies (source)</li>
                     <li>Guard pattern for modules</li>
                     <li>Prefix _ for private functions</li>
-                    <li>Documentation parametri</li>
+                    <li>Parameter documentation</li>
                     <li>Consistent return codes</li>
                 </ul>
             </div>
@@ -855,7 +909,7 @@ mini_project/
 └── tests/
     └── test_processor.sh ──►  test_process_file(), test_validate()
 
-Dependențe:
+Dependencies:
   main.sh ─────► common.sh ◄─── logging.sh
                     ▲
                     │
@@ -869,8 +923,8 @@ Dependențe:
 <section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)">
     <h2>Practical Exercise</h2>
     <div class="highlight-box">
-        <h4>Refactorizare Monolithic Script</h4>
-        <p>Primiți un script de 300 lines. Sarcina voastră:</p>
+        <h4>Refactor a Monolithic Script</h4>
+        <p>Given a 300-line teaching script, complete these tasks:</p>
         <ol style="font-size: 0.9em;">
             <li>Identify distinct responsibilities</li>
             <li>Create directory structure</li>
@@ -880,22 +934,24 @@ Dependențe:
         </ol>
     </div>
     <p style="margin-top: 2em;">
-        <strong>Time:</strong> 45 minutes | <strong>Score:</strong> 10p architecture
+        <strong>Suggested practice:</strong> 45 minutes | <strong>Historical score proposal:</strong> 10p architecture; author confirmation required
     </p>
 </section>
 
 </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script src="../../assets/vendor/reveal.js/4.5.0/reveal.js"></script>
+<script src="../../assets/vendor/reveal.js/4.5.0/plugin/highlight/highlight.js"></script>
 <script>
 Reveal.initialize({
     hash: true,
     slideNumber: 'c/t',
     transition: 'slide',
+    keyboardCondition: event => !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(event.target.tagName) && !event.target.isContentEditable,
     plugins: [RevealHighlight]
 });
 </script>
+<script src="../../assets/js/presentation_fallback.js"></script>
 </body>
 </html>

@@ -282,7 +282,7 @@ class TestAIIndicatorDetection(unittest.TestCase):
         """Simple beginner script should have no AI indicators."""
         # Create a temporary directory with a simple script
         with tempfile.TemporaryDirectory() as tmpdir:
-            script_path = Path(tmpdir) / 'ex1_operatori.sh'
+            script_path = Path(tmpdir) / 'ex1_operators.sh'
             script_path.write_text('''#!/bin/bash
 # my script
 echo "hello"
@@ -296,7 +296,7 @@ ls && echo "done"
     def test_detects_overly_elaborate_comments(self):
         """Should detect Python docstring-style comments in Bash."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            script_path = Path(tmpdir) / 'ex1_operatori.sh'
+            script_path = Path(tmpdir) / 'ex1_operators.sh'
             script_path.write_text('''#!/bin/bash
 # Args: input_file - the file to process
 # Returns: 0 on success, 1 on failure
@@ -318,7 +318,7 @@ process_file() {
     def test_detects_elaborate_variable_names(self):
         """Should detect overly descriptive variable names."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            script_path = Path(tmpdir) / 'ex1_operatori.sh'
+            script_path = Path(tmpdir) / 'ex1_operators.sh'
             script_path.write_text('''#!/bin/bash
 user_input_value="test"
 file_content_data=$(cat file.txt)
@@ -340,7 +340,7 @@ echo "$user_input_value"
     def test_high_comment_ratio_detection(self):
         """Should detect unusually high comment-to-code ratio."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            script_path = Path(tmpdir) / 'ex1_operatori.sh'
+            script_path = Path(tmpdir) / 'ex1_operators.sh'
             # Create script with more comments than code
             script_path.write_text('''#!/bin/bash
 # This is a comment

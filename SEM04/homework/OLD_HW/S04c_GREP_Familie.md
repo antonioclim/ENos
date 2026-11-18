@@ -1,5 +1,7 @@
 # S04_TC02 - The GREP Family - Text Searching
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory Material - Seminar 4 (Redistributed)
 
@@ -35,7 +37,7 @@ At the end of this laboratory, the student will be able to:
 
 ## 2. Basic Syntax
 
-```bash
+```text
 grep [options] 'pattern' [files]
 grep [options] -e 'pattern1' -e 'pattern2' [files]
 grep [options] -f pattern_file [files]
@@ -47,7 +49,7 @@ grep [options] -f pattern_file [files]
 
 ### 3.1 Matching Options
 
-```bash
+```text
 -i, --ignore-case       # Case-insensitive
 -w, --word-regexp       # Whole word
 -x, --line-regexp       # Entire line
@@ -58,19 +60,19 @@ grep [options] -f pattern_file [files]
 
 ### 3.2 Output Options
 
-```bash
+```text
 -n, --line-number       # Display line numbers
--c, --count             # Count matches
+-c, --count             # Count selected lines
 -l, --files-with-matches    # Only file names with matches
 -L, --files-without-match   # Files WITHOUT matches
 -o, --only-matching     # Display only the matching part
--m NUM                  # Stop after NUM matches
+-m NUM                  # Stop after NUM selected lines per input file
 -q, --quiet             # Silent (only exit code)
 ```
 
 ### 3.3 Context Options
 
-```bash
+```text
 -A NUM, --after-context=NUM     # NUM lines after match
 -B NUM, --before-context=NUM    # NUM lines before match
 -C NUM, --context=NUM           # NUM lines before and after
@@ -78,7 +80,7 @@ grep [options] -f pattern_file [files]
 
 ### 3.4 File Options
 
-```bash
+```text
 -r, --recursive         # Search recursively in directories
 -R, --dereference-recursive  # Recursive, follow symlinks
 --include=GLOB          # Only files that match
@@ -155,10 +157,10 @@ grep -rl 'pattern' .
 ### 4.5 Counting and Statistics
 
 ```bash
-# Number of matches
+# Number of matching lines
 grep -c 'error' log.txt
 
-# Number of matches per file
+# Number of matching lines per file
 grep -c 'error' *.log
 
 # Files with matches
@@ -196,10 +198,10 @@ grep -E '\b[A-Z]+\b' file.txt   # words in uppercase
 ### 5.3 Useful Examples
 
 ```bash
-# Email
+# Email-shaped substrings, not full RFC validation
 grep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' file.txt
 
-# IP Address
+# IPv4-shaped substrings, without octet-range validation
 grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' log.txt
 
 # URL
@@ -220,7 +222,10 @@ dmesg | grep -i error
 
 # Combine with other commands
 cat access.log | grep '404' | wc -l
-grep -l 'pattern' *.txt | xargs rm
+# In the owned exercise workspace, review candidates before deletion.
+find . -maxdepth 1 -type f -name '*.txt' -exec grep -lZ 'pattern' {} + | xargs -0 -r printf 'Candidate: %s\n'
+# After reviewing the same predicate: replace the final printf with rm --.
+# This is not atomic; do not use concurrently changing untrusted paths.
 
 # Extract and count
 grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' access.log | sort | uniq -c | sort -rn
@@ -237,14 +242,12 @@ ps aux | grep '[n]ginx'         # [n]ginx does not match "grep nginx"
 # Exit codes
 # 0 - found matches
 # 1 - did not find matches
-# 2 - error
+# >1 - error; -q can report an earlier match even if a later read fails
 
 # Usage in scripts
-if grep -q 'pattern' file.txt; then
-    echo "Found"
-else
-    echo "Not found"
-fi
+grep -q 'pattern' file.txt
+rc=$?
+case $rc in 0) echo "Found" ;; 1) echo "Not found" ;; *) echo "Search failed ($rc)" >&2; exit "$rc" ;; esac
 ```
 
 ---
@@ -282,7 +285,7 @@ grep -oE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' access.log | sort | uniq -c | sort -r
 
 ## Cheat Sheet
 
-```bash
+```text
 # MATCHING
 -i          case-insensitive
 -w          whole word
@@ -333,14 +336,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OverlayFS Layer Visualizer | Lecture 16 - Containerisation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>OverlayFS Layer Visualiser | Lecture 16 - Containerisation</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #0a0d13;
@@ -213,7 +213,84 @@
             background: #4b5563;
             border-radius: 3px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
@@ -225,7 +302,7 @@
                         <i class="fas fa-layer-group text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">OverlayFS Layer Visualizer</h1>
+                        <h1 class="text-xl font-bold">OverlayFS Layer Visualiser</h1>
                         <p class="text-sm text-gray-400">Lecture 16 • Layered Filesystem for Docker</p>
                     </div>
                 </div>
@@ -236,7 +313,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Overlay model and Dockerfile scope</h2><p>Lookup, read and merged view use the same per-path upper state. Deleting a copied-up lower file removes the upper copy and adds a whiteout; recreating it removes that whiteout. Storage is a qualitative count of upper entries, not invented MB. The corrected Dockerfile fragment installs Python and a virtual environment, copies requirements.txt before installing it, then copies app/. It groups multiple actual layers for this display. Supply requirements.txt and app/ in the build context and choose the application entry point; these project inputs and a container build are not supplied or executed here.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Concept Overview -->
@@ -246,10 +323,10 @@
                     <i class="fas fa-info-circle text-blue-400 text-xl"></i>
                 </div>
                 <div class="flex-1">
-                    <h2 class="font-bold text-lg mb-2">Conceptul OverlayFS</h2>
+                    <h2 class="font-bold text-lg mb-2">The OverlayFS Model</h2>
                     <p class="text-gray-400 text-sm mb-3">
-                        OverlayFS combina mai multe directoare (layers) intr-o singura vizualizare unificata. 
-                        Layerele inferioare sunt read-only (imagine Docker), iar container-ul scrie intr-un layer superior (R/W).
+                        OverlayFS combines lower and upper directories into one merged view. 
+                        The lower directories are read-only in this model; container modifications are represented in the writable upper directory.
                     </p>
                     <div class="flex gap-4 text-xs">
                         <div class="flex items-center gap-2">
@@ -296,7 +373,7 @@
                             </div>
                         </div>
                         <div id="rwFiles" class="space-y-1 text-sm mono">
-                            <div class="text-gray-500 text-xs italic">No modifiedions yet</div>
+                            <div class="text-gray-500 text-xs italic">No modifications yet</div>
                         </div>
                     </div>
                     
@@ -485,7 +562,7 @@
                 <div class="glass-panel rounded-2xl p-5 mb-6">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                         <i class="fas fa-eye text-indigo-400"></i>
-                        Merged View (ce vede containerul)
+                        Merged View (What the Container Sees)
                     </h3>
                     <div class="merged-view rounded-xl p-4 border border-gray-700">
                         <div class="mono text-sm">
@@ -528,29 +605,29 @@
                 <div class="glass-panel rounded-2xl p-5 mb-6">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                         <i class="fab fa-docker text-blue-400"></i>
-                        Dockerfile → Layers
+                        Dockerfile → logical layer groups
                     </h3>
                     <div class="bg-gray-900 rounded-lg p-3 mono text-xs space-y-1">
                         <div class="dockerfile-line" data-layer="base">
                             <span class="text-purple-400">FROM</span> <span class="text-green-400">ubuntu:22.04</span>
-                            <span class="text-gray-500 ml-2"># Layer 1</span>
+                            <span class="text-gray-500 ml-2"># Group 1: base image layers</span>
                         </div>
                         <div class="dockerfile-line" data-layer="system">
-                            <span class="text-purple-400">RUN</span> apt-get update && apt-get install python3
-                            <span class="text-gray-500 ml-2"># Layer 2</span>
+                            <span class="text-purple-400">RUN</span> apt-get update &amp;&amp; apt-get install -y --no-install-recommends python3 python3-venv &amp;&amp; python3 -m venv /opt/venv
+                            <span class="text-gray-500 ml-2"># Group 2: system tools</span>
                         </div>
                         <div class="dockerfile-line" data-layer="deps">
-                            <span class="text-purple-400">RUN</span> pip install -r requirements.txt
-                            <span class="text-gray-500 ml-2"># Layer 3</span>
+                            <span class="text-purple-400">COPY</span> requirements.txt /tmp/requirements.txt<br><span class="text-purple-400">RUN</span> /opt/venv/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt
+                            <span class="text-gray-500 ml-2"># Group 3: COPY and RUN layers</span>
                         </div>
                         <div class="dockerfile-line" data-layer="app">
                             <span class="text-purple-400">COPY</span> app/ /app
-                            <span class="text-gray-500 ml-2"># Layer 4</span>
+                            <span class="text-gray-500 ml-2"># Group 4: application files</span>
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-lightbulb text-amber-400 mr-1"></i>
-                        Fiecare RUN/COPY create un new layer!
+                        RUN and COPY generally add filesystem layers; each displayed group may contain more than one actual image layer. Supply requirements.txt and app/ in the build context. The application entry point must be specified separately.
                     </p>
                 </div>
                 
@@ -586,13 +663,13 @@
             </h3>
             
             <p class="text-sm text-gray-400 mb-4">
-                Multiple containere din aceeasi imagine partajeaza layerele read-only, economisind spatiu pe disk!
+                Containers using the same local image can share its read-only layers, reducing duplicated image storage.
             </p>
             
             <div class="grid grid-cols-2 gap-6">
                 <!-- Containers -->
                 <div>
-                    <p class="text-sm text-gray-400 mb-3">10 Containere din aceeasi imagine:</p>
+                    <p class="text-sm text-gray-400 mb-3">10 Containers from the Same Image:</p>
                     <div class="flex flex-wrap gap-2 mb-4">
                         <div class="container-instance w-16 h-16 rounded-lg bg-amber-500/20 border border-amber-500/50 flex flex-col items-center justify-center">
                             <i class="fas fa-cube text-amber-400"></i>
@@ -645,7 +722,7 @@
                         
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-400">Cu layer sharing:</span>
+                                <span class="text-gray-400">With Layer Sharing:</span>
                                 <span class="text-emerald-400 font-bold">~450 MB</span>
                             </div>
                             <div class="efficiency-bar">
@@ -670,6 +747,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             rwFiles: [],
@@ -740,20 +853,7 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function findFileLayer(path) {
-            // Check R/W layer first
-            if (state.rwFiles.includes(path) || state.modifiedFiles.includes(path)) {
-                return 'rw';
-            }
-            
-            // Check whiteout
-            if (state.whiteoutFiles.includes(path)) {
-                return null; // File deleted
-            }
-            
-            // Check read-only layers
-            return fileLocations[path] || null;
-        }
+        function findFileLayer(path) { state.entries=state.entries||{};const item=state.entries[path];if(item==='whiteout')return null;if(item==='file')return 'rw';return fileLocations[path]||null; }
 
         async function highlightLayer(layerId) {
             const layer = elements.layers[layerId];
@@ -789,7 +889,7 @@
                     elements.layers[layerId].classList.add('found');
                     
                     // Highlight file
-                    const fileItem = document.querySelector(`[data-file="${path}"]`);
+                    const fileItem = Array.from(document.querySelectorAll('[data-file]')).find(el=>el.dataset.file===path);
                     if (fileItem) {
                         fileItem.classList.add('highlighted');
                         setTimeout(() => fileItem.classList.remove('highlighted'), 1500);
@@ -806,94 +906,45 @@
         }
 
         async function performWrite(path) {
-            log(`WRITE: Modifying ${path}`, 'write');
-            
-            const originalLayer = fileLocations[path];
-            
-            if (originalLayer && !state.modifiedFiles.includes(path)) {
-                // Copy-on-Write
-                log(`  ↳ Original in ${originalLayer.toUpperCase()} layer (read-only)`, 'info');
-                log(`  ↳ Performing Copy-on-Write to R/W layer...`, 'write');
-                
-                await highlightLayer(originalLayer);
-                
-                // Animate copy
-                const fileItem = document.querySelector(`[data-file="${path}"]`);
-                if (fileItem) {
-                    fileItem.classList.add('copied');
-                    setTimeout(() => fileItem.classList.remove('copied'), 500);
-                }
-                
-                await sleep(500);
-                
-                state.modifiedFiles.push(path);
-            } else if (!state.rwFiles.includes(path) && !state.modifiedFiles.includes(path)) {
-                // New file
-                log(`  ↳ Creating new file in R/W layer`, 'write');
-                state.rwFiles.push(path);
-            }
-            
-            state.rwSize += 10;
-            updateRWLayer();
-            
-            log(`  ↳ Write complete to R/W layer`, 'success');
-            await highlightLayer('rw');
-            elements.layers.rw.classList.add('found');
-            setTimeout(() => elements.layers.rw.classList.remove('found'), 1000);
-        }
+    if(typeof path!=='string'||!path.startsWith('/')){log('Use an absolute model path.','error');return;}
+    state.entries=state.entries||{};const was=findFileLayer(path);state.entries[path]='file';
+    log(`WRITE ${enosEscape(path)}: ${was&&was!=='rw'?'copy up from '+was:was==='rw'?'replace existing upper file':'create/recreate upper file'}`,'write');
+    document.querySelectorAll('[data-file]').forEach(el=>{if(el.dataset.file===path)el.classList.remove('whiteout');});
+    updateRWLayer();await highlightLayer('rw');
+}
 
         async function performDelete(path) {
-            log(`DELETE: Removing ${path}`, 'delete');
-            
-            const originalLayer = fileLocations[path];
-            
-            if (originalLayer) {
-                log(`  ↳ Original in ${originalLayer.toUpperCase()} layer (read-only)`, 'info');
-                log(`  ↳ Cannot delete from read-only layer!`, 'error');
-                log(`  ↳ Creating WHITEOUT marker in R/W layer...`, 'delete');
-                
-                state.whiteoutFiles.push(path);
-                
-                // Mark original as whiteout visually
-                const fileItem = document.querySelector(`[data-file="${path}"]`);
-                if (fileItem) {
-                    fileItem.classList.add('whiteout');
-                }
-                
-                state.rwSize += 1;
-                updateRWLayer();
-                
-                log(`  ↳ Whiteout created - file hidden from merged view`, 'success');
-            } else if (state.rwFiles.includes(path)) {
-                state.rwFiles = state.rwFiles.filter(f => f !== path);
-                updateRWLayer();
-                log(`  ↳ File removed from R/W layer`, 'success');
-            } else {
-                log(`  ↳ File not found!`, 'error');
-            }
-            
-            await highlightLayer('rw');
-        }
+    state.entries=state.entries||{};if(!findFileLayer(path)){log('No visible file at '+enosEscape(path),'info');return;}
+    if(fileLocations[path])state.entries[path]='whiteout';else delete state.entries[path];
+    log('DELETE '+enosEscape(path)+': '+(fileLocations[path]?'upper copy removed; lower hidden by whiteout':'upper-only file removed'),'delete');
+    document.querySelectorAll('[data-file]').forEach(el=>{if(el.dataset.file===path)el.classList.toggle('whiteout',!!fileLocations[path]);});
+    updateRWLayer();await highlightLayer('rw');
+}
 
         function updateRWLayer() {
-            elements.rwSize.textContent = state.rwSize + ' MB';
+            state.entries=state.entries||{};
+            state.rwFiles=Object.keys(state.entries).filter(p=>state.entries[p]==='file'&&!fileLocations[p]);
+            state.modifiedFiles=Object.keys(state.entries).filter(p=>state.entries[p]==='file'&&fileLocations[p]);
+            state.whiteoutFiles=Object.keys(state.entries).filter(p=>state.entries[p]==='whiteout');
+            state.rwSize=state.rwFiles.length+state.modifiedFiles.length;
+            elements.rwSize.textContent=state.rwSize+' upper file(s); '+state.whiteoutFiles.length+' whiteout(s)';
             
             let html = '';
             
             // New files
             for (const file of state.rwFiles) {
-                html += `<div class="file-item" data-file="${file}">
+                html += `<div class="file-item" data-file="${enosEscape(file)}">
                     <i class="fas fa-file-plus text-green-400"></i>
-                    <span class="text-green-300">${file}</span>
+                    <span class="text-green-300">${enosEscape(file)}</span>
                     <span class="text-xs text-green-500">(new)</span>
                 </div>`;
             }
             
             // Modified files
             for (const file of state.modifiedFiles) {
-                html += `<div class="file-item" data-file="${file}">
+                html += `<div class="file-item" data-file="${enosEscape(file)}">
                     <i class="fas fa-file-edit text-amber-400"></i>
-                    <span class="text-amber-300">${file}</span>
+                    <span class="text-amber-300">${enosEscape(file)}</span>
                     <span class="text-xs text-amber-500">(modified)</span>
                 </div>`;
             }
@@ -902,13 +953,13 @@
             for (const file of state.whiteoutFiles) {
                 html += `<div class="file-item">
                     <i class="fas fa-file-times text-pink-400"></i>
-                    <span class="text-pink-300 line-through">${file}</span>
+                    <span class="text-pink-300 line-through">${enosEscape(file)}</span>
                     <span class="text-xs text-pink-500">(whiteout)</span>
                 </div>`;
             }
             
             if (!html) {
-                html = '<div class="text-gray-500 text-xs italic">No modifiedions yet</div>';
+                html = '<div class="text-gray-500 text-xs italic">No modifications yet</div>';
             }
             
             elements.rwFiles.innerHTML = html;
@@ -923,7 +974,7 @@
             for (const file of state.rwFiles) {
                 html += `<div class="flex items-center gap-2 text-amber-300">
                     <i class="fas fa-file-plus text-amber-400"></i>
-                    <span>${file.split('/').pop()}</span>
+                    <span>${enosEscape(file.split('/').pop())}</span>
                     <span class="text-xs text-amber-500">(new in R/W)</span>
                 </div>`;
             }
@@ -931,7 +982,7 @@
             for (const file of state.modifiedFiles) {
                 html += `<div class="flex items-center gap-2 text-amber-300">
                     <i class="fas fa-file-edit text-amber-400"></i>
-                    <span>${file.split('/').pop()}</span>
+                    <span>${enosEscape(file.split('/').pop())}</span>
                     <span class="text-xs text-amber-500">(modified in R/W)</span>
                 </div>`;
             }
@@ -940,6 +991,8 @@
         }
 
         function reset() {
+            enosTimers.cancel();
+            state.entries = {};
             state.rwFiles = [];
             state.whiteoutFiles = [];
             state.modifiedFiles = [];
@@ -1022,6 +1075,27 @@
 
         // Initialize
         log('OverlayFS visualization ready', 'success');
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

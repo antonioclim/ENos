@@ -5,6 +5,8 @@
 
 ---
 
+> **Technical and assessment status:** starter TODOs remain exercises and must not be mistaken for completed implementations. Verify only owned fixtures. Local point values and schedules are author proposals; see [TEACHING_CONTRACT.md](TEACHING_CONTRACT.md).
+
 ## About Sprint Exercises
 
 Short exercises (5-10 minutes) for rapid practice. Each exercise:
@@ -77,7 +79,7 @@ Write a script that creates a temporary directory and deletes it automatically o
 # On exit (normal or Ctrl+C), directory disappears
 
 # Verification:
-ls /tmp/sprint_*  # Doesn't exist
+# Check the exact OWNED_DIR printed by this run, never a shared /tmp glob.
 ```
 
 ### Starter Template
@@ -86,8 +88,9 @@ ls /tmp/sprint_*  # Doesn't exist
 #!/bin/bash
 set -euo pipefail
 
-# TODO: Create temporary directory
+# Initialise before registering cleanup; allocate only after installing EXIT.
 TEMP_DIR=
+# TODO: Define cleanup, register EXIT and INT/TERM exit handlers, then call mktemp -d
 
 # TODO: Define cleanup function
 
@@ -95,7 +98,7 @@ TEMP_DIR=
 # TODO: Set trap
 
 
-echo "Temporary directory: $TEMP_DIR"
+printf 'OWNED_DIR=%s\n' "$TEMP_DIR"
 echo "Press Ctrl+C or wait 5 seconds..."
 sleep 5
 echo "Normal termination"
@@ -103,19 +106,7 @@ echo "Normal termination"
 
 ### Verification
 
-```bash
-# Run the script
-./sprint1.sh &
-PID=$!
-sleep 2
-# Check directory exists
-ls /tmp/sprint_* 2>/dev/null && echo "OK: Dir exists"
-# Send SIGINT
-kill -INT $PID
-sleep 1
-# Check directory disappeared
-ls /tmp/sprint_* 2>/dev/null || echo "OK: Cleaned up"
-```
+Use the exact-path child fixture in the instructor guide. It waits for the child's `OWNED_DIR=...` readiness record, checks that path exists, sends TERM to the owned child, waits for exit 143 and checks that the same path has disappeared. Background SIGINT can be inherited as ignored; globbing `/tmp/sprint_*` proves neither ownership nor cleanup. SIGKILL and host loss cannot run traps.
 
 ---
 
@@ -162,7 +153,7 @@ CONFIG_FILE="${1:-config.conf}"
 ```
 
 ### Hint
-Use `grep -v "^#\|^$"` to filter comments and empty lines.
+Treat the file as literal data. Use `while IFS= read -r line || [[ -n $line ]]`, trim surrounding whitespace, skip comments/empty lines and validate the allowed keys. A comment-only file is a valid empty result, not an error from `grep` returning 1. Never `source` or `eval` an untrusted configuration.
 
 ---
 
@@ -246,7 +237,7 @@ PROCESS_NAME="${1:-}"
 ```
 
 ### Hint
-`pgrep -x "$PROCESS_NAME"` finds processes exactly by name.
+`pgrep -x` matches a whole process-name regular expression, not a literal string. Escape regular-expression metacharacters for a literal-name contract. Status 1 means no match; status 2 or higher is an error. Process observations can race with process exit.
 
 ---
 
@@ -284,7 +275,7 @@ THRESHOLD="${2:-90}"
 ```
 
 ### Hint
-`df -h "$MOUNT_POINT" | awk 'NR==2 {print $5}' | tr -d '%'`
+Capture `LC_ALL=C df -P -- "$MOUNT_POINT"` and check its status first. Validate the extracted percentage and the 0–100 threshold before numeric comparison. Use the maintained `get_disk_usage` helper; missing data is unavailable, never a healthy 0%.
 
 ---
 
@@ -333,8 +324,8 @@ Check if a URL responds with HTTP 200.
 ### Requirement
 
 ```bash
-./sprint7.sh https://google.com
-# Output: OK: https://google.com responded with 200
+./sprint7.sh http://fixture.invalid/health # use the local mock; no network
+# Output: OK: fixture response was 200
 
 ./sprint7.sh https://nonexistent.invalid
 # Output: FAIL: https://nonexistent.invalid did not respond
@@ -358,7 +349,7 @@ URL="${1:-}"
 ```
 
 ### Hint
-`curl -s -o /dev/null -w "%{http_code}" "$URL"` returns the HTTP code.
+Capture `curl --silent --show-error --connect-timeout 2 --max-time 5 --output /dev/null --write-out "%{http_code}" -- "$URL"` in `if`. Transport failure is distinct from a non-200 HTTP status. Test 200, 404, timeout and malformed status with `scripts/examples/mock_curl.py`; do not send requests to public endpoints as a test default.
 
 ---
 
@@ -370,6 +361,7 @@ Implement file rotation (keep the last N).
 ### Requirement
 
 ```bash
+# Fixture has ten INDEPENDENT archives with strictly increasing mtimes. Names alone do not establish age.
 # If we have: backup_1.tar backup_2.tar ... backup_10.tar
 ./sprint8.sh /backups "backup_*.tar" 5
 # Keeps: backup_6.tar ... backup_10.tar
@@ -402,7 +394,7 @@ KEEP="${3:-5}"
 ```
 
 ### Hint
-`ls -t` sorts by time (newest first).
+Use a NUL-delimited, checked enumeration of regular files and a deterministic mtime/name sort, or Python Path/stat sorting. Do not parse `ls` output. Test empty directories, KEEP=0, equal mtimes, spaces/newlines and failed unlink. This exercise rotates independent files; incremental Backup requires ancestor-aware graph retention.
 
 ---
 
@@ -413,39 +405,41 @@ Configure automated backup using cron and understand the scheduling syntax.
 
 ### Context
 
-Last semester, a student set up a "daily" backup but accidentally scheduled it to run every minute. The disk filled up in 3 hours. Don't be that student.
+Historical author anecdote (date and evidence not supplied): a daily backup was reportedly scheduled every minute and filled a disk in three hours. Treat this as a scenario for checking a schedule, not a verified empirical result.
 
 ### Task
 
 1. Create a backup script:
    ```bash
    #!/bin/bash
-   # /usr/local/bin/daily_backup.sh
+   # Save in an owned exercise directory; configure paths explicitly.
    set -euo pipefail
    
-   LOG="/var/log/backup.log"
-   BACKUP_DIR="/var/backups"
-   SOURCE="/home/user/important"
+   : "${DEMO_ROOT:?Set an absolute owned exercise directory}"
+   LOG="$DEMO_ROOT/backup.log"
+   BACKUP_DIR="$DEMO_ROOT/backups"
+   SOURCE="$DEMO_ROOT/source"
+   [[ -d $BACKUP_DIR && -d $SOURCE ]] || exit 1
    
    echo "[$(date -Iseconds)] Starting backup" >> "$LOG"
    
    # Create timestamped backup
-   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-   tar -czf "${BACKUP_DIR}/backup_${TIMESTAMP}.tar.gz" "$SOURCE" 2>> "$LOG"
+   stage=$(mktemp "$BACKUP_DIR/.partial.XXXXXX")
+   trap 'rm -f -- "$stage"' EXIT
+   tar -czf "$stage" -C "$SOURCE" . 2>> "$LOG"
+   mv -- "$stage" "${stage/.partial./backup_}.tar.gz"
    
    echo "[$(date -Iseconds)] Backup complete" >> "$LOG"
    ```
 
-2. Add cron entry for 02:30 daily. Fill in the blanks:
-   ```bash
-   # Edit crontab
-   crontab -e
-   
-   # Add this line (what's the correct format?)
-   ___  ___  *  *  *  /usr/local/bin/daily_backup.sh
+2. Draft a cron entry for 02:30 daily; do not install it during this exercise. Fill in the blanks and expand the absolute paths for the intended host:
+   ```cron
+   MAILTO=""
+   # Interpreter, script and owned workspace paths must be explicit.
+   ___  ___  *  *  *  DEMO_ROOT=/absolute/owned/demo /bin/bash /absolute/owned/daily_backup.sh
    ```
 
-3. Verify cron is running:
+3. Optional read-only checks on a host whose cron service is available:
    ```bash
    systemctl status cron
    crontab -l
@@ -453,8 +447,10 @@ Last semester, a student set up a "daily" backup but accidentally scheduled it t
 
 ### Expected Answer
 ```
-30 2 * * * /usr/local/bin/daily_backup.sh
+30 2 * * * DEMO_ROOT=/absolute/owned/demo /bin/bash /absolute/owned/daily_backup.sh
 ```
+
+Times use the cron host timezone unless the selected implementation explicitly supports a configured timezone. Daylight-saving transitions can skip or repeat local times. A valid expression does not prove daemon execution, permissions or successful backup.
 
 ### Cron Format Reference
 ```
@@ -498,54 +494,79 @@ Answer: _______________
 ### Sprint 1
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-TEMP_DIR=$(mktemp -d /tmp/sprint_XXXXX)
-cleanup() { rm -rf "$TEMP_DIR"; echo "Cleaned: $TEMP_DIR"; }
-trap cleanup EXIT INT TERM
-echo "Dir: $TEMP_DIR"; sleep 5
+TEMP_DIR=
+cleanup() { [[ -z ${TEMP_DIR:-} ]] || rm -rf -- "$TEMP_DIR"; }
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+TEMP_DIR=$(mktemp -d)
+printf 'OWNED_DIR=%s\n' "$TEMP_DIR"
+sleep 5
 ```
 
 ### Sprint 2
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-CONFIG_FILE="${1:?Usage: $0 config_file}"
-[[ -f "$CONFIG_FILE" ]] || { echo "Not found: $CONFIG_FILE"; exit 1; }
-grep -v "^#\|^$" "$CONFIG_FILE"
+CONFIG_FILE=${1:?Usage: script config_file}
+[[ -r $CONFIG_FILE && -f $CONFIG_FILE ]] || { printf 'Unreadable configuration\n' >&2; exit 1; }
+while IFS= read -r line || [[ -n $line ]]; do
+    line=${line#"${line%%[![:space:]]*}"}
+    line=${line%"${line##*[![:space:]]}"}
+    [[ -z $line || $line == \#* ]] && continue
+    if [[ $line =~ ^(BACKUP_DIR|MAX_BACKUPS|COMPRESSION|DEBUG)=([^[:cntrl:]]*)$ ]]; then
+        printf '%s=%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+    else
+        printf 'Invalid literal setting: %s\n' "$line" >&2; exit 2
+    fi
+done < "$CONFIG_FILE"
 ```
 
 ### Sprint 3
 
 ```bash
 log() {
-    local level="$1" message="$2"
-    [[ ${LEVELS[$level]}  -ge ${LEVELS[$LOG_LEVEL]} ]] || return 0
-    printf "[%s] [%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$level" "$message"
+    [[ $# == 2 ]] || return 2
+    local level=$1 message=$2
+    [[ ${LEVELS[$level]+yes} && ${LEVELS[${LOG_LEVEL:-}]+yes} ]] || return 2
+    ((${LEVELS[$level]} >= ${LEVELS[$LOG_LEVEL]})) || return 0
+    printf '[%s] [%s] %s\n' "$(date -u +%FT%TZ)" "$level" "$message" >&2
 }
 ```
 
 ### Sprint 4
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-[[ -n "${1:-}" ]] || { echo "Usage: $0 process_name"; exit 1; }
-PIDS=$(pgrep -x "$1" 2>/dev/null) || { echo "Process '$1' not running"; exit 1; }
-echo "Process '$1' running (PID: $(echo $PIDS | tr '\n' ' '))"
+[[ $# == 1 && -n $1 ]] || { printf 'Usage: script literal_process_name\n' >&2; exit 2; }
+pattern=$(printf '%s' "$1" | sed 's/[][\.^$*+?(){}|]/\\&/g')
+if pids=$(pgrep -x -- "$pattern"); then
+    printf 'Process %s running; PIDs: %s\n' "$1" "${pids//$'\n'/, }"
+else
+    status=$?
+    if ((status == 1)); then printf 'Process %s not running\n' "$1"; exit 1; fi
+    printf 'Process query failed (%s)\n' "$status" >&2; exit 2
+fi
 ```
 
 ### Sprint 5
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-USAGE=$(df "$1" | awk 'NR==2 {print $5}' | tr -d '%')
-if [[ $USAGE -ge $2 ]]; then
-    echo "ALERT: $1 at ${USAGE}% (threshold: $2%)"; exit 1
+[[ $# == 2 && $2 =~ ^[0-9]{1,3}$ ]] || exit 2
+threshold=$((10#$2)); ((threshold <= 100)) || exit 2
+SEM06_DIR=$(realpath -- SEM06)
+source "$SEM06_DIR/scripts/examples/monitor_examples.sh"
+if usage=$(get_disk_usage "$1"); then :; else printf 'Disk sample unavailable\n' >&2; exit 2; fi
+if ((usage >= threshold)); then
+    printf 'ALERT: %s at %s%% (threshold: %s%%)\n' "$1" "$usage" "$threshold"; exit 1
 fi
-echo "OK: $1 at ${USAGE}%"
+printf 'OK: %s at %s%%\n' "$1" "$usage"
 ```
 
 ### Sprint 9

@@ -1,15 +1,15 @@
-/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+<!-- Historical source annotation, preserved as provenance: /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */ -->
 
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interrupt Flow Visualizer - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Interrupt Flow Visualiser - Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Outfit', sans-serif;
@@ -127,14 +127,91 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(5px); }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent">
-                <i class="fas fa-bolt mr-3"></i>Interrupt Flow Visualizer
+                <i class="fas fa-bolt mr-3"></i>Interrupt Flow Visualiser
             </h1>
             <p class="text-gray-400 text-lg">From interrupt arrival to execution return</p>
         </header>
@@ -193,7 +270,7 @@
                     <div id="stack-view" class="space-y-1 mono text-xs min-h-[150px]">
                         <div class="text-center text-gray-500 py-8">
                             <i class="fas fa-inbox text-2xl mb-2"></i>
-                            <div>Stack gol</div>
+                            <div>Empty stack</div>
                         </div>
                     </div>
                 </div>
@@ -276,15 +353,15 @@
                         <div id="step-5" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
                             <div class="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-400 font-bold shrink-0">5</div>
                             <div>
-                                <div class="font-semibold text-blue-400">Switch la Kernel Mode</div>
-                                <div class="text-sm text-gray-400">Mode bit: 1 → 0, acum CPU are privilegii complete</div>
+                                <div class="font-semibold text-blue-400">Switch to Kernel Mode</div>
+                                <div class="text-sm text-gray-400">Mode bit: 1 → 0; the CPU enters the model’s privileged mode</div>
                             </div>
                         </div>
                         
                         <div id="step-6" class="step-card p-3 rounded-xl bg-gray-800/30 border border-gray-700 flex items-start gap-3">
                             <div class="w-8 h-8 rounded-full bg-cyan-600/30 flex items-center justify-center text-cyan-400 font-bold shrink-0">6</div>
                             <div>
-                                <div class="font-semibold text-cyan-400">Jump la Handler</div>
+                                <div class="font-semibold text-cyan-400">Jump to Handler</div>
                                 <div class="text-sm text-gray-400">PC = address from IVT, begins handler execution</div>
                             </div>
                         </div>
@@ -438,11 +515,11 @@
         <!-- Info Section -->
         <div class="mt-6 glass-panel rounded-2xl p-6">
             <h3 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-info-circle mr-2 text-blue-400"></i>Concepte Cheie
+                <i class="fas fa-info-circle mr-2 text-blue-400"></i>Key Concepts
             </h3>
             <div class="grid md:grid-cols-3 gap-4 text-sm">
                 <div class="bg-gray-800/30 rounded-xl p-4">
-                    <h4 class="font-semibold text-amber-400 mb-2">Asincron vs Sincron</h4>
+                    <h4 class="font-semibold text-amber-400 mb-2">Asynchronous vs Synchronous</h4>
                     <p class="text-gray-400"><strong>Hardware IRQ</strong> = asynchronous (anytime). <strong>Exceptions/Traps</strong> = synchronous (caused by current instruction).</p>
                 </div>
                 <div class="bg-gray-800/30 rounded-xl p-4">
@@ -463,6 +540,42 @@
     </div>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         let isAnimating = false;
         let currentStep = 0;
@@ -491,7 +604,7 @@
                 'return': 'text-green-400'
             };
             const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = colors[type] || 'text-gray-300';
             entry.innerHTML = `<span class="text-gray-600">[${time}]</span> ${message}`;
             log.appendChild(entry);
@@ -583,7 +696,7 @@
             if (stackContent.length === 0) {
                 view.innerHTML = `<div class="text-center text-gray-500 py-8">
                     <i class="fas fa-inbox text-2xl mb-2"></i>
-                    <div>Stack gol</div>
+                    <div>Empty stack</div>
                 </div>`;
                 return;
             }
@@ -610,6 +723,7 @@
 
         // Reset all
         function resetAll() {
+            enosTimers.cancel();
             currentStep = 0;
             clearStack();
             document.querySelectorAll('.step-card').forEach(card => {
@@ -625,9 +739,7 @@
         // Main interrupt simulation
         async function triggerInterrupt(type) {
             if (isAnimating) return;
-            isAnimating = true;
-            
-            resetAll();
+            resetAll();isAnimating = true;try{
             const speed = getSpeed();
             
             const handlers = {
@@ -647,12 +759,12 @@
             
             // Step 2: Finish current instruction
             highlightStep(2);
-            logStatus('CPU completes current instruction...', 'info');
+            logStatus(type==='pagefault'?'Synchronous fault: save the faulting instruction address for retry.':'Asynchronous interrupt or INT: save the next instruction address.', 'info');
             await delay(speed);
             
             // Step 3: Save to stack
             highlightStep(3);
-            logStatus('Automatic save to stack (hardware)...', 'save');
+            logStatus('Simplified saved-context record; this is not the complete x86 privilege-transition frame.', 'save');
             await delay(speed / 2);
             
             pushStack('FLAGS', savedContext.flags);
@@ -660,7 +772,7 @@
             pushStack('CS', savedContext.cs);
             await delay(speed / 3);
             pushStack('PC (ret)', savedContext.pc);
-            updateRegister('sp', '0x7FFF00F4');
+            updateRegister('sp', 'kernel stack');
             logStatus('FLAGS, CS, PC → Stack', 'save');
             await delay(speed);
             
@@ -713,7 +825,7 @@
             await delay(speed);
             highlightStep(9); // Clear all highlights
             
-            isAnimating = false;
+            } finally {isAnimating=false;}
         }
 
         // Show interrupt type tab
@@ -732,6 +844,27 @@
 
         // Initialize
         logStatus('🖥️ Simulator ready', 'info');
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

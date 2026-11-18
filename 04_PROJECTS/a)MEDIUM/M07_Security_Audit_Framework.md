@@ -63,7 +63,7 @@ Modular framework for Linux security auditing: file permission verification, ins
 
 ## CLI Interface
 
-```bash
+```text
 ./security_audit.sh <command> [options]
 
 Commands:
@@ -134,7 +134,7 @@ AUDIT SUMMARY
   1. Edit /etc/ssh/sshd_config
   2. Set: PermitRootLogin no
   3. Ensure you have another admin user with sudo
-  4. Run: systemctl restart sshd
+  4. Validate with `sshd -t`, check effective configuration for the intended connection, then perform an explicitly authorised reload while retaining recovery access
   
   AUTO-FIX: ./security_audit.sh fix CRIT-001
 
@@ -180,7 +180,7 @@ AUDIT SUMMARY
   REMEDIATION:
   1. Ensure SSH keys are configured for all users
   2. Set: PasswordAuthentication no
-  3. Restart: systemctl restart sshd
+  3. Validate and perform an explicitly authorised reload with recovery access
 
 ... [continued] ...
 
@@ -284,20 +284,23 @@ M07_Security_Audit_Framework/
 
 ```bash
 check_empty_passwords() {
-    echo "Checking for empty passwords..."
-    
+    local passwd_file="${PASSWD_FILE:-/etc/passwd}" shadow_file="${SHADOW_FILE:-/etc/shadow}"
+    [[ -r "$passwd_file" ]] || return 2
+    local user pass row shadow_pass
     while IFS=: read -r user pass _; do
-        if [[ "$pass" == "" || "$pass" == "!" || "$pass" == "*" ]]; then
-            continue  # Locked or no password set (OK for system accounts)
-        fi
-        
-        # Check if password field is empty in shadow
-        shadow_pass=$(sudo grep "^${user}:" /etc/shadow | cut -d: -f2)
-        
-        if [[ -z "$shadow_pass" || "$shadow_pass" == "" ]]; then
-            report_finding "CRIT" "USER-001" "User '$user' has empty password"
-        fi
-    done < /etc/passwd
+        case "$pass" in
+            '' ) report_finding CRIT USER-001 "User '$user' has an empty UNIX password field"; continue ;;
+            '!'*|'*'*) continue ;;  # Locked UNIX password; other authentication may remain possible.
+            x)
+                [[ -r "$shadow_file" ]] || { report_finding INFO USER-UNAVAILABLE "Shadow unavailable; '$user' not checked"; continue; }
+                row=$(awk -F: -v name="$user" '$1==name {print; found=1; exit} END {if(!found) exit 1}' "$shadow_file") || {
+                    report_finding INFO USER-UNAVAILABLE "No shadow entry for '$user'"; continue;
+                }
+                IFS=: read -r _ shadow_pass _ <<< "$row"
+                [[ -n "$shadow_pass" ]] || report_finding CRIT USER-001 "User '$user' has an empty UNIX password field"
+                ;;
+        esac
+    done < "$passwd_file"
 }
 
 check_uid_zero() {
@@ -311,18 +314,22 @@ check_uid_zero() {
 }
 
 check_password_expiry() {
-    local max_days=90
-    local today
-    today=$(date +%s)
-    
-    while IFS=: read -r user _ _ _ _ _ expire _; do
-        [[ -z "$expire" || "$expire" == "" ]] && continue
-        
-        local expire_date=$((expire * 86400))
-        if ((expire_date < today)); then
-            report_finding "HIGH" "USER-003" "User '$user' password expired"
+    local shadow_file="${SHADOW_FILE:-/etc/shadow}" today
+    [[ -r "$shadow_file" ]] || { report_finding INFO USER-UNAVAILABLE "Shadow unavailable; expiry not checked"; return 2; }
+    today=$(( $(date +%s) / 86400 ))
+    local user hash changed minimum maximum warning inactive account_expiry reserved
+    while IFS=: read -r user hash changed minimum maximum warning inactive account_expiry reserved; do
+        case "$hash" in '!'*|'*'*) continue;; esac
+        if [[ $changed =~ ^[0-9]+$ && $maximum =~ ^[0-9]+$ ]] && ((maximum > 0 && maximum < 99999)); then
+            if ((changed == 0 || today > changed + maximum)); then
+                report_finding HIGH USER-003 "User '$user' UNIX password expired or requires change"
+            fi
         fi
-    done < <(sudo cat /etc/shadow)
+        if [[ $account_expiry =~ ^[0-9]+$ ]] && ((account_expiry > 0 && today >= account_expiry)); then
+            report_finding HIGH USER-004 "User '$user' account expiration date reached"
+        fi
+        # Field 7 is inactivity after password expiry, not an epoch expiration date.
+    done < "$shadow_file"
 }
 ```
 
@@ -332,9 +339,15 @@ check_password_expiry() {
 check_world_writable() {
     echo "Checking for world-writable files..."
     
-    find / -xdev -type f -perm -0002 2>/dev/null | while read -r file; do
+    local plan file
+    plan=$(mktemp) || return 2
+    if ! find "${AUDIT_ROOT:?Choose an authorised audit root}" -xdev -type f -perm -0002 -print0 > "$plan"; then
+        rm -f -- "$plan"; return 2
+    fi
+    while IFS= read -r -d '' file; do
         report_finding "HIGH" "FILE-001" "World-writable file: $file"
-    done
+    done < "$plan"
+    rm -f -- "$plan"
 }
 
 check_suid_sgid() {
@@ -342,13 +355,20 @@ check_suid_sgid() {
     
     echo "Checking SUID/SGID binaries..."
     
-    find / -xdev \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null | while read -r file; do
+    [[ -r "$baseline" ]] || return 2
+    local plan file
+    plan=$(mktemp) || return 2
+    if ! find "${AUDIT_ROOT:?Choose an authorised audit root}" -xdev \( -perm -4000 -o -perm -2000 \) -type f -print0 > "$plan"; then
+        rm -f -- "$plan"; return 2
+    fi
+    while IFS= read -r -d '' file; do
         if ! grep -qxF "$file" "$baseline" 2>/dev/null; then
             local perms
             perms=$(stat -c '%a' "$file")
             report_finding "HIGH" "FILE-002" "SUID/SGID binary not in baseline: $file ($perms)"
         fi
-    done
+    done < "$plan"
+    rm -f -- "$plan"
 }
 
 check_critical_files() {
@@ -363,7 +383,7 @@ check_critical_files() {
     for file in "${!expected_perms[@]}"; do
         local expected="${expected_perms[$file]}"
         local actual
-        actual=$(stat -c '%a' "$file" 2>/dev/null)
+        actual=$(stat -c '%a' "$file" 2>/dev/null) || { report_finding INFO FILE-UNAVAILABLE "Cannot inspect $file"; continue; }
         
         if [[ "$actual" != "$expected" ]]; then
             report_finding "MEDIUM" "FILE-003" \
@@ -377,32 +397,21 @@ check_critical_files() {
 
 ```bash
 check_ssh_config() {
-    local config="/etc/ssh/sshd_config"
-    
-    [[ ! -f "$config" ]] && return
-    
-    # PermitRootLogin
-    local root_login
-    root_login=$(grep -E "^PermitRootLogin" "$config" | awk '{print $2}')
-    
-    if [[ "$root_login" == "yes" ]]; then
-        report_finding "CRIT" "SSH-001" "SSH permits root login" \
-            "Set PermitRootLogin no in $config"
+    local config="${SSHD_CONFIG:-/etc/ssh/sshd_config}" effective root_login pass_auth
+    local context="${SSHD_MATCH_CONTEXT:?Provide user=...,host=...,addr=... for the assessed connection}"
+    command -v sshd >/dev/null || { report_finding INFO SSH-UNAVAILABLE "sshd unavailable"; return 2; }
+    sshd -t -f "$config" || { report_finding INFO SSH-UNAVAILABLE "Configuration could not be validated"; return 2; }
+    effective=$(sshd -T -f "$config" -C "$context") || return 2
+    root_login=$(awk '$1=="permitrootlogin" {print $2}' <<< "$effective")
+    pass_auth=$(awk '$1=="passwordauthentication" {print $2}' <<< "$effective")
+    [[ -n "$root_login" && -n "$pass_auth" ]] || return 2
+    if [[ $root_login == yes ]]; then
+        report_finding CRIT SSH-001 "Effective PermitRootLogin=yes for $context" "Review policy and alternate administrative access before changing it"
     fi
-    
-    # PasswordAuthentication
-    local pass_auth
-    pass_auth=$(grep -E "^PasswordAuthentication" "$config" | awk '{print $2}')
-    
-    if [[ "$pass_auth" != "no" ]]; then
-        report_finding "HIGH" "SSH-002" "SSH password authentication enabled" \
-            "Set PasswordAuthentication no after configuring key-based auth"
+    if [[ $pass_auth == yes ]]; then
+        report_finding HIGH SSH-002 "Effective PasswordAuthentication=yes for $context" "Review intended authentication policy; do not restart automatically"
     fi
-    
-    # Protocol (SSH 1 is insecure)
-    if grep -qE "^Protocol.*1" "$config"; then
-        report_finding "CRIT" "SSH-003" "SSH Protocol 1 enabled (insecure)"
-    fi
+    # Protocol 1 checks belong to explicitly versioned historical exercises.
 }
 ```
 
@@ -412,51 +421,31 @@ check_ssh_config() {
 declare -a FINDINGS=()
 
 report_finding() {
-    local severity="$1"
-    local id="$2"
-    local message="$3"
-    local remediation="${4:-}"
-    
-    local color
-    case "$severity" in
-        CRIT)   color="${RED}" ;;
-        HIGH)   color="${ORANGE}" ;;
-        MEDIUM) color="${YELLOW}" ;;
-        LOW)    color="${BLUE}" ;;
-        INFO)   color="${WHITE}" ;;
-    esac
-    
-    FINDINGS+=("${severity}|${id}|${message}|${remediation}")
-    
-    if [[ "$QUIET" != "true" ]]; then
-        echo -e "${color}[$severity]${NC} [$id] $message"
-    fi
+    local severity="$1" rule="$2" message="$3" remediation="${4:-}" record
+    local occurrence="${rule}-$(( ${#FINDINGS[@]} + 1 ))"
+    record=$(python3 - "$severity" "$rule" "$occurrence" "$message" "$remediation" <<'PYRECORD'
+import json, sys
+print(json.dumps(dict(zip(('severity','rule_id','id','message','remediation'), sys.argv[1:]))))
+PYRECORD
+) || return 1
+    FINDINGS+=("$record")
+    if [[ ${QUIET:-false} != true ]]; then printf '[%s] %s: %s\n' "$severity" "$occurrence" "$message" >&2; fi
+    return 0
 }
 
 generate_report() {
     local format="${1:-text}"
-    
-    case "$format" in
-        json)
-            echo "["
-            local first=true
-            for finding in "${FINDINGS[@]}"; do
-                IFS='|' read -r sev id msg rem <<< "$finding"
-                $first || echo ","
-                first=false
-                printf '  {"severity":"%s","id":"%s","message":"%s","remediation":"%s"}' \
-                    "$sev" "$id" "$msg" "$rem"
-            done
-            echo "]"
-            ;;
-        text)
-            for finding in "${FINDINGS[@]}"; do
-                IFS='|' read -r sev id msg rem <<< "$finding"
-                echo "[$sev] $id: $msg"
-                [[ -n "$rem" ]] && echo "  Remediation: $rem"
-            done
-            ;;
-    esac
+    # One JSON record per array element; JSON escapes embedded pipes/newlines/quotes.
+    printf '%s\n' "${FINDINGS[@]}" | python3 -c '
+import json, sys
+rows=[json.loads(line) for line in sys.stdin if line.strip()]
+if sys.argv[1]=="json": print(json.dumps(rows, indent=2))
+elif sys.argv[1]=="text":
+    for row in rows:
+        print("[{severity}] {id}: {message}".format(**row))
+        if row["remediation"]: print("  Remediation:", row["remediation"])
+else: raise SystemExit("Unsupported report format")
+' "$format"
 }
 ```
 

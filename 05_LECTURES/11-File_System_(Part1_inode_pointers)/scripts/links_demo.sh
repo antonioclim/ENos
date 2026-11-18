@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 set -euo pipefail
 IFS=$'\n\t'
 

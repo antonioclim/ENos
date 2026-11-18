@@ -1,8 +1,11 @@
 # Heron's Method (Babylonian) — `WHILE` Loop Implementation in Bash
 
+> **Current executable contract:** use the numbered `_EN.sh` file in this directory. Historical line numbers and Romanian output labels below describe the original teaching version, not exact current byte positions. The current code checks `bc` before input, runs with `set -euo pipefail` and passes arithmetic through `calculate`, which rejects nonzero calculator status and output that is not one numeric scalar. Bare `echo ... | bc` snippets below explain the arithmetic mechanism; the executable uses the checked wrapper. No calculator installation is performed automatically.
+
+
 ## General Overview
 
-This script computes the square root of a positive integer using **Heron's method** (also known as the Babylonian method). The chosen control structure is the `while` loop, which permits automatic termination upon reaching convergence — without imposing a fixed iteration count.
+This script computes the square root of a positive integer using **Heron's method** (also known as the Babylonian method). The chosen control structure is the `while` loop, which permits automatic termination upon reaching convergence — using an update threshold and a maximum of 1,000 iterations.
 
 The successive refinement formula is:
 
@@ -39,9 +42,9 @@ This is the **shebang** line (a contraction of *sharp* `#` and *bang* `!`). The 
 # De ce WHILE aici?
 #   WHILE repeta CAT TIMP o conditie este adevarata.
 #   Nu stim dinainte cate iteratii sunt necesare — depinde de N.
-#   Pentru N=4 converge in ~4 pasi, pentru N=1000000 poate in 20+.
+#   At scale=8 with x0=N/2: N=4 reaches the update threshold in 1 step; N=1000000 in 14.
 #   WHILE detecteaza convergenta si se opreste exact la momentul potrivit.
-#   Aceasta este varianta cea mai corecta algoritmic dintre cele trei.
+#   The current executable also checks calculator failures and caps the loop at 1000 steps.
 # =============================================================================
 ```
 
@@ -72,7 +75,7 @@ if [ -z "$N" ]; then
 fi
 ```
 
-- **`[ -z "$N" ]`** — The `-z` operator (from *zero*) tests whether the string `$N` has zero length. The double quotes around `$N` are mandatory: without them, if `N` is empty, the `[` command receives too few arguments and raises a syntax error.
+- **`[ -z "$N" ]`** — The `-z` operator (from *zero*) tests whether the string `$N` has zero length. The double quotes around `$N` are mandatory: without them, if `N` is empty, `[ -z ]` is a one-argument test of the nonempty string `-z` and succeeds; it is not a syntax error.
 - **`echo`** — Prints the error message to the screen.
 - **`exit 1`** — Terminates the script's execution with exit code `1`. By convention, code `0` signals success, whilst any non-zero value signals an error. The operating system and other scripts can read this code to decide how to proceed.
 - **`fi`** — Closes the `if` block (the word `if` spelt backwards).
@@ -253,8 +256,8 @@ The final comment block in the script underscores the fundamental difference bet
 | Criterion | `for` (fixed iterations) | `while` (convergence-driven) |
 |---|---|---|
 | Iteration count | Predetermined (e.g. 10) | Determined automatically by the algorithm |
-| Risk of too few iterations | Yes, if N is very large | None — continues until the threshold is met |
-| Risk of wasted iterations | Yes, if convergence is rapid | None — stops immediately |
+| Risk of too few iterations | Yes, if N is very large | A cap/calculator failure can stop before the threshold; report failure |
+| Risk of wasted iterations | Yes, if convergence is rapid | Stops after the computed update passes the test; calculator costs remain |
 | Code complexity | Simpler | Requires difference calculation and `break` |
 
 The challenge posed to students — "what happens if you replace `while true` with `while [ $pas -lt 3 ]`?" — targets the understanding that a fixed iteration count may prove insufficient for large values of N (sacrificing precision) or excessive for small values (wasting computation time).
@@ -299,3 +302,9 @@ The challenge posed to students — "what happens if you replace `while true` wi
      │  Display result     │
      └────────────────────┘
 ```
+
+## Numerical limits and verification scope
+
+`scale=8` (FOR/WHILE) or `scale=6` (IF) controls truncated decimal arithmetic, not a mathematical guarantee of that many correct digits. The update difference `|x_new - x|` is distinct from root error `|x - sqrt(N)|` and residual `|x² - N|`. In exact positive arithmetic, with `r = sqrt(N)`, `x_new - r = (x - r)²/(2x)`; the quadratic local convergence claim assumes `N > 0` and `x > 0`. Zero is handled separately before division. The IF labels classify the residual using the displayed illustrative thresholds; they are not an accuracy certificate for arbitrary N.
+
+The WHILE stopping-policy examples N=4 → 1 update and N=1,000,000 → 14 updates refer to the stated initial estimate, scale and threshold. They are bounded arithmetic reproductions, not a guarantee for a different precision or implementation. A missing/failing calculator must terminate with an error rather than produce a success message or an unbounded loop. The current calculator wrapper rejects multiline/wrapped or diagnostic output rather than accepting an invalid scalar; extremely large input can therefore be rejected.

@@ -1,0 +1,23 @@
+# Standalone Ruff configuration derived from linting.toml. Other tool sections stay in that reference file.
+"target-version" = "py311"
+"line-length" = 100
+"exclude" = [".git", ".venv", "__pycache__", "*.pyc", ".ruff_cache"]
+
+[lint]
+"select" = ["E", "W", "F", "I", "B", "C4", "UP", "SIM"]
+"ignore" = ["E501", "B008", "B905", "SIM108", "SIM105"]
+"fixable" = ["ALL"]
+"unfixable" = []
+
+[lint.per-file-ignores]
+"quiz_runner.py" = ["E402"]
+"*_autograder.py" = ["B904"]
+
+[lint.isort]
+"known-first-party" = ["quiz_runner", "autograder"]
+
+[format]
+"quote-style" = "double"
+"indent-style" = "space"
+"skip-magic-trailing-comma" = false
+"line-ending" = "auto"

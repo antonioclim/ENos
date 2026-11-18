@@ -1,109 +1,47 @@
-# 📁 Live Demos — SEM06
+# Demonstrations for SEM06
 
-> **Location:** `SEM06/scripts/demo/`  
-> **Purpose:** Interactive demonstrations for seminar teaching  
-> **Audience:** Instructors and students following along
+This directory is a navigation entry. The maintained examples live in
+[`../examples/`](../examples/); there is no `S06_01_hook_demo.sh`, generic
+`S06_0X_demo_topic.sh` or demo-specific colour/speed option in this directory.
 
-## Contents
+## Runnable local demonstrations
 
-| Demo | Topic | Duration |
-|------|-------|----------|
-| `S06_01_hook_demo.sh` | Attention grabber | ~3-5 min |
-
-## How to Present
-
-### Preparation
-
-1. Open terminal in fullscreen mode
-2. Increase font size: `Ctrl++` or Terminal → Preferences
-3. Consider using a dark background for visibility
-4. Read through demo script source before class
-
-### Running Demos
+From the repository root:
 
 ```bash
-# Make all executable (once)
-chmod +x *.sh
-
-# Run specific demo
-./S06_0X_demo_topic.sh
-
-# Run with explanation pauses
-bash -v ./S06_0X_demo_topic.sh
+bash SEM06/scripts/examples/owned_demos.sh snapshot
+bash SEM06/scripts/examples/owned_demos.sh release
+bash SEM06/scripts/examples/owned_demos.sh processes
+bash SEM06/scripts/examples/owned_demos.sh descriptors
 ```
 
-## Demo Descriptions
+Each mode creates an owned temporary workspace and removes only its own resources.
+The snapshot mode shows independent copies, not an incremental backup chain. The
+release mode demonstrates symlink activation in that workspace. Process and
+descriptor modes inspect only children or files created for the demonstration.
+No service account, real deployment, cron registration or visual-tool installation
+is required. Expected failures use explicit status handling; `set -e` alone is not
+a complete error-handling strategy.
 
-### S06_01_hook_demo.sh
+## Reusable teaching modules
 
-**Purpose:** Attention-grabbing opener for seminar start  
-**Duration:** ~3 minutes  
-**Visual effects:** ASCII art, colours, optional animations
+| Module | Purpose and invocation contract |
+|---|---|
+| `architecture_patterns.sh` | Sourceable factory, observer and command-history examples |
+| `monitor_examples.sh` | Sourceable validated metric and structured-output helpers |
+| `backup_examples.sh` | Sourceable archive/checksum helpers; pass owned input/output paths |
+| `deploy_strategies.sh` | Sourceable strategies with explicit caller-provided deployment/traffic hooks |
+| `test_helpers.sh`, `test_runner.sh` | Assertion helpers and a runner for an explicit test directory |
+| `mock_curl.py` | Synthetic HTTP process fixture, not an external HTTP request |
+| `retry.sh` | Bounded retries of an explicit external command |
+| `evidence_examples.py` | Allowlisted NUL environment parsing, trace records and content fingerprints |
+| `release_reference.py` | Owned release staging/activation helper used by the teaching examples |
 
-```bash
-# With full effects (requires figlet, lolcat)
-./S06_01_hook_demo.sh
+Read each module's interface and the corresponding tests before composing a new
+experiment. A sourceable helper is not an installed service or a complete student
+project. Ask learners to predict the result, run a small owned fixture, then compare
+its actual status/output with the prediction. Use shell tracing only on synthetic
+values; it may reveal arguments and secrets.
 
-# Install optional visual tools (Ubuntu)
-sudo apt install figlet lolcat cowsay
-```
-
-
-
-## Teaching Tips
-
-### For Instructors
-
-- **Read the source code first** — Comments contain teaching notes
-- **Pause at key points** — Scripts have built-in `read` pauses
-- **Encourage prediction** — Ask students what will happen before running
-- **Show failures too** — Error cases are educational
-
-### For Self-Study
-
-```bash
-# Step through manually
-bash -x ./demo_script.sh
-
-# Read with line numbers
-cat -n ./demo_script.sh | less
-```
-
-## Script Features
-
-All demo scripts include:
-
-- `set -euo pipefail` for safe error handling
-- Coloured output for visibility
-- `# TEACHING NOTE:` comments for instructors
-- Built-in pauses at demonstration points
-- Cleanup of any temporary files
-
-## Customisation
-
-### Adjusting Speed
-
-Edit the `PAUSE_DURATION` variable at script top:
-```bash
-PAUSE_DURATION=2  # seconds between steps
-```
-
-### Disabling Colours
-
-```bash
-NO_COLOR=1 ./S06_02_demo_topic.sh
-```
-
----
-
-## Related Resources
-
-- [`../bash/`](../bash/) — Utility scripts for students
-- [`../../docs/`](../../docs/) — Full documentation
-- [`../../presentations/`](../../presentations/) — Slide materials
-
----
-
-*Pro tip: Practice demos before class to ensure smooth delivery*
-
-*Last updated: January 2026*
+See [the test guide](../../tests/README.md), [teaching material](../../docs/) and
+[presentations](../../presentations/) for the classroom sequence and evidence limits.

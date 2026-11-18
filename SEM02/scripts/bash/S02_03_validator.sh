@@ -26,7 +26,7 @@ REQUIRED_FILES=(
 # Scores
 declare -A SCORES
 TOTAL_SCORE=0
-MAX_SCORE=100
+MAX_SCORE=92
 
 # Colours
 RED='\033[1;31m'
@@ -95,10 +95,10 @@ check_directory_structure() {
     for file in "${REQUIRED_FILES[@]}"; do
         if [[ -f "$HOMEWORK_DIR/$file" ]]; then
             log_pass "File found: $file"
-            ((found++))
+            found=$((found + 1))
         else
             log_fail "File missing: $file"
-            ((missing++))
+            missing=$((missing + 1))
         fi
     done
     
@@ -257,7 +257,7 @@ check_filters_exercise() {
     if grep -q '\bsort\b' "$script"; then
         log_pass "Uses sort"
         add_score "ex3" 2 "sort used"
-        ((filters_used++))
+        filters_used=$((filters_used + 1))
     fi
     
     if grep -q '\buniq\b' "$script"; then
@@ -270,25 +270,25 @@ check_filters_exercise() {
             log_warn "uniq without sort before - possibly incorrect"
             add_score "ex3" 1 "uniq used (possibly incorrect)"
         fi
-        ((filters_used++))
+        filters_used=$((filters_used + 1))
     fi
     
     if grep -q '\bcut\b' "$script"; then
         log_pass "Uses cut"
         add_score "ex3" 2 "cut used"
-        ((filters_used++))
+        filters_used=$((filters_used + 1))
     fi
     
     if grep -q '\btr\b' "$script"; then
         log_pass "Uses tr"
         add_score "ex3" 2 "tr used"
-        ((filters_used++))
+        filters_used=$((filters_used + 1))
     fi
     
     if grep -q '\bawk\b' "$script"; then
         log_pass "Uses awk (advanced)"
         add_score "ex3" 2 "awk used"
-        ((filters_used++))
+        filters_used=$((filters_used + 1))
     fi
     
     # Check pipeline
@@ -405,11 +405,11 @@ check_code_style() {
             log_pass "$file: Has comments"
         else
             log_warn "$file: Missing comments"
-            ((style_issues++))
+            style_issues=$((style_issues + 1))
         fi
         
         # Check quoted variables
-        if grep -qE '\$\w+[^"]' "$script" | grep -qvE '\$\(|for.*in' &>/dev/null; then
+        if grep -E '\$\w+[^"]' "$script" | grep -qvE '\$\(|for.*in' &>/dev/null; then
             log_warn "$file: Possible unquoted variables"
         fi
     done
@@ -428,7 +428,7 @@ generate_report() {
     
     echo ""
     echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}                    FINAL VALIDATION REPORT${NC}"
+    echo -e "${YELLOW}                    DIAGNOSTIC REPORT — POLICY PENDING${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
     
@@ -439,21 +439,9 @@ generate_report() {
     local percentage=$((TOTAL_SCORE * 100 / MAX_SCORE))
     local grade=""
     
-    if [[ $percentage -ge 90 ]]; then
-        grade="EXCELLENT (A)"
-    elif [[ $percentage -ge 80 ]]; then
-        grade="VERY GOOD (B)"
-    elif [[ $percentage -ge 70 ]]; then
-        grade="GOOD (C)"
-    elif [[ $percentage -ge 60 ]]; then
-        grade="SATISFACTORY (D)"
-    elif [[ $percentage -ge 50 ]]; then
-        grade="SUFFICIENT (E)"
-    else
-        grade="INSUFFICIENT (F)"
-    fi
-    
-    echo -e "  ${GREEN}Total Score: $TOTAL_SCORE / $MAX_SCORE ($percentage%)${NC}"
+    grade="PENDING_POLICY — diagnostic checks only; no final grade"
+
+    echo -e "  ${GREEN}Legacy diagnostic points: $TOTAL_SCORE / $MAX_SCORE ($percentage%)${NC}"
     echo -e "  ${YELLOW}Grade: $grade${NC}"
     echo ""
     
@@ -468,12 +456,12 @@ generate_report() {
     # Save report
     {
         echo "═══════════════════════════════════════════════════════════════"
-        echo "HOMEWORK VALIDATION REPORT SEMINAR 3-4"
+        echo "HOMEWORK VALIDATION REPORT SEMINAR 2"
         echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "Directory: $HOMEWORK_DIR"
         echo "═══════════════════════════════════════════════════════════════"
         echo ""
-        echo "TOTAL SCORE: $TOTAL_SCORE / $MAX_SCORE ($percentage%)"
+        echo "LEGACY DIAGNOSTIC POINTS: $TOTAL_SCORE / $MAX_SCORE ($percentage%)"
         echo "GRADE: $grade"
         echo ""
         echo "DETAILS:"
@@ -496,7 +484,7 @@ usage() {
     echo ""
     echo "Example: $0 ~/homework_seminar2"
     echo ""
-    echo "Validates homework for Seminar 3-4 and generates report."
+    echo "Validates homework for Seminar 2 and generates report."
 }
 
 main() {
@@ -506,6 +494,7 @@ main() {
     fi
     
     HOMEWORK_DIR="$1"
+    if [[ -d "$HOMEWORK_DIR/exercises" ]]; then HOMEWORK_DIR="$HOMEWORK_DIR/exercises"; fi
     
     if [[ ! -d "$HOMEWORK_DIR" ]]; then
         echo -e "${RED}Error: Directory '$HOMEWORK_DIR' does not exist${NC}"
@@ -513,7 +502,7 @@ main() {
     fi
     
     echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}       HOMEWORK VALIDATOR SEMINAR 3-4 v$VERSION${NC}"
+    echo -e "${YELLOW}       HOMEWORK VALIDATOR SEMINAR 2 v$VERSION${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
     echo -e "Validating directory: ${YELLOW}$HOMEWORK_DIR${NC}"

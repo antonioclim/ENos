@@ -79,7 +79,8 @@ log_check() {
 }
 
 verbose() {
-    [[ "$VERBOSE" == "true" ]] && echo -e "${DIM}$*${NC}"
+    if [[ "$VERBOSE" == "true" ]]; then echo -e "${DIM}$*${NC}"; fi
+    return 0
 }
 
 usage() {
@@ -185,7 +186,7 @@ check_local_variables() {
     
     # Check if local is used
     local local_count
-    local_count=$(grep -c '^\s*local\s' "$file" || echo 0)
+    local_count=$(grep -c '^\s*local\s' "$file" || true)
     
     if [[ $local_count -eq 0 ]] && [[ $func_count -gt 0 ]]; then
         log_check "fail" "No 'local' variables in $func_count functions"
@@ -219,7 +220,7 @@ check_declare_A() {
     fi
     
     local declare_A_count
-    declare_A_count=$(grep -c 'declare\s\+-A' "$file" || echo 0)
+    declare_A_count=$(grep -c 'declare\s\+-A' "$file" || true)
     
     if [[ $declare_A_count -eq 0 ]]; then
         log_check "fail" "Associative arrays without 'declare -A': $assoc_patterns"
@@ -248,7 +249,7 @@ check_quoted_arrays() {
     
     # Check for proper quoting
     local quoted_count
-    quoted_count=$(grep -c '"\${[^}]*\[@\]}"' "$file" || echo 0)
+    quoted_count=$(grep -c '"\${[^}]*\[@\]}"' "$file" || true)
     
     if [[ $quoted_count -gt 0 ]]; then
         log_check "pass" "Arrays with correct quotes ($quoted_count instances)" $WEIGHT_QUOTED_ARRAYS
@@ -317,9 +318,9 @@ check_shellcheck() {
     verbose "Running shellcheck..."
     
     local errors
-    errors=$(shellcheck -f gcc "$file" 2>&1 | grep -c ':.*error:' || echo 0)
+    errors=$(shellcheck -f gcc "$file" 2>&1 | grep -c ':.*error:' || true)
     local warnings
-    warnings=$(shellcheck -f gcc "$file" 2>&1 | grep -c ':.*warning:' || echo 0)
+    warnings=$(shellcheck -f gcc "$file" 2>&1 | grep -c ':.*warning:' || true)
     
     if [[ $errors -eq 0 ]] && [[ $warnings -eq 0 ]]; then
         log_check "pass" "shellcheck: no errors or warnings" $WEIGHT_SHELLCHECK
@@ -367,14 +368,15 @@ validate_file() {
     echo ""
     echo -e "${BOLD}Checks:${NC}"
     
-    check_shebang "$file"
-    check_strict_mode "$file"
-    check_local_variables "$file"
-    check_declare_A "$file"
-    check_quoted_arrays "$file"
-    check_trap_exit "$file"
-    check_usage_function "$file"
-    check_shellcheck "$file"
+    local failed=0
+    check_shebang "$file" || failed=1
+    check_strict_mode "$file" || failed=1
+    check_local_variables "$file" || failed=1
+    check_declare_A "$file" || failed=1
+    check_quoted_arrays "$file" || failed=1
+    check_trap_exit "$file" || failed=1
+    check_usage_function "$file" || failed=1
+    check_shellcheck "$file" || failed=1
     
     # Print results
     echo ""
@@ -391,13 +393,13 @@ validate_file() {
     local empty=$((20 - filled))
     printf "["
     if [[ $pct -ge 70 ]]; then
-        printf "${GREEN}%${filled}s${NC}" | tr ' ' '█'
+        printf "${GREEN}%${filled}s${NC}" | sed 's/ /█/g'
     elif [[ $pct -ge 50 ]]; then
-        printf "${YELLOW}%${filled}s${NC}" | tr ' ' '█'
+        printf "${YELLOW}%${filled}s${NC}" | sed 's/ /█/g'
     else
-        printf "${RED}%${filled}s${NC}" | tr ' ' '█'
+        printf "${RED}%${filled}s${NC}" | sed 's/ /█/g'
     fi
-    printf "${DIM}%${empty}s${NC}" | tr ' ' '░'
+    printf "${DIM}%${empty}s${NC}" | sed 's/ /░/g'
     printf "]\n"
     echo ""
     
@@ -430,7 +432,7 @@ validate_file() {
     fi
     
     echo ""
-    return 0
+    [[ ${#ISSUES[@]} -eq 0 && $failed -eq 0 ]]
 }
 
 # ============================================================
@@ -497,14 +499,16 @@ main() {
     echo "╚════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
     
+    local result=0
     for file in "${files[@]}"; do
-        validate_file "$file"
+        validate_file "$file" || result=1
     done
     
     if [[ ${#files[@]} -gt 1 ]]; then
         echo ""
         echo -e "${BOLD}Total files validated: ${#files[@]}${NC}"
     fi
+    return "$result"
 }
 
 main "$@"

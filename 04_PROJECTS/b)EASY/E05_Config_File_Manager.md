@@ -40,7 +40,7 @@ Develop a tool for managing configuration files: backup, restore, diff, validati
 
 ## Interface
 
-```bash
+```text
 ./config_manager.sh <command> [options]
 
 Commands:
@@ -69,6 +69,8 @@ Examples:
 
 ## Output Example
 
+These are synthetic illustrations, not measured runs or acceptance evidence.
+
 ```
 ╔══════════════════════════════════════════════════════════════════╗
 ║              CONFIG FILE MANAGER                                 ║
@@ -81,10 +83,10 @@ $ ./config_manager.sh list /etc/nginx/nginx.conf
 Ver   Date                 Size      Hash (first 8)
 ───────────────────────────────────────────────────────────────────
 v5    2025-01-20 14:30     2.3 KB    a1b2c3d4    [current]
-v4    2025-01-18 10:15     2.1 KB    e5f6g7h8
-v3    2025-01-15 09:00     2.0 KB    i9j0k1l2
-v2    2025-01-10 16:45     1.9 KB    m3n4o5p6
-v1    2025-01-05 11:20     1.8 KB    q7r8s9t0    [initial]
+v4    2025-01-18 10:15     2.1 KB    e5f607a8
+v3    2025-01-15 09:00     2.0 KB    a9b0c1d2
+v2    2025-01-10 16:45     1.9 KB    a3b4c5d6
+v1    2025-01-05 11:20     1.8 KB    e7f809a0    [initial]
 
 Total: 5 versions, 10.1 KB storage used
 
@@ -135,7 +137,7 @@ E05_Config_File_Manager/
 BACKUP_DIR="$HOME/.config_backups"
 # /etc/nginx/nginx.conf -> ~/.config_backups/etc/nginx/nginx.conf/
 # v1_20250105_112000_a1b2c3d4.conf
-# v2_20250110_164500_m3n4o5p6.conf
+# v2_20250110_164500_a3b4c5d6.conf
 
 # Hash for quick identification
 get_hash() {

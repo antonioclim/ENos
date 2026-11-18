@@ -8,6 +8,9 @@
 #
 
 set -o pipefail
+DEMO_WORK="$(mktemp -d "${TMPDIR:-/tmp}/enos-pipes.XXXXXXXX")" || exit 1
+trap 'rm -rf -- "$DEMO_WORK"' EXIT
+cd "$DEMO_WORK" || exit 1
 
 #
 # COLOUR AND STYLE CONFIGURATION
@@ -240,7 +243,7 @@ demo_pipestatus() {
     echo -e "${WHITE}Question: What is the exit code of a pipeline?${RESET}"
     echo ""
     echo "  By default: the exit code of the LAST command in the pipeline"
-    echo "  With pipefail: the first non-zero exit code"
+    echo "  With pipefail: the rightmost non-zero exit code"
     echo ""
     
     wait_for_user
@@ -248,7 +251,7 @@ demo_pipestatus() {
     print_subheader "Example: command that fails in the middle"
     
     echo -e "${YELLOW}Pipeline with error at the start:${RESET}"
-    run_with_highlight "ls /nonexistent 2>/dev/null | wc -l; echo \"Exit code: \$?\"" \
+    run_with_highlight "set +o pipefail; ls /nonexistent 2>/dev/null | wc -l; echo \"Exit code: \$?\"" \
         "ls fails, but wc succeeds, so exit=0"
     
     wait_for_user
@@ -271,7 +274,7 @@ demo_pipestatus() {
     
     print_subheader "set -o pipefail"
     
-    echo -e "${WHITE}With pipefail, the pipeline returns the first error:${RESET}"
+    echo -e "${WHITE}With pipefail, the pipeline returns the rightmost non-zero status:${RESET}"
     echo ""
     
     print_command "set -o pipefail"
@@ -378,14 +381,14 @@ EOF
     
     print_subheader "Analysis 2: Only errors (status 4xx and 5xx)"
     
-    run_with_highlight "cat $tmplog | awk '\$9 >= 400 {print \$1, \$9, \$7}'" \
+    run_with_highlight "cat $tmplog | awk '\$8 >= 400 {print \$1, \$8, \$6}'" \
         "IPs with errors, status code and URL"
     
     wait_for_user
     
     print_subheader "Analysis 3: Status code statistics"
     
-    run_with_highlight "cat $tmplog | awk '{print \$9}' | sort | uniq -c | sort -rn" \
+    run_with_highlight "cat $tmplog | awk '{print \$8}' | sort | uniq -c | sort -rn" \
         "Status code distribution"
     
     wait_for_user
@@ -487,7 +490,7 @@ demo_mistakes() {
     echo -e "${RED}❌ Variable is lost:${RESET}"
     count=0
     echo -e "a\nb\nc" | while read line; do
-        ((count++))
+        count=$((count + 1))
     done
     echo "   count = $count (expected 3!)"
     echo ""
@@ -495,7 +498,7 @@ demo_mistakes() {
     echo -e "${GREEN}✓ Solution: process substitution${RESET}"
     count=0
     while read line; do
-        ((count++))
+        count=$((count + 1))
     done < <(echo -e "a\nb\nc")
     echo "   count = $count (correct!)"
     echo ""

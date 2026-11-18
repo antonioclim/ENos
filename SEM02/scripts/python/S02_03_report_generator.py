@@ -117,11 +117,11 @@ class ResultLoader:
             data = json.load(f)
         
         return StudentResult(
-            student_name=data.get('student_name', 'Unknown'),
+            student_name=data.get('student_name') or Path(data.get('student_dir', 'Unknown')).name,
             student_group=data.get('student_group', 'Unknown'),
-            score=data.get('score', 0),
+            score=data.get('total_score', data.get('score', 0)),
             max_score=data.get('max_score', 100),
-            grade=data.get('grade', 'F'),
+            grade=data.get('assessment_status', data.get('grade', 'PENDING_POLICY')),
             timestamp=data.get('timestamp', datetime.now().isoformat()),
             categories=data.get('categories', {}),
             issues=data.get('issues', []),
@@ -138,7 +138,7 @@ class ResultLoader:
             try:
                 result = ResultLoader.load_json(str(json_file))
                 results.append(result)
-            except (json.JSONDecodeError, KeyError) as e:
+            except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
                 print(f"⚠️ Error reading {json_file}: {e}")
         
         return results
@@ -311,13 +311,14 @@ class ReportExporter:
         """Generate a text summary."""
         lines = []
         lines.append("=" * 70)
-        lines.append("  SUMMARY REPORT - Seminar 3-4 Evaluation")
+        lines.append("  SUMMARY REPORT - Seminar 2 Diagnostics")
         lines.append("  Generated: " + report.generated_at[:19].replace('T', ' '))
         lines.append("=" * 70)
         lines.append("")
         
         # General statistics
         all_scores = [r.percentage for r in report.all_results]
+        lines.append("PENDING_POLICY: descriptive diagnostics; no final grade, eligibility decision or penalty.")
         lines.append("📊 GENERAL STATISTICS")
         lines.append("-" * 40)
         lines.append(f"  Total students evaluated: {report.total_students}")
@@ -330,9 +331,9 @@ class ReportExporter:
         lines.append("")
         
         # Grade distribution
-        lines.append("📈 GRADE DISTRIBUTION")
+        lines.append("📈 ASSESSMENT STATUS / HISTORICAL LABELS")
         lines.append("-" * 40)
-        grade_order = ['A', 'B', 'C', 'D', 'E', 'F']
+        grade_order = sorted(report.grade_distribution)
         for grade in grade_order:
             count = report.grade_distribution.get(grade, 0)
             pct = count / report.total_students * 100 if report.total_students > 0 else 0
@@ -341,15 +342,15 @@ class ReportExporter:
         lines.append("")
         
         # Pass rate
-        passed = sum(report.grade_distribution.get(g, 0) for g in ['A', 'B', 'C', 'D', 'E'])
+        passed = sum(r.percentage >= 50 for r in report.all_results)
         pass_rate = passed / report.total_students * 100 if report.total_students > 0 else 0
-        lines.append(f"  Pass rate (≥50%): {pass_rate:.1f}%")
+        lines.append(f"  Records at ≥50% (descriptive): {pass_rate:.1f}%")
         lines.append("")
         
         # Statistics per group
         lines.append("👥 STATISTICS PER GROUP")
         lines.append("-" * 40)
-        lines.append(f"  {'Group':<10} {'N':>5} {'Mean':>8} {'Med.':>8} {'Min':>6} {'Max':>6} {'Pass%':>8}")
+        lines.append(f"  {'Group':<10} {'N':>5} {'Mean':>8} {'Med.':>8} {'Min':>6} {'Max':>6} {'≥50%':>8}")
         lines.append("  " + "-" * 55)
         
         for group_name, stats in sorted(report.groups.items()):
@@ -613,6 +614,7 @@ class ReportExporter:
     </style>
 </head>
 <body>
+<p role="status">PENDING_POLICY: these diagnostic points are not final grades. Assessment weights and eligibility remain open.</p>
     <div class="container">
         <div class="header">
             <h1>📊 Evaluation Report - Seminar 3-4</h1>
@@ -638,7 +640,7 @@ class ReportExporter:
             </div>
             <div class="stat-card">
                 <div class="value">{sum(1 for s in all_scores if s >= 50) / len(all_scores) * 100:.0f}%</div>
-                <div class="label">Pass Rate</div>
+                <div class="label">Records ≥50%</div>
             </div>
         </div>
         
@@ -693,7 +695,7 @@ class ReportExporter:
                     <th>Median</th>
                     <th>Min</th>
                     <th>Max</th>
-                    <th>Pass Rate</th>
+                    <th>Records ≥50%</th>
                 </tr>
 """
         
@@ -809,7 +811,7 @@ class ReportExporter:
                         borderWidth: 1
                     }},
                     {{
-                        label: 'Pass Rate (%)',
+                        label: 'Records ≥50% (%)',
                         data: groupData.pass_rates,
                         backgroundColor: 'rgba(40, 167, 69, 0.7)',
                         borderColor: '#28a745',
@@ -874,20 +876,9 @@ class ReportExporter:
         return html_content
     
     @staticmethod
-    def to_moodle_csv(report: OverallReport, filepath: str, 
-                      assignment_name: str = "Seminar 2"):
-        """Export in Moodle Gradebook compatible format."""
-        with open(filepath, 'w', encoding='utf-8', newline='') as f:
-            writer = csv.writer(f)
-            
-            # Moodle format
-            writer.writerow(['Email', 'Group', assignment_name, 'Feedback'])
-            
-            for r in report.all_results:
-                # Generate fictitious email based on name
-                email = f"{r.student_name.lower().replace(' ', '.')}@student.ase.ro"
-                feedback = f"Score: {r.score}/{r.max_score}. " + "; ".join(r.issues[:3])
-                writer.writerow([email, r.student_group, r.percentage, feedback])
+    def to_moodle_csv(report: OverallReport, filepath: str, assignment_name: str = "Seminar 2"):
+        """Grade export requires an approved policy and a verified Moodle identifier map."""
+        raise ValueError('PENDING_POLICY: no Moodle grades or identifiers are inferred from student names')
 
 # 
 # SECTION 5: COMPARISON BETWEEN EVALUATIONS
@@ -978,7 +969,7 @@ Usage examples:
         """
     )
     
-    parser.add_argument('--input', '-i', required=True,
+    parser.add_argument('--input', '-i',
                         help='JSON/CSV file or directory with results')
     parser.add_argument('--format', '-f',
                         choices=['txt', 'html', 'csv', 'moodle', 'all'],
@@ -1000,6 +991,31 @@ Usage examples:
     if not args.quiet:
         print_banner()
     
+    if args.compare:
+        def load_set(path):
+            source = Path(path)
+            if source.is_dir():
+                return ResultLoader.load_directory(path)
+            if source.suffix == '.json':
+                return [ResultLoader.load_json(path)]
+            return ResultLoader.load_csv(path)
+        progress = ComparisonAnalyzer(*(load_set(p) for p in args.compare)).analyze_progress()
+        content = json.dumps(progress, ensure_ascii=False, indent=2)
+        if args.format == 'html' or (args.output and Path(args.output).suffix == '.html'):
+            from html import escape
+            content = '<!doctype html><html lang="en"><meta charset="utf-8"><title>Progress comparison</title><h1>Progress comparison</h1><pre>' + escape(content) + '</pre></html>'
+        elif args.format not in ('txt', 'all'):
+            parser.error('Comparison supports txt (JSON summary) or html output')
+        if args.output:
+            Path(args.output).write_text(content, encoding='utf-8')
+        if not args.quiet:
+            print(content)
+        return 0
+    if not args.input:
+        parser.error('--input is required unless --compare is supplied')
+    if args.format == 'moodle':
+        parser.error('Moodle grade export is pending an approved grading policy and verified identifier mapping; use csv for descriptive results')
+
     # Load results
     input_path = Path(args.input)
     
@@ -1031,40 +1047,6 @@ Usage examples:
         if not args.quiet:
             print(f"  Filtered for minimum score {args.min_score}%: {len(results)} results")
     
-    # Comparison mode
-    if args.compare:
-        before_path, after_path = args.compare
-        
-        if Path(before_path).is_dir():
-            before_results = ResultLoader.load_directory(before_path)
-        else:
-            before_results = ResultLoader.load_csv(before_path)
-        
-        if Path(after_path).is_dir():
-            after_results = ResultLoader.load_directory(after_path)
-        else:
-            after_results = ResultLoader.load_csv(after_path)
-        
-        comparator = ComparisonAnalyzer(before_results, after_results)
-        progress = comparator.analyze_progress()
-        
-        if not args.quiet:
-            print(f"\n{Colours.BOLD}📈 PROGRESS ANALYSIS{Colours.ENDC}")
-            print(f"  Common students: {progress['common_students']}")
-            print(f"  Improvements: {len(progress['improvements'])} "
-                  f"(mean: +{progress['avg_improvement']:.1f}%)")
-            print(f"  Regressions: {len(progress['regressions'])} "
-                  f"(mean: {progress['avg_regression']:.1f}%)")
-            print(f"  Unchanged: {len(progress['unchanged'])}")
-            
-            if progress['improvements']:
-                print(f"\n  {Colours.GREEN}Top improvements:{Colours.ENDC}")
-                for e in progress['improvements'][:5]:
-                    print(f"    • {e['student']} ({e['group']}): "
-                          f"{e['before']:.0f}% → {e['after']:.0f}% (+{e['diff']:.0f}%)")
-        
-        return 0
-    
     # Generate report
     analyzer = StatisticsAnalyzer(results)
     report = analyzer.generate_overall_report()
@@ -1079,9 +1061,11 @@ Usage examples:
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    formats_to_export = ['txt', 'html', 'csv', 'moodle'] if args.format == 'all' else [args.format]
+    formats_to_export = ['txt', 'html', 'csv'] if args.format == 'all' else [args.format]
     
+    output_base = output_file
     for fmt in formats_to_export:
+        output_file = output_base.with_suffix('.' + fmt) if output_base and args.format == 'all' else output_base
         if fmt == 'txt':
             content = ReportExporter.to_summary_txt(report)
             filepath = output_file or output_dir / 'report_summary.txt'

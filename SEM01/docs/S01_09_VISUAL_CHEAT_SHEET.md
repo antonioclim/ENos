@@ -1,14 +1,14 @@
 # Visual Cheat Sheet - Seminar 1-2
 ## One-Pager for Students | Print and Keep!
 
+*(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
+
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                     🐧 BASH CHEAT SHEET - SEMINAR 1-2                         ║
 
-*(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
 
 
-*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                               ║
@@ -29,7 +29,7 @@
 ║  ┌─────────────────────────────────────────────────────────────────────────┐  ║
 ║  │                        📁 FILES & DIRECTORIES                           │  ║
 ║  ├─────────────────────────────────────────────────────────────────────────┤  ║
-║  │  touch file       Create empty file                                     │  ║
+║  │  touch file       Create if absent; else update times                                     │  ║
 ║  │  mkdir dir        Create directory                                      │  ║
 ║  │  mkdir -p a/b/c   Create directory hierarchy                            │  ║
 ║  │  cp src dst       Copy file                                             │  ║
@@ -53,14 +53,14 @@
 ║  ┌─────────────────────────────────────────────────────────────────────────┐  ║
 ║  │                        🔤 VARIABLES                                     │  ║
 ║  ├─────────────────────────────────────────────────────────────────────────┤  ║
-║  │  VAR="value"            Set local variable (no spaces!)                 │  ║
+║  │  VAR="value"            Set shell variable (no spaces!)                 │  ║
 ║  │  export VAR="val"       Set environment variable                        │  ║
 ║  │  echo $VAR              Display value                                   │  ║
 ║  │  unset VAR              Delete variable                                 │  ║
 ║  │                                                                         │  ║
 ║  │  SPECIAL VARIABLES:                                                     │  ║
 ║  │  $HOME    → /home/user         $USER   → username                       │  ║
-║  │  $PATH    → executable paths   $SHELL  → /bin/bash                      │  ║
+║  │  $PATH    → executable paths   $SHELL  → login-shell value                      │  ║
 ║  │  $PWD     → current directory  $?      → exit code (0=success)          │  ║
 ║  └─────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                               ║
@@ -125,7 +125,7 @@
 ║  ├── etc/             System configurations (passwd, hosts)                   ║
 ║  ├── home/            User directories                                        ║
 ║  │   └── student/     YOUR home                                               ║
-║  ├── tmp/             Temporary files (deleted on reboot)                     ║
+║  ├── tmp/             Temporary files (cleanup is local policy)                     ║
 ║  ├── var/             Variable data                                           ║
 ║  │   └── log/         System logs (syslog, auth.log)                          ║
 ║  └── usr/             User programs                                           ║
@@ -135,7 +135,7 @@
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                               ║
 ║  ❌ VAR = "val"     →  ✅ VAR="val"       (no spaces around =)               ║
-║  ❌ rm -rf /        →  ✅ NEVER!         (deletes ENTIRE system)             ║
+║  ❌ rm -rf /        →  ✅ NEVER!         (GNU rm protects / by default)             ║
 ║  ❌ '$VAR'          →  ✅ "$VAR"          (if you want expansion)            ║
 ║  ❌ cd /home/~      →  ✅ cd ~ or cd      (~ is already /home/user)          ║
 ║  ❌ alias ll=ls -la →  ✅ alias ll='ls -la' (with quotes)                    ║
@@ -144,6 +144,9 @@
 
                     📚 ASE-CSIE | Operating Systems | Seminar 1
 ```
+
+*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
+
 
 ---
 

@@ -1,364 +1,141 @@
 #!/usr/bin/env python3
+"""Reproduce the lecture PNG set from the current PlantUML sources.
+
+Author: Revolvix | ASE Bucharest — CSIE. Phase 5 maintenance: ENos v6 candidate.
+Generation is staged: a failed compilation never masquerades as an old success.
+Only --download permits obtaining the pinned compiler; ordinary runs are offline.
 """
-PNG Diagram Generator from PlantUML Files
-==========================================
-Operating Systems course — ASE Bucharest CSIE
-
-Usage:
-    python generate_diagrams.py [--jar PATH] [--output DIR] [--dpi DPI]
-
-Author: Revolvix | ASE Bucharest — CSIE
-Version: 2.0
-"""
-
 from __future__ import annotations
-
-import logging
-import os
-import sys
-import subprocess
-import urllib.request
 import argparse
-import tempfile
-import shutil
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
+import json
+import os
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Optional
+import re
+import struct
+import subprocess
+import tempfile
+import urllib.request
 
-# Configuration
-PLANTUML_JAR_URL = "https://github.com/plantuml/plantuml/releases/download/v1.2024.8/plantuml-1.2024.8.jar"
-PLANTUML_JAR_NAME = "plantuml.jar"
-DEFAULT_DPI = 200
-DEFAULT_OUTPUT_DIR = "diagrams_png"
-
-# Logging configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s"
-)
-logger = logging.getLogger(__name__)
+VERSION = '1.2026.10'
+JAR_SHA256 = 'e9bc9e6b2eb715e8c0c929f3dcb5fc1923be13f37599b09c293c66d354e88686'
+JAR_URL = f'https://github.com/plantuml/plantuml/releases/download/v{VERSION}/plantuml-{VERSION}.jar'
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def check_java() -> bool:
-    """Check whether Java is installed and accessible."""
-    try:
-        result = subprocess.run(
-            ["java", "-version"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-        return result.returncode == 0
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return False
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def download_plantuml_jar(target_path: Path) -> bool:
-    """
-    Download PlantUML JAR if it does not exist.
-    
-    Args:
-        target_path: Destination path for the JAR file
-        
-    Returns:
-        True if JAR is available, False otherwise
-    """
-    if target_path.exists():
-        logger.info("✓ PlantUML JAR found: %s", target_path)
-        return True
-
-    logger.info("⬇ Downloading PlantUML JAR from GitHub...")
-    try:
-        urllib.request.urlretrieve(PLANTUML_JAR_URL, target_path)
-        logger.info("✓ PlantUML JAR downloaded: %s", target_path)
-        return True
-    except OSError as e:
-        logger.error("✗ Download error: %s", e)
-        return False
+def diagram_name(path):
+    name = re.sub(r'^\d+_', '', path.stem)
+    return {'scheduling_algorithms_gantt_comparison': 'scheduling_gantt_comparison'}.get(name, name)
 
 
-def find_puml_files(base_dir: Path) -> list[Path]:
-    """
-    Find all .puml files recursively, excluding skin.puml.
-    
-    Args:
-        base_dir: Root directory to search
-        
-    Returns:
-        Sorted list of paths to .puml files
-    """
-    puml_files: list[Path] = []
-    excluded_dirs = {DEFAULT_OUTPUT_DIR, "__pycache__", ".git", "diagrams_png", "output_png"}
-
-    for root, dirs, files in os.walk(base_dir):
-        dirs[:] = [d for d in dirs if d not in excluded_dirs]
-        for file in files:
-            if file.endswith(".puml") and file != "skin.puml":
-                puml_files.append(Path(root) / file)
-
-    return sorted(puml_files)
-
-
-def find_skin_file(base_dir: Path) -> Optional[Path]:
-    """
-    Find the skin.puml file for shared styling.
-    
-    Args:
-        base_dir: Root directory to search
-        
-    Returns:
-        Path to skin.puml if found, None otherwise
-    """
-    for root, _, files in os.walk(base_dir):
-        if "skin.puml" in files:
-            return Path(root) / "skin.puml"
-    return None
+def compile_one(source, jar, dpi, stage, root):
+    dependencies = []
+    text = source.read_text(encoding='utf-8')
+    if text.count('@startuml') != 1 or text.count('@enduml') != 1:
+        raise ValueError(f'{source}: expected exactly one complete diagram')
+    for target in re.findall(r'^\s*!include\s+([^\r\n]+)', text, re.M):
+        dependency = (source.parent / target.strip()).resolve()
+        if not dependency.is_relative_to(root) or not dependency.is_file():
+            raise ValueError(f'Missing or non-repository include: {target} in {source}')
+        dependencies.append({'path': str(dependency.relative_to(root)), 'sha256': digest(dependency)})
+    run = subprocess.run(['java', '-Xmx768m', '-DPLANTUML_LIMIT_SIZE=16384', '-jar', str(jar),
+                          '-charset', 'UTF-8', '-tpng', f'-Sdpi={dpi}', '-pipe'],
+                         input=text.encode('utf-8'), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         cwd=source.parent, timeout=120)
+    if run.returncode or not run.stdout.startswith(b'\x89PNG\r\n\x1a\n') or len(run.stdout) < 24:
+        raise RuntimeError(f'{source.relative_to(root)}: compilation failed ({run.returncode}): '
+                           + run.stderr.decode('utf-8', 'replace')[-2000:])
+    width, height = struct.unpack('>II', run.stdout[16:24])
+    if not 0 < width < 16384 or not 0 < height < 16384:
+        raise RuntimeError(f'{source}: output has invalid dimensions or reaches the configured rendering limit')
+    target = stage / (diagram_name(source) + '.png')
+    target.write_bytes(run.stdout)
+    return {'source': str(source.relative_to(root)), 'source_sha256': digest(source),
+            'dependencies': dependencies, 'output': target.name, 'output_sha256': digest(target),
+            'width': width, 'height': height, 'compiler_exit': run.returncode}
 
 
-def preprocess_puml(puml_file: Path, skin_content: Optional[str] = None) -> str:
-    """
-    Preprocess a PUML file by inlining !include directives.
-    
-    Args:
-        puml_file: Path to the .puml file
-        skin_content: Optional content of skin.puml to inline
-        
-    Returns:
-        Preprocessed PlantUML content as string
-    """
-    content = puml_file.read_text(encoding="utf-8", errors="ignore")
-    lines = content.split("\n")
-    processed_lines: list[str] = []
-
-    for line in lines:
-        if line.strip().startswith("!include"):
-            if skin_content and "skin.puml" in line:
-                processed_lines.append("' [skin.puml content inlined]")
-                processed_lines.append(skin_content)
-            else:
-                processed_lines.append(f"' SKIPPED: {line.strip()}")
-        else:
-            processed_lines.append(line)
-
-    return "\n".join(processed_lines)
-
-
-def generate_png(
-    puml_file: Path,
-    jar_path: Path,
-    output_dir: Path,
-    dpi: int,
-    skin_content: Optional[str] = None
-) -> tuple[bool, str]:
-    """
-    Generate PNG from a PlantUML file.
-    
-    Args:
-        puml_file: Source .puml file
-        jar_path: Path to PlantUML JAR
-        output_dir: Output directory for PNG
-        dpi: Resolution in dots per inch
-        skin_content: Optional skin.puml content
-        
-    Returns:
-        Tuple of (success: bool, message: str)
-    """
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    try:
-        processed_content = preprocess_puml(puml_file, skin_content)
-
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            suffix=".puml",
-            delete=False,
-            encoding="utf-8"
-        ) as tmp:
-            tmp.write(processed_content)
-            tmp_path = Path(tmp.name)
-
-        try:
-            cmd = [
-                "java",
-                "-DPLANTUML_LIMIT_SIZE=16384",
-                "-jar", str(jar_path),
-                "-tpng",
-                f"-Sdpi={dpi}",
-                "-o", str(output_dir.absolute()),
-                str(tmp_path)
-            ]
-
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-
-            tmp_png = output_dir / f"{tmp_path.stem}.png"
-            final_png = output_dir / f"{puml_file.stem}.png"
-
-            if tmp_png.exists():
-                if final_png.exists():
-                    final_png.unlink()
-                tmp_png.rename(final_png)
-
-            if result.returncode == 0 and final_png.exists():
-                size_kb = final_png.stat().st_size / 1024
-                return (True, f"✓ {puml_file.name} → {final_png.name} ({size_kb:.0f} KB)")
-
-            error_msg = result.stderr[:200] if result.stderr else "PNG not generated"
-            return (False, f"✗ {puml_file.name}: {error_msg}")
-
-        finally:
-            if tmp_path.exists():
-                tmp_path.unlink()
-
-    except subprocess.TimeoutExpired:
-        return (False, f"✗ {puml_file.name}: Timeout (diagram too complex?)")
-    except OSError as e:
-        return (False, f"✗ {puml_file.name}: {str(e)[:200]}")
-
-
-def print_summary(results: list[tuple[bool, str]]) -> None:
-    """Display the generation summary."""
-    success_count = sum(1 for r in results if r[0])
-    failed_count = len(results) - success_count
-
-    logger.info("")
-    logger.info("=" * 60)
-    logger.info("PNG GENERATION SUMMARY")
-    logger.info("=" * 60)
-    logger.info("  Total files:    %d", len(results))
-    logger.info("  ✓ Generated:    %d", success_count)
-    logger.info("  ✗ Failed:       %d", failed_count)
-
-    if failed_count > 0:
-        logger.info("\nFiles with errors:")
-        for success_flag, msg in results:
-            if not success_flag:
-                logger.info("  %s", msg)
-
-
-def main() -> int:
-    """
-    Main entry point.
-    
-    Returns:
-        Exit code (0 for success, 1 for failure)
-    """
-    parser = argparse.ArgumentParser(
-        description="Generate PNG diagrams from PlantUML files",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python generate_diagrams.py                    # Generate all PNGs
-  python generate_diagrams.py --dpi 150          # Lower resolution
-  python generate_diagrams.py --output ./images  # Custom output
-        """
-    )
-
-    parser.add_argument(
-        "--jar",
-        type=Path,
-        default=Path(__file__).parent / PLANTUML_JAR_NAME,
-        help="Path to PlantUML JAR file"
-    )
-    parser.add_argument(
-        "--output", "-o",
-        type=Path,
-        default=Path(__file__).parent / DEFAULT_OUTPUT_DIR,
-        help="Output directory for PNG files"
-    )
-    parser.add_argument(
-        "--dpi",
-        type=int,
-        default=DEFAULT_DPI,
-        help="Resolution in DPI (default: 200)"
-    )
-    parser.add_argument(
-        "--workers", "-j",
-        type=int,
-        default=4,
-        help="Number of parallel workers"
-    )
-    parser.add_argument(
-        "--clean",
-        action="store_true",
-        help="Delete existing output before generation"
-    )
-
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--jar', type=Path, default=Path(__file__).parent / f'plantuml-{VERSION}.jar')
+    parser.add_argument('--download', action='store_true', help='Explicitly download the pinned compiler if missing')
+    parser.add_argument('--source-root', type=Path, default=ROOT)
+    parser.add_argument('--output', '-o', type=Path, default=Path(__file__).parent / 'diagrams_png')
+    parser.add_argument('--dpi', type=int, default=140)
+    parser.add_argument('--workers', '-j', type=int, default=2)
+    parser.add_argument('--clean', action='store_true', help='Remove only obsolete PNGs listed in the previous manifest, after successful generation')
+    parser.add_argument('--dry-run', action='store_true', help='List canonical source/output mappings without compiler, network or writes')
     args = parser.parse_args()
-
-    logger.info("""
-╔════════════════════════════════════════════════════════════════╗
-║       OS Kit — PlantUML Diagram Generator → PNG                ║
-║                    ASE Bucharest — CSIE                        ║
-╚════════════════════════════════════════════════════════════════╝
-    """)
-
-    # Prerequisite checks
-    if not check_java():
-        logger.error("✗ Java is not installed!")
+    if not 72 <= args.dpi <= 300 or not 1 <= args.workers <= 4:
+        parser.error('dpi must be 72–300 and workers 1–4')
+    root, jar, output = args.source_root.resolve(), args.jar.resolve(), args.output.resolve()
+    try:
+        sources = sorted((root / '05_LECTURES').glob('**/diagrams/*.puml'))
+        if not sources:
+            raise ValueError('No lecture diagram sources found')
+        names = [diagram_name(p) for p in sources]
+        if len(set(names)) != len(names):
+            raise ValueError('Duplicate diagram output names')
+        if args.dry_run:
+            print(json.dumps({'dry_run': True, 'diagram_count': len(sources),
+                              'scope': 'Source/output discovery only; compilation and dependency acceptance NOT_RUN.',
+                              'diagrams': [{'source': str(p.relative_to(root)), 'source_sha256': digest(p),
+                                            'output': str(output / (diagram_name(p)+'.png'))} for p in sources]}, indent=2))
+            return 0
+        if not jar.is_file() and args.download:
+            jar.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=jar.parent, delete=False) as handle:
+                pending = Path(handle.name)
+            try:
+                with urllib.request.urlopen(JAR_URL, timeout=60) as response, pending.open('wb') as handle:
+                    while chunk := response.read(1024 * 1024):
+                        handle.write(chunk)
+                if digest(pending) != JAR_SHA256:
+                    raise ValueError('Downloaded compiler checksum mismatch')
+                os.replace(pending, jar)
+            finally:
+                pending.unlink(missing_ok=True)
+        if not jar.is_file():
+            raise ValueError('Compiler missing. Supply --jar or explicitly use --download.')
+        if digest(jar) != JAR_SHA256:
+            raise ValueError('Compiler checksum does not match the pinned release')
+        previous = []
+        manifest_path = output / 'manifest.json'
+        if args.clean and manifest_path.is_file():
+            previous = json.loads(manifest_path.read_text(encoding='utf-8')).get('diagrams', [])
+        with tempfile.TemporaryDirectory(prefix='enos-diagrams-') as tmp:
+            stage = Path(tmp)
+            with ThreadPoolExecutor(max_workers=args.workers) as executor:
+                results = list(executor.map(lambda p: compile_one(p, jar, args.dpi, stage, root), sources))
+            output.mkdir(parents=True, exist_ok=True)
+            for item in results:
+                destination = output / item['output']
+                with tempfile.NamedTemporaryFile(dir=output, delete=False) as handle:
+                    handle.write((stage / item['output']).read_bytes())
+                    pending = Path(handle.name)
+                os.chmod(pending, 0o644)
+                os.replace(pending, destination)
+            expected = {item['output'] for item in results}
+            for item in previous:
+                old = item.get('output', '')
+                if old not in expected and re.fullmatch(r'[A-Za-z0-9_-]+\.png', old):
+                    (output / old).unlink(missing_ok=True)
+            manifest = {'compiler': f'PlantUML {VERSION}', 'compiler_sha256': JAR_SHA256,
+                        'dpi': args.dpi, 'render_limit': 16384, 'diagram_count': len(results),
+                        'scope': 'Successful native PlantUML compilation; visual review is a separate check.',
+                        'diagrams': results}
+            manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+        print(f'Generated {len(results)} current diagrams and manifest: {output}')
+        return 0
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+        print(f'Generation failed: {exc}', file=__import__('sys').stderr)
         return 1
-    logger.info("✓ Java available")
-
-    if not download_plantuml_jar(args.jar):
-        return 1
-
-    # Find source files
-    base_dir = Path(__file__).parent
-    puml_files = find_puml_files(base_dir)
-
-    if not puml_files:
-        logger.error("✗ No .puml files found!")
-        return 1
-
-    logger.info("✓ Found %d .puml files", len(puml_files))
-
-    # Load shared skin
-    skin_file = find_skin_file(base_dir)
-    skin_content: Optional[str] = None
-    if skin_file:
-        logger.info("✓ skin.puml found: %s", skin_file)
-        skin_content = skin_file.read_text(encoding="utf-8", errors="ignore")
-    else:
-        logger.warning("⚠ skin.puml not found (using default styles)")
-
-    # Prepare output directory
-    if args.clean and args.output.exists():
-        shutil.rmtree(args.output)
-    args.output.mkdir(parents=True, exist_ok=True)
-
-    # Generate PNGs
-    logger.info("\nGenerating PNGs (DPI=%d)...", args.dpi)
-    logger.info("-" * 60)
-
-    results: list[tuple[bool, str]] = []
-    with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {
-            executor.submit(
-                generate_png, f, args.jar, args.output, args.dpi, skin_content
-            ): f
-            for f in puml_files
-        }
-
-        for future in as_completed(futures):
-            result = future.result()
-            results.append(result)
-            logger.info(result[1])
-
-    print_summary(results)
-
-    failed_count = sum(1 for r in results if not r[0])
-    logger.info("""
-%s
-DONE! Diagrams saved to: %s
-%s
-    """, "=" * 60, args.output, "=" * 60)
-
-    return 1 if failed_count > 0 else 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == '__main__':
+    raise SystemExit(main())

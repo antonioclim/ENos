@@ -2,6 +2,8 @@
 
 > **⚠️ SPECIAL STRUCTURE:** SEM06 is an integration **CAPSTONE** seminar.
 
+> **Assessment status — author decision pending:** this file preserves the original requirements and point tables as proposals. They conflict with other SEM06/SEM07 documents and do not define an adopted grading policy. Read [the decision table](../docs/TEACHING_CONTRACT.md#author-decisions) before assigning grades, collecting machine identifiers or activating external integrations. Technical examples and TODO exercises can be practised locally meanwhile.
+
 ---
 
 ## Folder Contents homework/
@@ -10,7 +12,7 @@
 |------|-------------|----------|
 | `S06_00_README.md` | This explanatory document | Instructors |
 | `S06_01_HOMEWORK_CAPSTONE.md` | Complete requirements for CAPSTONE projects | Students |
-| `S06_02_RUBRICA_EVALUARE.md` | Detailed evaluation criteria | Instructors |
+| `S06_02_EVALUATION_RUBRIC.md` | Detailed evaluation criteria | Instructors |
 | `OLD_HW/` | Archived materials | - |
 
 ---
@@ -22,7 +24,7 @@
 | Aspect | Standard Seminars (SEM01-05) | SEM06 CAPSTONE |
 |--------|------------------------------|----------------|
 | Assignment type | Specific weekly exercises | Semester-long projects |
-| File structure | `S0X_01_TEMA.md` + generation script | `S06_01_HOMEWORK_CAPSTONE.md` (single large file) |
+| File structure | `seminar-specific current assignment brief` + generation script | `S06_01_HOMEWORK_CAPSTONE.md` (single large file) |
 | Evaluation | Per exercise | Portfolio + Integrated Project |
 | Time allocation | 1-2 weeks | 4 weeks + exam session |
 
@@ -115,8 +117,8 @@ CAPSTONE_LastnameFirstname/
 
 - **Documentation**: `../docs/S06_*`
 - **Base code**: `../scripts/projects/`
-- **Testing framework**: `../scripts/test_helpers.sh`
-- **Presentations**: `../prezentari/S06_*`
+- **Testing framework**: `../scripts/examples/test_helpers.sh`
+- **Presentations**: `../presentations/S06_*`
 
 ---
 
@@ -125,7 +127,7 @@ CAPSTONE_LastnameFirstname/
 1. **Continuous evaluation**: Intermediate milestones are recommended
 2. **Bonus flexibility**: Students can choose which bonus features to implement
 3. **Live demonstrations**: Reserve time during exam session for presentations
-4. **High complexity**: Estimate 40-60 hours of work per student
+4. **High complexity**: 40–60 hours is an unvalidated planning estimate; record actual workload before treating it as empirical evidence.
 
 ---
 
@@ -134,14 +136,14 @@ CAPSTONE_LastnameFirstname/
 ### Before (inconsistent structure):
 - `README.md`
 - `TEME_PRACTICE.md`
-- `S06_02_RUBRICA_EVALUARE.md`
+- `S06_02_EVALUATION_RUBRIC.md`
 
 ### After (standardised structure):
 - `S06_00_README.md` (this file)
 - `S06_01_HOMEWORK_CAPSTONE.md` (renamed from TEME_PRACTICE.md)
-- `S06_02_RUBRICA_EVALUARE.md` (unchanged)
+- `S06_02_EVALUATION_RUBRIC.md` (unchanged)
 
-**Action**: Delete `README.md` and `TEME_PRACTICE.md` after applying the patch.
+**Historical migration note:** the earlier draft requested deletion of README.md and TEME_PRACTICE.md. Those are not current files here; no deletion is required by this document.
 
 ---
 

@@ -7,7 +7,7 @@
 
 ## Overview
 
-The oral defence is mandatory for project grade validation. Students must demonstrate understanding of their own code and the concepts applied.
+Historical requirement: the oral defence was proposed for project grade validation; the author must reconcile its scope, timing and score consequences with the other project guides. Students must demonstrate understanding of their own code and the concepts applied.
 
 **Duration:** 10-15 minutes per student/team  
 **Format:** Individual questioning (even for team projects)
@@ -82,113 +82,145 @@ The oral defence is mandatory for project grade validation. Students must demons
 
 ## 2. Project-Specific Questions
 
-### 2.1 EASY Projects
+The following23 codes match the published catalogue. Use questions relevant to the submitted implementation and record a bounded demonstration, not an inferred authorship probability.
 
-#### E01 - File System Auditor
+### E01 — File System Auditor
 
-1. How do you handle symbolic links in your audit?
-2. What's the difference between `-mtime` and `-atime` in find?
-3. How do you calculate directory sizes recursively?
-4. Why might file counts differ between your tool and `ls | wc -l`?
+1. How do symlinks and unreadable directories affect your inventory?
+2. How do NUL delimiters preserve filenames with whitespace/newlines?
+3. Show a fixture with a known exact count and a deliberate failure.
 
-#### E02 - Log Analyser
+### E02 — Log Analyser
 
-1. What regular expression do you use to extract IP addresses?
-2. How do you handle log files with different formats?
-3. What happens with very large log files (> 1GB)?
-4. How do you count unique versus total entries?
+1. Which precise input grammar does your parser accept?
+2. How are malformed lines, timezones and empty matches reported?
+3. Demonstrate counts on a bounded known log, including a negative control.
 
-#### E03 - Process Monitor
+### E03 — Bulk File Organiser
 
-1. Where does your script get process information from?
-2. What's the difference between RSS and VSZ memory?
-3. How do you calculate CPU percentage?
-4. Why might your process list differ from `top`?
+1. How do you prevent overwriting a destination collision?
+2. What happens to dotfiles, extensionless files and symlinks?
+3. How can a dry run be compared with the actual owned-fixture changes?
 
-#### E04 - Backup Manager
+### E04 — System Health Reporter
 
-1. Explain your incremental backup logic.
-2. How do you ensure backup integrity?
-3. What happens during restoration?
-4. How do you handle file permission preservation?
+1. Which metrics are interval measurements and which are cumulative?
+2. How do unavailable data differ from healthy zero values?
+3. How do you encode quotes/newlines in JSON or CSV output?
 
-#### E05 - Network Diagnostics
+### E05 — Config File Manager
 
-1. How do you check if a host is reachable?
-2. What's the difference between TCP and UDP checks?
-3. How do you parse traceroute output?
-4. What timeout values do you use and why?
+1. How do you parse values without executing them?
+2. How are repeated/missing keys and spaces handled?
+3. Demonstrate a failed validation leaving the prior file intact.
 
-### 2.2 MEDIUM Projects
+### M01 — Incremental Backup System
 
-#### M01 - Incremental Backup System
+1. Which chain members are needed to restore a selected increment?
+2. Demonstrate create, modify, delete and rename across two backups.
+3. How does retention preserve every required parent?
 
-1. Explain your algorithm for detecting changed files.
-2. How do you handle renamed files?
-3. What metadata do you store with each backup?
-4. How does restoration work with incremental backups?
-5. What's your strategy for backup rotation?
+### M02 — Process Lifecycle Monitor
 
-#### M02 - System Resource Dashboard
+1. How do PID reuse and process start ticks affect identity?
+2. How do you parse a comm field containing parentheses/spaces?
+3. Which short-lived processes can polling miss?
 
-1. How do you calculate the CPU usage percentage?
-2. What refresh rate did you choose and why?
-3. How do you handle terminal resize events?
-4. Explain your colour-coding for thresholds.
-5. What's the memory overhead of your dashboard?
+### M03 — Service Health Watchdog
 
-#### M03 - Automated Testing Framework
+1. What observable condition defines health for this service?
+2. How do restart limits, backoff and unknown data interact?
+3. Show a bounded fake-service recovery and a persistent failure.
 
-1. How do you discover test files?
-2. What's your test isolation strategy?
-3. How do you report test failures?
-4. Can tests run in parallel? How?
-5. How do you handle test dependencies?
+### M04 — Network Security Scanner
 
-#### M04 - Configuration Management
+1. What explicit target range and time/concurrency bounds apply?
+2. How do DNS, connection refusal and timeout differ?
+3. What do scan results fail to establish about application security?
 
-1. How do you parse configuration files?
-2. What happens with syntax errors in config?
-3. How do you handle configuration inheritance?
-4. What's your strategy for secrets management?
-5. How do you validate configuration values?
+### M05 — Deployment Pipeline
 
-#### M05 - Service Health Monitor
+1. Which failure stops all later stages?
+2. What immutable package/digest is validated before activation?
+3. What is rolled back and what availability is actually demonstrated?
 
-1. How do you define "healthy" for a service?
-2. What's your alerting mechanism?
-3. How do you handle flapping services?
-4. What metrics do you collect?
-5. How do you avoid alert fatigue?
+### M06 — Resource Usage Historian
 
-### 2.3 ADVANCED Projects
+1. How do counter resets, sampling gaps and timestamp units affect rates?
+2. How are CPU guest/iowait and MemAvailable interpreted?
+3. How do you distinguish missing values from genuine zero?
 
-#### A01 - Container Management System
+### M07 — Security Audit Framework
 
-1. Explain your container isolation approach.
-2. How do you manage container networking?
-3. What's your image layer strategy?
-4. How do you handle resource limits?
-5. What security measures did you implement?
-6. How does your system compare to Docker?
+1. Which checks depend on permissions and which are unavailable?
+2. How does an empty/error result avoid a false compliance pass?
+3. What exact evidence supports a remediation recommendation?
 
-#### A02 - Distributed Task Queue
+### M08 — Disk Storage Manager
 
-1. Explain your task distribution algorithm.
-2. How do you handle worker failures?
-3. What's your strategy for task prioritisation?
-4. How do you ensure exactly-once execution?
-5. What's the throughput of your system?
-6. How do you handle network partitions?
+1. How do capacity and inode usage differ?
+2. How do you constrain cleanup to the intended owned tree?
+3. How do you verify a failed move/compression preserves source data?
 
-#### A03 - Custom Shell Implementation
+### M09 — Scheduled Tasks Manager
 
-1. How do you parse command lines?
-2. Explain your job control implementation.
-3. How do you handle pipes?
-4. What built-in commands did you implement?
-5. How do you handle signal forwarding?
-6. What's your approach to command history?
+1. Which cron grammar is supported, including ranges and steps?
+2. How do timezone/DST and day-of-month/day-of-week semantics matter?
+3. How is scheduler state staged and validated before replacement?
+
+### M10 — Process Tree Analyzer
+
+1. How do you handle reparenting, subreapers and PID reuse?
+2. What terminates ancestry traversal?
+3. What can a process snapshot establish and what can race with it?
+
+### M11 — Memory Forensics Tool
+
+1. Which memory data are accessible without added privilege?
+2. How are process-map permissions and disappearing processes represented?
+3. Why are strings and entropy observations not proof of malware?
+
+### M12 — File Integrity Monitor
+
+1. How are filenames, deletions and metadata represented in the baseline?
+2. How does a changed file during hashing affect evidence?
+3. Who can modify the baseline and what trust does it provide?
+
+### M13 — Log Aggregator
+
+1. How do inode replacement and copytruncate change tail offsets?
+2. How are partial lines and multiple sources separated?
+3. Show a rotated fixture with no silently lost complete records.
+
+### M14 — Environment Config Manager
+
+1. How is literal environment data separated from executable shell code?
+2. How are secret values kept out of ordinary diff output?
+3. How does a failed template expansion leave the destination intact?
+
+### M15 — Parallel Execution Engine
+
+1. How do you count owned running jobs and preserve their exit statuses?
+2. Why must input placeholders be substituted in one pass?
+3. How does retry validate metadata and avoid rerunning an already successful job?
+
+### A01 — Mini Job Scheduler
+
+1. Which lock protects shared-memory queue invariants?
+2. How do you recover from a dead owner or full queue?
+3. How are empty/oversized commands and worker termination tested?
+
+### A02 — Interactive Shell Extension
+
+1. What lifetime and byte bounds apply to readline completion candidates?
+2. How does the lexer distinguish quotes, operators and command position?
+3. What do UTF-8 trie tests demonstrate, and what remains unsupported?
+
+### A03 — Distributed File Sync
+
+1. How does the rolling checksum update differ from the strong block digest?
+2. How are delta literals/copies bounded and verified before publication?
+3. What failure leaves the old target intact, and how are concurrent updates handled?
 
 ---
 
@@ -226,10 +258,10 @@ The oral defence is mandatory for project grade validation. Students must demons
 
 | Behaviour | Concern |
 |-----------|---------|
-| Cannot explain basic syntax | May not have written the code |
-| Inconsistent naming knowledge | Copied from different sources |
-| Cannot modify code on request | Memorised, not understood |
-| Defensive when questioned | Hiding something |
+| Cannot explain basic syntax | Record the specific knowledge gap; offer a comparable follow-up task |
+| Inconsistent naming knowledge | Ask about source/provenance without presuming copying |
+| Cannot modify code on request | Record task conditions, support provided and observed difficulty |
+| Defensive or nervous demeanour | No authorship inference; clarify the task and allow an explanation |
 | Blames teammates for parts | Individual understanding lacking |
 
 ### 4.2 Follow-up Actions
@@ -247,7 +279,7 @@ If red flags appear:
 
 ### 5.1 Defence Score Impact
 
-The oral defence does not add points but can reduce the project score:
+The historical deduction proposal below is retained for author review. It is not an active automatic rule; first agree the evidence, accommodation, review and appeal process:
 
 | Performance | Adjustment |
 |-------------|------------|

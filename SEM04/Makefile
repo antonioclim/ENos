@@ -13,6 +13,7 @@ SHELL := /bin/bash
 PYTHON := python3
 SHELLCHECK := shellcheck
 SEMINAR := 04
+export ID SUM VERIFY_DIR
 
 # Directories (UPDATED: EN naming)
 SCRIPTS_BASH := scripts/bash
@@ -83,11 +84,11 @@ ifndef ID
 	@echo "Example: make generate-data ID=123456"
 	@exit 1
 endif
-	@echo -e "$(CYAN)Generating personalised data for student $(ID)...$(NC)"
-	@$(PYTHON) $(SCRIPTS_PYTHON)/S$(SEMINAR)_04_personalized_data_generator.py $(ID)
-	@echo -e "$(GREEN)✓ Data generated in student_$(ID)/$(NC)"
+	@echo -e "$(CYAN)Generating personalised data for the supplied identifier...$(NC)"
+	@$(PYTHON) $(SCRIPTS_PYTHON)/S$(SEMINAR)_04_personalized_data_generator.py "$$ID"
+	@echo -e "$(GREEN)✓ Data generation completed; see the generator output path$(NC)"
 
-verify-checksum: ## Verify student submission checksum (usage: make verify-checksum ID=123456 SUM=abc123)
+verify-checksum: ## Check legacy identifier token only (does not verify files) (usage: make verify-checksum ID=123456 SUM=abc123)
 ifndef ID
 	@echo -e "$(RED)Error: Student ID required$(NC)"
 	@exit 1
@@ -96,7 +97,7 @@ ifndef SUM
 	@echo -e "$(RED)Error: Checksum required$(NC)"
 	@exit 1
 endif
-	@$(PYTHON) $(SCRIPTS_PYTHON)/S$(SEMINAR)_04_personalized_data_generator.py --verify $(ID) $(SUM)
+	@$(PYTHON) $(SCRIPTS_PYTHON)/S$(SEMINAR)_04_personalized_data_generator.py --verify "$$ID" "$$SUM"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # QUIZ AND ASSESSMENT
@@ -148,24 +149,16 @@ lint: lint-bash lint-python ## Run all linting checks
 lint-bash: ## Check Bash scripts with shellcheck
 	@echo "Checking Bash scripts..."
 	@if command -v $(SHELLCHECK) >/dev/null 2>&1; then \
-		$(SHELLCHECK) --severity=warning $(SCRIPTS_BASH)/*.sh $(SCRIPTS_DEMO)/*.sh $(HOMEWORK_SOL)/*.sh 2>/dev/null || true; \
+		$(SHELLCHECK) --severity=warning $(SCRIPTS_BASH)/*.sh $(SCRIPTS_DEMO)/*.sh $(HOMEWORK_SOL)/*.sh || exit $$?; \
 		echo -e "$(GREEN)✓ Bash lint complete$(NC)"; \
 	else \
 		echo -e "$(YELLOW)⚠ shellcheck not installed, manual check required:$(NC)"; \
 		echo "  sudo apt install shellcheck"; \
 	fi
 
-lint-python: ## Check Python scripts with ruff/flake8
-	@echo "Checking Python scripts..."
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py 2>/dev/null || true; \
-	elif command -v flake8 >/dev/null 2>&1; then \
-		flake8 $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py --max-line-length=100 2>/dev/null || true; \
-	else \
-		echo -e "$(YELLOW)⚠ ruff/flake8 not installed$(NC)"; \
-		$(PYTHON) -m py_compile $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py && \
-		echo -e "$(GREEN)✓ Python syntax valid$(NC)"; \
-	fi
+lint-python: ## Check Python scripts with the explicit Ruff configuration
+	@command -v ruff >/dev/null 2>&1 || { echo "Ruff unavailable; lint not performed"; exit 2; }
+	@ruff check --config ci/ruff.toml $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py
 
 lint-yaml: ## Check YAML files
 	@echo "Checking YAML files..."
@@ -211,17 +204,18 @@ clean: ## Delete temporary and generated files
 	@rm -f $(FORMATIVE)/__pycache__/*.pyc 2>/dev/null || true
 	@echo -e "$(GREEN)✓ Cleanup complete$(NC)"
 
-clean-all: clean ## Complete cleanup including generated data
-	@rm -rf ~/demo_sem4 student_* instructor_answers 2>/dev/null || true
-	@echo -e "$(GREEN)✓ Complete cleanup (including demo and student data)$(NC)"
+clean-all: ## Explain explicit cleanup; generated/student data are not automatically deleted
+	@echo "Use the setup tool's owned-workspace cleanup for its exact workspace."
+	@echo "Generated student data and instructor_answers require explicit review; no deletion performed."
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # UTILITIES
 # ═══════════════════════════════════════════════════════════════════════════════
 
-validate: ## Validate the complete seminar structure
+validate: ## Validate supplied homework (use VERIFY_DIR=/owned/submission)
 	@echo "Validating seminar structure..."
-	@bash $(SCRIPTS_BASH)/S$(SEMINAR)_03_validator.sh || true
+	@test -n "$$VERIFY_DIR" || { echo "Usage: make validate VERIFY_DIR=/owned/submission"; exit 2; }
+	@bash $(SCRIPTS_BASH)/S$(SEMINAR)_03_validator.sh "$$VERIFY_DIR"
 	@echo -e "$(GREEN)✓ Validation complete$(NC)"
 
 stats: ## Display statistics about materials

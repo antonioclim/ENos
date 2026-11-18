@@ -30,6 +30,8 @@
 
 # Simple mode (without visual effects) - set SIMPLE_MODE=1 to disable
 SIMPLE_MODE=${SIMPLE_MODE:-0}
+DEMO_WORK="$(mktemp -d "${TMPDIR:-/tmp}/enos-hook.XXXXXXXX")" || exit 1
+trap 'rm -rf -- "$DEMO_WORK"' EXIT
 
 # ANSI colours
 RED='\033[0;31m'
@@ -192,14 +194,15 @@ demo_conditional() {
     pause 2
     
     # Cleanup
-    rm -rf /tmp/demo_test_dir 2>/dev/null
+    rm -rf -- "$DEMO_WORK/new_directory"
     
     cprint "$YELLOW" ""
     cprint "$YELLOW" "The WRONG method (with ;):"
-    type_cmd 'mkdir /root/no_permissions ; cd /root/no_permissions ; echo "I am in the directory!"'
+    type_cmd 'mkdir existing_file ; cd existing_file ; echo "I am in the directory!"'
     
     cprint "$RED" ""
-    mkdir /root/no_permissions 2>&1 | head -1
+    touch "$DEMO_WORK/existing_file"
+    mkdir "$DEMO_WORK/existing_file" 2>&1 | head -1
     # cd will fail but echo executes anyway
     cprint "$GREEN" 'I am in the directory!'
     cprint "$RED" "↑ WRONG! Echo executed even though mkdir failed!"
@@ -208,10 +211,10 @@ demo_conditional() {
     
     cprint "$YELLOW" ""
     cprint "$YELLOW" "The CORRECT method (with &&):"
-    type_cmd 'mkdir /tmp/demo_test && cd /tmp/demo_test && echo "I am in the directory!"'
+    type_cmd 'mkdir new_directory && cd new_directory && echo "I am in the directory!"'
     
     cprint "$GREEN" ""
-    if mkdir /tmp/demo_test_dir 2>/dev/null && cd /tmp/demo_test_dir; then
+    if mkdir "$DEMO_WORK/new_directory" 2>/dev/null && cd "$DEMO_WORK/new_directory"; then
         pwd
         cprint "$GREEN" "✓ Works perfectly!"
     fi
@@ -220,16 +223,16 @@ demo_conditional() {
     
     cprint "$YELLOW" ""
     cprint "$YELLOW" "With fallback (&&...||):"
-    type_cmd 'mkdir /root/test && echo "Created!" || echo "Creation error!"'
+    type_cmd 'mkdir existing_file && echo "Created!" || echo "Creation error!"'
     
     cprint "$GREEN" ""
-    mkdir /root/test 2>/dev/null && echo "Created!" || cprint "$RED" "Creation error!"
+    mkdir "$DEMO_WORK/existing_file" 2>/dev/null && echo "Created!" || cprint "$RED" "Creation error!"
     
     pause 3
     
     # Cleanup
-    cd ~
-    rm -rf /tmp/demo_test_dir 2>/dev/null
+    cd "$DEMO_WORK" || return 1
+    rm -rf -- "$DEMO_WORK/new_directory"
 }
 
 #

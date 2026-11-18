@@ -46,6 +46,8 @@ setup() {
     export LOG_TO_STDOUT="false"
     export LOG_FILE="${TEST_TMP_DIR}/test.log"
     export LOG_LEVEL="DEBUG"
+    export LOG_DIR="$TEST_TMP_DIR/logs" RUN_DIR="$TEST_TMP_DIR/run"
+    mkdir -p "$LOG_DIR" "$RUN_DIR"
 }
 
 # Cleanup after tests
@@ -70,13 +72,13 @@ assert_equals() {
     
     if [[ "$expected" == "$actual" ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Expected: '$expected'"
         echo "  Actual:   '$actual'"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -88,12 +90,12 @@ assert_not_empty() {
     
     if [[ -n "$value" ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Empty value received"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -105,12 +107,12 @@ assert_true() {
     
     if eval "$condition"; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Condition: $condition"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -122,12 +124,12 @@ assert_false() {
     
     if ! eval "$condition"; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Condition (should have been false): $condition"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -139,12 +141,12 @@ assert_file_exists() {
     
     if [[ -f "$file" ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  File: $file"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -157,13 +159,13 @@ assert_contains() {
     
     if [[ "$haystack" == *"$needle"* ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Searched for: '$needle'"
         echo "  In: '${haystack:0:200}...'"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -175,12 +177,12 @@ assert_is_number() {
     
     if [[ "$value" =~ ^-?[0-9]+$ ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Value: '$value'"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -194,12 +196,12 @@ assert_in_range() {
     
     if [[ "$value" =~ ^-?[0-9]+$ ]] && [[ $value -ge $min ]] && [[ $value -le $max ]]; then
         echo "✓ PASS: $message"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo "✗ FAIL: $message"
         echo "  Value: $value, Range: [$min, $max]"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         return 1
     fi
 }
@@ -208,7 +210,7 @@ assert_in_range() {
 skip_test() {
     local message="$1"
     echo "○ SKIP: $message"
-    ((TESTS_SKIPPED++))
+    TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
 }
 
 #------------------------------------------------------------------------------
@@ -310,7 +312,7 @@ test_core_lock() {
     
     # Test release lock
     release_lock "$lock_file"
-    assert_false '[[ -f "$lock_file" ]]' "Lock file deleted after release"
+    assert_true 'flock -n "$lock_file" true' "Released lock can be acquired without replacing its inode"
 }
 
 #------------------------------------------------------------------------------
@@ -447,7 +449,6 @@ test_config_load_file() {
 # Test config file
 THRESHOLD_CPU=75
 THRESHOLD_MEM=85
-TEST_VAR=test_value
 EOF
     
     # Load configuration
@@ -455,7 +456,7 @@ EOF
     
     assert_equals "75" "$THRESHOLD_CPU" "THRESHOLD_CPU loaded from file"
     assert_equals "85" "$THRESHOLD_MEM" "THRESHOLD_MEM loaded from file"
-    assert_equals "test_value" "${TEST_VAR:-}" "TEST_VAR loaded from file"
+    assert_true '[[ -z "${TEST_VAR:-}" ]]' "Unrecognised config variables are not assigned"
 }
 
 test_config_parse_args() {
@@ -502,51 +503,20 @@ test_config_validate() {
 #------------------------------------------------------------------------------
 
 test_integration_monitor() {
-    echo ""
-    echo "=== Tests: Monitor Integration ==="
-    
-    # Verify main script can be loaded
-    if [[ -f "${PROJECT_DIR}/monitor.sh" ]]; then
-        # Source only functions, don't execute main
-        (
-            # In subshell for isolation
-            SCRIPT_DIR="$PROJECT_DIR"
-            source "${PROJECT_DIR}/monitor.sh" 2>/dev/null
-            
-            # Verify main functions
-            declare -f check_cpu &>/dev/null && echo "check_cpu OK"
-            declare -f check_memory &>/dev/null && echo "check_memory OK"
-            declare -f check_disk &>/dev/null && echo "check_disk OK"
-        ) | grep -q "OK" && {
-            echo "✓ PASS: Main functions are defined"
-            ((TESTS_PASSED++))
-        } || {
-            echo "✗ FAIL: Main functions missing"
-            ((TESTS_FAILED++))
-        }
+    local result=0
+    LOG_DIR="$TEST_TMP_DIR/logs" RUN_DIR="$TEST_TMP_DIR/run" CPU_SAMPLE_INTERVAL=0.01 \
+        bash "$PROJECT_DIR/monitor.sh" -o json --cpu-threshold 100 --mem-threshold 100 --disk-threshold 100 \
+        >"$TEST_TMP_DIR/monitor.json" 2>"$TEST_TMP_DIR/monitor.err" || result=$?
+    assert_true '[[ $result == 0 || $result == 2 ]]' "Monitor completes (healthy or alert)"
+    if python3 -c 'import json,sys; x=json.load(open(sys.argv[1])); assert "metrics" in x' "$TEST_TMP_DIR/monitor.json"; then
+        assert_true true "Monitor emits structured JSON"
     else
-        skip_test "monitor.sh does not exist"
+        assert_true false "Monitor emits structured JSON"
     fi
 }
 
 test_integration_output_formats() {
-    echo ""
-    echo "=== Tests: Output Formats ==="
-    
-    # Preparation
-    ALERTS_COUNT=0
-    ALERTS_MESSAGES=()
-    
-    # Test text output
-    OUTPUT_FORMAT="text"
-    local text_output
-    text_output=$(generate_output 2>/dev/null || echo "")
-    
-    if [[ -n "$text_output" ]]; then
-        assert_contains "$text_output" "SYSTEM MONITOR" "Text output contains header"
-    else
-        skip_test "generate_output not available"
-    fi
+    test_integration_monitor
 }
 
 #------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+<!-- Historical source annotation, preserved as provenance: /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */ -->
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -6,11 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polling vs Interrupts Comparator - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'DM Sans', sans-serif;
@@ -118,7 +118,84 @@
                 #6b7280 8px
             );
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -281,7 +358,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-green-400" id="int-work">0</div>
-                        <div class="text-xs text-gray-400">Useful Work Aits</div>
+                        <div class="text-xs text-gray-400">Useful Work Units</div>
                     </div>
                     <div class="metric-card bg-gray-800/50 rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-green-400" id="int-efficiency">0%</div>
@@ -293,10 +370,10 @@
 
         <!-- Charts -->
         <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <!-- CPU Utilization Chart -->
+            <!-- CPU Utilisation Chart -->
             <div class="glass-card rounded-2xl p-5">
                 <h3 class="text-lg font-bold mb-4 flex items-center">
-                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>CPU Utilization Over Time
+                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>CPU Utilisation Over Time
                 </h3>
                 <div class="h-64">
                     <canvas id="utilizationChart"></canvas>
@@ -349,11 +426,11 @@
                                 <span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded">≤ Polling interval</span>
                             </td>
                             <td class="text-center py-3 px-4">
-                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Aproape instant</span>
+                                <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">After interrupt-delivery and handler-entry latency</span>
                             </td>
                         </tr>
                         <tr class="border-b border-gray-800">
-                            <td class="py-3 px-4 font-medium">Complexity Implementare</td>
+                            <td class="py-3 px-4 font-medium">Implementation Complexity</td>
                             <td class="text-center py-3 px-4">
                                 <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Simple</span>
                             </td>
@@ -362,7 +439,7 @@
                             </td>
                         </tr>
                         <tr class="border-b border-gray-800">
-                            <td class="py-3 px-4 font-medium">Predictibilitate</td>
+                            <td class="py-3 px-4 font-medium">Predictability</td>
                             <td class="text-center py-3 px-4">
                                 <span class="px-2 py-1 bg-green-900/30 text-green-400 rounded">Good</span>
                             </td>
@@ -387,7 +464,7 @@
         <!-- Summary Stats -->
         <div class="glass-card rounded-2xl p-5">
             <h3 class="text-lg font-bold mb-4 flex items-center">
-                <i class="fas fa-chart-bar mr-2 text-cyan-400"></i>Resulte Simulare
+                <i class="fas fa-chart-bar mr-2 text-cyan-400"></i>Simulation Results
             </h3>
             
             <div class="grid md:grid-cols-4 gap-4" id="summary-stats">
@@ -404,7 +481,7 @@
                     <div class="text-2xl font-bold text-green-400" id="int-response">-</div>
                 </div>
                 <div class="bg-gray-800/50 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-400 mb-1">Efficiency Gain</div>
+                    <div class="text-sm text-gray-400 mb-1">Response latency reduction</div>
                     <div class="text-2xl font-bold text-purple-400" id="efficiency-gain">-</div>
                 </div>
             </div>
@@ -417,6 +494,51 @@
     </div>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         let isRunning = false;
         let simulationInterval = null;
@@ -551,7 +673,7 @@
                 'yes': 'text-green-400',
                 'done': 'text-cyan-400'
             };
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = colors[type];
             entry.textContent = msg;
             log.appendChild(entry);
@@ -567,7 +689,7 @@
                 'handler': 'text-purple-400',
                 'done': 'text-green-400'
             };
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = colors[type];
             entry.textContent = msg;
             log.appendChild(entry);
@@ -674,113 +796,33 @@
 
         // Main simulation
         async function startSimulation() {
-            if (isRunning) return;
-            isRunning = true;
-            
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('start-btn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Running...';
-            
-            // Reset
-            resetMetrics();
-            document.getElementById('poll-log').innerHTML = '';
-            document.getElementById('int-log').innerHTML = '';
-            
-            const deviceLatency = parseInt(document.getElementById('device-latency').value);
-            const pollInterval = parseInt(document.getElementById('poll-interval').value);
-            const workTime = parseInt(document.getElementById('work-time').value);
-            
-            let elapsedTime = 0;
-            let dataArrived = false;
-            let pollComplete = false;
-            let intComplete = false;
-            const startTime = Date.now();
-            
-            pollLog('start polling...', 'info');
-            intLog('CPU executing useful work...', 'work');
-            
-            // Simulation loop
-            const tick = 100; // ms per tick
-            
-            const interval = setInterval(async () => {
-                elapsedTime += tick;
-                
-                // Check if data arrived
-                if (!dataArrived && elapsedTime >= deviceLatency) {
-                    dataArrived = true;
-                    setDevice('poll', true);
-                    setDevice('int', true);
-                    
-                    // Interrupt fires immediately
-                    intLog(`⚡ IRQ! Data ready @ ${elapsedTime}ms`, 'irq');
-                    setIntCPU('handler');
-                    intMetrics.responseTime = 50; // Handler overhead
-                    
-                    setTimeout(() => {
-                        intLog('Handler processing data...', 'handler');
-                        setTimeout(() => {
-                            intLog('✓ Transfer complete!', 'done');
-                            setIntCPU('working');
-                            intComplete = true;
-                        }, 100);
-                    }, 50);
-                }
-                
-                // Polling logic
-                if (!pollComplete) {
-                    if (elapsedTime % pollInterval < tick) {
-                        pollMetrics.checks++;
-                        setPollCPU('polling');
-                        showMessage('poll', 'right', 'Ready?');
-                        
-                        setTimeout(() => {
-                            if (dataArrived && !pollComplete) {
-                                pollLog(`✓ YES! Data found @ ${elapsedTime}ms`, 'yes');
-                                showMessage('poll', 'left', 'YES!');
-                                pollMetrics.responseTime = elapsedTime - deviceLatency;
-                                pollComplete = true;
-                                
-                                setTimeout(() => {
-                                    pollLog('Transfer data...', 'done');
-                                    setPollCPU('working');
-                                    setDevice('poll', false);
-                                }, 200);
-                            } else if (!pollComplete) {
-                                pollLog(`✗ No @ ${elapsedTime}ms`, 'no');
-                                showMessage('poll', 'left', 'No');
-                                pollMetrics.wastedTime += 50; // Time wasted per check
-                            }
-                        }, 100);
-                    }
-                }
-                
-                // Interrupt side - doing useful work
-                if (!intComplete && !dataArrived) {
-                    if (elapsedTime % workTime < tick) {
-                        intMetrics.workAits++;
-                        intMetrics.usefulTime += workTime;
-                        intLog(`Work unit #${intMetrics.workAits} completed`, 'work');
-                    }
-                    setIntCPU('working');
-                }
-                
-                // Update metrics
-                pollMetrics.totalTime = elapsedTime;
-                intMetrics.totalTime = elapsedTime;
-                updateMetrics();
-                
-                // Update chart
-                const pollUsage = dataArrived && pollComplete ? 20 : 80;
-                const intUsage = dataArrived ? 30 : 25;
-                updateCharts((elapsedTime / 1000).toFixed(1), pollUsage, intUsage);
-                
-                // End condition
-                if (elapsedTime >= deviceLatency + 1500 || (pollComplete && intComplete)) {
-                    clearInterval(interval);
-                    finishSimulation();
-                }
-                
-            }, tick);
-        }
+ if(isRunning)return;
+ const latency=enosInteger(document.getElementById('device-latency').value,1,60000,'Device latency');
+ const interval=enosInteger(document.getElementById('poll-interval').value,50,60000,'Polling interval');
+ const work=enosInteger(document.getElementById('work-time').value,1,60000,'Work duration');
+ if(latency===null||interval===null||work===null)return;
+ isRunning=true;resetMetrics();document.getElementById('start-btn').disabled=true;
+ document.getElementById('poll-log').innerHTML='';document.getElementById('int-log').innerHTML='';
+ const detectionCheck=Math.ceil(latency/interval),pollDetected=detectionCheck*interval+50,intDetected=latency+50;
+ const end=Math.max(pollDetected+100,intDetected+100);let elapsed=0;
+ pollLog('Virtual model: one 50 ms check per polling interval; 100 ms transfer.','info');
+ intLog('Virtual model: useful work before arrival; 50 ms handler entry and 100 ms transfer.','work');
+ simulationInterval=setInterval(()=>{
+  elapsed=Math.min(end,elapsed+100);
+  pollMetrics.checks=Math.min(detectionCheck,Math.floor(elapsed/interval));
+  pollMetrics.wastedTime=pollMetrics.checks*50;
+  pollMetrics.responseTime=pollDetected-latency;pollMetrics.totalTime=elapsed;
+  intMetrics.usefulTime=Math.min(elapsed,latency);
+  intMetrics.workAits=Math.floor(intMetrics.usefulTime/work);
+  intMetrics.responseTime=50;intMetrics.totalTime=elapsed;
+  setDevice('poll',elapsed>=latency&&elapsed<pollDetected);setDevice('int',elapsed>=latency&&elapsed<intDetected);
+  setPollCPU(elapsed<pollDetected?'polling':'working');setIntCPU(elapsed<latency?'working':'handler');
+  const pollCpu=pollMetrics.wastedTime+Math.max(0,Math.min(100,elapsed-pollDetected));
+  const intCpu=intMetrics.usefulTime+Math.max(0,Math.min(150,elapsed-latency));
+  updateMetrics();updateCharts((elapsed/1000).toFixed(1),Math.min(100,100*pollCpu/elapsed),Math.min(100,100*intCpu/elapsed));
+  if(elapsed>=end){clearInterval(simulationInterval);simulationInterval=null;finishSimulation();}
+ },100);
+}
 
         function finishSimulation() {
             isRunning = false;
@@ -816,7 +858,8 @@
         }
 
         function resetSimulation() {
-            if (isRunning) return;
+            enosTimers.cancel();
+            isRunning = false;
             
             resetMetrics();
             updateMetrics();
@@ -843,6 +886,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             initCharts();
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

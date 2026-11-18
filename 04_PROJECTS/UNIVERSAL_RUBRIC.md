@@ -1,5 +1,7 @@
 # Universal Evaluation Rubric - Semester Projects
 
+> **Current status:** Numerical assessment, bonus and penalty rules below are historical proposals awaiting author reconciliation. Timings, anecdotes and experiential claims are retained with unverified provenance. See [ASSESSMENT_AND_EVIDENCE_CONTRACT.md](ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for the concrete choices, consequences and recommended resolution. No grade or publication policy is adopted by these examples.
+
 > **Document for Evaluators**  
 > **Operating Systems** | ASE Bucharest - CSIE
 
@@ -67,8 +69,8 @@
 | Criterion | % | Excellent | Acceptable | Insufficient |
 |-----------|---|-----------|------------|--------------|
 | ShellCheck clean | 2% | 0 warnings | < 5 minor warnings | Multiple errors |
-| Error handling | 2% | `set -euo pipefail`, trap | Partial | No handling |
-| Portability | 1% | Works on any Linux | Minor issues | Hardcoded paths |
+| Error handling | 2% | Explicit tested errors, cleanup and strict-mode exceptions | Partial | No handling |
+| Portability | 1% | Works on the declared/tested Linux configurations | Minor issues | Hardcoded paths |
 
 ### 3. DOCUMENTATION (15%)
 

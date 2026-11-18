@@ -1,0 +1,353 @@
+{
+  "scope": "Selected unmodified npm package bytes, verified against registry tarball integrity and local package content. Generated Tailwind CSS is recorded separately. No package install lifecycle script was run.",
+  "packages": [
+    {
+      "npm_name": "tailwindcss",
+      "version": "3.4.17",
+      "tarball": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz",
+      "npm_integrity": "sha512-w33E2aCvSDP0tW9RZuNXadXlkHXqFzSkQew/aIa2i/Sj8fThxwovwlXHSPXTbAHwEIhBFXAedUhP2tueAKP8Og==",
+      "integrity_verified": true,
+      "tarball_sha256": "c42aab85fa6442055980e2ce61b4328f64a25abef44907feb75bd90681331d2a",
+      "files": [
+        {
+          "path": "assets/vendor/tailwindcss/3.4.17/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "60e0b68c0f35c078eef3a5d29419d0b03ff84ec1df9c3f9d6e39a519a5ae7985",
+          "bytes": 1071
+        }
+      ]
+    },
+    {
+      "npm_name": "chart.js",
+      "version": "4.4.1",
+      "tarball": "https://registry.npmjs.org/chart.js/-/chart.js-4.4.1.tgz",
+      "npm_integrity": "sha512-C74QN1bxwV1v2PEujhmKjOZ7iUM4w6BWs23Md/6aOZZSlwMzeCIDGuZay++rBgChYru7/+QFeoQW0fQoP534Dg==",
+      "integrity_verified": true,
+      "tarball_sha256": "9ee0a0470ab0888f95f2cd380b219c9e31a0a64a8356cea970f49bbfa829fd83",
+      "files": [
+        {
+          "path": "assets/vendor/chart.js/4.4.1/chart.umd.js",
+          "package_path": "dist/chart.umd.js",
+          "sha256": "74401d738dd3e03ee5dfb3b6841210fe2c4ead8a960c4011ca4ba0b78a9fd8f3",
+          "bytes": 205125
+        },
+        {
+          "path": "assets/vendor/chart.js/4.4.1/LICENSE.md",
+          "package_path": "LICENSE.md",
+          "sha256": "5a0877ad6d818529be4f33009d0942cdf7e2ed7656156f4aba7308459a546030",
+          "bytes": 1093
+        }
+      ]
+    },
+    {
+      "npm_name": "reveal.js",
+      "version": "4.5.0",
+      "tarball": "https://registry.npmjs.org/reveal.js/-/reveal.js-4.5.0.tgz",
+      "npm_integrity": "sha512-Lx1hUWhJR7Y7ScQNyGt7TFzxeviDAswK2B0cn9RwbPZogTMRgS8+FTr+/12KNHOegjvWKH0H0EGwBARNDPTgWQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "c908715b44b262350d0c5cc8e6757ca18db17e819fe0a1527d4ce954c007343c",
+      "files": [
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/reveal.js",
+          "package_path": "dist/reveal.js",
+          "sha256": "c2e4b8ae6a1e53ec01524e58bb2488f55dcdd65110dcfd4c746b3a7da3a61031",
+          "bytes": 92268
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/reveal.css",
+          "package_path": "dist/reveal.css",
+          "sha256": "6ca2c09db225df9a39e4a981b0d9bc6773db141527309b7ba8daa6cbbb17aa7e",
+          "bytes": 46578
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/reset.css",
+          "package_path": "dist/reset.css",
+          "sha256": "1aa8e84c9cabcbfe4d95b19879fe48b9c2c5e6d54574cbe679bc22edb9fe12b6",
+          "bytes": 871
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/theme/night.css",
+          "package_path": "dist/theme/night.css",
+          "sha256": "997c5a88d2a95769251d9b6f8623548857d88f392b1963cc680474b49a7f9e43",
+          "bytes": 7089
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/plugin/highlight/highlight.js",
+          "package_path": "plugin/highlight/highlight.js",
+          "sha256": "4bf14545a6762a744ebad7c141617350bf41f597961cf5058181e0a7aaf91200",
+          "bytes": 922686
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.5.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "b7cb6bd5ddfd103bf1795467346d95f2a20eb027db0c3fc96255e8a3434dbdb5",
+          "bytes": 1108
+        }
+      ]
+    },
+    {
+      "npm_name": "@fortawesome/fontawesome-free",
+      "version": "6.4.0",
+      "tarball": "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-6.4.0.tgz",
+      "npm_integrity": "sha512-0NyytTlPJwB/BF5LtRV8rrABDbe3TdTXqNB3PdZ+UUUZAEIrdOJdmABqKjt4AXwIoJNaRVVZEXxpNrqvE1GAYQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "385681597a3301b5f56fc70136274f9fd081e0ac5b9f8222351ac7e89465dfa2",
+      "files": [
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/css/all.min.css",
+          "package_path": "css/all.min.css",
+          "sha256": "1edb1725a9ea8ca4dcf2f5508cee183218aa1685e47c1b23056717f754f58ebf",
+          "bytes": 102025
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/LICENSE.txt",
+          "package_path": "LICENSE.txt",
+          "sha256": "0aa8f86525273b2efa4f40f4272a188e187704252170e979dc06879adf68d43c",
+          "bytes": 7427
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-brands-400.ttf",
+          "package_path": "webfonts/fa-brands-400.ttf",
+          "sha256": "20c4a58bc9d1d69e935d06f1528923646a715be5e218665655cade8f5f1b8c00",
+          "bytes": 187208
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-regular-400.ttf",
+          "package_path": "webfonts/fa-regular-400.ttf",
+          "sha256": "528d022dce6725f8a0811fd91d8e6513445c81ef33353a5c3234eab932551abf",
+          "bytes": 63952
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-solid-900.ttf",
+          "package_path": "webfonts/fa-solid-900.ttf",
+          "sha256": "67a65763c7f80903d81603bbeb9049fc2bf28508479b83ed011fe24c71fa950a",
+          "bytes": 394628
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-v4compatibility.ttf",
+          "package_path": "webfonts/fa-v4compatibility.ttf",
+          "sha256": "0515a423f828ce4e6accf92a2ea0b03d19d31cc86d9af0373291e1fd4db5f348",
+          "bytes": 10172
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-brands-400.woff2",
+          "package_path": "webfonts/fa-brands-400.woff2",
+          "sha256": "748332090c4b8e20f95d0ff59f0be20fa9c889359d3b36d4b886d73376054207",
+          "bytes": 108020
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-regular-400.woff2",
+          "package_path": "webfonts/fa-regular-400.woff2",
+          "sha256": "8e7e5ea1b15f62ab14dbd41768e8fbcd21cc859a4ea5da812457ee714299fb35",
+          "bytes": 24948
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-solid-900.woff2",
+          "package_path": "webfonts/fa-solid-900.woff2",
+          "sha256": "7152a6933ee3d690ec2af3d09da9d701723d16aa3410a6d80f28ff8866f3b880",
+          "bytes": 150124
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.4.0/webfonts/fa-v4compatibility.woff2",
+          "package_path": "webfonts/fa-v4compatibility.woff2",
+          "sha256": "694a17c3d9d6c05f8aac63c544615552a4b220e9a4de863d87341a6bcfc1bc8d",
+          "bytes": 4564
+        }
+      ]
+    },
+    {
+      "npm_name": "@fortawesome/fontawesome-free",
+      "version": "6.5.1",
+      "tarball": "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-6.5.1.tgz",
+      "npm_integrity": "sha512-CNy5vSwN3fsUStPRLX7fUYojyuzoEMSXPl7zSLJ8TgtRfjv24LOnOWKT2zYwaHZCJGkdyRnTmstR0P+Ah503Gw==",
+      "integrity_verified": true,
+      "tarball_sha256": "6b659a2f6596db8403e3761c81e64179383ee9476a9c4f09f4bcca929f94661e",
+      "files": [
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/css/all.min.css",
+          "package_path": "css/all.min.css",
+          "sha256": "c22cfb6520a7fdbb738632834019acf47c78b1279462c0eb4cb83bae83ecb5a7",
+          "bytes": 102641
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/LICENSE.txt",
+          "package_path": "LICENSE.txt",
+          "sha256": "0aa8f86525273b2efa4f40f4272a188e187704252170e979dc06879adf68d43c",
+          "bytes": 7427
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-brands-400.ttf",
+          "package_path": "webfonts/fa-brands-400.ttf",
+          "sha256": "5656d596bc597165a42182f67b2b9f17d2ae47a9e3ef1b042b9a729739730705",
+          "bytes": 207972
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-regular-400.ttf",
+          "package_path": "webfonts/fa-regular-400.ttf",
+          "sha256": "5d02dc9b858e3c85a794f87e379857f4fedc4e26cf15001714a9a0e0b1d2294d",
+          "bytes": 68004
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-solid-900.ttf",
+          "package_path": "webfonts/fa-solid-900.ttf",
+          "sha256": "fbbf06d7437aa30f3cd44c968380193545a8fc3eadfb7ad897bbb101eefec5a2",
+          "bytes": 419720
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-v4compatibility.ttf",
+          "package_path": "webfonts/fa-v4compatibility.ttf",
+          "sha256": "09663a36fc05e7190af8324b855105c5bb511ad94f94b81b34afee503279eca2",
+          "bytes": 10832
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-brands-400.woff2",
+          "package_path": "webfonts/fa-brands-400.woff2",
+          "sha256": "3a8924cd5203a28628716aedb5cef0943da4c3b44e3ffcee90ab06387b41c490",
+          "bytes": 117372
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-regular-400.woff2",
+          "package_path": "webfonts/fa-regular-400.woff2",
+          "sha256": "2bccecf0bc7e96cd5ce4003abeb3ae9ee4a3d19158c4e6edfd2df32d2f0d5721",
+          "bytes": 25452
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-solid-900.woff2",
+          "package_path": "webfonts/fa-solid-900.woff2",
+          "sha256": "9fc85f3a4544ab0d570c7f8f9bbb88db8d92c359b2707580ea8b07c75673eae2",
+          "bytes": 156496
+        },
+        {
+          "path": "assets/vendor/fontawesome-free/6.5.1/webfonts/fa-v4compatibility.woff2",
+          "package_path": "webfonts/fa-v4compatibility.woff2",
+          "sha256": "4d4a2d7fd1c6684845cb174fdd7fc073bd64cb741286fb247f8b76c2b7b852c4",
+          "bytes": 4792
+        }
+      ]
+    },
+    {
+      "npm_name": "highlight.js",
+      "version": "11.7.0",
+      "tarball": "https://registry.npmjs.org/highlight.js/-/highlight.js-11.7.0.tgz",
+      "npm_integrity": "sha512-1rRqesRFhMO/PRF+G86evnyJkCgaZFOI+Z6kdj15TA18funfoqJXvgPCLSf0SWq3SRfg1j3HlDs8o4s3EGq1oQ==",
+      "integrity_verified": true,
+      "tarball_sha256": "00816ed348ae5f4ba158cd0fee331e8d7403f49089577d7a8644802945b7610f",
+      "files": [
+        {
+          "path": "assets/vendor/highlight.js/11.7.0/monokai.css",
+          "package_path": "styles/monokai.css",
+          "sha256": "cff1e9f20834a9c8a4470018c2d43f76336a1dc5cb79daa308a6f4b335935c45",
+          "bytes": 790
+        },
+        {
+          "path": "assets/vendor/highlight.js/11.7.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490",
+          "bytes": 1514
+        }
+      ]
+    },
+    {
+      "npm_name": "highlight.js",
+      "version": "11.8.0",
+      "tarball": "https://registry.npmjs.org/highlight.js/-/highlight.js-11.8.0.tgz",
+      "npm_integrity": "sha512-MedQhoqVdr0U6SSnWPzfiadUcDHfN/Wzq25AkXiQv9oiOO/sG0S7XkvpFIqWBl9Yq1UYyYOOVORs5UW2XlPyzg==",
+      "integrity_verified": true,
+      "tarball_sha256": "d82fa4b731f6565c2e7925582e9bd581eb7d039a0ad625f38d8a7ce8d9e97a4e",
+      "files": [
+        {
+          "path": "assets/vendor/highlight.js/11.8.0/monokai.css",
+          "package_path": "styles/monokai.css",
+          "sha256": "cff1e9f20834a9c8a4470018c2d43f76336a1dc5cb79daa308a6f4b335935c45",
+          "bytes": 790
+        },
+        {
+          "path": "assets/vendor/highlight.js/11.8.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490",
+          "bytes": 1514
+        }
+      ]
+    },
+    {
+      "npm_name": "reveal.js",
+      "version": "4.6.1",
+      "tarball": "https://registry.npmjs.org/reveal.js/-/reveal.js-4.6.1.tgz",
+      "npm_integrity": "sha512-1CW0auaXNPmwmvQ7TwpszwVxMi2Xr5cTS3J3EBC/HHgbPF32Dn7aiu/LKWDOGjMbaDwKQiGmfqcoGQ74HUHCMw==",
+      "integrity_verified": true,
+      "tarball_sha256": "4f4121ef2b8e7e9398bdecd7b3b6ce5e0ee3a2f5af221708eb6c4ce03bcae6be",
+      "files": [
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/reveal.js",
+          "package_path": "dist/reveal.js",
+          "sha256": "73d4b64d59eded6de6a49500e7b709eb8d92c0d1d88d911319ce551c31341e9f",
+          "bytes": 92420
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/reveal.css",
+          "package_path": "dist/reveal.css",
+          "sha256": "fa4713396db8274bc0f1def50767464b6d98e61f4f83d17f4de6417210b25901",
+          "bytes": 46586
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/theme/night.css",
+          "package_path": "dist/theme/night.css",
+          "sha256": "997c5a88d2a95769251d9b6f8623548857d88f392b1963cc680474b49a7f9e43",
+          "bytes": 7089
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/plugin/highlight/highlight.js",
+          "package_path": "plugin/highlight/highlight.js",
+          "sha256": "4bf14545a6762a744ebad7c141617350bf41f597961cf5058181e0a7aaf91200",
+          "bytes": 922686
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/plugin/markdown/markdown.js",
+          "package_path": "plugin/markdown/markdown.js",
+          "sha256": "4bd0b58ec81d8e6437269ea50939d83629eb4bb6ad11dbddeacb68d1d3e7ab9e",
+          "bytes": 41552
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/plugin/notes/notes.js",
+          "package_path": "plugin/notes/notes.js",
+          "sha256": "5c49866ac430789657b5b33363d2bf3edb2ef804f91c81ebd19ebc351fb0451a",
+          "bytes": 66603
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/plugin/notes/speaker-view.html",
+          "package_path": "plugin/notes/speaker-view.html",
+          "sha256": "a0ee18870c7d63b8df67a1edfdc93a8416038fa7a4e059590cde7588bd8c6a4a",
+          "bytes": 23506
+        },
+        {
+          "path": "assets/vendor/reveal.js/4.6.1/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "b7cb6bd5ddfd103bf1795467346d95f2a20eb027db0c3fc96255e8a3434dbdb5",
+          "bytes": 1108
+        }
+      ]
+    },
+    {
+      "npm_name": "highlight.js",
+      "version": "11.9.0",
+      "tarball": "https://registry.npmjs.org/highlight.js/-/highlight.js-11.9.0.tgz",
+      "npm_integrity": "sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==",
+      "integrity_verified": true,
+      "tarball_sha256": "db2a70542f61a7ee55c82d7fa13a5a4ec3df690fb1c9476c0d7b8500d4bfab30",
+      "files": [
+        {
+          "path": "assets/vendor/highlight.js/11.9.0/monokai.css",
+          "package_path": "styles/monokai.css",
+          "sha256": "de6dac6f72f5fb049bf95d3f3479427305ba5a0f8d53395bdecd24a6080f4be9",
+          "bytes": 971
+        },
+        {
+          "path": "assets/vendor/highlight.js/11.9.0/LICENSE",
+          "package_path": "LICENSE",
+          "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490",
+          "bytes": 1514
+        }
+      ]
+    }
+  ]
+}

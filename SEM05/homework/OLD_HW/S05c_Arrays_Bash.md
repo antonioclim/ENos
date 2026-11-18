@@ -1,5 +1,8 @@
 # S05_TC02 - Arrays in Bash
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory material - Seminar 5 (SPLIT from TC6a)
 
@@ -269,13 +272,14 @@ declare -A word_count
 
 # Read and count
 while read -r word; do
-    ((word_count[$word]++))
+    [[ -n $word ]] || continue
+    word_count[$word]=$((${word_count[$word]:-0}+1))
 done < <(tr -cs '[:alpha:]' '\n' < text.txt | tr '[:upper:]' '[:lower:]')
 
 # Display sorted
 for word in "${!word_count[@]}"; do
     echo "${word_count[$word]} $word"
-done | sort -rn | head -10
+done | sort -rn | sed -n '1,10p'
 ```
 
 ### 5.2 Config Parser
@@ -284,18 +288,21 @@ done | sort -rn | head -10
 declare -A CONFIG
 
 parse_config() {
-    local file="$1"
-    while IFS='=' read -r key value; do
-        # Skip comments and empty lines
-        [[ "$key" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "$key" ]] && continue
-        
-        # Trim whitespace
-        key="${key// /}"
-        value="${value// /}"
-        
-        CONFIG["$key"]="$value"
-    done < "$file"
+    local file="$1" line key value
+    local -A next=()
+    # Literal single-line KEY=VALUE. Values (including spaces/=) are not expanded.
+    # No shell quoting/export grammar is implied; empty values are supported.
+    while IFS= read -r line || [[ -n $line ]]; do
+        [[ -z $line || $line =~ ^[[:space:]]*# ]] && continue
+        [[ $line == *=* ]] || return 2
+        key=${line%%=*}; value=${line#*=}
+        key=${key#"${key%%[![:space:]]*}"}; key=${key%"${key##*[![:space:]]}"}
+        [[ $key =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+        next[$key]=$value
+    done < "$file" || return 1
+    CONFIG=()
+    for key in "${!next[@]}"; do CONFIG[$key]=${next[$key]}; done
+    return 0
 }
 
 get_config() {
@@ -319,7 +326,8 @@ push() { STACK+=("$1"); }
 
 pop() {
     (( ${#STACK[@]} == 0 )) && { echo "Empty" >&2; return 1; }
-    echo "${STACK[-1]}"
+    local -n popped_ref=$1
+    popped_ref=${STACK[-1]}
     unset 'STACK[-1]'
 }
 
@@ -331,9 +339,12 @@ is_empty() { (( ${#STACK[@]} == 0 )); }
 push "a"
 push "b"
 push "c"
-echo "Pop: $(pop)"   # c
+pop popped
+echo "Pop: $popped"   # c; mutation occurs in this shell
 echo "Peek: $(peek)" # b
 ```
+
+Cache updates survive only a direct call in the parent shell; `$(cached_curl ...)` isolates those changes. Use an output parameter when retaining cache state matters.
 
 ### 5.4 Simple Cache
 

@@ -8,7 +8,7 @@ This list is **selective** and serves to historically and conceptually anchor th
 |---:|---|---|
 | 1 | Belady, L. A. (1966). A study of replacement algorithms for a virtual-storage computer. *IBM Systems Journal, 5*(2), 78–101. | https://doi.org/10.1147/sj.52.0078 |
 | 2 | Coffman, E. G., Jr., Elphick, M. J., & Shoshani, A. (1971). System deadlocks. *ACM Computing Surveys, 3*(2), 67–78. | https://doi.org/10.1145/356586.356588 |
-| 3 | Denning, P. J. (1970). Virtual memory. *ACM Computing Surveys, 2*(3), 153–189. | https://doi.org/10.1145/234313.234403 |
+| 3 | Denning, P. J. (1970). Virtual memory. *ACM Computing Surveys, 2*(3), 153–189. | https://doi.org/10.1145/356571.356573 |
 | 4 | Ghemawat, S., Gobioff, H., & Leung, S.-T. (2003). The Google file system. In *Proceedings of the Nineteenth ACM Symposium on Operating Systems Principles (SOSP '03)* (pp. 29–43). ACM. | https://doi.org/10.1145/945445.945450 |
 | 5 | Lampson, B. W. (1974). Protection. *ACM SIGOPS Operating Systems Review, 8*(1), 18–24. | https://doi.org/10.1145/775265.775268 |
 | 6 | Lampson, B. W., & Redell, D. D. (1980). Experience with processes and monitors in Mesa. *Communications of the ACM, 23*(2), 105–117. | https://doi.org/10.1145/358818.358824 |

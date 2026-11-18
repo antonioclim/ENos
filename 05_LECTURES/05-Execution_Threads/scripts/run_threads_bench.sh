@@ -36,5 +36,5 @@ echo "=== Run benchmark: reps=$REPS workers=$WORKERS n=$N ==="
 for i in $(seq 1 "$REPS"); do
   echo
   echo "--- Run $i/$REPS ---"
-  "$PY" --workers "$WORKERS" --n "$N"
+  python3 "$PY" --workers "$WORKERS" --n "$N"
 done

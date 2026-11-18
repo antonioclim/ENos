@@ -1,5 +1,8 @@
 # S05_TC05 - Logging and Debugging in Bash
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory material - Seminar 5 (NEW - Redistributed)
 
@@ -213,15 +216,12 @@ rotate_logs
 #!/bin/bash
 
 log_json() {
-    local level="$1"
-    shift
-    local message="$*"
-    
-    local timestamp
-    timestamp=$(date -Iseconds)
-    
-    printf '{"timestamp":"%s","level":"%s","message":"%s","pid":%d}\n' \
-        "$timestamp" "$level" "$message" "$$"
+    local level="$1"; shift
+    python3 - "$level" "$*" "$$" <<'PYLOG'
+import datetime,json,sys
+print(json.dumps({'timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+ 'level':sys.argv[1],'message':sys.argv[2],'pid':int(sys.argv[3])}))
+PYLOG
 }
 
 log_json INFO "Application started"
@@ -472,7 +472,7 @@ log() { echo "[$(date '+%H:%M:%S')] $*"; }
 log() { echo "[$(date)] $*" | tee -a "$LOG_FILE"; }
 
 # LEVELS
-log_debug() { [[ "$DEBUG" == true ]] && echo "[DEBUG] $*" >&2; }
+log_debug() { if [[ ${DEBUG:-false} == true ]]; then printf '[DEBUG] %s\n' "$*" >&2; fi; return 0; }
 log_error() { echo "[ERROR] $*" >&2; }
 
 # DEBUGGING

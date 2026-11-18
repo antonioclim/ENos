@@ -8,6 +8,15 @@
 
 set -euo pipefail
 
+if [[ $# -gt 0 ]]; then
+    if [[ $# -eq 1 && ( "$1" == --help || "$1" == -h ) ]]; then
+        echo "Usage: $0 (fixed ten-question interactive quiz; no timed/shuffle options)"
+        exit 0
+    fi
+    echo "Unsupported option. Use --help." >&2
+    exit 2
+fi
+
 # Colours
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -28,7 +37,7 @@ ask_question() {
     local correct="$3"
     local explanation="$4"
     
-    ((TOTAL++))
+    TOTAL=$((TOTAL + 1))
     
     echo ""
     echo -e "${CYAN}Question $TOTAL:${NC}"
@@ -44,7 +53,7 @@ ask_question() {
     
     if [ "$answer" == "$correct" ]; then
         echo -e "${GREEN}[CORRECT]${NC} Well done!"
-        ((SCORE++))
+        SCORE=$((SCORE + 1))
     else
         echo -e "${RED}[INCORRECT]${NC} The correct answer is: $correct"
     fi
@@ -93,7 +102,7 @@ B) The shell interprets commands, the terminal is the interface
 C) The terminal interprets commands, the shell is the window
 D) There is no functional difference" \
     "B" \
-    "The shell (bash, zsh) is the command interpreter. The terminal is the graphical interface."
+    "The shell (bash, zsh) is the command interpreter. The terminal provides input/output; it may be graphical, text-console or remote."
 
 # Question 4
 ask_question \
@@ -107,13 +116,13 @@ D) Virtual path" \
 
 # Question 5
 ask_question \
-    "If I set VAR='test' without export, what will echo \$VAR display in a subshell?" \
+    "With VAR previously unset, VAR='test'; bash --noprofile --norc -c 'echo \$VAR' (BASH_ENV unset) prints:" \
     "A) test
 B) Nothing (empty string)
 C) Error
 D) \$VAR literally" \
     "B" \
-    "Local variables (without export) are not visible in child processes."
+    "A (...) subshell inherits unexported shell variables. A newly invoked Bash receives exported variables only; BASH_ENV is unset in this fixture."
 
 # Question 6
 ask_question \
@@ -188,7 +197,7 @@ fi
 
 echo ""
 echo "Recommended next steps:"
-echo "  1. Review the MAIN_MATERIAL.md document"
-echo "  2. Try the SPRINT_EXERCISES.md"
-echo "  3. Complete the SELF_ASSESSMENT_REFLECTION.md"
+echo "  1. Review docs/S01_02_MAIN_MATERIAL.md"
+echo "  2. Try docs/S01_06_SPRINT_EXERCISES.md"
+echo "  3. Complete docs/S01_10_SELF_ASSESSMENT_REFLECTION.md"
 echo ""

@@ -120,6 +120,7 @@ A02_Interactive_Shell_Extension/
 #define SHELLEXT_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /* Token types for syntax highlighting */
 typedef enum {
@@ -176,7 +177,7 @@ void highlighter_free(char *highlighted);
 typedef struct TrieNode TrieNode;
 
 TrieNode *trie_create(void);
-void trie_insert(TrieNode *root, const char *word);
+int trie_insert(TrieNode *root, const char *word); /* 0 success, -1 error */
 char **trie_complete(TrieNode *root, const char *prefix, int *count);
 void trie_free_results(char **results, int count);
 void trie_destroy(TrieNode *root);
@@ -199,6 +200,14 @@ int validate_syntax(const char *line, char *error_msg, size_t error_size);
 ```
 
 ### Lexer/Tokeniser (lexer.c)
+
+This byte-oriented teaching lexer recognises simple words, standalone quoted
+strings, basic variables, options and command separators. It is not a Bash grammar
+or a syntax validator: here-documents, substitutions, assignments before commands,
+compound statements and quoted/unquoted word concatenation require further work.
+`TOKEN_ERROR` identifies an unmatched standalone quote/brace; it does not certify
+all other input as syntactically valid. The `validate_syntax` API remains a student
+exercise and must not claim full Bash acceptance on the strength of colouring.
 
 ```c
 #include "shellext.h"
@@ -250,7 +259,7 @@ static bool is_builtin(const char *word, size_t len) {
 }
 
 static bool is_operator_char(char c) {
-    return strchr("|&;<>(){}[]!", c) != NULL;
+    return c != '\0' && strchr("|&;<>()\n", c) != NULL;
 }
 
 void lexer_init(const char *input) {
@@ -277,7 +286,7 @@ Token lexer_next_token(void) {
     Token token = {TOKEN_END, NULL, 0, 0};
     
     /* Skip whitespace */
-    while (input_pos < input_len && isspace(peek())) {
+    while (input_pos < input_len && peek() != '\n' && isspace((unsigned char)peek())) {
         advance();
     }
     
@@ -307,6 +316,7 @@ Token lexer_next_token(void) {
             advance();
         }
         if (peek() == '"') advance();
+        else { token.type = TOKEN_ERROR; token.error_code = 1; }
         token.length = &input_buffer[input_pos] - token.start;
         return token;
     }
@@ -319,6 +329,7 @@ Token lexer_next_token(void) {
             advance();
         }
         if (peek() == '\'') advance();
+        else { token.type = TOKEN_ERROR; token.error_code = 1; }
         token.length = &input_buffer[input_pos] - token.start;
         return token;
     }
@@ -331,8 +342,9 @@ Token lexer_next_token(void) {
             advance();
             while (peek() && peek() != '}') advance();
             if (peek() == '}') advance();
+            else { token.type = TOKEN_ERROR; token.error_code = 2; }
         } else {
-            while (isalnum(peek()) || peek() == '_') advance();
+            while (isalnum((unsigned char)peek()) || peek() == '_') advance();
         }
         token.length = &input_buffer[input_pos] - token.start;
         return token;
@@ -354,22 +366,22 @@ Token lexer_next_token(void) {
         token.type = TOKEN_OPTION;
         advance();
         if (peek() == '-') advance();
-        while (isalnum(peek()) || peek() == '-') advance();
+        while (isalnum((unsigned char)peek()) || peek() == '-') advance();
         token.length = &input_buffer[input_pos] - token.start;
         return token;
     }
     
     /* Number */
-    if (isdigit(c)) {
+    if (isdigit((unsigned char)c)) {
         token.type = TOKEN_NUMBER;
-        while (isdigit(peek())) advance();
+        while (isdigit((unsigned char)peek())) advance();
         token.length = &input_buffer[input_pos] - token.start;
         return token;
     }
     
     /* Word (command, builtin, keyword, or path) */
     token.type = TOKEN_WORD;
-    while (peek() && !isspace(peek()) && !is_operator_char(peek())) {
+    while (peek() && !isspace((unsigned char)peek()) && !is_operator_char(peek())) {
         advance();
     }
     token.length = &input_buffer[input_pos] - token.start;
@@ -394,6 +406,7 @@ Token lexer_next_token(void) {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 static ColourScheme colours = {
     .command   = "\033[1;32m",    /* Bold green */
@@ -416,32 +429,41 @@ void highlighter_init(const ColourScheme *custom_colours) {
     }
 }
 
+/* The scheme strings are borrowed; they must remain valid during highlighting.
+ * NULL fields are equivalent to empty strings. Append checks actual byte counts. */
+static int append_bytes(char **buffer, size_t *used, size_t *capacity, const char *text, size_t length) {
+    if (length > SIZE_MAX - *used - 1) return -1;
+    size_t need = *used + length + 1;
+    if (need > *capacity) {
+        size_t next = *capacity;
+        while (next < need) {
+            if (next > SIZE_MAX/2) { next = need; break; }
+            next *= 2;
+        }
+        char *grown = realloc(*buffer, next);
+        if (!grown) return -1;
+        *buffer = grown; *capacity = next;
+    }
+    if (length) memcpy(*buffer + *used, text, length);
+    *used += length; (*buffer)[*used] = '\0';
+    return 0;
+}
+
 char *highlight_line(const char *line) {
     if (!line) return NULL;
-    
-    /* Allocate buffer (worst case: each char + colour codes) */
-    size_t max_len = strlen(line) * 20 + 1;
-    char *result = malloc(max_len);
+    size_t capacity = 64, used = 0;
+    char *result = malloc(capacity);
     if (!result) return NULL;
-    
-    char *out = result;
-    lexer_init(line);
-    
+    result[0] = '\0'; lexer_init(line);
     const char *last_end = line;
     Token token;
     bool first_word = true;
-    
     while ((token = lexer_next_token()).type != TOKEN_END) {
-        /* Copy any skipped whitespace */
-        while (last_end < token.start) {
-            *out++ = *last_end++;
-        }
-        
-        /* Get colour for token type */
+        if (append_bytes(&result, &used, &capacity, last_end, (size_t)(token.start-last_end)) < 0) goto fail;
         const char *colour = NULL;
         switch (token.type) {
             case TOKEN_KEYWORD:  colour = colours.keyword; break;
-            case TOKEN_BUILTIN:  colour = colours.builtin; break;
+            case TOKEN_BUILTIN:  colour = first_word ? colours.builtin : NULL; break;
             case TOKEN_STRING:   colour = colours.string; break;
             case TOKEN_VARIABLE: colour = colours.variable; break;
             case TOKEN_OPERATOR: colour = colours.operator_; break;
@@ -450,42 +472,23 @@ char *highlight_line(const char *line) {
             case TOKEN_PATH:     colour = colours.path; break;
             case TOKEN_OPTION:   colour = colours.option; break;
             case TOKEN_ERROR:    colour = colours.error; break;
-            case TOKEN_WORD:
-                /* First word is command */
-                if (first_word) {
-                    colour = colours.command;
-                    first_word = false;
-                }
-                break;
+            case TOKEN_WORD:    colour = first_word ? colours.command : NULL; break;
             default: break;
         }
-        
-        /* Reset first_word flag on pipe or semicolon */
-        if (token.type == TOKEN_OPERATOR && 
-            (token.start[0] == '|' || token.start[0] == ';')) {
-            first_word = true;
+        if (token.type == TOKEN_OPERATOR) {
+            if (strchr("|;&\n(", token.start[0])) first_word = true;
+        } else if (token.type != TOKEN_COMMENT) {
+            first_word = false; /* Includes builtins and path commands. */
         }
-        
-        /* Write coloured token */
-        if (colour) {
-            out += sprintf(out, "%s", colour);
-        }
-        memcpy(out, token.start, token.length);
-        out += token.length;
-        if (colour) {
-            out += sprintf(out, "%s", colours.reset);
-        }
-        
+        if (colour && append_bytes(&result, &used, &capacity, colour, strlen(colour)) < 0) goto fail;
+        if (append_bytes(&result, &used, &capacity, token.start, token.length) < 0) goto fail;
+        if (colour && colours.reset && append_bytes(&result, &used, &capacity, colours.reset, strlen(colours.reset)) < 0) goto fail;
         last_end = token.start + token.length;
     }
-    
-    /* Copy remaining */
-    while (*last_end) {
-        *out++ = *last_end++;
-    }
-    *out = '\0';
-    
+    if (append_bytes(&result, &used, &capacity, last_end, strlen(last_end)) < 0) goto fail;
     return result;
+fail:
+    free(result); return NULL;
 }
 
 void highlighter_free(char *highlighted) {
@@ -499,77 +502,76 @@ void highlighter_free(char *highlighted) {
 #include "shellext.h"
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdint.h>
 
-#define ALPHABET_SIZE 128
+/* Opaque non-NUL byte keys (including UTF-8), ordered by byte value.
+ * This is not Unicode normalisation or locale-aware collation. */
+#define ALPHABET_SIZE 256
+#define MAX_TRIE_KEY 1024
 
 struct TrieNode {
     struct TrieNode *children[ALPHABET_SIZE];
     bool is_end;
-    char *word;  /* Store complete word at end nodes */
+    char *word;
 };
 
-TrieNode *trie_create(void) {
-    TrieNode *node = calloc(1, sizeof(TrieNode));
-    return node;
-}
+TrieNode *trie_create(void) { return calloc(1, sizeof(TrieNode)); }
 
-void trie_insert(TrieNode *root, const char *word) {
-    if (!root || !word) return;
-    
+int trie_insert(TrieNode *root, const char *word) {
+    if (!root || !word || strlen(word) > MAX_TRIE_KEY) { errno = EINVAL; return -1; }
     TrieNode *node = root;
-    
-    for (const char *p = word; *p; p++) {
-        unsigned char idx = (unsigned char)*p;
-        if (idx >= ALPHABET_SIZE) continue;
-        
-        if (!node->children[idx]) {
-            node->children[idx] = trie_create();
+    for (const unsigned char *p = (const unsigned char *)word; *p; ++p) {
+        if (!node->children[*p]) {
+            TrieNode *created = trie_create();
+            if (!created) return -1; /* Existing words and ownership remain valid. */
+            node->children[*p] = created;
         }
-        node = node->children[idx];
+        node = node->children[*p];
     }
-    
-    node->is_end = true;
-    node->word = strdup(word);
+    if (node->is_end) return 0; /* Duplicate insertion is idempotent. */
+    char *copy = strdup(word);
+    if (!copy) return -1;
+    node->word = copy; node->is_end = true;
+    return 0;
 }
 
-static void collect_words(TrieNode *node, char ***results, int *count, int *capacity) {
-    if (!node) return;
-    
+static int collect_words(TrieNode *node, char ***results, int *count, int *capacity) {
     if (node->is_end && node->word) {
-        if (*count >= *capacity) {
-            *capacity *= 2;
-            *results = realloc(*results, *capacity * sizeof(char *));
+        if (*count == *capacity) {
+            if (*capacity > INT_MAX/2 || (size_t)*capacity > SIZE_MAX/(2*sizeof(char *))) { errno = EOVERFLOW; return -1; }
+            int next = *capacity * 2;
+            char **grown = realloc(*results, (size_t)next * sizeof(char *));
+            if (!grown) return -1;
+            *results = grown; *capacity = next;
         }
-        (*results)[(*count)++] = strdup(node->word);
+        char *copy = strdup(node->word);
+        if (!copy) return -1;
+        (*results)[(*count)++] = copy;
     }
-    
-    for (int i = 0; i < ALPHABET_SIZE; i++) {
-        if (node->children[i]) {
-            collect_words(node->children[i], results, count, capacity);
-        }
-    }
+    for (int i = 0; i < ALPHABET_SIZE; ++i)
+        if (node->children[i] && collect_words(node->children[i], results, count, capacity) < 0) return -1;
+    return 0;
 }
 
 char **trie_complete(TrieNode *root, const char *prefix, int *count) {
-    *count = 0;
-    if (!root || !prefix) return NULL;
-    
-    /* Navigate to prefix node */
+    if (!count) { errno = EINVAL; return NULL; }
+    *count = 0; errno = 0;
+    if (!root || !prefix || strlen(prefix) > MAX_TRIE_KEY) { errno = EINVAL; return NULL; }
     TrieNode *node = root;
-    for (const char *p = prefix; *p; p++) {
-        unsigned char idx = (unsigned char)*p;
-        if (idx >= ALPHABET_SIZE || !node->children[idx]) {
-            return NULL;
-        }
-        node = node->children[idx];
+    for (const unsigned char *p = (const unsigned char *)prefix; *p; ++p) {
+        if (!node->children[*p]) return NULL; /* count=0 and errno=0: no match. */
+        node = node->children[*p];
     }
-    
-    /* Collect all words from this node */
     int capacity = 16;
-    char **results = malloc(capacity * sizeof(char *));
-    
-    collect_words(node, &results, count, &capacity);
-    
+    char **results = malloc((size_t)capacity * sizeof(char *));
+    if (!results) return NULL;
+    if (collect_words(node, &results, count, &capacity) < 0) {
+        int saved = errno;
+        trie_free_results(results, *count); *count = 0; errno = saved;
+        return NULL;
+    }
     return results;
 }
 
@@ -601,14 +603,14 @@ void trie_destroy(TrieNode *root) {
 
 ```makefile
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -fPIC
+CFLAGS = -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -O2 -fPIC
 LDFLAGS = -lreadline
 
 SRC_DIR = src/c
 BUILD_DIR = build
 
 LIB_SOURCES = $(SRC_DIR)/lexer.c $(SRC_DIR)/highlighter.c \
-              $(SRC_DIR)/trie.c $(SRC_DIR)/completer.c
+              $(SRC_DIR)/trie.c $(SRC_DIR)/completer.c $(SRC_DIR)/readline_ext.c
 LIB_TARGET = $(BUILD_DIR)/libshellext.so
 
 .PHONY: all clean test install
@@ -630,6 +632,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 install: $(LIB_TARGET)
+	install -d /usr/local/lib /usr/local/share/shellext
 	cp $(LIB_TARGET) /usr/local/lib/
 	cp src/bash/*.sh /usr/local/share/shellext/
 	ldconfig
@@ -641,35 +644,51 @@ install: $(LIB_TARGET)
 
 ### Main Loader (shellext.sh)
 
+`libshellext.so` exposes a C API; exporting `LD_PRELOAD` does not load it into an
+already-running Bash. A `PROMPT_COMMAND` callback runs at prompt boundaries and is
+not a live editing hook. The loader below therefore requires a **student-supplied
+Bash loadable builtin bridge**, with Bash development headers matching the target
+Bash ABI. Its `shellext_install` builtin must install a readline redisplay/completion
+hook, retain the previous hooks and handle cursor/display escape widths;
+`shellext_uninstall` must restore them before unloading. Build
+`build/shellext_bash.so` from a separate `src/c/bash_builtin.c` module linked to the
+shown library. Do not link a second, incompatible readline into Bash.
+
+The bridge, completer and readline module are intentionally student work. The
+Makefile builds the C library only once those source files exist; it does not
+produce the Bash bridge automatically. Tests of lexer/trie/highlight output do not
+prove live editing integration. A standalone readline front end is another design,
+but it is a separate executable and must not be described as changing the current
+Bash editing session. The loader reports incomplete integration explicitly and
+never installs a no-op prompt hook or changes future processes through LD_PRELOAD.
+
 ```bash
-#!/bin/bash
-# shellext.sh - Load shell extensions
-
-SHELLEXT_DIR="${SHELLEXT_DIR:-$(dirname "${BASH_SOURCE[0]}")}"
-
-# Load C library
-if [[ -f "$SHELLEXT_DIR/../build/libshellext.so" ]]; then
-    export LD_PRELOAD="$SHELLEXT_DIR/../build/libshellext.so"
-fi
-
-# Source all modules
-source "$SHELLEXT_DIR/prompt.sh"
-source "$SHELLEXT_DIR/history.sh"
-source "$SHELLEXT_DIR/bookmarks.sh"
-source "$SHELLEXT_DIR/hooks.sh"
-source "$SHELLEXT_DIR/aliases.sh"
-
-# Enable syntax highlighting (requires C library)
-if command -v shellext_highlight &>/dev/null; then
-    PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_shellext_highlight_command"
-    
-    _shellext_highlight_command() {
-        # Hook into readline for live highlighting
-        :
-    }
-fi
-
-echo "Shell extensions loaded!"
+#!/usr/bin/env bash
+# Source in an interactive Bash. Bash modules and the C bridge are distinct stages.
+_shellext_load() {
+    [[ $- == *i* ]] || { printf 'Interactive Bash required\n' >&2; return 2; }
+    local module script_root project_root
+    script_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd) || return 1
+    project_root=$(cd -- "$script_root/../.." && pwd) || return 1
+    for module in prompt history bookmarks hooks aliases; do
+        [[ -r "$script_root/$module.sh" ]] || { printf 'Missing Bash module: %s\n' "$module" >&2; return 1; }
+    done
+    for module in prompt history bookmarks hooks aliases; do source "$script_root/$module.sh" || return 1; done
+    printf 'Bash modules loaded; C/readline integration is not verified.\n'
+    # Student-supplied Bash loadable builtin, compiled for this Bash ABI.
+    local bridge="$project_root/build/shellext_bash.so"
+    [[ -f $bridge ]] || { printf 'Live highlighting unavailable: build the Bash bridge first.\n' >&2; return 2; }
+    enable -f "$bridge" shellext_install || return 1
+    enable -f "$bridge" shellext_uninstall || { enable -d shellext_install; return 1; }
+    if ! shellext_install; then
+        enable -d shellext_uninstall; enable -d shellext_install
+        return 1
+    fi
+    printf 'Readline bridge installed. Validate editing and restoration interactively.\n'
+}
+_shellext_load
+# Removal after a successful installation:
+# shellext_uninstall && enable -d shellext_install && enable -d shellext_uninstall
 ```
 
 ---

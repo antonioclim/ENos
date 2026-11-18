@@ -99,7 +99,7 @@ send_email_notification() {
         return 1
     fi
     
-    echo "$body" | mail -s "$subject" "$NOTIFY_EMAIL"
+    printf '%s\n' "$body" | mail -s "$subject" "$NOTIFY_EMAIL" || return 1
     log_info "Email notification sent to: $NOTIFY_EMAIL"
 }
 
@@ -126,25 +126,15 @@ send_slack_notification() {
     esac
     
     local payload
-    payload=$(cat << EOF
-{
-    "attachments": [
-        {
-            "color": "$color",
-            "title": "System Monitor Alert",
-            "text": "$message",
-            "footer": "$(get_hostname) | $(date '+%Y-%m-%d %H:%M:%S')"
-        }
-    ]
-}
-EOF
-)
-    
-    if command -v curl &>/dev/null; then
-        curl -s -X POST -H 'Content-type: application/json' \
-            --data "$payload" "$NOTIFY_SLACK_WEBHOOK" &>/dev/null
-        log_debug "Slack notification sent"
-    fi
+    payload=$(python3 - "$color" "$message" "$(get_hostname) | $(date '+%Y-%m-%d %H:%M:%S')" <<'PYJSON'
+import json, sys
+print(json.dumps({"attachments": [{"color": sys.argv[1], "title": "System Monitor Alert", "text": sys.argv[2], "footer": sys.argv[3]}]}))
+PYJSON
+) || return 1
+    command -v curl &>/dev/null || { log_error "curl unavailable: notification not sent"; return 1; }
+    curl --fail --silent --show-error --max-time 15 -X POST -H 'Content-type: application/json' \
+        --data "$payload" "$NOTIFY_SLACK_WEBHOOK" >/dev/null || return 1
+    log_debug "Slack notification sent"
 }
 
 # Send all notifications
@@ -153,8 +143,10 @@ send_alerts() {
     local body="$2"
     local severity="${3:-warning}"
     
-    send_email_notification "$subject" "$body"
-    send_slack_notification "$body" "$severity"
+    local result=0
+    send_email_notification "$subject" "$body" || result=1
+    send_slack_notification "$body" "$severity" || result=1
+    return "$result"
 }
 
 #------------------------------------------------------------------------------
@@ -164,7 +156,13 @@ send_alerts() {
 # Check CPU usage
 check_cpu() {
     local cpu_usage
-    cpu_usage=$(get_cpu_usage)
+    if ! cpu_usage=$(get_cpu_usage); then
+        METRIC_CPU=null
+        ALERTS_MESSAGES+=("CPU measurement unavailable")
+        ALERTS_COUNT=$((ALERTS_COUNT + 1))
+        return 1
+    fi
+    METRIC_CPU="$cpu_usage"
     
     log_debug "CPU Usage: ${cpu_usage}%"
     
@@ -172,7 +170,7 @@ check_cpu() {
         local msg="CPU ALERT: ${cpu_usage}% (threshold: ${THRESHOLD_CPU}%)"
         log_warn "$msg"
         ALERTS_MESSAGES+=("$msg")
-        ((ALERTS_COUNT++))
+        ALERTS_COUNT=$((ALERTS_COUNT + 1))
         return 1
     fi
     
@@ -183,7 +181,8 @@ check_cpu() {
 # Check memory usage
 check_memory() {
     local mem_usage
-    mem_usage=$(get_memory_usage)
+    mem_usage=$(get_memory_usage) || return 1
+    METRIC_MEM="$mem_usage"
     
     log_debug "Memory Usage: ${mem_usage}%"
     
@@ -191,7 +190,7 @@ check_memory() {
         local msg="MEMORY ALERT: ${mem_usage}% (threshold: ${THRESHOLD_MEM}%)"
         log_warn "$msg"
         ALERTS_MESSAGES+=("$msg")
-        ((ALERTS_COUNT++))
+        ALERTS_COUNT=$((ALERTS_COUNT + 1))
         return 1
     fi
     
@@ -202,7 +201,8 @@ check_memory() {
 # Check swap usage
 check_swap() {
     local swap_usage
-    swap_usage=$(get_swap_usage)
+    swap_usage=$(get_swap_usage) || return 1
+    METRIC_SWAP="$swap_usage"
     
     log_debug "Swap Usage: ${swap_usage}%"
     
@@ -210,7 +210,7 @@ check_swap() {
         local msg="SWAP ALERT: ${swap_usage}% (threshold: ${THRESHOLD_SWAP}%)"
         log_warn "$msg"
         ALERTS_MESSAGES+=("$msg")
-        ((ALERTS_COUNT++))
+        ALERTS_COUNT=$((ALERTS_COUNT + 1))
         return 1
     fi
     
@@ -220,7 +220,9 @@ check_swap() {
 
 # Check disk usage
 check_disk() {
-    local disk_alerts=0
+    local disk_alerts=0 disk_data
+    disk_data=$(get_all_disk_info) || return 1
+    [[ -n "$disk_data" ]] || return 1
     
     while IFS='|' read -r mount_point size used avail percent; do
         # Skip excluded mount points
@@ -234,15 +236,16 @@ check_disk() {
         done
         $skip && continue
         
+        [[ $percent =~ ^[0-9]+$ ]] || return 1
         log_debug "Disk $mount_point: ${percent}%"
         
         if [[ ${percent:-0} -gt $THRESHOLD_DISK ]]; then
             local msg="DISK ALERT: $mount_point at ${percent}% (threshold: ${THRESHOLD_DISK}%)"
             log_warn "$msg"
             ALERTS_MESSAGES+=("$msg")
-            ((disk_alerts++))
+            disk_alerts=$((disk_alerts + 1))
         fi
-    done < <(get_all_disk_info)
+    done <<< "$disk_data"
     
     if [[ $disk_alerts -gt 0 ]]; then
         ((ALERTS_COUNT += disk_alerts))
@@ -256,13 +259,15 @@ check_disk() {
 # Check load average
 check_load() {
     local load_avg
-    load_avg=$(get_load_average)
+    load_avg=$(get_load_average) || return 1
     local load1
     load1=$(echo "$load_avg" | awk '{print $1}')
     
     local cores
-    cores=$(get_cpu_cores)
-    local threshold=$((cores * THRESHOLD_LOAD_MULT))
+    cores=$(get_cpu_cores) || return 1
+    [[ $cores =~ ^[1-9][0-9]*$ && $load1 =~ ^[0-9]+([.][0-9]+)?$ ]] || return 1
+    local threshold
+    threshold=$(awk -v c="$cores" -v m="$THRESHOLD_LOAD_MULT" 'BEGIN{print c*m}') || return 1
     
     log_debug "Load Average: $load_avg (threshold: $threshold)"
     
@@ -273,7 +278,7 @@ check_load() {
         local msg="LOAD ALERT: $load1 (threshold: ${threshold} = ${cores} cores × ${THRESHOLD_LOAD_MULT})"
         log_warn "$msg"
         ALERTS_MESSAGES+=("$msg")
-        ((ALERTS_COUNT++))
+        ALERTS_COUNT=$((ALERTS_COUNT + 1))
         return 1
     fi
     
@@ -295,9 +300,9 @@ output_text() {
     echo "Status: $status"
     echo ""
     echo "----- METRICS -----"
-    echo "CPU:    $(get_cpu_usage)% (threshold: ${THRESHOLD_CPU}%)"
-    echo "Memory: $(get_memory_usage)% (threshold: ${THRESHOLD_MEM}%)"
-    echo "Swap:   $(get_swap_usage)% (threshold: ${THRESHOLD_SWAP}%)"
+    echo "CPU:    ${METRIC_CPU:-unavailable}% (threshold: ${THRESHOLD_CPU}%)"
+    echo "Memory: ${METRIC_MEM:-unavailable}% (threshold: ${THRESHOLD_MEM}%)"
+    echo "Swap:   ${METRIC_SWAP:-unavailable}% (threshold: ${THRESHOLD_SWAP}%)"
     echo "Load:   $(get_load_average)"
     echo ""
     echo "----- DISK -----"
@@ -322,48 +327,13 @@ output_text() {
 
 # Generate JSON format output
 output_json() {
-    local status="${1:-OK}"
-    local alerts_json="[]"
-    
-    if [[ ${#ALERTS_MESSAGES[@]} -gt 0 ]]; then
-        alerts_json="["
-        local first=true
-        for alert in "${ALERTS_MESSAGES[@]}"; do
-            if ! $first; then alerts_json+=","; fi
-            alerts_json+="\"$alert\""
-            first=false
-        done
-        alerts_json+="]"
-    fi
-    
-    cat << EOF
-{
-  "timestamp": "$(date -Iseconds)",
-  "hostname": "$(get_hostname)",
-  "status": "$status",
-  "alerts_count": $ALERTS_COUNT,
-  "metrics": {
-    "cpu": {
-      "usage": $(get_cpu_usage),
-      "threshold": $THRESHOLD_CPU,
-      "cores": $(get_cpu_cores)
-    },
-    "memory": {
-      "usage": $(get_memory_usage),
-      "threshold": $THRESHOLD_MEM
-    },
-    "swap": {
-      "usage": $(get_swap_usage),
-      "threshold": $THRESHOLD_SWAP
-    },
-    "load": {
-      "average": "$(get_load_average)",
-      "threshold_multiplier": $THRESHOLD_LOAD_MULT
-    }
-  },
-  "alerts": $alerts_json
-}
-EOF
+    python3 - "$1" "$(date -Iseconds)" "$(get_hostname)" "${METRIC_CPU:-null}" "$THRESHOLD_CPU" "$(get_cpu_cores)" "${METRIC_MEM:-null}" "$THRESHOLD_MEM" "${METRIC_SWAP:-null}" "$THRESHOLD_SWAP" "$(get_load_average)" "$THRESHOLD_LOAD_MULT" "${ALERTS_MESSAGES[@]}" <<'PYJSON'
+import json, sys
+v=sys.argv[1:]
+def number(x):
+    return None if x == 'null' else int(x)
+print(json.dumps({'timestamp':v[1], 'hostname':v[2], 'status':v[0], 'alerts_count':len(v[12:]), 'metrics':{'cpu':{'usage':number(v[3]),'threshold':int(v[4]),'cores':int(v[5])}, 'memory':{'usage':number(v[6]),'threshold':int(v[7])}, 'swap':{'usage':number(v[8]),'threshold':int(v[9])}, 'load':{'average':v[10],'threshold_multiplier':int(v[11])}}, 'alerts':v[12:]}, ensure_ascii=False, indent=2))
+PYJSON
 }
 
 # Generate CSV format output
@@ -402,13 +372,18 @@ run_checks() {
     
     local check_errors=0
     
+    METRIC_CPU=""; METRIC_MEM=""; METRIC_SWAP=""
     # Run all checks
-    check_cpu    || ((check_errors++))
-    check_memory || ((check_errors++))
-    check_swap   || ((check_errors++))
-    check_disk   || ((check_errors++))
-    check_load   || ((check_errors++))
+    check_cpu    || check_errors=$((check_errors + 1))
+    check_memory || check_errors=$((check_errors + 1))
+    check_swap   || check_errors=$((check_errors + 1))
+    check_disk   || check_errors=$((check_errors + 1))
+    check_load   || check_errors=$((check_errors + 1))
     
+    if (( check_errors > 0 && ALERTS_COUNT == 0 )); then
+        ALERTS_MESSAGES+=("CHECK ERROR: one or more resource probes failed; health is unknown")
+        ALERTS_COUNT=1
+    fi
     LAST_CHECK_TIME=$(date +%s)
     
     # Generate output
@@ -425,7 +400,7 @@ run_checks() {
         send_alerts \
             "[ALERT] System Monitor - $(get_hostname) - $ALERTS_COUNT alerts" \
             "$alert_body" \
-            "danger"
+            "danger" || log_error "One or more notifications failed"
         
         return 2
     fi
@@ -451,7 +426,7 @@ daemon_loop() {
         local waited=0
         while $RUNNING && [[ $waited -lt $MONITOR_INTERVAL ]]; do
             sleep 1
-            ((waited++))
+            waited=$((waited + 1))
         done
     done
     
@@ -506,8 +481,9 @@ main() {
     if [[ "$DAEMON_MODE" == "true" ]]; then
         daemon_loop
     else
-        run_checks
-        exit $?
+        local result=0
+        run_checks || result=$?
+        return "$result"
     fi
 }
 

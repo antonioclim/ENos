@@ -62,7 +62,9 @@ echo ""
 read -rp "Press Enter to open nano with a demo file..."
 
 # Create a demo file
-cat > /tmp/nano_demo.txt << 'EOF'
+demo_file=$(mktemp "${TMPDIR:-/tmp}/enos-nano.XXXXXX.txt")
+trap 'rm -f -- "$demo_file"' EXIT
+cat > "$demo_file" << 'EOF'
 # This is a nano demonstration
 # ============================
 
@@ -78,8 +80,8 @@ Try these actions:
 # Note: All commands are displayed in the bottom bar!
 EOF
 
-nano /tmp/nano_demo.txt
+nano "$demo_file"
 
 echo ""
 echo -e "${GREEN}✓ Nano demo complete!${NC}"
-rm -f /tmp/nano_demo.txt
+rm -f -- "$demo_file"

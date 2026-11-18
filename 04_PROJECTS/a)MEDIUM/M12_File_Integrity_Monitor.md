@@ -6,7 +6,7 @@
 
 ## Description
 
-Critical file integrity monitoring system: hash-based change detection, real-time alerting, complete audit trail and compliance reports. Similar to AIDE or Tripwire, but implemented in Bash.
+Critical file integrity monitoring system: hash-based change detection, real-time alerting, an audit trail with explicit event-loss and reconciliation limits and compliance reports. Similar to AIDE or Tripwire, but implemented in Bash.
 
 ---
 
@@ -61,7 +61,7 @@ Critical file integrity monitoring system: hash-based change detection, real-tim
 
 ## CLI Interface
 
-```bash
+```text
 ./fim.sh <command> [options]
 
 Commands:
@@ -153,19 +153,19 @@ INTEGRITY STATUS: ⚠️ CHANGES DETECTED
 ───────────────────────────────────────────────────────────────────────────────
 
   /etc/passwd
-  ├─ Hash changed:     a1b2c3d4... → e5f6g7h8...
+  ├─ Hash changed:     a1b2c3d4... → e5f607a8...
   ├─ Modified:         2025-01-18 14:30:22
   ├─ Size:             2,456 → 2,512 bytes (+56)
   └─ Permissions:      unchanged (644)
   
   /etc/ssh/sshd_config
-  ├─ Hash changed:     x9y8z7w6... → m3n4o5p6...
+  ├─ Hash changed:     a9b8c7d6... → a3b4c5d6...
   ├─ Modified:         2025-01-19 09:15:00
   ├─ Size:             3,312 → 3,298 bytes (-14)
   └─ Permissions:      unchanged (600)
   
   /usr/bin/sudo
-  ├─ Hash changed:     q1r2s3t4... → u5v6w7x8...
+  ├─ Hash changed:     a1b2c3d4... → e5f607a8...
   ├─ Modified:         2025-01-17 02:30:00 (apt update)
   ├─ Size:             232,416 → 234,512 bytes
   └─ Permissions:      unchanged (4755)
@@ -225,7 +225,7 @@ Report saved: /var/log/fim/check_20250120_173000.log
 [17:45:01] Watch mode active. Waiting for events...
 
 [17:45:23] 📝 MODIFY  /etc/hosts
-           Hash: a1b2c3d4 → e5f6g7h8
+           Hash: a1b2c3d4 → e5f607a8
            Action: Logged, notification sent
 
 [17:46:05] ➕ CREATE  /etc/cron.d/new-job
@@ -250,10 +250,11 @@ Last event: 17:52:30
 
 ```sql
 -- Schema for baseline
-CREATE TABLE files (
+CREATE TABLE IF NOT EXISTS files (
     id INTEGER PRIMARY KEY,
     path TEXT UNIQUE NOT NULL,
     hash TEXT NOT NULL,
+    algorithm TEXT NOT NULL, -- every stored digest has an explicit algorithm
     size INTEGER,
     mtime INTEGER,
     permissions TEXT,
@@ -263,7 +264,7 @@ CREATE TABLE files (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE changes (
+CREATE TABLE IF NOT EXISTS changes (
     id INTEGER PRIMARY KEY,
     path TEXT NOT NULL,
     change_type TEXT,  -- modified, added, deleted, permission
@@ -274,8 +275,8 @@ CREATE TABLE changes (
     detected_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_files_path ON files(path);
-CREATE INDEX idx_changes_path ON changes(path);
+CREATE INDEX IF NOT EXISTS idx_files_path ON files(path);
+CREATE INDEX IF NOT EXISTS idx_changes_path ON changes(path);
 ```
 
 ---
@@ -315,18 +316,19 @@ M12_File_Integrity_Monitor/
 ### File hash calculation
 
 ```bash
-compute_hash() {
+compute_hash() (
+    set -o pipefail
     local file="$1"
     local algorithm="${2:-sha256}"
     
     case "$algorithm" in
-        md5)    md5sum "$file" | cut -d' ' -f1 ;;
-        sha1)   sha1sum "$file" | cut -d' ' -f1 ;;
-        sha256) sha256sum "$file" | cut -d' ' -f1 ;;
-        sha512) sha512sum "$file" | cut -d' ' -f1 ;;
+        md5)    md5sum < "$file" | cut -d' ' -f1 ;;
+        sha1)   sha1sum < "$file" | cut -d' ' -f1 ;;
+        sha256) sha256sum < "$file" | cut -d' ' -f1 ;;
+        sha512) sha512sum < "$file" | cut -d' ' -f1 ;;
         *)      echo "Unknown algorithm: $algorithm" >&2; return 1 ;;
     esac
-}
+)
 
 # Parallel calculation for performance
 compute_hashes_parallel() {
@@ -338,36 +340,27 @@ compute_hashes_parallel() {
 }
 ```
 
+The executable [baseline reference](../reference/fim_reference.py) is a Bash-callable
+Python/SQLite helper. It uses parameterised SQL, an explicit v1 schema, staged
+transactional publication, persistent locking and per-baseline algorithm metadata.
+Its config is literal JSON: `{"roots":["/owned/fixture"],"exclude":[],"algorithm":"sha256"}`.
+Regular files are monitored; symlinks are not followed, each hard-link pathname is
+recorded and directories are scope containers. Database/lock files are excluded
+from their own scan. An unreadable root or changing file makes the operation
+unavailable, rather than producing a successful partial baseline. Snapshot
+consistency against hostile concurrent mutation is outside this teaching helper.
+The earlier SQL diagram is explanatory; the helper's executable schema is canonical
+for this reference. Migration of another schema must be explicit.
+
 ### Creating baseline
 
 ```bash
+: "${FIM_HELPER:?Path to 04_PROJECTS/reference/fim_reference.py}"
 create_baseline() {
-    local config="$1"
-    local db="$BASELINE_DB"
-    
-    # Initialise DB
-    sqlite3 "$db" < "$SCHEMA_FILE"
-    
-    # For each configured directory
-    while IFS= read -r dir; do
-        find "$dir" -type f | while read -r file; do
-            # Skip excluded
-            if is_excluded "$file"; then
-                continue
-            fi
-            
-            local hash size mtime perms uid gid
-            hash=$(compute_hash "$file")
-            size=$(stat -c %s "$file")
-            mtime=$(stat -c %Y "$file")
-            perms=$(stat -c %a "$file")
-            uid=$(stat -c %u "$file")
-            gid=$(stat -c %g "$file")
-            
-            sqlite3 "$db" "INSERT INTO files (path, hash, size, mtime, permissions, uid, gid, type) 
-                          VALUES ('$file', '$hash', $size, $mtime, '$perms', $uid, $gid, 'file');"
-        done
-    done < <(get_monitored_dirs "$config")
+    local config="$1" operation="${2:-create}"
+    # Explicit update replaces only configured roots; other roots are retained.
+    [[ $operation == create || $operation == update ]] || return 2
+    python3 "$FIM_HELPER" "$operation" "$BASELINE_DB" "$config"
 }
 ```
 
@@ -375,38 +368,9 @@ create_baseline() {
 
 ```bash
 check_integrity() {
-    local db="$BASELINE_DB"
-    local changes=0
-    
-    # Check files from baseline
-    sqlite3 "$db" "SELECT path, hash, size, permissions FROM files" | \
-    while IFS='|' read -r path old_hash old_size old_perms; do
-        if [[ ! -e "$path" ]]; then
-            report_change "deleted" "$path"
-            ((changes++))
-            continue
-        fi
-        
-        local new_hash new_size new_perms
-        new_hash=$(compute_hash "$path")
-        new_size=$(stat -c %s "$path")
-        new_perms=$(stat -c %a "$path")
-        
-        if [[ "$new_hash" != "$old_hash" ]]; then
-            report_change "modified" "$path" "$old_hash" "$new_hash"
-            ((changes++))
-        fi
-        
-        if [[ "$new_perms" != "$old_perms" ]]; then
-            report_change "permission" "$path" "$old_perms" "$new_perms"
-            ((changes++))
-        fi
-    done
-    
-    # Check for new files
-    find_new_files "$db"
-    
-    return $((changes > 0 ? 1 : 0))
+    # JSON output is format-aware; 0 unchanged, 1 changed, 2 unavailable/error.
+    # Includes hash, size, mtime, permissions, UID/GID, additions and deletions.
+    python3 "$FIM_HELPER" check "$BASELINE_DB"
 }
 ```
 
@@ -429,36 +393,20 @@ watch_directories() {
         watch_args+=(-r "$dir")
     done
     
-    # Monitoring
-    inotifywait -m -e modify,create,delete,attrib \
-        --format '%T %w%f %e' --timefmt '%Y-%m-%d %H:%M:%S' \
-        "${watch_args[@]}" 2>/dev/null | \
-    while read -r timestamp path event; do
-        # Skip excluded
-        if is_excluded "$path"; then
-            log_debug "Excluded: $path"
-            continue
-        fi
-        
-        log_event "$timestamp" "$path" "$event"
-        
-        case "$event" in
-            MODIFY)
-                local old_hash new_hash
-                old_hash=$(get_baseline_hash "$path")
-                new_hash=$(compute_hash "$path")
-                if [[ "$old_hash" != "$new_hash" ]]; then
-                    alert "File modified: $path"
-                fi
-                ;;
-            CREATE)
-                alert "New file: $path"
-                ;;
-            DELETE)
-                alert "File deleted: $path"
-                ;;
-            ATTRIB)
-                alert "Attributes changed: $path"
+    # inotify-tools with %0 NUL formatting and --no-newline is required.
+    # Event flags are sets; moves and replacements trigger a full reconciliation.
+    set -o pipefail
+    inotifywait -m -r -e modify,create,delete,attrib,moved_from,moved_to,delete_self,move_self \
+        --format '%T%0%w%f%0%e%0' --timefmt '%Y-%m-%dT%H:%M:%S%z' --no-newline \
+        -- "${dirs[@]}" |
+    while IFS= read -r -d '' timestamp && IFS= read -r -d '' path && IFS= read -r -d '' events; do
+        if is_excluded "$path"; then continue; fi
+        log_event "$timestamp" "$path" "$events"
+        case ",$events," in
+            *,MODIFY,*|*,CREATE,*|*,DELETE,*|*,ATTRIB,*|*,MOVED_FROM,*|*,MOVED_TO,*|*,DELETE_SELF,*|*,MOVE_SELF,*)
+                local result=0
+                check_integrity || result=$?
+                case "$result" in 0) :;; 1) alert "Integrity changes detected; inspect structured report";; *) echo "Reconciliation unavailable" >&2; return 2;; esac
                 ;;
         esac
     done
@@ -466,6 +414,12 @@ watch_directories() {
 ```
 
 ---
+
+Queue overflow, watch-count limits, startup races and recursive directory creation
+can lose events. Periodic full verification is required; an inotify loop alone
+cannot certify a complete history. Validate installed inotify-tools capabilities
+before starting; unsupported formatting must fail rather than fall back to
+whitespace parsing.
 
 ## Specific Evaluation Criteria
 

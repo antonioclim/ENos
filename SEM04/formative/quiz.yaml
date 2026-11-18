@@ -14,7 +14,7 @@ metadata:
   version: "1.2"
   language: "en-GB"
   estimated_time_minutes: 20
-  total_score: 128
+  total_score: 139
   pass_threshold: 65
   
   # Bloom distribution for beginners (Year 1)
@@ -124,7 +124,7 @@ questions:
     lo: [LO1]
     score: 7
     text: |
-      What is the MAIN difference between BRE and ERE in grep?
+      For GNU grep, what is the MAIN difference between BRE and ERE in these examples?
     options:
       - "In BRE, metacharacters +, ?, {}, (), | require escaping with backslash"
       - "BRE is faster than ERE"
@@ -133,7 +133,8 @@ questions:
     correct: 0
     explanation: |
       In BRE (Basic Regular Expressions), the characters +, ?, {}, (), | are 
-      literal by default and must be escaped (\+, \?, etc.) to be metacharacters.
+      literal by default and must be escaped (\+, \?, etc.) to act as GNU BRE operators.
+      Escaped +, ? and | are GNU extensions, not portable POSIX BRE syntax.
       In ERE (Extended), these are metacharacters by default.
       
       Example:
@@ -150,7 +151,7 @@ questions:
     text: |
       What does the regex pattern `^[^#]` match?
     options:
-      - "Lines that do NOT start with #"
+      - "Non-empty lines whose first character is not #"
       - "Lines that start with #"
       - "The character ^ followed by #"
       - "Any line that contains #"
@@ -158,7 +159,7 @@ questions:
     explanation: |
       The first ^ = anchor for the start of line
       [^#] = any character EXCEPT #
-      Thus: lines that start with any character different from #
+      Thus: non-empty lines that start with a character different from #; empty lines do not match.
       
       Note: ^ has two different meanings:
       - Outside [] = start of line
@@ -241,7 +242,7 @@ questions:
     lo: [LO1, LO2]
     score: 8
     text: |
-      Which command extracts ALL IP addresses from the file log.txt?
+      Which command extracts IPv4-shaped dotted decimal candidates from log.txt (without validating octets 0–255)?
     options:
       - "grep -oE '([0-9]{1,3}\\.){3}[0-9]{1,3}' log.txt"
       - "grep -o '[0-9]*' log.txt"
@@ -266,7 +267,7 @@ questions:
     lo: [LO3]
     score: 8
     text: |
-      Which sed command deletes all blank lines from a file?
+      Which sed command deletes all completely empty lines (not whitespace-only lines) from a file?
     options:
       - "sed '/^$/d' file.txt"
       - "sed 's/^$//' file.txt"
@@ -290,7 +291,7 @@ questions:
     lo: [LO4]
     score: 8
     text: |
-      Which awk command calculates the sum of values in column 3 of a CSV?
+      For a non-empty, headerless comma-delimited file with numeric column 3 and no quoted fields or embedded commas, which awk command sums that column?
     options:
       - "awk -F, '{sum+=$3} END {print sum}' data.csv"
       - "awk '{print $3}' data.csv | sum"
@@ -382,8 +383,7 @@ questions:
     lo: [LO3, LO4, LO5]
     score: 9
     text: |
-      Which approach is MORE EFFICIENT for processing a 1GB CSV file 
-      and extracting only column 2?
+      For a comma-delimited file without quoted or embedded commas, which command uses one awk process and direct field selection to print column 2?
     options:
       - "awk -F, '{print $2}' large.csv"
       - "cat large.csv | cut -d, -f2"
@@ -391,13 +391,13 @@ questions:
       - "All are equally efficient"
     correct: 0
     explanation: |
-      awk is the most efficient for field extraction because:
+      The keyed answer uses one awk process and direct field selection:
       - It parses the line only once
       - It does not create additional processes
       - It is optimised for field processing
       
       Option B: cat | cut = UUOC (Useless Use of Cat) + pipe overhead
-      Option C: sed with complex regex is slower for a simple task
+      Option C uses regular-expression substitution. Runtime performance requires a representative benchmark; it is not established by this question.
     misconceptions:
       1: "UUOC (Useless Use of Cat) - cat is not needed here"
       2: "sed is powerful but not ideal for simple field extraction"
@@ -413,7 +413,7 @@ questions:
     score: 8
     text: |
       You need to extract all unique error messages from a 10GB log file 
-      and count their occurrences. Which approach is MOST efficient?
+      and count their occurrences. Assuming the distinct-message counts fit in memory, which approach accumulates counts before sorting only the distinct results?
     options:
       - "grep 'ERROR' huge.log | sort | uniq -c | sort -rn"
       - "awk '/ERROR/ {errors[$0]++} END {for(e in errors) print errors[e], e}' huge.log | sort -rn"
@@ -423,8 +423,8 @@ questions:
     explanation: |
       awk processes the file in a single pass, storing counts in memory.
       The grep|sort|uniq pipeline requires multiple passes and disk I/O for sorting.
-      For very large files, awk's single-pass approach is significantly faster
-      (assuming sufficient memory for the unique error set).
+      The memory requirement grows with the number and length of distinct messages.
+      This structure does not establish a universal runtime advantage.
       
       Option A works but sort on 10GB is expensive.
       Option C has useless cat overhead.
@@ -460,11 +460,12 @@ questions:
       A better pattern would be:
       sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/[REDACTED]/g'
       
-      Option A is incorrect because * is not greedy enough (matches zero or more).
+      The limiting issue is the character class and permitted structure, not lack of greediness.
+      Both patterns are simplified heuristics; they do not guarantee complete anonymisation.
       Option C is incorrect; /g works correctly.
       Option D is incorrect; the replacement string syntax is valid.
     misconceptions:
-      0: "The pattern is actually not greedy enough, missing characters"
+      0: "The character classes omit valid address characters; greediness is a different property"
       2: "The /g flag exists and works correctly in sed"
       3: "Square brackets in replacement string are valid literal characters"
 

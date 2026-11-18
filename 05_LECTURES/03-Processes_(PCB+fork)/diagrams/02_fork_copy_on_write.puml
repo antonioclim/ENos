@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml fork_copy_on_write
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title fork() and Copy-on-Write (CoW)
 
 skinparam rectangle {

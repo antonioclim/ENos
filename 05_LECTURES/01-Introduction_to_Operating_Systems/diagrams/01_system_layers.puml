@@ -1,0 +1,55 @@
+' Recovered from the baseline PNG's embedded PlantUML, then translated and corrected.
+@startuml system_layers
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Layers of a Computer System
+
+skinparam rectangle {
+    roundCorner 15
+}
+
+rectangle "**USER**" as user #E8F6FF {
+    rectangle "Interfaces: CLI, GUI, Touch, Voice" as ui #FFFFFF
+}
+
+rectangle "**APPLICATIONS**" as apps #DCEDC8 {
+    rectangle "Browser | Editor | Compiler | Games | Office" as applist #FFFFFF
+}
+
+rectangle "**OPERATING SYSTEM**" as os #FFF3E0 {
+    rectangle "**KERNEL**" as kernel #FFE0B2 {
+        rectangle "Process\nManager" as pm #FFFFFF
+        rectangle "Memory\nManager" as mm #FFFFFF  
+        rectangle "File\nSystem" as fs #FFFFFF
+        rectangle "I/O\nManager" as io #FFFFFF
+        rectangle "Network\nStack" as net #FFFFFF
+        rectangle "Security\nModule" as sec #FFFFFF
+    }
+}
+
+rectangle "**HARDWARE**" as hw #F3E5F5 {
+    rectangle "CPU | RAM | Disk | GPU | Network | Peripherals" as hwlist #FFFFFF
+}
+
+user -[hidden]down- apps
+apps -[hidden]down- os
+os -[hidden]down- hw
+
+ui -[#3498DB,dashed]-> applist : Interaction
+applist -[#27AE60,bold]-> kernel : **System Calls**
+kernel -[#E74C3C,bold]-> hwlist : **Drivers / HAL**
+
+note right of kernel
+  The kernel mediates access
+  to protected hardware resources.
+  User-space access requires configured mappings/permissions.
+end note
+
+legend right
+  | Colour | Layer |
+  |<#E8F6FF>| User Space |
+  |<#DCEDC8>| Applications |
+  |<#FFE0B2>| Kernel |
+  |<#F3E5F5>| Hardware |
+endlegend
+
+@enduml

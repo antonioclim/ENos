@@ -55,6 +55,8 @@ CONCEPT="${MAGENTA}"
 CODE="${WHITE}"
 
 # Directories and files
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+CRON_VALIDATOR="$SCRIPT_DIR/../python/S03_cron_expression.py"
 DEMO_DIR="$HOME/cron_demo_lab"
 LOG_DIR="$DEMO_DIR/logs"
 SCRIPTS_DIR="$DEMO_DIR/scripts"
@@ -319,7 +321,7 @@ count=0
 while IFS= read -r -d '' file; do
     log "DELETE: $file"
     rm -rf "$file"
-    ((count++)) || true
+    count=$((count + 1)) || true
 done < <(find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" -mtime +$DAYS_OLD -print0 2>/dev/null)
 
 log "END: $count directories deleted"
@@ -609,7 +611,7 @@ EOF
         │          │                                                          │
         │          └─────────────────────────── Minute: 30                    │
         │                                                                     │
-        │   🗓️ Executes: On 15th June, if it's Monday, at 8:30 AM            │
+        │   🗓️ Executes: June 15 OR any Monday in June, at 8:30 AM            │
         │                                                                     │
         └─────────────────────────────────────────────────────────────────────┘
 
@@ -721,7 +723,7 @@ EOF
 │                                                                             │
 │   EXAMPLES:                                                                 │
 │   0 0 1 jan *     = 1st January at 00:00                                    │
-│   0 0 1 1,4,7,10  = First day of each quarter                               │
+│   0 0 1 1,4,7,10 *  = First day of each quarter                               │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -788,7 +790,7 @@ EOF
 │       │                                                                     │
 │       └── Hour: 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22                   │
 │                                                                             │
-│   0 0 */3 * *  cmd     = Every 3 days, at midnight                          │
+│   0 0 */3 * *  cmd     = Days 1,4,7,… each month (step resets), at midnight                          │
 │         │                                                                   │
 │         └── Day: 1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31                    │
 │                                                                             │
@@ -839,7 +841,7 @@ EOF
 │             │                                                               │
 │             └── 3 days of the week                                          │
 │                                                                             │
-│   0 9 * 1,4,7,10 *  cmd   = On 1st of months Jan, Apr, Jul, Oct             │
+│   0 9 1 1,4,7,10 *  cmd   = On 1st of months Jan, Apr, Jul, Oct             │
 │             │               (start of each quarter, assuming                │
 │             │               day of month = implicitly first or other)       │
 │             └── 4 specific months                                           │
@@ -876,10 +878,10 @@ EOF
 │     │    └── Only during working hours                                      │
 │     └── At 10 minute intervals                                              │
 │                                                                             │
-│   0 0 1-7 * 1  cmd        = First Monday of the month                       │
-│         │   │              (any day 1-7 that is Monday)                     │
-│         │   └── Only Monday                                                 │
-│         └── Only first 7 days                                               │
+│   0 0 1-7 * 1  cmd        = Days 1–7 OR every Monday                       │
+│         │   │              (not a first-Monday expression)                     │
+│         │   └── All Mondays (OR)                                                 │
+│         └── All days 1–7 (OR)                                               │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -914,7 +916,7 @@ EOF
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│   ⚠️  SUBTLETY: day_of_month AND day_of_week are in OR relationship!        │
+│   ⚠️  SUBTLETY: Restricted DOM and DOW use OR (leading wildcard uses AND).        │
 │                                                                             │
 │   0 0 15 * 5            = On 15th of month OR on Fridays                    │
 │         │   │                                                               │
@@ -922,17 +924,19 @@ EOF
 │         └── Any 15th                                                        │
 │                                                                             │
 │   This means it executes MUCH more often than you might think!             │
-│   (~4 fridays + 1 day = ~5 executions/month, NOT only when 15th is Friday) │
+│   (4 or 5 Fridays plus the 15th if it is not already a Friday) │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 EOF
 
-    print_warning "Day of month + day of week = OR logic, not AND!"
+    print_warning "Restricted DOM + restricted DOW use OR; a leading * field uses AND."
     
     echo ""
     echo "If you want ONLY the days when a specific date falls on a specific day,"
-    echo "you need to use a script with conditional logic."
+    echo "you need to use a script with conditional logic. First Monday example:"
+    printf '%s\n' '0 0 * * 1 [ "$(date +\%d)" -le 7 ] && /path/to/job.sh'
+    echo "The escaped percent is required in a crontab command; this example is not installed."
     
     pause_interactive
     
@@ -957,8 +961,8 @@ EOF
 │           │ 9-17 = from 9 to 17 inclusive                                   │
 │           │ mon-fri = from Monday to Friday                                 │
 ├───────────┼─────────────────────────────────────────────────────────────────┤
-│  L,W,#    │ ⚠️  Pitfall: These are VIXIE CRON extensions or other           │
-│           │ implementations (not standard POSIX)!                           │
+│  L,W,#    │ ⚠️  Pitfall: These belong to other dialects (e.g. Quartz), not           │
+│           │ the Debian/Vixie subset used here (nor POSIX).                           │
 │           │ Check if your cron supports them.                               │
 └───────────┴─────────────────────────────────────────────────────────────────┘
 
@@ -1042,7 +1046,7 @@ EOF
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ⚠️  Pitfall: @reboot executes when cron starts, NOT when OS starts.       │
-│              If cron is manually restarted, @reboot runs!                   │
+│              Restart behaviour depends on daemon/distribution; test locally.                   │
 │                                                                             │
 │  💡 TIP: For persistent services, consider systemd instead of @reboot      │
 │                                                                             │
@@ -1075,7 +1079,7 @@ EOF
   CONTRA strings:
     ✗ Less flexible (you can't say @daily at 3 AM)
     ✗ Some cron implementations don't support them
-    ✗ Experienced programmers prefer expressions
+    ✗ Expression preference depends on the task, not experience
 
 EOF
 
@@ -1337,11 +1341,11 @@ EOF
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  SOLUTION 3: Load profile in script                                         │
+│  SOLUTION 3: Load an explicit job environment file                                         │
 │  ───────────────────────────────────────────────────────────────────────── │
 │                                                                             │
 │  #!/bin/bash                                                                │
-│  source ~/.bashrc    # or source ~/.profile                                 │
+│  source /home/user/job.env  # explicit non-interactive settings                                 │
 │  # ... rest of script                                                       │
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -1387,8 +1391,8 @@ EOF
 │                                                                             │
 │  • If job produces output (stdout or stderr), cron sends it                 │
 │    to the address in MAILTO                                                 │
-│  • To disable: MAILTO="" or redirect: cmd > /dev/null                       │
-│  • Requires configured MTA (postfix, sendmail, etc.)                        │
+│  • To disable: MAILTO="" or redirect: cmd > /dev/null 2>&1                       │
+│  • Requires configured mail transport; delivery is not guaranteed                        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -1514,7 +1518,7 @@ EOF
 │  # Simulate cron environment:                                               │
 │  env -i HOME=$HOME /bin/bash -c '/path/to/script.sh'                        │
 │     │                                                                       │
-│     └── env -i = empty environment (like cron)                              │
+│     └── env -i = reduced test; not a complete cron simulation                              │
 │                                                                             │
 │  STEP 4: Add debugging to script                                            │
 │  ─────────────────────────────────────────────────────────────────────────  │
@@ -1725,7 +1729,7 @@ EOF
 │     # First:                                                                │
 │     0 3 * * * echo "Would delete old files" >> /tmp/test.log                │
 │     # After verification:                                                   │
-│     0 3 * * * find /tmp -mtime +7 -delete                                   │
+│     0 3 * * * /home/user/owned_cleanup.sh                                   │
 │                                                                             │
 │  4. PREVENT SIMULTANEOUS EXECUTIONS (LOCK FILES)                            │
 │     ────────────────────────────────────────────────────────────────────── │
@@ -1778,7 +1782,7 @@ EOF
 │  flock -n 200 || exit 1                                                     │
 │  # ... code ...                                                             │
 │                                                                             │
-│  SOLUTION 2: Manual lock file (in script)                                   │
+│  WRONG EXAMPLE: check-then-write PID file is race-prone                                   │
 │  ─────────────────────────────────────────────────────────────────────────  │
 │  LOCK="/tmp/myjob.lock"                                                     │
 │  if [ -f "$LOCK" ]; then                                                    │
@@ -1823,7 +1827,7 @@ EOF
 │      → Test with empty env: env -i HOME=$HOME bash -c './script.sh'         │
 │                                                                             │
 │  ☠️  ASSUMPTIONS ABOUT CURRENT DIRECTORY                                    │
-│      → Working directory in cron is often / or $HOME                        │
+│      → Debian cron normally starts in HOME; do not assume all daemons                        │
 │      → Use explicit cd or absolute paths                                    │
 │                                                                             │
 │  ☠️  FORGETTING ABOUT % IN CRONTAB                                          │
@@ -1871,7 +1875,7 @@ EOF
         echo "  6) Custom (enter manually)"
         echo "  q) Exit"
         echo ""
-        read -r -p "Choose (1-6 or q): " freq_choice
+        read -r -p "Choose (1-6 or q): " freq_choice || return 0
         
         case "$freq_choice" in
             q|Q)
@@ -1937,13 +1941,11 @@ EOF
                 ;;
         esac
         
-        # Simple validation
-        field_count=$(echo "$cron_expr" | awk '{print NF}')
-        if [ "$field_count" -ne 5 ]; then
-            echo -e "${RED}Invalid expression! Must have exactly 5 fields.${RESET}"
+        # Validate all bounds/grammar, including assembled fields, before display.
+        if ! python3 -B "$CRON_VALIDATOR" "$cron_expr"; then
             continue
         fi
-        
+
         # Display result
         echo ""
         echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${RESET}"
@@ -1978,158 +1980,7 @@ EOF
 #
 
 explain_cron_expression() {
-    local expr="$1"
-    
-    # Parse fields
-    local minute=$(echo "$expr" | awk '{print $1}')
-    local hour=$(echo "$expr" | awk '{print $2}')
-    local dom=$(echo "$expr" | awk '{print $3}')
-    local month=$(echo "$expr" | awk '{print $4}')
-    local dow=$(echo "$expr" | awk '{print $5}')
-    
-    echo -e "  ${CYAN}Interpretation:${RESET}"
-    echo ""
-    
-    # Explain each field
-    echo -n "  • Minute:        "
-    explain_field "$minute" "minute" 0 59
-    
-    echo -n "  • Hour:          "
-    explain_field "$hour" "hour" 0 23
-    
-    echo -n "  • Day of month:  "
-    explain_field "$dom" "dom" 1 31
-    
-    echo -n "  • Month:         "
-    explain_field "$month" "month" 1 12
-    
-    echo -n "  • Day of week:   "
-    explain_field "$dow" "dow" 0 7
-    
-    echo ""
-    
-    # Generate natural language description
-    generate_natural_description "$minute" "$hour" "$dom" "$month" "$dow"
-}
-
-explain_field() {
-    local value="$1"
-    local field_type="$2"
-    local min="$3"
-    local max="$4"
-    
-    if [[ "$value" == "*" ]]; then
-        echo "any value ($min-$max)"
-    elif [[ "$value" == *"/"* ]]; then
-        local step="${value#*/}"
-        local range="${value%/*}"
-        if [[ "$range" == "*" ]]; then
-            echo "every $step (from $min-$max)"
-        else
-            echo "every $step in range $range"
-        fi
-    elif [[ "$value" == *","* ]]; then
-        echo "values: $value"
-    elif [[ "$value" == *"-"* ]]; then
-        echo "range $value"
-    else
-        case "$field_type" in
-            dow)
-                case "$value" in
-                    0|7) echo "Sunday" ;;
-                    1) echo "Monday" ;;
-                    2) echo "Tuesday" ;;
-                    3) echo "Wednesday" ;;
-                    4) echo "Thursday" ;;
-                    5) echo "Friday" ;;
-                    6) echo "Saturday" ;;
-                    *) echo "$value" ;;
-                esac
-                ;;
-            month)
-                case "$value" in
-                    1) echo "January" ;;
-                    2) echo "February" ;;
-                    3) echo "March" ;;
-                    4) echo "April" ;;
-                    5) echo "May" ;;
-                    6) echo "June" ;;
-                    7) echo "July" ;;
-                    8) echo "August" ;;
-                    9) echo "September" ;;
-                    10) echo "October" ;;
-                    11) echo "November" ;;
-                    12) echo "December" ;;
-                    *) echo "$value" ;;
-                esac
-                ;;
-            *)
-                echo "$value"
-                ;;
-        esac
-    fi
-}
-
-generate_natural_description() {
-    local minute="$1"
-    local hour="$2"
-    local dom="$3"
-    local month="$4"
-    local dow="$5"
-    
-    echo -e "  ${YELLOW}📅 Description:${RESET}"
-    echo -n "     "
-    
-    # Build description
-    local desc=""
-    
-    # Check common patterns
-    if [[ "$minute" == "*" && "$hour" == "*" && "$dom" == "*" && "$month" == "*" && "$dow" == "*" ]]; then
-        desc="Every minute"
-    elif [[ "$minute" == "0" && "$hour" == "*" && "$dom" == "*" && "$month" == "*" && "$dow" == "*" ]]; then
-        desc="Every hour (at minute 0)"
-    elif [[ "$minute" == "0" && "$hour" == "0" && "$dom" == "*" && "$month" == "*" && "$dow" == "*" ]]; then
-        desc="Daily at midnight (00:00)"
-    elif [[ "$minute" == */[0-9]* && "$hour" == "*" ]]; then
-        local step="${minute#*/}"
-        desc="Every $step minutes"
-    elif [[ "$hour" == */[0-9]* ]]; then
-        local step="${hour#*/}"
-        desc="Every $step hours, at minute $minute"
-    elif [[ "$dow" == "1-5" || "$dow" == "mon-fri" ]]; then
-        desc="Monday-Friday at $hour:$(printf '%02d' $minute)"
-    elif [[ "$dow" == "0,6" || "$dow" == "sat,sun" ]]; then
-        desc="Weekend at $hour:$(printf '%02d' $minute)"
-    elif [[ "$dom" != "*" && "$dow" == "*" && "$month" == "*" ]]; then
-        desc="On days $dom of every month, at $hour:$(printf '%02d' $minute)"
-    elif [[ "$dow" != "*" && "$dom" == "*" && "$month" == "*" ]]; then
-        desc="On days $dow of the week, at $hour:$(printf '%02d' $minute)"
-    else
-        # Generic
-        local time_part=""
-        if [[ "$minute" != "*" && "$hour" != "*" ]]; then
-            time_part="at $(printf '%02d:%02d' $hour $minute)"
-        elif [[ "$minute" == "*" && "$hour" != "*" ]]; then
-            time_part="in hour $hour"
-        elif [[ "$minute" != "*" && "$hour" == "*" ]]; then
-            time_part="at minute $minute of every hour"
-        fi
-        
-        local date_part=""
-        if [[ "$dom" != "*" ]]; then
-            date_part="on $dom of the month"
-        fi
-        if [[ "$month" != "*" ]]; then
-            date_part="$date_part in month $month"
-        fi
-        if [[ "$dow" != "*" ]]; then
-            date_part="$date_part on days $dow"
-        fi
-        
-        desc="$time_part $date_part"
-    fi
-    
-    echo "$desc"
+    python3 -B "$CRON_VALIDATOR" "$1"
 }
 
 tool_validator() {
@@ -2139,7 +1990,7 @@ tool_validator() {
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │            CRON EXPRESSION VALIDATOR AND EXPLAINER                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Enter a cron expression to receive a natural language explanation.         │
+│  Enter five schedule fields or one macro; commands are not accepted.         │
 │  Enter 'q' to exit.                                                         │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -2147,60 +1998,17 @@ EOF
 
     while true; do
         echo ""
-        read -r -p "Cron expression (or 'q' to exit): " input
+        read -r -p "Cron expression (or 'q' to exit): " input || return 0
         
         if [[ "$input" == "q" || "$input" == "Q" ]]; then
             echo "Goodbye!"
             return 0
         fi
         
-        # Check if special string
-        case "$input" in
-            @reboot)
-                echo -e "${GREEN}@reboot${RESET} = At system startup (once)"
-                continue
-                ;;
-            @yearly|@annually)
-                echo -e "${GREEN}$input${RESET} = 0 0 1 1 * = Annually on 1st January at 00:00"
-                continue
-                ;;
-            @monthly)
-                echo -e "${GREEN}@monthly${RESET} = 0 0 1 * * = Monthly on the first day at 00:00"
-                continue
-                ;;
-            @weekly)
-                echo -e "${GREEN}@weekly${RESET} = 0 0 * * 0 = Weekly Sunday at 00:00"
-                continue
-                ;;
-            @daily|@midnight)
-                echo -e "${GREEN}$input${RESET} = 0 0 * * * = Daily at midnight"
-                continue
-                ;;
-            @hourly)
-                echo -e "${GREEN}@hourly${RESET} = 0 * * * * = Every hour, minute 0"
-                continue
-                ;;
-        esac
-        
-        # Validate field count
-        field_count=$(echo "$input" | awk '{print NF}')
-        if [ "$field_count" -lt 5 ]; then
-            echo -e "${RED}❌ Invalid expression! Requires at least 5 fields.${RESET}"
-            echo "   Format: minute hour day_of_month month day_of_week [command]"
+        if ! explain_cron_expression "$input"; then
             continue
         fi
-        
-        # Extract only first 5 fields
-        cron_expr=$(echo "$input" | awk '{print $1, $2, $3, $4, $5}')
-        
-        echo ""
-        echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${RESET}"
-        echo -e "${GREEN}  EXPRESSION ANALYSIS: ${WHITE}$cron_expr${RESET}"
-        echo -e "${GREEN}════════════════════════════════════════════════════════════════════════════${RESET}"
-        echo ""
-        
-        explain_cron_expression "$cron_expr"
-        
+
         # Calculate next executions (simplified)
         echo ""
         echo -e "  ${MAGENTA}💡 TIP: For exact calculation of next executions,${RESET}"
@@ -2319,7 +2127,7 @@ OPTIONS:
   -s, --section NUM Run only the specified section (1-8)
   -c, --cleanup     Clean up demo environment
   --generator       Launch cron expression generator
-  --validator       Launch cron expression validator
+  --validator       Validate schedule syntax (five fields or a macro; no command)
   --monitor         Launch cron jobs monitor
   --cheat-sheet     Display the cheat sheet
 

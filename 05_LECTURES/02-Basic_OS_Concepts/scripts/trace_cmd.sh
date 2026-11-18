@@ -1,6 +1,5 @@
-/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
-
 #!/usr/bin/env bash
+# Historical translation annotation: FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ
 set -euo pipefail
 IFS=$'\n\t'
 

@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
 # Makefile — Orchestration for Seminar 05: Advanced Bash Scripting
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -81,14 +82,14 @@ quiz-shuffle:
 	@python3 $(FORMATIVE)/quiz_runner.py $(FORMATIVE)/quiz.yaml --shuffle
 
 quiz-category:
-	@echo "Available categories: functions, arrays, reliability, trap"
+	@echo "Available categories: Functions, Arrays, Reliability, Trap and Error Handling, Consolidation"
 	@read -p "Choose category: " cat; \
-	python3 $(FORMATIVE)/quiz_runner.py $(FORMATIVE)/quiz.yaml --category $$cat
+	python3 $(FORMATIVE)/quiz_runner.py $(FORMATIVE)/quiz.yaml --category "$$cat"
 
 export-lms:
 	@echo "$(BLUE)Exporting quiz to LMS format...$(NC)"
 	@if [ -f $(FORMATIVE)/quiz_runner.py ]; then \
-		python3 $(FORMATIVE)/quiz_runner.py $(FORMATIVE)/quiz.yaml --export > /dev/null && \
+		python3 $(FORMATIVE)/quiz_runner.py $(FORMATIVE)/quiz.yaml --export-lms $(FORMATIVE)/quiz_lms.json && \
 		echo "$(GREEN)✓ Exported to $(FORMATIVE)/quiz_lms.json$(NC)"; \
 	else \
 		echo "$(RED)Error: quiz_runner.py does not exist$(NC)"; \
@@ -106,7 +107,7 @@ test:
 	@if [ -f $(TESTS)/run_all_tests.sh ]; then \
 		bash $(TESTS)/run_all_tests.sh; \
 	else \
-		echo "$(YELLOW)Warning: run_all_tests.sh does not exist$(NC)"; \
+		echo "$(RED)Error: run_all_tests.sh does not exist$(NC)"; exit 1; \
 	fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -123,15 +124,15 @@ lint-bash:
 	@echo "$(BLUE)═══════════════════════════════════════════════════════════════$(NC)"
 	@if command -v shellcheck >/dev/null 2>&1; then \
 		echo "Checking $(SCRIPTS_BASH)/*.sh..."; \
-		shellcheck --severity=warning $(SCRIPTS_BASH)/*.sh 2>/dev/null || true; \
+		shellcheck --severity=warning $(SCRIPTS_BASH)/*.sh || exit $$?; \
 		echo "Checking $(SCRIPTS_DEMO)/*.sh..."; \
-		shellcheck --severity=warning $(SCRIPTS_DEMO)/*.sh 2>/dev/null || true; \
+		shellcheck --severity=warning $(SCRIPTS_DEMO)/*.sh || exit $$?; \
 		echo "Checking $(SCRIPTS_TEMPLATES)/*.sh..."; \
-		shellcheck --severity=warning $(SCRIPTS_TEMPLATES)/*.sh 2>/dev/null || true; \
+		shellcheck --severity=warning $(SCRIPTS_TEMPLATES)/*.sh || exit $$?; \
 		echo "$(GREEN)✓ ShellCheck complete$(NC)"; \
 	else \
 		echo "$(YELLOW)Warning: shellcheck is not installed$(NC)"; \
-		echo "  Install with: sudo apt install shellcheck"; \
+		echo "  Install with: sudo apt install shellcheck"; exit 2; \
 	fi
 
 lint-python:
@@ -140,15 +141,15 @@ lint-python:
 	@echo "$(BLUE)═══════════════════════════════════════════════════════════════$(NC)"
 	@if command -v ruff >/dev/null 2>&1; then \
 		echo "Checking with ruff..."; \
-		ruff check $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py 2>/dev/null || true; \
+		ruff check $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py || exit $$?; \
 		echo "$(GREEN)✓ Ruff complete$(NC)"; \
 	elif command -v flake8 >/dev/null 2>&1; then \
 		echo "Checking with flake8..."; \
-		flake8 $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py --max-line-length=100 2>/dev/null || true; \
+		flake8 $(SCRIPTS_PYTHON)/*.py $(FORMATIVE)/*.py --max-line-length=100 || exit $$?; \
 		echo "$(GREEN)✓ Flake8 complete$(NC)"; \
 	else \
 		echo "$(YELLOW)Warning: neither ruff nor flake8 are installed$(NC)"; \
-		echo "  Install with: pip install ruff"; \
+		echo "  Install with: pip install ruff"; exit 2; \
 	fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -183,9 +184,9 @@ setup:
 	@echo "$(BLUE)  Installing Dependencies$(NC)"
 	@echo "$(BLUE)═══════════════════════════════════════════════════════════════$(NC)"
 	@echo "Installing Python dependencies..."
-	pip3 install --user pyyaml rich 2>/dev/null || \
-	pip3 install --break-system-packages pyyaml rich 2>/dev/null || \
-	pip install --user pyyaml rich
+	python3 -m venv .venv
+	.venv/bin/python -m pip install pyyaml rich pytest
+	@echo "Activate this environment with: source .venv/bin/activate"
 	@echo ""
 	@echo "For shellcheck (optional):"
 	@echo "  Ubuntu/Debian: sudo apt install shellcheck"
@@ -200,7 +201,7 @@ check-deps:
 	@echo "$(BLUE)Checking dependencies...$(NC)"
 	@echo ""
 	@printf "Python3:    "; command -v python3 >/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(RED)✗$(NC)"
-	@printf "Bash 4.0+:  "; bash -c '[[ "${BASH_VERSINFO[0]}" -ge 4 ]]' 2>/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(RED)✗$(NC)"
+	@printf "Bash 4.0+:  "; bash -c '[[ "$${BASH_VERSINFO[0]}" -ge 4 ]]' 2>/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(RED)✗$(NC)"
 	@printf "PyYAML:     "; python3 -c "import yaml" 2>/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(YELLOW)✗ (run: make setup)$(NC)"
 	@printf "Rich:       "; python3 -c "import rich" 2>/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(YELLOW)✗ (run: make setup)$(NC)"
 	@printf "ShellCheck: "; command -v shellcheck >/dev/null && echo "$(GREEN)✓$(NC)" || echo "$(YELLOW)✗ (optional)$(NC)"
@@ -215,10 +216,7 @@ clean:
 	@echo "$(BLUE)Cleaning temporary files...$(NC)"
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.log" -delete 2>/dev/null || true
-	@find . -type f -name "*.tmp" -delete 2>/dev/null || true
-	@find . -type f -name "*~" -delete 2>/dev/null || true
-	@find . -type f -name "*.bak" -delete 2>/dev/null || true
+	@echo "User logs, input data and backup files are preserved; remove them explicitly if intended."
 	@echo "$(GREEN)✓ Cleanup complete$(NC)"
 
 # ═══════════════════════════════════════════════════════════════════════════════

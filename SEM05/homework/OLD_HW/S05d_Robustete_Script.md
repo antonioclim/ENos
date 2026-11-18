@@ -22,11 +22,13 @@
 
 ---
 
+> **Archive status:** Historical task retained. Recording, submission and assessment policy must be confirmed separately; consult the current recorder and [teaching contract](../../docs/TEACHING_CONTRACT.md).
+
 ## Objectives
 
 At the end of this lab, the student will be able to:
 - Use `set -euo pipefail` for safe scripts
-- Configure IFS for safe processing
+- Choose IFS for a documented parsing grammar; quote filename expansions
 - Implement defensive checks
 - Write code that handles edge cases
 
@@ -46,7 +48,7 @@ done
 # Output: one, two, three (separated)
 ```
 
-### 2.2 Safe IFS
+### 2.2 Alternative IFS (Not a Filename Guarantee)
 
 ```bash
 #!/bin/bash
@@ -185,7 +187,7 @@ die() {
 
 # Usage
 [[ -f config.txt ]] || die "config.txt not found"
-[[ -n "$API_KEY" ]] || die "API_KEY not set"
+[[ -n "${API_KEY:-}" ]] || die "API_KEY not set"
 ```
 
 ### 4.2 Input Validation
@@ -197,7 +199,8 @@ set -euo pipefail
 validate_port() {
     local port="$1"
     [[ "$port" =~ ^[0-9]+$ ]] || die "Port must be numeric: $port"
-    (( port >= 1 && port <= 65535 )) || die "Port out of range: $port"
+    [[ ${#port} -le 5 ]] || die "Port out of range"
+    (( 10#$port >= 1 && 10#$port <= 65535 )) || die "Port out of range: $port"
 }
 
 validate_email() {
@@ -237,10 +240,10 @@ set -euo pipefail
 file="my file with spaces.txt"
 
 # WRONG
-rm $file        # Tries to delete "my", "file", "with", "spaces.txt"
+printf 'Wrong split argument: <%s>\n' $file  # Observe the split without deleting anything
 
 # CORRECT
-rm "$file"      # Deletes "my file with spaces.txt"
+printf 'One preserved argument: <%s>\n' "$file"
 
 # Arrays - use @
 files=("file 1.txt" "file 2.txt")
@@ -291,7 +294,7 @@ fi
 # Or
 set +u
 if [[ -n "$OPTIONAL_VAR" ]]; then
-    # ...
+    : # Exercise body goes here
 fi
 set -u
 ```
@@ -354,14 +357,14 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
-   - Automatically upload the file to the server
+   - Preserve the recorder output; authentication depends on the unresolved institutional protocol
+   - Use only a separately authorised submission workflow; this review does not perform an upload
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> ⚠️ **DO NOT modify the `.cast` file** after generation - its digest changes; this is not proof of authenticated authorship.
 
 ---
 

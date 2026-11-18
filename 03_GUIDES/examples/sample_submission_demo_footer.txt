@@ -1,0 +1,4 @@
+Historical demonstration-only footer, removed from the JSONL playback file.
+This is not a real signature or an institutional submission.
+
+## c2FtcGxlX3NpZ25hdHVyZV9mb3JfZGVtb25zdHJhdGlvbl9wdXJwb3Nlc19vbmx5X25vdF9hX3JlYWxfc2lnbmF0dXJl

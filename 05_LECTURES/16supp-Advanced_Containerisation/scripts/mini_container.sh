@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 #
 # mini_container.sh - Minimal container using only Linux primitives
 # Operating Systems | ASE Bucharest - CSIE | 2025-2026
@@ -403,10 +403,11 @@ EOF
 #######################################
 
 main() {
+    local cmd="${1:-help}"
+    case "$cmd" in help|-h|--help) show_help; return 0;; esac
+    case "$cmd" in prepare|run|shell|advanced|info|clean) ;; *) log_err "Unknown command: $cmd"; show_help; return 2;; esac
     check_root
     check_commands
-    
-    local cmd="${1:-help}"
     
     case "$cmd" in
         prepare)

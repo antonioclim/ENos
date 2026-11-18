@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Segmentation Visualiser | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -82,7 +82,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -94,7 +171,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Segmentation Visualiser</h1>
-                    <p class="text-xs text-stone-500">Translatere Adrese cu Segmente</p>
+                    <p class="text-xs text-stone-500">Address Translation with Segments</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-medium">
@@ -123,14 +200,14 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-exchange-alt text-violet-500"></i>
-                        Translatere Address
+                        Address Translation
                     </h2>
                     
                     <!-- Logical Address Input -->
                     <div class="mb-6 p-4 bg-violet-50 rounded-lg">
                         <div class="flex flex-wrap items-end gap-4">
                             <div>
-                                <label class="text-xs text-stone-500 block mb-1">Number Segment</label>
+                                <label class="text-xs text-stone-500 block mb-1">Segment Number</label>
                                 <select id="segmentNum" class="w-24 p-2 border border-stone-300 rounded mono text-sm">
                                     <!-- Options populated dynamically -->
                                 </select>
@@ -157,7 +234,7 @@
                     <!-- Translation Flow -->
                     <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
                         <div class="address-flow p-4 bg-blue-50 rounded-lg text-center border border-blue-200">
-                            <div class="text-xs text-blue-600 mb-1">Address Logica</div>
+                            <div class="text-xs text-blue-600 mb-1">Logical Address</div>
                             <div class="mono font-bold text-lg">
                                 (<span id="dispSegNum">0</span>, <span id="dispOffset">0</span>)
                             </div>
@@ -165,7 +242,7 @@
                         </div>
                         
                         <div class="address-flow p-4 bg-purple-50 rounded-lg text-center border border-purple-200">
-                            <div class="text-xs text-purple-600 mb-1">Tabel Segmente</div>
+                            <div class="text-xs text-purple-600 mb-1">Segment Table</div>
                             <div class="mono text-sm">
                                 Base: <span id="dispBase" class="font-bold">0</span>
                             </div>
@@ -182,7 +259,7 @@
                         </div>
                         
                         <div class="p-4 bg-green-50 rounded-lg text-center border border-green-200">
-                            <div class="text-xs text-green-600 mb-1">Address Fizica</div>
+                            <div class="text-xs text-green-600 mb-1">Physical Address</div>
                             <div id="physicalResult" class="mono font-bold text-lg text-green-700">
                                 -
                             </div>
@@ -192,7 +269,7 @@
                     
                     <!-- Translation Steps -->
                     <div id="translationSteps" class="p-4 bg-stone-50 rounded-lg text-sm space-y-2">
-                        <div class="text-stone-500">Select un segment and offset, apoi apasa "Translate"</div>
+                        <div class="text-stone-500">Select a segment and offset, then press "Translate"</div>
                     </div>
                 </div>
 
@@ -218,7 +295,7 @@
                     <div class="mt-3 flex flex-wrap gap-3 text-xs">
                         <div class="flex items-center gap-1">
                             <div class="w-4 h-3 bg-blue-500 rounded"></div>
-                            <span>Codee</span>
+                            <span>Code</span>
                         </div>
                         <div class="flex items-center gap-1">
                             <div class="w-4 h-3 bg-green-500 rounded"></div>
@@ -250,7 +327,7 @@
                             <thead>
                                 <tr class="bg-stone-50">
                                     <th class="p-2 text-left">#</th>
-                                    <th class="p-2 text-left">Nume</th>
+                                    <th class="p-2 text-left">Name</th>
                                     <th class="p-2 text-center">Base</th>
                                     <th class="p-2 text-center">Limit</th>
                                     <th class="p-2 text-center">R</th>
@@ -270,11 +347,11 @@
                 <!-- Statistics -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">Segmente Active</div>
+                        <div class="text-xs text-stone-500 mb-1">Active Segments</div>
                         <div id="activeSegments" class="text-2xl font-bold text-violet-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">Memorie Folosita</div>
+                        <div class="text-xs text-stone-500 mb-1">Used Memory</div>
                         <div id="usedMemory" class="text-2xl font-bold text-green-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
@@ -282,7 +359,7 @@
                         <div id="segFaults" class="text-2xl font-bold text-red-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">Translateri OK</div>
+                        <div class="text-xs text-stone-500 mb-1">Successful Translations</div>
                         <div id="successTranslations" class="text-2xl font-bold text-blue-600">0</div>
                     </div>
                 </div>
@@ -297,13 +374,13 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Nume Segment</label>
+                            <label class="text-xs text-stone-500 block mb-1">Segment Name</label>
                             <input type="text" id="newSegName" placeholder="ex: heap2" class="w-full p-2 border border-stone-300 rounded text-sm">
                         </div>
                         <div>
                             <label class="text-xs text-stone-500 block mb-1">Type</label>
                             <select id="newSegType" class="w-full p-2 border border-stone-300 rounded text-sm">
-                                <option value="code">Codee (R-X)</option>
+                                <option value="code">Code (R-X)</option>
                                 <option value="data">Data (RW-)</option>
                                 <option value="stack">Stack (RW-)</option>
                                 <option value="heap">Heap (RW-)</option>
@@ -328,20 +405,20 @@
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Actions Rapide
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Quick Actions
                     </h3>
                     <div class="space-y-2">
                         <button onclick="randomTranslation()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
-                            <i class="fas fa-random mr-1"></i> Translatere Aleatorie
+                            <i class="fas fa-random mr-1"></i> Random Translation
                         </button>
                         <button onclick="triggerSegFault()" class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm">
-                            <i class="fas fa-bug mr-1"></i> Declanseaza Seg Fault
+                            <i class="fas fa-bug mr-1"></i> Trigger a Segmentation Fault
                         </button>
                         <button onclick="loadScenario('process')" class="btn-action w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded text-sm">
-                            <i class="fas fa-cog mr-1"></i> Scenariu Proces Typeic
+                            <i class="fas fa-cog mr-1"></i> Example Process Layout
                         </button>
                         <button onclick="loadScenario('shared')" class="btn-action w-full p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded text-sm">
-                            <i class="fas fa-share-alt mr-1"></i> Memorie Partajata
+                            <i class="fas fa-share-alt mr-1"></i> Shared Memory
                         </button>
                         <button onclick="resetSegments()" class="w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm">
                             <i class="fas fa-redo mr-1"></i> Reset
@@ -352,20 +429,20 @@
                 <!-- Protection Explanation -->
                 <div class="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl shadow-sm border border-violet-200 p-4">
                     <h3 class="text-sm font-semibold text-violet-800 mb-3">
-                        <i class="fas fa-shield-alt text-violet-500 mr-2"></i>Biti de Protection
+                        <i class="fas fa-shield-alt text-violet-500 mr-2"></i>Protection Bits
                     </h3>
                     <div class="space-y-2 text-xs">
                         <div class="flex items-center gap-2 p-2 bg-white/50 rounded">
                             <span class="w-6 h-6 flex items-center justify-center bg-blue-500 text-white rounded font-bold">R</span>
-                            <span><strong>Read</strong> - citire permisa</span>
+                            <span><strong>Read</strong> - read permitted</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 bg-white/50 rounded">
                             <span class="w-6 h-6 flex items-center justify-center bg-amber-500 text-white rounded font-bold">W</span>
-                            <span><strong>Write</strong> - scriere permisa</span>
+                            <span><strong>Write</strong> - write permitted</span>
                         </div>
                         <div class="flex items-center gap-2 p-2 bg-white/50 rounded">
                             <span class="w-6 h-6 flex items-center justify-center bg-green-500 text-white rounded font-bold">X</span>
-                            <span><strong>Execute</strong> - executie permisa</span>
+                            <span><strong>Execute</strong> - execute permitted</span>
                         </div>
                     </div>
                 </div>
@@ -373,23 +450,23 @@
                 <!-- Segmentation vs Paging -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-balance-scale text-blue-500 mr-2"></i>Segmentare vs Paginare
+                        <i class="fas fa-balance-scale text-blue-500 mr-2"></i>Segmentation vs Paging
                     </h3>
                     <div class="space-y-2 text-xs text-stone-600">
                         <div class="p-2 bg-violet-50 rounded-lg">
-                            <strong class="text-violet-700">Segmentare:</strong>
+                            <strong class="text-violet-700">Segmentation:</strong>
                             <ul class="mt-1 list-disc list-inside">
-                                <li>Size variable</li>
-                                <li>Vizibila programatorului</li>
-                                <li>Fragmentare externa</li>
+                                <li>Variable size</li>
+                                <li>Visible in this programmer-level segment model</li>
+                                <li>External fragmentation</li>
                             </ul>
                         </div>
                         <div class="p-2 bg-blue-50 rounded-lg">
-                            <strong class="text-blue-700">Paginare:</strong>
+                            <strong class="text-blue-700">Paging:</strong>
                             <ul class="mt-1 list-disc list-inside">
-                                <li>Size fixa</li>
-                                <li>Transparenta</li>
-                                <li>Fragmentare interna</li>
+                                <li>Fixed size</li>
+                                <li>Transparent address translation</li>
+                                <li>Internal fragmentation</li>
                             </ul>
                         </div>
                     </div>
@@ -398,11 +475,11 @@
                 <!-- Formulas -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formule
+                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formulae
                     </h3>
                     <div class="space-y-2 text-xs mono">
                         <div class="p-2 bg-stone-50 rounded">
-                            <strong>Address Fizica:</strong><br>
+                            <strong>Physical Address:</strong><br>
                             physical = base + offset
                         </div>
                         <div class="p-2 bg-stone-50 rounded">
@@ -427,6 +504,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== Constants ====================
         const TOTAL_MEMORY = 4096;
         const SEGMENT_COLORS = {
@@ -482,7 +595,7 @@
         // ==================== Address Translation ====================
         function translateAddress(accessType = 'read') {
             const segNum = parseInt(document.getElementById('segmentNum').value);
-            const offset = parseInt(document.getElementById('offsetInput').value);
+            const offset=enosInteger(document.getElementById('offsetInput').value,0,Number.MAX_SAFE_INTEGER,'Offset');if(offset===null)return;
             
             if (isNaN(segNum) || segNum < 0 || segNum >= segments.length) {
                 showFault('Invalid segment number');
@@ -521,10 +634,10 @@
             document.getElementById('checkResult').innerHTML = `<span class="text-green-600">${offset} < ${segment.limit} ✓</span>`;
             
             // Step 3: Check permissions
-            if (accessType !== 'read') {
-                const permKey = accessType === 'write' ? 'w' : 'x';
+            if (['read','write','execute'].includes(accessType)) {
+                const permKey = accessType === 'read' ? 'r' : accessType === 'write' ? 'w' : 'x';
                 if (!segment.permissions[permKey]) {
-                    const permName = accessType === 'write' ? 'Write' : 'Execute';
+                    const permName = accessType;
                     showFault(`${permName} not permitted on segment "${segment.name}"`);
                     document.getElementById('physicalResult').textContent = 'PROTECTION FAULT';
                     highlightSegment(segNum, 'fault');
@@ -541,14 +654,14 @@
             
             // Show steps
             document.getElementById('translationSteps').innerHTML = `
-                <div class="font-semibold text-violet-800 mb-2">steps Translatere (${accessType}):</div>
+                <div class="font-semibold text-violet-800 mb-2">Translation steps (${accessType}):</div>
                 <ol class="list-decimal list-inside space-y-1 text-stone-700">
-                    <li>Extrage numarul segmentului: <strong>${segNum}</strong> (${segment.name})</li>
-                    <li>Citeste din tabelul de segmente: Base = ${segment.base}, Limit = ${segment.limit}</li>
-                    <li>Check validitatea: Segment valid ✓</li>
-                    <li>Check offset-ul: ${offset} < ${segment.limit} ✓</li>
-                    ${accessType !== 'read' ? `<li>Check permisiuni: ${accessType.toUpperCase()} permis ✓</li>` : ''}
-                    <li>Calculeaza adresa fizica: ${segment.base} + ${offset} = <strong class="text-green-600">${physicalAddr}</strong></li>
+                    <li>Extract the segment number: <strong>${segNum}</strong> (${segment.name})</li>
+                    <li>Read the segment-table entry: Base = ${segment.base}, Limit = ${segment.limit}</li>
+                    <li>Check validity: segment valid ✓</li>
+                    <li>Check the offset: ${offset} < ${segment.limit} ✓</li>
+                    ${accessType !== 'read' ? `<li>Check permissions: ${accessType.toUpperCase()} permitted ✓</li>` : ''}
+                    <li>Calculate the physical address: ${segment.base} + ${offset} = <strong class="text-green-600">${physicalAddr}</strong></li>
                 </ol>
             `;
             
@@ -646,6 +759,7 @@
         function toggleSegmentValid(segId) {
             const seg = segments.find(s => s.id === segId);
             if (seg) {
+                if(!seg.valid && segments.some(other=>other!==seg&&other.valid&&seg.base<other.base+other.limit&&other.base<seg.base+seg.limit)){alert('The physical region overlaps an active segment. Move or deactivate that region first.');return;}
                 seg.valid = !seg.valid;
                 render();
             }
@@ -838,11 +952,33 @@
         }
 
         function resetSegments() {
+            enosTimers.cancel();
             initSegments();
         }
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', initSegments);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

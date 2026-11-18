@@ -1,5 +1,5 @@
 @startuml vm_vs_container
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Virtual Machines vs Containers
 
 skinparam rectangle {
@@ -31,7 +31,7 @@ rectangle "**VIRTUAL MACHINES**" as vm #E3F2FD {
     • Boot: 30-60 sec
     • Size: 5-50 GB
     • RAM: 500MB-2GB overhead
-    • Isolation: **COMPLETE**
+    • Isolation: hypervisor boundary; depends on configuration and trusted components
     • Density: 10-20 VM/host
     end note
 }
@@ -75,12 +75,13 @@ vm -[hidden]right-> cont
 
 legend bottom
 |= Aspect |= VM |= Container |
-| Isolation | Complete (hardware) | Process (namespaces) |
+| Isolation | Hypervisor boundary | Shared-kernel namespaces |
 | Overhead | High | **Minimal** |
 | Startup | Minutes | **Seconds** |
-| Different OSes | ✅ Yes | ❌ Linux only |
-| Security | Very good | Good (shared kernel) |
+| Guest kernels | Can differ from host | Linux containers share Linux host kernel |
+| Security | Depends on hypervisor/configuration | Depends on host kernel/configuration |
 | Use Case | Strict isolation | **Microservices, CI/CD** |
 endlegend
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

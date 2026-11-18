@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Replacement Algorithms | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -70,7 +70,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -99,7 +176,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-list-ol text-blue-500"></i>
-                        Sir de references
+                        Reference String
                     </h3>
                     <div class="flex gap-2 mb-3">
                         <input type="text" id="referenceString" value="7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1" 
@@ -128,7 +205,7 @@
                             Frame State (Live)
                         </h3>
                         <div class="text-sm">
-                            <span class="text-stone-500">Pas:</span>
+                            <span class="text-stone-500">Step:</span>
                             <span id="currentStep" class="mono font-bold">0</span>/<span id="totalSteps" class="mono">0</span>
                         </div>
                     </div>
@@ -182,7 +259,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-chart-bar text-indigo-500"></i>
-                        Comparison Algorithmi
+                        Algorithm Comparison
                     </h3>
                     <div class="h-64">
                         <canvas id="comparisonChart"></canvas>
@@ -204,14 +281,14 @@
                         <option value="clock">Clock (Second Chance)</option>
                     </select>
                     <p id="algorithmDesc" class="mt-2 text-xs text-stone-500">
-                        replace pagina care a fost incarcata first (cea mai veche).
+                        Replace the page loaded earliest among the resident pages.
                     </p>
                 </div>
 
                 <!-- Frame Count -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-memory text-blue-500 mr-2"></i>Number Frame-uri
+                        <i class="fas fa-memory text-blue-500 mr-2"></i>Number of Frames
                     </h3>
                     <input type="range" id="frameCount" min="2" max="7" value="3" class="w-full" oninput="updateFrameCount()">
                     <div class="flex justify-between text-xs text-stone-500 mt-1">
@@ -224,7 +301,7 @@
                 <!-- Playback Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Controale
+                        <i class="fas fa-play-circle text-green-500 mr-2"></i>Controls
                     </h3>
                     <div class="grid grid-cols-4 gap-2 mb-3">
                         <button onclick="runSimulation()" id="btnRun" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
@@ -252,7 +329,7 @@
                         <i class="fas fa-layer-group text-purple-500 mr-2"></i>Comparison
                     </h3>
                     <button onclick="compareAllAlgorithms()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
-                        <i class="fas fa-balance-scale mr-1"></i> Run all Algorithmii
+                        <i class="fas fa-balance-scale mr-1"></i> Run All Algorithms
                     </button>
                     <div id="comparisonResults" class="mt-3 space-y-2 text-xs">
                         <!-- Comparison results will appear here -->
@@ -263,19 +340,19 @@
                 <div class="space-y-3">
                     <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl shadow-sm border border-blue-200 p-3">
                         <h4 class="text-xs font-semibold text-blue-800 mb-1">FIFO</h4>
-                        <p class="text-xs text-blue-700">Simplu dar may suferi de Bélády's Anomaly (mai multe frame-uri = mai multe fault-uri)</p>
+                        <p class="text-xs text-blue-700">Simple, but can exhibit Belady’s anomaly: more frames can produce more faults.</p>
                     </div>
                     <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-sm border border-green-200 p-3">
                         <h4 class="text-xs font-semibold text-green-800 mb-1">LRU</h4>
-                        <p class="text-xs text-green-700">Aproximeaza Optimal. Nu sufera de anomalie. Costisitor de implementat.</p>
+                        <p class="text-xs text-green-700">Uses past recency rather than future knowledge. Exact LRU is a stack algorithm; maintaining exact recency has a cost.</p>
                     </div>
                     <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl shadow-sm border border-amber-200 p-3">
                         <h4 class="text-xs font-semibold text-amber-800 mb-1">Optimal</h4>
-                        <p class="text-xs text-amber-700">Teoretic cel mai good. Requires knowledge of the future - imposibil in practica.</p>
+                        <p class="text-xs text-amber-700">The offline minimum for a known trace. Requires future references, so it is a comparison oracle rather than an online policy.</p>
                     </div>
                     <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-sm border border-purple-200 p-3">
                         <h4 class="text-xs font-semibold text-purple-800 mb-1">Clock</h4>
-                        <p class="text-xs text-purple-700">Aproximeaza LRU eficient. Foloseste bit de referinta. Implementare practica.</p>
+                        <p class="text-xs text-purple-700">Uses reference bits and a circular hand to approximate recency; it is not exact LRU.</p>
                     </div>
                 </div>
             </div>
@@ -285,11 +362,11 @@
         <div id="beladySection" class="mt-6 bg-amber-50 rounded-xl shadow-sm border border-amber-200 p-6 hidden">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-amber-800">
                 <i class="fas fa-exclamation-triangle text-amber-500"></i>
-                Bélády's Anomaly Detectata!
+                Belady’s Anomaly Detected
             </h2>
             <p class="text-sm text-amber-700 mb-4">
-                Cu FIFO, cresterea numarului de frame-uri may duce paradoxal la mai multe page faults.
-                Acest fenomen nu apare la algoritmii stack-based (LRU, Optimal).
+                With FIFO, increasing the number of frames can increase page faults.
+                This anomaly does not occur with stack algorithms such as exact LRU and OPT.
             </p>
             <div id="beladyComparison" class="grid grid-cols-3 gap-4 text-center">
                 <!-- Bélády comparison will be shown here -->
@@ -305,6 +382,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let referenceString = [];
         let frameCount = 3;
@@ -322,11 +444,10 @@
         }
 
         function parseReferenceString() {
-            const input = document.getElementById('referenceString').value;
-            referenceString = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-            renderReferenceDisplay();
-            resetSimulation();
-        }
+    const raw=document.getElementById('referenceString').value.trim(),tokens=raw.split(',').map(s=>s.trim());
+    if(!raw||tokens.some(s=>!/^\d+$/.test(s)||!Number.isSafeInteger(Number(s)))) { alert('Enter a nonempty comma-separated sequence of nonnegative integer pages.'); return false; }
+    referenceString=tokens.map(Number);renderReferenceDisplay();resetSimulation();return true;
+}
 
         function renderReferenceDisplay() {
             const container = document.getElementById('referenceDisplay');
@@ -339,10 +460,9 @@
         }
 
         function updateFrameCount() {
-            frameCount = parseInt(document.getElementById('frameCount').value);
-            document.getElementById('frameCountDisplay').textContent = frameCount;
-            resetSimulation();
-        }
+    const n=enosInteger(document.getElementById('frameCount').value,1,20,'Frame count');if(n===null)return;
+    frameCount=n;document.getElementById('frameCountDisplay').textContent=n;resetSimulation();
+}
 
         // ==================== Algorithms ====================
         function createSimulationState() {
@@ -473,6 +593,7 @@
 
         // ==================== Simulation Control ====================
         function runSimulation() {
+            if (isRunning || !referenceString.length) return;
             if (!simulationState) {
                 simulationState = createSimulationState();
             }
@@ -503,11 +624,7 @@
             setTimeout(runStep, speed);
         }
 
-        function pauseSimulation() {
-            isPaused = true;
-            isRunning = false;
-            updateButtons();
-        }
+        function pauseSimulation() { enosTimers.cancel(); isPaused=true;isRunning=false;updateButtons(); }
 
         function stepSimulation() {
             if (!simulationState) {
@@ -526,6 +643,7 @@
         }
 
         function resetSimulation() {
+            enosTimers.cancel();
             isRunning = false;
             isPaused = false;
             simulationState = createSimulationState();
@@ -590,7 +708,7 @@
             // Update step result
             const resultEl = document.getElementById('stepResult');
             if (result.fault) {
-                resultEl.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Page Fault${result.victim !== null ? ` (victima: ${result.victim})` : ''}</span>`;
+                resultEl.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Page Fault${result.victim !== null ? ` (victim: ${result.victim})` : ''}</span>`;
             } else {
                 resultEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Hit</span>`;
             }
@@ -776,7 +894,7 @@
                 document.getElementById('beladyComparison').innerHTML = results.map(r => `
                     <div class="p-3 ${r.frames === frameCount ? 'bg-amber-200' : 'bg-white'} rounded-lg">
                         <div class="text-2xl font-bold">${r.frames}</div>
-                        <div class="text-xs text-stone-500">frame-uri</div>
+                        <div class="text-xs text-stone-500">frames</div>
                         <div class="text-lg font-bold ${r.faults > results[0].faults && r.frames > results[0].frames ? 'text-red-600' : 'text-stone-700'}">${r.faults} faults</div>
                     </div>
                 `).join('');
@@ -809,10 +927,10 @@
             currentAlgorithm = document.getElementById('algorithm').value;
             
             const descriptions = {
-                fifo: 'replace pagina care a fost incarcata first (cea mai veche in memorie).',
-                lru: 'replace pagina care nu a fost folosita de cel mai mult timp.',
-                optimal: 'replace pagina care nu va fi folosita for cel mai mult timp in viitor.',
-                clock: 'Foloseste un pointer circular and biti de referinta for a aproxima LRU eficient.'
+                fifo: 'Replace the page loaded earliest among the resident pages.',
+                lru: 'Replace the least recently used resident page.',
+                optimal: 'Replace the resident page whose next reference is farthest in the future.',
+                clock: 'Use a circular hand and reference bits to approximate recent use.'
             };
             
             document.getElementById('algorithmDesc').textContent = descriptions[currentAlgorithm];
@@ -821,6 +939,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', init);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

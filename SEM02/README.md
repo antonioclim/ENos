@@ -1,5 +1,7 @@
 # Seminar 2: Control Operators, I/O Redirection, Filters and Loops
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](homework/ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > Lab observation: note down key commands and relevant output (2–3 lines) as you work. It helps with debugging and, honestly, by the end you'll have a decent README with no extra effort.
 > Operating Systems | Bucharest University of Economic Studies - CSIE  
 > Version: 1.0 | Date: January 2025  
@@ -9,16 +11,16 @@
 
 ## Table of Contents
 
-1. [Description](#-description)
-2. [Learning Outcomes](#-learning-outcomes)
-3. [Package Structure](#-package-structure)
-4. [Usage Guide](#-usage-guide)
-5. [For Instructors](#-for-instructors)
-6. [For Students](#-for-students)
-7. [Technical Requirements](#%EF%B8%8F-technical-requirements)
-8. [Installation and Configuration](#-installation-and-configuration)
-9. [Frequently Encountered Problems](#-frequently-encountered-problems)
-10. [Additional Resources](#-additional-resources)
+1. [Description](#description)
+2. [Learning Outcomes](#learning-outcomes)
+3. [Package Structure](#package-structure)
+4. [Usage Guide](#usage-guide)
+5. [For Instructors](#for-instructors)
+6. [For Students](#for-students)
+7. [Technical Requirements](#technical-requirements)
+8. [Installation and Configuration](#installation-and-configuration)
+9. [Frequently Encountered Problems](#frequently-encountered-problems)
+10. [Additional Resources](#additional-resources)
 
 ---
 
@@ -204,7 +206,10 @@ for cmd in figlet lolcat dialog pv cowsay; do
 done
 
 # 3. Create clean demo directory
-rm -rf ~/demo_sem2 && mkdir ~/demo_sem2 && cd ~/demo_sem2
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 # 4. Set terminal with large, visible font
 # (manual: Preferences → Font Size 14+)
@@ -236,13 +241,15 @@ rm -rf ~/demo_sem2 && mkdir ~/demo_sem2 && cd ~/demo_sem2
 # Evaluate single student
 python3 scripts/python/S02_01_autograder.py ~/student_assignments/PopescuIon/
 
-# Batch evaluate entire group
+# Export one JSON diagnostic per submission; run from SEM02/.
+mkdir -p results
 for d in ~/student_assignments/*/; do
-    python3 scripts/python/S02_01_autograder.py "$d" >> results.csv
+    [[ -d "$d" ]] || continue
+    python3 scripts/python/S02_01_autograder.py "$d" --json "results/$(basename "$d").json"
 done
 
-# Generate report
-python3 scripts/python/S02_03_report_generator.py results.csv > group_report.html
+# Generate descriptive report (assessment policy is pending)
+python3 scripts/python/S02_03_report_generator.py --input results/ --format html --output group_report.html
 ```
 
 ---
@@ -267,10 +274,12 @@ This course **permits** AI tool usage (ChatGPT, Claude, Copilot, etc.) with cond
 - ❌ Expecting AI to handle edge cases correctly
 
 ### Why This Matters
-The autograder includes AI pattern detection. Submissions with obvious AI fingerprints (overly elaborate comments, suspiciously perfect formatting, descriptive variable names unusual for beginners) may receive penalties:
-- 2-4 AI indicators: warning only
-- 3-4 AI indicators: -5% penalty
-- 5+ AI indicators: -10% penalty + manual review
+The checker records lexical style observations for manual review. Comment density,
+clear naming and consistent formatting do not establish authorship or misconduct.
+No automatic penalty is applied (`null`, `PENDING_POLICY`). The former overlapping
+thresholds are not used. Sanctions, evidence standards and the review process remain
+author decisions in [ASSESSMENT_STATUS.md](homework/ASSESSMENT_STATUS.md).
+Accurate disclosure, understanding and functional evidence remain the relevant tasks.
 
 **The philosophy**: We don't ban AI because you'll use these tools professionally. Better to learn critical evaluation now than make costly mistakes later. The goal is to help you become a skilled evaluator of AI output, not just a consumer.
 
@@ -489,7 +498,7 @@ echo "Exit codes: ${PIPESTATUS[@]}"
 # Or set pipefail
 set -o pipefail
 cmd1 | cmd2 | cmd3
-echo $?  # Now returns the first non-zero
+echo $?  # Now returns the rightmost non-zero
 ```
 
 ### 8. While read loop doesn't modify variables

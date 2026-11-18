@@ -54,6 +54,7 @@ class Colours:
     RED = '\033[91m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    GRAY = '\033[90m'
     END = '\033[0m'
     
     # Background
@@ -306,7 +307,7 @@ Suffixes: c (bytes), k (KB), M (MB), G (GB)""",
             category=Category.FIND_XARGS,
             difficulty=Difficulty.MEDIUM,
             question_type=QuestionType.MULTIPLE_CHOICE,
-            text="Which command finds files modified in the last 24 hours?",
+            text="Which command uses a strict less-than age test to find paths modified in the last 24 hours?",
             options=[
                 "A) find . -mtime 1",
                 "B) find . -mtime -1",
@@ -317,8 +318,8 @@ Suffixes: c (bytes), k (KB), M (MB), G (GB)""",
             explanation="""-mtime measures in 24-hour days. Values:
   -mtime -1 = modified less than 1 day ago (last ~24h)
   -mtime 1  = modified between 1 and 2 days ago
-  -mtime +1 = modified more than 1 day ago
-  -mtime 0  = modified in the last 24h (similar to -1)
+  -mtime +1 = at least 2 complete 24-hour periods old
+  -mtime 0  = bucket 0 (also matches the last 24h, but is an equality test)
 For minutes, use -mmin.""",
             tags=["find", "-mtime", "time"],
             points=2

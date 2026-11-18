@@ -1,5 +1,8 @@
 # S05_TC01 - Advanced Functions in Bash
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory material - Seminar 5 (SPLIT from TC6a)
 
@@ -278,6 +281,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -o|--output)
+            [[ $# -ge 2 ]] || { echo "--output requires a value" >&2; exit 2; }
             OUTPUT="$2"
             shift 2
             ;;
@@ -286,11 +290,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -n|--num)
+            [[ $# -ge 2 && $2 =~ ^[1-9][0-9]*$ ]] || { echo "--num requires a positive integer" >&2; exit 2; }
             NUM="$2"
             shift 2
             ;;
         --num=*)
             NUM="${1#*=}"
+            [[ $NUM =~ ^[1-9][0-9]*$ ]] || exit 2
             shift
             ;;
         --)
@@ -334,8 +340,8 @@ process_file() {
 # Log wrapper
 log_run() {
     echo "[$(date '+%H:%M:%S')] Running: $*" >&2
-    "$@"
-    local status=$?
+    local status
+    if "$@"; then status=0; else status=$?; fi
     echo "[$(date '+%H:%M:%S')] Finished with status: $status" >&2
     return $status
 }

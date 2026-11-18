@@ -1,5 +1,5 @@
 @startuml race_condition
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Race Condition - counter++
 
 skinparam sequence {

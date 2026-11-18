@@ -1,0 +1,530 @@
+{
+  "compiler": "PlantUML 1.2026.10",
+  "compiler_sha256": "e9bc9e6b2eb715e8c0c929f3dcb5fc1923be13f37599b09c293c66d354e88686",
+  "dpi": 140,
+  "render_limit": 16384,
+  "diagram_count": 39,
+  "scope": "Successful native PlantUML compilation; visual review is a separate check.",
+  "diagrams": [
+    {
+      "source": "05_LECTURES/01-Introduction_to_Operating_Systems/diagrams/01_system_layers.puml",
+      "source_sha256": "e95051b4b3ded8df1efe5791b763883f24a50b8b389d9ba260e0342a62cb9465",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "system_layers.png",
+      "output_sha256": "e85e7f6be5ecb49dd31ebe3e1d2ed311087e45293e52ba141706a3b832d214ee",
+      "width": 1285,
+      "height": 1253,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/01-Introduction_to_Operating_Systems/diagrams/02_os_evolution.puml",
+      "source_sha256": "3544893bfbf266b4cfffcfb24d694b0dc79109152a7f507d4bb74c5f3569d692",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "os_evolution.png",
+      "output_sha256": "5260419b0384875434af18f77872d92164f90909b71b18ab58a762aba3201bdb",
+      "width": 1869,
+      "height": 881,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/01-Introduction_to_Operating_Systems/diagrams/03_kernel_architectures.puml",
+      "source_sha256": "87e6ee4fbd699d020bcde3466018b9ef0e2052f3b285dda9b48b756b70758b2f",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "kernel_architectures.png",
+      "output_sha256": "2030143c414d453f45fd085b16d745258162809a5eebe6167b46fb198e630d5f",
+      "width": 3046,
+      "height": 1206,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/02-Basic_OS_Concepts/diagrams/01_syscall_mechanism.puml",
+      "source_sha256": "88d756a5bdd7e2f5bb5f26d19525b81ec4b992fc141d7a0acb953892f2888ff2",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "syscall_mechanism.png",
+      "output_sha256": "2bbbc927ecf4159f70ae7c5a25c596e4db431e82c0f7d460346d076232385f16",
+      "width": 2371,
+      "height": 1895,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/02-Basic_OS_Concepts/diagrams/02_syscall_categories.puml",
+      "source_sha256": "809f4f9e4873c52accc81c6d9082d1dd01d29c63393ea89dc09ece6cfc138c09",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "syscall_categories.png",
+      "output_sha256": "a4c83b03865703694edab989f2e411ae9317bd1a5652d31f18d3394dd10f7c83",
+      "width": 2505,
+      "height": 357,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/03-Processes_(PCB+fork)/diagrams/01_process_state_diagram.puml",
+      "source_sha256": "42cac69a7478d75d6d9a35190145aa76f0e30f2a0f66aeacc53b7913f8176071",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "process_state_diagram.png",
+      "output_sha256": "cb08e74f4a0c97026fecfd744a878efdbbba13eac14f5a94fa97f4fc051306a2",
+      "width": 1175,
+      "height": 1286,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/03-Processes_(PCB+fork)/diagrams/02_fork_copy_on_write.puml",
+      "source_sha256": "105b94e7fe87a84c02e6cde7019cd82b780dc48911b2d890ac1fffa0c1e0c02d",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "fork_copy_on_write.png",
+      "output_sha256": "8e0d84bff03e5808bb24c3328b3dbd9a49de956271b816e12e3fbc6d8a91bb03",
+      "width": 3386,
+      "height": 1343,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/04-Process_Scheduling/diagrams/01_scheduling_algorithms_gantt_comparison.puml",
+      "source_sha256": "2cf3ceda2b5d1d668ae3bf3a3abd963434549f86e28ead35079ef334851fce8b",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "scheduling_gantt_comparison.png",
+      "output_sha256": "84acdf5ebc18ada483f897463317e1674bb8a74e9c7f9db9ed96c636544e527a",
+      "width": 3549,
+      "height": 856,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/04-Process_Scheduling/diagrams/02_mlfq_structure.puml",
+      "source_sha256": "788fcce581e6431f1554be7efbd6bba8959ee05ca8f89e70cabbf415df9dcf18",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "mlfq_structure.png",
+      "output_sha256": "b00c8e9a45134bdaf3c4984e0ce02097c4e3ba7ab330d171acceb96d2d040ce6",
+      "width": 2107,
+      "height": 1413,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/05-Execution_Threads/diagrams/01_thread_vs_process_memory.puml",
+      "source_sha256": "b0b952d021ce97dca0ee5194a0222747ad28cc4219758082c95edf285af07778",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "thread_vs_process_memory.png",
+      "output_sha256": "d95e84244769ca0c7ff23a05920c0ae79705d64fc95f7f89f6a0fc6612fbb796",
+      "width": 3236,
+      "height": 898,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/05-Execution_Threads/diagrams/02_multithreading_models.puml",
+      "source_sha256": "ff085d6b616f7bec715434bb70f3f223b798b2351f883b67a85caf27467b23b2",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "multithreading_models.png",
+      "output_sha256": "5f25e0b12a64cff1625dbc92f83f821d3408426eb62d1a65025c42a973cb2bef",
+      "width": 2085,
+      "height": 972,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/diagrams/01_race_condition.puml",
+      "source_sha256": "8a9d0d6022b22cdb0863e05b6e73e364449e0c90c7a496848e3d42dcdae2ed81",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "race_condition.png",
+      "output_sha256": "e259367da970d6695658d41c4b2758d4f79adedd36790bc6fe439781ae6f7dd0",
+      "width": 652,
+      "height": 1033,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/diagrams/02_critical_section.puml",
+      "source_sha256": "499dbce937752a4c83cc025f6a5c3073c72887c4c8a558eee500d6f76cd1dee0",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "critical_section.png",
+      "output_sha256": "01b879c7180e623576d3001ef72a3acaf8ef00683929797e23547699cf9ea78d",
+      "width": 923,
+      "height": 1118,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/diagrams/01_producer_consumer.puml",
+      "source_sha256": "4e8c387035a9e1ecd235bd0a2132cfec87a2179877acd758c44a4c15b1a9aec7",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "producer_consumer.png",
+      "output_sha256": "b79eeb4c44f62417ade42df501d23d268fea2f50ed7b76ea58d8b7c0f4132521",
+      "width": 2362,
+      "height": 1248,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/diagrams/02_semaphore_operations.puml",
+      "source_sha256": "7434e5ea4d9a14ff930dbdd71559a0010eb7ddb5767a9d0585dff74b0c615324",
+      "dependencies": [],
+      "output": "semaphore_operations.png",
+      "output_sha256": "5330205a503d8fa4163361d67fd7d7bca66ffbf4092af6d01667105a6a0d13eb",
+      "width": 1065,
+      "height": 1101,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/08-Deadlock_(Coffman)/diagrams/01_coffman_conditions.puml",
+      "source_sha256": "7351934afba4b6b133cfe366259d03b316d445207549c96d00124d7289a5cf38",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "coffman_conditions.png",
+      "output_sha256": "1aa107f6d59f159c8c4579f374551a71137bbeca68379ca4962de56c736c13d4",
+      "width": 2048,
+      "height": 595,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/08-Deadlock_(Coffman)/diagrams/02_dining_philosophers.puml",
+      "source_sha256": "309b2fb7372750532594bdf5a48d1e50cf12d76eee313858cdac630ab910c62f",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "dining_philosophers.png",
+      "output_sha256": "b6f519bb11db53da633e143e92067b4f04db1ffee225a0685e979633a619cfc1",
+      "width": 1179,
+      "height": 2016,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/09-Memory_Management_Part1_paging_segmentation/diagrams/01_virtual_address_space.puml",
+      "source_sha256": "872c1c19dfff31ba32c06379e1e24141e85e055b00417dabecd3a2412cf4cd7c",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "virtual_address_space.png",
+      "output_sha256": "7226be97b6d398690be106a75c83149a1d9450fca063d8bf0aff97a7b5a2a296",
+      "width": 1567,
+      "height": 1912,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/09-Memory_Management_Part1_paging_segmentation/diagrams/02_paging_mechanism.puml",
+      "source_sha256": "8596dd9a83874ffbe8958a52876247d0bac2ff2358502fe34624e3c0b415b598",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "paging_mechanism.png",
+      "output_sha256": "c4eed96887a10260bba0e14630286ad821fc0764adb1ebdd4eebd1ebe0f319be",
+      "width": 1517,
+      "height": 1292,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/diagrams/01_tlb_memory_access.puml",
+      "source_sha256": "766834055b8a443bea46a1adf7c78368e5da6ef7ed961b1c3b86ececdb8a002d",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "tlb_memory_access.png",
+      "output_sha256": "b4d8e94e1e17d9032645eac0b5ab55e935d05846d13eb51e67da9653491d6119",
+      "width": 1469,
+      "height": 1744,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/diagrams/02_page_replacement_algorithms.puml",
+      "source_sha256": "fd70ca568edeed4e86c28a846615569decb89bc50f14251a86a10bc125f2c305",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "page_replacement_algorithms.png",
+      "output_sha256": "b5c403b403d9cf2802da17ec7ecf62b7afffbb19b89b088b6212229e9ef35f25",
+      "width": 2660,
+      "height": 813,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/11-File_System_(Part1_inode_pointers)/diagrams/01_inode_structure.puml",
+      "source_sha256": "58b16e998d7925ffb4b82772a092a01580177168a338fb87683e5f31ebbe7dec",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "inode_structure.png",
+      "output_sha256": "ae0fe10b72c09e613ff1fec2c68c11c1f01c949f9bb4c5883343345802cc5a7a",
+      "width": 2358,
+      "height": 944,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/11-File_System_(Part1_inode_pointers)/diagrams/02_hard_vs_symbolic_link.puml",
+      "source_sha256": "b3fbc3e7a2eeb6f01f3423706bc77419940a0e5e97c27aed74ed485ec5554428",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "hard_vs_symbolic_link.png",
+      "output_sha256": "cb95a0314001046938fecce4c2dd473bfe9201f6804c93b0f5ab0481c044a9b0",
+      "width": 1923,
+      "height": 1004,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/12-File_System_Part2_alloc_extent_struct/diagrams/01_journaling_mechanism.puml",
+      "source_sha256": "75f40e91f2dcc5e37bf4ebaddf774b295d50d4638451be3acef15c83db73a4fa",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "journaling_mechanism.png",
+      "output_sha256": "6123bab8e4320445ee70ce7e9b30a407c3a4632b317bbd41065f91102574a7c5",
+      "width": 895,
+      "height": 1386,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/12-File_System_Part2_alloc_extent_struct/diagrams/02_fat_vs_inode.puml",
+      "source_sha256": "463e7b9cc3c9721d2bfb57a962bd12aed191c50065de84c72db8175df680817a",
+      "dependencies": [],
+      "output": "fat_vs_inode.png",
+      "output_sha256": "fb35ed6842b17770ff301cc277f44c285a6949705b628b69406e32d94afe64c3",
+      "width": 1699,
+      "height": 1436,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/13-Security_in_Operating_Systems/diagrams/01_security_aaa_permissions.puml",
+      "source_sha256": "44a92217770c918f2be171eb92a554a2584e9e870ae36bcf149022d431e079de",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "security_aaa_permissions.png",
+      "output_sha256": "f664cd8dc37ee6a768ab2c15f897dba3f805af0b18e8d4185b4f71a20d55b80a",
+      "width": 2380,
+      "height": 1065,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/13-Security_in_Operating_Systems/diagrams/02_capabilities_model.puml",
+      "source_sha256": "413974160603b6acddfa0b2a0ccadd74e88c3df1548aa55d50a3ccbc90fc7a9d",
+      "dependencies": [],
+      "output": "capabilities_model.png",
+      "output_sha256": "4423ca90ca48ac2e22851541d4abda38eb64b8f4aac8e367e92efb810526e236",
+      "width": 1560,
+      "height": 1776,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/14-Virtualization+Recap/diagrams/01_vm_vs_container.puml",
+      "source_sha256": "6bdfbf9ee59362cb95da1c51e2e1942b91830b396c3a61ae4fee4a85c723867b",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "vm_vs_container.png",
+      "output_sha256": "95cd30bb73ac9bce2fb180d7a7e2a3e69b50ff2844f5743a9c58f75859f2311c",
+      "width": 4500,
+      "height": 823,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/14-Virtualization+Recap/diagrams/02_docker_namespaces.puml",
+      "source_sha256": "f6c6c2122208fd55bb2451081e5762cf3d2e274dbfb5733601d542bc5681e927",
+      "dependencies": [
+        {
+          "path": "00_SUPPLEMENTARY/diagrams_common/skin.puml",
+          "sha256": "b7938818c9b71881b4ce7962d84a85f40010f0200f5eac31861edb8599ca74c0"
+        }
+      ],
+      "output": "docker_namespaces.png",
+      "output_sha256": "87a7fa3124b92e03a28efebd22ca1cef5b9259477297bd026bdb360f6236cfb5",
+      "width": 1735,
+      "height": 1063,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/15supp-Network_Connection/diagrams/01_client_server_model.puml",
+      "source_sha256": "fc4cd970e040cdba67db2fdb3a10ebc40ad8a80e0c7820739fae8aa3701e5463",
+      "dependencies": [],
+      "output": "client_server_model.png",
+      "output_sha256": "11a1f85a7d53b336f8d087685d9ec3163b65c8e7f564631a70829192ecd872f3",
+      "width": 883,
+      "height": 956,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/15supp-Network_Connection/diagrams/02_socket_api_flow.puml",
+      "source_sha256": "2b86d7b225c28e44e2679923723c382a6818b7c5f9d14d0300644835f6dc1458",
+      "dependencies": [],
+      "output": "socket_api_flow.png",
+      "output_sha256": "118552fd99d2e2c2880fcc19fb2f4de314d185c5b4495d5c7bda2d43ae82a283",
+      "width": 737,
+      "height": 1208,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/16supp-Advanced_Containerisation/diagrams/01_namespace_types.puml",
+      "source_sha256": "77460c7270d6f4beb35f0075e75b134e0f496bc21f439fd215d460be7368e9c0",
+      "dependencies": [],
+      "output": "namespace_types.png",
+      "output_sha256": "f50c080b10b65d1e415c03cc642f183aefcc0f4027a985eb8fd7862d7b94cf32",
+      "width": 1776,
+      "height": 353,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/16supp-Advanced_Containerisation/diagrams/02_cgroup_hierarchy.puml",
+      "source_sha256": "2146c6ea4a5f014bdc1952d25672622f7e866cf9c2ea933846a8922df50b3dea",
+      "dependencies": [],
+      "output": "cgroup_hierarchy.png",
+      "output_sha256": "695d03136e0e069fa7e99284bb127ec21d12f464b5ffc6ea38927a3a0773c7d5",
+      "width": 1234,
+      "height": 583,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/17supp-Kernel_Level_OS_Programming/diagrams/01_kernel_module_lifecycle.puml",
+      "source_sha256": "df84d08a00acfa4c21cb2c198b183c10698c054f683eed77ae14de18c5d30347",
+      "dependencies": [],
+      "output": "kernel_module_lifecycle.png",
+      "output_sha256": "9f1e9f5186771e5554d38f6bf49bf998bb8ad1016ba796f2626d01cb1297d266",
+      "width": 862,
+      "height": 1179,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/17supp-Kernel_Level_OS_Programming/diagrams/02_ebpf_architecture.puml",
+      "source_sha256": "77d856e8c893114151ed9ade14eda5c9959b3cfd1d13196db0a206e5eb2b6bbb",
+      "dependencies": [],
+      "output": "ebpf_architecture.png",
+      "output_sha256": "f5eceb177df82c0b0778d1e59f771c44cd4d017394e1f8943cbca0d2a454b30a",
+      "width": 1311,
+      "height": 1235,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/diagrams/01_heterogeneous_soc_architecture.puml",
+      "source_sha256": "0f81d77f5bc8394cc4306f833c16bbe3eff36b777d3af9007a8d57f89f995523",
+      "dependencies": [],
+      "output": "heterogeneous_soc_architecture.png",
+      "output_sha256": "fdc19a9eabe24184d8b4ac6261b8e2179d13bb3bbc93a926b1546867da97bf7d",
+      "width": 1326,
+      "height": 1266,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/diagrams/02_thread_director_flow.puml",
+      "source_sha256": "9b9eb41eecbe10f02f96b45908aca496d29315f48ae6d56640184297bf3749c6",
+      "dependencies": [],
+      "output": "thread_director_flow.png",
+      "output_sha256": "3de2d1b828052ab21afb7f19343a5f5d7612386b734de8fda1e04c3e33b1695d",
+      "width": 1120,
+      "height": 1276,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/diagrams/03_unified_vs_discrete_memory.puml",
+      "source_sha256": "4e0571cf81bb4f46331560d801291ed3c4c83240dcb16701e0c88a0fc56898b1",
+      "dependencies": [],
+      "output": "unified_vs_discrete_memory.png",
+      "output_sha256": "c8fa3f570f07eaa07c66a415bdd3358110becaf12791a7eefc7849089e3c1830",
+      "width": 1610,
+      "height": 949,
+      "compiler_exit": 0
+    },
+    {
+      "source": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/diagrams/04_npu_vs_cpu_scheduling.puml",
+      "source_sha256": "e2ee528dab8002da0347f27ffca072292987a4a5ec115a6f9485821f59131f9d",
+      "dependencies": [],
+      "output": "npu_vs_cpu_scheduling.png",
+      "output_sha256": "00d01b7cce07cbd6854c708f69cf50ddd535827dfe5d1ea706f0fcd87cac77ac",
+      "width": 2093,
+      "height": 1096,
+      "compiler_exit": 0
+    }
+  ]
+}

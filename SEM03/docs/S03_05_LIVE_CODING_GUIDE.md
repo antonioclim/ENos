@@ -27,9 +27,11 @@ Method: Announce → Predict → Execute → Explain
 #!/bin/bash
 # Run before the seminar!
 
-# Create structure
-mkdir -p ~/live_demo/{project,temp,backup,logs,src,config}
-cd ~/live_demo
+# Create a fresh owned structure; retain DEMO_DIR throughout this session.
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s03-live.XXXXXX") || exit 1
+export DEMO_DIR
+mkdir -p "$DEMO_DIR"/{project,temp,backup,logs,src,config}
+cd -- "$DEMO_DIR" || exit 1
 
 # Populate with test files
 touch project/{main.c,utils.c,config.h,README.md}
@@ -55,29 +57,28 @@ touch -d "60 days ago" temp/ancient.tmp
 # Executable and non-executable scripts
 echo '#!/bin/bash' > src/runnable.sh
 
-*Personal note: Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.*
 
 echo 'echo "Hello"' >> src/runnable.sh
 chmod +x src/runnable.sh
-
-*(Permissions seem complicated at first, but the rule is simple: think about who needs what access.)*
-
 
 echo '#!/bin/bash' > src/not_exec.sh
 echo 'echo "World"' >> src/not_exec.sh
 # Intentionally without chmod +x
 
 echo "✅ Setup complete!"
-ls -laR ~/live_demo
+ls -laR "$DEMO_DIR"
 ```
+
+*Personal note: Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.*
+
 
 ### Pre-Session Checks
 
 ```bash
 # Verify everything is ok
-[ -d ~/live_demo ] && echo "✅ Directory exists"
-[ -f ~/live_demo/project/main.c ] && echo "✅ Test files exist"
-[ -f ~/live_demo/logs/large.log ] && echo "✅ Large files exist"
+[ -d "$DEMO_DIR" ] && echo "✅ Directory exists"
+[ -f "$DEMO_DIR"/project/main.c ] && echo "✅ Test files exist"
+[ -f "$DEMO_DIR"/logs/large.log ] && echo "✅ Large files exist"
 which find xargs locate && echo "✅ Commands available"
 ```
 
@@ -110,7 +111,7 @@ At the end, students will be able to:
 
 #### [CODE + PREDICTION]
 ```bash
-cd ~/live_demo
+cd "$DEMO_DIR"
 
 # PREDICTION: "What do you think this command will display?"
 find .
@@ -126,7 +127,7 @@ find .
 #### [EXPLANATION]
 ```
 📖 "Find without criteria displays EVERYTHING from the starting point.
-    It is equivalent to 'ls -R' but in complete path format.
+    It traverses names recursively, including hidden names by default; ls -R has different output and hidden-name rules.
     Notice: it displays both directories and files."
 ```
 
@@ -140,7 +141,9 @@ find ./project
 ```bash
 find ./project
 # Output: only what is in project/
+```
 
+```text
 📖 "The first argument is the starting point. 
     It can be: . (current), / (root), ~ (home), or any path."
 ```
@@ -196,7 +199,9 @@ find . -type d
 ```bash
 find . -type d
 # Output: only directories
+```
 
+```text
 📖 "Common types:
     -type f = files
     -type d = directories
@@ -219,9 +224,11 @@ find . -type f -name "*.log"
 📢 "Find can also search by size or timestamp. 
     This is where it becomes truly powerful for administration."
 
-> 💡 Many students initially underestimate the importance of permissions. Then they encounter their first 'Permission denied' and everything becomes clear.
 
 ```
+
+> 💡 Many students initially underestimate the importance of permissions. Then they encounter their first 'Permission denied' and everything becomes clear.
+
 
 #### [CODE + PREDICTION]
 ```bash
@@ -233,13 +240,15 @@ find . -type f -size +1M
 ```bash
 find . -type f -size +1M
 # Output: logs/large.log, temp/huge.tmp (those created with dd)
+```
 
+```text
 📖 "Syntax for size:
     +N = larger than N
     -N = smaller than N
     N  = exactly N
     
-    Suffixes: c=bytes, k=KB, M=MB, G=GB"
+    Suffixes: c=bytes, k=KiB, M=MiB, G=GiB; size rounds up to the selected unit"
 ```
 
 #### [CODE + PREDICTION]
@@ -252,15 +261,17 @@ find . -type f -mtime -7
 ```bash
 find . -type f -mtime -7
 # Output: files modified in the last 7 days
+```
 
+```text
 📖 "Time in find:
     -mtime = modification time (content)
     -atime = access time (read)
-    -ctime = change time (metadata)
+    -ctime = inode change time (metadata changes and content writes)
     
     -N = less than N days
-    +N = more than N days
-    N  = exactly N days"
+    +N = at least N+1 complete days
+    N  = from N days inclusive to N+1 days exclusive"
 ```
 
 #### [DEMO CODE]
@@ -268,7 +279,7 @@ find . -type f -mtime -7
 # Files modified in the last 30 minutes
 find . -type f -mmin -30
 
-# Files OLDER than 10 days
+# Files at least 11 complete days old
 find . -type f -mtime +10
 ```
 
@@ -290,13 +301,13 @@ find . -type f -name "*.c" -size +0
 ```
 
 #### [EXECUTION + EXPLANATION]
-```bash
+```text
 📖 "When you put multiple tests, find combines them with AND.
     The file must satisfy ALL conditions."
+```
 
 > 💡 Over the years, I have found that practical examples beat theory every time.
 
-```
 
 #### [CODE + PREDICTION - OR]
 ```bash
@@ -308,7 +319,9 @@ find . -type f \( -name "*.c" -o -name "*.py" \)
 ```bash
 find . -type f \( -name "*.c" -o -name "*.py" \)
 # Output: all .c and .py
+```
 
+```text
 📖 "For OR:
     -o = OR
     \( \) = grouping (escaped for shell)
@@ -336,7 +349,9 @@ find . -type f ! -name "*.tmp"
 ```bash
 find . -type f ! -name "*.tmp"
 # Output: all files EXCEPT .tmp
+```
 
+```text
 📖 "NOT:
     ! = negation
     -not = alternative (more explicit)
@@ -378,7 +393,7 @@ find . -name "*.log" -exec wc -l {} \;
 # ...
 
 find . -name "*.log" | xargs wc -l
-# Output: wc runs ONCE with all files
+# Output: wc runs in one or more bounded batches
 # 10 ./logs/app.log
 # 5 ./logs/error.log
 # 15 total
@@ -388,11 +403,11 @@ find . -name "*.log" | xargs wc -l
 ```
 📖 "Differences:
     -exec {} \; = runs command for EACH file (slow)
-    | xargs     = collects and runs ONCE (fast)
+    | xargs     = collects into size-bounded batches
     
     For 1000 files:
     -exec {} \; = 1000 processes
-    | xargs     = 1-10 processes"
+    | xargs     = depends on argument lengths, environment and configured limits"
 ```
 
 ---
@@ -454,7 +469,9 @@ find . -name "*.c" | xargs -I{} echo "Processing: {}"
 # Output:
 # Processing: ./project/main.c
 # Processing: ./project/utils.c
+```
 
+```text
 📖 "-I{} replaces {} with the input.
     Useful when the command needs argument in the middle:
     xargs -I{} cp {} backup/
@@ -474,7 +491,9 @@ echo "a b c d e f" | xargs -n 2 echo
 # a b
 # c d
 # e f
+```
 
+```text
 📖 "-n N = process maximum N arguments per command
     Useful for commands with argument limits."
 ```
@@ -482,8 +501,8 @@ echo "a b c d e f" | xargs -n 2 echo
 #### [DEMO CODE - Parallel]
 ```bash
 # Parallel processing (BONUS)
-find . -name "*.log" -print0 | xargs -0 -P 4 gzip
-# -P 4 = 4 processes in parallel
+find . -type f -name "*.log" -print0 | xargs -0 -r -P 4 -n 1 gzip --
+# -P 4 = at most 4 concurrent child processes; -n 1 provides separate batches
 ```
 
 ---
@@ -505,7 +524,7 @@ At the end, students will be able to:
 #### [CREATE SCRIPT]
 ```bash
 # Create a test script
-nano ~/live_demo/params.sh
+nano "$DEMO_DIR"/params.sh
 ```
 
 #### [CODE]
@@ -520,7 +539,7 @@ echo "All arguments: $@"
 
 #### [EXECUTION]
 ```bash
-chmod +x ~/live_demo/params.sh
+chmod +x "$DEMO_DIR"/params.sh
 ./params.sh hello world test
 # Output:
 # Script: ./params.sh
@@ -552,7 +571,7 @@ chmod +x ~/live_demo/params.sh
 
 #### [CREATE SCRIPT]
 ```bash
-nano ~/live_demo/at_vs_star.sh
+nano "$DEMO_DIR"/at_vs_star.sh
 ```
 
 #### [CODE]
@@ -572,7 +591,7 @@ done
 
 #### [EXECUTION]
 ```bash
-chmod +x ~/live_demo/at_vs_star.sh
+chmod +x "$DEMO_DIR"/at_vs_star.sh
 ./at_vs_star.sh "hello world" test "one two"
 ```
 
@@ -602,7 +621,7 @@ Argument: [hello world test one two]
 
 #### [CREATE SCRIPT]
 ```bash
-nano ~/live_demo/shift_demo.sh
+nano "$DEMO_DIR"/shift_demo.sh
 ```
 
 #### [CODE]
@@ -619,7 +638,7 @@ done
 
 #### [EXECUTION]
 ```bash
-chmod +x ~/live_demo/shift_demo.sh
+chmod +x "$DEMO_DIR"/shift_demo.sh
 ./shift_demo.sh a b c d
 ```
 
@@ -638,7 +657,7 @@ chmod +x ~/live_demo/shift_demo.sh
 
 #### [CREATE SCRIPT]
 ```bash
-nano ~/live_demo/getopts_demo.sh
+nano "$DEMO_DIR"/getopts_demo.sh
 ```
 
 #### [CODE]
@@ -685,7 +704,7 @@ echo "remaining arguments: $@"
 
 #### [EXECUTION]
 ```bash
-chmod +x ~/live_demo/getopts_demo.sh
+chmod +x "$DEMO_DIR"/getopts_demo.sh
 
 # Test without options
 ./getopts_demo.sh arg1 arg2
@@ -886,19 +905,20 @@ ls -l test_umask.txt
 
 #### [EXPLANATION]
 ```
-📖 "The calculation:
+📖 "The calculation uses requested mode & ~mask, not subtraction (no default ACL):
     Default file:  666 (rw-rw-rw-)
-    umask:        -022
+    remove bits:   022
     Result:        644 (rw-r--r--)
     
     Default directory: 777 (rwxrwxrwx)
-    umask:            -022
+    remove bits:       022
     Result:            755 (rwxr-xr-x)"
 ```
 
 #### [DEMO CODE]
 ```bash
-# Change umask
+# Change umask in this shell, preserving its actual prior value
+PREVIOUS_UMASK=$(umask)
 umask 077
 
 # Create file and directory
@@ -909,7 +929,7 @@ ls -l private.txt      # -rw-------
 ls -ld private_dir     # drwx------
 
 # Restore
-umask 022
+umask "$PREVIOUS_UMASK"
 ```
 
 ---
@@ -934,7 +954,7 @@ chmod g+s shared_project
 ls -ld shared_project
 # drwxr-sr-x (s in group-execute position)
 
-# Sticky (1) - only owner deletes
+# Sticky (1) - file owner, directory owner or privilege may remove entries
 ls -ld /tmp
 # drwxrwxrwt (t in others-execute position)
 ```
@@ -995,44 +1015,36 @@ echo "0 0 1 * *     # first day of month, midnight"
 
 ---
 
-### SEGMENT 2: Live job creation (2 minutes)
+### SEGMENT 2: Prepare a Job and Inspect the Result (2 minutes)
 
-#### [DEMO CODE]
+Create and run a logger locally in the owned session directory. This checks the
+script and path resolution without altering a scheduler:
+
 ```bash
-# Create a simple script
-cat > ~/test_cron.sh << 'EOF'
+cat > "$DEMO_DIR/test_cron.sh" <<'EOF'
 #!/bin/bash
-echo "$(date): Cron test" >> /tmp/cron_test.log
+LOG_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+printf '%s: Cron teaching logger\n' "$(date -u +%FT%TZ)" >> "$LOG_DIR/cron_test.log"
 EOF
-chmod +x ~/test_cron.sh
-
-# Add to crontab (runs every minute)
-(crontab -l 2>/dev/null; echo "* * * * * $HOME/test_cron.sh") | crontab -
-
-# Verify
-crontab -l
+chmod +x -- "$DEMO_DIR/test_cron.sh"
+"$DEMO_DIR/test_cron.sh"
+cat -- "$DEMO_DIR/cron_test.log"
+printf '* * * * * "%s"\n' "$DEMO_DIR/test_cron.sh" > "$DEMO_DIR/candidate.cron"
+cat -- "$DEMO_DIR/candidate.cron"
 ```
 
-#### [MONITORING]
-```bash
-# Wait a minute and verify
-tail -f /tmp/cron_test.log
-# [wait for output to appear]
-```
+For a separately authorised scheduler demonstration in a disposable lab account,
+use the complete D3 model in [Spectacular Demos](S03_08_SPECTACULAR_DEMOS.md#d3-live-cron-monitor).
+It requires an explicit `--install`, a readable existing table, an owned workspace
+and a unique marker. It removes only its own marked entry, preserving unrelated
+jobs. A local logger run does not establish daemon timing or mail delivery.
 
----
+### SEGMENT 3: Cleanup and Best Practices (1 minute)
 
-### SEGMENT 3: Cleanup and best practices (1 minute)
-
-#### [DEMO CODE]
-```bash
-# Remove the test job
-crontab -l | grep -v "test_cron.sh" | crontab -
-crontab -l
-
-# OR to empty completely (CAUTION!)
-# crontab -r # DELETES EVERYTHING!
-```
+The D3 model owns its scheduler cleanup. Never use `grep -v test_cron.sh` to remove
+arbitrary existing jobs. For this local-only session, inspect `DEMO_DIR`, leave it
+and remove only that exact owned `enos-s03-live.*` directory when it is no longer
+needed. Do not call `crontab -r` as exercise cleanup.
 
 #### [TIPS]
 ```
@@ -1061,7 +1073,7 @@ crontab -l
 
 ### Quick Cheat Sheet
 
-```bash
+```text
 # find
 find PATH -type f -name "*.ext" -size +1M -mtime -7 -exec CMD {} \;
 
@@ -1083,3 +1095,8 @@ chmod u+x file    # symbolic
 ---
 
 *Document generated for UES Bucharest - CSIE | Operating Systems | Seminar 3*
+
+
+## Retained Author Notes
+
+*(Permissions seem complicated at first, but the rule is simple: think about who needs what access.)*

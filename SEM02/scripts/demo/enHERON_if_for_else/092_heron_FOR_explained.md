@@ -1,5 +1,8 @@
 # `heron_FOR.sh` — Detailed Line-by-Line Explanation
 
+> **Current executable contract:** use the numbered `_EN.sh` file in this directory. Historical line numbers and Romanian output labels below describe the original teaching version, not exact current byte positions. The current code checks `bc` before input, runs with `set -euo pipefail` and passes arithmetic through `calculate`, which rejects nonzero calculator status and output that is not one numeric scalar. Bare `echo ... | bc` snippets below explain the arithmetic mechanism; the executable uses the checked wrapper. No calculator installation is performed automatically.
+
+
 ## Overview
 
 This script implements **Heron's method** (also known as the Babylonian method) for approximating the square root of a positive integer. The central control structure is the `for` loop, which repeats the refinement formula exactly **10 times** without checking whether the result has already stabilised.
@@ -52,7 +55,7 @@ A three-step algorithmic summary. The wording is deliberately concise: step 1 es
 #   Diferenta fata de WHILE: nu verificam convergenta — facem fix 10 pasi.
 ```
 
-A justification for choosing the `for` structure over alternatives. The central argument: the number of repetitions is **fixed and known in advance** (10 steps), which makes `for` the natural choice. The comments emphasise that `if` would require manually duplicating the same formula 10 times (an inefficient and error-prone approach), whilst `while` would be appropriate only if early termination based on convergence were desired.
+A justification for choosing the `for` structure over alternatives. The central argument: the number of repetitions is **fixed and known in advance** (10 steps), which makes `for` the natural choice. The comments emphasise that `if` would require manually duplicating the same formula 10 times (an inefficient and error-prone approach), whilst the accompanying `while` example demonstrates an adaptive stopping condition; either loop form can implement either policy.
 
 ---
 
@@ -74,7 +77,7 @@ The `read` command halts script execution and waits for keyboard input. The `-p`
 if [ -z "$N" ]; then
 ```
 
-The keyword `if` opens a decision structure. The square brackets `[ ... ]` delimit a test expression (equivalent to the `test` command). The `-z` flag checks whether the following string has **zero** length — in other words, whether the user pressed *Enter* without typing anything. The double quotes around `$N` are essential: if `N` holds nothing, omitting the quotes would cause the expression to become `[ -z ]`, which would produce a syntax error. The semicolon `;` separates the condition from the keyword `then`, which marks the beginning of the block of instructions to be executed if the test evaluates to true.
+The keyword `if` opens a decision structure. The square brackets `[ ... ]` delimit a test expression (equivalent to the `test` command). The `-z` flag checks whether the following string has **zero** length — in other words, whether the user pressed *Enter* without typing anything. The double quotes around `$N` are essential: if `N` holds nothing, omitting the quotes would cause the expression to become `[ -z ]`, which is a one-argument test of the nonempty string `-z` and succeeds; it is not a syntax error. The semicolon `;` separates the condition from the keyword `then`, which marks the beginning of the block of instructions to be executed if the test evaluates to true.
 
 ---
 
@@ -174,7 +177,7 @@ This is one of the densest lines in the script and merits decomposition into its
 - **`$(...)`** — command substitution: Bash executes the command inside and replaces the entire construct with the text that command produces.
 - **`echo "scale=8; $N / 2"`** — constructs a string containing an instruction for the `bc` calculator. For instance, if `N` is `50`, the string becomes `scale=8; 50 / 2`.
 - **`|`** — the pipe operator: redirects the text produced by `echo` to the input of the programme that follows.
-- **`bc`** — an arbitrary-precision arithmetic calculator available on virtually every Unix-like system. Bash cannot natively perform decimal arithmetic — its `/` operator carries out integer division only.
+- **`bc`** — an arbitrary-precision decimal calculator that must be installed separately when absent. Bash cannot natively perform decimal arithmetic — its `/` operator carries out integer division only.
 - **`scale=8`** — sets the number of decimal places to 8, allowing detailed observation of convergence from one step to the next.
 
 The result is stored in variable `x`, which becomes the initial estimate: $x_0 = N / 2$.
@@ -293,7 +296,7 @@ The final separator line, closing the results block.
 
 The comments in section 5 of the script raise an important efficiency concern: if the script is run with `N=9`, the exact square root is `3`. From step 4 onward, the value no longer changes — yet the `for` loop continues regardless until step 10, performing 6 unnecessary calculations.
 
-This is the **structural limitation** of a `for` loop with a fixed iteration count: it cannot evaluate an early termination condition. If automatic stopping upon convergence is desired, one turns to the `while` loop, optionally combined with the `break` instruction (see `heron_WHILE.sh`).
+This is a **chosen fixed-count stopping policy**, not a limitation of Bash `for`: either `for` or `while` can use `break`, and a C-style `for` may include a convergence condition. The WHILE example demonstrates one adaptive design with an explicit 1,000-iteration cap.
 
 ---
 
@@ -341,3 +344,9 @@ The script mentions four syntactic forms in its comments. All produce the same o
 │  Display result: sqrt(N) ≈ x        │
 └─────────────────────────────────────┘
 ```
+
+## Numerical limits and verification scope
+
+`scale=8` (FOR/WHILE) or `scale=6` (IF) controls truncated decimal arithmetic, not a mathematical guarantee of that many correct digits. The update difference `|x_new - x|` is distinct from root error `|x - sqrt(N)|` and residual `|x² - N|`. In exact positive arithmetic, with `r = sqrt(N)`, `x_new - r = (x - r)²/(2x)`; the quadratic local convergence claim assumes `N > 0` and `x > 0`. Zero is handled separately before division. The IF labels classify the residual using the displayed illustrative thresholds; they are not an accuracy certificate for arbitrary N.
+
+The WHILE stopping-policy examples N=4 → 1 update and N=1,000,000 → 14 updates refer to the stated initial estimate, scale and threshold. They are bounded arithmetic reproductions, not a guarantee for a different precision or implementation. A missing/failing calculator must terminate with an error rather than produce a success message or an unbounded loop. The current calculator wrapper rejects multiline/wrapped or diagnostic output rather than accepting an invalid scalar; extremely large input can therefore be rejected.

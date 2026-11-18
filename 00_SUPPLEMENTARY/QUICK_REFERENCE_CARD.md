@@ -19,8 +19,8 @@
 | Algorithm | Preemptive | Optimal For | Weakness |
 |-----------|------------|-------------|----------|
 | FCFS | No | Simplicity | Convoy effect |
-| SJF | No | Avg wait time | Starvation of long jobs |
-| SRTF | Yes | Avg wait time | Requires burst prediction |
+| SJF | No | Mean wait for known bursts, equal arrivals | Starvation of long jobs |
+| SRTF | Yes | Mean flow/wait in the ideal known-burst model | Requires burst prediction |
 | Round Robin | Yes | Fairness | High context switch overhead |
 | MLFQ | Yes | Mixed workloads | Complex tuning |
 
@@ -53,7 +53,7 @@ All four must hold simultaneously for deadlock:
 | Calculation | Formula |
 |-------------|---------|
 | Virtual Address Space | 2^(address bits) |
-| Number of Pages | Virtual Size ÷ Page Size |
+| Number of Pages for a byte range | ceil(Virtual Size ÷ Page Size) |
 | Page Table Entries | Number of Pages |
 | Page Table Size | Entries × Entry Size |
 | Physical Address | (Frame# × Page Size) + Offset |
@@ -61,8 +61,8 @@ All four must hold simultaneously for deadlock:
 ### Address Translation Example
 
 ```
-Virtual Address: 0x00002ABC (page size = 4KB = 0x1000)
-Page Number:     0x00002ABC ÷ 0x1000 = 0x2
+Virtual Address: 0x00002ABC (page size = 4 KiB = 0x1000)
+Page Number:     floor(0x00002ABC ÷ 0x1000) = 0x2
 Offset:          0x00002ABC mod 0x1000 = 0xABC
 
 If Page 2 → Frame 7:
@@ -76,7 +76,7 @@ Physical Address = 7 × 0x1000 + 0xABC = 0x7ABC
 | FIFO | Replace oldest | Yes (Bélády) |
 | LRU | Replace least recently used | No |
 | Optimal | Replace furthest future use | No (theoretical) |
-| Clock | FIFO with second chance | No |
+| Clock | Circular second chance, with explicit hand/reference-bit rules | Yes, ordinary Clock can exhibit Bélády anomalies |
 
 ---
 
@@ -89,7 +89,9 @@ Physical Address = 7 × 0x1000 + 0xABC = 0x7ABC
 | Data Block | Actual file content |
 | Directory | Filename → Inode number mapping |
 
-### Inode Pointer Structure (ext2/3/4)
+### Classical Inode Pointer Structure (legacy ext2/ext3-style mapping)
+
+Modern ext4 normally uses an extent tree in `i_block`. The following arithmetic assumes 4-byte pointers and is not a universal ext4 maximum file size.
 
 ```
 ┌─────────────────┐
@@ -110,7 +112,7 @@ Physical Address = 7 × 0x1000 + 0xABC = 0x7ABC
 | Inode | Same as target | Different (own inode) |
 | Cross filesystem | No | Yes |
 | Target deleted | Still works | Broken (dangling) |
-| Storage | No extra | Stores path string |
+| Storage | Additional directory entry; shared inode/data | Separate inode and stored target path |
 
 ---
 
@@ -125,6 +127,8 @@ Physical Address = 7 × 0x1000 + 0xABC = 0x7ABC
 
 ### Peterson's Algorithm (2 processes)
 
+This is a sequentially consistent shared-memory model. Ordinary non-atomic concurrent C loads/stores cause a data race; a real C implementation needs suitable atomics and memory ordering.
+
 ```c
 flag[i] = true;
 turn = j;
@@ -137,22 +141,26 @@ flag[i] = false;
 
 ## Process vs Thread
 
+The timing/cost labels below are retained historical teaching estimates, with no measured environment. Context-switch costs depend on architecture, address-space identifiers and workload; not every process switch flushes every TLB entry. Processes can share mappings, and a shared-host failure can affect several processes.
+
 | Aspect | Process | Thread |
 |--------|---------|--------|
 | Address Space | Separate | Shared |
 | Creation Cost | High (~ms) | Low (~μs) |
 | Communication | IPC (pipes, sockets) | Shared memory |
 | Crash Impact | Isolated | Kills entire process |
-| Context Switch | Expensive (TLB flush) | Cheap |
+| Context Switch | May change address space; TLB handling is architecture-dependent | Same-process threads retain the address space |
 
 ---
 
 ## Virtualisation
 
+The following legacy overhead/start-up labels are not measured guarantees. Isolation depends on the hypervisor/kernel, privileges and configuration; multiple VMs on one host do not establish high availability. Provenance or an explicitly adopted illustrative model remains an author decision.
+
 | Type | Isolation | Overhead | Boot Time |
 |------|-----------|----------|-----------|
-| VM (Type 1) | Full | Medium | Minutes |
-| VM (Type 2) | Full | High | Minutes |
+| VM (Type 1) | Hypervisor boundary | Medium | Minutes |
+| VM (Type 2) | Hypervisor/host boundary | High | Minutes |
 | Container | Process-level | Low | Seconds |
 
 ### Popek-Goldberg Requirements
@@ -167,9 +175,9 @@ flag[i] = false;
 
 | Unit | Value |
 |------|-------|
-| 1 KB | 2¹⁰ = 1,024 bytes |
-| 1 MB | 2²⁰ = 1,048,576 bytes |
-| 1 GB | 2³⁰ bytes |
+| 1 KiB | 2¹⁰ = 1,024 bytes |
+| 1 MiB | 2²⁰ = 1,048,576 bytes |
+| 1 GiB | 2³⁰ bytes |
 | 1 ms | 10⁻³ seconds |
 | 1 μs | 10⁻⁶ seconds |
 | 1 ns | 10⁻⁹ seconds |
@@ -177,3 +185,5 @@ flag[i] = false;
 ---
 
 *Print this page for quick exam reference — Good luck!*
+
+**Clock counterexample:** for the reference string `1,2,3,4,1,2,5,1,2,3,4,5`, initially empty frames, hand at 0, insertion bit 1, hit bit set and hand advanced after insertion, Clock incurs 9 faults with 3 frames and 10 with 4. These rules matter to reproducibility.

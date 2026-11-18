@@ -1,10 +1,10 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "Unpublished ENos v6 candidate based on v5.5.0 (d8fdd0507fe26e6bc1438a692da14afc2112464c). Cite the exact version and commit used."
 authors:
   - family-names: "Clim"
     given-names: "Antonio"
     affiliation: "Bucharest University of Economic Studies"
 title: "ENos — OPERATING SYSTEMS: Educational Kit"
 type: software
-version: "5.4.0"
+version: "6.0.0-dev"
 url: "https://github.com/antonioclim/ENos"

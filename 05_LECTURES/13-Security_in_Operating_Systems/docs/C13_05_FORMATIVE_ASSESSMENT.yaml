@@ -1,10 +1,10 @@
 # C13_05_FORMATIVE_ASSESSMENT.yaml
-# Course 13: Security in Sisteme de Operare
+# Course 13: Security in Operating Systems
 # Formative Assessment — Conceptual Quiz
 
 metadata:
   course: 13
-  subject: "Security in Sisteme de Operare"
+  subject: "Security in Operating Systems"
   version: "2.0"
   creation_date: "2026-01-28"
   author: "by Revolvix"
@@ -32,7 +32,7 @@ questions:
   - id: q02
     bloom: remember
     difficulty: easy
-    text: "What do the permisiuni rwxr-xr-- represent in Linux?"
+    text: "Which answer fully describes the permissions rwxr-xr-- in Linux?"
     options:
       - "Everyone has full access"
       - "Owner: read+write+execute, Group: read+execute, Others: read only"
@@ -47,11 +47,11 @@ questions:
     text: "What is the SUID bit?"
     options:
       - "A virus"
-      - "When set on an executable, it runs with the owner's permisiuni, not those of the utilizator executing it"
+      - "When honoured on an executable binary, it sets the process effective UID to the file owner UID"
       - "A type of encryption"
-      - "A network comandă"
+      - "A network command"
     correct: 1
-    explanation: "SUID: allows normal users to execute programs with elevated privileges (e.g. passwd)."
+    explanation: "SUID changes effective identity when honoured; Linux ignores it under conditions including no_new_privs, nosuid mounts or tracing. It does not grant every permission unconditionally."
 
   - id: q04
     bloom: understand
@@ -63,7 +63,7 @@ questions:
       - "Authorisation comes first"
       - "Authentication is not necessary"
     correct: 1
-    explanation: "Authentication = identity verification (login). Authorisation = access control (permisiuni)."
+    explanation: "Authentication = identity verification (login). Authorisation = access control (permissions)."
 
   - id: q05
     bloom: understand
@@ -71,11 +71,11 @@ questions:
     text: "What is the 'least privilege' principle?"
     options:
       - "All users have root access"
-      - "Processes and users receive only the minimum permisiuni necessary for their task"
+      - "Processes and users receive only the minimum permissions necessary for their task"
       - "Privileges increase automatically"
       - "It does not apply in practice"
     correct: 1
-    explanation: "Least privilege: minimises the attack surface. If a proces is compromised, the damage is limited."
+    explanation: "Least privilege: minimises the attack surface. If a process is compromised, the damage is limited."
 
   - id: q06
     bloom: understand
@@ -83,7 +83,7 @@ questions:
     text: "What is a buffer overflow?"
     options:
       - "RAM is full"
-      - "Data written to a buffer exceeds its boundary, overwriting adjacent memorie"
+      - "Data written to a buffer exceeds its boundary, overwriting adjacent memory"
       - "A type of compression"
       - "A network error"
     correct: 1
@@ -95,35 +95,35 @@ questions:
     text: "What is ASLR (Address Space Layout Randomisation)?"
     options:
       - "An encryption algorithm"
-      - "Randomises memorie positions (stack, heap, libraries) to make exploitation harder"
+      - "Randomises memory positions (stack, heap, libraries) to make exploitation harder"
       - "A firewall"
       - "A type of permission"
     correct: 1
-    explanation: "ASLR: the attacker does not know where data is in memorie → overflow does not know where to jump."
+    explanation: "ASLR randomises selected mappings. Its protection depends on entropy, platform, configuration and information leaks; it does not guarantee that an attacker cannot locate code or data."
 
   - id: q08
     bloom: understand
     difficulty: medium
-    text: "Why does the sticky bit on /tmp prevent deletion of other users' files?"
+    text: "How does the sticky bit restrict deletion in a shared directory such as /tmp?"
     options:
       - "It encrypts the files"
-      - "With sticky bit, only the file owner or root can delete files from the director"
+      - "Subject to normal access checks, deletion requires file ownership, directory ownership or an appropriate privilege"
       - "It compresses the files"
       - "It hides the files"
     correct: 1
-    explanation: "Sticky bit (t): in world-writable directories, prevents deletion of files by non-owners."
+    explanation: "For Linux sticky directories, the caller effective UID must match the file owner or directory owner, or the caller needs CAP_FOWNER; normal directory access checks also apply."
 
   - id: q09
     bloom: analyse
     difficulty: hard
     text: "Why does DEP/NX bit help prevent buffer overflow exploits?"
     options:
-      - "It encrypts memorie"
-      - "Marks memorie regions as non-executable: injected data cannot be executed as code"
+      - "It encrypts memory"
+      - "Marks memory regions as non-executable: injected data cannot be executed as code"
       - "It increases speed"
       - "It does not help"
     correct: 1
-    explanation: "NX: stack/heap non-executable. Injected shellcode cannot run directly, requires ROP techniques."
+    explanation: "NX prevents direct instruction execution from pages marked non-executable. It does not prevent the overwrite itself or code-reuse attacks such as ROP."
 
   - id: q10
     bloom: analyse
@@ -132,10 +132,10 @@ questions:
     options:
       - "It increases speed"
       - "Limits syscalls and available resources, reducing the impact of a compromise"
-      - "It saves memorie"
+      - "It saves memory"
       - "It offers no advantages"
     correct: 1
-    explanation: "Sandbox: a compromised application cannot access the entire system, only permitted resources."
+    explanation: "A correctly configured sandbox can restrict access through complementary mechanisms. Its coverage depends on the configuration and kernel; it is not an unconditional containment guarantee."
 
   - id: q11
     bloom: analyse
@@ -143,20 +143,20 @@ questions:
     text: "What is the main risk of SUID root programs?"
     options:
       - "They are too slow"
-      - "Any vulnerability in the program gives the attacker full root access"
-      - "They consume too much memorie"
+      - "An exploitable flaw reached while privileged may permit escalation to the effective root identity"
+      - "They consume too much memory"
       - "There is no risk"
     correct: 1
-    explanation: "Bug in SUID root = privilege escalation. The attacker gains root by exploiting the program."
+    explanation: "SUID root increases the potential consequence of exploitable flaws. Actual escalation depends on the vulnerability, reachable code, privilege transitions and other controls."
 
   - id: q12
     bloom: apply
     difficulty: hard
-    text: "You find a file with permisiuni -rwsr-xr-x owned by root. What security risk might exist?"
+    text: "You find a file with permissions -rwsr-xr-x owned by root. What security risk might exist?"
     options:
       - "None"
-      - "It is SUID root: any vulnerability allows privilege escalation to root"
+      - "It is SUID root: an exploitable flaw while privileged could enable escalation"
       - "The file is corrupted"
-      - "The permisiuni are normal"
+      - "The permissions are normal"
     correct: 1
-    explanation: "SUID (s in owner execute) + owner=root = execution as root. Careful auditing required."
+    explanation: "When honoured, executable SUID with owner root sets effective UID to root. The permission string alone does not prove a vulnerability; inspect the programme and execution conditions."

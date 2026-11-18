@@ -1,5 +1,7 @@
 # S04_TC01 - Regular Expressions
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory Material - Seminar 4 (Redistributed)
 
@@ -32,6 +34,14 @@ At the end of this laboratory, the student will be able to:
 
 ---
 
+
+## Dialect and Locale Contract
+
+Examples target GNU grep/sed. `\+`, `\?` and `\|` in BRE and backreferences in
+GNU grep ERE are extensions: do not assume the same pattern works in AWK or
+another POSIX ERE consumer. `\w`, `\s` and `\b` also work in GNU grep BRE/ERE.
+ASCII range/class equivalences below assume `LC_ALL=C`; POSIX class membership
+depends on the active locale. See the [main capability table](../../docs/S04_02_MAIN_MATERIAL.md#tool-and-dialect-contract).
 
 ## 2. Basic Metacharacters
 
@@ -69,7 +79,7 @@ grep '192\.168\.1\.1' log   # literal IP (escaped dots)
 
 ### 3.1 Explicit Sets
 
-```bash
+```text
 [abc]       # one of: a, b, or c
 [a-z]       # any lowercase letter
 [A-Z]       # any uppercase letter
@@ -82,7 +92,7 @@ grep '192\.168\.1\.1' log   # literal IP (escaped dots)
 
 ### 3.2 POSIX Classes
 
-```bash
+```text
 [[:alpha:]]     # letters [a-zA-Z]
 [[:digit:]]     # digits [0-9]
 [[:alnum:]]     # alphanumeric [a-zA-Z0-9]
@@ -172,7 +182,7 @@ grep -E '^(yes|no)$' file.txt       # lines with only "yes" or "no"
 # Reference to captured group
 # \1 = first group, \2 = second, etc.
 
-# Duplicate words
+# Select entire lines containing duplicate words (use -oE to extract only each pair)
 grep -E '\b(\w+)\s+\1\b' file.txt   # "the the", "is is"
 
 # Matching HTML tags
@@ -185,7 +195,7 @@ grep -E '<([a-z]+)>.*</\1>' file.html
 
 ### 6.1 Anchors
 
-```bash
+```text
 ^       # start of line
 $       # end of line
 \A      # start of string (PCRE)
@@ -194,7 +204,7 @@ $       # end of line
 
 ### 6.2 Word Boundaries
 
-```bash
+```text
 \b      # word boundary (start or end of word)
 \B      # non-word boundary
 \<      # start of word (GNU)
@@ -250,9 +260,12 @@ grep -E '(abc)+' file.txt
 grep -E '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' emails.txt
 ```
 
+The email expression is a simplified lexical subset, not RFC-complete validation.
+
 ### 8.2 IP Address Validation
 
 ```bash
+# Shape only; values such as 999.999.999.999 also match.
 grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$' ips.txt
 
 # Stricter (0-255)
@@ -269,7 +282,7 @@ grep -E '07[0-9]{2}(-?[0-9]{3}){2}' phones.txt
 ### 8.4 Dates
 
 ```bash
-# Format: DD/MM/YYYY or DD-MM-YYYY
+# Shape illustration only: also permits mixed separators and impossible dates; calendar validity requires separate checks
 grep -E '[0-3][0-9][/-][0-1][0-9][/-][0-9]{4}' dates.txt
 ```
 
@@ -308,7 +321,7 @@ grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' log.txt
 
 ## Cheat Sheet
 
-```bash
+```text
 # METACHARACTERS
 .           any character
 ^           start of line
@@ -360,14 +373,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

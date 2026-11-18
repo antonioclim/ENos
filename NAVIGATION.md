@@ -3,7 +3,7 @@
 > **Quick reference for finding materials in this kit**  
 > **Course:** Operating Systems | ASE Bucharest — CSIE  
 > **Author:** ing. dr. Antonio Clim  
-> **Last Updated:** January 2025
+> **Candidate updated:** 17 November 2026 — baseline v5.5.0; target v6.0.0 unpublished
 
 ---
 
@@ -76,7 +76,7 @@ Each seminar contains standardised documents:
 
 | Tool | Location | Purpose |
 |------|----------|---------|
-| Autograder | `SEM0X/scripts/python/S0X_01_autograder.py` | Automated submission grading |
+| Autograder | `SEM0X/scripts/python/S0X_01_autograder.py` | Bounded component checks; unresolved policy or missing evidence stays explicit |
 | Quiz Generator | `SEM0X/scripts/python/S0X_02_quiz_generator.py` | Generate assessment quizzes |
 | Report Generator | `SEM0X/scripts/python/S0X_03_report_generator.py` | Create grade reports |
 
@@ -85,9 +85,9 @@ Each seminar contains standardised documents:
 | Tool | Location | Purpose |
 |------|----------|---------|
 | Plagiarism Detector | `SEM01/scripts/python/S01_05_plagiarism_detector.py` | Code similarity check |
-| AI Scanner | `SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py` | Detect AI-generated text |
+| AI Scanner | `SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py` | Describe style features for human review; no authorship probability |
 | MOSS/JPlag Guide | `SEM07/external_tools/MOSS_JPLAG_GUIDE.md` | External tools integration |
-| Combined Pipeline | `SEM07/external_tools/run_plagiarism_check.sh` | Full integrity check |
+| Combined Pipeline | `SEM07/external_tools/run_plagiarism_check.sh` | Local comparison report; service transfer is a separate authorised action |
 
 ### Shared Libraries
 
@@ -108,6 +108,8 @@ Each seminar contains standardised documents:
 ## 📊 Evaluation
 
 ### Component Weights
+
+**Historical proposal, `PENDING_POLICY`.** The following 25/50/25 split is retained for comparison with conflicting rubrics, not adopted as a final grade policy. See [AUTHOR_DECISIONS.md](AUTHOR_DECISIONS.md).
 
 | Component | Weight | Details |
 |-----------|--------|---------|
@@ -219,7 +221,7 @@ grep -rn "find.*-exec" --include="*.md" .
 - **Author:** ing. dr. Antonio Clim
 - **Institution:** ASE Bucharest — Faculty of Cybernetics, Statistics and Economic Informatics
 - **Course:** Operating Systems (Sisteme de Operare)
-- **LICENCE:** RESTRICTED (but not for teaching/learning from this repository only!)
+- **Licence:** baseline declarations conflict; author reconciliation remains pending
 
 ---
 
@@ -232,4 +234,4 @@ grep -rn "find.*-exec" --include="*.md" .
 
 ---
 
-*This navigation index is automatically verified by CI/CD. See `.github/workflows/quality.yml` for details.*
+*Run `bash scripts/check_links.sh NAVIGATION.md` for a local link/anchor check. No active root GitHub Actions workflow or successful remote run is asserted.*

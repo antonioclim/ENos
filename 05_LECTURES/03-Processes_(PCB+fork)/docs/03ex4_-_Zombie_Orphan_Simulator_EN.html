@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zombie & Orphan Simulator - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Inter', sans-serif;
@@ -137,7 +137,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -149,30 +226,30 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Zombie & Orphan Simulator</h1>
-                    <p class="text-xs text-stone-500">Demonstratie Pas-cu-Pas</p>
+                    <p class="text-xs text-stone-500">Step-by-Step Demonstration</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-stone-100 text-stone-700 rounded-full text-sm font-medium">
                 <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
             </span>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Lifecycle model</h2><p>The animation uses an init-only adoption scenario; Linux can instead reparent to the nearest living child subreaper. A zombie has released its user address space but retains minimal kernel exit/accounting information until reaped. The terminal is schematic output, not a live ps session. Parent and child branches run in separate processes.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Scenario Selector -->
         <div class="mb-6 bg-white rounded-xl shadow-sm border border-stone-200 p-4">
             <div class="flex items-center gap-4 flex-wrap">
-                <span class="text-sm font-semibold text-stone-700">Select Scenariul:</span>
+                <span class="text-sm font-semibold text-stone-700">Select Scenario:</span>
                 <div class="flex gap-2">
                     <label class="flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-lg cursor-pointer hover:bg-stone-200 transition-colors">
                         <input type="radio" name="scenario" value="zombie" checked class="w-4 h-4 text-stone-600">
                         <i class="fas fa-skull text-stone-500"></i>
-                        <span class="text-sm font-medium">Crearea unui Zombie</span>
+                        <span class="text-sm font-medium">Creating a Zombie</span>
                     </label>
                     <label class="flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-lg cursor-pointer hover:bg-stone-200 transition-colors">
                         <input type="radio" name="scenario" value="orphan" class="w-4 h-4 text-orange-600">
                         <i class="fas fa-user-slash text-orange-500"></i>
-                        <span class="text-sm font-medium">Crearea unui Orphan</span>
+                        <span class="text-sm font-medium">Creating an Orphan</span>
                     </label>
                 </div>
             </div>
@@ -181,7 +258,7 @@
         <!-- Stats Bar -->
         <div class="mb-6 grid grid-cols-3 gap-4">
             <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 text-center">
-                <div class="text-xs text-stone-500 mb-1">Activee Processes</div>
+                <div class="text-xs text-stone-500 mb-1">Active Processes</div>
                 <div id="statActivee" class="text-2xl font-bold text-blue-600">1</div>
             </div>
             <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200 text-center">
@@ -200,7 +277,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
                         <i class="fas fa-project-diagram text-blue-500"></i>
-                        Vizualizare Procese
+                        Process Visualisation
                     </h2>
                     
                     <div id="visualization" class="relative min-h-[300px]">
@@ -251,10 +328,10 @@
                     <div id="explanationBox" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <h4 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
                             <i class="fas fa-info-circle"></i>
-                            <span id="explanationTitle">Stare Initiala</span>
+                            <span id="explanationTitle">Initial State</span>
                         </h4>
                         <p id="explanationText" class="text-sm text-blue-700">
-                            Sistemul este initializat cu procesul init (PID 1). Apasa "Pas Next" for a start scenariul.
+                            The model starts with init (PID 1). Press "Next Step" to begin the scenario.
                         </p>
                     </div>
                 </div>
@@ -263,7 +340,7 @@
                 <div class="bg-stone-900 rounded-xl shadow-sm border border-stone-700 p-4">
                     <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
                         <i class="fas fa-terminal"></i>
-                        <span id="terminalTitle">ps aux | grep -E "STAT|1000|1001"</span>
+                        <span id="terminalTitle">ps -eo user,pid,ppid,stat,comm (schematic) | grep -E "STAT|1000|1001"</span>
                     </h3>
                     <pre id="terminalOutput" class="text-xs mono text-green-300 overflow-x-auto">
 USER       PID  PPID  STAT  COMMAND
@@ -277,7 +354,7 @@ root         1     0  Ss    /sbin/init
                 <!-- Step Progress -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-4">
-                        <i class="fas fa-list-ol text-purple-500 mr-2"></i>Progres Scenariu
+                        <i class="fas fa-list-ol text-purple-500 mr-2"></i>Scenario Progress
                     </h3>
                     <div id="stepProgress" class="flex justify-between items-center">
                         <!-- Steps will be rendered here -->
@@ -287,7 +364,7 @@ root         1     0  Ss    /sbin/init
                 <!-- C Code -->
                 <div class="bg-stone-800 rounded-xl shadow-sm border border-stone-700 p-4">
                     <h3 class="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
-                        <i class="fas fa-code"></i> Cod C Corespunzator
+                        <i class="fas fa-code"></i> Corresponding C Pseudocode
                     </h3>
                     <pre id="codeBlock" class="text-xs mono text-stone-300 leading-relaxed"></pre>
                 </div>
@@ -295,14 +372,14 @@ root         1     0  Ss    /sbin/init
                 <!-- Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-4">
-                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controale
+                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controls
                     </h3>
                     <div class="grid grid-cols-4 gap-2">
                         <button id="btnPrev" class="btn-action p-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center gap-1" disabled>
                             <i class="fas fa-chevron-left"></i> Back
                         </button>
                         <button id="btnNext" class="btn-action col-span-2 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2">
-                            Pas Next <i class="fas fa-chevron-right"></i>
+                            Next Step <i class="fas fa-chevron-right"></i>
                         </button>
                         <button id="btnReset" class="btn-action p-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-sm font-medium flex items-center justify-center gap-1">
                             <i class="fas fa-redo"></i>
@@ -323,7 +400,7 @@ root         1     0  Ss    /sbin/init
                 <!-- Quiz Section -->
                 <div id="quizSection" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 hidden">
                     <h3 class="text-sm font-semibold text-stone-700 mb-4">
-                        <i class="fas fa-question-circle text-amber-500 mr-2"></i>verification Cunostinte
+                        <i class="fas fa-question-circle text-amber-500 mr-2"></i>Knowledge Check
                     </h3>
                     <div id="quizContent">
                         <!-- Quiz will be rendered here -->
@@ -337,20 +414,20 @@ root         1     0  Ss    /sbin/init
             <div id="zombieSummary" class="bg-gradient-to-br from-stone-50 to-stone-100 rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <span class="text-2xl">💀</span>
-                    Rezumat: Proces Zombie
+                    Summary: Zombie Process
                 </h3>
                 <div class="space-y-3 text-sm">
                     <div class="p-3 bg-white rounded-lg border-l-4 border-stone-400">
-                        <strong>Definitie:</strong> Un proces care s-a finished dar the parent nu a citit inca exit status-ul prin wait().
+                        <strong>Definition:</strong> A process that has exited but whose status has not yet been collected with wait().
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-amber-400">
-                        <strong>In sistem:</strong> Ocupa un slot in tabela de procese, dar NU consuma CPU or memorie.
+                        <strong>System state:</strong> Retains exit status and kernel process metadata, but does not execute or retain its user address space.
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-red-400">
-                        <strong>Pericol:</strong> Prea multe zombie-uri pot epuiza PID-urile disponibile (~32000).
+                        <strong>Risk:</strong> Too many zombies can exhaust configured process limits; 32,000 is an illustrative limit, not a universal default.
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-green-400">
-                        <strong>solution:</strong> The parent must to apeleze wait() or waitpid() for a "reaps" zombie-ul.
+                        <strong>solution:</strong> The parent or designated reaper must collect the status with wait()/waitpid(), unless an appropriate automatic-reaping policy applies.
                     </div>
                 </div>
             </div>
@@ -358,20 +435,20 @@ root         1     0  Ss    /sbin/init
             <div id="orphanSummary" class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-sm border border-orange-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <span class="text-2xl">👤</span>
-                    Rezumat: Proces Orphan
+                    Summary: Orphan Process
                 </h3>
                 <div class="space-y-3 text-sm">
                     <div class="p-3 bg-white rounded-lg border-l-4 border-orange-400">
-                        <strong>Definitie:</strong> Un proces al carui parent s-a finished before ca el to se termine.
+                        <strong>Definition:</strong> A process whose parent exits before it does.
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-blue-400">
-                        <strong>Reparenting:</strong> Sistemul il adopta automat — init (PID 1) devine noul parent.
+                        <strong>Reparenting:</strong> In this selected model, init (PID 1) becomes its parent; Linux can also use a living child subreaper.
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-green-400">
-                        <strong>Avantaj:</strong> Init face automat wait() when orfanul finish, prevenind zombie-uri.
+                        <strong>Benefit:</strong> The selected init reaper promptly collects the adopted child’s exit status, avoiding a persistent zombie.
                     </div>
                     <div class="p-3 bg-white rounded-lg border-l-4 border-purple-400">
-                        <strong>Daemon pattern:</strong> Multe daemoane folosesc intentionat orfanizarea for a rula independent.
+                        <strong>Daemon pattern:</strong> Traditional daemonisation may deliberately orphan a child; service-manager supervision uses other lifecycle arrangements.
                     </div>
                 </div>
             </div>
@@ -386,22 +463,58 @@ root         1     0  Ss    /sbin/init
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== Scenarios Data ====================
         const scenarios = {
             zombie: {
-                name: "Crearea unui Zombie",
+                name: "Creating a Zombie",
                 steps: [
                     {
-                        title: "Stare Initiala",
-                        explanation: "Sistemul run cu procesul init (PID 1). Vom crea un parent care va fork()-a un copil.",
+                        title: "Initial State",
+                        explanation: "The model starts with init (PID 1). We create a parent that will fork a child.",
                         codeLine: null,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init`,
                         action: 'init'
                     },
                     {
-                        title: "fork() - Creation Procese",
-                        explanation: "The parent (PID 1000) apeleaza fork(). Se create copilul (PID 1001). Ambele procese sunt active.",
+                        title: "fork() - Process Creatione",
+                        explanation: "The parent (PID 1000) calls fork(). The child (PID 1001) is created. Both processes are active.",
                         codeLine: 1,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
@@ -411,7 +524,7 @@ user      1001  1000  S     ./program`,
                     },
                     {
                         title: "child: exit(42)",
-                        explanation: "Copilul isi finish executia cu exit(42). The PCB remains in the system cu exit status-ul 42, asteptand ca the parent to-l citeasca.",
+                        explanation: "The child exits with status 42. Kernel process metadata retains that status until the parent or reaper collects it.",
                         codeLine: 3,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
@@ -420,18 +533,18 @@ user      1001  1000  Z     [program] <defunct>`,
                         action: 'childExit'
                     },
                     {
-                        title: "ps aux | grep Z",
-                        explanation: "Folosind comanda ps, we can vedea procesul zombie. Starea 'Z' and '<defunct>' indica un zombie. The parent inca nu a facut wait()!",
+                        title: "ps -eo user,pid,ppid,stat,comm (schematic)",
+                        explanation: "The ps output shows a zombie. State 'Z' and '<defunct>' identify it; the parent has not yet called wait().",
                         codeLine: null,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 user      1001  1000  Z     [program] <defunct>
 
-# Zombie detectat! Procesul 1001 waits reaping.`,
+# Zombie detected: process 1001 awaits reaping.`,
                         action: 'showZombie'
                     },
                     {
                         title: "parent: wait(&status)",
-                        explanation: "The parent apeleaza wait(). Exit status-ul (42) este citit, iar zombie-ul este eliminat din sistem. Resursele sunt complet eliberate.",
+                        explanation: "The parent calls wait(). It collects exit status 42 and the remaining zombie record is removed.",
                         codeLine: 7,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
@@ -443,39 +556,39 @@ user      1000     1  S     ./program
                 ],
                 code: `<span class="code-line" data-line="1">pid_t pid = fork();</span>
 <span class="code-line" data-line="2">if (pid == 0) {</span>
-<span class="code-line" data-line="3">    // Cod copil</span>
-<span class="code-line" data-line="4">    exit(42);  // ← Copilul finish</span>
+<span class="code-line" data-line="3">    // Child code</span>
+<span class="code-line" data-line="4">    exit(42);  // ← The child exits</span>
 <span class="code-line" data-line="5">} else {</span>
-<span class="code-line" data-line="6">    sleep(10);  // The parent "uita" to faca wait</span>
+<span class="code-line" data-line="6">    sleep(10);  // The parent deliberately delays wait in this example</span>
 <span class="code-line" data-line="7">    wait(&status);  // ← Reaping zombie</span>
 <span class="code-line" data-line="8">}</span>`,
                 quiz: [
                     {
-                        question: "Ce return fork() in procesul copil?",
+                        question: "What does fork() return in the child process?",
                         options: ["PID-ul parentlui", "0", "PID-ul copilului", "-1"],
                         correct: 1
                     },
                     {
-                        question: "Ce se intampla cu un zombie if the parent nu face niciodata wait()?",
-                        options: ["Este omorat automat", "Ramane in sistem pana la reboot", "It is adopted by init", "Consuma 100% CPU"],
+                        question: "Who adopts the zombie in this model when its parent exits without collecting it?",
+                        options: ["It is killed automatically", "It remains until reboot", "It is adopted by init", "It consumes 100% CPU"],
                         correct: 1
                     }
                 ]
             },
             orphan: {
-                name: "Crearea unui Orphan",
+                name: "Creating an Orphan",
                 steps: [
                     {
-                        title: "Stare Initiala",
-                        explanation: "Sistemul run cu procesul init (PID 1). Vom crea un parent care va fork()-a un copil, apoi the parent va finish first.",
+                        title: "Initial State",
+                        explanation: "The model starts with init (PID 1). A parent forks a child, then the parent exits first.",
                         codeLine: null,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init`,
                         action: 'init'
                     },
                     {
-                        title: "fork() - Creation Procese",
-                        explanation: "The parent (PID 1000) apeleaza fork(). Se create copilul (PID 1001). Ambele procese sunt active, copilul are PPID=1000.",
+                        title: "fork() - Process Creatione",
+                        explanation: "The parent (PID 1000) calls fork(). The child (PID 1001) is created. Both are active and the child has PPID=1000.",
                         codeLine: 1,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
@@ -485,7 +598,7 @@ user      1001  1000  S     ./program`,
                     },
                     {
                         title: "parent: exit(0)",
-                        explanation: "The parent isi finish executia before de copil! Copilul devine ORFAN. Sistemul il reparent-eaza automat to init (PID 1).",
+                        explanation: "The parent exits before the child. The child becomes orphaned and is reparented to init (PID 1) in this model.",
                         codeLine: 6,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
@@ -493,53 +606,62 @@ user      1001     1  S     ./program  # PPID changed! Was 1000, now 1`,
                         action: 'parentExit'
                     },
                     {
-                        title: "Copilul continue...",
-                        explanation: "Copilul (acum orfan) continue to ruleze normal. Observati ca PPID s-a schimbat de la 1000 la 1. Init este acum responsabil for el.",
+                        title: "The child continues...",
+                        explanation: "The child, now orphaned, continues running. In this model its PPID changes from 1000 to 1 and init becomes its reaper.",
                         codeLine: 3,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
-user      1001     1  S     ./program  # Orphan adoptat de init
+user      1001     1  S     ./program  # Orphan adopted by init
 
-# Copilul run independent de fostul parent.`,
+# The child runs independently of its former parent.`,
                         action: 'childContinue'
                     },
                     {
                         title: "child: exit(0)",
-                        explanation: "When copilul finish, init face automat wait(). Nu exists zombie! Acesta este unul among avantajele reparenting-ului to init.",
+                        explanation: "After the child exits, init collects its status. This model shows reaping immediately; a real system may show a brief zombie interval.",
                         codeLine: 4,
                         terminal: `USER       PID  PPID  STAT  COMMAND
 root         1     0  Ss    /sbin/init
 
-# Copilul a finished. Init a facut wait() automat.
-# Nu exists zombie!`,
+# The child exited and the selected init reaper collected its status.
+# No zombie remains after reaping.`,
                         action: 'childExit'
                     }
                 ],
                 code: `<span class="code-line" data-line="1">pid_t pid = fork();</span>
 <span class="code-line" data-line="2">if (pid == 0) {</span>
-<span class="code-line" data-line="3">    // Cod copil - continue to ruleze</span>
+<span class="code-line" data-line="3">    // Child code: continues running</span>
 <span class="code-line" data-line="4">    sleep(5);</span>
 <span class="code-line" data-line="5">    exit(0);</span>
 <span class="code-line" data-line="6">} else {</span>
-<span class="code-line" data-line="7">    // The parent finish IMEDIAT</span>
-<span class="code-line" data-line="8">    exit(0);  // ← Copilul devine orfan</span>
+<span class="code-line" data-line="7">    // The parent exits immediately</span>
+<span class="code-line" data-line="8">    exit(0);  // ← The child becomes orphaned</span>
 <span class="code-line" data-line="9">}</span>`,
                 quiz: [
                     {
-                        question: "Cine devine the parent unui proces orfan?",
-                        options: ["Kernel-ul", "init (PID 1)", "Procesul cu cel mai mic PID", "Nimeni"],
+                        question: "Who adopts the orphan in this init-only model?",
+                        options: ["The kernel", "init (PID 1)", "The process with the smallest PID", "Nobody"],
                         correct: 1
                     },
                     {
-                        question: "De ce orfanii NU devin zombie-uri when finish?",
-                        options: ["Orphanii nu pot finish", "Init face automat wait()", "Kernel-ul ii delete direct", "PPID devine 0"],
+                        question: "Why does no zombie remain after the adopted child is reaped?",
+                        options: ["Orphans cannot exit", "Init collects the exit status with wait()", "The kernel deletes it immediately", "PPID becomes 0"],
                         correct: 1
                     }
                 ]
             }
         };
 
-        // ==================== State ====================
+        
+scenarios.zombie.quiz[1]={question:'What happens if a parent exits without reaping its zombie child?',options:['The child consumes 100% CPU','It must remain until reboot','It is adopted by the nearest living subreaper or the namespace init, which can reap it','It resumes executing'],correct:2,explanation:'Linux reparents the child to a living subreaper or namespace init. Reaping still requires the designated reaper to wait; reboot is not required.'};
+scenarios.orphan.quiz[0].question='In this classic init-only scenario (no subreaper), who adopts the orphan?';
+scenarios.orphan.quiz[1]={question:'Why is no persistent zombie shown after the adopted child exits in this scenario?',options:['Orphans cannot exit','The chosen init reaper promptly waits for it','All kernels omit exit records for orphans','Its PPID becomes zero'],correct:1,explanation:'Prompt reaping is a policy in this scenario. A transient exit record can exist; adoption alone does not guarantee instantaneous reaping.'};
+scenarios.zombie.steps[2].codeLine=4;
+scenarios.orphan.steps[2].codeLine=8;scenarios.orphan.steps[3].codeLine=4;scenarios.orphan.steps[4].codeLine=5;
+scenarios.orphan.steps[4].explanation='The adopted child exits. In this selected scenario init promptly calls wait and removes the minimal exit record. Adoption alone does not guarantee immediate reaping.';
+scenarios.orphan.steps[4].terminal='USER       PID  PPID  STAT  COMMAND\nroot         1     0  Ss    /sbin/init\n\n# Child exited and was reaped by the selected init policy.';
+
+// ==================== State ====================
         let currentScenario = 'zombie';
         let currentStep = 0;
         let autoPlayInterval = null;
@@ -572,8 +694,8 @@ root         1     0  Ss    /sbin/init
                 const lineNum = parseInt(line.dataset.line);
                 if (step.codeLine && lineNum === step.codeLine) {
                     line.classList.add('highlight');
-                } else if (step.codeLine && lineNum < step.codeLine) {
-                    line.classList.add('executed');
+                } else if (false) {
+                    // Branches execute in different processes; no cumulative prefix highlight.
                 }
             });
         }
@@ -597,105 +719,28 @@ root         1     0  Ss    /sbin/init
         }
 
         function applyAction(action) {
-            const parentProcess = document.getElementById('parentProcess');
-            const childProcess = document.getElementById('childProcess');
-            const parentInitLine = document.getElementById('parentInitLine');
-            const parentChildLine = document.getElementById('parentChildLine');
-            const orphanInitLine = document.getElementById('orphanInitLine');
-            const childBox = childProcess.querySelector('.process-box');
-            const parentBox = parentProcess.querySelector('.process-box');
-            
-            // Reset classes
-            childBox?.classList.remove('zombie', 'spawning', 'dying', 'active');
-            parentBox?.classList.remove('spawning', 'dying', 'active');
-            
-            switch(action) {
-                case 'init':
-                    parentProcess.classList.add('hidden');
-                    childProcess.classList.add('hidden');
-                    parentInitLine.classList.add('hidden');
-                    parentChildLine.classList.add('hidden');
-                    orphanInitLine.classList.add('hidden');
-                    document.getElementById('exitStatusBadge').classList.add('hidden');
-                    break;
-                    
-                case 'fork':
-                    parentProcess.classList.remove('hidden');
-                    childProcess.classList.remove('hidden');
-                    parentInitLine.classList.remove('hidden');
-                    parentChildLine.classList.remove('hidden');
-                    orphanInitLine.classList.add('hidden');
-                    
-                    parentBox.classList.add('spawning');
-                    setTimeout(() => childBox.classList.add('spawning'), 300);
-                    
-                    document.getElementById('parentState').textContent = 'Running';
-                    document.getElementById('childState').textContent = 'Running';
-                    childBox.classList.remove('bg-gradient-to-br', 'from-stone-100', 'to-stone-200', 'border-stone-400');
-                    childBox.classList.add('bg-gradient-to-br', 'from-green-100', 'to-green-200', 'border-green-400');
-                    document.getElementById('childIcon').className = 'fas fa-child text-green-500 text-lg mb-1';
-                    document.getElementById('exitStatusBadge').classList.add('hidden');
-                    break;
-                    
-                case 'childExit':
-                    if (currentScenario === 'zombie') {
-                        // Zombie case
-                        document.getElementById('childState').textContent = 'Zombie';
-                        childBox.classList.remove('from-green-100', 'to-green-200', 'border-green-400');
-                        childBox.classList.add('from-stone-100', 'to-stone-200', 'border-stone-400', 'zombie');
-                        document.getElementById('childIcon').className = 'fas fa-skull text-stone-500 text-lg mb-1';
-                        document.getElementById('exitStatusBadge').classList.remove('hidden');
-                    } else {
-                        // Orphan case - child exits cleanly
-                        childProcess.classList.add('hidden');
-                        parentChildLine.classList.add('hidden');
-                        orphanInitLine.classList.add('hidden');
-                    }
-                    break;
-                    
-                case 'showZombie':
-                    childBox.classList.add('zombie', 'active');
-                    break;
-                    
-                case 'parentWait':
-                    childBox.classList.remove('zombie');
-                    childBox.classList.add('dying');
-                    setTimeout(() => {
-                        childProcess.classList.add('hidden');
-                        parentChildLine.classList.add('hidden');
-                    }, 500);
-                    break;
-                    
-                case 'parentExit':
-                    parentBox.classList.add('dying');
-                    parentInitLine.classList.add('breaking');
-                    
-                    setTimeout(() => {
-                        parentProcess.classList.add('hidden');
-                        parentInitLine.classList.add('hidden');
-                        parentChildLine.classList.add('hidden');
-                        
-                        // Move child and show orphan line
-                        childProcess.style.left = '65%';
-                        orphanInitLine.classList.remove('hidden');
-                        
-                        // Update child PPID display
-                        const ppidSpan = childProcess.querySelector('.mono');
-                        ppidSpan.textContent = 'PID 1001';
-                        
-                        // Mark as orphan
-                        childBox.classList.add('active');
-                        childBox.style.borderStyle = 'dashed';
-                        childBox.style.borderColor = '#f97316';
-                    }, 500);
-                    break;
-                    
-                case 'childContinue':
-                    childBox.classList.add('active');
-                    document.getElementById('childState').textContent = 'Running (Orphan)';
-                    break;
-            }
-        }
+    const parent=document.getElementById('parentProcess'),child=document.getElementById('childProcess');
+    const cb=child.querySelector('.process-box'),pb=parent.querySelector('.process-box');
+    const isZombie=currentScenario==='zombie';
+    const parentVisible=currentStep>0&&(isZombie||currentStep<2);
+    const childVisible=currentStep>0&&currentStep<4;
+    parent.classList.toggle('hidden',!parentVisible);child.classList.toggle('hidden',!childVisible);
+    document.getElementById('parentInitLine').classList.toggle('hidden',!parentVisible);
+    document.getElementById('parentInitLine').classList.remove('breaking');
+    document.getElementById('parentChildLine').classList.toggle('hidden',!(parentVisible&&childVisible));
+    const orphan=!isZombie&&currentStep>=2&&currentStep<4;
+    document.getElementById('orphanInitLine').classList.toggle('hidden',!orphan);
+    child.style.left=orphan?'65%':'35%';cb.style.borderStyle=orphan?'dashed':'solid';cb.style.borderColor=orphan?'#f97316':'';
+    cb.classList.remove('zombie','spawning','dying','active','from-stone-100','to-stone-200','border-stone-400','from-green-100','to-green-200','border-green-400');
+    pb.classList.remove('spawning','dying','active');
+    const zombie=isZombie&&(currentStep===2||currentStep===3);
+    cb.classList.add(...(zombie?['zombie','from-stone-100','to-stone-200','border-stone-400']:['from-green-100','to-green-200','border-green-400']));
+    if(orphan||action==='showZombie')cb.classList.add('active');
+    document.getElementById('parentState').textContent='Running';
+    document.getElementById('childState').textContent=zombie?'Zombie':orphan?'Running (adopted)':'Running';
+    document.getElementById('childIcon').className=zombie?'fas fa-skull text-stone-500 text-lg mb-1':'fas fa-child text-green-500 text-lg mb-1';
+    document.getElementById('exitStatusBadge').classList.toggle('hidden',!zombie);
+}
 
         function updateStats() {
             const scenario = scenarios[currentScenario];
@@ -767,6 +812,7 @@ root         1     0  Ss    /sbin/init
                 if (idx === correct) opt.classList.add('correct');
                 else if (idx === selected && idx !== correct) opt.classList.add('incorrect');
                 opt.style.pointerEvents = 'none';
+                opt.setAttribute('aria-disabled','true');
             });
         }
 
@@ -787,8 +833,10 @@ root         1     0  Ss    /sbin/init
         }
 
         function resetScenario() {
+            enosTimers.cancel();
             currentStep = 0;
             stopAutoPlay();
+            document.getElementById('autoPlay').checked=false;
             
             // Reset visual elements
             const childProcess = document.getElementById('childProcess');
@@ -817,6 +865,7 @@ root         1     0  Ss    /sbin/init
         }
 
         function startAutoPlay() {
+            stopAutoPlay();
             const speed = parseInt(document.getElementById('speedSlider').value);
             autoPlayInterval = setInterval(() => {
                 const scenario = scenarios[currentScenario];
@@ -863,6 +912,27 @@ root         1     0  Ss    /sbin/init
             // Initial render
             renderAll();
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

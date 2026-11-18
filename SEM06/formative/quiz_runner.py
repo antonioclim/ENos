@@ -26,6 +26,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from lib.quiz_contract import validate_bank, export_bank
+
 try:
     import yaml
 except ImportError:
@@ -138,6 +141,10 @@ class Quiz:
         self.questions = [Question(q) for q in self.data.get("questions", self.data.get("intrebari", []))]
         self.config = self.data.get("configuration", self.data.get("configurare", {}))
         self.results = []
+        if not self.questions or self.total_points <= 0:
+            raise ValueError("Quiz must contain questions with positive total points")
+        if len({q.id for q in self.questions}) != len(self.questions):
+            raise ValueError("Question IDs must be unique")
 
     def _load_quiz(self) -> dict:
         """Loads the quiz from YAML file."""
@@ -145,7 +152,12 @@ class Quiz:
             raise FileNotFoundError(f"File {self.filepath} does not exist")
 
         with open(self.filepath, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f)
+        validate_bank(data)
+        if any(not isinstance(q.get('options', q.get('optiuni')), dict) or
+               not isinstance(q.get('text'), str) for q in data.get('questions', data.get('intrebari', []))):
+            raise ValueError('SEM06 requires text and letter-keyed answer options')
+        return data
 
     @property
     def title(self) -> str:
@@ -166,7 +178,7 @@ class Quiz:
 
         print(f"\nQuestions: {len(self.questions)}")
         print(f"Total points: {self.total_points}")
-        print(f"Pass threshold: {self.passing_score}%")
+        print(f"Formative feedback threshold: {self.passing_score}%")
 
         if practice:
             print(color_text("\nPRACTICE mode - you will see explanations after each question", "cyan"))
@@ -197,6 +209,7 @@ class Quiz:
 
             self.results.append({
                 "question_id": question.id,
+                "bloom": question.bloom,
                 "answer": answer,
                 "correct": is_correct,
                 "points": question.points if is_correct else 0,
@@ -219,9 +232,9 @@ class Quiz:
         print(f"\nScore: {score}/{self.total_points} ({percentage:.1f}%)")
 
         if passed:
-            print(color_text("\n✓ PASSED", "green"))
+            print(color_text("\n✓ FORMATIVE TARGET REACHED", "green"))
         else:
-            print(color_text("\n✗ NOT PASSED", "red"))
+            print(color_text("\n✗ FORMATIVE TARGET NOT YET REACHED", "red"))
 
         # Level feedback
         feedback = self.config.get("messages", self.config.get("mesaje", {}))
@@ -237,8 +250,8 @@ class Quiz:
         # Statistics per Bloom level
         print("\n" + color_text("Performance per Bloom level:", "cyan"))
         bloom_stats = {}
-        for result, question in zip(self.results, self.questions):
-            level = question.bloom
+        for result in self.results:
+            level = result["bloom"]
             if level not in bloom_stats:
                 bloom_stats[level] = {"correct": 0, "total": 0}
             bloom_stats[level]["total"] += 1
@@ -261,6 +274,9 @@ class Quiz:
             "total": self.total_points,
             "percentage": (sum(r["points"] for r in self.results) / self.total_points) * 100,
             "passed": (sum(r["points"] for r in self.results) / self.total_points) * 100 >= self.passing_score,
+            "passed_semantics": "Formative feedback target reached; not institutional pass/fail.",
+            "formative_target_percent": self.passing_score,
+            "assessment_scope": "Formative practice; no institutional grade or eligibility decision.",
             "results": self.results,
         }
 
@@ -412,6 +428,8 @@ Examples:
     parser.add_argument("--test", "-t", action="store_true", help="Run unit tests")
     parser.add_argument("--version", "-v", action="version", version="Quiz Runner 1.0.0")
 
+    parser.add_argument("--validate", action="store_true", help="Validate the bank and derived totals without a quiz")
+    parser.add_argument("--export-bank", type=Path, help="Export local ENos JSON bank data, not an LMS import format")
     args = parser.parse_args()
 
     if args.test:
@@ -423,6 +441,12 @@ Examples:
 
     try:
         quiz = Quiz(args.quiz_file)
+        if args.export_bank:
+            args.export_bank.write_text(json.dumps(export_bank(quiz.data, quiz.filepath), ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+            return 0
+        if args.validate:
+            print(json.dumps(validate_bank(quiz.data)))
+            return 0
         quiz.run_interactive(shuffle=args.shuffle, practice=args.practice)
 
         if args.export:
@@ -430,13 +454,13 @@ Examples:
 
         return 0
 
-    except FileNotFoundError as e:
+    except OSError as e:
         print(color_text(f"Error: {e}", "red"))
         return 1
-    except yaml.YAMLError as e:
+    except (ValueError, yaml.YAMLError) as e:
         print(color_text(f"YAML parsing error: {e}", "red"))
         return 1
-    except KeyboardInterrupt:
+    except (EOFError, KeyboardInterrupt):
         print(color_text("\n\nQuiz interrupted.", "yellow"))
         return 130
 

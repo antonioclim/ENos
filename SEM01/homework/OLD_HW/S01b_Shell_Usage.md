@@ -83,7 +83,7 @@ A process is a task loaded and tracked by the kernel. An application can have mu
 | Modifications | Forbidden | Permitted |
 | Redistribution | Restricted | Free (with conditions) |
 
-GPL (GNU Public License) - the Linux licence - requires that modifications be made public.
+GPL means **GNU General Public License**. Private modifications do not have to be published. Distribution of covered software triggers the applicable licence conditions, including corresponding-source obligations; it does not mean every private change must be released publicly. See the [GNU GPL FAQ on private modifications](https://www.gnu.org/licenses/gpl-faq.html#GPLRequireSourcePostedPublic). This explanation does not select or change the licence of this teaching repository.
 
 ### 1.5 Linux Distributions
 
@@ -134,8 +134,10 @@ user@hostname:~/directory$
 | **fish** | Friendly Interactive Shell | `~/.config/fish/` |
 
 ```bash
-# Check current shell
-echo $SHELL
+# Login-shell value inherited in the environment (not proof of the running interpreter)
+printf '%s\n' "$SHELL"
+# In Bash, BASH_VERSION identifies the current Bash version
+printf '%s\n' "$BASH_VERSION"
 
 # List available shells
 cat /etc/shells
@@ -238,7 +240,7 @@ Navigation in `man`:
 | `?` | Wildcard - single character |
 | `$` | Variable expansion |
 | `\` | Escape character |
-| `` ` `` | Command substitution (deprecated) |
+| `` ` `` | Command substitution (supported older syntax; `$()` is easier to nest) |
 | `$()` | Command substitution (preferred) |
 | `"..."` | Double quotes (allows expansion) |
 | `'...'` | Single quotes (literal) |
@@ -290,7 +292,7 @@ echo $?         # exit code of last command (0 = success)
 ### 4.2 Setting Variables
 
 ```bash
-# Local variable (only in current shell)
+# Unexported shell variable (retained in parenthesised subshells, not passed to a newly invoked interpreter)
 MESSAGE="Hello world"
 echo $MESSAGE
 
@@ -447,14 +449,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

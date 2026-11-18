@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>07ex2 - Producer-Consumer Problem | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
@@ -150,7 +150,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -387,13 +464,13 @@
                     <h4 class="font-semibold text-cyan-400 mb-3">The 3 Semaphores:</h4>
                     <div class="space-y-2 text-sm">
                         <div class="p-2 rounded bg-emerald-900/30 border border-emerald-500/30">
-                            <coof class="text-emerald-400">empty = N</code>: free slots available
+                            <code class="text-emerald-400">empty = N</code>: free slots available
                         </div>
                         <div class="p-2 rounded bg-amber-900/30 border border-amber-500/30">
-                            <coof class="text-amber-400">full = 0</code>: occupied slots available
+                            <code class="text-amber-400">full = 0</code>: occupied slots available
                         </div>
                         <div class="p-2 rounded bg-cyan-900/30 border border-cyan-500/30">
-                            <coof class="text-cyan-400">mutex = 1</code>: exclusive access to buffer
+                            <code class="text-cyan-400">mutex = 1</code>: exclusive access to buffer
                         </div>
                     </div>
                 </div>
@@ -408,7 +485,57 @@
         </div>
     </footer>
 
-    <script>
+    <script>function pcQueue() { return state.waiters || (state.waiters={empty:[],full:[],mutex:[]}); }
+function pcWait(name, actor) {
+ if(state[name]>0) { state[name]--; updateSemaphoreDisplay(); return Promise.resolve(); }
+ state[actor+'Blocked']=true; setActorState(actor,'BLOCKED',true);
+ addLog(`${actor}: waiting for ${name}`, 'blocked');
+ return new Promise(resolve => pcQueue()[name].push({resolve,actor}));
+}
+function pcSignal(name) {
+ const next=pcQueue()[name].shift();
+ if(next) { state[next.actor+'Blocked']=false; setActorState(next.actor,'RUNNING'); next.resolve(); }
+ else state[name]++;
+ updateSemaphoreDisplay();
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             bufferSize: 5,
@@ -450,7 +577,7 @@
         function initBuffer() {
             elements.bufferContainer.innerHTML = '';
             for (let i = 0; i < state.bufferSize; i++) {
-                const slot = document.createdeElement('div');
+                const slot = document.createElement('div');
                 slot.id = `slot-${i}`;
                 slot.className = 'buffer-slot empty w-12 h-12 rounded-lg flex items-center justify-center';
                 slot.innerHTML = '<span class="text-slate-600 text-xs">—</span>';
@@ -537,7 +664,7 @@
                 semaphore: 'text-cyan-400'
             };
             
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = colors[type];
             entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
             elements.operationLog.appendChild(entry);
@@ -549,153 +676,48 @@
         }
 
         async function produce() {
-            if (state.producerBlocked) return;
-            
-            // Step 1: Produce item
-            highlightCode('producer', 2);
-            setActorState('producer', 'PRODUCING');
-            addLog('Producer: Producing item...', 'producer');
-            await sleep(state.speed);
-            
-            // Step 2: wait(empty)
-            highlightCode('producer', 3);
-            addLog(`Producer: wait(empty) - empty=${state.empty}`, 'semaphore');
-            
-            if (state.empty <= 0) {
-                highlightCode('producer', 3, true);
-                setActorState('producer', 'BLOCKED', true);
-                state.producerBlocked = true;
-                addLog('Producer: BLOCKED! Buffer full, waiting for empty slot...', 'blocked');
-                return;
-            }
-            
-            state.empty--;
-            updateSemaphoreDisplay();
-            await sleep(state.speed);
-            
-            // Step 3: wait(mutex)
-            highlightCode('producer', 4);
-            addLog(`Producer: wait(mutex) - mutex=${state.mutex}`, 'semaphore');
-            state.mutex--;
-            updateSemaphoreDisplay();
-            await sleep(state.speed);
-            
-            // Step 4: Add to buffer
-            highlightCode('producer', 5);
-            const itemId = state.nextItemId++;
-            state.buffer.push(itemId);
-            state.totalProduced++;
-            
-            // Animate slot
-            const filledSlot = document.getElementById(`slot-${state.buffer.length - 1}`);
-            filledSlot.classList.add('producing');
-            updateBufferDisplay();
-            updateStats();
-            addLog(`Producer: Added item #${itemId} to buffer (position ${state.buffer.length})`, 'producer');
-            await sleep(state.speed);
-            filledSlot.classList.remove('producing');
-            
-            // Step 5: signal(mutex)
-            highlightCode('producer', 6);
-            state.mutex++;
-            updateSemaphoreDisplay();
-            addLog(`Producer: signal(mutex) - mutex=${state.mutex}`, 'semaphore');
-            await sleep(state.speed);
-            
-            // Step 6: signal(full)
-            highlightCode('producer', 7);
-            state.full++;
-            updateSemaphoreDisplay();
-            addLog(`Producer: signal(full) - full=${state.full}`, 'semaphore');
-            
-            // Check if consumer was blocked
-            if (state.consumerBlocked && state.full > 0) {
-                state.consumerBlocked = false;
-                setActorState('consumer', 'IDLE');
-                highlightCode('consumer', 0);
-                addLog('Consumer: UNBLOCKED! Item available in buffer.', 'consumer');
-            }
-            
-            await sleep(state.speed);
-            
-            highlightCode('producer', 0);
-            setActorState('producer', 'IDLE');
-        }
+ if(state.producerBusy) return; state.producerBusy=true;
+ const owner=enosTimers.generation;
+ try {
+  setActorState('producer','PRODUCING'); highlightCode('producer',2); await sleep(state.speed);
+  highlightCode('producer',3); await pcWait('empty','producer');
+  if(owner!==enosTimers.generation)return;
+  highlightCode('producer',4); await pcWait('mutex','producer');
+  if(owner!==enosTimers.generation)return;
+  highlightCode('producer',5);
+  const item=state.nextItemId++; state.buffer.push(item); state.totalProduced++;
+  updateBufferDisplay(); updateStats(); addLog(`Producer: inserted item #${item}`,'producer');
+  await sleep(state.speed);
+  highlightCode('producer',6); pcSignal('mutex');
+  highlightCode('producer',7); pcSignal('full');
+  setActorState('producer','IDLE'); highlightCode('producer',0);
+ } finally { if(owner===enosTimers.generation)state.producerBusy=false; }
+}
 
         async function consume() {
-            if (state.consumerBlocked) return;
-            
-            // Step 1: wait(full)
-            highlightCode('consumer', 2);
-            setActorState('consumer', 'CONSUMING');
-            addLog(`Consumer: wait(full) - full=${state.full}`, 'semaphore');
-            
-            if (state.full <= 0) {
-                highlightCode('consumer', 2, true);
-                setActorState('consumer', 'BLOCKED', true);
-                state.consumerBlocked = true;
-                addLog('Consumer: BLOCKED! Buffer empty, waiting for item...', 'blocked');
-                return;
-            }
-            
-            state.full--;
-            updateSemaphoreDisplay();
-            await sleep(state.speed);
-            
-            // Step 2: wait(mutex)
-            highlightCode('consumer', 3);
-            addLog(`Consumer: wait(mutex) - mutex=${state.mutex}`, 'semaphore');
-            state.mutex--;
-            updateSemaphoreDisplay();
-            await sleep(state.speed);
-            
-            // Step 3: Remove from buffer
-            highlightCode('consumer', 4);
-            const consumingSlot = document.getElementById(`slot-${state.buffer.length - 1}`);
-            consumingSlot.classList.add('consuming');
-            await sleep(state.speed / 2);
-            
-            const item = state.buffer.shift();
-            state.totalConsumed++;
-            updateBufferDisplay();
-            updateStats();
-            addLog(`Consumer: Removed item #${item} from buffer`, 'consumer');
-            await sleep(state.speed / 2);
-            
-            // Step 4: signal(mutex)
-            highlightCode('consumer', 5);
-            state.mutex++;
-            updateSemaphoreDisplay();
-            addLog(`Consumer: signal(mutex) - mutex=${state.mutex}`, 'semaphore');
-            await sleep(state.speed);
-            
-            // Step 5: signal(empty)
-            highlightCode('consumer', 6);
-            state.empty++;
-            updateSemaphoreDisplay();
-            addLog(`Consumer: signal(empty) - empty=${state.empty}`, 'semaphore');
-            
-            // Check if producer was blocked
-            if (state.producerBlocked && state.empty > 0) {
-                state.producerBlocked = false;
-                setActorState('producer', 'IDLE');
-                highlightCode('producer', 0);
-                addLog('Producer: UNBLOCKED! Empty slot available in buffer.', 'producer');
-            }
-            
-            await sleep(state.speed);
-            
-            // Step 6: Consume
-            highlightCode('consumer', 7);
-            addLog(`Consumer: Consuming item #${item}...`, 'consumer');
-            await sleep(state.speed);
-            
-            highlightCode('consumer', 0);
-            setActorState('consumer', 'IDLE');
-        }
+ if(state.consumerBusy)return; state.consumerBusy=true;
+ const owner=enosTimers.generation;
+ try {
+  highlightCode('consumer',2); await pcWait('full','consumer');
+  if(owner!==enosTimers.generation)return;
+  highlightCode('consumer',3); await pcWait('mutex','consumer');
+  if(owner!==enosTimers.generation)return;
+  highlightCode('consumer',4); setActorState('consumer','CONSUMING');
+  const slot=document.getElementById('slot-0'); if(slot)slot.classList.add('consuming');
+  await sleep(state.speed);
+  const item=state.buffer.shift(); state.totalConsumed++;
+  if(slot)slot.classList.remove('consuming'); updateBufferDisplay();updateStats();
+  addLog(`Consumer: removed FIFO item #${item}`,'consumer');
+  highlightCode('consumer',5); pcSignal('mutex');
+  highlightCode('consumer',6); pcSignal('empty');
+  setActorState('consumer','IDLE'); highlightCode('consumer',0);
+ } finally { if(owner===enosTimers.generation)state.consumerBusy=false; }
+}
 
         function reset() {
+            enosTimers.cancel();
             stopAuto();
+            state.waiters={empty:[],full:[],mutex:[]}; state.producerBusy=false;state.consumerBusy=false;
             state.buffer = [];
             state.empty = state.bufferSize;
             state.full = 0;
@@ -762,6 +784,27 @@
         // Initialize
         initBuffer();
         updateSemaphoreDisplay();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

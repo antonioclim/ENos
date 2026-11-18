@@ -1,41 +1,36 @@
 #!/bin/bash
-
-# 1. Capture arguments
-NUMBER=$1
-PRECISION=$2
-
-# Check if arguments are provided
-if [[ -z "$NUMBER" || -z "$PRECISION" ]]; then
-    echo "Usage: $0 <number> <decimal_places>"
-    echo "Example: $0 15 2"
-    exit 1
+# Integer Heron approximation, truncated (not rounded) to the requested decimals.
+# Requires Bash with signed 64-bit arithmetic. Accepted domain: non-negative
+# integer NUMBER, PRECISION 0..9, NUMBER * 10^(2*PRECISION) <= 2^63-1.
+set -euo pipefail
+if (( $# != 2 )) || [[ ! $1 =~ ^[0-9]+$ || ! $2 =~ ^[0-9]+$ ]]; then
+    echo "Usage: $0 <non-negative integer> <decimal places 0..9>" >&2; exit 2
 fi
-
-# 2. Prepare the scale
-# To achieve P decimal places of precision using only integers,
-# we scale the number by 10^(P*2).
-# For example, for 2 decimals, we multiply by 10,000 (10^4).
-SCALE_FACTOR=$(( 10**PRECISION ))
-TARGET=$(( NUMBER * SCALE_FACTOR * SCALE_FACTOR ))
-
-# 3. Implement Heron's Algorithm (Babylonian Method)
-# Initial guess: the scaled number itself
+NUMBER=$1 PRECISION=$2
+while [[ ${#NUMBER} -gt 1 && $NUMBER == 0* ]]; do NUMBER=${NUMBER:1}; done
+while [[ ${#PRECISION} -gt 1 && $PRECISION == 0* ]]; do PRECISION=${PRECISION:1}; done
+if [[ ${#NUMBER} -gt 19 || ${#PRECISION} -gt 1 ]] || (( PRECISION > 9 )); then
+    echo 'Supported-range error: precision 0..9 and scaled value <= 2^63-1 are required.' >&2; exit 2
+fi
+MAX_INTEGER=9223372036854775807
+if (( MAX_INTEGER <= 0 )) || [[ ${#NUMBER} -eq 19 && $NUMBER > 9223372036854775807 ]]; then
+    echo 'Supported-range error: signed 64-bit arithmetic required.' >&2; exit 2
+fi
+SCALE_FACTOR=$((10**PRECISION))
+SCALE_SQUARED=$((SCALE_FACTOR*SCALE_FACTOR))
+if (( NUMBER > MAX_INTEGER / SCALE_SQUARED )); then
+    echo 'Supported-range error: NUMBER * 10^(2*PRECISION) would overflow.' >&2; exit 2
+fi
+TARGET=$((NUMBER*SCALE_SQUARED))
 x=$TARGET
-prev_x=0
-
-# Self-calibration loop
-# Because we are working with integers, the value will eventually 
-# settle or oscillate between two adjacent integers.
-while [ "$x" != "$prev_x" ] && [ "$x" != "$((prev_x + 1))" ] && [ "$x" != "$((prev_x - 1))" ]; do
-    prev_x=$x
-    # Heron's Formula: x = (x + Target/x) / 2
-    x=$(( (x + TARGET / x) / 2 ))
+y=$((TARGET/2+1))
+# Descending integer Heron sequence, ending at floor(sqrt(TARGET)).
+while (( y < x )); do
+    x=$y
+    y=$(((x+TARGET/x)/2))
 done
-
-# 4. Format the result to place the decimal point correctly
-INTEGER_PART=$(( x / SCALE_FACTOR ))
-FRACTIONAL_PART=$(( x % SCALE_FACTOR ))
-
-# Output the result
-# %0*d ensures leading zeros are kept (e.g., 3.07 instead of 3.7)
-printf "Result: %d.%0*d\n" "$INTEGER_PART" "$PRECISION" "$FRACTIONAL_PART"
+if (( PRECISION == 0 )); then
+    printf 'Result: %d\n' "$x"
+else
+    printf 'Result: %d.%0*d\n' "$((x/SCALE_FACTOR))" "$PRECISION" "$((x%SCALE_FACTOR))"
+fi

@@ -110,16 +110,17 @@ log() {
         if [[ "$level" == "ERROR" ]] || [[ "$level" == "FATAL" ]]; then
             echo -e "$formatted_msg" >&2
         else
-            echo -e "$formatted_msg"
+            echo -e "$formatted_msg" >&2
         fi
     fi
     
     # Output to file if configured
-    if [[ -n "$LOG_FILE" ]]; then
+    if [[ -n "$LOG_FILE" && -d "$(dirname "$LOG_FILE")" ]]; then
         # No colours in file
         local file_msg="[${timestamp}] [${level}] ${message}"
-        echo "$file_msg" >> "$LOG_FILE"
+        printf '%s\n' "$file_msg" >> "$LOG_FILE"
     fi
+    return 0
 }
 
 # Shorthand functions for different levels
@@ -275,56 +276,29 @@ in_range() {
 # Acquire an exclusive lock
 # Usage: acquire_lock "/path/to/lockfile"
 acquire_lock() {
-    local lock_file="$1"
-    local timeout="${2:-0}"
-    
-    require_var "LOCK_FILE" "$lock_file"
-    
-    # Check existing lock
-    if [[ -f "$lock_file" ]]; then
-        local existing_pid
-        existing_pid=$(cat "$lock_file" 2>/dev/null)
-        
-        # Check if process is still running
-        if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
-            log_error "Process already running (PID: $existing_pid)"
-            return 1
-        fi
-        
-        # Stale lock, remove it
-        log_warn "Stale lock file found, removing it"
-        rm -f "$lock_file"
+    local lock_file="$1" wait_seconds="${2:-0}"
+    command -v flock >/dev/null || { log_error "flock is required"; return 1; }
+    mkdir -p -- "$(dirname "$lock_file")" || return 1
+    exec {MONITOR_LOCK_FD}>"$lock_file" || return 1
+    if ! flock -w "$wait_seconds" "$MONITOR_LOCK_FD"; then
+        exec {MONITOR_LOCK_FD}>&-
+        unset MONITOR_LOCK_FD
+        return 1
     fi
-    
-    # Create directory if it doesn't exist
-    local lock_dir
-    lock_dir=$(dirname "$lock_file")
-    require_dir "$lock_dir" true "Lock directory"
-    
-    # Write current PID
-    echo $$ > "$lock_file" || die "Cannot create lock file: $lock_file"
-    
-    log_debug "Lock acquired: $lock_file (PID: $$)"
+    printf '%s\n' "$$" >&"$MONITOR_LOCK_FD"
     return 0
 }
 
 # Release a lock
 # Usage: release_lock "/path/to/lockfile"
 release_lock() {
-    local lock_file="$1"
-    
-    if [[ -f "$lock_file" ]]; then
-        local stored_pid
-        stored_pid=$(cat "$lock_file" 2>/dev/null)
-        
-        # Delete only if it's our lock
-        if [[ "$stored_pid" == "$$" ]]; then
-            rm -f "$lock_file"
-            log_debug "Lock released: $lock_file"
-        else
-            log_warn "Lock file does not belong to this process"
-        fi
+    if [[ -n "${MONITOR_LOCK_FD:-}" ]]; then
+        flock -u "$MONITOR_LOCK_FD" || return 1
+        exec {MONITOR_LOCK_FD}>&-
+        unset MONITOR_LOCK_FD
     fi
+    # Keep the inode: unlinking would permit another independent lock.
+    return 0
 }
 
 #------------------------------------------------------------------------------
@@ -393,7 +367,7 @@ format_bytes() {
     
     while [[ $(echo "$size >= 1024" | bc -l 2>/dev/null || echo 0) -eq 1 ]] && [[ $unit -lt 4 ]]; do
         size=$(echo "scale=2; $size / 1024" | bc -l)
-        ((unit++))
+        unit=$((unit + 1))
     done
     
     printf "%.2f %s" "$size" "${units[$unit]}"

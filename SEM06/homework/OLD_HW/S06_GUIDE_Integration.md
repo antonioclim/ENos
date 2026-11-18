@@ -5,23 +5,11 @@
 
 ---
 
-> 🚨 **BEFORE STARTING THE ASSIGNMENT**
+> **Archive status:** the original recording names and automatic-upload/signature claims referred to an older workflow. Current recorders and their unresolved authenticity limits are documented in [RECORDING_CONTRACT.md](../../../03_GUIDES/RECORDING_CONTRACT.md). This archive does not authorise an upload or establish a signature protocol.
 >
-> 1. Download and configure the `002HWinit` package (see GHID_STUDENT_RO.md)
-> 2. Open a terminal and navigate to `~/HOMEWORKS`
-> 3. Start recording with:
->    ```bash
->    python3 record_homework_tui_RO.py
->    ```
->    or the Bash variant:
->    ```bash
->    ./record_homework_RO.sh
->    ```
-> 4. Complete the requested data (name, group, assignment no.)
-> 5. **ONLY THEN** start solving the requirements below
+> The integration architecture below is a proposal: actual projects have separate `lib/core.sh`, `lib/config.sh` and `lib/utils.sh` files. No unified lib/logging.sh, controller or automatic remediation is shipped. Historical commands for that proposed interface are displayed as text. Current executable examples are in [the live coding guide](../../docs/S06_05_LIVE_CODING_GUIDE.md) and the project READMEs.
 
 ---
-
 
 ## Introduction
 
@@ -98,7 +86,7 @@ This guide explains how the three CAPSTONE projects (Monitor, Backup, Deployer) 
 - Exit codes for integration with other scripts
 
 **Integration:**
-```bash
+```text
 # Trigger backup when disk > 90%
 monitor.sh --check disk --threshold 90 --on-alert "backup.sh create --type quick"
 ```
@@ -117,7 +105,7 @@ monitor.sh --check disk --threshold 90 --on-alert "backup.sh create --type quick
 - Checksum for verification
 
 **Integration:**
-```bash
+```text
 # Backup before deploy
 backup.sh create --source /var/www/app --tag "pre-deploy-$(date +%Y%m%d)"
 
@@ -128,7 +116,7 @@ backup.sh restore --backup-id 20250127_153045 --dest /var/www/app
 ### 2.3 Deployer (HW03)
 
 **Responsibilities:**
-- Application deployment with zero-downtime
+- Application deployment with explicit health/capacity/rollback conditions; no availability guarantee
 - Rollback to previous versions
 - Pre/post deploy hook execution
 - Health checks after deploy
@@ -139,7 +127,7 @@ backup.sh restore --backup-id 20250127_153045 --dest /var/www/app
 - Deployment logs
 
 **Integration:**
-```bash
+```text
 # Deploy with automatic backup
 deployer.sh deploy --source ./dist --pre-hook "backup.sh create"
 
@@ -210,7 +198,7 @@ deployer.sh rollback --steps 1 --post-hook "monitor.sh --check all"
 
 ### 4.1 config.sh
 
-```bash
+```text
 #!/bin/bash
 # lib/config.sh - Common configuration functions
 
@@ -237,7 +225,8 @@ get_config() {
     local default="${2:-}"
     
     local value
-    eval "value=\${$key:-}"
+    [[ $key =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+    value=${!key-}
     
     echo "${value:-$default}"
 }
@@ -245,7 +234,7 @@ get_config() {
 
 ### 4.2 logging.sh
 
-```bash
+```text
 #!/bin/bash
 # lib/logging.sh - Unified logging system
 
@@ -283,7 +272,7 @@ log_fatal() { _log FATAL "$@"; exit 1; }
 
 ### 4.3 utils.sh
 
-```bash
+```text
 #!/bin/bash
 # lib/utils.sh - General utilities
 
@@ -296,25 +285,17 @@ require_cmd() {
 
 # Lock file to prevent simultaneous execution
 acquire_lock() {
-    local lock_file="$1"
-    
-    if [[ -f "$lock_file" ]]; then
-        local pid
-        pid=$(cat "$lock_file")
-        if kill -0 "$pid" 2>/dev/null; then
-            log_error "Already running (PID $pid)"
-            return 1
-        fi
-        log_warn "Removing stale lock file"
-        rm -f "$lock_file"
-    fi
-    
-    echo $$ > "$lock_file"
+    local lock_file=$1
+    [[ -z ${LOCK_FD:-} ]] || return 2
+    exec {LOCK_FD}>"$lock_file" || return 1
+    flock -n "$LOCK_FD" || { exec {LOCK_FD}>&-; unset LOCK_FD; return 1; }
 }
-
 release_lock() {
-    local lock_file="$1"
-    rm -f "$lock_file"
+    [[ -n ${LOCK_FD:-} ]] || return 0
+    flock -u "$LOCK_FD" || return 1
+    exec {LOCK_FD}>&-
+    unset LOCK_FD
+    # Do not unlink: pathname stability is part of the locking contract.
 }
 
 # Human readable bytes
@@ -322,11 +303,11 @@ human_readable() {
     local bytes=$1
     
     if (( bytes >= 1073741824 )); then
-        printf "%.2f GB" "$(echo "$bytes / 1073741824" | bc -l)"
+        printf "%.2f GiB" "$(echo "$bytes / 1073741824" | bc -l)"
     elif (( bytes >= 1048576 )); then
-        printf "%.2f MB" "$(echo "$bytes / 1048576" | bc -l)"
+        printf "%.2f MiB" "$(echo "$bytes / 1048576" | bc -l)"
     elif (( bytes >= 1024 )); then
-        printf "%.2f KB" "$(echo "$bytes / 1024" | bc -l)"
+        printf "%.2f KiB" "$(echo "$bytes / 1024" | bc -l)"
     else
         printf "%d B" "$bytes"
     fi
@@ -339,7 +320,7 @@ human_readable() {
 
 ### 5.1 Example crontab
 
-```bash
+```text
 # /etc/cron.d/sysadmin
 
 # Environment variables
@@ -365,7 +346,7 @@ LOG_LEVEL=INFO
 
 ### 5.2 Workflow Integration
 
-```bash
+```text
 #!/bin/bash
 # /opt/sysadmin/scripts/daily_maintenance.sh
 # Runs all daily maintenance tasks
@@ -402,7 +383,7 @@ log_info "Daily maintenance completed"
 
 ### 6.1 Deploy with Backup and Verification
 
-```bash
+```text
 #!/bin/bash
 # deploy_safe.sh - Deploy with all verifications
 
@@ -439,7 +420,7 @@ echo "=== Deploy $TAG completed successfully ==="
 
 ### 6.2 Disaster Recovery
 
-```bash
+```text
 #!/bin/bash
 # disaster_recovery.sh - Complete restoration
 
@@ -488,7 +469,7 @@ echo "=== Recovery completed ==="
 - [ ] Monitor: Generates alerts
 - [ ] Backup: Creates full and incremental backup
 - [ ] Backup: Rotation and cleanup
-- [ ] Deployer: Deploy with zero-downtime
+- [ ] Deployer: Demonstrate stated availability criteria on an authorised host
 - [ ] Deployer: Functional rollback
 - [ ] Integration: Hooks between components
 - [ ] Automation: Cron jobs configured
@@ -510,25 +491,9 @@ echo "=== Recovery completed ==="
 
 ---
 
-## 📤 Completion and Submission
+## Completion and recording status
 
-After completing all requirements:
-
-1. **Stop recording** by typing:
-   ```bash
-   STOP_tema
-   ```
-   or press `Ctrl+D`
-
-2. **Wait** - the script will:
-   - Generate the cryptographic signature
-   - Automatically upload the file to server
-
-3. **Check the final message**:
-   - ✅ `UPLOAD SUCCESSFUL!` - assignment was submitted
-   - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
-
-> ⚠️ **DO NOT modify the `.cast` file** after generation - signature becomes invalid!
+Historical STOP_tema/automatic-upload instructions are superseded by the current recording contract linked above. Format validation is separate from authentication; a local file or successful transfer does not establish grading acceptance. Preserve the original recording and review explicit transfer and verifier results. No external service is contacted by this archive.
 
 ---
 

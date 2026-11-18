@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 # ═══════════════════════════════════════════════════════════════════════════════
 # Makefile — SEM06 CAPSTONE Build Orchestration
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -51,20 +52,23 @@ test:
 lint:
 	@echo "$(CYAN)Verifying code quality...$(RESET)"
 	@if command -v shellcheck >/dev/null 2>&1; then \
-		shellcheck -S warning $(SCRIPTS_DIR)/*.sh 2>/dev/null || true; \
+		set -o pipefail; find "$(SCRIPTS_DIR)" -type f -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning || exit $$?; \
 	else \
-		echo "$(YELLOW)shellcheck is not installed$(RESET)"; \
+		echo "$(YELLOW)shellcheck is not installed$(RESET)"; exit 2; \
 	fi
 
 check:
 	@echo "$(CYAN)Verifying dependencies...$(RESET)"
-	@for cmd in bash python3 tar curl; do \
-		command -v $$cmd >/dev/null && echo "$(GREEN)✓$(RESET) $$cmd" || echo "$(RED)✗$(RESET) $$cmd"; \
-	done
-	@python3 -c "import yaml" 2>/dev/null && echo "$(GREEN)✓$(RESET) pyyaml" || echo "$(YELLOW)○$(RESET) pyyaml (pip install pyyaml)"
+	@missing=0; for cmd in bash python3 tar curl awk find sort flock; do \
+		if command -v "$$cmd" >/dev/null; then echo "$(GREEN)✓$(RESET) $$cmd"; \
+		else echo "$(RED)✗$(RESET) $$cmd"; missing=1; fi; \
+	done; \
+	if python3 -c "import yaml" 2>/dev/null; then echo "$(GREEN)✓$(RESET) pyyaml"; \
+	else echo "$(YELLOW)NOT_RUN$(RESET) pyyaml missing (quiz dependency)"; missing=1; fi; \
+	test "$$missing" -eq 0
 
 clean:
-	@rm -f *.log *.tmp results_*.json
+	@echo "User logs and result files are preserved."
 	@rm -rf __pycache__
 	@echo "$(GREEN)Cleanup completed.$(RESET)"
 

@@ -1,4 +1,12 @@
 # COMPLETE INSTALLATION GUIDE FOR BEGINNERS
+
+> **Phase 5 source correction:** Keep the academic identifier (for example `AP_1001_A`) in your student records. The machine hostname is a separate DNS-compatible label: map that example to `ap-1001-a` by lowercasing and replacing underscores with hyphens. This is a technical mapping, not an authentication or grading rule. Usernames must also satisfy the installer: start with a lower-case letter, use a suitable unique local username and keep the full student identity separately.
+
+Use a unique local password that you can retain securely. Never configure the shared historical example password `stud` on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.
+
+**Host/guest architecture:** check the host first (`uname -m` on macOS/Linux; Windows Settings → System → About). An x86-64 host uses an amd64 Ubuntu Server 24.04.x image. Apple Silicon uses the matching Arm64 VirtualBox package and an arm64 Ubuntu 24.04.x guest. VirtualBox does not run x86 guests on Arm hosts. The Intel VMX check below is not an Apple Silicon test. Select the Ubuntu 24.04 family and architecture explicitly; do not assume a generic download page selects them.
+
+Primary references: [Oracle VirtualBox 7.2 platform/guest requirements](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/Introduction.html), [Arm limitations](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/installation.html), [Ubuntu 24.04 amd64 images](https://releases.ubuntu.com/24.04/) and [Ubuntu 24.04 ARM64 server images](https://cdimage.ubuntu.com/releases/24.04/release/). These are documentation-based routes; native installation on each host remains a separate acceptance check.
 ## Ubuntu Server 24.04 LTS in VirtualBox (Virtual Machine)
 
 > *Personal note: Many prefer `zsh`, but I stick with Bash because it is the standard on servers. Consistency beats comfort.*
@@ -51,7 +59,7 @@ At the end of this guide, you will be able to:
 
 - [ ] **LO1:** Install VirtualBox + Extension Pack on Windows, macOS or Linux
 - [ ] **LO2:** Create a virtual machine with the correct parameters (4GB RAM, 2 CPU, 25GB disk, Bridge network)
-- [ ] **LO3:** Install Ubuntu Server 24.04 and configure user (surname) and hostname (`INITIAL_GROUP_SERIES`)
+- [ ] **LO3:** Install Ubuntu Server 24.04 and configure user (surname) and hostname (`initials-group-series`)
 - [ ] **LO4:** Connect via SSH to the VM and transfer files with PuTTY/WinSCP (Windows) or ssh/scp (macOS/Linux)
 - [ ] **LO5:** Manage the VM headless (start/stop from command line with `VBoxManage`)
 - [ ] **LO6:** Enable virtualisation in BIOS when disabled and resolve Bridge network issues
@@ -175,6 +183,7 @@ Hardware virtualisation must be enabled. Here is how to check on each system:
 If it says "Disabled", you need to enable virtualisation in BIOS (see Section 18).
 
 > **True story from 2022:** A student with a brand new gaming laptop could not start any VM. After an hour of debugging, we discovered the manufacturer had disabled virtualisation by default to "improve battery life". One BIOS setting later, everything worked. Always check this first.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 ### On macOS
 
@@ -186,7 +195,7 @@ If it says "Disabled", you need to enable virtualisation in BIOS (see Section 18
 sysctl -a | grep machdep.cpu.features | grep VMX
 ```
 
-If text containing "VMX" appears, virtualisation is enabled. Modern Macs have virtualisation enabled by default.
+On an Intel Mac, this reports a visible CPU capability; it does not by itself prove that a VM can start. On Apple Silicon, skip this Intel-only check and select the Arm64 route.
 
 **Step 3:** Check the processor type:
 
@@ -197,7 +206,7 @@ uname -m
 - If `x86_64` appears = you have a Mac with Intel processor
 - If `arm64` appears = you have a Mac with Apple Silicon processor (M1/M2/M3/M4)
 
-**⚠️ WARNING for Mac with Apple Silicon:** VirtualBox works but with limited performance. A better alternative is UTM (https://mac.getutm.app/).
+**Apple Silicon:** use an Arm64 guest with the Arm64 host package. Available features differ from Intel hosts; consult the linked Oracle requirements. No comparative performance ranking is established here.
 
 ### On Linux
 
@@ -267,7 +276,7 @@ mkdir -p ~/VirtualBox_Kits
 In your folder you should have 3 files:
 1. The VirtualBox installer (`.exe` for Windows, `.dmg` for Mac)
 2. Extension Pack (`.vbox-extpack`)
-3. Ubuntu Server ISO (`ubuntu-24.04-live-server-amd64.iso`)
+3. Ubuntu Server ISO (the Ubuntu 24.04.x ISO for your architecture (`amd64` on x86-64; `arm64` on Apple Silicon))
 
 ---
 
@@ -430,7 +439,7 @@ The Extension Pack adds features like USB 2.0/3.0 support, which are useful for 
 - **Folder:** leave default or choose a folder with space
 - **ISO Image:** Click on the dropdown arrow and select Other...
   - Navigate to the downloads folder
-  - Select the file `ubuntu-24.04-live-server-amd64.iso`
+  - Select the file the Ubuntu 24.04.x ISO for your architecture (`amd64` on x86-64; `arm64` on Apple Silicon)
 - **Type:** `Linux`
 - **Version:** `Ubuntu (64-bit)`
 
@@ -477,6 +486,7 @@ The virtual machine is created! You can now see it in the list on the left.
 Bridge makes Ubuntu inside VirtualBox appear as a separate computer in your network. It will receive an IP address from your router, like any other device in your home.
 
 > **Lab observation:** About 30% of "SSH doesn't work" issues come from using NAT instead of Bridge. NAT isolates the VM — you can reach the internet, but nothing can reach you. Bridge gives you a real IP on your local network.
+> Historical author statement retained; any empirical frequency/performance claim needs author-supplied provenance.
 
 ## Configuration
 
@@ -601,10 +611,10 @@ A confirmation message appears: "Confirm destructive action". Navigate to [ Cont
 This is where you create your account.
 
 - **Your name:** Your full name (e.g.: `Ion Popescu`)
-- **Your server's name:** Your hostname in format `INITIAL_GROUP_SERIES` (e.g.: `IP_1001_A`)
+- **Your server's name:** Your hostname in format `initials-group-series` (e.g.: `ip-1001-a`)
 - **Pick a username:** Your surname in lowercase (e.g.: `popescu`)
-- **Choose a password:** `stud`
-- **Confirm your password:** `stud`
+- **Choose a password:** a unique local password
+- **Confirm your password:** repeat your unique local password
 
 Navigate to [ Done ] and press Enter
 
@@ -648,11 +658,11 @@ Ubuntu-Server-2404-SO login:
 
 Type your username (e.g.: `popescu`) and press Enter.
 
-Type your password (`stud`) and press Enter.
+Type your unique local password and press Enter.
 
 **Remember:** You will not see the password as you type — this is normal.
 
-If you see a prompt like `popescu@IP_1001_A:~$`, congratulations! Ubuntu is installed.
+If you see a prompt like `popescu@ip-1001-a:~$`, congratulations! Ubuntu is installed.
 
 ---
 
@@ -664,13 +674,13 @@ If you see a prompt like `popescu@IP_1001_A:~$`, congratulations! Ubuntu is inst
 hostname
 ```
 
-You should see your hostname (e.g.: `IP_1001_A`). If you see something else or need to change it:
+You should see your hostname (e.g.: `ip-1001-a`). If you see something else or need to change it:
 
 ```bash
-sudo hostnamectl set-hostname INITIAL_GROUP_SERIES
+sudo hostnamectl set-hostname initials-group-series
 ```
 
-Replace `INITIAL_GROUP_SERIES` with your actual hostname (e.g.: `IP_1001_A`).
+Replace `initials-group-series` with your actual hostname (e.g.: `ip-1001-a`).
 
 ## Update the system
 
@@ -816,7 +826,7 @@ hostname -I
 - Host name: VM IP address
 - Port: 22
 - User name: your username
-- Password: stud
+- Password: your unique local password
 
 **Step 3:** Click Save, give it a name: `Ubuntu-VBox`
 
@@ -842,7 +852,7 @@ Replace `popescu` with your username and `192.168.1.105` with your VM IP.
 
 At first connection, type `yes` to accept the host key.
 
-Enter your password (`stud`).
+Enter your unique local password.
 
 ## Create an SSH config (optional, saves typing)
 
@@ -1043,7 +1053,7 @@ Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorith
 **macOS/Linux (compare on host):**
 ```bash
 # HOST TERMINAL - Compare checksum
-sha256sum /tmp/test_from_host.txt
+shasum -a 256 /tmp/test_from_host.txt  # macOS; use sha256sum on Linux
 ```
 
 ## Cleanup
@@ -1102,7 +1112,7 @@ hostname && whoami && lsb_release -d && hostname -I && echo "---" && ls ~/Books 
 
 ## What you should see
 
-- Your hostname (e.g.: `IP_1001_A`)
+- Your hostname (e.g.: `ip-1001-a`)
 - Your username (e.g.: `popescu`)
 - Ubuntu 24.04
 - An IP address
@@ -1222,7 +1232,7 @@ sudo systemctl start ssh
 - ❌ `IonPopescu_1001_A` (full name, not initials)
 
 **Correct format:**
-- ✅ `IP_1001_A`
+- ✅ `ip-1001-a`
 
 ## Mistake 5: VM not running when trying to SSH
 
@@ -1277,7 +1287,7 @@ sudo systemctl start ssh
 | What you want | How to do it |
 |---------------|--------------|
 | Start VM headless | `VBoxManage startvm "Ubuntu-Server-2404-SO" --type headless` |
-| Stop VM | `VBoxManage controlvm "Ubuntu-Server-2404-SO" poweroff` |
+| Stop VM | `VBoxManage controlvm "Ubuntu-Server-2404-SO" acpipowerbutton` |
 | VM Status | `VBoxManage showvminfo "Ubuntu-Server-2404-SO" \| grep State` |
 
 ## In Ubuntu
@@ -1302,8 +1312,8 @@ sudo systemctl start ssh
 - [ ] Bridge network configured and working
 - [ ] Ubuntu Server 24.04 installed
 - [ ] Username = surname (e.g.: popescu)
-- [ ] Password = stud
-- [ ] Hostname = INITIAL_GROUP_SERIES (e.g.: IP_1001_A)
+- [ ] Unique local password set
+- [ ] Hostname = initials-group-series (e.g.: ip-1001-a)
 - [ ] System updated
 - [ ] Software packages installed
 - [ ] SSH working
@@ -1337,7 +1347,7 @@ Answer honestly to the following questions. If you cannot tick all of them, revi
    → `hostname -I`
 
 3. **What command stops the VM from terminal?**
-   → `VBoxManage controlvm "Ubuntu-Server-2404-SO" poweroff`
+   → `VBoxManage controlvm "Ubuntu-Server-2404-SO" acpipowerbutton`
 
 4. **Why would you choose Bridge instead of NAT for network?**
    → Bridge gives its own IP from the network, accessible from outside; NAT isolates the VM
@@ -1350,11 +1360,11 @@ Answer honestly to the following questions. If you cannot tick all of them, revi
 
 **Next steps:**
 1. Download homework recording tools → see `02_INIT_HOMEWORKS/`
-2. Browse the Bash reference → see `03_GUIDES/01_Bash_Scripting_Guide.md`
+2. Browse the Bash reference → see [SEM01 shell fundamentals](../SEM01/README.md)
 3. Attend SEM01 with your environment ready
 
 **If something breaks later:**
-- Check `03_GUIDES/03_Observability_and_Debugging_Guide.md`
+- Check [SEM05 scripting and debugging](../SEM05/README.md)
 - Or ask an AI assistant (Section 20)
 
 ---

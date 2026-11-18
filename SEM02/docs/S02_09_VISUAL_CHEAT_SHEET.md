@@ -305,7 +305,7 @@ Useful commands:
 In pipeline:
   $?              # only last exit code
   ${PIPESTATUS[@]} # all exit codes
-  set -o pipefail # $? = first non-zero
+  set -o pipefail # $? = rightmost non-zero
 ```
 
 ---

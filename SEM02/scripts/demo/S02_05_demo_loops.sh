@@ -444,7 +444,7 @@ SYNTAX
 count=1
 while [ $count -le 5 ]; do
     echo "Count: $count"
-    ((count++))
+    count=$((count + 1))
 done
 CODE
     
@@ -452,7 +452,7 @@ CODE
     count=1
     while [ $count -le 5 ]; do
         animate_iteration "$count"
-        ((count++))
+        count=$((count + 1))
     done
     
     wait_for_user
@@ -523,7 +523,7 @@ demo_subshell_trap() {
     print_multiline_code << 'CODE'
 count=0
 echo -e "a\nb\nc" | while read line; do
-    ((count++))
+    count=$((count + 1))
     echo "Inside: count=$count"
 done
 echo "Outside: count=$count"   # count = 0!
@@ -532,7 +532,7 @@ CODE
     echo -e "${BLUE}Execution:${RESET}"
     count=0
     echo -e "a\nb\nc" | while read line; do
-        ((count++))
+        count=$((count + 1))
         echo -e "  ${GREEN}Inside: count=$count${RESET}"
     done
     echo -e "  ${RED}Outside: count=$count   ← LOST!${RESET}"
@@ -564,7 +564,7 @@ DIAGRAM
     print_multiline_code << 'CODE'
 count=0
 while read line; do
-    ((count++))
+    count=$((count + 1))
 done < <(echo -e "a\nb\nc")
 echo "Outside: count=$count"   # count = 3!
 CODE
@@ -572,7 +572,7 @@ CODE
     echo -e "${BLUE}Execution:${RESET}"
     count=0
     while read line; do
-        ((count++))
+        count=$((count + 1))
     done < <(echo -e "a\nb\nc")
     echo -e "  ${GREEN}Outside: count=$count   ← CORRECT!${RESET}"
     
@@ -583,7 +583,7 @@ CODE
     print_multiline_code << 'CODE'
 count=0
 while read line; do
-    ((count++))
+    count=$((count + 1))
 done <<< "$(echo -e 'a\nb\nc')"
 echo "Outside: count=$count"
 CODE
@@ -591,7 +591,7 @@ CODE
     echo -e "${BLUE}Execution:${RESET}"
     count=0
     while read line; do
-        ((count++))
+        count=$((count + 1))
     done <<< "$(echo -e 'a\nb\nc')"
     echo -e "  ${GREEN}Outside: count=$count   ← CORRECT!${RESET}"
     
@@ -616,7 +616,7 @@ demo_until() {
 count=1
 until [ $count -gt 5 ]; do
     echo "Count: $count"
-    ((count++))
+    count=$((count + 1))
 done
 CODE
     
@@ -624,7 +624,7 @@ CODE
     count=1
     until [ $count -gt 5 ]; do
         animate_iteration "$count"
-        ((count++))
+        count=$((count + 1))
     done
     
     wait_for_user

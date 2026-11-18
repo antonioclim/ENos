@@ -1,5 +1,8 @@
 # S05_04 — Oral Defence Protocol
 
+> **Author decision pending:** The assessment rules below are retained proposals. They conflict across the brief, rubric and oral guide, so no combined final-grade formula, penalty order, remote-proctoring rule or integrity inference is enacted. See [the exact alternatives, consequences and recommendation](../docs/TEACHING_CONTRACT.md). Technical exercises remain usable. Historical success rates and classroom claims are not independently verified.
+
+
 > **Operating Systems** | ASE Bucharest — CSIE  
 > **Seminar 5:** Advanced Bash Scripting  
 > **Document:** Instructor guidelines for oral examination  
@@ -9,7 +12,7 @@
 
 ## Purpose and Rationale
 
-The oral defence constitutes **20% of the total assignment grade** and serves as the primary mechanism for verifying authentic student work. In an era where AI tools can generate syntactically correct code, the ability to explain, modify and reason about one's own work becomes the definitive marker of genuine understanding.
+The oral defence constitutes **20% of the total assignment grade** and serves as the primary mechanism for verifying authentic student work. In an era where AI tools can generate syntactically correct code, the ability to explain, modify and reason about one's own work becomes evidence of demonstrated understanding under the stated task, without proving authorship.
 
 > *From experience: I introduced mandatory oral defences in 2023 after noticing a peculiar pattern — submissions with perfect shellcheck scores from students who couldn't explain what `IFS` does. The correlation between "suspiciously perfect code" and "deer in headlights during viva" was nearly 1:1.*
 
@@ -137,7 +140,9 @@ Ask 2-3 "what if" questions without requiring implementation.
 
 ---
 
-## Remote Examination Protocol
+## Historical Remote Examination Proposal — Author Decision Pending
+
+No webcam, recording, photograph or private-history collection is activated here. Define an approved purpose, minimal data, alternatives, access and retention before use. A synthetic assessment session can demonstrate commands without exposing unrelated history.
 
 For online sessions (Teams/Zoom/Meet):
 
@@ -160,7 +165,7 @@ For online sessions (Teams/Zoom/Meet):
 
 1. **Handwritten pseudocode photo** — before coding, ask student to photograph hand-drawn logic
 2. **Language switching** — "Explain this in Romanian, then show me the English code"
-3. **Terminal history check** — `cat ~/.bash_history | tail -50`
+3. **Terminal history check** — a synthetic, task-limited command log (do not collect private shell history by default)
 4. **Deliberate error injection** — "There's a bug on line 47" (there isn't) — authentic students will look and say "I don't see it"
 
 ---
@@ -187,7 +192,9 @@ Final Assignment Score = (Written Submission × 0.8) + (Oral Defence × 0.2)
 
 ---
 
-## Handling Suspected AI-Generated Submissions
+## Historical Integrity-Review Proposal — Author Decision Pending
+
+Language fluency, style, unfamiliar terminology and hesitation are not validated authorship tests. Record observable task performance and follow an explicitly approved procedure; the retained numerical referral rule below has not been adopted by this review.
 
 ### During the Viva
 

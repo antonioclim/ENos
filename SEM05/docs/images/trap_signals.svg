@@ -1,90 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
-    </marker>
-    <linearGradient id="signalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#ffcdd2"/>
-      <stop offset="100%" style="stop-color:#ef9a9a"/>
-    </linearGradient>
-  </defs>
-  
-  <!-- Title -->
-  <text x="400" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
-    Trap și Semnale în Bash
-  </text>
-  
-  <!-- Script execution flow -->
-  <rect x="50" y="60" width="700" height="90" rx="8" ry="8" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
-  <text x="400" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1565c0">SCRIPT ÎN EXECUȚIE</text>
-  
-  <!-- Code inside script -->
-  <rect x="70" y="95" width="300" height="45" rx="3" ry="3" fill="#fff" stroke="#90caf9" stroke-width="1"/>
-  <text x="80" y="115" font-family="monospace" font-size="11" fill="#333">cleanup() { rm -f "$TMP"; }</text>
-  <text x="80" y="132" font-family="monospace" font-size="11" fill="#1565c0">trap cleanup EXIT ERR INT TERM</text>
-  
-  <!-- Trap handler box -->
-  <rect x="400" y="95" width="330" height="45" rx="3" ry="3" fill="#e8f5e9" stroke="#4caf50" stroke-width="1"/>
-  <text x="565" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Handler-ul "cleanup" e înregistrat</text>
-  <text x="565" y="132" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">pentru 4 semnale diferite</text>
-  
-  <!-- Signals section -->
-  <text x="400" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c62828">SEMNALE CARE POT OPRI SCRIPTUL</text>
-  
-  <!-- Signal boxes -->
-  <!-- EXIT -->
-  <rect x="50" y="195" width="160" height="100" rx="5" ry="5" fill="#fff3e0" stroke="#ff9800" stroke-width="2"/>
-  <text x="130" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#e65100">EXIT</text>
-  <text x="60" y="245" font-family="Arial, sans-serif" font-size="10" fill="#333">Se declanșează:</text>
-  <text x="60" y="260" font-family="Arial, sans-serif" font-size="10" fill="#333">• La ieșire normală</text>
-  <text x="60" y="275" font-family="Arial, sans-serif" font-size="10" fill="#333">• La orice exit</text>
-  <text x="60" y="290" font-family="Arial, sans-serif" font-size="10" fill="#2e7d32">✓ ÎNTOTDEAUNA!</text>
-  
-  <!-- ERR -->
-  <rect x="230" y="195" width="160" height="100" rx="5" ry="5" fill="#ffebee" stroke="#c62828" stroke-width="2"/>
-  <text x="310" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#c62828">ERR</text>
-  <text x="240" y="245" font-family="Arial, sans-serif" font-size="10" fill="#333">Se declanșează:</text>
-  <text x="240" y="260" font-family="Arial, sans-serif" font-size="10" fill="#333">• Când comandă eșuează</text>
-  <text x="240" y="275" font-family="Arial, sans-serif" font-size="10" fill="#333">• Cu set -e activ</text>
-  <text x="240" y="290" font-family="Arial, sans-serif" font-size="10" fill="#c62828">⚠ Nu în if/||/&&</text>
-  
-  <!-- INT -->
-  <rect x="410" y="195" width="160" height="100" rx="5" ry="5" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
-  <text x="490" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0277bd">INT (Ctrl+C)</text>
-  <text x="420" y="245" font-family="Arial, sans-serif" font-size="10" fill="#333">Se declanșează:</text>
-  <text x="420" y="260" font-family="Arial, sans-serif" font-size="10" fill="#333">• Utilizator Ctrl+C</text>
-  <text x="420" y="275" font-family="Arial, sans-serif" font-size="10" fill="#333">• kill -INT</text>
-  <text x="420" y="290" font-family="Arial, sans-serif" font-size="10" fill="#333">• Semnal 2</text>
-  
-  <!-- TERM -->
-  <rect x="590" y="195" width="160" height="100" rx="5" ry="5" fill="#fce4ec" stroke="#ad1457" stroke-width="2"/>
-  <text x="670" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#880e4f">TERM</text>
-  <text x="600" y="245" font-family="Arial, sans-serif" font-size="10" fill="#333">Se declanșează:</text>
-  <text x="600" y="260" font-family="Arial, sans-serif" font-size="10" fill="#333">• kill (default)</text>
-  <text x="600" y="275" font-family="Arial, sans-serif" font-size="10" fill="#333">• Sistem shutdown</text>
-  <text x="600" y="290" font-family="Arial, sans-serif" font-size="10" fill="#333">• Semnal 15</text>
-  
-  <!-- Arrows to cleanup -->
-  <path d="M130 295 L130 330 L400 330" stroke="#ff9800" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <path d="M310 295 L310 330 L400 330" stroke="#c62828" stroke-width="2" fill="none"/>
-  <path d="M490 295 L490 330 L400 330" stroke="#0288d1" stroke-width="2" fill="none"/>
-  <path d="M670 295 L670 330 L400 330" stroke="#ad1457" stroke-width="2" fill="none"/>
-  
-  <!-- Cleanup execution -->
-  <rect x="300" y="345" width="200" height="50" rx="5" ry="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
-  <text x="400" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2e7d32">cleanup() EXECUTĂ</text>
-  <text x="400" y="385" text-anchor="middle" font-family="monospace" font-size="11" fill="#333">rm -f "$TMP"</text>
-  
-  <!-- Important notes -->
-  <rect x="50" y="420" width="340" height="70" rx="5" ry="5" fill="#fff8e1" stroke="#ffc107" stroke-width="1"/>
-  <text x="60" y="440" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#f57c00">⚠ IMPORTANT:</text>
-  <text x="60" y="458" font-family="Arial, sans-serif" font-size="10" fill="#333">• trap NU se moștenește în subshell</text>
-  <text x="60" y="474" font-family="Arial, sans-serif" font-size="10" fill="#333">• Definește funcția ÎNAINTE de trap</text>
-  
-  <!-- Best practice -->
-  <rect x="410" y="420" width="340" height="70" rx="5" ry="5" fill="#e8f5e9" stroke="#4caf50" stroke-width="1"/>
-  <text x="420" y="440" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2e7d32">✓ BEST PRACTICE:</text>
-  <text x="420" y="458" font-family="monospace" font-size="10" fill="#333">trap 'cleanup; exit 130' INT</text>
-  <text x="420" y="474" font-family="Arial, sans-serif" font-size="10" fill="#666">→ Exit code corect pentru Ctrl+C</text>
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-labelledby="sem05-trap_signals-title sem05-trap_signals-desc" xml:lang="en">
+  <title id="sem05-trap_signals-title">Bash trap events and operating-system signals</title>
+  <desc id="sem05-trap_signals-desc">EXIT and ERR are Bash events, not operating-system signals. ERR does not require errexit and has tested-context exceptions. INT and TERM handlers request shell exit; one EXIT handler performs owned-resource cleanup. SIGKILL and abrupt machine failure cannot run cleanup. ERR inheritance requires errtrace where appropriate.</desc>
+  <rect width="800" height="600" fill="#fff" />
+  <text x="400" y="30" font-family="Arial, sans-serif" font-size="20" fill="#0d47a1" text-anchor="middle" id="SEM05_trap_signals-text-4">Bash Trap Events and Operating-system Signals</text>
+  <rect x="30" y="50" width="740" height="205" rx="6" fill="#e3f2fd" stroke="#1565c0" />
+  <text x="45" y="73" font-family="Arial, sans-serif" font-size="14" fill="#0d47a1" id="SEM05_trap_signals-text-6">One owned temporary file; one EXIT cleanup handler</text>
+  <text x="48" y="98" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-7">tmp=</text>
+  <text x="48" y="120" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-8">cleanup() { [[ -z ${tmp:-} ]] || rm -f -- "$tmp"; }</text>
+  <text x="48" y="142" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-9">trap 'status=$?; cleanup; exit "$status"' EXIT</text>
+  <text x="48" y="164" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-10">trap 'exit 130' INT; trap 'exit 143' TERM</text>
+  <text x="48" y="186" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-11">tmp=$(mktemp) || exit 1</text>
+  <text x="48" y="208" font-family="monospace" font-size="12" fill="#333" id="SEM05_trap_signals-text-12"># Work with "$tmp"; define handlers before allocation.</text>
+  <text x="45" y="241" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-13">The function must exist when its handler executes; defining it first avoids a registration-to-definition gap.</text>
+  <rect x="30" y="275" width="170" height="150" rx="6" fill="#fff3e0" stroke="#8e3600" />
+  <text x="115" y="300" font-family="Arial, sans-serif" font-size="16" fill="#8e3600" text-anchor="middle" id="SEM05_trap_signals-text-15">EXIT</text>
+  <text x="115" y="320" font-family="Arial, sans-serif" font-size="11" fill="#8e3600" text-anchor="middle" id="SEM05_trap_signals-text-16">Bash exit event</text>
+  <text x="40" y="344" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-17">Runs on normal shell exit</text>
+  <text x="40" y="363" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-18">and explicit exit requests.</text>
+  <text x="40" y="382" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-19">Not a guarantee for SIGKILL</text>
+  <text x="40" y="401" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-20">or abrupt machine failure.</text>
+  <rect x="220" y="275" width="170" height="150" rx="6" fill="#ffebee" stroke="#8b1b1b" />
+  <text x="305" y="300" font-family="Arial, sans-serif" font-size="16" fill="#8b1b1b" text-anchor="middle" id="SEM05_trap_signals-text-22">ERR</text>
+  <text x="305" y="320" font-family="Arial, sans-serif" font-size="11" fill="#8b1b1b" text-anchor="middle" id="SEM05_trap_signals-text-23">Bash failure event</text>
+  <text x="230" y="344" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-24">Eligible failures only.</text>
+  <text x="230" y="363" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-25">Does not require set -e.</text>
+  <text x="230" y="382" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-26">if / while / AND-OR tests</text>
+  <text x="230" y="401" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-27">have documented exceptions.</text>
+  <rect x="410" y="275" width="170" height="150" rx="6" fill="#e1f5fe" stroke="#0d47a1" />
+  <text x="495" y="300" font-family="Arial, sans-serif" font-size="16" fill="#0d47a1" text-anchor="middle" id="SEM05_trap_signals-text-29">INT</text>
+  <text x="495" y="320" font-family="Arial, sans-serif" font-size="11" fill="#0d47a1" text-anchor="middle" id="SEM05_trap_signals-text-30">OS signal 2</text>
+  <text x="420" y="344" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-31">Often from Ctrl+C.</text>
+  <text x="420" y="363" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-32">Handler requests exit 130.</text>
+  <text x="420" y="382" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-33">The EXIT handler then</text>
+  <text x="420" y="401" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-34">cleans the owned file.</text>
+  <rect x="600" y="275" width="170" height="150" rx="6" fill="#fce4ec" stroke="#880e4f" />
+  <text x="685" y="300" font-family="Arial, sans-serif" font-size="16" fill="#880e4f" text-anchor="middle" id="SEM05_trap_signals-text-36">TERM</text>
+  <text x="685" y="320" font-family="Arial, sans-serif" font-size="11" fill="#880e4f" text-anchor="middle" id="SEM05_trap_signals-text-37">OS signal 15</text>
+  <text x="610" y="344" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-38">A termination request.</text>
+  <text x="610" y="363" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-39">Handler requests exit 143.</text>
+  <text x="610" y="382" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-40">The EXIT handler then</text>
+  <text x="610" y="401" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-41">cleans the owned file.</text>
+  <rect x="30" y="445" width="740" height="120" rx="6" fill="#f5f5f5" stroke="#777" />
+  <text x="45" y="468" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-43">ERR inheritance: set -E (errtrace) enables inheritance in functions, substitutions and subshells.</text>
+  <text x="45" y="492" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-44">Other traps and shell options have their own inheritance rules; do not generalise from ERR.</text>
+  <text x="45" y="516" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-45">An INT/TERM handler can return instead of exiting. This example explicitly requests exit.</text>
+  <text x="45" y="540" font-family="Arial, sans-serif" font-size="11" fill="#333" id="SEM05_trap_signals-text-46">Cleanup is bounded by process lifetime and resource ownership; it cannot make every failure recoverable.</text>
+  <text x="400" y="588" font-family="Arial, sans-serif" font-size="10" fill="#444" text-anchor="middle" id="SEM05_trap_signals-text-47">Bash reference semantics; actual signal delivery also depends on foreground jobs and waiting.</text>
 </svg>

@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCORE=0
 TOTAL=10
-DATA_DIR="../resources/sample_data"
+DATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../resources/sample_data" && pwd)"
 
 echo "=== TEST 01: REGEX BASICS ==="
 echo ""
@@ -13,7 +13,7 @@ echo ""
 # Ex 1: Find lines starting with # (comments)
 echo -n "Ex 1 - Comments (^#): "
 EXPECTED=6
-RESULT=$(grep -c '^#' "$DATA_DIR/config.ini" 2>/dev/null || echo 0)
+RESULT=$(grep -c '^#' "$DATA_DIR/config.ini" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -24,7 +24,7 @@ fi
 # Ex 2: Find empty lines
 echo -n "Ex 2 - Empty lines (^$): "
 EXPECTED=6
-RESULT=$(grep -c '^$' "$DATA_DIR/config.ini" 2>/dev/null || echo 0)
+RESULT=$(grep -c '^$' "$DATA_DIR/config.ini" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -67,3 +67,5 @@ fi
 
 echo ""
 echo "=== FINAL SCORE: $SCORE / $TOTAL ==="
+
+[[ $SCORE -eq $TOTAL ]]

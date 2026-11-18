@@ -1,4 +1,6 @@
 # Seminar 2 Assignment: Pipeline Master
+
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
 ## Operating Systems | ASE Bucharest - CSIE
 
 Document: S02_01_ASSIGNMENT.md  
@@ -170,7 +172,7 @@ Requirements:
 
 File: `part3_filters/ex2_csv_analyzer.sh`
 
-Write a script that analyses a CSV file (with header):
+For this beginner exercise, input is a simple unquoted comma-separated table with one header row, no embedded comma, quote or newline in a field. General quoted CSV requires a CSV parser. Write a script that analyses this input:
 1. Displays the number of rows (excluding header)
 2. Displays the number of columns
 3. Displays column names
@@ -180,14 +182,14 @@ Write a script that analyses a CSV file (with header):
 
 File: `part3_filters/ex3_log_stats.sh`
 
-Write a script that analyses an Apache/Nginx access log:
+Use the exact synthetic eight-field log format from sprint F3: IP, two placeholders, one bracketed timestamp without timezone, quoted method/path without HTTP version, status and bytes. Path is field 6, status 7 and bytes 8. Other server formats need a declared adapter. Write a script that analyses this input:
 1. Top 5 IP addresses by number of requests
 2. Top 5 most accessed pages
 3. Distribution of HTTP codes (2xx, 3xx, 4xx, 5xx)
 
 ### Exercise 3.4: Frequency Counter (5%)
 
-File: `part3_filters/ex3_frequency_counter.sh`
+File: `part3_filters/ex4_frequency_counter.sh`
 
 Write a script that receives a column number and a CSV file, displaying the frequency of values in that column, sorted descending.
 
@@ -286,37 +288,41 @@ Requirements:
 
 File: `part6_verification/proof_of_understanding.sh`
 
-Create a script that generates proof you worked on the assignment locally:
+Create a **task-specific reproducibility record** in `part6_verification/local_proof.txt`. It records source hashes, Bash version and syntax-check outcomes. It is self-generated evidence: it does not prove who wrote the code, where it was written, that it runs correctly or that an assessment has been passed. Do not collect shell history, MAC address, hostname, username or files outside the assignment for this record.
 
 ```bash
 #!/bin/bash
-# proof_of_understanding.sh
-# This script generates evidence of local work
-
-echo "=== ASSIGNMENT VERIFICATION ===" > local_proof.txt
-echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')" >> local_proof.txt
-echo "Hostname: $(hostname)" >> local_proof.txt
-echo "Username: $(whoami)" >> local_proof.txt
-echo "Working directory: $(pwd)" >> local_proof.txt
-echo "MAC address: $(ip link show 2>/dev/null | grep ether | head -1 | awk '{print $2}')" >> local_proof.txt
-echo "" >> local_proof.txt
-
-# List YOUR assignment files with their sizes
-echo "=== YOUR ASSIGNMENT FILES ===" >> local_proof.txt
-find .. -name "*.sh" -exec ls -la {} \; >> local_proof.txt 2>/dev/null
-
-# Show recent bash history (last 20 commands) - proves you worked in terminal
-echo "" >> local_proof.txt
-echo "=== RECENT TERMINAL ACTIVITY ===" >> local_proof.txt
-tail -20 ~/.bash_history >> local_proof.txt 2>/dev/null || echo "History unavailable" >> local_proof.txt
-
-echo "Proof generated: local_proof.txt"
+# proof_of_understanding.sh — syntax and source manifest only
+set -euo pipefail
+VERIFY_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+ASSIGNMENT_ROOT=$(cd -- "$VERIFY_DIR/.." && pwd -P)
+[[ ${VERIFY_DIR##*/} == part6_verification ]] || { printf 'Place this script in part6_verification\n' >&2; exit 1; }
+cd -- "$ASSIGNMENT_ROOT"
+REPORT_TMP=$(mktemp "$VERIFY_DIR/local_proof.XXXXXX.tmp")
+FILE_LIST=$(mktemp "$VERIFY_DIR/source_list.XXXXXX.tmp")
+trap 'rm -f -- "$REPORT_TMP" "$FILE_LIST"' EXIT
+# find does not follow directory symlinks; only regular assignment .sh files.
+find . -type f -name '*.sh' -print0 > "$FILE_LIST"
+{
+    printf '=== ASSIGNMENT REPRODUCIBILITY RECORD ===\n'
+    printf 'Generated UTC: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf 'Bash version: %s\n' "$BASH_VERSION"
+    printf 'Scope: assignment .sh source files; syntax only; no student code executed\n'
+    while IFS= read -r -d '' script; do
+        printf '\nFile: %q\n' "$script"
+        sha256sum -- "$script"
+        if bash -n -- "$script"; then
+            printf 'Syntax: PASS\n'
+        else
+            printf 'Syntax: FAIL\n'
+        fi
+    done < "$FILE_LIST"
+} > "$REPORT_TMP" 2>&1
+mv -- "$REPORT_TMP" "$VERIFY_DIR/local_proof.txt"
+printf 'Record generated: part6_verification/local_proof.txt\n'
 ```
 
-**Requirements**:
-- Run this script from within your assignment directory
-- Submit the generated `local_proof.txt` file
-- The MAC address and hostname will be verified for consistency
+**Requirements:** Run the script from any directory after placing it at the specified path. Review the generated record and include it at `part6_verification/local_proof.txt`. Hashes identify bytes but do not authenticate authorship. The oral discussion below evaluates comprehension. Its weighting, institutional acceptance and any broader evidence/privacy requirements remain pending in `ASSESSMENT_STATUS.md`; no new identity protocol is adopted here.
 
 ### Exercise 6.2: Oral Explanation (2%)
 

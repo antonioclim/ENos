@@ -1,20 +1,24 @@
-@startuml
-title eBPF Architecture
-rectangle "Utilizator Space" {
-  rectangle "Program"
-  rectangle "libbpf"
-}
-rectangle "Kernel" {
-  rectangle "Verifier"
-  rectangle "JIT"
-  rectangle "VM"
-  rectangle "Hooks"
-}
-rectangle "Maps"
-Program --> libbpf
-libbpf --> Verifier
-Verifier --> JIT
-JIT --> VM
-VM --> Hooks
-Hooks --> Maps
+@startuml ebpf_architecture
+title eBPF — load-time preparation and event-time execution
+rectangle "User space loader\n(libbpf / bpf syscall)" as loader
+rectangle "Kernel verifier" as verifier
+rectangle "JIT native code\n(if supported/enabled)" as jit
+rectangle "Interpreter\n(where supported)" as interp
+rectangle "Attached hook\n(event occurs)" as hook
+rectangle "Program execution\n(abstract BPF runtime)" as run
+database "BPF maps" as maps
+loader --> verifier : load bytecode; validate
+verifier --> jit : prepare one execution path
+verifier --> interp : alternative execution path
+loader --> hook : attach verified program
+hook --> run : invoke on event
+jit ..> run : native implementation
+interp ..> run : interpreted implementation
+run --> maps : lookup/update through permitted helpers
+loader --> maps : permitted user-space map operations
+legend bottom
+Solid labelled edges: preparation, attachment or invocation as stated.
+Dotted edges: alternative implementations of the abstract runtime.
+JIT-native execution does not then require an interpreter stage.
+endlegend
 @enduml

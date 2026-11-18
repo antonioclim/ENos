@@ -1,11 +1,12 @@
 [project]
 name = "enos-educational-kit"
-version = "2.0.0"
+version = "6.0.0.dev0"
 description = "Operating Systems Educational Kit for ASE Bucharest"
 authors = [{name = "ing. dr. Antonio Clim", email = "antonio.clim@csie.ase.ro"}]
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+# Baseline LICENSE and package metadata state MIT; LICENCE.md states restrictive terms.
+# No replacement licence is selected; resolve AUTHOR_DECISIONS.md before publication.
 
 keywords = [
     "education",
@@ -19,7 +20,6 @@ keywords = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -36,28 +36,38 @@ dev = [
     "mypy>=1.0.0",
     "black>=23.0.0",
     "pyyaml>=6.0",
+    "markdown-it-py>=3.0,<5",
 ]
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+# The Python distribution contains the shared library. Teaching materials and
+# standalone seminar applications remain in the repository/release archive.
+[tool.setuptools]
+packages = ["lib"]
+
 # =============================================================================
 # PYTEST CONFIGURATION
 # =============================================================================
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = [
+    "lib",
+    "scripts",
     "SEM01/tests",
     "SEM02/tests",
     "SEM03/tests",
     "SEM04/tests",
     "SEM05/tests",
     "SEM06/tests",
+    "SEM07/tests",
 ]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --import-mode=importlib"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",

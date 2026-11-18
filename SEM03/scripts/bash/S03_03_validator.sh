@@ -142,25 +142,25 @@ record_test() {
     local max_points=$4
     local details=$5
     
-    ((TOTAL_TESTS++))
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
     
     case "$result" in
         PASS)
-            ((TESTS_PASSED++))
+            TESTS_PASSED=$((TESTS_PASSED + 1))
             TOTAL_POINTS=$((TOTAL_POINTS + points))
             log PASS "$name (+$points pts)"
             ;;
         FAIL)
-            ((TESTS_FAILED++))
+            TESTS_FAILED=$((TESTS_FAILED + 1))
             log FAIL "$name (0/$max_points pts)"
             if [ -n "$details" ]; then
                 log INFO "  Details: $details"
             fi
             ;;
         WARN)
-            ((TESTS_WARNED++))
+            TESTS_WARNED=$((TESTS_WARNED + 1))
             if [ "$STRICT" = true ]; then
-                ((TESTS_FAILED++))
+                TESTS_FAILED=$((TESTS_FAILED + 1))
                 log FAIL "$name (WARN → FAIL in strict mode)"
             else
                 TOTAL_POINTS=$((TOTAL_POINTS + points))
@@ -199,7 +199,7 @@ check_structure() {
     
     for file in "${required_files[@]}"; do
         if [ -f "$HOMEWORK_DIR/$file" ]; then
-            ((found++))
+            found=$((found + 1))
             log DEBUG "Found: $file"
         else
             missing+=("$file")
@@ -258,22 +258,22 @@ validate_find_commands() {
     local advanced_opts=0
     
     if grep -q "\-type" "$file" 2>/dev/null; then
-        ((advanced_opts++))
+        advanced_opts=$((advanced_opts + 1))
         log DEBUG "Uses -type"
     fi
     
     if grep -q "\-size" "$file" 2>/dev/null; then
-        ((advanced_opts++))
+        advanced_opts=$((advanced_opts + 1))
         log DEBUG "Uses -size"
     fi
     
     if grep -q "\-mtime\|\-mmin" "$file" 2>/dev/null; then
-        ((advanced_opts++))
+        advanced_opts=$((advanced_opts + 1))
         log DEBUG "Uses -mtime/-mmin"
     fi
     
     if grep -q "\-exec\|xargs" "$file" 2>/dev/null; then
-        ((advanced_opts++))
+        advanced_opts=$((advanced_opts + 1))
         log DEBUG "Uses -exec or xargs"
     fi
     
@@ -326,9 +326,9 @@ validate_professional_script() {
         record_test "Uses getopts" "PASS" 5 5 ""
         
         # Check required options
-        local has_h=$(grep -c "\-h\|help" "$file" || echo 0)
-        local has_v=$(grep -c "\-v\|verbose" "$file" || echo 0)
-        local has_o=$(grep -c "\-o\|output" "$file" || echo 0)
+        local has_h=$(grep -c "\-h\|help" "$file" || true)
+        local has_v=$(grep -c "\-v\|verbose" "$file" || true)
+        local has_o=$(grep -c "\-o\|output" "$file" || true)
         
         if [ "$has_h" -gt 0 ] && [ "$has_v" -gt 0 ] && [ "$has_o" -gt 0 ]; then
             record_test "Options -h, -v, -o implemented" "PASS" 5 5 ""
@@ -473,7 +473,8 @@ validate_cron_jobs() {
     fi
     
     # Count non-comment, non-empty lines
-    local cron_lines=$(grep -v "^#" "$file" | grep -v "^$" | wc -l)
+    local cron_lines
+    cron_lines=$(awk '!/^[[:space:]]*(#|$)/ {n++} END {print n+0}' "$file")
     
     if [ "$cron_lines" -ge 3 ]; then
         record_test "Minimum 3 cron expressions" "PASS" 3 3 "Found: $cron_lines"
@@ -487,22 +488,14 @@ validate_cron_jobs() {
     
     while IFS= read -r line; do
         # Ignore comments and empty lines
-        [[ "$line" =~ ^# ]] && continue
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
         [[ -z "${line// }" ]] && continue
         
-        # Check basic format (5 fields + command)
-        local fields=$(echo "$line" | awk '{print NF}')
-        if [ "$fields" -ge 6 ]; then
-            # Check that first 5 fields are valid
-            local cron_expr=$(echo "$line" | awk '{print $1,$2,$3,$4,$5}')
-            if [[ "$cron_expr" =~ ^[0-9\*\/\,\-]+[[:space:]][0-9\*\/\,\-]+[[:space:]][0-9\*\/\,\-]+[[:space:]][0-9\*\/\,\-]+[[:space:]][0-9\*\/\,\-]+$ ]]; then
-                ((valid_crons++))
-            elif [[ "$cron_expr" =~ ^@ ]]; then
-                # Special string (@daily, @reboot, etc.)
-                ((valid_crons++))
-            else
-                invalid_crons+=("$line")
-            fi
+        local fields
+        fields=$(awk '{print NF}' <<< "$line")
+        if { [[ "$line" == @* && "$fields" -ge 2 ]] || [[ "$line" != @* && "$fields" -ge 6 ]]; } &&
+           python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")/../python" && pwd)/S03_01_autograder.py" --test-cron "$line" --no-color >/dev/null; then
+            valid_crons=$((valid_crons + 1))
         else
             invalid_crons+=("$line")
         fi
@@ -558,22 +551,22 @@ validate_integration() {
     local concepts=0
     
     if grep -q "find" "$file" 2>/dev/null; then
-        ((concepts++))
+        concepts=$((concepts + 1))
         log DEBUG "Uses find"
     fi
     
     if grep -q "getopts" "$file" 2>/dev/null; then
-        ((concepts++))
+        concepts=$((concepts + 1))
         log DEBUG "Uses getopts"
     fi
     
     if grep -q "chmod\|chown" "$file" 2>/dev/null; then
-        ((concepts++))
+        concepts=$((concepts + 1))
         log DEBUG "Manages permissions"
     fi
     
     if grep -qE "cron|crontab|>>.*log" "$file" 2>/dev/null; then
-        ((concepts++))
+        concepts=$((concepts + 1))
         log DEBUG "Integration logging/cron"
     fi
     
@@ -659,25 +652,12 @@ check_bonuses() {
 generate_report() {
     print_header "📊 FINAL REPORT"
     
-    local percentage=$((TOTAL_POINTS * 100 / MAX_POINTS))
+    local percentage=0
+    if [[ $MAX_POINTS -gt 0 ]]; then percentage=$((TOTAL_POINTS * 100 / MAX_POINTS)); fi
     local grade
     
-    if [ $percentage -ge 90 ]; then
-        grade="10 (Excellent)"
-    elif [ $percentage -ge 80 ]; then
-        grade="9 (Very good)"
-    elif [ $percentage -ge 70 ]; then
-        grade="8 (Good)"
-    elif [ $percentage -ge 60 ]; then
-        grade="7 (Satisfactory)"
-    elif [ $percentage -ge 50 ]; then
-        grade="6 (Sufficient)"
-    elif [ $percentage -ge 40 ]; then
-        grade="5 (Weak)"
-    else
-        grade="4 (Insufficient)"
-    fi
-    
+    grade="PENDING_POLICY — diagnostic checks only"
+
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║${NC}                    ${BOLD}VALIDATION RESULTS${NC}                         ${CYAN}║${NC}"
     echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════╣${NC}"
@@ -693,7 +673,7 @@ generate_report() {
     echo -e "${CYAN}║${NC}  ${BOLD}Score:${NC}"
     echo -e "${CYAN}║${NC}    Obtained:           ${BOLD}$TOTAL_POINTS${NC} / $MAX_POINTS"
     echo -e "${CYAN}║${NC}    Percentage:         ${BOLD}$percentage%${NC}"
-    echo -e "${CYAN}║${NC}    Estimated grade:    ${BOLD}$grade${NC}"
+    echo -e "${CYAN}║${NC}    Assessment status:    ${BOLD}$grade${NC}"
     echo -e "${CYAN}║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     
@@ -708,7 +688,7 @@ generate_report() {
             echo "SUMMARY"
             echo "═══════════════════════════════════════════════════════════════"
             echo "Score: $TOTAL_POINTS / $MAX_POINTS ($percentage%)"
-            echo "Estimated grade: $grade"
+            echo "Assessment status: $grade"
             echo "Date: $(date)"
         } >> "$REPORT_FILE"
     fi

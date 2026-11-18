@@ -1,7 +1,7 @@
 # Peer Instruction - Seminar 03
 ## Operating Systems | Bucharest UES - CSIE
 
-> 18+ MCQ Questions for Peer Instruction activities  
+> 18 questions (PI-10 explicitly permits two answers) for Peer Instruction activities  
 > Format: Question → Individual vote → Pair discussion → Final vote → Explanation
 
 ---
@@ -25,7 +25,7 @@ For each question in this document, follow this protocol:
 
 - **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote observation:** Record any change; a 20–30% improvement is a historical teaching expectation, not a verified outcome of this package
 
 ### Question Notation
 
@@ -38,11 +38,11 @@ Each question includes:
 
 ## Contents
 
-1. [find and xargs Questions (PI-01 to PI-05)](#-find-and-xargs-questions)
-2. [Script Parameters Questions (PI-06 to PI-09)](#-script-parameters-questions)
-3. [Permissions Questions (PI-10 to PI-14)](#-permissions-questions)
-4. [Cron Questions (PI-15 to PI-18)](#-cron-questions)
-5. [Usage Guide](#-usage-guide)
+1. [find and xargs Questions (PI-01 to PI-05)](#find-and-xargs-questions)
+2. [Script Parameters Questions (PI-06 to PI-09)](#script-parameters-questions)
+3. [Permissions Questions (PI-10 to PI-14)](#permissions-questions)
+4. [Cron Questions (PI-15 to PI-18)](#cron-questions)
+5. [Usage Guide](#usage-guide)
 
 ---
 
@@ -55,7 +55,8 @@ Each question includes:
 ║  🗳️ PI-01: find vs locate                                        ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  You just created a file: touch ~/project/config.txt             ║
+║  Assume this path was absent from the current locate database and no update occurs.
+You just created a file: touch ~/project/config.txt             ║
 ║  Immediately after, you run: locate config.txt                   ║
 ║                                                                  ║
 ║  What happens?                                                   ║
@@ -135,7 +136,8 @@ find . -type f \( -name "*.txt" -o -name "*.md" \)
 ║  🗳️ PI-03: -exec \; vs +                                         ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  You have 100 .txt files. How many `cat` processes does each     ║
+║  You have 100 short-path .txt files whose combined arguments fit one batch.
+How many `cat` processes does each     ║
 ║  start?                                                          ║
 ║                                                                  ║
 ║  find . -name "*.txt" -exec cat {} \;                            ║
@@ -153,15 +155,15 @@ Correct answer: B
 
 Explanation:
 - `\;` executes the command for EACH file found (100 × `cat file.txt`)
-- `+` groups files and executes ONCE (`cat file1.txt file2.txt ... file100.txt`)
+- `+` groups files into bounded batches (one batch under the stated assumption)
 
 Performance:
 - `\;` - slow, many forks
-- `+` - fast, single process
+- `+` - fewer invocations here; no universal speed ranking is implied
 
 When to use which:
 - `\;` - when command must receive exactly one argument
-- `+` - for maximum performance (similar to xargs)
+- `+` - for argument batching (similar to xargs); it also preserves filename boundaries
 
 ---
 
@@ -172,7 +174,7 @@ When to use which:
 ║  🗳️ PI-04: xargs with spaces in names                            ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  You have a file: "important document.txt"                       ║
+║  In a fresh owned directory, the only file is "important document.txt".                       ║
 ║  You run: find . -name "*.txt" | xargs rm                        ║
 ║                                                                  ║
 ║  What happens?                                                   ║
@@ -188,8 +190,8 @@ When to use which:
 Correct answer: B
 
 Explanation:
-xargs by default splits on spaces and newlines. "important document.txt" becomes three arguments:
-- "important"
+xargs by default splits on spaces and newlines. "important document.txt" becomes two arguments:
+- "./important"
 - "document.txt"
 
 ```bash
@@ -199,7 +201,7 @@ rm document.txt     # Error: doesn't exist
 
 Solution:
 ```bash
-find . -name "*.txt" -print0 | xargs -0 rm
+find . -type f -name "*.txt" -print0 | xargs -0 -r rm --
 ```
 - `-print0` - separates with NULL (not newline)
 - `-0` - xargs reads with NULL delimiter
@@ -213,7 +215,7 @@ find . -name "*.txt" -print0 | xargs -0 rm
 ║  🗳️ PI-05: -delete vs -exec rm                                   ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  Which command is safer for deletion?                            ║
+║  Which command requests per-file confirmation before deletion?                            ║
 ║                                                                  ║
 ║  A) find . -name "*.tmp" -delete                                 ║
 ║  B) find . -name "*.tmp" -exec rm {} \;                          ║
@@ -408,7 +410,7 @@ If you run `./script.sh -b` (without argument), getopts returns an error.
 ║  chmod 700 mydir/                                                ║
 ║  chmod 600 mydir/                                                ║
 ║                                                                  ║
-║  After chmod 600, what can you NO longer do?                     ║
+║  As the unprivileged owner, select TWO operations that fail.                     ║
 ║                                                                  ║
 ║  A) ls mydir/ (list contents)                                    ║
 ║  B) cd mydir/ (access directory)                                 ║
@@ -418,12 +420,12 @@ If you run `./script.sh -b` (without argument), getopts returns an error.
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
-Correct answer: B (and implicitly C)
+Correct answers: B and C (multiple-answer item). Assume readable target files, searchable ancestors, no ACL/security-module exception and plain name listing without extra stat requests.
 
 Explanation:
 On directory:
 - r (4) = can list contents (ls)
-- w (2) = can create/delete files
+- w (2), together with directory x = can create/delete entries subject to further restrictions
 - x (1) = can access the directory (cd) and files within
 
 With 600 (rw-):
@@ -478,7 +480,8 @@ Result: 751
 ║  umask 027                                                       ║
 ║  touch newfile.txt                                               ║
 ║                                                                  ║
-║  What permissions will newfile.txt have?                         ║
+║  Assume the file does not already exist, creation requests 0666 and no default ACL applies.
+What permissions will newfile.txt have?                         ║
 ║                                                                  ║
 ║  A) 027 (----w-rwx)                                              ║
 ║  B) 640 (rw-r-----)                                              ║
@@ -494,13 +497,14 @@ Explanation:
 umask REMOVES bits from default permissions:
 - Default files: 666 (rw-rw-rw-)
 - umask: 027
-- Result: 666 - 027 = 640 (rw-r-----)
+- Result: 0666 & ~0027 = 0640 (rw-r-----)
 
 Detailed calculation:
 ```
-  666 = rw-rw-rw-
-- 027 = ---w--rwx
-= 640 = rw-r-----
+Requested: 0666 = rw-rw-rw-
+Remove bits present in 0027 = ----w-rwx
+Result:    0640 = rw-r-----
+Bitwise removal, not arithmetic subtraction.
 ```
 
 ---
@@ -565,7 +569,7 @@ Correct answer: B
 Explanation:
 Sticky bit ('t' in others execute) on directory:
 - Everyone can create files (has w)
-- But each can only delete their OWN files
+- File owner, directory owner or appropriate privilege may remove entries; Bob is assumed to have neither ownership nor that privilege
 
 Without sticky bit, bob could delete anything in /tmp (because he has write on directory).
 
@@ -585,7 +589,7 @@ Without sticky bit, bob could delete anything in /tmp (because he has write on d
 ║  When does this job run?                                         ║
 ║                                                                  ║
 ║  A) Every 15 minutes, 24/7                                       ║
-║  B) Every 15 minutes, between 9:00-17:00, Monday-Friday          ║
+║  B) Every 15 minutes, from 09:00 through 17:45, Monday-Friday          ║
 ║  C) At hour 15, between 9 and 17, days 1-5 of month              ║
 ║  D) 15 times per hour, on working days                           ║
 ║                                                                  ║
@@ -603,7 +607,7 @@ Explanation:
 1-5     = Monday-Friday
 ```
 
-Result: Job runs every 15 minutes during working hours, Monday-Friday.
+Result: 09:00, 09:15, …, 17:00, 17:15, 17:30 and 17:45 on Monday–Friday.
 
 ---
 
@@ -650,7 +654,7 @@ Explanation:
 ║                                                                  ║
 ║  A) Cron cannot run bash scripts                                 ║
 ║  B) Missing execute permission                                   ║
-║  C) Relative path - cron doesn't know current directory          ║
+║  C) Relative path resolves in /home/user rather than /home/user/scripts          ║
 ║  D) Cron only runs in the morning                                ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -661,11 +665,11 @@ Correct answer: C
 Explanation:
 Cron runs with a minimal environment:
 - Limited PATH
-- HOME may not be set
-- There is no "current directory" in the sense of your session
+- HOME normally comes from the user account on Debian/Ubuntu cron
+- The job has a working directory, but it is not the directory of your interactive session
 
 Solution:
-```bash
+```cron
 # Use absolute paths
 * * * * * /home/user/scripts/backup.sh
 

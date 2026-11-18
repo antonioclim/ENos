@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Guide - Homework Recording</title>
-    <style>
-        :root {
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENos — Homework Recording: Student Guide</title>
+<meta name="generator" content="pandoc 3.1.11.1">
+<meta name="source-sha256" content="739aab4ca08140b7d0244db333b6844c1cc306aee6a7a137c9ecad8209f4c275">
+<style>
+/* Original student-guide visual theme, preserved for reproducible HTML export. */
+:root {
             --bg-primary: #0d1117;
             --bg-secondary: #161b22;
             --bg-tertiary: #21262d;
@@ -157,249 +160,355 @@
                 font-size: 0.85em;
             }
         }
-    </style>
+
+</style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
-<h1 id="user-guide-homework-recording">User Guide - Homework Recording</h1>
-<h2 id="operating-systems-2023-2027">Operating Systems 2023-2027</h2>
-<p><strong>Version:</strong> 1.1.1 | <strong>Last updated:</strong> January 2025</p>
-<hr />
-<h2 id="before-you-begin">🎯 Before You Begin</h2>
-<p><strong>Don't panic!</strong> This process looks complicated at first glance, but:
-- The script does almost everything automatically
-- The most common error (typo in STOP_homework) is fixed in 2 seconds
-- You can re-record as many times as you need</p>
-<p>💪 <strong>85% of students from previous years succeeded on their first attempt.</strong></p>
-<hr />
-<h2 id="recording-process-diagram">🔄 Recording Process Diagram</h2>
-<pre><code>┌─────────────────┐
-│  🚀 Start       │
-│    Script       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐     No       ┌─────────────────┐
-│  Dependencies   ├─────────────►│ 📦 Automatic    │
-│  installed?     │              │ install pip,    │
-└────────┬────────┘              │ asciinema, etc. │
-         │ Yes                   └────────┬────────┘
-         │◄──────────────────────────────┘
-         ▼
-┌─────────────────┐
-│ 📝 Enter        │◄───┐
-│ student data    │    │ Invalid data
-└────────┬────────┘    │
-         │ Data OK     │
-         ▼             │
-┌─────────────────┐    │
-│  Validate       ├────┘
-│  data format    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 💾 Save         │
-│ local config    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 🎬 START        │
-│ Recording       │
-│ asciinema       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ 👨‍💻 Execute      │◄───┐
-│ homework cmds   │    │
-└────────┬────────┘    │ No
-         │             │
-         ▼             │
-┌─────────────────┐    │
-│ STOP_homework?  ├────┘
-└────────┬────────┘
-         │ Yes
-         ▼
-┌─────────────────┐
-│ 🔐 Generate     │
-│ RSA signature   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐     Failed   ┌─────────────────┐
-│ 📤 SCP Upload   ├─────────────►│ Retry (max 3x)  │
-│ to server       │◄─────────────┤ or saved        │
-└────────┬────────┘              │ LOCALLY         │
-         │ Success               └─────────────────┘
-         ▼
-┌─────────────────┐
-│ ✅ SUCCESS!     │
-│ Homework sent   │
-└─────────────────┘
-</code></pre>
+<main>
+<h1 id="user-guide---homework-recording">User Guide - Homework
+Recording</h1>
+<p>This recording workflow requires <strong>asciinema CLI 2.x</strong>,
+which writes asciicast v2. The recorder checks
+<code>asciinema --version</code> before starting. CLI 3.x writes an
+incompatible v3 format and is rejected with an explanation; the scripts
+do not install or downgrade packages. See the <a
+href="https://docs.asciinema.org/manual/asciicast/v2/">official v2</a>
+and <a href="https://docs.asciinema.org/manual/asciicast/v3/">v3</a>
+specifications. Version detection has local regression coverage; native
+terminal recording remains a separate acceptance check.</p>
 <blockquote>
-<p>💡 <strong>From the trenches:</strong> In 2023, a student accidentally typed <code>STOP-homework</code> (with hyphen instead of underscore) and spent 20 minutes wondering why the recording wouldn't stop. The solution? Read the screen carefully — it says <code>STOP_homework</code> with an <strong>underscore</strong>! Since then, I've made the text larger and added Ctrl+D as a backup. Learn from others' mistakes.</p>
+<p><strong>v6 candidate correction:</strong> Follow the <a
+href="RECORDING_CONTRACT.md">current recording contract</a>. Practice
+requires <code>--offline</code>; online configuration and the
+replacement verification protocol remain unresolved. Historical version
+labels below identify the source edition, not a new release.</p>
+</blockquote>
+<p>For an authorised online run, first obtain the host, account, port
+and host-key fingerprint from the service owner through a trusted
+channel. The supplied clients target <code>sop.ase.ro</code>; if the
+confirmed destination differs, the client configuration must be
+reconciled before use. Install only the verified host-key entry in
+<code>known_hosts</code>. The clients use
+<code>StrictHostKeyChecking=yes</code>.</p>
+<p>After the configuration and use of the existing workflow have been
+confirmed, use the current client interface:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">read</span> <span class="at">-r</span> <span class="at">-p</span> <span class="st">&#39;SSH port confirmed by the service owner: &#39;</span> <span class="va">ENOS_CONFIRMED_PORT</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--port</span> <span class="st">&quot;</span><span class="va">$ENOS_CONFIRMED_PORT</span><span class="st">&quot;</span></span></code></pre></div>
+<p>The Bash alternative is
+<code>bash record_homework_EN.sh --port "$ENOS_CONFIRMED_PORT"</code>.
+Both clients validate the supplied port; neither historical port is
+selected by this guide. For local practice, continue to use
+<code>--offline</code>.</p>
+<h2 id="operating-systems-2023-2027">Operating Systems 2023-2027</h2>
+<p><strong>Version:</strong> 1.1.1 | <strong>Last updated:</strong>
+January 2025</p>
+<hr />
+<h2 id="dart-before-you-begin">🎯 Before You Begin</h2>
+<p><strong>Don't panic!</strong> This process looks complicated at first
+glance, but:</p>
+<ul>
+<li>The script records the session and reports the outcome; install
+dependencies and choose the mode explicitly</li>
+<li>A typo in <code>STOP_homework</code> can be corrected; Ctrl+D also
+closes the recorded shell. The historical “most common / 2 seconds”
+claim is unverified</li>
+<li>Local practice can be repeated after preserving the existing file;
+institutional resubmission rules remain pending</li>
+</ul>
+<p>💪 <strong>85% of students from previous years succeeded on their
+first attempt.</strong></p>
+<blockquote>
+<p><strong>Provenance pending author review:</strong> The percentage is
+retained from the source; no denominator, cohort or measurement record
+is established here.</p>
 </blockquote>
 <hr />
-<h2 id="initial-configuration-one-time-only">Initial Configuration (one time only)</h2>
+<h2 id="arrows_counterclockwise-recording-process-diagram">🔄 Recording
+Process Diagram</h2>
+<ol type="1">
+<li>Check prerequisites; report missing commands without installing
+them.</li>
+<li>Enter and validate student data. Save TUI preferences locally.</li>
+<li>Start the terminal recording and execute the homework commands.</li>
+<li>Stop the recorded shell with <code>STOP_homework</code> or
+Ctrl+D.</li>
+<li>Save self-declared identity fields in the asciicast header.</li>
+<li>In <code>--offline</code> mode, retain the local file and stop
+without networking.</li>
+<li>In online mode with a confirmed port, attempt the existing legacy
+metadata token; retain the file on failure.</li>
+<li>Attempt upload up to three times. Report transfer success or failure
+separately from institutional acceptance.</li>
+</ol>
+<blockquote>
+<p><strong>Historical anecdote — provenance pending author
+review.</strong> 💡 <strong>From the trenches:</strong> In 2023, a
+student accidentally typed <code>STOP-homework</code> (with hyphen
+instead of underscore) and spent 20 minutes wondering why the recording
+wouldn't stop. The solution? Read the screen carefully — it says
+<code>STOP_homework</code> with an <strong>underscore</strong>! Since
+then, I've made the text larger and added Ctrl+D as a backup. Learn from
+others' mistakes.</p>
+</blockquote>
+<hr />
+<h2 id="initial-configuration-one-time-only">Initial Configuration (one
+time only)</h2>
 <h3 id="step-1-open-the-terminal">Step 1: Open the terminal</h3>
 <p>On Ubuntu/WSL, open a terminal.</p>
-<p><em>(WSL2 has completely changed the way I teach — now students can practise Linux without dual boot.)</em></p>
+<p><em>(Historical author statement, retained for review: WSL2 has
+completely changed the way I teach — now students can practise Linux
+without dual boot.)</em></p>
 <blockquote>
-<p>🚨 <strong>WARNING!</strong> Use YOUR OWN terminal, installed and configured as your instructor has directed!</p>
+<p>🚨 <strong>WARNING!</strong> Use YOUR OWN terminal, installed and
+configured as your instructor has directed!</p>
 <p>DO NOT connect to sop.ase.ro!</p>
-<p>⚠️ Errors caused by not following this instruction are your responsibility, and homework that is not posted and generated from your personal server will NOT be considered!</p>
+<p>⚠️ Errors caused by not following this instruction are your
+responsibility, the original eligibility rule requires author
+confirmation; the tools do not decide eligibility automatically.</p>
 </blockquote>
 <hr />
-<h3 id="step-2-create-the-homework-directory">Step 2: Create the homework directory</h3>
-<pre><code class="language-bash">mkdir -p ~/HOMEWORKS
-</code></pre>
-<p><strong>You should see:</strong> Nothing (the <code>mkdir -p</code> command is silent on success). This is normal!</p>
+<h3 id="step-2-create-the-homework-directory">Step 2: Create the
+homework directory</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/HOMEWORKS</span></code></pre></div>
+<p><strong>You should see:</strong> Nothing (the <code>mkdir -p</code>
+command is silent on success). This is normal!</p>
 <p>Verify it was created:</p>
-<pre><code class="language-bash">ls -la ~/HOMEWORKS
-</code></pre>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> ~/HOMEWORKS</span></code></pre></div>
 <p><strong>You should see something similar to:</strong></p>
 <pre><code>total 8
 drwxr-xr-x  2 stud stud 4096 Jan 27 10:00 .
-drwxr-xr-x 15 stud stud 4096 Jan 27 09:55 ..
-</code></pre>
-<p>📝 <strong>Note:</strong> The directory is empty for now (only <code>.</code> and <code>..</code>). This is perfectly normal!</p>
-<p>Observation: <code>~</code> represents your home directory (<code>/home/{username}/</code>).</p>
+drwxr-xr-x 15 stud stud 4096 Jan 27 09:55 ..</code></pre>
+<p>📝 <strong>Note:</strong> The directory is empty for now (only
+<code>.</code> and <code>..</code>). This is perfectly normal!</p>
+<p>Observation: <code>~</code> represents your home directory
+(<code>/home/{username}/</code>).</p>
 <hr />
 <h3 id="step-3-download-the-script">Step 3: Download the script</h3>
-<p><strong>Option A: Download from Google Drive (recommended for beginners)</strong></p>
-<ol>
-<li>Open the link in your browser:</li>
-<li>Python TUI (recommended): https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link</li>
-<li>
-<p>Bash (alternative): https://drive.google.com/file/d/1dLXPEtGjLo4f9G0Uojd-YXzY7c3ku1Ez/view?usp=drive_link</p>
-</li>
-<li>
-<p>Click on Download (or the ⬇️ icon)</p>
-</li>
-<li>
-<p>Save the file to your Windows computer</p>
-</li>
+<p><strong>Current source:</strong> use the recorder supplied with this
+checkout.</p>
+<p><strong>Historical Option A: Google Drive distribution (not verified
+as this candidate)</strong></p>
+<ol type="1">
+<li><p>Open the link in your browser:</p>
+<ul>
+<li>Python TUI (recommended): <a
+href="https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link">https://drive.google.com/file/d/1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz/view?usp=drive_link</a></li>
+<li>Bash (alternative): <a
+href="https://drive.google.com/file/d/1dLXPEtGjLo4f9G0Uojd-YXzY7c3ku1Ez/view?usp=drive_link">https://drive.google.com/file/d/1dLXPEtGjLo4f9G0Uojd-YXzY7c3ku1Ez/view?usp=drive_link</a></li>
+</ul></li>
+<li><p>Click on Download (or the ⬇️ icon)</p></li>
+<li><p>Save the file to your Windows computer</p></li>
 </ol>
 <hr />
-<p><strong>Option B: Download directly with wget in terminal</strong></p>
-<pre><code class="language-bash">cd ~/HOMEWORKS
-wget -O record_homework_tui_EN.py &quot;https://drive.google.com/uc?export=download&amp;id=1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz&quot;
-</code></pre>
+<p><strong>Historical Option B: old download example, retained for
+provenance; use the current checkout</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-O</span> record_homework_tui_EN.py <span class="st">&quot;https://drive.google.com/uc?export=download&amp;id=1YLqNamLCdz6OzF6hlcPr1hr738DIaSYz&quot;</span></span></code></pre></div>
 <p><strong>You should see:</strong></p>
 <pre><code>--2025-01-27 10:05:32--  https://drive.google.com/uc?...
 Resolving drive.google.com (drive.google.com)... 142.250.185.78
 Connecting to drive.google.com (drive.google.com)|142.250.185.78|:443... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: 34644 (34K) [application/octet-stream]
-Saving to: 'record_homework_tui_EN.py'
+Saving to: &#39;record_homework_tui_EN.py&#39;
 
 record_homework_tui_EN.py   100%[===================&gt;]  33.83K  --.-KB/s    in 0.02s
 
-2025-01-27 10:05:33 (1.65 MB/s) - 'record_homework_tui_EN.py' saved [34644/34644]
-</code></pre>
-<p>⚠️ <strong>If you see "ERROR 403: Forbidden":</strong> The link may be restricted. Download manually from the browser.</p>
+2025-01-27 10:05:33 (1.65 MB/s) - &#39;record_homework_tui_EN.py&#39; saved [34644/34644]</code></pre>
+<p>⚠️ <strong>If you see "ERROR 403: Forbidden":</strong> The link may
+be restricted. Download manually from the browser.</p>
 <blockquote>
-<p>💡 This method downloads the file directly into the HOMEWORKS folder, without intermediate steps!</p>
+<p>💡 This method downloads the file directly into the HOMEWORKS folder,
+without intermediate steps!</p>
 </blockquote>
 <hr />
 <p><strong>Option C: Copy the script to Ubuntu using WinSCP</strong></p>
-<ol>
+<ol type="1">
 <li>Open WinSCP and connect to your Ubuntu/WSL system</li>
 <li>Navigate to <code>/home/{username}/HOMEWORKS/</code></li>
-<li>Copy the downloaded file (<code>record_homework_tui_EN.py</code>) to this directory</li>
+<li>Copy the downloaded file (<code>record_homework_tui_EN.py</code>) to
+this directory</li>
 </ol>
 <hr />
 <p><strong>Option D: Copy directly in WSL (if using WSL)</strong></p>
-<pre><code class="language-bash">cp /mnt/c/Users/{WindowsName}/Downloads/record_homework_tui_EN.py ~/HOMEWORKS/
-</code></pre>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /mnt/c/Users/{WindowsName}/Downloads/record_homework_tui_EN.py ~/HOMEWORKS/</span></code></pre></div>
 <p><strong>You should see:</strong> Nothing (silent success).</p>
 <p>⚠️ Replace <code>{WindowsName}</code> with your Windows username!</p>
 <p><strong>Verify it worked:</strong></p>
-<pre><code class="language-bash">ls -l ~/HOMEWORKS/
-</code></pre>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/HOMEWORKS/</span></code></pre></div>
 <p><strong>You should see the file listed.</strong></p>
 <hr />
-<h3 id="step-4-make-the-script-executable">Step 4: Make the script executable</h3>
-<pre><code class="language-bash">cd ~/HOMEWORKS
-chmod +x record_homework_tui_EN.py
-</code></pre>
+<h3 id="step-4-make-the-script-executable">Step 4: Make the script
+executable</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x record_homework_tui_EN.py</span></code></pre></div>
 <p><strong>You should see:</strong> Nothing (silent success).</p>
 <p>Verify that the permissions have changed:</p>
-<pre><code class="language-bash">ls -l record_homework_tui_EN.py
-</code></pre>
-<p><strong>You should see <code>x</code> in the permissions:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> record_homework_tui_EN.py</span></code></pre></div>
+<p><strong>You should see <code>x</code> in the
+permissions:</strong></p>
 <pre><code>-rwxr-xr-x 1 stud stud 34644 Jan 27 10:05 record_homework_tui_EN.py
  ^^^
- These 'x' mean &quot;executable&quot;
-</code></pre>
-<p>❌ <strong>If you see <code>-rw-r--r--</code></strong> (without <code>x</code>): The chmod command did not work. 
-Check that you are in the correct directory with <code>pwd</code> — it should show <code>~/HOMEWORKS</code> or <code>/home/{username}/HOMEWORKS</code>.</p>
+ These &#39;x&#39; mean &quot;executable&quot;</code></pre>
+<p>❌ <strong>If you see <code>-rw-r--r--</code></strong> (without
+<code>x</code>): The chmod command did not work. Check that you are in
+the correct directory with <code>pwd</code> — it should show
+<code>~/HOMEWORKS</code> or <code>/home/{username}/HOMEWORKS</code>.</p>
 <hr />
-<h3 id="step-5-verify-the-final-structure">Step 5: Verify the final structure</h3>
-<pre><code class="language-bash">ls -la ~/HOMEWORKS/
-</code></pre>
+<h3 id="step-5-verify-the-final-structure">Step 5: Verify the final
+structure</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> ~/HOMEWORKS/</span></code></pre></div>
 <p><strong>You should see:</strong></p>
 <pre><code>drwxr-xr-x  2 {username} {username} 4096 Jan 21 10:00 .
 drwxr-xr-x 15 {username} {username} 4096 Jan 21 09:55 ..
--rwxr-xr-x  1 {username} {username} 38000 Jan 21 10:00 record_homework_tui_EN.py
-</code></pre>
+-rwxr-xr-x  1 {username} {username} 38000 Jan 21 10:00 record_homework_tui_EN.py</code></pre>
 <p>✅ <strong>If you see something similar, you are ready!</strong></p>
 <hr />
-<h2 id="optional-practice-run-highly-recommended">🧪 Optional: Practice Run (Highly Recommended!)</h2>
-<p>Before recording your real homework, do a test run with fictitious data. This takes 2 minutes and eliminates surprises when it matters.</p>
-<pre><code class="language-bash">cd ~/HOMEWORKS
-./record_homework_tui_EN.py
-</code></pre>
-<p>Enter test data:
-- Surname: <code>TEST</code>
-- First name: <code>Student</code>
-- Group: <code>0000</code>
-- Specialisation: Economic Informatics (English)
-- Homework: <code>01x</code></p>
-<p>Then:
-1. Type a few simple commands (<code>ls</code>, <code>pwd</code>, <code>echo "hello"</code>)
-2. Type <code>STOP_homework</code> (with <strong>underscore</strong>, not hyphen!)
-3. Observe the signature generation
-4. The upload will fail (group 0000 doesn't exist) — that's fine for practice</p>
+<h2 id="test_tube-optional-practice-run-highly-recommended">🧪 Optional:
+Practice Run (Highly Recommended!)</h2>
+<p>Before recording your real homework, do a test run with fictitious
+data. This takes 2 minutes and eliminates surprises when it matters.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--offline</span></span></code></pre></div>
+<p>Enter test data:</p>
+<ul>
+<li>Surname: <code>TEST</code></li>
+<li>First name: <code>Student</code></li>
+<li>Group: <code>0000</code></li>
+<li>Specialisation: Economic Informatics (English)</li>
+<li>Homework: <code>01x</code></li>
+</ul>
+<p>Then:</p>
+<ol type="1">
+<li>Type a few simple commands (<code>ls</code>, <code>pwd</code>,
+<code>echo "hello"</code>)</li>
+<li>Type <code>STOP_homework</code> (with <strong>underscore</strong>,
+not hyphen!)</li>
+<li>Observe the local file being saved; offline mode skips legacy token
+generation</li>
+<li>With <code>--offline</code>, no connection or upload is attempted.
+Group 0000 alone does not disable upload</li>
+</ol>
 <p>Delete the test file afterwards:</p>
-<pre><code class="language-bash">rm 0000_TEST_Student_HW01x.cast
-</code></pre>
-<p><strong>Why practice?</strong> The first time you see the recording interface, signature process and upload can feel overwhelming. A 2-minute practice run builds confidence for the real submission.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> 0000_TEST_Student_HW01x.cast</span></code></pre></div>
+<p><strong>Why practice?</strong> The first time you see the recording
+interface, legacy metadata-token step and upload can feel overwhelming.
+A 2-minute practice run builds confidence for the real submission.</p>
 <hr />
 <h2 id="quick-start-every-time">Quick Start (every time)</h2>
-<h3 id="step-1-enter-the-homeworks-directory">Step 1: Enter the HOMEWORKS directory</h3>
-<pre><code class="language-bash">cd ~/HOMEWORKS
-</code></pre>
-<p><strong>You should see:</strong> Nothing (silent success). The prompt may change the displayed directory.</p>
+<h3 id="step-1-enter-the-homeworks-directory">Step 1: Enter the
+HOMEWORKS directory</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span></code></pre></div>
+<p><strong>You should see:</strong> Nothing (silent success). The prompt
+may change the displayed directory.</p>
 <hr />
 <h3 id="step-2-run-the-script">Step 2: Run the script</h3>
-<pre><code class="language-bash">python3 record_homework_tui_EN.py
-</code></pre>
-<p><strong>You should see:</strong> The "Matrix rain" effect followed by the programme banner.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--offline</span></span></code></pre></div>
+<p><strong>You should see:</strong> The "Matrix rain" effect followed by
+the programme banner.</p>
 <hr />
-<h3 id="step-3-follow-the-on-screen-instructions">Step 3: Follow the on-screen instructions</h3>
+<h3 id="step-3-follow-the-on-screen-instructions">Step 3: Follow the
+on-screen instructions</h3>
 <hr />
-<h2 id="first-use-takes-longer">First Use (Takes Longer!)</h2>
-<p>On the first run, the script will:</p>
-<ol>
-<li>✅ Check and install <code>pip</code> (if missing)</li>
-<li>✅ Install Python libraries: <code>rich</code>, <code>questionary</code></li>
-<li>✅ Install system utilities: <code>asciinema</code>, <code>openssl</code>, <code>sshpass</code></li>
-</ol>
-<p>This process may take 1-3 minutes depending on your internet connection.</p>
-<p><strong>You should see messages similar to:</strong></p>
-<pre><code>⚡ Installing pip...
-✓ pip has been installed!
-
-⚡ Installing Python packages: rich, questionary...
-✓ Python packages have been installed!
-
-⚡ Installing system packages: asciinema, openssl, sshpass...
-✓ System packages have been installed!
-</code></pre>
-<p>Subsequent runs will be instant - nothing more needs to be installed.</p>
+<h2 id="first-use-explicit-dependency-setup">First Use: Explicit
+Dependency Setup</h2>
+<p>Install system packages explicitly in the lab environment, then
+create one Python virtual environment:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/.venvs/enos-recorder</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.venvs/enos-recorder/bin/activate</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> pip install rich questionary</span></code></pre></div>
+<p>Run with <code>python record_homework_tui_EN.py --offline</code>
+while that environment is active. The recorder only checks dependencies;
+it does not modify the OS or install into system Python.</p>
 <hr />
 <h2 id="entering-data">Entering Data</h2>
 <h3 id="surname">Surname</h3>
@@ -419,32 +528,42 @@ drwxr-xr-x 15 {username} {username} 4096 Jan 21 09:55 ..
 <h3 id="group">Group</h3>
 <ul>
 <li>Format: Exactly 4 digits</li>
-<li>Valid examples: <code>1029</code>, <code>1035</code>, <code>1234</code></li>
+<li>Valid examples: <code>1029</code>, <code>1035</code>,
+<code>1234</code></li>
 </ul>
 <h3 id="specialisation">Specialisation</h3>
 <ul>
 <li>Use the up/down arrow keys to navigate</li>
 <li>Press <strong>ENTER</strong> to select</li>
-<li>Options:</li>
+<li>Options:
+<ul>
 <li>Economic Informatics (English)</li>
 <li>ID Group</li>
 <li>Economic Informatics (Romanian)</li>
+</ul></li>
 </ul>
 <h3 id="homework-number">Homework number</h3>
 <ul>
 <li>Format: 01-07 followed by a letter</li>
-<li>Valid examples: <code>01a</code>, <code>03b</code>, <code>07c</code></li>
+<li>Valid examples: <code>01a</code>, <code>03b</code>,
+<code>07c</code></li>
 </ul>
 <hr />
 <h2 id="pre-filled-data">Pre-filled Data</h2>
-<p>After the first use, your data will be saved automatically:
-- Surname
-- First name
-- Group</p>
-<p>On the next run, these fields will be <strong>pre-filled</strong>. You can:
-- Press <strong>ENTER</strong> to keep the previous value
-- Type something else to replace it</p>
-<p>The homework number is not pre-filled (it is different each time).</p>
+<p>After the first use, your data will be saved automatically:</p>
+<ul>
+<li>Surname</li>
+<li>First name</li>
+<li>Group</li>
+</ul>
+<p>On the next run, these fields will be <strong>pre-filled</strong>.
+You can:</p>
+<ul>
+<li>Press <strong>ENTER</strong> to keep the previous value</li>
+<li>Type something else to replace it</li>
+</ul>
+<p>The homework number is not pre-filled (it is different each
+time).</p>
 <hr />
 <h2 id="recording">Recording</h2>
 <h3 id="when-recording-starts">When recording starts:</h3>
@@ -456,40 +575,42 @@ drwxr-xr-x 15 {username} {username} 4096 Jan 21 09:55 ..
 ║                                                                   ║
 ║   or press Ctrl+D                                                 ║
 ║                                                                   ║
-╚═══════════════════════════════════════════════════════════════════╝
-</code></pre>
+╚═══════════════════════════════════════════════════════════════════╝</code></pre>
 <h3 id="what-to-do">What to do:</h3>
-<ol>
+<ol type="1">
 <li>Execute the commands required for your homework</li>
 <li>Clearly show what you are doing and why</li>
 <li>When you have finished, type:</li>
 </ol>
-<pre><code class="language-bash">STOP_homework
-</code></pre>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">STOP_homework</span></span></code></pre></div>
 <p>or press <code>Ctrl+D</code></p>
 <h3 id="tips-for-a-good-recording">Tips for a good recording:</h3>
 <ul>
 <li>✅ Type clearly — rushing leads to typos</li>
-<li>✅ Optionally, comment what you're doing (helps the instructor follow your logic)</li>
+<li>✅ Optionally, comment what you're doing (helps the instructor
+follow your logic)</li>
 <li>✅ Check the results of commands before stopping</li>
-<li>❌ DO NOT delete mistakes — they show you are learning from them</li>
+<li>❌ DO NOT delete mistakes — they show you are learning from
+them</li>
 <li>❌ DO NOT use clear/cls excessively</li>
 </ul>
 <hr />
 <h2 id="upload">Upload</h2>
 <p>After stopping the recording:</p>
-<ol>
-<li>✅ The script generates the cryptographic signature</li>
-<li>✅ Automatically uploads to server (3 attempts)</li>
-<li>✅ Displays the final summary</li>
+<ol type="1">
+<li>Save the local recording and self-declared header metadata.</li>
+<li>In offline mode, stop with no connection or token generation.</li>
+<li>In online mode with a confirmed port, generate the legacy token and
+attempt transfer up to three times. Keep the recording on failure.</li>
 </ol>
 <h3 id="if-the-upload-succeeds">If the upload succeeds:</h3>
 <pre><code>╔═══════════════════════════════════════════════════════════════════╗
 ║                     ✅ UPLOAD SUCCESSFUL!                         ║
-╚═══════════════════════════════════════════════════════════════════╝
-</code></pre>
+╚═══════════════════════════════════════════════════════════════════╝</code></pre>
 <h3 id="if-the-upload-fails">If the upload fails:</h3>
-<p>The file is saved locally and you will see a message with the command for manual submission:</p>
+<p>The file is saved locally and you will see a message with the command
+for manual submission:</p>
 <pre><code>╔═════════════════════════════════════════════════════════════════════════╗
 ║                          Submission Failed                              ║
 ╠═════════════════════════════════════════════════════════════════════════╣
@@ -506,314 +627,447 @@ drwxr-xr-x 15 {username} {username} 4096 Jan 21 09:55 ..
 ║                                                                         ║
 ║   Try later (when you restore connection) using:                        ║
 ║                                                                         ║
-║   scp -P 1001 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
+║   scp -P &quot;$ENOS_CONFIRMED_PORT&quot; 1029_SMITH_John_HW03b.cast stud-id@sop.ase.ro:/home...    ║
 ║                                                                         ║
 ║   ⚠️  DO NOT modify the .cast file before submission!                   ║
 ║                                                                         ║
-╚═════════════════════════════════════════════════════════════════════════╝
-</code></pre>
-<p>Remember:
-- ⚠️ DO NOT modify the <code>.cast</code> file - the signature becomes invalid!
-- 📋 Copy the displayed command and run it when you have internet
-- 🔄 You can try as many times as needed</p>
+╚═════════════════════════════════════════════════════════════════════════╝</code></pre>
+<p>Remember:</p>
+<ul>
+<li>⚠️ Preserve the original <code>.cast</code> as evidence; the legacy
+token does not detect every modification.</li>
+<li>📋 The screen above is an illustration with a truncated destination.
+Use only the actual file, account and destination confirmed for your
+submission, the confirmed port and
+<code>-o StrictHostKeyChecking=yes</code>; retain the local recording if
+verification or transfer fails</li>
+<li>🔄 You can repeat local practice after preserving the previous
+recording; this does not establish an institutional resubmission
+right</li>
+</ul>
 <hr />
-<h2 id="verify-before-sending">✅ Verify Before Sending</h2>
+<h2 id="white_check_mark-verify-before-sending">✅ Verify Before
+Sending</h2>
 <p>Use our verification script to check your submission:</p>
-<pre><code class="language-bash">./check_my_submission.sh 1029_SMITH_John_HW03b.cast
-</code></pre>
-<p>This checks file size, signature presence, filename format and more. Fix any errors before attempting manual upload.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./check_my_submission.sh</span> 1029_SMITH_John_HW03b.cast</span></code></pre></div>
+<p>This parses the supported header/events and footer syntax. Exit 0
+reports valid structure, while authentication remains UNVERIFIED and
+submission readiness UNCONFIRMED.</p>
 <hr />
 <h2 id="generated-file">Generated File</h2>
 <h3 id="location">Location:</h3>
-<p>The <code>.cast</code> file is saved in the current directory (i.e. <code>~/HOMEWORKS/</code> if you followed the configuration steps).</p>
-<pre><code>/home/{username}/HOMEWORKS/1029_SMITH_John_HW03b.cast
-</code></pre>
+<p>The <code>.cast</code> file is saved in the current directory (i.e.
+<code>~/HOMEWORKS/</code> if you followed the configuration steps).</p>
+<pre><code>/home/{username}/HOMEWORKS/1029_SMITH_John_HW03b.cast</code></pre>
 <h3 id="file-name">File name:</h3>
-<pre><code>[GROUP]_[SURNAME]_[FirstName]_HW[Number].cast
-</code></pre>
+<pre><code>[GROUP]_[SURNAME]_[FirstName]_HW[Number].cast</code></pre>
 <p>Example: <code>1029_SMITH_John_HW03b.cast</code></p>
 <h3 id="contents">Contents:</h3>
 <ul>
 <li>The complete recording of the terminal session</li>
-<li>The cryptographic signature (for authenticity verification)</li>
+<li>The legacy metadata token in online mode (authenticity remains
+unverified)</li>
 </ul>
 <hr />
-<h2 id="frequently-asked-questions-faq">❓ Frequently Asked Questions (FAQ)</h2>
+<h2 id="question-frequently-asked-questions-faq">❓ Frequently Asked
+Questions (FAQ)</h2>
 <h3 id="general">General</h3>
-<p><strong>Q: Why must I use my own terminal and not the sop.ase.ro server?</strong></p>
-<p>A: The asciinema recording captures ALL terminal activity. On the server, your activity would mix with other students' and the resulting file would be unusable. Additionally, the cryptographic signature is based on the LOCAL user.</p>
+<p><strong>Q: Why must I use my own terminal and not the sop.ase.ro
+server?</strong></p>
+<p>A: Asciicast v2 records its associated pseudoterminal stream and
+timing. Ordinary text recording does not capture unrelated sessions or
+ambient audio. Use your own configured lab environment so that commands
+and files belong to the intended exercise; the metadata labels do not
+authenticate the user.</p>
 <blockquote>
-<p><em>A former student once ran the script on the shared server. The resulting 47-minute recording included three other students' work, a coffee break conversation and someone's Spotify playlist playing in the background. Don't be that student.</em></p>
+<p><strong>Historical anecdote — capture context and provenance
+unconfirmed. Standard asciicast does not record audio or unrelated
+sessions.</strong> <em>A former student once ran the script on the
+shared server. The resulting 47-minute recording included three other
+students' work, a coffee break conversation and someone's Spotify
+playlist playing in the background. Don't be that student.</em></p>
 </blockquote>
 <hr />
-<p><strong>Q: Can I use a different terminal than the default (Windows Terminal, iTerm2)?</strong></p>
-<p>A: Yes, any terminal that supports ANSI sequences will work. Recommendations:
-- Windows: Windows Terminal (pre-installed on Windows 11)
-- macOS: iTerm2 or Terminal.app
-- Linux: GNOME Terminal, Konsole, Alacritty</p>
+<p><strong>Q: Can I use a different terminal than the default (Windows
+Terminal, iTerm2)?</strong></p>
+<p>A: Yes, any terminal that supports ANSI sequences will work.
+Recommendations:</p>
+<ul>
+<li>Windows: Windows Terminal (pre-installed on Windows 11)</li>
+<li>macOS: iTerm2 or Terminal.app</li>
+<li>Linux: GNOME Terminal, Konsole, Alacritty</li>
+</ul>
 <hr />
-<p><strong>Q: What happens if I accidentally closed the terminal during recording?</strong></p>
-<p>A: The recording stops automatically and the partial file is saved. You can:
-1. Check if the .cast file exists: <code>ls -la ~/HOMEWORKS/*.cast</code>
-2. If it is too short, delete it and start again: <code>rm ~/HOMEWORKS/...cast</code>
-3. Run the script again</p>
+<p><strong>Q: What happens if I accidentally closed the terminal during
+recording?</strong></p>
+<p>A: The recording stops automatically and the partial file is saved.
+You can:</p>
+<ol type="1">
+<li>Check if the .cast file exists:
+<code>ls -la ~/HOMEWORKS/*.cast</code></li>
+<li>If it is too short, delete it and start again:
+<code>rm ~/HOMEWORKS/...cast</code></li>
+<li>Run the script again</li>
+</ol>
 <hr />
 <p><strong>Q: Can I edit the .cast file after recording?</strong></p>
-<p>A: <strong>NO!</strong> Any modification invalidates the cryptographic signature and the homework will be automatically rejected. If you made a mistake, delete the file and re-record.</p>
+<p>A: The existing public-key-encrypted metadata token is not a digital
+signature and does not bind the recording content. It cannot establish
+authorship, non-repudiation or detect every edit. Preserve the original
+recording; the institutional verification and resubmission contract
+remains pending author decision.</p>
 <hr />
 <p><strong>Q: How can I verify that the signature is valid?</strong></p>
-<p>A: You cannot verify it yourself - only the instructor has the private key. But you can verify that the signature EXISTS:</p>
-<pre><code class="language-bash">tail -5 ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast
-# The last line should start with &quot;## &quot; followed by Base64
-</code></pre>
+<p>A: The current format is public-key encryption of metadata, not a
+digital signature. A syntax check cannot authenticate it; the
+replacement protocol remains an author decision. You may inspect the
+footer:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-5</span> ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The last line should start with &quot;## &quot; followed by Base64</span></span></code></pre></div>
 <p>Or use our verification script:</p>
-<pre><code class="language-bash">./check_my_submission.sh your_homework.cast
-</code></pre>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./check_my_submission.sh</span> your_homework.cast</span></code></pre></div>
 <hr />
-<h2 id="common-problems-troubleshooting">🔧 Common Problems (Troubleshooting)</h2>
+<h2 id="wrench-common-problems-troubleshooting">🔧 Common Problems
+(Troubleshooting)</h2>
 <h3 id="installation-problems">Installation Problems</h3>
-<h4 id="1-permission-denied-during-installation">1. "Permission denied" during installation</h4>
-<pre><code class="language-bash"># Make sure you are in the HOMEWORKS directory
-cd ~/HOMEWORKS
-
-# Run with sudo the first time (for installing dependencies)
-sudo python3 record_homework_tui_EN.py
-</code></pre>
-<p><strong>You should see:</strong> The dependency installation process, followed by the normal interface.</p>
+<h4 id="1-permission-denied-during-installation">1. "Permission denied"
+during installation</h4>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure you are in the HOMEWORKS directory</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> record_homework_tui_EN.py <span class="at">--offline</span></span></code></pre></div>
+<p><strong>You should see:</strong> Dependency checks followed by the
+interface, if all prerequisites are available.</p>
 <hr />
-<h4 id="2-e-unable-to-locate-package-asciinema">2. "E: Unable to locate package asciinema"</h4>
+<h4 id="2-e-unable-to-locate-package-asciinema">2. "E: Unable to locate
+package asciinema"</h4>
 <p>The apt repositories are not updated. Run:</p>
-<pre><code class="language-bash">sudo apt update
-sudo apt install asciinema
-</code></pre>
-<p><strong>You should see:</strong> The updated package list, then the asciinema installation.</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install asciinema</span></code></pre></div>
+<p><strong>You should see:</strong> The updated package list, then the
+asciinema installation.</p>
 <p>If it still does not work, add the official PPA:</p>
-<pre><code class="language-bash">sudo apt-add-repository ppa:zanchey/asciinema
-sudo apt update
-sudo apt install asciinema
-</code></pre>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-add-repository ppa:zanchey/asciinema</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install asciinema</span></code></pre></div>
 <hr />
-<h4 id="3-pip-install-fails-with-externally-managed-environment">3. pip install fails with "externally-managed-environment"</h4>
+<h4 id="3-pip-install-fails-with-externally-managed-environment">3. pip
+install fails with "externally-managed-environment"</h4>
 <p>On Ubuntu 23.04+ and Debian 12+, the system protects Python packages.
-Our script handles this case automatically, but if you install manually:</p>
-<pre><code class="language-bash">pip install --user --break-system-packages rich questionary
-</code></pre>
+Use a dedicated virtual environment:</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/.venvs/enos-recorder</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.venvs/enos-recorder/bin/activate</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> pip install rich questionary</span></code></pre></div>
 <hr />
-<h4 id="4-sudo-apt-command-not-found">4. "sudo: apt: command not found"</h4>
-<p><strong>Cause:</strong> You are not on a Debian/Ubuntu distribution.</p>
+<h4 id="4-sudo-apt-command-not-found">4. "sudo: apt: command not
+found"</h4>
+<p><strong>Cause:</strong> You are not on a Debian/Ubuntu
+distribution.</p>
 <p><strong>Solution:</strong> If you are using Fedora/RHEL:</p>
-<pre><code class="language-bash">sudo dnf install asciinema openssl sshpass
-</code></pre>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dnf install asciinema openssl sshpass</span></code></pre></div>
 <p>For Arch:</p>
-<pre><code class="language-bash">sudo pacman -S asciinema openssl sshpass
-</code></pre>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pacman <span class="at">-S</span> asciinema openssl sshpass</span></code></pre></div>
 <hr />
-<h4 id="5-python3-command-not-found">5. "python3: command not found"</h4>
-<p><strong>Cause:</strong> Python is not installed or is not in PATH.</p>
+<h4 id="5-python3-command-not-found">5. "python3: command not
+found"</h4>
+<p><strong>Cause:</strong> Python is not installed or is not in
+PATH.</p>
 <p><strong>Solution:</strong></p>
-<pre><code class="language-bash"># Check if it exists under another name:
-python --version
-
-# If it works, create a symlink:
-sudo ln -s $(which python) /usr/local/bin/python3
-
-# If it does not exist at all:
-sudo apt install python3
-</code></pre>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install python3 python3-venv</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">--version</span></span></code></pre></div>
 <hr />
-<h4 id="6-wsl-chmod-cannot-access-record_homework_tui_enpy-no-such-file">6. WSL: "chmod: cannot access 'record_homework_tui_EN.py': No such file"</h4>
+<h4
+id="6-wsl-chmod-cannot-access-record_homework_tui_enpy-no-such-file">6.
+WSL: "chmod: cannot access 'record_homework_tui_EN.py': No such
+file"</h4>
 <p><strong>Cause:</strong> The file is not in the current directory.</p>
 <p><strong>Solution:</strong></p>
-<pre><code class="language-bash"># Check where you are:
-pwd
-# You should see: /home/YOURNAME/HOMEWORKS
-
-# If not, navigate:
-cd ~/HOMEWORKS
-
-# Check the contents:
-ls -la
-</code></pre>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check where you are:</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="bu">pwd</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You should see: /home/YOURNAME/HOMEWORKS</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If not, navigate:</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/HOMEWORKS</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the contents:</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span></span></code></pre></div>
 <hr />
 <h3 id="running-problems">Running Problems</h3>
-<h4 id="7-rich-or-questionary-import-error-after-installation">7. "rich" or "questionary" import error after installation</h4>
-<p><strong>Cause:</strong> pip installed in user site-packages, but Python cannot find it.</p>
+<h4 id="7-rich-or-questionary-import-error-after-installation">7. "rich"
+or "questionary" import error after installation</h4>
+<p><strong>Cause:</strong> pip installed in user site-packages, but
+Python cannot find it.</p>
 <p><strong>Solution:</strong></p>
-<pre><code class="language-bash"># Check where it was installed:
-python3 -m pip show rich | grep Location
-
-# Add to PYTHONPATH (temporary):
-export PYTHONPATH=&quot;$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH&quot;
-
-# Or reinstall globally (requires sudo):
-sudo pip3 install rich questionary
-</code></pre>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/.venvs/enos-recorder</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.venvs/enos-recorder/bin/activate</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> pip install rich questionary</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">&quot;import rich, questionary; print(&#39;OK&#39;)&quot;</span></span></code></pre></div>
 <hr />
-<h4 id="8-the-matrix-rain-screen-is-broken-strange-characters">8. The "Matrix rain" screen is broken (strange characters)</h4>
-<p><strong>Cause:</strong> The terminal does not support Japanese Unicode characters.</p>
-<p><strong>Solution:</strong> Set the terminal font to one that supports Unicode:
-- Windows Terminal: "Cascadia Code" or "Consolas"
-- VS Code terminal: "Fira Code" or "JetBrains Mono"</p>
+<h4 id="8-the-matrix-rain-screen-is-broken-strange-characters">8. The
+"Matrix rain" screen is broken (strange characters)</h4>
+<p><strong>Cause:</strong> The terminal does not support Japanese
+Unicode characters.</p>
+<p><strong>Solution:</strong> Set the terminal font to one that supports
+Unicode:</p>
+<ul>
+<li>Windows Terminal: "Cascadia Code" or "Consolas"</li>
+<li>VS Code terminal: "Fira Code" or "JetBrains Mono"</li>
+</ul>
 <p>Alternatively, use the Bash version (without Matrix effects):</p>
-<pre><code class="language-bash">./record_homework_EN.sh
-</code></pre>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> record_homework_EN.sh <span class="at">--offline</span></span></code></pre></div>
 <hr />
-<h4 id="9-colours-do-not-appear-everything-is-blackwhite">9. Colours do not appear (everything is black/white)</h4>
-<p><strong>Cause:</strong> The terminal does not support 256 colours or ANSI is disabled.</p>
+<h4 id="9-colours-do-not-appear-everything-is-blackwhite">9. Colours do
+not appear (everything is black/white)</h4>
+<p><strong>Cause:</strong> The terminal does not support 256 colours or
+ANSI is disabled.</p>
 <p><strong>Solution:</strong></p>
-<pre><code class="language-bash"># Check colour support:
-echo $TERM
-# You should see: xterm-256color
-
-# If you see something else (e.g.: &quot;dumb&quot;):
-export TERM=xterm-256color
-# Add to ~/.bashrc for permanence
-</code></pre>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check colour support:</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$TERM</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You should see: xterm-256color</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If you see something else (e.g.: &quot;dumb&quot;):</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">TERM</span><span class="op">=</span>xterm-256color</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Add to ~/.bashrc for permanence</span></span></code></pre></div>
 <hr />
 <h3 id="recording-problems">Recording Problems</h3>
-<h4 id="10-recording-does-not-stop-when-i-type-stop_homework">10. Recording does not stop when I type STOP_homework</h4>
-<p><strong>Cause:</strong> <code>STOP_homework</code> is an alias defined in the recording session.</p>
-<p>Possible causes:
-1. You typed in a different terminal (it must be THE ONE where the recording is running)
-2. You wrote <code>stop_homework</code> (case-sensitive!)
-3. You wrote <code>STOP-homework</code> (with hyphen instead of underscore!)
-4. You have extra spaces</p>
-<p><strong>Alternative solution:</strong> Press <code>Ctrl+D</code> (end of file)</p>
+<h4 id="10-recording-does-not-stop-when-i-type-stop_homework">10.
+Recording does not stop when I type STOP_homework</h4>
+<p><strong>Cause:</strong> <code>STOP_homework</code> is an alias
+defined in the recording session.</p>
+<p>Possible causes:</p>
+<ol type="1">
+<li>You typed in a different terminal (it must be THE ONE where the
+recording is running)</li>
+<li>You wrote <code>stop_homework</code> (case-sensitive!)</li>
+<li>You wrote <code>STOP-homework</code> (with hyphen instead of
+underscore!)</li>
+<li>You have extra spaces</li>
+</ol>
+<p><strong>Alternative solution:</strong> Press <code>Ctrl+D</code> (end
+of file)</p>
 <blockquote>
 <p>Honestly, this catches someone every semester. You're not alone.</p>
 </blockquote>
 <hr />
-<h4 id="11-the-cast-file-is-empty-or-very-small-under-1kb">11. The .cast file is empty or very small (under 1KB)</h4>
+<h4 id="11-the-cast-file-is-empty-or-very-small-under-1kb">11. The .cast
+file is empty or very small (under 1KB)</h4>
 <p><strong>Cause:</strong> The recording stopped prematurely.</p>
-<p>Causes:
-1. You pressed Ctrl+C instead of Ctrl+D
-2. The shell crashed
-3. Error during asciinema initialisation</p>
+<p>Causes:</p>
+<ol type="1">
+<li>You pressed Ctrl+C instead of Ctrl+D</li>
+<li>The shell crashed</li>
+<li>Error during asciinema initialisation</li>
+</ol>
 <p><strong>Solution:</strong> Check with:</p>
-<pre><code class="language-bash">cat ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast | head -20
-# You should see valid JSON
-</code></pre>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/HOMEWORKS/GROUP_SURNAME_FirstName_HWxx.cast <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># You should see valid JSON</span></span></code></pre></div>
 <hr />
-<h4 id="12-i-made-a-mistake-with-a-command-and-want-to-redo-it">12. I made a mistake with a command and want to redo it</h4>
-<p><strong>Solution:</strong> DO NOT stop the recording! Mistakes are OK and show the learning process. Simply:
-1. Press up arrow to edit the previous command
-2. Or type the correct command</p>
-<p>⚠️ <strong>DO NOT use <code>clear</code></strong> — it erases the visual history needed for evaluation.</p>
+<h4 id="12-i-made-a-mistake-with-a-command-and-want-to-redo-it">12. I
+made a mistake with a command and want to redo it</h4>
+<p><strong>Solution:</strong> DO NOT stop the recording! Mistakes are OK
+and show the learning process. Simply:</p>
+<ol type="1">
+<li>Press up arrow to edit the previous command</li>
+<li>Or type the correct command</li>
+</ol>
+<p>⚠️ <strong>DO NOT use <code>clear</code></strong> — it clears the
+current display but leaves earlier recording events intact; keep the
+demonstration easy to follow.</p>
 <hr />
-<h4 id="13-i-want-to-pause-during-the-recording">13. I want to pause during the recording</h4>
+<h4 id="13-i-want-to-pause-during-the-recording">13. I want to pause
+during the recording</h4>
 <p><strong>Info:</strong> Asciinema also records idle time.</p>
-<p><strong>Solution:</strong> You can pause, but:
-- During playback a long pause will be visible
-- The instructor can speed up playback, so it is not a problem
-- If the pause is VERY long (hours), it is better to stop and restart</p>
+<p><strong>Solution:</strong> You can pause, but:</p>
+<ul>
+<li>During playback a long pause will be visible</li>
+<li>The instructor can speed up playback, so it is not a problem</li>
+<li>If the pause is VERY long (hours), it is better to stop and
+restart</li>
+</ul>
 <hr />
-<h3 id="network-upload-problems">Network / Upload Problems</h3>
-<h4 id="14-connection-refused-during-upload">14. "Connection refused" during upload</h4>
-<p><strong>Possible causes:</strong>
-- You are not connected to the internet
-- The server is temporarily unavailable
-- You are on a restricted network</p>
-<p><strong>Solution:</strong> The file is saved locally. Try later or contact the instructor.</p>
+<h3 id="network--upload-problems">Network / Upload Problems</h3>
+<h4 id="14-connection-refused-during-upload">14. "Connection refused"
+during upload</h4>
+<p><strong>Possible causes:</strong></p>
+<ul>
+<li>You are not connected to the internet</li>
+<li>The server is temporarily unavailable</li>
+<li>You are on a restricted network</li>
+</ul>
+<p><strong>Solution:</strong> The file is saved locally. Try later or
+contact the instructor.</p>
 <hr />
 <h4 id="15-connection-timed-out">15. "Connection timed out"</h4>
-<p><strong>Cause:</strong> The sop.ase.ro server uses port 1001 (not standard 22). </p>
-<p>Possible causes:
-1. Firewall blocks port 1001 (common in corporate networks)
-2. Active VPN that does not route correctly
-3. Server temporarily unavailable</p>
+<p><strong>Configuration pending:</strong> Historical copies use 1001
+and 1002. Confirm the port through the service owner; neither number is
+established as the current service configuration.</p>
+<p>Possible causes:</p>
+<ol type="1">
+<li>The confirmed service port is unreachable on the approved network
+route</li>
+<li>Active VPN that does not route correctly</li>
+<li>Server temporarily unavailable</li>
+</ol>
 <p><strong>Solution:</strong></p>
-<pre><code class="language-bash"># Test connectivity:
-nc -zv sop.ase.ro 1001
-
-# If you are on VPN, disconnect temporarily
-# If you are on a restricted network, use mobile hotspot
-</code></pre>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Only when a service-owner-authorised connectivity check is appropriate:</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="bu">:</span> <span class="st">&quot;</span><span class="va">${ENOS_CONFIRMED_PORT</span><span class="op">:?</span>Set the SSH port confirmed by the service owner<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="ex">nc</span> <span class="at">-zv</span> sop.ase.ro <span class="st">&quot;</span><span class="va">$ENOS_CONFIRMED_PORT</span><span class="st">&quot;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the approved network route; do not disable protective controls to bypass a restriction.</span></span></code></pre></div>
 <hr />
-<h4 id="16-host-key-verification-failed">16. "Host key verification failed"</h4>
-<p><strong>Cause:</strong> The server's SSH key has changed or it is the first connection.</p>
-<p><strong>Note:</strong> The script uses <code>-o StrictHostKeyChecking=no</code> so you should NOT see this error. If it still appears:</p>
-<pre><code class="language-bash">ssh-keygen -R sop.ase.ro
-# Then run the script again
-</code></pre>
-<hr />
-<h4 id="17-permission-denied-during-upload-but-connection-works">17. "Permission denied" during upload (but connection works)</h4>
-<p><strong>Cause:</strong> The destination directory does not exist or you do not have permissions.</p>
-<p><strong>Solution:</strong> This is a server problem. Contact the instructor with:
-- Selected specialisation: [eninfo/grupeid/roinfo]
-- The exact error message
-- Output of the command: <code>sshpass -p stud ssh -p 1001 stud-id@sop.ase.ro "ls -la /home/HOMEWORKS/"</code></p>
-<hr />
-<h3 id="other-problems">Other Problems</h3>
-<h4 id="18-the-script-does-not-start-at-all">18. The script does not start at all</h4>
-<pre><code class="language-bash"># Check the Python version
-python3 --version
-# Must be Python 3.8 or newer
-
-# Check that the script exists and is executable
-ls -l ~/HOMEWORKS/record_homework_tui_EN.py
-</code></pre>
-<hr />
-<h4 id="19-i-entered-the-wrong-data">19. I entered the wrong data</h4>
-<p>Run the script again and enter the correct data. The previous file will be overwritten.</p>
-<hr />
-<h4 id="20-the-recording-includes-the-script-prompt-too-not-just-my-commands">20. The recording includes the script prompt too (not just my commands)</h4>
-<p><strong>Note:</strong> This is all intentional! The instructor sees the complete context. Asciinema captures everything that happens in the terminal, including script messages. This helps verify authenticity.</p>
-<hr />
-<h2 id="about-the-cryptographic-signature">About the Cryptographic Signature</h2>
-<p>Each recording is digitally signed with RSA. This guarantees:</p>
-<ul>
-<li>✅ <strong>Authenticity</strong> - the instructor can verify that you created the file</li>
-<li>✅ <strong>Integrity</strong> - the file cannot be modified after signing</li>
-<li>✅ <strong>Non-repudiation</strong> - you cannot deny that you sent the homework</li>
-<li>Always check the result before continuing</li>
-</ul>
-<p><strong>You CANNOT forge another student's signature!</strong></p>
-<hr />
-<h2 id="tips-for-success">✨ Tips for Success</h2>
-<ol>
-<li><strong>Read the ENTIRE guide</strong> before your first attempt (15 minutes)</li>
-<li><strong>Do a practice run</strong> with fictitious data (see section above)</li>
-<li><strong>Prepare your commands</strong> in another document before recording</li>
-<li><strong>Test commands</strong> individually before the final recording</li>
-<li><strong>Verify your submission</strong> with <code>check_my_submission.sh</code> before manual upload</li>
+<h4 id="16-host-key-verification-failed">16. "Host key verification
+failed"</h4>
+<p><strong>Meaning:</strong> The client cannot match the server key to a
+trusted entry, or the presented key differs from the stored entry. The
+current clients use <code>StrictHostKeyChecking=yes</code>; a first
+connection or changed key can therefore stop the transfer.</p>
+<ol type="1">
+<li>Retain the local recording and stop the online attempt.</li>
+<li>Confirm the exact host, port and host-key fingerprint with the
+service owner through a trusted channel, independent of the failing
+connection.</li>
+<li>Add or replace only the specifically verified
+<code>known_hosts</code> entry using the service owner's procedure. Do
+not disable host-key checking or delete entries merely to suppress the
+warning.</li>
+<li>Retry only after the entry and destination have been verified. Use
+<code>--offline</code> for further local practice while this remains
+unresolved.</li>
 </ol>
 <hr />
-<h2 id="you-did-it">🏆 You Did It!</h2>
-<p>If you have reached this point and successfully submitted your homework — <strong>congratulations</strong>! </p>
-<p>You have just used:
-- 🐧 <strong>Shell scripting</strong> in Linux
-- 🔐 <strong>Asymmetric cryptography</strong> (RSA)
-- 🌐 <strong>Secure file transfer</strong> (SCP)
-- 📹 <strong>Terminal recording</strong> (asciinema)</p>
-<p>These are real skills used daily by system administrators and DevOps engineers. <strong>You are on the right track!</strong></p>
+<h4 id="17-permission-denied-during-upload-but-connection-works">17.
+"Permission denied" during upload (but connection works)</h4>
+<p><strong>Cause:</strong> The destination directory does not exist or
+you do not have permissions.</p>
+<p><strong>Solution:</strong> This is a server problem. Contact the
+instructor with:</p>
+<ul>
+<li>Selected specialisation: [eninfo/grupeid/roinfo]</li>
+<li>The exact error message</li>
+<li>The confirmed host, port, account and destination, with passwords,
+private keys and other credentials omitted. A remote diagnostic command
+requires the service owner's instructions; the historical shared
+password and fixed-port command are not a current diagnostic
+procedure</li>
+</ul>
+<hr />
+<h3 id="other-problems">Other Problems</h3>
+<h4 id="18-the-script-does-not-start-at-all">18. The script does not
+start at all</h4>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the Python version</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">--version</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Must be Python 3.8 or newer</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the script exists and is executable</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/HOMEWORKS/record_homework_tui_EN.py</span></code></pre></div>
+<hr />
+<h4 id="19-i-entered-the-wrong-data">19. I entered the wrong data</h4>
+<p>Run the script again and enter the correct data. Keep the previous
+file as evidence and move it aside deliberately before reusing the same
+name.</p>
+<hr />
+<h4
+id="20-the-recording-includes-the-script-prompt-too-not-just-my-commands">20.
+The recording includes the script prompt too (not just my commands)</h4>
+<p><strong>Note:</strong> This is all intentional! The instructor sees
+the complete context. Asciinema captures the recorded pseudoterminal
+stream during the session. Prompts can aid interpretation but do not
+prove authenticity.</p>
+<hr />
+<h2 id="about-the-legacy-metadata-token">About the Legacy Metadata
+Token</h2>
+<p>Online mode retains public-key encryption of metadata. The following
+intended properties are <strong>not</strong> established:</p>
+<ul>
+<li><strong>Authenticity:</strong> self-declared labels do not prove who
+created the file</li>
+<li><strong>Integrity:</strong> the legacy payload is not bound to the
+event content</li>
+<li><strong>Non-repudiation:</strong> no supported proof is established
+by this token</li>
+<li>Always check the result before continuing</li>
+</ul>
+<p><strong>This legacy format does not prove authenticity or prevent
+forgery.</strong></p>
+<hr />
+<h2 id="sparkles-tips-for-success">✨ Tips for Success</h2>
+<ol type="1">
+<li><strong>Read the ENTIRE guide</strong> before your first attempt (15
+minutes)</li>
+<li><strong>Do a practice run</strong> with fictitious data (see section
+above)</li>
+<li><strong>Prepare your commands</strong> in another document before
+recording</li>
+<li><strong>Test commands</strong> individually before the final
+recording</li>
+<li><strong>Verify your submission</strong> with
+<code>check_my_submission.sh</code> before manual upload</li>
+</ol>
+<hr />
+<h2 id="trophy-you-did-it">🏆 You Did It!</h2>
+<p>If you have reached this point and successfully submitted your
+homework — <strong>congratulations</strong>!</p>
+<p>You have just used:</p>
+<ul>
+<li>🐧 <strong>Shell scripting</strong> in Linux</li>
+<li>🔐 <strong>Asymmetric cryptography</strong> (RSA)</li>
+<li>🌐 <strong>Secure file transfer</strong> (SCP)</li>
+<li>📹 <strong>Terminal recording</strong> (asciinema)</li>
+</ul>
+<p>These are real skills used daily by system administrators and DevOps
+engineers. <strong>You are on the right track!</strong></p>
 <hr />
 <h2 id="support">Support</h2>
 <p>For technical problems, follow this escalation path:</p>
-<ol>
-<li><strong>Self-help first:</strong></li>
-<li>Run <code>./check_my_submission.sh</code> to diagnose problems</li>
+<ol type="1">
+<li><p><strong>Self-help first:</strong></p>
+<ul>
+<li>Run
+<code>bash check_my_submission.sh path/to/your_recording.cast</code> to
+inspect the local format</li>
 <li>Check the FAQ section above</li>
 <li>Check the Troubleshooting section</li>
-<li>
-<p>Verify you have the latest version of the script</p>
-</li>
-<li>
-<p><strong>Peer support:</strong></p>
-</li>
+<li>Verify you have the latest version of the script</li>
+</ul></li>
+<li><p><strong>Peer support:</strong></p>
+<ul>
 <li>Ask a colleague who has already submitted successfully</li>
-<li>
-<p>Check the course forum/Teams channel (if available)</p>
-</li>
-<li>
-<p><strong>Instructor contact:</strong></p>
-</li>
+<li>Check the course forum/Teams channel (if available)</li>
+</ul></li>
+<li><p><strong>Instructor contact:</strong></p>
+<ul>
 <li>Contact your lab instructor during office hours</li>
-<li>Email with subject line: <code>[OS Homework] Brief description of problem</code></li>
+<li>Email with subject line:
+<code>[OS Homework] Brief description of problem</code></li>
 <li>Include: your group, the exact error message, what you tried</li>
+</ul></li>
 </ol>
-<p><strong>Response times:</strong> Lab instructors typically respond within 24-48 hours during term time. For urgent issues before deadlines, use office hours.</p>
+<p><strong>Unconfirmed historical response-time claim (author review
+required):</strong> Lab instructors typically respond within 24-48 hours
+during term time. For urgent issues before deadlines, use office
+hours.</p>
 <hr />
 <p><em>Operating Systems 2023-2027 - ASE Bucharest</em>
 <em>Documentation version: 1.1.1</em></p>
+
+</main>
 </body>
 </html>

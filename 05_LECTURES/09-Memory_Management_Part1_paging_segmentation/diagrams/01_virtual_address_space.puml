@@ -1,7 +1,7 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml virtual_address_space
-!include ../../diagrams_common/skin.puml
-title Virtual Address Space (64-bit Linux)
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Virtual Address Space — Linux x86-64, four-level / 48-bit address example
 
 skinparam rectangle {
     roundCorner 3
@@ -9,36 +9,34 @@ skinparam rectangle {
 
 rectangle "**VIRTUAL ADDRESS SPACE**" as vas #FAFAFA {
     
-    rectangle "0xFFFFFFFF...\n**KERNEL SPACE**\n~128 TB" as kernel #FFE0B2 {
-        note right
+    rectangle "0xFFFFFFFFFFFFFFFF\n**KERNEL SPACE**\n128 TiB" as kernel #FFE0B2 {
+        note as kernel_contents
         • Kernel code
         • Drivers
         • Page tables
         end note
     }
     
-    rectangle "**NON-CANONICAL GAP**\n(invalid addresses)\nAccess → SEGFAULT" as gap #FFCDD2
+    rectangle "**NON-CANONICAL GAP**\n(invalid addresses)\nInvalid canonical-address form" as gap #FFCDD2
     
-    rectangle "**USER SPACE** ~128 TB" as user #E3F2FD {
+    rectangle "**USER SPACE** 128 TiB" as user #E3F2FD {
         
-        rectangle "**STACK** ↓\n~8 MB default" as stack #FFCDD2 {
-            note right
+        rectangle "**STACK** ↓\nStack limit is configurable" as stack #FFCDD2 {
+            note as stack_contents
             Local variables
             Function parameters
             Return addresses
             end note
         }
-        
-        rectangle "⬇️ grows downward" as arrow1 #FFFFFF
+
         
         rectangle "**MEMORY MAPPED**\n.so libraries\nmmap() regions" as mmap #E1BEE7
-        
-        rectangle "⬆️ grows upward" as arrow2 #FFFFFF
+
         
         rectangle "**HEAP** ↑\nmalloc(), new" as heap #FFF9C4 {
-            note right
+            note as heap_contents
             Dynamic allocation
-            brk() extends
+            brk() may extend; mmap() also used
             end note
         }
         
@@ -47,22 +45,30 @@ rectangle "**VIRTUAL ADDRESS SPACE**" as vas #FAFAFA {
         rectangle "**DATA**\nInitialised global vars" as data #C8E6C9
         
         rectangle "**TEXT (CODE)**\nRead-only, Exec" as text #BBDEFB {
-            note right
+            note as code_contents
             Instructions
-            Shared on fork
+            Read-only file-backed pages may be shared
             end note
         }
         
-        rectangle "0x00000000\n**RESERVED**\nNULL region" as null #ECEFF1
+        rectangle "0x00000000\n**RESERVED**\nNULL region" as reserved_null #ECEFF1
     }
 }
+
+stack -[hidden]down-> mmap
+mmap -[hidden]down-> heap
+heap -[hidden]down-> bss
+bss -[hidden]down-> data
+data -[hidden]down-> text
+text -[hidden]down-> reserved_null
 
 kernel -[hidden]down-> gap
 gap -[hidden]down-> user
 
 note bottom of vas
 **Linux visualisation:** cat /proc/PID/maps
-Each process has its own virtual space!
+Private mappings are per-process; explicit shared mappings are possible.
+ASLR, ABI, page-table depth and resource limits change actual addresses/sizes.
 end note
 
 @enduml

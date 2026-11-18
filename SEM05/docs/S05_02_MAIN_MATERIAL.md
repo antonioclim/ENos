@@ -62,17 +62,17 @@ Functions in Bash are reusable code blocks that encapsulate specific logic. Unli
 ```bash
 # Standard form (recommended)
 function_name() {
-    # code
+    : # Replace with the function body
 }
 
 # Alternative form with function keyword
 function function_name {
-    # code
+    : # Replace with the function body
 }
 
 # Combined form (redundant, avoid)
 function function_name() {
-    # code
+    : # Replace with the function body
 }
 ```
 
@@ -127,7 +127,7 @@ greet() {
 process_file() {
     count=0                    # GLOBAL! Modifies variable from main
     for item in "$@"; do
-        ((count++))
+        count=$((count+1))
     done
     echo "Processed: $count"
 }
@@ -148,7 +148,7 @@ echo "After: count=$count"     # SURPRISE: 3, not 100!
 process_file() {
     local count=0              # LOCAL! Does not affect outside
     for item in "$@"; do
-        ((count++))
+        count=$((count+1))
     done
     echo "Processed: $count"
 }
@@ -207,8 +207,8 @@ demo_local_modifiers() {
     local -n ref=$1                              # nameref (Bash 4.3+)
     
     # CONSTANT="something"  # ERROR: readonly variable
-    number="not a number"   # Becomes 0 (not a valid integer)
-    echo "number=$number"   # 0
+    number="2 + 3"          # Integer attributes evaluate an arithmetic expression
+    echo "number=$number"   # 5; "not a number" is a syntax error, not conversion to 0
 }
 ```
 
@@ -238,7 +238,7 @@ echo "Sum: $result"   # 8
 
 # WRONG - what does NOT work:
 # result = get_sum 5 3 # Syntax error
-# result=get_sum 5 3 # result becomes string "get_sum"
+# result=get_sum 5 3 # Temporary assignment for command named 5; usually command not found
 ```
 
 ### Method 2: Global Variable
@@ -265,7 +265,7 @@ echo "Sum: $RESULT"   # 8
 ```bash
 #!/bin/bash
 
-*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
+# Editorial note: Bash syntax is unusual; portability here means Bash is installed.
 
 
 is_even() {
@@ -292,7 +292,7 @@ result=$(get_value)  # result is EMPTY, not 42!
 get_value
 echo $?              # 42 (must be used immediately)
 
-> 💡 Many students initially underestimate the importance of permissions. Then they encounter their first 'Permission denied' and see the light.
+# Teaching prompt: explain the permissions needed to execute this file.
 
 ```
 
@@ -356,32 +356,26 @@ echo "10! = $(factorial 10)"  # 3628800
 ```bash
 #!/bin/bash
 
-declare -A FIB_CACHE
-
+declare -A FIB_CACHE=()
+FIB_RESULT=0
 fib() {
-    local n=$1
-    
-    # Check cache
-    if [[ -v FIB_CACHE[$n] ]]; then
-        echo "${FIB_CACHE[$n]}"
-        return
-    fi
-    
-    local result
-    if [ "$n" -le 1 ]; then
-        result=$n
+    local n="$1" a b
+    [[ $n =~ ^[0-9]+$ ]] && ((10#$n <= 92)) || return 2
+    n=$((10#$n))
+    if [[ -v FIB_CACHE[$n] ]]; then FIB_RESULT=${FIB_CACHE[$n]}; return 0; fi
+    if ((n <= 1)); then FIB_RESULT=$n
     else
-        local a b
-        a=$(fib $((n - 1)))
-        b=$(fib $((n - 2)))
-        result=$((a + b))
+        fib "$((n-1))" || return
+        a=$FIB_RESULT
+        fib "$((n-2))" || return
+        b=$FIB_RESULT
+        FIB_RESULT=$((a+b))
     fi
-    
-    FIB_CACHE[$n]=$result
-    echo "$result"
+    FIB_CACHE[$n]=$FIB_RESULT
 }
-
-echo "fib(20) = $(fib 20)"    # 6765 (fast with cache)
+fib 20
+echo "fib(20) = $FIB_RESULT"    # 6765; cache updates remain in this shell
+# $(fib ...) would isolate the mutable cache in a subshell.
 ```
 
 ---
@@ -577,7 +571,7 @@ done
 idx=0
 for item in "${arr[@]}"; do
     echo "[$idx] = $item"
-    ((idx++))
+    idx=$((idx+1))
 done
 ```
 
@@ -621,7 +615,7 @@ arr=("cherry" "apple" "banana" "date")
 # Sort and create new array
 readarray -t sorted < <(printf '%s\n' "${arr[@]}" | sort)
 
-> 💡 In previous labs, we saw that the most frequent mistake is forgetting quotes for variables with spaces.
+# Teaching prompt: preserve spaces by quoting each array expansion.
 
 echo "Sorted: ${sorted[*]}"    # apple banana cherry date
 
@@ -789,26 +783,28 @@ declare -A CONFIG
 
 # Parse key=value configuration file
 parse_config() {
-    local file="$1"
-    
-    while IFS='=' read -r key value; do
-        # Skip comments and empty lines
-        [[ "$key" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "$key" ]] && continue
-        
-        # Remove spaces
-        key="${key// /}"
-        value="${value// /}"
-        
-        CONFIG["$key"]="$value"
-    done < "$file"
+    local file="$1" line key value
+    local -A next=()
+    # Literal single-line KEY=VALUE. Values (including spaces/=) are not expanded.
+    # No shell quoting/export grammar is implied; empty values are supported.
+    while IFS= read -r line || [[ -n $line ]]; do
+        [[ -z $line || $line =~ ^[[:space:]]*# ]] && continue
+        [[ $line == *=* ]] || return 2
+        key=${line%%=*}; value=${line#*=}
+        key=${key#"${key%%[![:space:]]*}"}; key=${key%"${key##*[![:space:]]}"}
+        [[ $key =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+        next[$key]=$value
+    done < "$file" || return 1
+    CONFIG=()
+    for key in "${!next[@]}"; do CONFIG[$key]=${next[$key]}; done
+    return 0
 }
 
 # Getter with default
 get_config() {
     local key="$1"
     local default="${2:-}"
-    echo "${CONFIG[$key]:-$default}"
+    echo "${CONFIG[$key]-$default}"
 }
 
 # Usage
@@ -829,7 +825,8 @@ count_words() {
     local word
     
     while read -r word; do
-        ((word_count[$word]++))
+        [[ -n $word ]] || continue
+        word_count[$word]=$((${word_count[$word]:-0}+1))
     done < <(tr '[:upper:]' '[:lower:]' < "$file" | tr -cs '[:alpha:]' '\n')
 }
 
@@ -839,7 +836,7 @@ show_top() {
     
     for word in "${!word_count[@]}"; do
         echo "${word_count[$word]} $word"
-    done | sort -rn | head -n "$n"
+    done | sort -rn | sed -n "1,${n}p"
 }
 
 # Usage
@@ -883,15 +880,15 @@ get_cached() {
 
 ## 4.1 The `set -euo pipefail` Triad
 
-This combination of options transforms a fragile script into a solid one:
+These options expose some failures; explicit validation, error propagation and tests are still required:
 
 ```bash
 #!/bin/bash
 
 # Recommendation: ALWAYS in the first lines of the script
-set -e          # Exit on first error
+set -e          # Exit on an unhandled nonzero status outside its documented exceptions
 set -u          # Error for undefined variables  
-set -o pipefail # Pipeline returns error from first command that fails
+set -o pipefail # Pipeline status is the rightmost nonzero status, or zero
 # (without this, a pipe can "hide" errors — very unpleasant surprise at 3 AM when you're deploying)
 
 # Or compact form:
@@ -973,20 +970,21 @@ false || true             # Does not stop
 false && true             # Does not stop
 echo "Script continues"    # EXECUTES!
 
-# 3. Commands in subshells (without propagation)
-(false)                   # Does not stop main script in all cases
-echo "Script continues"    # EXECUTES!
-
-# 4. Functions in test context
-check() { false; }
-if check; then
-    echo "No"
+# 3. Ordinary (...) subshells inherit -e; their failing status can stop the parent.
+# Run the stopping case in a child so this lesson itself continues.
+if bash -ec '(false); echo unreachable'; then
+    echo "Unexpected success"
+else
+    echo "Child stopped on the failing subshell"
 fi
-echo "Script continues"    # EXECUTES!
 
-# 5. Commands in command substitution in certain contexts
-result=$(false)           # Stops
-echo "But: $(false)"      # Does NOT stop in some Bash versions!
+# 4. Functions invoked in a tested context ignore -e throughout that invocation.
+check() { false; echo "continued inside tested function"; }
+if check; then echo "Final echo made the function succeed"; fi
+
+# 5. Command substitution normally clears -e (unless POSIX mode or inherit_errexit).
+echo "Captured: $(false; echo continued)"  # echo's own status is zero
+if result=$(false); then echo unexpected; else echo "Assignment status is nonzero"; fi
 ```
 
 ### Solutions for Special Cases
@@ -995,7 +993,7 @@ echo "But: $(false)"      # Does NOT stop in some Bash versions!
 #!/bin/bash
 set -euo pipefail
 
-# For pipes - use shopt
+# For command substitutions (not pipelines) - use shopt
 shopt -s inherit_errexit  # Bash 4.4+ - propagates set -e in substitutions
 
 # For explicit checks
@@ -1004,11 +1002,8 @@ result=$(command_that_might_fail) || {
     exit 1
 }
 
-# For subshells
-(
-    set -e
-    false  # Now stops the subshell
-) || exit 1
+# A tested compound command can suppress -e; use explicit propagation instead.
+( command_that_might_fail || exit "$?"; echo "only after success" ) || exit 1
 ```
 
 ---
@@ -1050,28 +1045,17 @@ fi
 
 ---
 
-## 4.5 Safe IFS
+## 4.5 IFS and filenames
 
-`IFS` (Internal Field Separator) controls how Bash separates words:
+`IFS` controls field splitting; removing space does not make filenames safe.
+Filenames may contain tabs and newlines. Use quoted arrays/globs or NUL framing.
 
 ```bash
-#!/bin/bash
-
-# Default IFS includes spaces, tab, newline
-# This can cause problems with files containing spaces
-
-# Safe IFS - only newline and tab
-IFS=$'\n\t'
-
-# Now iteration is safer
-for file in $(ls); do
-    echo "File: $file"
-done
-
-# Remember: quotes should still be used for maximum safety!
-for file in *; do
-    echo "File: $file"
-done
+# Glob results are already separate pathnames; do not parse ls output.
+shopt -s nullglob
+files=(./*)
+for file in "${files[@]}"; do printf 'File: %s\n' "$file"; done
+# For recursive enumeration, use find -print0 with read -d '' and check find status.
 ```
 
 ---
@@ -1102,11 +1086,12 @@ cleanup() {
     exit $exit_code
 }
 
-# Set trap for EXIT (executes ALWAYS on exit)
+# EXIT runs on shell exit; SIGKILL, power loss and some abrupt termination bypass cleanup.
 trap cleanup EXIT
 
 # Trap for interrupt signals
-trap 'echo "Interrupted!"; exit 130' INT TERM
+trap 'echo "Interrupted!"; exit 130' INT
+trap 'echo "Terminated!"; exit 143' TERM
 
 # Create temporary resources
 TEMP_FILE=$(mktemp)
@@ -1139,7 +1124,7 @@ error_handler() {
     echo "═══════════════════════════════════════════" >&2
 }
 
-# Trap ERR (executes when a command fails)
+# ERR follows documented errexit-style exceptions; -E enables inheritance.
 trap 'error_handler $LINENO "$BASH_COMMAND" $?' ERR
 
 # Test - this command will fail
@@ -1148,12 +1133,12 @@ false
 echo "This line won't execute"
 ```
 
-> ⚠️ **Trap: trap is NOT inherited in subshells!**
+> **ERR inheritance is controlled by `set -E` (`errtrace`).** Without it, the inner failing command does not run the inherited ERR handler; the parent may still trap the failing compound command. ERR is also suppressed in tested contexts.
 > 
 > ```bash
 > trap 'echo "Error"' ERR
 > (
->     false    # trap does NOT execute here!
+>     false    # Inner ERR handler is not inherited without -E; parent status remains visible.
 > )
 > ```
 
@@ -1253,7 +1238,7 @@ log() {
     local level_num="${LOG_LEVELS[$level]:-1}"
     local threshold="${LOG_LEVELS[$LOG_LEVEL]:-1}"
     
-    [ "$level_num" -lt "$threshold" ] && return
+    [ "$level_num" -lt "$threshold" ] && return 0
     
     # Format: [TIMESTAMP] [LEVEL] [SCRIPT:LINE] Message
     local timestamp
@@ -1362,15 +1347,18 @@ VERBOSE="${VERBOSE:-0}"
 
 # Debug functions
 debug() {
-    [[ "$DEBUG" == "true" ]] && echo "[DEBUG] $*" >&2
+    if [[ "$DEBUG" == "true" ]]; then echo "[DEBUG] $*" >&2; fi
+    return 0
 }
 
 verbose() {
-    [ "$VERBOSE" -ge 1 ] && echo "$*" >&2
+    if [ "$VERBOSE" -ge 1 ]; then echo "$*" >&2; fi
+    return 0
 }
 
 very_verbose() {
-    [ "$VERBOSE" -ge 2 ] && echo "[VERBOSE] $*" >&2
+    if [ "$VERBOSE" -ge 2 ]; then echo "[VERBOSE] $*" >&2; fi
+    return 0
 }
 
 # Usage
@@ -1399,9 +1387,9 @@ echo "DEBUG: array=(${arr[*]})" >&2
 echo "Called from: $(caller 0)" >&2
 
 # Full call stack
-local frame=0
+frame=0  # local is only legal inside a function
 while caller $frame; do
-    ((frame++))
+    frame=$((frame+1))
 done
 
 # Trap to see each line executed
@@ -1425,7 +1413,7 @@ This template incorporates all best practices discussed:
 # Author: [Name]
 # Version: 1.0.0
 # Date: 2025-01
-# Licence: MIT
+# Licence: [author decision required before distribution]
 #
 # USAGE:
 # ./template.sh [options] <input_file>
@@ -1475,7 +1463,7 @@ USAGE:
 OPTIONS:
     -h, --help          Display this message
     -V, --version       Display version
-    -v, --verbose       Verbose mode (can be repeated: -vv)
+    -v, --verbose       Verbose mode (repeat -v or use -vv)
     -n, --dry-run       Simulation without changes
     -o, --output FILE   Output file (default: stdout)
 
@@ -1547,14 +1535,18 @@ parse_args() {
                 exit 0
                 ;;
             -v|--verbose)
-                ((VERBOSE++))
+                VERBOSE=$((VERBOSE+1))
                 shift
+                ;;
+            -vv)
+                VERBOSE=$((VERBOSE+2)); shift
                 ;;
             -n|--dry-run)
                 DRY_RUN=true
                 shift
                 ;;
             -o|--output)
+                [[ $# -ge 2 ]] || die "--output requires a value"
                 OUTPUT="$2"
                 shift 2
                 ;;
@@ -1598,6 +1590,7 @@ validate() {
 # MAIN LOGIC
 # ============================================================
 process() {
+    if [[ "$DRY_RUN" == true ]]; then printf 'DRY RUN: would process %s\n' "$INPUT"; return 0; fi
     log "Processing: $INPUT"
     debug "Verbose level: $VERBOSE"
     debug "Dry run: $DRY_RUN"
@@ -1607,9 +1600,9 @@ process() {
         return 0
     fi
     
-    # === IMPLEMENTATION HERE ===
-    
-    log "Processing complete"
+    # TODO: IMPLEMENTATION HERE — no completed operation is claimed by this scaffold.
+    printf 'NOT_IMPLEMENTED\n' >&2
+    return 3
 }
 
 main() {
@@ -1670,7 +1663,7 @@ find . -name "*.sh" -exec shellcheck {} \;
 
 ## 9.3 Patterns to Avoid
 
-```bash
+```text
 # WRONG: Global variable in function
 process() {
     result="value"    # Modifies global
@@ -1753,7 +1746,7 @@ command -v cmd >/dev/null || die "cmd missing"
 
 # === DEBUGGING ===
 set -x / set +x
-debug() { [[ "$DEBUG" == "true" ]] && echo "[D] $*" >&2; }
+debug() { if [[ ${DEBUG:-false} == true ]]; then printf '[D] %s\n' "$*" >&2; fi; return 0; }
 ```
 
 ---

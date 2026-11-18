@@ -4,17 +4,26 @@ final_grade_calculator_EN.py - Final Grade Calculator
 ======================================================
 Operating Systems | ASE Bucharest - CSIE
 
-Calculates final grades from homework, project, and test scores.
-Enforces elimination criteria (80% threshold).
+Reviews explicit homework, project and test scores without treating missing data as zero.
+Final grades and eligibility require a complete, explicitly supplied policy.
+Historical constants below remain comparison material; they are not selected defaults.
 """
 
 import argparse
 import csv
+import io
+import json
+import math
+import os
 import sys
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+# Historical values are retained for comparison only. No policy is selected by default.
+POLICY_CONFIGURED = False
+POLICY = {}
 
 # Configuration
 WEIGHTS = {
@@ -51,91 +60,182 @@ class StudentGrades:
     # Homework
     homework_scores: List[float] = field(default_factory=list)
     homework_count: int = 0
-    homework_average: float = 0.0
+    homework_average: Optional[float] = None
     
     # Project
-    project_auto_score: float = 0.0
-    project_manual_score: float = 0.0
-    project_total: float = 0.0
-    project_eligible: bool = True
+    project_auto_score: Optional[float] = None
+    project_manual_score: Optional[float] = None
+    project_total: Optional[float] = None
+    project_eligible: Optional[bool] = None
     
     # Tests
     test_scores: List[float] = field(default_factory=list)
     test_count: int = 0
-    test_average: float = 0.0
+    test_average: Optional[float] = None
     
     # Final
-    weighted_score: float = 0.0
-    final_grade: int = 0
+    weighted_score: Optional[float] = None
+    final_grade: Optional[int] = None
     status: str = ""
     elimination_reason: str = ""
+    issues: List[str] = field(default_factory=list)
+
+
+def checked_number(value, label, low=0, high=10):
+    if type(value) is bool:
+        raise ValueError(f'{label} must be numeric, not boolean')
+    result = float(value)
+    if not math.isfinite(result) or not low <= result <= high:
+        raise ValueError(f'{label} must be finite and in [{low}, {high}]')
+    return result
+
+
+def checked_identity(row):
+    values = tuple(row.get(key, '').strip() for key in ('student_id', 'student_name', 'student_group'))
+    if any(not value or value.upper() == 'UNKNOWN' for value in values):
+        raise ValueError('Complete explicit student identity is required')
+    return values
+
+
+def boolean(value, label):
+    if str(value).lower() in ('yes', 'true'):
+        return True
+    if str(value).lower() in ('no', 'false'):
+        return False
+    raise ValueError(f'{label} must be yes/no or true/false')
+
+
+def checked_csv_rows(filepath, required_fields):
+    """Validate the header even for an empty table, then reject ambiguous rows."""
+    try:
+        with open(filepath, newline='', encoding='utf-8') as handle:
+            reader = csv.DictReader(handle, strict=True)
+            headers = reader.fieldnames
+            if not headers or any(not name.strip() for name in headers):
+                raise ValueError(f'{filepath}: a non-empty CSV header is required')
+            if len(headers) != len(set(headers)):
+                raise ValueError(f'{filepath}: duplicate CSV column names are not allowed')
+            missing = sorted(set(required_fields) - set(headers))
+            if missing:
+                raise ValueError(f'{filepath}: missing required CSV columns: {", ".join(missing)}')
+            for row in reader:
+                if None in row or any(value is None for value in row.values()):
+                    raise ValueError(f'{filepath}: CSV row ending at line {reader.line_num} has a different number of fields from its header')
+                yield row
+    except csv.Error as error:
+        raise ValueError(f'{filepath}: invalid CSV: {error}') from error
 
 
 def load_homework_grades(filepath: str) -> dict:
-    """Load homework grades from CSV."""
-    grades = {}
-    
-    with open(filepath, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            student_id = row['student_id']
-            if student_id not in grades:
-                grades[student_id] = {
-                    'name': row.get('student_name', 'Unknown'),
-                    'group': row.get('student_group', 'Unknown'),
-                    'scores': [],
-                    'count': 0,
-                }
-            
-            score = float(row.get('score', 0))
-            if score > 0:  # Only count submitted assignments
-                grades[student_id]['scores'].append(score)
-                grades[student_id]['count'] += 1
-    
+    """Load distinct assignments with explicit final scores; never apply a second penalty."""
+    grades, seen = {}, set()
+    for row in checked_csv_rows(filepath, ('student_id', 'student_name', 'student_group', 'seminar',
+                                          'homework_id', 'final_score', 'late_days', 'signature_valid')):
+        student_id, name, group = checked_identity(row)
+        assignment = (student_id, row['seminar'].strip(), row['homework_id'].strip())
+        if not all(assignment) or assignment in seen:
+            raise ValueError(f'Missing or duplicate assignment requires resubmission decision: {assignment}')
+        seen.add(assignment)
+        valid = boolean(row['signature_valid'], 'signature_valid')
+        late_days = int(row['late_days'])
+        if late_days < 0:
+            raise ValueError('late_days must be a non-negative integer')
+        # An ambiguous old `score` column is not assumed already adjusted.
+        record = grades.setdefault(student_id, {'name':name, 'group':group, 'scores':[], 'count':0, 'issues':[]})
+        if (record['name'], record['group']) != (name, group):
+            raise ValueError(f'Conflicting identity: {student_id}')
+        if not valid:
+            record['issues'].append('Unverified homework excluded from numerical aggregation')
+            continue
+        if not row.get('final_score', '').strip():
+            record['issues'].append('Missing human-reviewed final_score')
+            continue
+        score = checked_number(row['final_score'], 'final_score')
+        record['scores'].append(score)
+        if late_days == 0 or (POLICY_CONFIGURED and POLICY['late_homework_counts']):
+            record['count'] += 1
+        elif not POLICY_CONFIGURED:
+            record['issues'].append('Late participation requires explicit author policy')
     return grades
 
 
 def load_project_grades(filepath: str) -> dict:
-    """Load project grades from CSV."""
     grades = {}
-    
-    with open(filepath, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            student_id = row['student_id']
-            grades[student_id] = {
-                'name': row.get('student_name', 'Unknown'),
-                'group': row.get('student_group', 'Unknown'),
-                'auto_score': float(row.get('auto_score', 0)),
-                'manual_score': float(row.get('manual_score', 0)),
-                'eligible': row.get('eligible', 'yes').lower() == 'yes',
-            }
-    
+    for row in checked_csv_rows(filepath, ('student_id', 'student_name', 'student_group',
+                                          'auto_score', 'manual_score', 'eligible')):
+        student_id, name, group = checked_identity(row)
+        if student_id in grades:
+            raise ValueError(f'Duplicate project requires explicit selection: {student_id}')
+        auto = checked_number(row['auto_score'], 'auto_score') if row.get('auto_score', '').strip() else None
+        manual = checked_number(row['manual_score'], 'manual_score') if row.get('manual_score', '').strip() else None
+        if auto is not None and manual is not None and auto + manual > 10:
+            raise ValueError(f'Project component sum exceeds 10 for {student_id}; resolve the scale')
+        grades[student_id] = {'name':name, 'group':group, 'auto_score':auto,
+                              'manual_score':manual, 'eligible':boolean(row['eligible'], 'eligible') if row.get('eligible', '').strip() else None,
+                              'issues':[]}
     return grades
 
 
 def load_test_grades(filepath: str) -> dict:
-    """Load test grades from CSV."""
-    grades = {}
-    
-    with open(filepath, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            student_id = row['student_id']
-            if student_id not in grades:
-                grades[student_id] = {
-                    'name': row.get('student_name', 'Unknown'),
-                    'group': row.get('student_group', 'Unknown'),
-                    'scores': [],
-                    'count': 0,
-                }
-            
-            score = float(row.get('score', -1))
-            if score >= 0:  # -1 indicates absent
-                grades[student_id]['scores'].append(score)
-                grades[student_id]['count'] += 1
-    
+    grades, seen = {}, set()
+    for row in checked_csv_rows(filepath, ('student_id', 'student_name', 'student_group', 'test_id', 'score')):
+        student_id, name, group = checked_identity(row)
+        test_id = row['test_id'].strip()
+        if not test_id or (student_id, test_id) in seen:
+            raise ValueError(f'Missing or duplicate test requires explicit selection: {student_id}/{test_id}')
+        seen.add((student_id, test_id))
+        score = checked_number(row['score'], 'test score', low=-1) if row.get('score', '').strip() else None
+        if score is not None and -1 < score < 0:
+            raise ValueError('Only -1 denotes absence; a present test score is 0..10')
+        record = grades.setdefault(student_id, {'name':name, 'group':group, 'scores':[], 'count':0, 'issues':[]})
+        if (record['name'], record['group']) != (name, group):
+            raise ValueError(f'Conflicting identity: {student_id}')
+        if score is None:
+            record['issues'].append(f'Missing reviewed score for test {test_id}')
+        elif score >= 0:
+            record['scores'].append(score)
+            record['count'] += 1
     return grades
+
+
+def load_policy(path):
+    """Load an explicitly provided policy; this does not itself prove author approval."""
+    global POLICY, POLICY_CONFIGURED, WEIGHTS, THRESHOLDS, GRADE_BOUNDARIES
+    policy = json.loads(Path(path).read_text())
+    if type(policy['schema_version']) is not int or policy['schema_version'] != 1 or policy['score_stage'] != 'final':
+        raise ValueError('Expected policy schema 1 and score_stage=final')
+    if type(policy['late_homework_counts']) is not bool:
+        raise ValueError('late_homework_counts must be explicitly true or false')
+    for key in ('passing_grade', 'elimination_grade', 'require_project_eligible'):
+        if key not in policy:
+            raise ValueError(f'Explicit policy choice required: {key}')
+    if type(policy['passing_grade']) is not int or not 1 <= policy['passing_grade'] <= 10:
+        raise ValueError('passing_grade must be an integer in 1..10')
+    if policy['elimination_grade'] is not None and (type(policy['elimination_grade']) is not int or not 1 <= policy['elimination_grade'] <= 10):
+        raise ValueError('elimination_grade must be null or an integer in 1..10')
+    if type(policy['require_project_eligible']) is not bool:
+        raise ValueError('require_project_eligible must be explicitly true or false')
+    weights = {key: checked_number(policy['weights'][key], key, high=1) for key in WEIGHTS}
+    if not math.isclose(sum(weights.values()), 1.0, abs_tol=1e-9):
+        raise ValueError('Weights must sum to 1')
+    thresholds = policy['thresholds']
+    for key in THRESHOLDS:
+        if type(thresholds[key]) is not int or thresholds[key] < 0:
+            raise ValueError(f'{key} must be a non-negative integer')
+    for prefix in ('homework', 'tests'):
+        if not 0 <= thresholds[prefix+'_min'] <= thresholds[prefix+'_total']:
+            raise ValueError('Minimum cannot exceed total')
+    boundaries = policy['grade_boundaries']
+    if not isinstance(boundaries, list) or not boundaries or boundaries[-1][0] != 0:
+        raise ValueError('Grade boundaries must cover score zero')
+    previous = float('inf')
+    for lower, grade in boundaries:
+        checked_number(lower, 'boundary')
+        if lower >= previous or type(grade) is not int or not 1 <= grade <= 10:
+            raise ValueError('Boundaries must descend strictly and have integer grades 1..10')
+        previous = lower
+    WEIGHTS, THRESHOLDS, GRADE_BOUNDARIES = weights, thresholds, boundaries
+    POLICY, POLICY_CONFIGURED = policy, True
 
 
 def calculate_grade(score: float) -> int:
@@ -143,7 +243,7 @@ def calculate_grade(score: float) -> int:
     for boundary, grade in GRADE_BOUNDARIES:
         if score >= boundary:
             return grade
-    return 4
+    raise ValueError('Score is outside the explicitly configured grade boundaries')
 
 
 def process_student(
@@ -161,8 +261,8 @@ def process_student(
     
     student = StudentGrades(
         student_id=student_id,
-        student_name=hw_data.get('name') or proj_data.get('name') or test_data.get('name', 'Unknown'),
-        student_group=hw_data.get('group') or proj_data.get('group') or test_data.get('group', 'Unknown'),
+        student_name=hw_data.get('name') or proj_data.get('name') or test_data.get('name', ''),
+        student_group=hw_data.get('group') or proj_data.get('group') or test_data.get('group', ''),
     )
     
     # Process homework
@@ -172,10 +272,11 @@ def process_student(
         student.homework_average = sum(student.homework_scores) / len(student.homework_scores)
     
     # Process project
-    student.project_auto_score = proj_data.get('auto_score', 0)
-    student.project_manual_score = proj_data.get('manual_score', 0)
-    student.project_total = student.project_auto_score + student.project_manual_score
-    student.project_eligible = proj_data.get('eligible', False)
+    student.project_auto_score = proj_data.get('auto_score')
+    student.project_manual_score = proj_data.get('manual_score')
+    if student.project_auto_score is not None and student.project_manual_score is not None:
+        student.project_total = student.project_auto_score + student.project_manual_score
+    student.project_eligible = proj_data.get('eligible')
     
     # Process tests
     student.test_scores = test_data.get('scores', [])
@@ -183,163 +284,177 @@ def process_student(
     if student.test_scores:
         student.test_average = sum(student.test_scores) / len(student.test_scores)
     
-    # Check elimination criteria
+    identities = {(d['name'], d['group']) for d in (hw_data, proj_data, test_data) if d}
+    if not identities or not student.student_name or not student.student_group:
+        raise ValueError(f'Complete explicit identity is unavailable: {student_id}')
+    if len(identities) > 1:
+        raise ValueError(f'Conflicting identity across components: {student_id}')
+    components = {'homework': student.homework_average, 'project': student.project_total,
+                  'tests': student.test_average}
+    records = {'homework': hw_data, 'project': proj_data, 'tests': test_data}
+    required = {name for name in components if not POLICY_CONFIGURED or WEIGHTS[name] > 0}
+    blocking_issues = []
+    for name, value in components.items():
+        component_issues = list(records[name].get('issues', []))
+        if value is None:
+            component_issues.append(f'Missing reviewed {name} component')
+        student.issues.extend(component_issues)
+        if name in required:
+            blocking_issues.extend(component_issues)
+    if student.project_eligible is None:
+        issue = 'Project eligibility evidence is missing'
+        student.issues.append(issue)
+        if not POLICY_CONFIGURED or POLICY['require_project_eligible']:
+            blocking_issues.append(issue)
+    if not POLICY_CONFIGURED:
+        student.status = "PENDING_POLICY"
+        student.elimination_reason = "No explicit policy file; no authoritative final grade or eligibility decision" + ("; " + "; ".join(student.issues) if student.issues else "")
+        return student
+
+    if blocking_issues:
+        student.status = "PENDING_EVIDENCE"
+        student.elimination_reason = "; ".join(student.issues)
+        return student
+
+    # Inactive components stay missing in the report, even when the supplied
+    # policy deliberately assigns them no weight. Their issues remain visible.
+    if student.issues:
+        student.elimination_reason = 'Non-blocking under supplied policy: ' + '; '.join(student.issues)
+
+    # Check explicitly configured eligibility criteria
     elimination_reasons = []
     
     # Homework threshold
-    if student.homework_count < THRESHOLDS['homework_min']:
+    if WEIGHTS['homework'] > 0 and student.homework_count < THRESHOLDS['homework_min']:
         elimination_reasons.append(
             f"Homework: {student.homework_count}/{THRESHOLDS['homework_total']} "
             f"(min: {THRESHOLDS['homework_min']})"
         )
     
     # Test threshold
-    if student.test_count < THRESHOLDS['tests_min']:
+    if WEIGHTS['tests'] > 0 and student.test_count < THRESHOLDS['tests_min']:
         elimination_reasons.append(
             f"Tests: {student.test_count}/{THRESHOLDS['tests_total']} "
             f"(min: {THRESHOLDS['tests_min']})"
         )
     
     # Project eligibility
-    if not student.project_eligible:
+    if POLICY['require_project_eligible'] and not student.project_eligible:
         elimination_reasons.append("Project requirements not met")
     
     # Calculate final grade
     if elimination_reasons:
         student.status = "ELIMINATION"
-        student.elimination_reason = "; ".join(elimination_reasons)
-        student.final_grade = 4
-        student.weighted_score = 0.0
+        student.elimination_reason = "; ".join(elimination_reasons + student.issues)
+        student.final_grade = POLICY['elimination_grade']
+        student.weighted_score = None
     else:
         # Calculate weighted score
-        student.weighted_score = (
-            student.homework_average * WEIGHTS['homework'] +
-            student.project_total * WEIGHTS['project'] +
-            student.test_average * WEIGHTS['tests']
-        )
+        student.weighted_score = sum(components[name] * weight
+                                     for name, weight in WEIGHTS.items() if weight > 0)
         
         student.final_grade = calculate_grade(student.weighted_score)
         
-        if student.final_grade >= 5:
+        if student.final_grade >= POLICY['passing_grade']:
             student.status = "PASS"
         else:
             student.status = "FAIL"
-            student.elimination_reason = "Score below passing threshold"
+            student.elimination_reason = "; ".join(["Score below passing threshold"] + student.issues)
     
     return student
 
 
-def generate_report(students: List[StudentGrades], output_path: str):
-    """Generate final grades report."""
-    
-    # Sort by group, then name
-    students.sort(key=lambda s: (s.student_group, s.student_name))
-    
-    # CSV output
-    csv_path = Path(output_path).with_suffix('.csv')
-    with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            'Student ID', 'Name', 'Group',
-            'HW Count', 'HW Avg', 
-            'Project',
-            'Test Count', 'Test Avg',
-            'Weighted Score', 'Final Grade',
-            'Status', 'Notes'
-        ])
-        
-        for s in students:
-            writer.writerow([
-                s.student_id,
-                s.student_name,
-                s.student_group,
-                s.homework_count,
-                f"{s.homework_average:.2f}",
-                f"{s.project_total:.2f}",
-                s.test_count,
-                f"{s.test_average:.2f}",
-                f"{s.weighted_score:.2f}",
-                s.final_grade,
-                s.status,
-                s.elimination_reason,
-            ])
-    
-    print(f"CSV report saved to: {csv_path}")
-    
-    # Markdown report
-    md_path = Path(output_path).with_suffix('.md')
-    with open(md_path, 'w', encoding='utf-8') as f:
-        f.write("# Final Grades Report\n\n")
-        f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-        f.write("---\n\n")
-        
-        # Statistics
-        total = len(students)
-        passing = sum(1 for s in students if s.status == "PASS")
-        failing = sum(1 for s in students if s.status == "FAIL")
-        eliminated = sum(1 for s in students if s.status == "ELIMINATION")
-        
-        f.write("## Summary Statistics\n\n")
-        f.write(f"| Metric | Count | Percentage |\n")
-        f.write(f"|--------|-------|------------|\n")
-        f.write(f"| Total Students | {total} | 100% |\n")
-        f.write(f"| Passing | {passing} | {passing*100/total:.1f}% |\n")
-        f.write(f"| Failing | {failing} | {failing*100/total:.1f}% |\n")
-        f.write(f"| Eliminated (80% threshold) | {eliminated} | {eliminated*100/total:.1f}% |\n")
-        f.write("\n")
-        
-        # Grade distribution
-        grade_counts = {}
-        for s in students:
-            grade_counts[s.final_grade] = grade_counts.get(s.final_grade, 0) + 1
-        
-        f.write("## Grade Distribution\n\n")
-        f.write("| Grade | Count |\n")
-        f.write("|-------|-------|\n")
-        for grade in range(10, 3, -1):
-            count = grade_counts.get(grade, 0)
-            f.write(f"| {grade} | {count} |\n")
-        f.write("\n")
-        
-        # Elimination breakdown
-        if eliminated > 0:
-            f.write("## Elimination Details\n\n")
-            f.write("| Student | Group | Reason |\n")
-            f.write("|---------|-------|--------|\n")
-            for s in students:
-                if s.status == "ELIMINATION":
-                    f.write(f"| {s.student_name} | {s.student_group} | {s.elimination_reason} |\n")
-            f.write("\n")
-        
-        # Full grades table
-        f.write("## Detailed Grades\n\n")
-        f.write("| Name | Group | HW | Project | Tests | Score | Grade | Status |\n")
-        f.write("|------|-------|-----|---------|-------|-------|-------|--------|\n")
-        
-        for s in students:
-            status_emoji = "✓" if s.status == "PASS" else "✗"
-            f.write(
-                f"| {s.student_name} | {s.student_group} | "
-                f"{s.homework_average:.1f} ({s.homework_count}) | "
-                f"{s.project_total:.1f} | "
-                f"{s.test_average:.1f} ({s.test_count}) | "
-                f"{s.weighted_score:.2f} | {s.final_grade} | {status_emoji} {s.status} |\n"
-            )
-        
-        f.write("\n---\n")
-        f.write("*Generated by final_grade_calculator_EN.py*\n")
-    
-    print(f"Markdown report saved to: {md_path}")
-    
-    # Console summary
-    print("\n" + "=" * 60)
-    print("FINAL GRADES SUMMARY")
-    print("=" * 60)
-    print(f"Total students:  {total}")
-    print(f"Passing:         {passing} ({passing*100/total:.1f}%)")
-    print(f"Failing:         {failing} ({failing*100/total:.1f}%)")
-    print(f"Eliminated:      {eliminated} ({eliminated*100/total:.1f}%)")
-    print("=" * 60)
+def checked_report_paths(output_path, input_paths=()):
+    """Reject existing destinations and any resolved or hard-link alias of an input."""
+    targets = [Path(output_path).with_suffix(suffix) for suffix in ('.csv', '.json', '.md')]
+    for target in targets:
+        for source in map(Path, input_paths):
+            if (target.resolve() == source.resolve() or
+                    (target.exists() and source.exists() and target.samefile(source))):
+                raise ValueError(f'Report destination must not overwrite an input or its alias: {target}')
+        if target.exists() or target.is_symlink():
+            raise FileExistsError(f'Report destination already exists; choose a new output prefix: {target}')
+    return targets
+
+
+def write_report_files(prepared):
+    """Create outputs exclusively; clean up owned files after a caught write failure."""
+    created = []
+    try:
+        for target, text in prepared:
+            descriptor = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(descriptor, 'w', encoding='utf-8', newline='') as handle:
+                info = os.fstat(handle.fileno())
+                created.append((target, info.st_dev, info.st_ino))
+                handle.write(text)
+    except BaseException:
+        for target, device, inode in created:
+            try:
+                info = target.lstat()
+                if (info.st_dev, info.st_ino) == (device, inode):
+                    target.unlink()
+            except OSError:
+                pass
+        raise
+
+
+def generate_report(students: List[StudentGrades], output_path: str, *, input_paths=()):
+    """Write matching CSV, JSON and Markdown, retaining absent values and zero marks."""
+    csv_path, json_path, md_path = checked_report_paths(output_path, input_paths)
+    students = sorted(students, key=lambda item: (item.student_group, item.student_name))
+    generated_at = datetime.now().astimezone().isoformat(timespec='seconds')
+    def number(value):
+        return "" if value is None else f"{value:.2f}"
+    def md(value):
+        return str(value).replace("|", "\\|").replace("\n", " ")
+    with io.StringIO(newline='') as handle:
+        writer = csv.writer(handle)
+        writer.writerow(['Student ID','Name','Group','HW Count','HW Avg','Project','Test Count','Test Avg',
+                         'Weighted Score','Final Grade','Status','Notes'])
+        for item in students:
+            writer.writerow([item.student_id,item.student_name,item.student_group,item.homework_count,
+                number(item.homework_average),number(item.project_total),item.test_count,number(item.test_average),
+                number(item.weighted_score),item.final_grade,item.status,item.elimination_reason])
+        csv_text = handle.getvalue()
+    statuses = {name: sum(item.status == name for item in students)
+                for name in sorted({item.status for item in students})}
+    with io.StringIO() as handle:
+        handle.write('# Component Review Report\n\n')
+        handle.write('Policy: explicitly supplied; author approval must be checked separately.\n\n' if POLICY_CONFIGURED
+                     else 'PENDING_POLICY: reviewed components only; no final grades or eligibility decisions.\n\n')
+        handle.write('Blank numerical cells mean missing/unreviewed evidence. A reviewed zero is displayed as 0.00.\n\n')
+        handle.write(f'Generated: {generated_at}\n\n')
+        handle.write('## Processing Status\n\n| Status | Count |\n|---|---:|\n')
+        for name, count in statuses.items(): handle.write(f'| {name} | {count} |\n')
+        if not students: handle.write('| NO_RECORDS | 0 |\n')
+        if POLICY_CONFIGURED and any(item.final_grade is not None for item in students):
+            counts = {}
+            for item in students:
+                if item.final_grade is not None: counts[item.final_grade] = counts.get(item.final_grade, 0) + 1
+            handle.write('\n## Grades Calculated Under the Supplied Policy\n\n| Grade | Count |\n|---|---:|\n')
+            for grade,count in sorted(counts.items(),reverse=True): handle.write(f'| {grade} | {count} |\n')
+        handle.write('\n## Component Detail\n\n| Name | Group | HW | Project | Tests | Score | Grade | Status | Evidence / decision notes |\n')
+        handle.write('|---|---|---|---|---|---|---|---|---|\n')
+        for item in students:
+            values=[item.student_name,item.student_group,number(item.homework_average),number(item.project_total),
+                    number(item.test_average),number(item.weighted_score),'' if item.final_grade is None else item.final_grade,
+                    item.status,item.elimination_reason]
+            handle.write('| '+' | '.join(map(md,values))+' |\n')
+        md_text = handle.getvalue()
+    report = {
+        'schema_version': 1,
+        'generated_at': generated_at,
+        'policy_status': 'SUPPLIED_POLICY_UNVERIFIED' if POLICY_CONFIGURED else 'PENDING_POLICY',
+        'policy_supplied': POLICY_CONFIGURED,
+        'policy_approval': 'UNVERIFIED' if POLICY_CONFIGURED else 'NOT_SUPPLIED',
+        'status_counts': statuses,
+        'students': [asdict(student) for student in students],
+        'limits': 'Component evidence and calculations under an explicitly supplied policy, if any. Supplying a policy does not prove author or institutional approval. No publication or eligibility rule is adopted by this export.',
+    }
+    json_text = json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False)+'\n'
+    write_report_files([(csv_path, csv_text), (json_path, json_text), (md_path, md_text)])
+    print(f'CSV report: {csv_path}\nJSON report: {json_path}\nMarkdown report: {md_path}')
+    print('Processing statuses: '+(json.dumps(statuses) if statuses else 'NO_RECORDS'))
 
 
 def main():
@@ -351,13 +466,11 @@ Examples:
   %(prog)s --homework hw.csv --project proj.csv --tests tests.csv -o grades
   %(prog)s -hw hw.csv -p proj.csv -t tests.csv --output final_grades
 
-Formula:
-  FINAL = (HW × 0.25) + (PROJECT × 0.50) + (TESTS × 0.25)
-
-Elimination Criteria (80%):
-  - Homework: minimum 25/31 submitted
-  - Tests: minimum 5/6 taken
-  - Project: must meet all eligibility requirements
+Policy:
+  Without --policy, the tool reports components with PENDING_POLICY.
+  A supplied policy must explicitly provide weights, thresholds, grade boundaries,
+  late_homework_counts, passing_grade, elimination_grade and require_project_eligible.
+  The historical 25/50/25 and 80% examples above are not automatically adopted.
         """
     )
     
@@ -387,7 +500,10 @@ Elimination Criteria (80%):
         help='Verbose output'
     )
     
+    parser.add_argument('--policy', help='Explicit JSON policy; without it reports remain preliminary')
     args = parser.parse_args()
+    if args.policy:
+        load_policy(args.policy)
     
     # Validate input files
     for filepath, name in [(args.homework, 'homework'), 
@@ -418,12 +534,18 @@ Elimination Criteria (80%):
         results.append(student)
         
         if args.verbose:
-            status_symbol = "✓" if student.status == "PASS" else "✗"
-            print(f"  {status_symbol} {student.student_name}: {student.final_grade}")
+            print(f"  {student.student_name}: {student.status}; grade={student.final_grade}")
     
     # Generate reports
-    generate_report(results, args.output)
+    input_paths = [args.homework, args.project, args.tests]
+    if args.policy:
+        input_paths.append(args.policy)
+    generate_report(results, args.output, input_paths=input_paths)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (OSError, ValueError, KeyError, TypeError, IndexError) as exc:
+        print(f'Cannot calculate grades: {exc}', file=sys.stderr)
+        raise SystemExit(1)

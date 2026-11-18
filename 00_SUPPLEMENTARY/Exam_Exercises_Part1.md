@@ -348,7 +348,8 @@ SJF Waiting times:
    Average = (5 + 0 + 11 + 2) / 4 = 18 / 4 = 4.5 minutes
 
 d) Conclusion: SJF reduces average waiting time from 7.5 to 4.5 minutes 
-   (40% reduction), confirming that SJF is optimal for this criterion.
+   (40% reduction), confirming the minimum for this all-ready workload with known bursts,
+   non-preemptive execution and no switching overhead.
 ```
 
 ---
@@ -357,124 +358,66 @@ d) Conclusion: SJF reduces average waiting time from 7.5 to 4.5 minutes
 
 ## Detailed ASCII Diagrams
 
-### Diagram 2.1: System Call Mechanism (Detailed)
+### Diagram 2.1: System Call Mechanism (Linux x86-64 model)
 
-```
-═══════════════════════════════════════════════════════════════════════════
-                    SYSTEM CALL MECHANISM - DETAILED
-═══════════════════════════════════════════════════════════════════════════
+The C library API and the raw system call ABI are separate interfaces. The
+following path describes a Linux x86-64 `open()` wrapper that uses `openat()`;
+glibc's Linux implementation uses this route. A direct raw `open` example
+would use syscall number 2 instead. Other ABIs and libc versions need their
+own register and syscall-number tables.
 
-    USER SPACE                                    KERNEL SPACE
-    ══════════                                    ════════════
-    
-┌─────────────────────┐
-│  C Application      │
-│  ─────────────────  │
-│  int fd = open(     │
-│    "/tmp/file.txt", │
-│    O_RDONLY         │
-│  );                 │
-└─────────┬───────────┘
-          │ 1. libc function call
-          ▼
-┌─────────────────────┐
-│  glibc wrapper      │
-│  ─────────────────  │
-│  open():            │
-│    mov $2, %rax     │  // syscall number for open = 2
-│    mov path, %rdi   │  // first argument
-│    mov flags, %rsi  │  // second argument
-│    mov mode, %rdx   │  // third argument
-│    syscall          │  // 2. SYSCALL instruction
-└─────────┬───────────┘
-          │
-          │ ════════════════════════════════════════════════════════════
-          │              USER/KERNEL BOUNDARY (Ring 3 → Ring 0)
-          │ ════════════════════════════════════════════════════════════
-          │
-          │ 3. CPU saves state:
-          │    - RIP (return address) → in special register
-          │    - RFLAGS → in special register
-          │    - Switches to Ring 0 (kernel mode)
-          │    - Loads RSP from TSS (kernel stack)
-          ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  SYSTEM CALL ENTRY POINT (entry_SYSCALL_64)                             │
-│  ─────────────────────────────────────────────                          │
-│  4. Saves registers on kernel stack:                                    │
-│     push %rcx, %r11, %rax, %rdi, %rsi, %rdx, %r10, %r8, %r9            │
-│                                                                         │
-│  5. Verifies syscall number is valid (0 ≤ %rax < NR_syscalls)          │
-│                                                                         │
-│  6. Lookup in sys_call_table:                                          │
-│     ┌────────────────────────────────────────────────┐                 │
-│     │  sys_call_table[__NR_open] = sys_open          │                 │
-│     │                                                │                 │
-│     │  Index │ Handler          │ Description        │                 │
-│     │  ──────┼──────────────────┼────────────────────│                 │
-│     │    0   │ sys_read         │ Read from fd       │                 │
-│     │    1   │ sys_write        │ Write to fd        │                 │
-│     │    2   │ sys_open   ◄──── │ Open file          │                 │
-│     │    3   │ sys_close        │ Close fd           │                 │
-│     │   ...  │ ...              │ ...                │                 │
-│     │  435   │ sys_clone3       │ Clone process      │                 │
-│     └────────────────────────────────────────────────┘                 │
-│                                                                         │
-│  7. Calls sys_open(path, flags, mode)                                  │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  sys_open() - Kernel Implementation                                     │
-│  ──────────────────────────────────                                     │
-│                                                                         │
-│  a) Copies path from user space to kernel space (copy_from_user)       │
-│  b) Verifies permissions (can current user access this file?)          │
-│  c) Looks up the file's inode in VFS                                   │
-│  d) Allocates a new file descriptor in the process table               │
-│  e) Creates the file structure for this open                           │
-│  f) Returns fd (or negative error)                                     │
-│                                                                         │
-│  return fd;  // e.g. 3 (first 3: 0=stdin, 1=stdout, 2=stderr)         │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │
-                                 │ 8. Result in %rax
-                                 │
-┌────────────────────────────────┴────────────────────────────────────────┐
-│  SYSTEM CALL EXIT                                                       │
-│  ────────────────                                                       │
-│  9. Restores registers from kernel stack                               │
-│  10. Checks if there are pending signals                               │
-│  11. Executes SYSRET (or IRET)                                         │
-│      - Switches back to Ring 3                                         │
-│      - Restores RIP, RFLAGS, RSP                                       │
-└────────────────────────────────┬────────────────────────────────────────┘
-                                 │
-          ════════════════════════════════════════════════════════════
-                         BACK IN USER SPACE
-          ════════════════════════════════════════════════════════════
-                                 │
-                                 ▼
-┌─────────────────────┐
-│  glibc wrapper      │
-│  ─────────────────  │
-│  12. Checks %rax:   │
-│     if (rax < 0)    │
-│       errno = -rax; │
-│       return -1;    │
-│     return rax;     │
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│  Application        │
-│  ─────────────────  │
-│  fd = 3             │
-│  // Success!        │
-└─────────────────────┘
+```mermaid
+flowchart TD
+    A["C application: open(path, flags)"] --> B["libc wrapper: openat"]
+    B --> C["SYSCALL and kernel entry code"]
+    C --> D["VFS lookup, permissions and descriptor allocation"]
+    D --> E["Kernel return and libc error conversion"]
+    E --> F["Application receives fd or -1 with errno"]
 ```
+
+| Register | `openat` raw syscall arguments | Direct `open` alternative |
+|---|---|---|
+| `rax` | 257 | 2 |
+| `rdi` | `AT_FDCWD` (-100) | pathname pointer |
+| `rsi` | pathname pointer | flags |
+| `rdx` | flags | mode, when required |
+| `r10` | mode, when required | unused |
+
+1. The application calls the libc function with the C calling convention.
+2. The wrapper prepares the raw ABI registers and executes `SYSCALL`.
+3. Hardware records the return instruction pointer in `RCX` and flags in
+   `R11`, changes privilege and transfers to the configured kernel entry.
+   `SYSCALL` does **not** load `RSP` from the TSS.
+4. Kernel entry software preserves the user stack pointer, switches to an
+   appropriate kernel stack and saves the register context.
+5. The kernel validates/dispatches the syscall number. Internal handler
+   names and dispatch implementations vary across kernel versions.
+6. The open path obtains the user pathname safely; user pointers cannot be
+   dereferenced as trusted kernel pointers.
+7. VFS pathname lookup, access checks, file-object creation and descriptor
+   allocation are performed. Their internal ordering is implementation-specific.
+8. Success returns a descriptor in `RAX`; it need not be 3 because earlier
+   descriptors may be closed. Linux raw errors use the reserved negative
+   errno range, commonly -4095 through -1.
+9. Return processing handles pending work, including signals or scheduling
+   where needed, and restores the saved context.
+10. Software restores the user stack pointer. `SYSRET` (or an `IRET` path
+    when needed) returns to user mode; `SYSRET` itself does not restore `RSP`.
+11. The libc wrapper translates a raw error into return value -1 and `errno`.
+12. The application checks the result, uses the descriptor on success and
+    closes it when finished. The fd indexes its descriptor table; it is not
+    a direct inode or physical-disc address.
+
+Implementation references: [Linux x86-64 entry source](https://github.com/torvalds/linux/blob/v6.6/arch/x86/entry/entry_64.S),
+[glibc Linux open64 wrapper](https://codebrowser.dev/glibc/glibc/sysdeps/unix/sysv/linux/open64.c.html)
+and [Linux syscall ABI](https://man7.org/linux/man-pages/man2/syscall.2.html).
+This is a source-based explanation, not a captured `strace` or kernel execution.
 
 ### Diagram 2.2: System Call Categories
+
+The names below group operating-system **APIs** by purpose. Some are libc
+functions rather than direct system calls: `opendir`/`readdir` use lower-level
+operations, and some time queries may use a vDSO path without entering the kernel.
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -680,107 +623,49 @@ Concrete example: Without syscalls, two processes could write simultaneously to 
 
 ### Diagram 3.1: Complete State Diagram
 
-```
-═══════════════════════════════════════════════════════════════════════════
-                    PROCESS STATE DIAGRAM
-═══════════════════════════════════════════════════════════════════════════
+This single-CPU teaching model distinguishes ready and running. Linux's
+`TASK_RUNNING` covers both runnable and currently running tasks.
 
-                                    PROCESS CREATION
-                                    (fork/exec)
-                                         │
-                                         ▼
-                               ┌─────────────────┐
-                               │                 │
-                               │      NEW        │
-                               │                 │
-                               │  (PCB allocation│
-                               │   resources)    │
-                               └────────┬────────┘
-                                        │
-                                        │ admitted (scheduler accepts)
-                                        │
-                                        ▼
-                    ┌──────────────────────────────────────┐
-                    │                                      │
-           ┌────────┤              READY                   │◄────────────┐
-           │        │                                      │             │
-           │        │     ┌─────────────────────────┐     │             │
-           │        │     │    READY QUEUE          │     │             │
-           │        │     │  ┌───┐ ┌───┐ ┌───┐     │     │             │
-           │        │     │  │P2 │→│P5 │→│P3 │→... │     │             │
-           │        │     │  └───┘ └───┘ └───┘     │     │             │
-           │        │     └─────────────────────────┘     │             │
-           │        │                                      │             │
-           │        └──────────────────┬───────────────────┘             │
-           │                           │                                 │
-           │                           │ dispatch                        │
-           │                           │ (scheduler selects)             │
-           │     ┌─────────────────────┤                                 │
-           │     │                     │                                 │
-           │     │                     ▼                                 │
-           │     │         ┌─────────────────────┐                      │
-           │     │         │                     │                      │
-           │     │         │      RUNNING        │──────────────────────┤
-           │     │         │                     │     preemption       │
-           │     │         │   (on CPU now)      │   (timer interrupt,  │
-           │     │         │                     │    higher priority)  │
-           │     │         └──────────┬──────────┘                      │
-           │     │                    │                                 │
-           │     │      ┌─────────────┼─────────────┐                   │
-           │     │      │             │             │                   │
-           │     │      ▼             ▼             ▼                   │
-           │     │  I/O request   terminate    child wait              │
-           │     │  (read/write)   (exit)      (fork)                  │
-           │     │      │             │             │                   │
-           │     │      │             │             │                   │
-           │     │      ▼             │             ▼                   │
-           │     │ ┌─────────┐        │      ┌─────────────┐           │
-           │     │ │         │        │      │   WAITING   │           │
-           │     │ │ WAITING │        │      │  (for child)│           │
-           │     │ │ (I/O)   │        │      │             │           │
-           │     │ └────┬────┘        │      └──────┬──────┘           │
-           │     │      │             │             │                   │
-           │     │      │ I/O         │             │ child exits       │
-           │     │      │ complete    │             │ (SIGCHLD)        │
-           │     │      │             │             │                   │
-           │     └──────┴─────────────┴─────────────┘                   │
-           │                          │                                 │
-           │                          ▼                                 │
-           │              ┌─────────────────────┐                       │
-           │              │                     │                       │
-           │              │    TERMINATED       │                       │
-           │              │     (ZOMBIE)        │                       │
-           │              │                     │                       │
-           │              │  (waiting for       │                       │
-           │              │   parent's wait())  │                       │
-           │              └──────────┬──────────┘                       │
-           │                         │                                  │
-           │                         │ parent calls wait()              │
-           │                         │ (reaps zombie)                   │
-           │                         ▼                                  │
-           │              ┌─────────────────────┐                       │
-           │              │                     │                       │
-           │              │       DEAD          │                       │
-           │              │  (PCB released)     │                       │
-           │              │                     │                       │
-           │              └─────────────────────┘                       │
-           │                                                            │
-           │                                                            │
-           │              BLOCKED/WAITING QUEUE                         │
-           │              ┌────────────────────────────────────────┐   │
-           └──────────────┤  Disc I/O: P7, P9, P12                 │───┘
-                          │  Network:  P4, P8                       │
-                          │  Pipe:     P6                           │
-                          │  Sleep:    P10, P11                     │
-                          └────────────────────────────────────────┘
-                                        │
-                                        │ event occurs
-                                        │ (I/O complete, signal, etc.)
-                                        │
-                                        └──────────► moves to READY
+```mermaid
+stateDiagram-v2
+    [*] --> New: fork creates child
+    New --> Ready: initialisation complete
+    Ready --> Running: dispatch
+    Running --> Ready: preemption
+    Running --> Blocked: blocking I/O or waitpid
+    Blocked --> Ready: awaited event occurs
+    Running --> Running: successful exec replaces image
+    Running --> Zombie: exit
+    Zombie --> Reaped: parent or reaper collects status
+    Reaped --> [*]
 ```
+
+A ready queue may contain P2, P5 and P3. Separate waiting queues can contain
+P7/P9/P12 for disc I/O, P4/P8 for networking, P6 for a pipe and P10/P11 for a
+timer. Event completion makes a task ready; it does not terminate it or give
+it the CPU immediately. A blocking `wait`/`waitpid` waits for a child's status;
+`fork` creates the child. Successful `exec` preserves the process identity
+and replaces its image. A zombie retains exit/accounting information until
+reaped; it is not executing. Signal dispositions and automatic reaping can
+alter the visible zombie interval. These abstract states are not a complete
+listing of Linux internal task states.
+
+References: [fork](https://man7.org/linux/man-pages/man2/fork.2.html),
+[execve](https://man7.org/linux/man-pages/man2/execve.2.html) and
+[wait](https://man7.org/linux/man-pages/man2/wait.2.html).
 
 ### Diagram 3.2: fork() and Copy-on-Write
+
+The addresses and page counts below are illustrative. Linux commonly shares
+eligible private pages after `fork`, using read-only mappings plus software
+metadata to recognise copy-on-write faults. A hardware PTE need not contain a
+literal CoW bit. Shared mappings, page tables and excluded mappings require
+separate treatment. After one task copies a page, the other mapping can remain
+write-protected until its next write fault; if it is then the sole owner, that
+fault may restore write permission without another copy. The diagram's final
+read/write permissions denote the resolved state, not a simultaneous update
+of both processes' PTEs. Fork costs depend on mappings and implementation;
+they are not a fixed number of kilobytes.
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -985,8 +870,8 @@ Solution:
 | nonvoluntary_ctxt_switches | 89 | How many preemptions (timer interrupt, higher priority) |
 
 Observations:
-- The process uses only 36% of allocated virtual memory (45/125 MB)
-- The voluntary/nonvoluntary ratio (17:1) suggests an I/O-bound process
+- The reported resident/virtual-size ratio is 45/125 = 36%; this is not a measurement of wasted memory or of which allocated bytes the programme uses.
+- The voluntary/nonvoluntary switch ratio is 17:1. Blocking I/O is one possible explanation, but synchronisation and other waits also contribute; workload traces are needed to classify the process.
 - 4 threads in a single Python process
 
 ---
@@ -1017,18 +902,19 @@ What is CoW? (1p)
 Copy-on-Write is an optimisation technique that defers copying memory pages until one of the copies tries to write to the page.
 
 How does it work? (2p)
-1. At fork(), the kernel does NOT copy the memory pages
-2. Both processes share the same physical frames
-3. Pages are marked Read-Only (even if they were RW)
-4. On first write → Page Fault → Kernel copies the page → Updates page tables
+1. Eligible private pages can initially be shared after fork().
+2. Their page-table mappings refer to the same physical frames.
+3. Writable private mappings are write-protected and tracked for CoW.
+4. On a write fault, the kernel copies if another owner needs the old page;
+   a sole-owner case can restore write permission without copying.
 
 Why is it essential? (2p)
-- Traditional fork() copied the entire memory (~100+ MB) = slow
-- With CoW, fork() only copies page tables (~KB) = fast
+- Eagerly copying eligible private data has a cost proportional to those pages.
+- CoW defers that data copying; page-table and task setup costs remain.
 - Many child processes do exec() immediately → wouldn't have used the copied data
-- Code pages (text segment) are never copied (read-only anyway)
+- Ordinary read-only executable mappings can remain shared; modified/private mappings and special cases need separate handling.
 
-Concrete example: The shell does fork() + exec() for each command. Without CoW, it would copy tens of MB each time. With CoW, it copies only a few KB.
+Concrete example: A conventional shell may use fork() followed by exec() for an external command; builtins and spawn/exec optimisations differ. CoW avoids eagerly copying all eligible private data pages. Page-table and task setup costs still depend on the mappings, so neither tens of MiB nor a few KiB is a universal cost.
 
 ---
 
@@ -1163,16 +1049,25 @@ FINAL COMPARISON:
 ├───────────────┼───────────┼──────────────┼──────────────┤
 │     FCFS      │    8.5    │    12.25     │     8.5      │
 │     SJF       │   2.75    │     6.5      │    2.75      │ ← Best wait
-│  RR (q=2)     │    6.0    │    9.75      │     3.0      │ ← Best response
+│  RR (q=2)     │    6.0    │    9.75      │     3.0      │ ← Earlier P1 response
 └───────────────┴───────────┴──────────────┴──────────────┘
 
 Observations:
-• SJF minimises waiting time (theoretically optimal)
-• RR offers the best response time (interactivity)
+• SJF has the best mean wait AND mean response in this all-ready example.
+• With known bursts, no overhead and all jobs available, SJF minimises mean wait.
+• RR starts P1 at 0 instead of 7; its mean response here is 3.0, above SJF 2.75.
 • FCFS has convoy effect (P4 with burst=1 waits 14 units!)
 ```
 
 ### Diagram 4.2: MLFQ (Multi-Level Feedback Queue)
+
+**Policy for this example:** strict priority between queues; RR in Q0–Q2 and
+FCFS within Q3. A newly ready higher-priority task preempts a lower-priority
+one. Each level's CPU allotment is cumulative across I/O and preemption;
+yielding does not reset it. Exhausting the allotment demotes the task, except
+at the final queue. A periodic boost moves tasks to Q0 and resets their
+allotments; equal-priority order is preserved. This is one explicit teaching
+policy, not a claim that every MLFQ implementation uses these rules.
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -1221,10 +1116,10 @@ Observations:
 │  ═══════════════════════════════════════════════════════               │
 │                                                                         │
 │  Rule 1: If Priority(A) > Priority(B) → A runs                         │
-│  Rule 2: If Priority(A) = Priority(B) → RR between them                │
+│  Rule 2: Equal priority uses RR in Q0–Q2; Q3 uses FCFS                  │
 │  Rule 3: New process → Queue 0 (maximum priority)                      │
-│  Rule 4a: If uses entire quantum → demote one queue                    │
-│  Rule 4b: If yields CPU (I/O) → stays in same queue                    │
+│  Rule 4a: If cumulative level allotment expires → demote                │
+│  Rule 4b: On I/O, keep level AND used allotment until exhausted         │
 │  Rule 5: PRIORITY BOOST every S seconds                                │
 │          (move ALL processes to Queue 0)                               │
 │                                                                         │
@@ -1241,18 +1136,19 @@ t=0:   Both in Q0 (newly created)
        A runs 3ms, does I/O → stays in Q0 ✓
        B runs 8ms (entire quantum) → demotes to Q1 ↓
 
-t=8:   A (Q0) has priority > B (Q1)
+t=11:  A completes its I/O and returns to Q0; B is in Q1
        A runs 2ms, does I/O → stays in Q0 ✓
 
-t=10:  A does I/O, B (Q1) runs
+t=13:  A does I/O, B (Q1) runs
        B runs 16ms (entire Q1 quantum) → demotes to Q2 ↓
 
-t=26:  A returns from I/O
+t=29:  A returns from I/O
        A (Q0) has priority > B (Q2)
        A runs...
 
-Result: A (interactive) always has fast response!
-        B (batch) runs when A doesn't need CPU.
+Result: A responds immediately at the stated I/O completion times in this trace.
+        It has used 5 of its 8 ms Q0 allotment by t=13, not a fresh quantum.
+        B runs while A is blocked. No universal response bound follows from this trace.
 
 Visual timeline:
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -1428,7 +1324,7 @@ Metrics:
 
 > ⚠️ **Exam insight:** Questions 4.1–4.3 appear in nearly every examination session. Master the calculation technique — draw the Gantt chart first, then derive all metrics from it.
 
-4.1 (Multiple Choice) ⭐ Which scheduling algorithm is optimal for minimising average waiting time?
+4.1 (Multiple Choice) ⭐ With all jobs ready initially, exact burst lengths, no switching overhead and non-preemptive execution, which scheduling algorithm minimises average waiting time?
 - a) FCFS
 - b) SJF ✓
 - c) Round Robin
@@ -1504,20 +1400,22 @@ a) Typical structure (3 points):
 
 b) Transition rules (2 points):
    - NEW process → Q0 (benefit of the doubt)
-   - Uses ENTIRE quantum → demotes one queue (it's CPU-bound)
-   - Yields CPU before quantum (I/O) → stays in same queue
-   - Uses total allocated CPU in a window → demotes
+   - Exhausts cumulative CPU allotment at this level → demotes, unless in Q3
+   - Yields or is preempted → retains level and already-used allotment
+   - Higher-priority wakeup preempts; final Q3 uses FCFS within that level
 
 c) Starvation and the solution (1 point):
    Problem: Processes in low queues don't get CPU if there are always
             processes in high queues
    Solution: PRIORITY BOOST - every S seconds, move ALL processes
-            to Q0. Guarantees that each process eventually gets CPU.
+            to Q0 and reset allotments. With a finite runnable set and fair
+            queue order this prevents indefinite exclusion; arbitrary overload
+            does not have a response bound merely because a boost exists.
 
 d) SJF approximation (1 point):
    - Processes with short burst finish in Q0 → SJF-like behaviour
    - Processes with long burst demote → run with lower priority
-   - Result: Short processes finish first, without knowing the burst
+   - Tendency: recent short CPU usage receives priority; this is not exact SJF
    - MLFQ "learns" from the process's past behaviour
 ```
 
@@ -1550,45 +1448,24 @@ Consider these criteria in your analysis:
 5. Starvation risk
 
 **Model Answer:**
-```
-MLFQ (option d) is optimal for this mixed workload scenario.
 
-Analysis by criterion:
+MLFQ is a reasonable candidate for the stated mixed workload, conditional on
+measured arrival rates, burst distributions, queue lengths and switching cost.
+The two means (5 ms and 500 ms) cannot establish an optimal scheduler.
 
-1. Response Time (Interactive):
-   - FCFS: Poor (5ms job waits behind 500ms job = 500ms response)
-   - SJF: Excellent (5ms jobs always first)
-   - RR Q=10ms: Good (max 10ms initial wait per queued process)
-   - MLFQ: Excellent (interactive stays in Q0, gets 8ms quantum quickly)
+| Criterion | FCFS | SJF with estimates | RR, q=10 ms | MLFQ, 8/16/32 ms then FCFS |
+|---|---|---|---|---|
+| Interactive response | A short job behind a 500 ms job can wait 500 ms | Favourable when predictions identify short jobs; arrivals and prediction errors matter | With n runnable jobs ahead, initial delay is at most n quanta plus overhead in this closed queue | Higher-priority work preempts lower levels, but Q0 backlog still causes delay |
+| Batch throughput | Few quantum preemptions; dispatch/blocking costs remain | Long jobs can wait behind short arrivals; this does not imply inherently low throughput | More quantum switches can reduce useful CPU time if their cost is material | Long jobs reach the FCFS level but higher queues still preempt them |
+| Fairness | Arrival-order service | Optimises mean wait only under the relevant known-burst/all-ready assumptions | Equal runnable CPU quanta in this single-CPU model | Unequal priorities; cumulative allotments limit I/O gaming |
+| Complexity | Low | Prediction and ordering required | Ready queue and timer | Several queues, accounting, preemption and boost rules |
+| Starvation | Finite jobs ahead eventually complete | Possible under a continuing stream of preferred short jobs | Avoided for a finite runnable set with finite service/switch costs | Boost helps under finite load and fair queue order; it is not an unconditional delay bound |
 
-2. Throughput (Batch):
-   - FCFS: Good (no context switch overhead)
-   - SJF: Poor (batch jobs always last, may starve)
-   - RR: Moderate (frequent context switches hurt large jobs)
-   - MLFQ: Good (batch demotes to Q3 FCFS, runs efficiently)
-
-3. Fairness:
-   - FCFS: Unfair (arrival order dominates)
-   - SJF: Very unfair (long jobs starve)
-   - RR: Very fair (equal time slices)
-   - MLFQ: Fair with boost (periodic priority reset)
-
-4. Implementation Complexity:
-   - FCFS: Trivial
-   - SJF: Hard (requires burst prediction)
-   - RR: Simple
-   - MLFQ: Moderate (multiple queues, boost logic)
-
-5. Starvation Risk:
-   - FCFS: None
-   - SJF: High (long jobs indefinitely delayed)
-   - RR: None
-   - MLFQ: None (with priority boost)
-
-CONCLUSION: MLFQ achieves the best balance. It automatically adapts
-to workload type without requiring burst prediction, provides excellent
-interactive response, and prevents starvation through priority boosting.
-```
+Use the explicit MLFQ policy in Diagram 4.2. Compare measured latency quantiles,
+throughput and CPU overhead against RR with the same workload and hardware.
+Retain FCFS when simplicity and batch efficiency dominate; consider SJF when
+prediction quality and long-job treatment are acceptable. A final deployment
+choice requires the workload and service objectives, not an invented ranking.
 
 ---
 
@@ -1616,51 +1493,49 @@ Provide:
 - d) Overload handling strategy
 
 **Model Answer:**
-```
-a) Algorithm: Rate Monotonic Scheduling (RMS) with priority inheritance
 
-   Justification:
-   - RMS is optimal for fixed-priority preemptive scheduling
-   - Priority inheritance prevents priority inversion
-   - Well-understood, formally verified, used in automotive (AUTOSAR)
+**a–b) Candidate and assumptions.** Use a single preemptive CPU with independent
+periodic tasks, fixed priorities in order of increasing period, zero release
+jitter, no self-suspension and the listed worst-case execution times. For the
+calculation below, blocking and scheduling/interrupt overhead are zero. Real
+deployment must include their verified bounds. The priority order is collision
+avoidance, lane keeping, navigation, then infotainment. Rate monotonic optimality
+has specific task-model assumptions; it is not a guarantee for arbitrary deadlines.
+If shared resources are introduced, choose a bounded blocking protocol and add
+its blocking term. Priority inheritance alone does not make blocking zero.
 
-b) Priority Assignment (RMS: shorter period = higher priority):
-   
-   Priority 1 (Highest): Collision Avoidance (10ms period)
-   Priority 2: Lane Keeping (50ms period)
-   Priority 3: Navigation Update (200ms period)
-   Priority 4 (Lowest): Infotainment (500ms period)
+**c) Schedulability in this model.** Utilisation is
+`2/10 + 8/50 + 15/200 + 50/500 = 0.535` (53.5%). The four-task
+Liu–Layland sufficient bound is `4(2^(1/4)-1) = 0.756828...`.
+The fourth deadline is 1000 ms rather than its 500 ms period: applying the
+implicit-deadline bound is conservative only after replacing that deadline by
+500 ms. Here the stronger result also follows directly from response times.
 
-c) Schedulability Analysis:
-   
-   CPU Utilisation = Σ(Ci/Ti)
-   = 2/10 + 8/50 + 15/200 + 50/500
-   = 0.20 + 0.16 + 0.075 + 0.10
-   = 0.535 (53.5%)
-   
-   RMS Utilisation Bound for n=4: U = 4(2^(1/4) - 1) = 0.757 (75.7%)
-   
-   Since 0.535 < 0.757, the system IS SCHEDULABLE.
-   
-   Verification via Response Time Analysis:
-   - R_collision = 2ms < 10ms ✓
-   - R_lane = 2 + 8 = 10ms (one collision preemption) < 50ms ✓
-   - R_nav = 2 + 8 + 15 + ceil(25/10)*2 = 31ms < 200ms ✓
-   - R_info = worst case with all preemptions < 1000ms ✓
+Start `R_i^(0)=C_i`; iterate
+`R_i^(k+1)=C_i+B_i+Σ(j<i) ceil(R_i^(k)/T_j) C_j`, with `B_i=0` here.
 
-d) Overload Handling Strategy:
-   
-   1. ADMISSION CONTROL: Reject new infotainment requests if
-      CPU utilisation exceeds 70%
-   
-   2. GRACEFUL DEGRADATION:
-      - If collision avoidance exceeds 2ms: skip navigation update
-      - If lane keeping exceeds 8ms: reduce infotainment to 1Hz
-      - Never skip safety-critical tasks
-   
-   3. WATCHDOG: Hardware timer resets system if collision
-      avoidance misses deadline (fail-safe to emergency stop)
-```
+| Task | Iterates, ms | Fixed point | Deadline | Result |
+|---|---|---:|---:|---|
+| Collision avoidance | 2 → 2 | 2 | 10 | Meets |
+| Lane keeping | 8 → 10 → 10 | 10 | 50 | Meets |
+| Navigation | 15 → 27 → 29 → 29 | 29 | 200 | Meets |
+| Infotainment | 50 → 83 → 99 → 101 → 111 → 113 → 113 | 113 | 1000 | Meets |
+
+Each response is also below its period, so the iteration does not leave
+unfinished instances of the same task overlapping. In the navigation equation,
+include each higher-priority interference term once; adding a separate initial
+collision term again would double-count it.
+
+**d) Overload and assurance.** Admit additional work only after repeating the
+analysis with execution, blocking and overhead budgets. The former 70% threshold
+is merely an unvalidated candidate, not a result of this analysis. Deferring
+infotainment, reducing optional update rates and detecting execution-budget
+overruns are design options; changing or skipping navigation must be assessed
+against the system's safety requirements. A watchdog reset is not intrinsically
+a safe vehicle response. A verified hazard analysis, recovery design and measured
+worst-case timing are needed before claiming vehicle-level safety. The exercise
+establishes the listed deadlines only within its explicit mathematical model;
+it does not certify an implementation or select an institutional safety policy.
 
 ---
 

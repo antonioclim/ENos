@@ -5,6 +5,8 @@
 
 ---
 
+> **Provenance:** years, student attributions and grades below are historical author claims without supplied records; they are not newly verified results. Student solutions intentionally retain defects for analysis. Corrected alternatives are teaching examples.
+
 ## IMPORTANT NOTE
 
 These examples are for **reference and inspiration**. 
@@ -85,7 +87,7 @@ fi
 set -euo pipefail
 
 readonly SCRIPT_NAME=$(basename "$0")
-readonly LOG_FILE="/var/log/${SCRIPT_NAME%.sh}.log"
+LOG_FILE=${LOG_FILE:-/dev/null} # Set an explicitly owned log file when required.
 readonly THRESHOLD_CPU="${THRESHOLD_CPU:-80}"
 readonly THRESHOLD_MEM="${THRESHOLD_MEM:-85}"
 
@@ -93,24 +95,10 @@ log() {
     printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$LOG_FILE"
 }
 
-get_cpu() {
-    # More solid method using /proc/stat
-    local cpu_line
-    cpu_line=$(head -1 /proc/stat)
-    
-    local user nice system idle
-    read -r _ user nice system idle _ <<< "$cpu_line"
-    
-    local total=$((user + nice + system + idle))
-    local active=$((user + nice + system))
-    
-    echo $((active * 100 / total))
-}
-
-get_mem() {
-    awk '/MemTotal:/ {total=$2} /MemAvailable:/ {avail=$2} 
-         END {printf "%.0f", (1 - avail/total) * 100}' /proc/meminfo
-}
+# From the repository root; validated two-sample CPU and MemAvailable helpers.
+source SEM06/scripts/examples/monitor_examples.sh
+get_cpu() { get_cpu_usage 0.2; }
+get_mem() { get_memory_usage; }
 
 main() {
     local cpu mem alerts=0
@@ -122,12 +110,12 @@ main() {
     
     if ((cpu > THRESHOLD_CPU)); then
         log "ALERT: CPU ${cpu}% > ${THRESHOLD_CPU}%"
-        ((alerts++))
+        alerts=$((alerts+1))
     fi
     
     if ((mem > THRESHOLD_MEM)); then
         log "ALERT: Memory ${mem}% > ${THRESHOLD_MEM}%"
-        ((alerts++))
+        alerts=$((alerts+1))
     fi
     
     exit $alerts
@@ -150,7 +138,7 @@ main "$@"
 # backup.sh - Simple backup
 
 SOURCE=$1
-DEST="/backup"
+DEST="" # Required: choose an owned output directory.
 DATE=$(date +%Y%m%d)
 
 # Create backup
@@ -190,7 +178,7 @@ usage() {
 Usage: $SCRIPT_NAME [OPTIONS] <source>
 
 Options:
-    -d, --dest DIR      Destination directory (default: /backup)
+    -d, --dest DIR      Destination directory (required, explicitly owned)
     -r, --retention N   Retention days (default: 7)
     -c, --compress ALG  Compression algorithm: gz, bz2, xz (default: gz)
     -h, --help          Display this message
@@ -202,12 +190,15 @@ log() { printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
 
 # Defaults
-DEST="/backup"
+DEST="" # Required: choose an owned output directory.
 RETENTION=7
 COMPRESS="gz"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -d|--dest|-r|--retention|-c|--compress) [[ $# -ge 2 && -n $2 ]] || die "Missing option value" ;;
+    esac
     case "$1" in
         -d|--dest) DEST="$2"; shift 2 ;;
         -r|--retention) RETENTION="$2"; shift 2 ;;
@@ -222,11 +213,15 @@ SOURCE="${1:?Specify source directory}"
 
 # Validations
 [[ -d "$SOURCE" ]] || die "Source doesn't exist: $SOURCE"
-[[ -d "$DEST" ]] || mkdir -p "$DEST"
+[[ -n $DEST && $RETENTION =~ ^[0-9]{1,5}$ ]] || die "Explicit destination and nonnegative retention required"
+mkdir -p -- "$DEST"
+source_real=$(realpath -- "$SOURCE")
+dest_real=$(realpath -- "$DEST")
+[[ $source_real != / && $dest_real != "$source_real" && $dest_real != "$source_real/"* ]] || die "Destination must be outside source"
 
 # Space verification
-source_size=$(du -s "$SOURCE" | awk '{print $1}')
-dest_avail=$(df "$DEST" | awk 'NR==2 {print $4}')
+source_size=$(du -sk -- "$SOURCE" | awk '{print $1}')
+dest_avail=$(LC_ALL=C df -Pk -- "$DEST" | awk 'NR==2 {print $4}')
 ((dest_avail > source_size * 2)) || die "Insufficient space in $DEST"
 
 # Select compression extension
@@ -238,17 +233,20 @@ case "$COMPRESS" in
 esac
 
 # Create backup
-BACKUP_FILE="$DEST/backup_$(date +%Y%m%d_%H%M%S).$EXT"
+stage=$(mktemp "$DEST/.partial.XXXXXX")
+trap 'rm -f -- "$stage"' EXIT
+BACKUP_FILE="${stage/.partial./backup_}.$EXT"
 log "Creating backup: $BACKUP_FILE"
 
-if tar c${TAR_OPT}f "$BACKUP_FILE" -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")"; then
+if tar c${TAR_OPT}f "$stage" -C "$SOURCE" .; then
+    mv -- "$stage" "$BACKUP_FILE" || die "Publish failed"
     log "Backup created: $(du -h "$BACKUP_FILE" | cut -f1)"
 else
     die "Backup failed"
 fi
 
 # Rotation
-deleted=$(find "$DEST" -name "backup_*.$EXT" -mtime +"$RETENTION" -delete -print | wc -l)
+deleted=$(find "$DEST" -maxdepth 1 -type f -name "backup_*.$EXT" -mtime +"$RETENTION" -delete -printf 'x\n' | wc -l)
 log "Deleted $deleted old backups"
 
 log "Backup complete!"
@@ -357,7 +355,7 @@ echo "Done!"
 1. Also moves directories (should have `-f` check)
 2. Doesn't handle files without extension
 3. Doesn't handle name conflicts
-4. Also moves hidden files
+4. The normal `*` glob omits leading-dot files; inherited dotglob would change that behaviour
 5. No dry-run mode
 6. Minimal feedback
 
@@ -395,7 +393,7 @@ VERBOSE=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -m|--mode) MODE="$2"; shift 2 ;;
+        -m|--mode) [[ $# -ge 2 && $2 =~ ^(ext|date|size)$ ]] || usage 2; MODE="$2"; shift 2 ;;
         -n|--dry-run) DRY_RUN=true; shift ;;
         -v|--verbose) VERBOSE=true; shift ;;
         -h|--help) usage ;;
@@ -410,10 +408,11 @@ DIR="${1:?Specify directory}"
 # Functions for determining category
 get_ext_category() {
     local file="$1"
-    local ext="${file##*.}"
+    local base=${file##*/}
+    local ext=${base##*.}
     
     # Files without extension
-    [[ "$ext" == "$file" ]] && echo "no_extension" && return
+    [[ $base != *.* || $base == .* && ${base:1} != *.* || $base == *. ]] && { echo "no_extension"; return 0; }
     
     # Lowercase
     ext="${ext,,}"
@@ -457,7 +456,7 @@ skipped=0
 shopt -s nullglob  # Don't expand glob to literal if no match
 for file in "$DIR"/*; do
     # Skip directories
-    [[ -f "$file" ]] || continue
+    [[ -f "$file" && ! -L $file ]] || continue
     
     # Skip hidden files
     [[ "$(basename "$file")" == .* ]] && continue
@@ -474,29 +473,31 @@ for file in "$DIR"/*; do
     dest_file="$dest_dir/$(basename "$file")"
     
     # Conflict handling
-    if [[ -e "$dest_file" ]]; then
-        base="${dest_file%.*}"
-        ext="${dest_file##*.}"
+    if [[ -e "$dest_file" || -L $dest_file ]]; then
+        base="$dest_file"
+        ext=""
         counter=1
-        while [[ -e "${base}_${counter}.${ext}" ]]; do
-            ((counter++))
+        while [[ -e "${base}_${counter}${ext}" ]]; do
+            counter=$((counter+1))
         done
-        dest_file="${base}_${counter}.${ext}"
+        dest_file="${base}_${counter}${ext}"
     fi
     
     verbose "  $file -> $dest_file"
     
     if [[ "$DRY_RUN" == false ]]; then
-        mkdir -p "$dest_dir"
-        mv "$file" "$dest_file"
-        ((moved++))
+        [[ ! -L $dest_dir ]] || { printf 'Symlink category refused\n' >&2; exit 1; }
+        mkdir -p -- "$dest_dir"
+        mv -n -- "$file" "$dest_file"
+        [[ ! -e $file ]] || { printf 'Move did not complete\n' >&2; exit 1; }
+        moved=$((moved+1))
     else
-        ((moved++))  # Count for dry-run
+        moved=$((moved+1))  # Count for dry-run
     fi
 done
 
 log "Organisation complete: $moved files processed"
-[[ "$DRY_RUN" == true ]] && log "(DRY-RUN - nothing was moved)"
+if [[ "$DRY_RUN" == true ]]; then log "(DRY-RUN - nothing was moved)"; fi
 ```
 
 ---
@@ -506,23 +507,26 @@ log "Organisation complete: $moved files processed"
 ### 1. Quoting and Word Splitting
 ```bash
 # WRONG
-for file in $(ls *.txt); do ...
+for file in $(ls *.txt); do :; done # WRONG: splitting and glob expansion
 
 # CORRECT
 for file in *.txt; do
     [[ -e "$file" ]] || continue
-    ...
+    printf '%s\n' "$file"
 done
 ```
 
 ### 2. Unvalidated Variables
 ```bash
 # WRONG
-rm -rf $DIR/*
+printf 'Unsafe deletion argument: <%s>\n' $DIR/* # WRONG ownership/splitting plan only
 
 # CORRECT
-[[ -n "$DIR" && -d "$DIR" ]] || exit 1
-rm -rf "${DIR:?}"/*
+owned=
+trap '[[ -z ${owned:-} ]] || rm -rf -- "$owned"' EXIT
+owned=$(mktemp -d)
+# Only files created by this demonstration belong under "$owned".
+printf 'Owned workspace: %s\n' "$owned"
 ```
 
 ### 3. Missing Error Handling

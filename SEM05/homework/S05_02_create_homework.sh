@@ -23,6 +23,7 @@ fi
 
 STUDENT_NAME="$1"
 GROUP="$2"
+[[ -n $STUDENT_NAME && $STUDENT_NAME != *'/'* && $STUDENT_NAME != *$'\n'* && $GROUP =~ ^[A-Za-z0-9_-]+$ ]] || { echo 'Invalid name/group' >&2; exit 2; }
 DATE_CREATED=$(date +%Y-%m-%d)
 HOMEWORK_DIR="$HOME/homework_S05_${STUDENT_NAME// /_}"
 
@@ -196,28 +197,33 @@ parse_line() {
     # TODO: Parse a log line
     # Format: [TIMESTAMP] [LEVEL] Message
     local line="$1"
-    echo "TODO: Implement parse_line"
+    echo "TODO: Implement parse_line" >&2
+    return 3
 }
 
 count_levels() {
     # TODO: Count entries by level
-    echo "TODO: Implement count_levels"
+    echo "TODO: Implement count_levels" >&2
+    return 3
 }
 
 get_top_messages() {
     # TODO: Return the top N most frequent messages
     local n="${1:-$TOP_N}"
-    echo "TODO: Implement get_top_messages"
+    echo "TODO: Implement get_top_messages" >&2
+    return 3
 }
 
 print_report() {
     # TODO: Display the final report
+    [[ $# -eq 1 && $TOP_N =~ ^[1-9][0-9]*$ && ${#TOP_N} -le 6 ]] || { echo "Expected one file and positive --top" >&2; return 2; }
     local log_file="$1"
     echo "═══════════════════════════════════════════"
     echo "Log Analysis Report: $log_file"
     echo "═══════════════════════════════════════════"
     echo ""
-    echo "TODO: Complete the report"
+    echo "TODO: Complete the report" >&2
+    return 3
 }
 
 cleanup() {
@@ -235,9 +241,9 @@ main() {
         case "$1" in
             -h|--help) usage; exit 0 ;;
             -v|--verbose) VERBOSE=true; shift ;;
-            -l|--level) LEVEL_FILTER="$2"; shift 2 ;;
-            -o|--output) OUTPUT_FILE="$2"; shift 2 ;;
-            --top) TOP_N="$2"; shift 2 ;;
+            -l|--level) [[ $# -ge 2 ]] || { echo "Option $1 needs a value" >&2; return 2; }; LEVEL_FILTER="$2"; shift 2 ;;
+            -o|--output) [[ $# -ge 2 ]] || { echo "Option $1 needs a value" >&2; return 2; }; OUTPUT_FILE="$2"; shift 2 ;;
+            --top) [[ $# -ge 2 ]] || { echo "Option $1 needs a value" >&2; return 2; }; TOP_N="$2"; shift 2 ;;
             --version) echo "$SCRIPT_NAME version $VERSION"; exit 0 ;;
             -*) echo "Unknown option: $1" >&2; usage; exit 1 ;;
             *) break ;;
@@ -250,6 +256,7 @@ main() {
         exit 1
     fi
     
+    [[ $# -eq 1 && $TOP_N =~ ^[1-9][0-9]*$ && ${#TOP_N} -le 6 ]] || { echo "Expected one file and positive --top" >&2; return 2; }
     local log_file="$1"
     
     if [[ ! -f "$log_file" ]]; then
@@ -281,7 +288,8 @@ set -euo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly CONFIG_FILE="${CONFIG_FILE:-./app.conf}"
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/test_files/app.conf}"
 
 declare -A CONFIG
 readonly REQUIRED_KEYS=("HOST" "PORT")
@@ -312,23 +320,24 @@ load_config() {
     if [[ ! -f "$CONFIG_FILE" ]]; then
         return 1
     fi
-    echo "TODO: Implement load_config"
+    echo "TODO: Implement load_config" >&2
+    return 3
 }
 
-save_config() { echo "TODO: Implement save_config"; }
-get_value() { local key="$1"; echo "TODO: Implement get_value for '$key'"; }
-set_value() { local key="$1" value="$2"; echo "TODO: Implement set_value"; }
-delete_key() { local key="$1"; echo "TODO: Implement delete_key"; }
-list_config() { echo "TODO: Implement list_config"; }
-validate_config() { echo "TODO: Implement validate_config"; }
-export_config() { echo "TODO: Implement export_config"; }
+save_config() { echo "TODO: Implement save_config" >&2; return 3; }
+get_value() { local key="$1"; echo "TODO: Implement get_value for '$key'" >&2; return 3; }
+set_value() { local key="$1" value="$2"; echo "TODO: Implement set_value" >&2; return 3; }
+delete_key() { local key="$1"; echo "TODO: Implement delete_key" >&2; return 3; }
+list_config() { echo "TODO: Implement list_config" >&2; return 3; }
+validate_config() { echo "TODO: Implement validate_config" >&2; return 3; }
+export_config() { echo "TODO: Implement export_config" >&2; return 3; }
 
 main() {
     if [[ $# -lt 1 ]]; then usage; exit 1; fi
     
     local command="$1"
     shift
-    load_config || true
+    if [[ $command != -h && $command != --help ]]; then load_config || return $?; fi
     
     case "$command" in
         get) [[ $# -lt 1 ]] && { echo "Error: key missing" >&2; exit 1; }; get_value "$1" ;;
@@ -379,7 +388,8 @@ cleanup() { :; }
 
 process_files() {
     # TODO: Refactor - use local, avoid UUOC, quote arrays
-    echo "TODO: Implement refactored process_files"
+    echo "TODO: Implement refactored process_files" >&2
+    return 3
 }
 
 main() {
@@ -401,7 +411,7 @@ main() {
         exit 1
     fi
     
-    process_files "${files[@]}"
+    process_files "${files[@]}" || return $?
     echo "Processed ${#files[@]} files"
 }
 

@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCORE=0
 TOTAL=10
-DATA_DIR="../resources/sample_data"
+DATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../resources/sample_data" && pwd)"
 
 echo "=== TEST 02: GREP MASTERY ==="
 echo ""
@@ -13,7 +13,7 @@ echo ""
 # Ex 1: Count ERRORs in log
 echo -n "Ex 1 - Count ERROR: "
 EXPECTED=4
-RESULT=$(grep -c 'ERROR' "$DATA_DIR/server.log" 2>/dev/null || echo 0)
+RESULT=$(grep -c 'ERROR' "$DATA_DIR/server.log" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -24,7 +24,7 @@ fi
 # Ex 2: Find WARNING and ERROR (case insensitive)
 echo -n "Ex 2 - WARNING or ERROR: "
 EXPECTED=9
-RESULT=$(grep -ciE 'warning|error' "$DATA_DIR/server.log" 2>/dev/null || echo 0)
+RESULT=$(grep -ciE 'warning|error' "$DATA_DIR/server.log" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -35,7 +35,7 @@ fi
 # Ex 3: Lines that do NOT contain INFO
 echo -n "Ex 3 - Lines without INFO: "
 EXPECTED=12
-RESULT=$(grep -cv 'INFO' "$DATA_DIR/server.log" 2>/dev/null || echo 0)
+RESULT=$(grep -cv 'INFO' "$DATA_DIR/server.log" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -57,7 +57,7 @@ fi
 # Ex 5: Number of logins
 echo -n "Ex 5 - Logins: "
 EXPECTED=3
-RESULT=$(grep -c 'logged in' "$DATA_DIR/server.log" 2>/dev/null || echo 0)
+RESULT=$(grep -c 'logged in' "$DATA_DIR/server.log" 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT)"
     ((SCORE+=2))
@@ -67,3 +67,5 @@ fi
 
 echo ""
 echo "=== FINAL SCORE: $SCORE / $TOTAL ==="
+
+[[ $SCORE -eq $TOTAL ]]

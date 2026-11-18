@@ -2,7 +2,7 @@
 ## Operating Systems | Operators, Redirection, Filters, Loops
 
 Document: S02_03_PEER_INSTRUCTION.md  
-Total questions: 18 (minimum 15 required)  
+Total questions: 15 (PI-01–PI-15)  
 Time per question: 3-5 minutes  
 Format: Individual vote → Pair discussion → Revote → Explanation
 
@@ -99,7 +99,7 @@ Correct answer: B
 | Distractor | Targeted misconception |
 |------------|------------------------|
 | A | Doesn't understand that mkdir returns error when directory exists |
-| C | Believes `||` always executes after `&&` |
+| C | Believes `\|\|` always executes after `&&` |
 | D | Confusion with 2>/dev/null or doesn't know errors are displayed |
 
 Instructor notes:
@@ -123,6 +123,8 @@ rmdir test
 ---
 
 ### PI-02: Pipe vs Exit Code
+
+Assume `pipefail` and `errexit` are disabled for the displayed question.
 
 Level: Intermediate | Duration: 4 min | Target: ~45% correct
 
@@ -151,13 +153,15 @@ Correct answer: B
 Instructor notes:
 - `$?` returns only the exit code of the last command in pipeline
 - For all exit codes: `${PIPESTATUS[@]}`
-- `set -o pipefail` changes behaviour (returns first non-zero)
+- `set -o pipefail` changes behaviour (returns rightmost non-zero)
 
 After vote, demonstrate:
 ```bash
+set +o pipefail
 ls /nonexistent | wc -l
-echo "Exit code: $?"
-echo "PIPESTATUS: ${PIPESTATUS[@]}"
+statuses=("${PIPESTATUS[@]}")  # capture immediately; any later command replaces it
+printf 'Exit code without pipefail: %s\n' "${statuses[1]}"
+printf 'PIPESTATUS: %s\n' "${statuses[*]}"
 
 # With pipefail
 set -o pipefail
@@ -583,7 +587,7 @@ Instructor notes:
 - Brace expansion happens before variable expansion!
 - `{1..$N}` cannot be expanded because `$N` isn't interpreted yet
 - Remains literal: `{1..$N}`
-- Loop iterates once with i="{1..$N}"
+- Parameter expansion then produces `{1..5}`. The loop iterates once with `i="{1..5}"`; brace expansion is not repeated.
 
 Solutions:
 ```bash
@@ -593,13 +597,14 @@ for i in $(seq 1 $N); do echo $i; done
 # Solution 2: C-style
 for ((i=1; i<=N; i++)); do echo $i; done
 
-# Solution 3: eval (not recommended)
-eval "for i in {1..$N}; do echo \$i; done"
+# Do not reparse input with eval. Use the arithmetic loop for a validated integer N.
 ```
 
 ---
 
 ### PI-12: while read in Pipe (CRITICAL! )
+
+Assume default `lastpipe` disabled and `errexit` disabled for the deliberate counter example.
 
 Level: Advanced | Duration: 5 min | Target: ~35% correct
 
@@ -650,6 +655,7 @@ while read line; do
 done <<< "$(echo -e 'a\nb\nc')"
 
 # Solution 3: lastpipe (Bash 4.2+)
+set +m  # lastpipe requires job control to be disabled
 shopt -s lastpipe
 count=0
 echo -e "a\nb\nc" | while read line; do ((count++)); done
@@ -705,6 +711,8 @@ Instructor notes:
 
 ### PI-14: for with files containing spaces
 
+Assume a fresh owned directory containing only these two files, normal Bash globbing and `LC_ALL=C`. The locale determines ordering; glob expansion retains each pathname as one word.
+
 Level: Intermediate | Duration: 4 min | Target: ~45% correct
 
 ```bash
@@ -717,8 +725,8 @@ done
 What is displayed?
 
 ```
-A) File: my file.txt
-   File: another file.txt
+A) File: another file.txt
+   File: my file.txt
 B) File: my
    File: file.txt
    File: another
@@ -760,6 +768,8 @@ rm "my file.txt" "another file.txt"
 ---
 
 ### PI-15: IFS in while read
+
+The main shell starts with the default `IFS=$' \t\n'`.
 
 Level: Advanced | Duration: 4 min | Target: ~40% correct
 
@@ -838,3 +848,5 @@ Recommendation: Use 3-4 questions per seminar, chosen strategically.
 
 *Material for Seminar 3-4 OS | ASE Bucharest - CSIE*  
 *Based on Peer Instruction methodology (Mazur, Porter et al.)*
+
+Target percentages and expected discussion improvements are retained planning assumptions/author annotations, not established empirical results for this cohort. Measure actual votes before drawing conclusions.

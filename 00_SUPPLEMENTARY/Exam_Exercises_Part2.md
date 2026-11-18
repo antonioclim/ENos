@@ -23,6 +23,13 @@
 
 ### Diagram 5.1: Thread vs Process Memory Layout
 
+Separate process address spaces provide isolation of private mappings, not
+complete isolation of all kernel resources or shared mappings. Executable
+file-backed pages may be physically shared; a drawn CODE region per process
+does not imply a separate physical copy. The creation/switch timing ranges
+below are unverified illustrative inputs, not portable measurements. Linux
+threads still have task identity and their own configured user/kernel stacks.
+
 ```
 ═══════════════════════════════════════════════════════════════════════════
                     PROCESS vs THREAD - MEMORY LAYOUT
@@ -65,7 +72,7 @@ TWO SEPARATE PROCESSES:
 │  │(Stack A)│ │(Heap A) │ │(Stack B)│ │(Heap B) │ │(shared) │       │
 │  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
 │                                                                     │
-│  COMPLETE Isolation: A cannot access B's memory!                   │
+│  PRIVATE address spaces; explicitly shared mappings are possible.       │
 └─────────────────────────────────────────────────────────────────────┘
 
 ══════════════════════════════════════════════════════════════════════════
@@ -141,7 +148,7 @@ COMPARATIVE SUMMARY:
 │   Component     │   SEPARATE PROCESSES     │   THREADS (same process) │
 ├─────────────────┼──────────────────────────┼──────────────────────────┤
 │ Address Space   │ SEPARATE for each        │ SHARED                   │
-│ Text (Code)     │ Copied/Separate          │ SHARED                   │
+│ Text (Code)     │ May share physical pages │ SHARED                   │
 │ Data/BSS        │ SEPARATE                 │ SHARED                   │
 │ Heap            │ SEPARATE                 │ SHARED                   │
 │ Stack           │ SEPARATE                 │ SEPARATE per thread      │
@@ -149,12 +156,12 @@ COMPARATIVE SUMMARY:
 │ PC              │ SEPARATE                 │ SEPARATE per thread      │
 │ File Descriptors│ Copied at fork           │ SHARED                   │
 │ PID             │ Different                │ Same                     │
-│ TID             │ N/A                      │ Different                │
+│ TID             │ Main task has a TID      │ Different per task       │
 ├─────────────────┼──────────────────────────┼──────────────────────────┤
-│ Isolation       │ ✅ Complete              │ ❌ Minimal               │
+│ Isolation       │ Private address spaces   │ Shared address space     │
 │ Communication   │ IPC (pipes, sockets)     │ Direct shared memory     │
 │ Creation        │ ~1-10 ms                 │ ~10-100 μs               │
-│ Context Switch  │ ~1-10 μs + TLB flush     │ ~0.1-1 μs                │
+│ Context Switch  │ Illustrative ~1-10 μs    │ Illustrative ~0.1-1 μs   │
 │ Crash Impact    │ Only that process        │ Entire process dies      │
 └─────────────────┴──────────────────────────┴──────────────────────────┘
 ```
@@ -305,6 +312,12 @@ Problem: For each scenario, decide whether threads or separate processes should 
 
 ### Exercise 5.2: Thread Safety
 
+The unsynchronised Python example is intentionally problematic. Whether a
+particular run visibly loses updates depends on interpreter version, GIL or
+free-threaded configuration and execution interleavings. A result of 400000
+does not prove the programme thread-safe; a lower result is not guaranteed.
+The lock and per-thread aggregation variants express the intended safe designs.
+
 Problem: Identify the problems in the following code and correct them.
 
 ```python
@@ -324,7 +337,7 @@ for t in threads:
 for t in threads:
     t.join()
 
-print(counter)  # Should be 400000, but probably smaller!
+print(counter)  # Serial target: 400000; a visible lost update is not guaranteed.
 ```
 
 Solution:
@@ -380,31 +393,32 @@ print(total)  # 400000 guaranteed!
 
 ---
 
-5.3 (5p) Explain why creating a thread is faster than creating a new process.
+5.3 (5p) Explain why creating a thread can cost less than creating a new process, and identify the assumptions needed for a speed claim.
 
 Model answer:
 
-Creating a thread is faster for several reasons:
+Thread creation often avoids some process-creation work, but relative speed
+depends on the API, mappings, resource tables, libc/kernel version and workload.
 
-1. No address space duplication (2p):
-   - Fork() copies page tables (even with CoW)
-   - Thread: only allocates a new stack (~8KB)
+1. **Address space (2p):** `fork` generally creates a separate address-space
+   description and page tables, with eligible pages initially shared through
+   CoW. Threads share an address space but still require task bookkeeping,
+   thread-local storage and a user stack. Stack size follows attributes and
+   platform limits; it is not universally 8 KiB.
+2. **Attributes (1p):** process and thread creation both inherit and initialise
+   applicable credentials, scheduling and resource attributes. A thread is not
+   exempt from all security work, nor does every `fork` reauthenticate a user.
+3. **Identity (0.5p):** Linux creates a task/TID for a kernel thread. Thread-group
+   identity differs from task identity; TID allocation is not inherently simpler
+   than allocating a process identifier.
+4. **Descriptor table (0.5p):** POSIX threads ordinarily share the table; `fork`
+   creates a distinct table whose entries refer to shared open file descriptions.
+5. **Implementation (1p):** libc wrappers may use clone-family mechanisms with
+   different sharing flags. There is no universal fewer-syscalls proof. Compare
+   the same useful work on a specified system before asserting a speed ratio.
 
-2. No new security settings (1p):
-   - New process: UID/GID verification, setting capabilities
-   - Thread: inherits everything from process
-
-3. No PID allocation (0.5p):
-   - Process: kernel allocates new PID
-   - Thread: only TID (simpler)
-
-4. No file descriptor duplication (0.5p):
-   - Fork: copies the fd table
-   - Thread: shares directly
-
-5. Fewer syscalls (1p):
-   - Fork: `fork()` + complete setup
-   - Thread: `clone(CLONE_VM|CLONE_FILES|...)` with flags saying "share everything"
+References: [pthread_create](https://man7.org/linux/man-pages/man3/pthread_create.3.html)
+and [clone](https://man7.org/linux/man-pages/man2/clone.2.html).
 
 ---
 
@@ -625,6 +639,11 @@ THE 3 REQUIRED PROPERTIES:
 
 ### Exercise 6.1: Lock Implementation with TAS
 
+The following is pseudocode. `TestAndSet` is assumed to be a single atomic
+read-modify-write, and lock release must have the corresponding atomic ordering.
+A function assembled from ordinary C loads/stores does not implement atomic TAS.
+Use language/platform atomic primitives for executable code.
+
 Problem: Implement a spinlock using Test-and-Set in pseudocode.
 
 Solution:
@@ -673,6 +692,12 @@ Problem: Demonstrate that Peterson's algorithm satisfies mutual exclusion for 2 
 
 Solution:
 
+This is sequentially consistent pseudocode: each flag/turn access is atomic
+and programme order is preserved. Plain C/C++ shared variables do not meet
+that contract; conflicting unsynchronised accesses have undefined behaviour.
+An executable C11 version would require appropriately ordered atomic objects
+(for this direct proof, sequentially consistent operations), not just `volatile`.
+
 ```c
 bool flag[2] = {false, false};  // flag[i] = process i wants to enter
 int turn;                        // whose turn it is
@@ -688,16 +713,19 @@ flag[0] = false;                 flag[1] = false;
 
 Mutual Exclusion Proof:
 
-Let's assume BOTH processes are in CS simultaneously (contradiction).
+Consider the current entry attempt of each process. If both have raised their
+flags, one of their writes to `turn` is last in the sequentially consistent
+order. Suppose P1 writes `turn=0` last. P0 has already raised its flag and
+written `turn=1`. Until P0 leaves its critical section and clears its flag,
+P1's guard sees `flag[0]=true` and `turn=0`, so P1 cannot enter. The case where
+P0 writes last is symmetric.
 
-1. P0 passed the while → `¬(flag[1] ∧ turn=1)` → `¬flag[1] ∨ turn=0`
-2. P1 passed the while → `¬(flag[0] ∧ turn=0)` → `¬flag[0] ∨ turn=1`
-
-But both flag[i] = true when they want to enter. So:
-- From (1): turn = 0 (because flag[1] = true)
-- From (2): turn = 1 (because flag[0] = true)
-
-Contradiction! turn cannot be both 0 and 1 simultaneously. □
+If P0 passed its guard earlier because P1's flag was false, P1's later entry
+attempt raises its flag and writes `turn=0`, yielding to P0 while P0 remains
+inside. Therefore an earlier successful guard test cannot invalidate the
+argument. We compare the ordering of writes and entry attempts, rather than
+treating two guard evaluations at different times as simultaneous. Mutual
+exclusion follows under the stated atomic/SC assumptions.
 
 ---
 
@@ -715,41 +743,44 @@ Contradiction! turn cannot be both 0 and 1 simultaneously. □
 
 6.2 (5p) ⭐⭐⭐ A system has 3 processes P1, P2, P3 accessing a shared counter. Each process increments the counter 1000 times. Initially the counter is 0.
 
-a) What is the expected value of the counter without synchronisation?
-b) What is the minimum possible value? Explain.
-c) How do you solve the problem?
+a) What is the correct serial result? Is there a defined expected value without synchronisation?
+b) In an SC model with separate atomic load and store steps per increment, what is the minimum final value after all three processes finish? Explain.
+c) How do you solve the problem in executable code?
 
 Answer:
 
-```
-a) Expected value (if everything were correct): 3000
+**Model boundary:** each increment is `r = counter; r = r + 1; counter = r`,
+with separate sequentially consistent atomic loads/stores, private registers,
+no overflow and no other writers. This models lost updates. It does not assign
+defined semantics to a data race on a plain C/C++ integer.
 
-b) Minimum value: 3 (in the worst theoretical case, almost 1000)
+**a)** Serial execution produces 3000, the maximum in this model. An expected
+value requires a probability distribution over interleavings; none is supplied.
+There is no justified typical range such as 1000–2500.
 
-   Explanation for extreme theoretical minimum:
-   - All threads read 0 simultaneously — and related to this, all add 1
-   - All write 1
-   - Repeat: read 1, add 1, write 1
-   - ... until one finishes
-   
-   In practice, the minimum is hard to reach but can be significantly
-   less than 3000. Typically: ~1000-2500.
+**b) The exact minimum is 2.** A complete constructive schedule is:
 
-c) Solution: Protect with mutex/lock
+| Stage | Operation | Counter | Completed increments (A, B, C) |
+|---|---|---:|---|
+| 1 | B reads 0 for its first increment and pauses before storing | 0 | (0, 0, 0) |
+| 2 | A performs 999 complete increments | 999 | (999, 0, 0) |
+| 3 | C performs all 1000 increments | 1999 | (999, 0, 1000) |
+| 4 | B stores its saved value plus one | 1 | (999, 1, 1000) |
+| 5 | A reads 1 for its final increment and pauses before storing | 1 | (999, 1, 1000) |
+| 6 | B completes its remaining 999 increments | 1000 | (999, 1000, 1000) |
+| 7 | A stores its saved value plus one | 2 | (1000, 1000, 1000) |
 
-   mutex_t lock;
-   
-   void increment() {
-       for (int i = 0; i < 1000; i++) {
-           lock(&lock);
-           counter++;
-           unlock(&lock);
-       }
-   }
-   
-   Or use atomic operations:
-   __sync_fetch_and_add(&counter, 1);
-```
+For the lower bound, the last store belongs to a process's 1000th increment.
+Before its final load, that process has completed an earlier store. All stores
+write a positive value; no operation writes zero. Its final load is therefore
+at least 1 and its final store at least 2. The construction attains this bound.
+
+**c)** Protect the entire read-modify-write with a mutex, or use one atomic
+read-modify-write rather than separate atomic load/store operations. For example,
+with `atomic_int counter = 0` in C11, each worker can execute
+`atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed)` 1000 times.
+After joining all workers, the result is 3000. Relaxed ordering suffices for this
+isolated counter, but not automatically for publishing other associated data.
 
 ---
 
@@ -946,26 +977,39 @@ Problem: Writers can starve if new readers keep arriving!
 
 Answer:
 
-| Aspect | Semaphore wait() | Condition Variable wait() |
-|--------|------------------|---------------------------|
-| Lock | Does NOT affect any lock | RELEASES the associated lock |
-| Memory | Remembers signals (counts) | Does NOT remember - signal lost if no one waiting |
-| On signal | Decrements counter | Only wakes, doesn't guarantee condition |
-| Check | No need for while | MUST use while (condition may be false again) |
-| Semantics | Counting resource | Notification/wait on condition |
+| Aspect | Semaphore wait/post | Condition-variable wait/notify |
+|---|---|---|
+| Associated mutex | No implicit release/reacquire of an unrelated mutex | Wait atomically releases the associated mutex while blocking and reacquires it before returning |
+| Stored state | Successful wait acquires a permit; post adds a permit, possibly waking a waiter | Notification does not store a permit for a future waiter; the protected predicate stores the state |
+| Return condition | A successful wait acquired a permit; errors/interruption need separate handling | A return does not imply the predicate is true; spurious wakeups and competing waiters are possible |
+| Correct pattern | Wait before accessing the counted resource; post after releasing it | Hold the mutex and use `while (!predicate) wait(cv, mutex)` |
 
-Concrete example:
 ```c
-// Semaphore
-signal(sem);  // Even if no one is waiting, sem increases
-...           // Later:
-wait(sem);    // Will succeed immediately (sem > 0)
+// Semaphore pseudocode: a posted permit remains available.
+post(sem);             // increments the available permit count
+wait(sem);             // later acquires/decrements that permit
 
-// CV
-signal(cv);   // If no one is waiting, LOST!
-...           // Later:
-wait(cv);     // Will block forever!
+// Condition-variable pseudocode: the predicate is the persistent state.
+lock(mutex);
+while (!ready)
+    wait(cv, mutex);   // releases mutex, waits, then reacquires mutex
+consume_ready_state();
+unlock(mutex);
+
+// Producer:
+lock(mutex);
+ready = true;
+notify(cv);            // wakes a waiter if present; does not store a permit
+unlock(mutex);
 ```
+
+A notification sent before a wait is not remembered by the condition variable.
+Checking the predicate under the mutex avoids depending on such a notification.
+Do not claim that an unconditional later wait must block forever: spurious
+wakeups or later notifications are possible, but neither makes that pattern correct.
+References: [POSIX condition wait](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_cond_wait.html),
+[sem_wait](https://man7.org/linux/man-pages/man3/sem_wait.3.html) and
+[sem_post](https://man7.org/linux/man-pages/man3/sem_post.3.html).
 
 ---
 
@@ -1348,10 +1392,11 @@ c) Solution Evaluation:
 
    SOLUTION 1 - Global Lock Ordering:
    + Prevents deadlock completely (breaks circular wait)
-   + Zero runtime overhead
+   + No cycle detector required when every locking path follows the order
    + Simple to implement
-   - Requires code refactoring (T2, T3 must change)
-   - May reduce parallelism (all wait for A first)
+   - Requires T3 to acquire A before C; T1 and T2 already follow A < B < C
+   - Acquire only the needed subset: T2 still uses B then C, not A
+   - Changed lock lifetimes can affect contention and must be assessed
    
    SOLUTION 2 - Timeout with Retry:
    + No code changes to lock order
@@ -1369,10 +1414,12 @@ c) Solution Evaluation:
 
    RECOMMENDATION: Solution 1 (Global Lock Ordering)
    
-   Rationale: In a database with well-defined resources, lock ordering
-   is the gold standard. It provides compile-time guarantees with zero
-   runtime cost. The refactoring effort is one-time, whilst Solutions 2
-   and 3 have ongoing performance and complexity costs.
+   Rationale: For these known resources, a consistently enforced global
+   order removes circular wait. This is a conditional design argument, not
+   an automatic compile-time proof or a zero-cost claim. Audit every path,
+   including callbacks and error handling. Dynamic resource discovery may
+   instead justify timeout/retry or detection, with rollback and victim
+   selection requirements made explicit.
 ```
 
 ---
@@ -1398,94 +1445,105 @@ b) Provide pseudocode for enqueue() and dequeue() operations
 c) Explain how your design meets the latency requirement
 d) Discuss trade-offs you made
 
-**Model Answer:**
+**Model Answer: contract, reference and remaining performance obligation**
+
+The specified drop-oldest policy is retained. “Never block producer” and the
+sub-microsecond target require a progress definition and hardware measurements;
+neither follows from the words “atomic” or “lock-free”. A lock-free operation
+can be preempted and may retry indefinitely while other operations progress.
+
+**a) Exact abstract contract.** Initially the queue is empty. Treat each operation
+as one atomic step: enqueue removes the oldest queued message if capacity 1024
+is reached, records that drop, then appends the new message; dequeue returns and
+removes the oldest queued message, or reports empty. Concurrent calls must be
+linearised consistently with completed-before-invoked ordering. For each producer,
+sequential enqueue calls retain FIFO among surviving messages. Concurrent calls
+using the same producer ID need an additional defined sequence order. A message
+already dequeued is owned by that consumer and cannot be overwritten or counted
+as a queued drop. No message is returned twice; consumed and dropped sets are disjoint.
+
+**b) Executable correctness reference (C++17 or later).** The bounded array and
+mutex implement this contract without allocating message storage per operation.
+It is a reference/oracle for functional tests. Mutex acquisition can block, so
+this implementation does **not** satisfy the non-blocking producer requirement
+and is not presented as the required production solution.
+
+```cpp
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <mutex>
+#include <optional>
+
+struct Message {
+    std::uint32_t producer;
+    std::uint64_t sequence;
+    std::array<std::byte, 48> payload{};
+};
+
+template<std::size_t Capacity = 1024>
+class DropOldestReference {
+    static_assert(Capacity > 0);
+    std::array<Message, Capacity> slots{};
+    std::size_t front = 0, count = 0;
+    std::mutex mutex;
+public:
+    // Returns the dropped message, if the queue was full.
+    std::optional<Message> enqueue(const Message& message) {
+        std::lock_guard<std::mutex> lock(mutex);
+        std::optional<Message> dropped;
+        if (count == Capacity) {
+            dropped = slots[front];
+            front = (front + 1) % Capacity;
+            --count;
+        }
+        slots[(front + count) % Capacity] = message;
+        ++count;
+        return dropped;
+    }
+    std::optional<Message> dequeue() {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == 0) return std::nullopt;
+        Message message = slots[front];
+        front = (front + 1) % Capacity;
+        --count;
+        return message;
+    }
+};
 ```
-a) Synchronisation Primitives:
 
-   CHOSEN: Lock-free circular buffer with atomic operations
-   
-   NOT mutex/semaphore because:
-   - Mutex: ~25ns best case, up to 1μs with contention
-   - Semaphore: Similar overhead plus kernel involvement
-   - Neither meets <1μs target under high contention
-   
-   Data Structures:
-   - Circular array: Message buffer[1024]
-   - Atomic head: position for next write
-   - Atomic tail: position for next read  
-   - Per-slot sequence numbers for ABA prevention
+**Why the former sequence-slot sketch is WRONG.** Its slot sequences were
+uninitialised. Even if initialised to their indices, inserting 1025 messages
+without a consumer overwrites slot 0 while leaving the consumer position at 0;
+the subsequent sequence test can report empty despite queued data. A producer
+also overwrites non-atomic message storage without proving the consumer no
+longer owns it. Initialisation or stronger memory ordering alone cannot repair
+that ownership and overflow protocol. This counterexample is retained as the
+reason to reject that algorithm rather than as runnable queue code.
 
-b) Pseudocode:
+**c) Design/performance obligation.** A production candidate must specify slot
+claim/publication/reclamation states, atomic linearisation points for dropping
+and consuming, safe handling of a paused producer/consumer, sequence wraparound
+and the exact progress guarantee. Independently check bounded capacity, no lost
+ownership, exactly-once consumption/drop accounting and per-producer surviving
+FIFO against the reference. “No wait for a free slot” is weaker than a wait-free
+operation: discuss which meaning the requirement needs.
 
-   struct Slot {
-       atomic<uint64_t> sequence;
-       Message data;
-   };
-   
-   Slot buffer[1024];
-   atomic<uint64_t> head = 0;
-   atomic<uint64_t> tail = 0;
-   
-   bool enqueue(Message msg) {
-       uint64_t pos = head.fetch_add(1, relaxed);
-       uint64_t index = pos & 1023;  // Fast modulo for power of 2
-       Slot* slot = &buffer[index];
-       
-       // Wait for slot to be consumed (or overwrite if overflow)
-       uint64_t expected_seq = pos;
-       while (slot->sequence.load(acquire) != expected_seq) {
-           if (pos - tail.load(relaxed) >= 1024) {
-               // Overflow: oldest message will be dropped
-               break;
-           }
-           _mm_pause();  // CPU hint for spin-wait
-       }
-       
-       slot->data = msg;
-       slot->sequence.store(pos + 1, release);
-       return true;
-   }
-   
-   bool dequeue(Message* msg) {
-       uint64_t pos = tail.load(relaxed);
-       Slot* slot = &buffer[pos & 1023];
-       uint64_t seq = slot->sequence.load(acquire);
-       
-       if (seq != pos + 1) {
-           return false;  // Buffer empty
-       }
-       
-       if (tail.compare_exchange_weak(pos, pos + 1, relaxed)) {
-           *msg = slot->data;
-           slot->sequence.store(pos + 1024, release);
-           return true;
-       }
-       return false;  // Contention, retry
-   }
+The original illustrative 25 ns mutex, 10–20 cycle atomic, 20–40 cycle barrier
+and 30–60 ns total figures have no pinned hardware or benchmark provenance.
+They do not establish the <1 µs target. Measure enqueue/dequeue latency
+distributions under 16 producers/8 consumers, overflow and preemption, with
+specified CPU topology, message size, compiler, affinity and workload. Report
+tail latency and drops, not only the mean. A deterministic worst-case guarantee
+also requires a scheduling/platform model; no such guarantee is demonstrated here.
 
-c) Latency Analysis:
-
-   - No system calls (pure user-space)
-   - No context switches (lock-free)
-   - Cache-line optimised (64-byte slot alignment)
-   - fetch_add: ~10-20 cycles on modern x86
-   - Memory barriers: ~20-40 cycles
-   - Total: ~100-200 cycles ≈ 30-60 nanoseconds
-   
-   This is well under the 1μs requirement even with moderate contention.
-
-d) Trade-offs:
-
-   ACCEPTED:
-   - Message loss under overflow (acceptable per requirements)
-   - Higher memory usage (padding for cache alignment)
-   - More complex code (harder to maintain)
-   
-   REJECTED ALTERNATIVES:
-   - Blocking queue: Too slow
-   - Single-producer optimisation: Need multiple producers
-   - Unbounded buffer: Memory exhaustion risk
-```
+**d) Alternatives and recommendation.** Retain the bounded mutex reference for
+correctness comparison. For the stated deployment target, evaluate a reviewed
+MPMC implementation with an explicitly supported drop-oldest ownership protocol;
+an arbitrary overwrite patch to a different queue contract is insufficient.
+Per-producer queues or relaxing overflow/progress semantics are alternative
+architectures only if the requirements are explicitly changed. No such change,
+hardware benchmark or production acceptance is implied by this model answer.
 
 ---
 

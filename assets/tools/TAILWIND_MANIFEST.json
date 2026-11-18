@@ -1,0 +1,293 @@
+{
+  "compiler": "tailwindcss",
+  "version": "3.4.17",
+  "source": "package-lock.json pins compiler and transitive npm dependencies",
+  "method": "Static source extraction plus explicit safelist for interpolated colour classes; no native browser layout acceptance",
+  "inputs": [
+    {
+      "path": "05_LECTURES/01-Introduction_to_Operating_Systems/docs/01ex1_-_Dual_Mode_Simulator.html",
+      "sha256": "7a70d14dd60c2757ad7643da7e34f1703aa12e5c4ff9934b62ec181f023acc13",
+      "bytes": 40958
+    },
+    {
+      "path": "05_LECTURES/01-Introduction_to_Operating_Systems/docs/01ex2_-_Kernel_Architectures.html",
+      "sha256": "e4d109c84cc1aa86ab7a67d3218f58ef4314f27c2c4c7c2d1228c503874378b3",
+      "bytes": 61909
+    },
+    {
+      "path": "05_LECTURES/02-Basic_OS_Concepts/docs/02ex1_-_Interrupt_Flow.html",
+      "sha256": "9aec0f2b1f692c8f6068da61041bd0dcd4bb4917e293551ad66193877011d42a",
+      "bytes": 45562
+    },
+    {
+      "path": "05_LECTURES/02-Basic_OS_Concepts/docs/02ex2_-_Polling_vs_Interrupts.html",
+      "sha256": "aee7f5641f2695d6c8f77055d4ef74b5da06a9469a0a75fd9aa643284cb1b00c",
+      "bytes": 45850
+    },
+    {
+      "path": "05_LECTURES/03-Processes_(PCB+fork)/docs/03ex1_-_Process_State_Diagram_EN.html",
+      "sha256": "749ec39d39d6821fb53e9c89c3670696957b6f0d567f1955f2a730d3acc5aa15",
+      "bytes": 52393
+    },
+    {
+      "path": "05_LECTURES/03-Processes_(PCB+fork)/docs/03ex2_-_Fork_Exec_Simulator_EN.html",
+      "sha256": "5e5a2489e1d11cf2c586c39ba4a33019c71c91f79f066a6ed437f7c03ee48fab",
+      "bytes": 55491
+    },
+    {
+      "path": "05_LECTURES/03-Processes_(PCB+fork)/docs/03ex3_-_Process_Tree_Builder_EN.html",
+      "sha256": "204234776a338acdc8cd3c0cb59c77748d018d9e935184c39fc32e68c540ddc0",
+      "bytes": 48092
+    },
+    {
+      "path": "05_LECTURES/03-Processes_(PCB+fork)/docs/03ex4_-_Zombie_Orphan_Simulator_EN.html",
+      "sha256": "515d528edb043597b47a09cb94664c0a25093775989629402038d5371d56458d",
+      "bytes": 50613
+    },
+    {
+      "path": "05_LECTURES/04-Process_Scheduling/docs/04ex1_-_Scheduling_Simulator_Gantt_EN.html",
+      "sha256": "427f7540c868f99991eadd5bcc2b0e5700d7eef45a3e09161a53732fc38d3497",
+      "bytes": 54908
+    },
+    {
+      "path": "05_LECTURES/04-Process_Scheduling/docs/04ex2_-_Scheduling_Comparator_EN.html",
+      "sha256": "c83b27dab44f1f938fce798793c89bd2a0b69fe64c923031bcad395b4abb6166",
+      "bytes": 47974
+    },
+    {
+      "path": "05_LECTURES/04-Process_Scheduling/docs/04ex3_-_MLFQ_Simulator_EN.html",
+      "sha256": "7ee16cd724374642f1bec92d0dcb0f60a01c1cc798fd566fba54cfee7afcad30",
+      "bytes": 49243
+    },
+    {
+      "path": "05_LECTURES/04-Process_Scheduling/docs/04ex4_-_Starvation_Demonstrator_EN.html",
+      "sha256": "703ffccfd06041f6f3b04617583450b895d78fde3db20fe71f9e898cf2601225",
+      "bytes": 52553
+    },
+    {
+      "path": "05_LECTURES/05-Execution_Threads/docs/05ex1_-_Thread_vs_Process_Memory.html",
+      "sha256": "de77c82c09da298026457a8009fd6ea2d29e2a863f381a1b9b2594b0aa72982f",
+      "bytes": 44187
+    },
+    {
+      "path": "05_LECTURES/05-Execution_Threads/docs/05ex2_-_Threading_Models.html",
+      "sha256": "66b7383d6501a6c6448b0f32bd0ff6b64a6c7c4e79e96854ad2cdbeb8ba13b9c",
+      "bytes": 52536
+    },
+    {
+      "path": "05_LECTURES/05-Execution_Threads/docs/05ex3_-_Context_Switch_Comparator.html",
+      "sha256": "2ecd1da14315bae3b863b6802c71d013a7966f63106136039571007348475c2f",
+      "bytes": 58572
+    },
+    {
+      "path": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/docs/06ex1_-_Race_Condition_Demo.html",
+      "sha256": "fc8ec5f3f7e9d71bbf770badb0aa760db6194af6c20ba07aec6e7273168143d1",
+      "bytes": 45232
+    },
+    {
+      "path": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/docs/06ex2_-_Peterson_Algorithm.html",
+      "sha256": "f7e45e6afbf90f5c0c27e2670e32fadc5116ece0a9b595dfc5d83d5789abd094",
+      "bytes": 44855
+    },
+    {
+      "path": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/docs/06ex3_-_Mutex_vs_Spinlock.html",
+      "sha256": "f5c376c78b7aca9449a7f39cfc91f98dd14e75f28b87ed6319eae7c51c52ba29",
+      "bytes": 48281
+    },
+    {
+      "path": "05_LECTURES/06-Synchronisation_(Part1_Peterson+locks+mutex)/docs/06ex4_-_Critical_Section_Requirements.html",
+      "sha256": "eedde8322b0b1a1216ffb55e19b0c6ef027e5cf8f67a606def81a1eeadf57d5d",
+      "bytes": 47640
+    },
+    {
+      "path": "05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/07ex1_-_Semaphore_Operations.html",
+      "sha256": "2dd12fd0fd0916197704ec970fd10f3627cf74dd329b5151d831ca2602d04fad",
+      "bytes": 42187
+    },
+    {
+      "path": "05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/07ex2_-_Producer_Consumer.html",
+      "sha256": "ccebc7622d8e349845a33e74f23d0263dd7d585881f7111f1f20dcf9c35e3b47",
+      "bytes": 40676
+    },
+    {
+      "path": "05_LECTURES/07-Synchronisation_(Part2_semaphore_buffer)/07ex3_-_Readers_Writers.html",
+      "sha256": "4fd0c3be2c8acd4a9d55b7f24acbbdc0890b44833e606f96b535940c8f304ee1",
+      "bytes": 46961
+    },
+    {
+      "path": "05_LECTURES/08-Deadlock_(Coffman)/docs/08ex1_-_RAG_Visualizer_EN.html",
+      "sha256": "9a463b4955b93f75fba907596f61851d66645e9dd8cf11a7dd8265c397135eb9",
+      "bytes": 51531
+    },
+    {
+      "path": "05_LECTURES/08-Deadlock_(Coffman)/docs/08ex2_-_Bankers_Algorithm_EN.html",
+      "sha256": "f2917f6485569b9351ae45d20a9f1bde9198b02230aa4bba5bb7bf478e738ac2",
+      "bytes": 51875
+    },
+    {
+      "path": "05_LECTURES/08-Deadlock_(Coffman)/docs/08ex3_-_Deadlock_Detection_Recovery_EN.html",
+      "sha256": "aa43ea49ef326d905db157c2d680eafbac2fd560b461bb7d80e422126d7a79de",
+      "bytes": 58319
+    },
+    {
+      "path": "05_LECTURES/09-Memory_Management_Part1_paging_segmentation/docs/09ex1_-_Memory_Partitioning_EN.html",
+      "sha256": "886789e96cc5d8f39ff980edba7a511091778e3ca4e906858a6ea28c49935829",
+      "bytes": 51375
+    },
+    {
+      "path": "05_LECTURES/09-Memory_Management_Part1_paging_segmentation/docs/09ex2_-_Paging_Visualizer_EN.html",
+      "sha256": "012f5f0f08e61c5a4be0bf306ad5e8205be6d80e6ba0b6ec3acd8480efc22723",
+      "bytes": 48282
+    },
+    {
+      "path": "05_LECTURES/09-Memory_Management_Part1_paging_segmentation/docs/09ex3_-_Segmentation_Visualizer_EN.html",
+      "sha256": "1e42f4dea752aae38ebdfa65d5f80dba69694da6d52cfadaa73e97c3e97fe1f8",
+      "bytes": 51455
+    },
+    {
+      "path": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/10ex1_-_Page_Replacement_Algorithms_EN.html",
+      "sha256": "24c8213c7b16a58810ba98e4193aaeb2e5cf3ca86fa4fa2ab40afe60992d4397",
+      "bytes": 47994
+    },
+    {
+      "path": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/10ex2_-_Working_Set_Model_EN.html",
+      "sha256": "9f13ae61f3ff1a838b9f0741a85768d32fb5ca8adbc2945594b6b124063055c2",
+      "bytes": 35129
+    },
+    {
+      "path": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/10ex3_-_Thrashing_Demo_EN.html",
+      "sha256": "8d0d78b5fa7fd57fbaccbf8950d3db91cc8b4895a6c2ecbc32a1a4d70615b651",
+      "bytes": 45569
+    },
+    {
+      "path": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/10ex4_-_Demand_Paging_EN.html",
+      "sha256": "4b69ed8bbc67b98e6c27af8a4e2113c9e591c71f0a2b32ff92bba604ae27ebc8",
+      "bytes": 42656
+    },
+    {
+      "path": "05_LECTURES/10-Virtual_Memory_(TLB_Belady)/docs/10ex5_-_Memory_Mapped_Files_EN.html",
+      "sha256": "8eeedf32721cd723240caa732b3a5035d71bffe7f2191991b24912fe100c85d0",
+      "bytes": 44512
+    },
+    {
+      "path": "05_LECTURES/11-File_System_(Part1_inode_pointers)/docs/11ex1_-_Inode_Explorer.html",
+      "sha256": "0e3739c79774f2c71f55aff3be40f38d8ea6320923dd06dffda157a5a4ca1d41",
+      "bytes": 58458
+    },
+    {
+      "path": "05_LECTURES/11-File_System_(Part1_inode_pointers)/docs/11ex2_-_Pointer_Indirection.html",
+      "sha256": "960c19ecce9270e8ec5f189906940046166b2dba1b0bb9abeea375c87583145b",
+      "bytes": 47762
+    },
+    {
+      "path": "05_LECTURES/11-File_System_(Part1_inode_pointers)/docs/11ex3_-_Hard_vs_Symbolic_Links.html",
+      "sha256": "844e974953a18f3c4219cd6f923575cf9f205d98c18fa83e587d65429fbbebb7",
+      "bytes": 41456
+    },
+    {
+      "path": "05_LECTURES/12-File_System_Part2_alloc_extent_struct/docs/12ex1_-_Allocation_Methods.html",
+      "sha256": "6c0501f8fa22325639bd0afe772621fc76c8d08f05ab443e7f5b1c1c355543c2",
+      "bytes": 51751
+    },
+    {
+      "path": "05_LECTURES/12-File_System_Part2_alloc_extent_struct/docs/12ex2_-_Journaling_Demo.html",
+      "sha256": "791cbd089482cfd2c27a702c86a3ace12db804d1f67019f18857fbb558a6cc32",
+      "bytes": 47925
+    },
+    {
+      "path": "05_LECTURES/13-Security_in_Operating_Systems/docs/13ex1_-_Permissions_Calculator.html",
+      "sha256": "b007c4236fcbfb474328f0413f15b64fc2be28a6c97c6ad9b291c378182c7e65",
+      "bytes": 43243
+    },
+    {
+      "path": "05_LECTURES/13-Security_in_Operating_Systems/docs/13ex2_-_Buffer_Overflow_Demo.html",
+      "sha256": "92b60fda460d5fc426fa3c7b1358d8f050b6623c86ce23ca5e07480b3fa39383",
+      "bytes": 38660
+    },
+    {
+      "path": "05_LECTURES/14-Virtualization+Recap/docs/14ex1_-_VM_vs_Container.html",
+      "sha256": "6729eed65c32a37e6122da2b3f1543e5a965050e24f037da3de1c3a4591d58ec",
+      "bytes": 45114
+    },
+    {
+      "path": "05_LECTURES/15supp-Network_Connection/docs/15ex1_-_Socket_API_Flow.html",
+      "sha256": "6ab0e333afcb91586c0560eb97344d9de86a193ce246246e71d931523defde70",
+      "bytes": 74212
+    },
+    {
+      "path": "05_LECTURES/15supp-Network_Connection/docs/15ex2_-_TCP_vs_UDP.html",
+      "sha256": "360ffc0dc01684bc9eb5e7de26f185a6f13a53d5b6febf378e9cd1d5351620c7",
+      "bytes": 65458
+    },
+    {
+      "path": "05_LECTURES/15supp-Network_Connection/docs/15ex3_-_IO_Multiplexing.html",
+      "sha256": "5cdbfa0d8239c225d865b237639881290409e948aff0579b6ba6b8fa19438f86",
+      "bytes": 63477
+    },
+    {
+      "path": "05_LECTURES/16supp-Advanced_Containerisation/docs/16ex1_-_Namespaces_Visualizer.html",
+      "sha256": "a4b123c9b4bb28bae5c54e078538ba717b5ed78b33d84a3aba5cafd5b3b65edc",
+      "bytes": 65635
+    },
+    {
+      "path": "05_LECTURES/16supp-Advanced_Containerisation/docs/16ex2_-_Cgroups_Limiter.html",
+      "sha256": "99418d15afcbf4d260c3ff97b2084cbea27710e843aced36e9f274bdefd09811",
+      "bytes": 53462
+    },
+    {
+      "path": "05_LECTURES/16supp-Advanced_Containerisation/docs/16ex3_-_Overlay_FS_Layers.html",
+      "sha256": "237de034b245079d541be312aaf1bd85d27c4667cd83e90613f2fddf378d3f21",
+      "bytes": 56894
+    },
+    {
+      "path": "05_LECTURES/17supp-Kernel_Level_OS_Programming/docs/17ex1_-_Kernel_Module_Lifecycle.html",
+      "sha256": "b0a4d6d5495ff65e20a7add6bb4ff462b0f8c8050e3507ef500be6d7f7db65ad",
+      "bytes": 53658
+    },
+    {
+      "path": "05_LECTURES/17supp-Kernel_Level_OS_Programming/docs/17ex2_-_Character_Device_Flow.html",
+      "sha256": "bbcefbfa36c8418d00a5d2edf80bcf811a13c85d6a3e1b008de77158eda17e26",
+      "bytes": 52675
+    },
+    {
+      "path": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/docs/18ex1_-_Heterogeneous_Computing.html",
+      "sha256": "b479730456094548e57b9ed330071afdf4728b2f40a979b712cf85319476f56a",
+      "bytes": 52216
+    },
+    {
+      "path": "05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/docs/18ex2_-_CPU_GPU_NPU_Comparator.html",
+      "sha256": "c038b454682fee940c41c5af7d6330529c9e5a2253a7538987876e0ef16a5878",
+      "bytes": 57206
+    },
+    {
+      "path": "assets/tools/input.css",
+      "sha256": "cc1a7ad0d019ddb1d32d0ecb588ba0ac26ce41d8625dd6c366348b25f83a28ec",
+      "bytes": 59
+    },
+    {
+      "path": "assets/tools/tailwind.config.cjs",
+      "sha256": "d08f02449d82fcb27de99aff922bc317d1119b4b4adf9ae461f0dd996826f979",
+      "bytes": 1038
+    },
+    {
+      "path": "assets/tools/build_tailwind.cjs",
+      "sha256": "abe3fc2a0d9086d675662f68c90ed2170aa76bd8829b62a4fce96eeecf7651d2",
+      "bytes": 1808
+    },
+    {
+      "path": "assets/tools/package.json",
+      "sha256": "3d8edba756f261228a92a0f469b6b853ccb6952c2cf2a284cffa988baedb664a",
+      "bytes": 259
+    },
+    {
+      "path": "assets/tools/package-lock.json",
+      "sha256": "ab2af2d17f16bfb55547a86b9042c34229f77d32b7095fe03e173d49a45653e2",
+      "bytes": 34159
+    }
+  ],
+  "output": {
+    "path": "assets/css/lecture_utilities.css",
+    "sha256": "1ac922398b5ca261647174ca16446a10bee37b9787e7367f14080f9041f79826",
+    "bytes": 92511
+  }
+}

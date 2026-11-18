@@ -1,7 +1,7 @@
 /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
 
 @startuml categorii_syscalls
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title System Call Categories
 
 skinparam rectangle {

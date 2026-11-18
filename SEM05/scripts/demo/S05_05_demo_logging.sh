@@ -34,8 +34,7 @@ readonly DIM='\033[2m'
 readonly NC='\033[0m'
 
 # Temporary directory for demo
-DEMO_LOG_DIR="/tmp/logging_demo_$$"
-mkdir -p "$DEMO_LOG_DIR"
+DEMO_LOG_DIR=$(mktemp -d "${TMPDIR:-/tmp}/logging_demo.XXXXXX")
 
 # Cleanup on exit
 cleanup_demo() {
@@ -71,7 +70,7 @@ info() {
 
 pause() {
     echo ""
-    read -r -p "Press Enter to continue..." </dev/tty 2>/dev/null || true
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || true; fi
     echo ""
 }
 
@@ -196,7 +195,7 @@ log() {
     local message="$*"
     
     # Check if should be logged
-    [ "${LOG_LEVELS[$level]:-0}" -lt "${LOG_LEVELS[$LOG_LEVEL]:-1}" ] && return
+    [ "${LOG_LEVELS[$level]:-0}" -lt "${LOG_LEVELS[$LOG_LEVEL]:-1}" ] && return 0
     
     local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
     echo "[$timestamp] [$level] $message" | tee -a "$LOG_FILE"
@@ -339,7 +338,9 @@ log() {
     adv_log INFO "Application starting"
     adv_log DEBUG "Initializing modules..."
     process_file "/etc/passwd"
-    process_file "/nonexistent/file.txt"
+    if ! process_file "/nonexistent/file.txt"; then
+        adv_log INFO "Expected missing-file case handled; continuing the demonstration"
+    fi
     adv_log INFO "Application finished"
     
     echo ""
@@ -398,7 +399,7 @@ log() {
     local max_size=${2:-10485760}  # 10MB default
     local keep=${3:-5}
     
-    [[ ! -f "$log_file" ]] && return
+    [[ ! -f "$log_file" ]] && return 0
     
     local size=$(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file")
     
@@ -515,7 +516,7 @@ LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
 log() {
     local level=$1; shift
-    [[ ${LOG_LEVELS[$level]} -lt ${LOG_LEVELS[$LOG_LEVEL]} ]] && return
+    [[ ${LOG_LEVELS[$level]} -lt ${LOG_LEVELS[$LOG_LEVEL]} ]] && return 0
     
     local ts=$(date "+%Y-%m-%d %H:%M:%S")
     local line="[$ts] [$level] [$SCRIPT_NAME] $*"

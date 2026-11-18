@@ -567,9 +567,9 @@ questions:
     category: "integrated"
     text: |
       ```bash
-      cat access.log | grep "404" | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5
+      awk 'NF == 8 && $7 == 404' access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5
       ```
-      What does this pipeline do?
+      For the eight-field synthetic log format in sprint F3 (status field 7), what does this pipeline do?
     options:
       - "Displays the first 5 lines with 404 errors"
       - "Displays top 5 IPs with the most 404 errors"
@@ -578,8 +578,8 @@ questions:
     correct: 1
     explanation: |
       Step by step:
-      1. cat access.log: reads the file
-      2. grep "404": filters lines with 404
+      1. awk reads access.log
+      2. NF == 8 && $7 == 404 selects exactly eight-field rows whose status is 404
       3. cut -d' ' -f1: extracts the first field (IP)
       4. sort: sorts IPs (required for uniq)
       5. uniq -c: counts occurrences
@@ -669,18 +669,18 @@ questions:
           rm "$f"
       done
       ```
-      What is the best practice for deleting .log files?
+      After reviewing the matching regular files in an owned exercise directory, which command performs the recursive deletion without splitting filenames?
     options:
       - "The code is correct and safe"
-      - "find . -name '*.log' -delete"
+      - "find . -depth -type f -name '*.log' -delete"
       - "rm *.log"
       - "ls *.log | xargs rm"
     correct: 1
     explanation: |
-      find -delete is the safest and most efficient:
+      The keyed find command preserves filename boundaries and limits selection to regular files:
       - Correctly handles spaces and special characters in names
-      - A single process, no fork for each file
-      - Atomic: deletes exactly what it finds
+      - No separate rm process is needed for each file
+      - The live filesystem may change during traversal; preview is not an atomic snapshot
       
       The colleague's code: problems with spaces in file names.
       rm *.log: not recursive, may fail with "argument list too long".

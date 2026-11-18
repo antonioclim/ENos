@@ -36,6 +36,11 @@ done
 
 [[ -n "$SOURCE" && -n "$DEST" ]] || { echo "Error: -s and -d are mandatory." >&2; usage; exit 2; }
 [[ -d "$SOURCE" ]] || { echo "Error: SOURCE is not a directory: $SOURCE" >&2; exit 2; }
+[[ "$ROT" =~ ^[1-9][0-9]*$ ]] || { echo "Rotations must be a positive integer." >&2; exit 2; }
+if (( DRYRUN )); then
+  printf 'Would create a unique archive of %s in %s and retain %s snapshots. No changes made.\n' "$SOURCE" "$DEST" "$ROT"
+  exit 0
+fi
 mkdir -p -- "$DEST"
 
 run() { if (( DRYRUN )); then echo "+ $*"; else "$@"; fi; }
@@ -47,8 +52,9 @@ if ! flock -n 9; then
   exit 1
 fi
 
-ts="$(date +%Y%m%d_%H%M%S)"
-archive="$DEST/backup_${ts}.tar.gz"
+ts="$(date +%Y%m%d_%H%M%S_%N)"
+archive="$(mktemp "$DEST/backup_${ts}_XXXXXX.tar.gz")"
+trap 'rm -f -- "$archive"' ERR
 
 echo "[INFO] Creating archive: $archive" >&2
 run tar -czf "$archive" -C "$SOURCE" .

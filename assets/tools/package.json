@@ -1,0 +1,8 @@
+{
+  "name": "enos-presentation-assets",
+  "version": "6.0.0-dev",
+  "private": true,
+  "description": "Pinned offline CSS build for the ENos lecture sources",
+  "scripts": {"build": "node build_tailwind.cjs"},
+  "devDependencies": {"tailwindcss": "3.4.17"}
+}

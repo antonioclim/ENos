@@ -1,10 +1,16 @@
-# Sprint Exercises - Seminar 3-4
+# Sprint Exercises - Seminar 02
 ## Operating Systems | Operators, Redirection, Filters, Loops
 
 Version: 1.0 | Total available duration: ~45 minutes from seminar  
 Philosophy: Active learning through timed practice and immediate feedback
 
 ---
+
+## Exercise workspace and input contract
+
+Start each mutating sprint in a fresh owned directory, then keep all sample inputs and outputs there. For example, `SPRINT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-sprint.XXXXXX") && cd -- "$SPRINT_DIR"`. This preparation is separate from the exercise. Never run reset commands in an existing personal project. Preserve the directory if you need the outputs; remove only this exact newly created directory after reviewing its contents.
+
+Expected ordering uses `LC_ALL=C`. CSV exercises accept only newline-terminated, unquoted comma-separated fields without embedded commas, quotes or newlines. Their fictional `Pass >= 5` labels illustrate data processing; they do not define course assessment policy. Process/network examples are environment-dependent snapshots, not measured results supplied with this lesson.
 
 ## ABOUT SPRINT EXERCISES
 
@@ -144,7 +150,14 @@ else
 fi
 
 echo ""
-echo "Total $PROC processes: $(pgrep -c "$PROC" 2>/dev/null || echo 0)"
+if process_count=$(pgrep -c "$PROC"); then
+    :
+else
+    pgrep_status=$?
+    ((pgrep_status == 1)) || exit "$pgrep_status"
+    # A normal no-match result already prints exactly one 0.
+fi
+printf 'Total %s processes: %s\n' "$PROC" "$process_count"
 ```
 
 ---
@@ -187,6 +200,10 @@ Time: 12 min | Mode: Pairs | Points: 25
 ```bash
 #!/bin/bash
 # build.sh - Build process simulator
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 START=$(date +%s)
 echo "═══════════════════════════════════════"
@@ -201,18 +218,18 @@ command -v gcc &>/dev/null && echo "✓" || { echo "✗ gcc not found"; exit 1; 
 # Stage 2
 echo -n "[2/4] Compiling... "
 sleep 1
-touch /tmp/build_artifact.o && echo "✓" || { echo "✗ Compile failed"; exit 1; }
+touch "$DEMO_DIR/build_artifact.o" && echo "✓" || { echo "✗ Compile failed"; exit 1; }
 
 # Stage 3
 echo -n "[3/4] Testing... "
 sleep 1
-[ -f /tmp/build_artifact.o ] && echo "✓" || { echo "✗ Tests failed"; exit 1; }
+[ -f "$DEMO_DIR/build_artifact.o" ] && echo "✓" || { echo "✗ Tests failed"; exit 1; }
 
 # Stage 4
 echo -n "[4/4] Packaging... "
 mkdir -p build
 sleep 1
-mv /tmp/build_artifact.o build/app.bin && echo "✓" || { echo "✗ Packaging failed"; exit 1; }
+mv "$DEMO_DIR/build_artifact.o" build/app.bin && echo "✓" || { echo "✗ Packaging failed"; exit 1; }
 
 END=$(date +%s)
 echo ""
@@ -260,18 +277,46 @@ Time: 10 min | Mode: Pairs | Points: 20
 ╚════════════════════════════════════════════════════════════════════╝
 ```
 
-💡 Solution (tee variant):
-```bash
-{ find /etc -name "*.conf" -type f; ls /nonexistent_directory; } 2>&1 | tee combined.log | grep -v "No such" > success.log; grep "No such" combined.log > errors.log
-```
+💡 Solution preserving the two streams:
 
-💡 Alternative solution (more elegant):
 ```bash
+#!/bin/bash
+set -o pipefail
+LOG_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-streams.XXXXXX") || exit 1
+# Fresh owned outputs; the directory is retained for inspection.
 {
     find /etc -name "*.conf" -type f
     ls /nonexistent_directory
-} > >(tee -a success.log combined.log) 2> >(tee -a errors.log combined.log >&2)
+} > "$LOG_DIR/success.log" 2> "$LOG_DIR/errors.log"
+command_status=$?  # the expected ls failure is data for this lesson
+cat -- "$LOG_DIR/success.log" "$LOG_DIR/errors.log" | tee "$LOG_DIR/combined.log" || exit 1
+printf 'Logs: %s; command status: %s\n' "$LOG_DIR" "$command_status"
 ```
+
+No message text is used to guess stream identity. `combined.log` is explicitly **the stdout block followed by the stderr block**, not a chronological reconstruction. Arbitrary text such as `No such` on stdout stays stdout; arbitrary stderr stays stderr.
+
+For live duplication with `tee`, use explicit FIFO readers, wait for them and only then build the combined view:
+
+```bash
+#!/bin/bash
+set -o pipefail
+LOG_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-streams.XXXXXX") || exit 1
+mkfifo -- "$LOG_DIR/out.fifo" "$LOG_DIR/err.fifo" || exit 1
+tee "$LOG_DIR/success.log" < "$LOG_DIR/out.fifo" & out_pid=$!
+tee "$LOG_DIR/errors.log" < "$LOG_DIR/err.fifo" >&2 & err_pid=$!
+{ printf 'No such is ordinary stdout\n'; printf 'Arbitrary stderr marker\n' >&2; } \
+    > "$LOG_DIR/out.fifo" 2> "$LOG_DIR/err.fifo"
+writer_status=$?
+copy_status=0
+wait "$out_pid" || copy_status=1
+wait "$err_pid" || copy_status=1
+rm -- "$LOG_DIR/out.fifo" "$LOG_DIR/err.fifo" || exit 1
+((writer_status == 0 && copy_status == 0)) || exit 1
+cat -- "$LOG_DIR/success.log" "$LOG_DIR/errors.log" > "$LOG_DIR/combined.log" || exit 1
+printf 'Completed logs: %s\n' "$LOG_DIR"
+```
+
+The streams can interleave on the terminal. Neither variant promises an ordering between independent stdout/stderr writes; that would require an explicit framed event protocol. There are no lingering unawaited `tee` processes and no appended outputs from earlier runs.
 
 ---
 
@@ -493,7 +538,7 @@ Time: 10 min | Mode: Pairs | Points: 20
 ║  ─────────────────────────────────────────────────────────────────  ║
 ║  EXPECTED OUTPUT:                                                  ║
 ║                                                                    ║
-║    5 the                                                           ║
+║    4 the                                                           ║
 ║    4 quick                                                         ║
 ║    4 fox                                                           ║
 ║    3 dog                                                           ║
@@ -518,6 +563,8 @@ cat text.txt | tr 'A-Z' 'a-z' | tr -cs 'a-z' '\n' | sort | uniq -c | sort -rn | 
 ---
 
 ### SPRINT F3: Log Analyser
+
+Fixture schema: eight whitespace-separated fields, with no timezone and no HTTP-version token. The request occupies fields 5–6, path is field 6 (with its closing quote), status is field 7 and bytes are field 8. This is a teaching subset, not a parser for arbitrary Apache formats. The exact fixture has 10 requests, status counts 200:8, 404:1, 500:1 and 12,928 transferred bytes. Equal frequencies use reverse lexical order in the shown `sort -rn` pipeline.
 Time: 15 min | Mode: Pairs | Points: 30
 
 ```
@@ -525,7 +572,7 @@ Time: 15 min | Mode: Pairs | Points: 30
 ║  🏃 SPRINT F3: LOG ANALYSER                                        ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
-║  OBJECTIVE: Analyse an Apache log file and extract                 ║
+║  OBJECTIVE: Analyse the declared synthetic log file and extract                 ║
 ║            relevant statistics                                     ║
 ║                                                                    ║
 ║  SETUP - create access.log:                                        ║
@@ -568,13 +615,13 @@ wc -l < access.log
 cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head -3
 
 # 3. Top 3 pages
-awk '{print $7}' access.log | sort | uniq -c | sort -rn | head -3
+awk '{gsub(/"/, "", $6); print $6}' access.log | sort | uniq -c | sort -rn | head -3
 
 # 4. HTTP code distribution
-awk '{print $9}' access.log | sort | uniq -c | sort -rn
+awk '{print $7}' access.log | sort | uniq -c | sort -rn
 
 # 5. Total bytes
-awk '{sum += $10} END {print sum}' access.log
+awk '{sum += $8} END {print sum+0}' access.log
 ```
 
 💡 Bonus script:
@@ -594,12 +641,12 @@ echo "2. Top 3 IPs:"
 cut -d' ' -f1 "$LOG" | sort | uniq -c | sort -rn | head -3 | awk '{print "   " $2 ": " $1 " requests"}'
 echo ""
 echo "3. Top 3 pages:"
-awk '{print $7}' "$LOG" | sort | uniq -c | sort -rn | head -3 | awk '{print "   " $2 ": " $1 " accesses"}'
+awk '{gsub(/"/, "", $6); print $6}' "$LOG" | sort | uniq -c | sort -rn | head -3 | awk '{print "   " $2 ": " $1 " accesses"}'
 echo ""
 echo "4. HTTP codes:"
-awk '{print $9}' "$LOG" | sort | uniq -c | sort -rn | awk '{print "   HTTP " $2 ": " $1}'
+awk '{print $7}' "$LOG" | sort | uniq -c | sort -rn | awk '{print "   HTTP " $2 ": " $1}'
 echo ""
-echo "5. Total bytes: $(awk '{sum += $10} END {print sum}' "$LOG")"
+echo "5. Total bytes: $(awk '{sum += $8} END {print sum+0}' "$LOG")"
 echo ""
 echo "═══════════════════════════════════════════════════"
 ```
@@ -643,8 +690,11 @@ Time: 10 min | Mode: Individual | Points: 20
 #!/bin/bash
 # batch_rename.sh
 
-# Cleanup
-rm -f file*.txt document_*.txt
+# Use a new owned workspace; preserve all caller files.
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 # 1. Create files
 for i in {1..5}; do
@@ -660,7 +710,7 @@ echo ""
 for file in file*.txt; do
     # Extract number
     num=${file//[^0-9]/}
-    mv "$file" "document_$num.txt"
+    mv -- "$file" "document_$num.txt" || exit 1
 done
 
 # 4. Display after
@@ -714,6 +764,8 @@ Time: 10 min | Mode: Pairs | Points: 20
 ```bash
 #!/bin/bash
 # dir_stats.sh - Directory statistics
+set -o pipefail
+shopt -s nullglob dotglob
 
 DIR="${1:-.}"
 
@@ -726,20 +778,20 @@ echo "────────────────────────�
 total_files=0
 total_size=0
 
-for subdir in "$DIR"/*/; do
-    [[ ! -d "$subdir" ]] && continue
+for subdir in "$DIR"/*; do
+    [[ ! -d "$subdir" || -L "$subdir" ]] && continue
     
     name=$(basename "$subdir")
-    files=$(find "$subdir" -maxdepth 1 -type f | wc -l)
-    size=$(du -sh "$subdir" 2>/dev/null | cut -f1)
+    files=$(find "$subdir" -maxdepth 1 -type f -printf . | wc -c) || exit 1
+    size=$(du -sh "$subdir" | cut -f1) || exit 1
     
     printf "%-20s: %3d files, %s\n" "$name/" "$files" "$size"
     
-    ((total_files += files))
+    total_files=$((total_files + files))
 done
 
 echo "─────────────────────────────────────────"
-total_size=$(du -sh "$DIR" 2>/dev/null | cut -f1)
+total_size=$(du -sh "$DIR" | cut -f1) || exit 1
 echo "TOTAL: $total_files files in subdirectories, $total_size total"
 ```
 
@@ -782,9 +834,9 @@ Time: 15 min | Mode: Pairs | Points: 30
 ║    Ionescu Maria    | A2 | Average: 9.67 | ✓ Pass                  ║
 ║    ...                                                             ║
 ║    ─────────────────────────────────────────                       ║
-║    Group A1 average: 7.33                                          ║
+║    Group A1 average: 7.44                                          ║
 ║    Group A2 average: 9.17                                          ║
-║    Overall average: 8.07                                           ║
+║    Overall average: 8.13                                           ║
 ║                                                                    ║
 ╚════════════════════════════════════════════════════════════════════╝
 ```
@@ -793,10 +845,13 @@ Time: 15 min | Mode: Pairs | Points: 30
 ```bash
 #!/bin/bash
 # process_csv.sh - Student CSV processor
+set -o pipefail
+export LC_ALL=C
+command -v bc >/dev/null || { printf 'bc is required\n' >&2; exit 1; }
 
 CSV="${1:-students.csv}"
 
-[[ ! -f "$CSV" ]] && { echo "✗ File '$CSV' doesn't exist"; exit 1; }
+[[ ! -f "$CSV" || ! -r "$CSV" ]] && { echo "✗ File '$CSV' doesn't exist"; exit 1; }
 
 echo "📊 STUDENT REPORT"
 echo "═══════════════════════════════════════════════════════"
@@ -807,15 +862,16 @@ total_count=0
 
 # Skip header, process
 tail -n +2 "$CSV" | while IFS=',' read -r name group n1 n2 n3; do
-    # Calculate average (using bc for precision)
-    average=$(echo "scale=2; ($n1 + $n2 + $n3) / 3" | bc)
+    # Keep precision for calculation; printf rounds the displayed result to 2 decimals.
+    [[ $n1 =~ ^[0-9]+([.][0-9]+)?$ && $n2 =~ ^[0-9]+([.][0-9]+)?$ && $n3 =~ ^[0-9]+([.][0-9]+)?$ ]] || { printf 'Invalid grade row\n' >&2; exit 1; }
+    average=$(printf 'scale=10; (%s + %s + %s) / 3\n' "$n1" "$n2" "$n3" | bc) || exit 1
     
     # Status
     status="✓ Pass"
     [[ $(echo "$average < 5" | bc) -eq 1 ]] && status="✗ Fail"
     
     printf "%-18s | %s | Average: %5.2f | %s\n" "$name" "$group" "$average" "$status"
-done
+done || exit 1
 
 echo "═══════════════════════════════════════════════════════"
 
@@ -833,7 +889,8 @@ END {
     for (g in group) {
         printf "   Group %s average: %.2f\n", g, group[g]/count[g]
     }
-    printf "\n   Overall average: %.2f\n", total/n
+    if (n) printf "\n   Overall average: %.2f\n", total/n
+    else print "No student records; average is undefined"
 }' "$CSV"
 ```
 
@@ -858,7 +915,7 @@ Time: 15 min | Mode: Pairs | Points: 35
 ║    3. Memory section: total, used, free, %                         ║
 ║    4. Disk section: top 3 partitions by usage                      ║
 ║    5. Processes section: top 5 by memory                           ║
-║    6. Network section: active IPs, connections                     ║
+║    6. Network section: assigned IPv4 addresses, listening TCP/UDP sockets                     ║
 ║    7. Save to report_YYYYMMDD_HHMMSS.txt                           ║
 ║    8. Display confirmation message with file path                  ║
 ║                                                                    ║
@@ -873,6 +930,7 @@ Time: 15 min | Mode: Pairs | Points: 35
 ```bash
 #!/bin/bash
 # system_report.sh - Complete system report
+set -o pipefail
 
 REPORT="report_$(date '+%Y%m%d_%H%M%S').txt"
 
@@ -906,11 +964,11 @@ REPORT="report_$(date '+%Y%m%d_%H%M%S').txt"
     echo "━━━ NETWORK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "IPs:"
     ip -4 addr show | grep inet | awk '{print "  " $2}'
-    echo "Active connections: $(ss -tuln | wc -l)"
+    echo "Listening TCP/UDP sockets: $(ss -H -tuln | wc -l)"
     echo ""
     
     echo "════════════════════════════════════════════════════════════"
-} | tee "$REPORT"
+} | tee "$REPORT" || { printf 'Report failed\n' >&2; exit 1; }
 
 echo ""
 echo "✓ Report saved to: $REPORT"

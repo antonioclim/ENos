@@ -1,7 +1,7 @@
-# Live Coding Guide - Seminar 3-4
+# Live Coding Guide - Seminar 02
 ## Operating Systems | Operators, Redirection, Filters, Loops
 
-Total live coding duration: ~45-50 minutes (distributed throughout the seminar)  
+Total live coding duration: 55 minutes (15 + 10 + 15 + 15) (distributed throughout the seminar)  
 Style: Incremental, with predictions and deliberate errors
 
 ---
@@ -25,13 +25,17 @@ Style: Incremental, with predictions and deliberate errors
 │  3. EXECUTION  - Run the command                           │
 │  4. EXPLANATION - "Notice that... because..."              │
 
-> 💡 I've observed that students who draw the diagram on paper before writing code achieve much better results.
 
 │  5. VARIATION  - "But what if we change X?"                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+> 💡 I've observed that students who draw the diagram on paper before writing code achieve much better results.
+
+
 ---
+
+The deliberate failure demonstrations assume `errexit` and `lastpipe` are disabled. Corrected counters use assignments when strict-mode execution is discussed. Examples with CSV use simple unquoted fields, without embedded commas/newlines. Historical percentages/anecdotes are not measured outcomes supplied by this package.
 
 ## INITIAL SETUP
 
@@ -42,9 +46,10 @@ Style: Incremental, with predictions and deliberate errors
 # === COMPLETE SETUP FOR DEMO ===
 
 # Cleanup and create working directory
-rm -rf ~/demo_seminar34 2>/dev/null
-mkdir -p ~/demo_seminar34
-cd ~/demo_seminar34
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 # Short PS1 for demo (more visible)
 export PS1='\[\e[1;32m\]demo\[\e[0m\]:\[\e[1;34m\]\W\[\e[0m\]$ '
@@ -110,7 +115,7 @@ ls -la
 
 ```bash
 # SAY: "Let's verify that we have everything prepared..."
-cd ~/demo_seminar34
+cd -- "${DEMO_DIR:?Run the owned-workspace setup first}" || exit 1
 pwd
 ls
 ```
@@ -144,10 +149,9 @@ mkdir project && echo "Directory created!"
 
 EXPLANATION: "mkdir succeeded, so && allowed echo to run."
 
-```bash
-
 *(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
+```bash
 # PREDICTION: "But what if I run the same command again?"
 mkdir project && echo "Created again!"
 ```
@@ -245,9 +249,11 @@ rm -rf test_err  # cleanup
 mkdir test_err && echo "Success" || echo "Error"  # First time: 
 mkdir test_err && echo "Success" || echo "Error"  # Second: Error
 
-> 💡 In exams from previous sessions, this question has consistently appeared — so it's worth attention.
 
 ```
+
+> 💡 In exams from previous sessions, this question has consistently appeared — so it's worth attention.
+
 
 ---
 
@@ -256,7 +262,7 @@ mkdir test_err && echo "Success" || echo "Error"  # Second: Error
 ### Step 1: Output to File `>` (2 min)
 
 ```bash
-cd ~/demo_seminar34
+cd -- "${DEMO_DIR:?Run the owned-workspace setup first}" || exit 1
 
 # SAY: "Let's see how we save output to a file..."
 echo "First line" > output.txt
@@ -287,13 +293,15 @@ EXPLANATION: "Now we have all three lines. `>>` appends at the end."
 
 ```bash
 
-*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 # SAY: "Now the more complicated part - errors have their own channel."
 
 # PREDICTION: "What do we see here?"
 ls /home /nonexistent_directory
 ```
+
+*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
+
 
 EXPLANATION: "We see two DIFFERENT things: the listing of /home (stdout) and the error (stderr). Both go to the screen, but they are separate channels."
 
@@ -358,7 +366,7 @@ cat everything3.txt
 ### Step 1: The First Pipe (2 min)
 
 ```bash
-cd ~/demo_seminar34
+cd -- "${DEMO_DIR:?Run the owned-workspace setup first}" || exit 1
 
 # SAY: "The pipe connects the output of one command to the input of another."
 
@@ -383,19 +391,19 @@ SAY: "Let's build a complex pipeline, step by step."
 ps aux
 
 # Step 2: Extract only the user column (first)
-ps aux | awk '{print $1}'
+ps -e -o user=
 
 # Step 3: Sort (REQUIRED for uniq!)
-ps aux | awk '{print $1}' | sort
+ps -e -o user= | sort
 
 # Step 4: Count duplicates
-ps aux | awk '{print $1}' | sort | uniq -c
+ps -e -o user= | sort | uniq -c
 
 # Step 5: Sort by count (descending)
-ps aux | awk '{print $1}' | sort | uniq -c | sort -rn
+ps -e -o user= | sort | uniq -c | sort -rn
 
 # Step 6: Take the first 5
-ps aux | awk '{print $1}' | sort | uniq -c | sort -rn | head -5
+ps -e -o user= | sort | uniq -c | sort -rn | head -5
 ```
 
 EXPLANATION: "Each step adds a modification. It's like an assembly line!"
@@ -475,7 +483,7 @@ echo "hello" | tr 'he' 'HE'
 ### Step 1: for with List (3 min)
 
 ```bash
-cd ~/demo_seminar34
+cd -- "${DEMO_DIR:?Run the owned-workspace setup first}" || exit 1
 
 # SAY: "The for loop iterates through elements..."
 
@@ -670,13 +678,14 @@ done
 
 ```bash
 # Quick cleanup
-rm -rf ~/demo_seminar34/* 2>/dev/null
+printf 'Current owned workspace: %s\n' "${DEMO_DIR:?Run setup first}"
+# Start the setup block again for a fresh workspace; do not wipe a fixed home path.
 
 # Reset test files
 # (run the setup script again)
 
 # Quick check of what exists
-ls -la ~/demo_seminar34/
+ls -la -- "${DEMO_DIR:?Run setup first}"
 
 # Clear with header
 clear; echo "=== DEMO: [NAME] ===" 

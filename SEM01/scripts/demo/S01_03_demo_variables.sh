@@ -174,8 +174,9 @@ echo "  Exit code \$? -> $?"
 echo ""
 
 echo "  Running: ls /nonexistent 2>/dev/null"
-ls /nonexistent 2>/dev/null || true
-echo "  Exit code \$? -> $?"
+status=0
+ls /nonexistent 2>/dev/null || status=$?
+echo "  Exit code \$? -> $status"
 echo ""
 
 echo -e "${GREEN}Remember: Exit code 0 = success, non-zero = error${NC}"

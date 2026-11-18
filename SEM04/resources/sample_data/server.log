@@ -1,0 +1,17 @@
+2026-01-01T00:00:00 ERROR 192.0.2.1 logged in
+2026-01-01T00:00:01 ERROR 192.0.2.2 logged in
+2026-01-01T00:00:02 ERROR 192.0.2.3 logged in
+2026-01-01T00:00:03 ERROR 192.0.2.4 synthetic event
+2026-01-01T00:00:04 WARNING 192.0.2.5 synthetic event
+2026-01-01T00:00:05 WARNING 192.0.2.6 synthetic event
+2026-01-01T00:00:06 WARNING 192.0.2.7 synthetic event
+2026-01-01T00:00:07 WARNING 192.0.2.8 synthetic event
+2026-01-01T00:00:08 WARNING 192.0.2.9 synthetic event
+2026-01-01T00:00:09 DEBUG 192.0.2.1 synthetic event
+2026-01-01T00:00:10 DEBUG 192.0.2.2 synthetic event
+2026-01-01T00:00:11 DEBUG 192.0.2.3 synthetic event
+2026-01-01T00:00:12 INFO 192.0.2.4 synthetic event
+2026-01-01T00:00:13 INFO 192.0.2.5 synthetic event
+2026-01-01T00:00:14 INFO 192.0.2.6 synthetic event
+2026-01-01T00:00:15 INFO 192.0.2.7 synthetic event
+2026-01-01T00:00:16 INFO 192.0.2.8 synthetic event

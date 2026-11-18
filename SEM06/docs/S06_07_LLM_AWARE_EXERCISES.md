@@ -7,13 +7,9 @@
 
 ## LLM-Aware Philosophy
 
-In the era of ChatGPT/Claude/Copilot, traditional exercises can be solved instantly by AI. LLM-aware exercises are designed to:
+These exercises combine prediction, local execution, explanation and reproducible evidence. An AI system with authorised tools can execute commands and document debugging; hostnames, PIDs, timestamps, screenshots and stylistic features are not proof of authorship. Machine observations are time-dependent and can be fabricated or copied. Assess the technical reasoning against an explicitly approved rubric.
 
-1. **Require access to real system** — AI cannot run commands on your computer
-2. **Involve machine-specific output** — hostname, PID, unique timestamps
-3. **Require real-time debugging** — analysing a running process
-4. **Request decisions based on local context** — what services are running NOW
-5. **Combine code with understanding** — not just "write code", but "explain why"
+**Author decision remains open:** the historical real-machine collection and mandatory signature proposal below requires a choice of minimisation, retention, recipients, redaction and assessment consequences. The technical corrections do not approve that collection policy. Use the supplied synthetic fixtures to practise parsers without exposing real identifiers. See [TEACHING_CONTRACT.md](TEACHING_CONTRACT.md).
 
 ---
 
@@ -42,11 +38,14 @@ A "suspect" process is running on the system. You need to investigate it using `
    # Your answer: _______________
    ```
 
-   b) What environment variables does it have? (first 5)
+   b) How is a NUL-delimited environment parsed without dumping secrets? Inspect an explicit synthetic fixture (no user environment is collected):
    ```bash
-   head -5 /proc/$$/environ | tr '\0' '\n'
-   # Your answer: _______________
+   fixture=$(mktemp)
+   trap 'rm -f -- "$fixture"' EXIT
+   printf 'DEMO_TASK=capstone\0LANG=C.UTF-8\0TOKEN=do-not-display\0TERM=xterm\0' > "$fixture"
+   python3 SEM06/scripts/examples/evidence_examples.py environment "$fixture"
    ```
+   The allowlist is DEMO_TASK, LANG, TERM, SHELL and TZ, at most five records. Splitting after `head -5` is wrong because `/proc/PID/environ` uses NUL separators. Do not submit real command lines, environment values, descriptor targets or working paths before the collection/redaction policy is approved.
 
    c) What file descriptors are open?
    ```bash
@@ -60,14 +59,14 @@ A "suspect" process is running on the system. You need to investigate it using `
    # Your answer: _______________
    ```
 
-### Why AI Cannot Solve This
+### What this evidence can establish
 - Answers depend on YOUR system
-- PID is unique for each run
+- A PID identifies a process only within a namespace and time interval; it can be reused
 - Environment variables are session-specific
 
 ### Evaluation
 - 2p per correct answer with real output
-- -1p if output appears fabricated
+- Historical proposed penalty: −1p for fabrication. Do not infer fabrication from appearance; the evidentiary standard and review process require author approval.
 
 ---
 
@@ -89,16 +88,18 @@ You want to understand what a script does "under the hood".
 
 2. Run with strace and capture output:
    ```bash
-   strace -f -o trace.log ./script.sh
+   strace -f -ttt -o trace.log bash ./script.sh
    ```
 
 3. Analyse trace.log and answer:
 
    a) How many `write()` calls were made? List the first 3:
    ```bash
-   grep "^write" trace.log | head -3
+   python3 SEM06/scripts/examples/evidence_examples.py trace trace.log
    # Your answer: _______________
    ```
+
+   The parser counts entered `write(` records with optional PID and timestamp prefixes and lists the first three. Resumed records are not double-counted. It is a bounded teaching parser, not a universal decoder of every strace mode.
 
    b) What system call opens /etc/hostname?
    ```bash
@@ -112,14 +113,14 @@ You want to understand what a script does "under the hood".
    # Your answer: _______________
    ```
 
-### Why AI Cannot Solve This
+### What this evidence can establish
 - strace output is kernel/version specific
-- Memory addresses and file descriptors are unique
-- Timestamps are real
+- Addresses and descriptor numbers can recur and do not authenticate a recording
+- `-ttt` requests timestamps; they reflect the local clock and are not independently trusted
 
 ### Evaluation
 - Must attach trace.log (or relevant fragments)
-- Fabricated output = 0p
+- Historical proposed zero for fabrication is subject to the approved evidentiary and review policy; parser output alone cannot determine fabrication.
 
 ---
 
@@ -142,15 +143,15 @@ Your system is "slow". Investigate with the tools you've learned.
    cat /proc/loadavg
    
    # Top 5 processes by CPU
-   ps aux --sort=-%cpu | head -6
+   ps -eo pid,pcpu,pmem,comm --sort=-pcpu | sed -n '1,6p'
    ```
 
-2. Run a simple "stress test":
+2. Optional load fixture on a disposable lab host with explicit intent to consume CPU for five seconds (do not run on shared production infrastructure):
    ```bash
    # Create temporary load
-   dd if=/dev/zero of=/dev/null bs=1M count=1000 &
+   timeout --signal=TERM --kill-after=1 5 dd if=/dev/zero of=/dev/null bs=1M status=none &
    STRESS_PID=$!
-   sleep 5
+   # Observe only this owned bounded process; do not wait five seconds before taking the sample.
    ```
 
 3. Capture state again and compare:
@@ -164,7 +165,8 @@ Your system is "slow". Investigate with the tools you've learned.
 
 4. Stop the stress:
    ```bash
-   kill $STRESS_PID 2>/dev/null
+   if wait "$STRESS_PID"; then status=0; else status=$?; fi
+   [[ $status == 0 || $status == 124 ]] || { printf 'Load fixture failed: %s\n' "$status" >&2; exit 1; }
    ```
 
 5. Answer:
@@ -172,7 +174,7 @@ Your system is "slow". Investigate with the tools you've learned.
    - What happened to load average?
    - Identify the dd process in ps output. What is the %CPU?
 
-### Why AI Cannot Solve This
+### What this evidence can establish
 - Values are specific to your hardware
 - Capture moment affects results
 - Load average depends on number of cores
@@ -184,7 +186,7 @@ Your system is "slow". Investigate with the tools you've learned.
 ### Context
 You have a script with bugs. Find them WITHOUT correcting before analysis.
 
-### Buggy Script
+### Buggy Script — intentionally WRONG; analyse before correcting
 
 ```bash
 #!/bin/bash
@@ -222,10 +224,10 @@ main
 3. Correct errors one by one, running after each correction
 4. Document the solution for each
 
-### Why AI Cannot Solve This
+### What this evidence can establish
 - Exact error messages depend on Bash version
 - Order of error discovery is important
-- AI can correct instantly, but CANNOT document the debugging process
+- A tool-assisted system can also document the debugging process; retain exact inputs, outputs and the explanation
 
 ### Evaluation
 - Debugging process documented step by step: 10p
@@ -268,10 +270,10 @@ echo ""
 
 ### Deliverable
 - Complete script
-- 3 consecutive outputs (proving it runs on real system)
+- 3 observations with reproducible commands and stated limits; consecutive text is not proof of execution
 
-### Why AI Cannot Solve This
-- Hostname is unique
+### What this evidence can establish
+- A hostname is configurable and need not be unique
 - Top 3 processes vary over time
 - Timestamps must be consecutive at ~1 minute apart
 
@@ -280,9 +282,9 @@ echo ""
 ## Exercise 6: Explain This Code (15 min)
 
 ### Context
-You receive this script and must explain what it does WITHOUT running it.
+You receive this intentionally unsafe script and must explain it WITHOUT running it. The shared `/tmp` deletion is outside a legitimate owned fixture, and unlinking a held lock file can let another process lock a different inode. The corrected runtime keeps a stable lock pathname and deletes only explicitly owned files.
 
-```bash
+```text
 #!/bin/bash
 set -euo pipefail
 
@@ -311,10 +313,10 @@ done
 
 2. Answer:
    - What happens if you run the script twice simultaneously?
-   - Why is the trap important here?
+   - Why can this unlinking trap break mutual exclusion? How would a stable lock inode fix it?
    - What is the potential security problem?
 
-### Why AI Cannot Solve This (Well)
+### What this evidence can establish
 - AI can explain generically, but cannot demonstrate understanding
 - We're looking for YOUR explanation, not a copied one
 - Questions are open-ended and evaluate reasoning
@@ -352,23 +354,23 @@ File types:
 
 3. Run on your system and attach real output
 
-### Why AI Cannot Solve This
+### What this evidence can establish
 - Final output must be from your system
 - Numbers will be different
-- AI cannot verify if code produces expected output
+- Executing a check establishes that particular input/output behaviour, whoever operates the tools
 
 ---
 
-## Exercise 8: Signature Script (MANDATORY - 15 min)
+## Exercise 8: Historical signature proposal — author decision pending (15 min)
 
 ### Purpose
-Generate a unique "fingerprint" of your system that proves YOU ran the code. This exercise is **mandatory** for the CAPSTONE submission.
+The historical draft proposed a mandatory machine fingerprint and claimed it proved execution. That claim is unsupported: hashes of self-reported identifiers provide neither a digital signature nor authorship. The original requested fields and timing are preserved below for the author to accept, minimise or remove explicitly. They are not newly adopted requirements.
 
 ### Task
 
-Create `signature.sh` that outputs system-specific identifiers:
+**Historical proposal, non-executable review text:** `signature.sh` would collect the following identifiers. Do not run or submit it under an assumed policy.
 
-```bash
+```text
 #!/bin/bash
 # signature.sh - Generate unique system fingerprint
 # MANDATORY for CAPSTONE submission
@@ -408,10 +410,10 @@ echo "=== CHECKSUM ==="
 echo "Signature hash: $(hostname; date +%s; cat /etc/machine-id 2>/dev/null) | sha256sum | cut -c1-16"
 ```
 
-### Submission Requirements
+### Historical submission requirements (pending author decision)
 
 1. Run script and save output:
-   ```bash
+   ```text
    ./signature.sh > signature_run1.txt
    sleep 60
    ./signature.sh > signature_run2.txt
@@ -423,23 +425,32 @@ echo "Signature hash: $(hostname; date +%s; cat /etc/machine-id 2>/dev/null) | s
 2. Include `signature.txt` in your CAPSTONE submission
 3. Output MUST be from YOUR computer
 4. Timestamps must be within 24h of submission deadline
-5. Timestamps must be ~1 minute apart (proving real execution)
+5. Timestamps were requested approximately one minute apart; this timing does not prove real execution.
 
-### Why This Works Against AI-Generated Submissions
+### Limits of the historical authenticity claim
 
-| Element | Why It's Hard to Fake |
+| Element | Evidentiary limitation |
 |---------|----------------------|
-| Machine ID | Unique per OS installation, persistent |
-| Boot ID | Changes each reboot, proves recent execution |
-| Process tree | Shows YOUR terminal emulator |
-| MAC address | Unique to your network card |
-| Load average | Varies constantly |
-| Memory free | Different every second |
-| Consecutive timestamps | Must be ~1 min apart |
+| Machine ID | Can be copied or reset; reveals a persistent identifier |
+| Boot ID | Local reported value; does not prove when submitted text was produced |
+| Process tree | Time-dependent and namespace-dependent; can be reproduced or fabricated |
+| MAC address | Can be randomised, changed or shared by virtual configurations |
+| Load average | Dynamic metric; arbitrary text can claim any value |
+| Memory free | Dynamic metric, not identity evidence |
+| Consecutive timestamps | Local clock values can be edited |
 
-**Combined:** These elements are virtually impossible to fabricate convincingly.
+Combining these fields does not create authentication. The original checksum line also printed a pipeline as text instead of hashing the displayed record. The following separate synthetic exercise hashes exactly the bytes in its fixture:
 
-### Verification Process
+```bash
+record=$(mktemp)
+trap 'rm -f -- "$record"' EXIT
+printf 'task=capstone-demo\nrun=1\nvalue=synthetic\n' > "$record"
+python3 SEM06/scripts/examples/evidence_examples.py fingerprint "$record"
+```
+
+The 16 hexadecimal characters are a truncated SHA-256 checksum, not a digital signature, freshness guarantee or authentication token.
+
+### Proposed live discussion
 
 During the live demonstration, the instructor may ask you to:
 1. Run `signature.sh` again on the spot
@@ -459,13 +470,13 @@ During the live demonstration, the instructor may ask you to:
 | 5. Custom monitor | 35 min | 20p | Concept integration |
 | 6. Explain code | 15 min | 15p | Deep understanding |
 | 7. Reverse eng. | 25 min | 20p | Synthesis |
-| **8. Signature** | **15 min** | **MANDATORY** | **Authenticity proof** |
+| **8. Signature proposal** | **15 min** | **Author decision pending** | **No authenticity proof established** |
 
 ---
 
 ## How to Detect AI Solutions
 
-Indicators that solution is AI-generated:
+Historical heuristic list preserved for critical review. None is a valid detector or basis for a penalty on its own:
 
 1. **Generic output** — hostname "ubuntu-server", PID 1234
 2. **Round timestamps** — exactly :00:00
@@ -476,11 +487,11 @@ Indicators that solution is AI-generated:
 
 ### What to Ask Students For
 
-- Terminal screenshots (hard to fabricate)
+- Screenshots as illustrations only; they can be altered and may expose private information
 - Attached .log files (with real timestamps)
 - Explanations in their own words
 - Live demonstrations in seminar
-- **signature.txt with 3 consecutive runs**
+- Machine fingerprint collection only if the author explicitly adopts a minimised, justified policy
 
 ---
 

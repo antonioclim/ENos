@@ -18,7 +18,7 @@ A comprehensive template including:
 ### Features
 - Strict mode: `set -euo pipefail`
 - Coloured logging (info, warn, error)
-- Argument parsing with getopts
+- Explicit short/long option parsing
 - Configuration file support
 - Cleanup trap for temporary files
 - Help message generation
@@ -40,7 +40,8 @@ chmod +x my_project.sh
 
 ### Structure
 
-```bash
+```text
+# Structural illustration only; the actual template below is executable.
 #!/bin/bash
 # Header with metadata
 
@@ -74,3 +75,5 @@ main "$@"
 *See also: [`../../scripts/projects/`](../../scripts/projects/) for complete examples*
 
 *Last updated: January 2026*
+
+The maintained template reports NOT_IMPLEMENTED with status3 for unfinished main behaviour; help/version are available. Copying it does not complete a capstone. Literal configuration is data, cleanup owns only allocated paths and INT/TERM use explicit exit statuses. See [the teaching contract](../../docs/TEACHING_CONTRACT.md).

@@ -12,7 +12,7 @@
 This self-assessment helps you identify what you have understood and where you need more practice. 
 
 **Rules:**
-1. Complete **HONESTLY** - nobody else sees the answers
+1. Complete **HONESTLY** for your own reflection. Sharing/collection depends on the separately stated course policy; this file cannot guarantee confidentiality
 2. Do not use Google or notes
 3. If you are not sure, tick "Not sure"
 4. At the end, focus on areas with ❌ or ❓
@@ -127,7 +127,7 @@ Your answer:
 
 ### Mini-Test
 
-> **Question**: What command do you use to replace ALL occurrences of "localhost" with "127.0.0.1" in config.txt, keeping a backup?
+> **Question**: What command do you use to replace ALL occurrences of "localhost" with "127.0.0.1" in config.txt, keeping a backup in a fresh owned fixture where config.txt.bak does not already exist?
 
 Your answer:
 ```
@@ -167,7 +167,7 @@ Your answer:
 
 ### Mini-Test
 
-> **Question**: Write an awk command that displays the sum of column 3 from a CSV (skip header).
+> **Question**: Write an awk command that sums numeric column 3 from a simple unquoted comma-delimited fixture (skip one header; no quoted commas/newlines).
 
 Your answer:
 ```
@@ -208,6 +208,10 @@ Total ❌: _____ / 52
 ```
 
 ## Interpretation
+
+These are informal self-report bands, not a validated proficiency scale or final
+grade. The retained motivational claim about outperforming 90% of users has no
+supporting comparison dataset in this package.
 
 | Score ✅ | Level | Recommendation |
 |----------|-------|----------------|
@@ -305,10 +309,13 @@ With `grep -E` (Extended RE), `+` becomes a quantifier = "1 or more".
 <summary>Answer to Mini-Test 2 (Count all occurrences)</summary>
 
 ```bash
-grep -o 'error' file.txt | wc -l
+grep -ow 'error' file.txt | wc -l
 ```
 
-`-o` displays each match on a separate line, `wc -l` counts the lines.
+`-o` emits each nonempty match, `-w` requires a whole word under GNU grep word
+character rules and `wc -l` counts it. `terror` and `errorless` must not count.
+Check grep status separately if using this in an error-sensitive script: 1 means
+no matches, whereas a missing/unreadable file is an error.
 
 </details>
 
@@ -319,7 +326,7 @@ grep -o 'error' file.txt | wc -l
 sed -i.bak 's/localhost/127.0.0.1/g' config.txt
 ```
 
-`-i.bak` = in-place editing with backup in config.txt.bak
+`-i.bak` = in-place editing with one backup in config.txt.bak; a later run can overwrite that backup
 `/g` = global, all occurrences
 
 </details>
@@ -328,13 +335,13 @@ sed -i.bak 's/localhost/127.0.0.1/g' config.txt
 <summary>Answer to Mini-Test 4 (awk sum)</summary>
 
 ```bash
-awk -F',' 'NR > 1 { sum += $3 } END { print sum }' file.csv
+awk -F',' 'NR > 1 { sum += $3 } END { print sum+0 }' file.csv
 ```
 
 `-F','` = comma separator
 `NR > 1` = skip header
 `sum += $3` = add column 3
-`END { print sum }` = display at the end
+`END { print sum+0 }` = display at the end
 
 </details>
 
