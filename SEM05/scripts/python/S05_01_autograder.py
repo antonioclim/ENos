@@ -21,6 +21,7 @@ import argparse
 import logging
 import os
 import re
+import shlex
 import subprocess
 import sys
 import json
@@ -33,6 +34,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
 from logging_utils import setup_logging
 
 logger = setup_logging(__name__)
+# Machine-readable stdout is reserved for the selected report format.
+for handler in logger.handlers:
+    if isinstance(handler, logging.StreamHandler) and not isinstance(handler, logging.FileHandler):
+        handler.setStream(sys.stderr)
 
 @dataclass
 class CheckResult:
@@ -65,7 +70,7 @@ class BashAutograder:
     def log(self, message: str):
         """Verbose log."""
         if self.verbose:
-            print(f"[DEBUG] {message}")
+            print(f"[DEBUG] {message}", file=sys.stderr)
     
     def read_script(self, filepath: str) -> str:
         """Read script content."""
@@ -78,7 +83,7 @@ class BashAutograder:
         
         valid_shebangs = ['#!/bin/bash', '#!/usr/bin/env bash']
         
-        if any(first_line.startswith(s) for s in valid_shebangs):
+        if re.fullmatch(r'#!(?:/bin/bash|/usr/bin/env bash)(?:\s+.*)?', first_line):
             return CheckResult(
                 name="Shebang",
                 passed=True,
@@ -101,27 +106,34 @@ class BashAutograder:
         points = 0.0
         max_points = 3.0
         
-        # Check set -e (or errexit)
-        if re.search(r'set\s+-[a-z]*e|set\s+-o\s+errexit', content):
-            points += 1.0
-            details.append("✓ set -e (errexit)")
-        else:
-            details.append("✗ set -e missing")
-        
-        # Check set -u (or nounset)
-        if re.search(r'set\s+-[a-z]*u|set\s+-o\s+nounset', content):
-            points += 1.0
-            details.append("✓ set -u (nounset)")
-        else:
-            details.append("✗ set -u missing")
-        
-        # Check pipefail
-        if re.search(r'set\s+-o\s+pipefail', content):
-            points += 1.0
-            details.append("✓ set -o pipefail")
-        else:
-            details.append("✗ pipefail missing")
-        
+        # Lexical diagnostic only: this does not prove control-flow coverage.
+        enabled = set()
+        for line in content.splitlines():
+            try:
+                words = shlex.split(line, comments=True)
+            except ValueError:
+                continue
+            if not words or words[0] != 'set':
+                continue
+            index = 1
+            while index < len(words):
+                word = words[index]
+                if word.startswith(('-', '+')):
+                    on = word[0] == '-'
+                    for option in word[1:]:
+                        name = {'e':'errexit', 'u':'nounset'}.get(option)
+                        if option == 'o' and index+1 < len(words):
+                            index += 1
+                            name = words[index]
+                        if name in ('errexit', 'nounset', 'pipefail'):
+                            if on: enabled.add(name)
+                            else: enabled.discard(name)
+                index += 1
+        for name in ('errexit', 'nounset', 'pipefail'):
+            found = name in enabled
+            points += float(found)
+            details.append(('✓ ' if found else '✗ ') + name + ' (lexical setting)')
+
         return CheckResult(
             name="Strict Mode",
             passed=(points == max_points),
@@ -301,7 +313,7 @@ class BashAutograder:
     
     def check_usage_function(self, content: str) -> CheckResult:
         """Check existence of usage() function."""
-        has_usage = bool(re.search(r'usage\s*\(\)', content))
+        has_usage = bool(re.search(r'(?:usage|show_help|print_help)\s*\(\)', content))
         
         if has_usage:
             return CheckResult(
@@ -335,7 +347,9 @@ class BashAutograder:
             try:
                 issues = json.loads(output) if output else []
             except json.JSONDecodeError:
-                issues = []
+                return CheckResult('ShellCheck', False, 0.0, 2.0, 'Invalid ShellCheck JSON'), output
+            if result.returncode not in (0, 1) or not isinstance(issues, list):
+                return CheckResult('ShellCheck', False, 0.0, 2.0, 'ShellCheck execution failed'), output + result.stderr
             
             errors = [i for i in issues if i.get('level') == 'error']
             warnings = [i for i in issues if i.get('level') == 'warning']
@@ -375,10 +389,10 @@ class BashAutograder:
         except FileNotFoundError:
             return CheckResult(
                 name="ShellCheck",
-                passed=True,
-                points=1.0,
+                passed=False,
+                points=0.0,
                 max_points=2.0,
-                message="shellcheck not installed (skipped)"
+                message="shellcheck not installed (NOT_RUN)"
             ), ""
         except subprocess.TimeoutExpired:
             return CheckResult(
@@ -393,6 +407,7 @@ class BashAutograder:
                    input_data: str = None, timeout: int = 10) -> Tuple[bool, str, int]:
         """Execute script and return output."""
         try:
+            filepath = str(Path(filepath).resolve())
             cmd = ['bash', filepath] + (args or [])
             result = subprocess.run(
                 cmd,
@@ -452,7 +467,7 @@ class BashAutograder:
                 expected_code = tc.get('expected_code', 0)
                 expected_output = tc.get('expected_output')
                 
-                passed = (code == expected_code)
+                passed = success and (code == expected_code)
                 if expected_output and expected_output not in output:
                     passed = False
                 
@@ -534,6 +549,8 @@ def main():
         parser.print_help()
         sys.exit(1)
     
+    if not scripts:
+        parser.error("No scripts selected")
     reports = []
     for script in scripts:
         logger.info(f"Processing: {script.name}")
@@ -545,7 +562,9 @@ def main():
     
     if args.json:
         output = [{
+            'schema_version': 'enos.sem05.diagnostic.v1',
             'script': r.script_name,
+            'errors': r.errors,
             'score': r.total_score,
             'max_score': r.max_score,
             'percentage': (r.total_score / r.max_score * 100) if r.max_score > 0 else 0,

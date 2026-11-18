@@ -150,64 +150,15 @@ get_sorted_backups() {
 # Rotate backups keeping only last N
 # Usage: rotate_backups DIRECTORY COUNT [PATTERN]
 rotate_backups() {
-    local directory="$1"
-    local keep_count="$2"
-    local pattern="${3:-backup_*.tar*}"
-    
-    log_info "Rotating backups in $directory (keeping last $keep_count)"
-    
-    # Get sorted list (oldest first)
-    local backups=()
-    while IFS= read -r backup; do
-        [[ -n "$backup" ]] && backups+=("$backup")
-    done < <(get_sorted_backups "$directory" "$pattern")
-    
-    local total=${#backups[@]}
-    log_debug "Total backups found: $total"
-    
-    if [[ $total -le $keep_count ]]; then
-        log_info "Backup count ($total) <= limit ($keep_count), nothing to delete"
-        return 0
-    fi
-    
-    local to_delete=$((total - keep_count))
-    local deleted=0
-    
-    for ((i=0; i<to_delete; i++)); do
-        local backup="${backups[$i]}"
-        log_info "Deleting old backup: $(basename "$backup")"
-        
-        if rm -f "$backup"; then
-            ((deleted++))
-        else
-            log_error "Cannot delete: $backup"
-        fi
-    done
-    
-    log_info "Rotation complete: $deleted backups deleted"
-    return 0
+    local directory="$1" keep_count="$2" pattern="${3:-backup_*.tar*}"
+    python3 "$(dirname "${BASH_SOURCE[0]}")/retention.py" "$directory" "$keep_count" "$pattern"
 }
 
 # Rotation based on age (days)
 # Usage: rotate_by_age DIRECTORY DAYS [PATTERN]
 rotate_by_age() {
-    local directory="$1"
-    local max_age_days="$2"
-    local pattern="${3:-backup_*.tar*}"
-    
-    log_info "Deleting backups older than $max_age_days days from $directory"
-    
-    local deleted=0
-    
-    while IFS= read -r backup; do
-        if [[ -n "$backup" ]]; then
-            log_info "Deleting old backup: $(basename "$backup")"
-            rm -f "$backup" && ((deleted++))
-        fi
-    done < <(find "$directory" -maxdepth 1 -type f -name "$pattern" -mtime +"$max_age_days" 2>/dev/null)
-    
-    log_info "Deleted $deleted old backups"
-    return 0
+    local directory="$1" max_age_days="$2" pattern="${3:-backup_*.tar*}"
+    python3 "$(dirname "${BASH_SOURCE[0]}")/retention.py" "$directory" 0 "$pattern" --age-days "$max_age_days"
 }
 
 #------------------------------------------------------------------------------
@@ -233,31 +184,16 @@ get_backup_type_for_today() {
 
 # Get backup name based on type
 get_backup_name_for_type() {
-    local type="$1"
-    local prefix="${2:-backup}"
-    
-    case "$type" in
-        daily)
-            echo "${prefix}_daily_$(date +%Y%m%d)"
-            ;;
-        weekly)
-            echo "${prefix}_weekly_$(date +%Y)-W$(date +%V)"
-            ;;
-        monthly)
-            echo "${prefix}_monthly_$(date +%Y%m)"
-            ;;
-        *)
-            echo "${prefix}_$(date +%Y%m%d_%H%M%S)"
-            ;;
-    esac
+    local type="$1" prefix="${2:-${BACKUP_PREFIX:-backup}}"
+    printf '%s_%s_%s%s\n' "$prefix" "$type" "$(date +%Y%m%d_%H%M%S_%N)" "$(get_archive_extension "${COMPRESSION:-gz}")"
 }
 
 # Get retention for a backup type
 get_retention_for_type() {
     local type="$1"
-    local daily="${2:-7}"
-    local weekly="${3:-4}"
-    local monthly="${4:-12}"
+    local daily="${2:-${RETENTION_DAILY:-7}}"
+    local weekly="${3:-${RETENTION_WEEKLY:-4}}"
+    local monthly="${4:-${RETENTION_MONTHLY:-12}}"
     
     case "$type" in
         daily)   echo "$daily" ;;
@@ -314,7 +250,8 @@ calculate_checksum() {
             sha256sum "$file" | awk '{print $1}'
             ;;
         *)
-            sha256sum "$file" | awk '{print $1}'
+            log_error "Unsupported checksum algorithm: $algorithm"
+            return 1
             ;;
     esac
 }
@@ -326,9 +263,9 @@ save_checksum() {
     
     local checksum_file="${archive}.${algorithm}"
     local checksum
-    checksum=$(calculate_checksum "$archive" "$algorithm")
+    checksum=$(calculate_checksum "$archive" "$algorithm") || return 1
     
-    echo "$checksum  $(basename "$archive")" > "$checksum_file"
+    printf '%s  %s\n' "$checksum" "$(basename "$archive")" > "$checksum_file" || return 1
     log_debug "Checksum saved: $checksum_file"
 }
 
@@ -348,7 +285,7 @@ verify_checksum() {
     expected_checksum=$(awk '{print $1}' "$checksum_file")
     
     local actual_checksum
-    actual_checksum=$(calculate_checksum "$archive" "$algorithm")
+    actual_checksum=$(calculate_checksum "$archive" "$algorithm") || return 1
     
     if [[ "$expected_checksum" == "$actual_checksum" ]]; then
         log_info "✓ Checksum valid"
@@ -496,3 +433,25 @@ _check_backup_dependencies() {
 _check_backup_dependencies
 
 log_debug "utils.sh v${UTILS_VERSION} loaded (backup)"
+
+# Multi-source entry-point contract. Members are rooted beneath /, so restoration
+# preserves distinct source paths even when two source directories share a basename.
+create_archive_multi() {
+    local destination="$1" compression="$2" exclude_file="$3" snapshot="$4"
+    shift 4
+    local source absolute rel
+    local args=(tar --create --file="$destination" --directory=/)
+    local opt
+    opt=$(get_tar_compress_option "$compression") || return 1
+    [[ -z "$opt" ]] || args+=("$opt")
+    [[ -z "$exclude_file" ]] || args+=(--exclude-from="$exclude_file")
+    [[ -z "$snapshot" ]] || args+=(--listed-incremental="$snapshot")
+    local members=()
+    for source in "$@"; do
+        absolute=$(realpath -e -- "$source") || return 1
+        rel="${absolute#/}"
+        [[ -n "$rel" ]] || { log_error "Backing up / is not supported by this teaching tool"; return 1; }
+        members+=("$rel")
+    done
+    "${args[@]}" -- "${members[@]}"
+}

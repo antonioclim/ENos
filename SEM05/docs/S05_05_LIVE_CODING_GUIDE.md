@@ -6,6 +6,9 @@
 
 ---
 
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
+
+
 ## Live Coding Philosophy
 
 ### Fundamental Principles
@@ -17,6 +20,18 @@
 5. **Use errors as learning moments**
 
 ### Recommended Setup
+
+Begin in SEM05. Use an owned workspace for generated scripts:
+
+```bash
+SEMINAR_DIR=$PWD
+DEMO_ROOT=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$DEMO_ROOT"' EXIT
+cd -- "$DEMO_ROOT" || exit 1
+```
+
+Blocks with `$` / `>` prompts are terminal transcripts, not files to copy verbatim. Expected failures belong in disposable child Bash processes.
+
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -40,7 +55,7 @@
 
 **Objective:** Basic syntax and calling
 
-```bash
+```console
 # Open terminal, type directly:
 
 $ # Let's create our first function
@@ -64,7 +79,7 @@ $ # Because we did not tell it to use it!
 ```
 
 **🎯 Learning moment:**
-```bash
+```console
 $ greet() {
 >     echo "Hello, $1!"
 > }
@@ -85,7 +100,7 @@ $ # What is $1? The first argument of the FUNCTION
 **Objective:** Visual demonstration of the global variables problem
 
 **STEP 1: Setup the problem**
-```bash
+```console
 $ cat > demo_global.sh << 'EOF'
 #!/bin/bash
 
@@ -108,7 +123,7 @@ $ chmod +x demo_global.sh
 ```
 
 **STEP 2: Prediction**
-```bash
+```console
 $ # QUESTION FOR CLASS:
 $ # What will "After: count=..." display?
 $ # A) 100
@@ -118,7 +133,7 @@ $ # Vote!
 ```
 
 **STEP 3: Execution and surprise**
-```bash
+```console
 $ ./demo_global.sh
 Before: count=100
 In function: count=3
@@ -129,7 +144,7 @@ $ # Why? Variables in functions are GLOBAL by default!
 ```
 
 **STEP 4: The solution**
-```bash
+```console
 $ # Edit the file - add 'local'
 $ cat > demo_local.sh << 'EOF'
 #!/bin/bash
@@ -167,7 +182,7 @@ After: count=100    # Correct now!
 ### LC1.3: Return vs Echo (8 min)
 
 **STEP 1: The common mistake**
-```bash
+```console
 $ get_sum() {
 >     return $(($1 + $2))
 > }
@@ -180,7 +195,7 @@ $ # Empty?! Why?
 ```
 
 **STEP 2: Explanation**
-```bash
+```console
 $ # return sets EXIT CODE, does not return values!
 $ get_sum 5 3
 $ echo "Exit code: $?"
@@ -193,7 +208,7 @@ Exit code: 44    # 300 % 256 = 44 (overflow!)
 ```
 
 **STEP 3: The correct solution**
-```bash
+```console
 $ get_sum() {
 >     echo $(($1 + $2))    # Echo to "return" values
 > }
@@ -224,7 +239,7 @@ Result: 300
 
 ### LC2.1: Basic Indexed Array (5 min)
 
-```bash
+```console
 $ # Create an array
 $ fruits=("apple" "banana" "cherry")
 
@@ -255,7 +270,7 @@ apple banana cherry date
 ### LC2.2: The Quotes Problem (8 min)
 
 **STEP 1: Setup the problem**
-```bash
+```console
 $ # Array with elements containing spaces
 $ files=("file one.txt" "file two.txt" "document.pdf")
 
@@ -265,9 +280,8 @@ $ echo "${#files[@]}"
 ```
 
 **STEP 2: WRONG iteration**
-```bash
+```console
 
-*Personal note: Many prefer `zsh`, but I stick to Bash because it is the standard on servers. Consistency beats comfort.*
 
 $ # WRONG - without quotes
 $ for f in ${files[@]}; do
@@ -283,8 +297,10 @@ $ # 5 iterations instead of 3! What happened?
 $ # Word splitting broke elements at spaces!
 ```
 
+*Personal note: Many prefer `zsh`, but I stick to Bash because it is the standard on servers. Consistency beats comfort.*
+
 **STEP 3: CORRECT iteration**
-```bash
+```console
 $ # CORRECT - with quotes
 $ for f in "${files[@]}"; do
 >     echo "-> $f"
@@ -311,7 +327,7 @@ $ # Exactly 3 iterations, elements intact!
 ### LC2.3: Associative Array (7 min)
 
 **STEP 1: The mistake (WITHOUT declare -A)**
-```bash
+```console
 $ # Try to create a "hash" without declare -A
 $ wrong[host]="localhost"
 $ wrong[port]="8080"
@@ -327,7 +343,7 @@ $ # as variables (undefined = 0), so both wrote to wrong[0]
 ```
 
 **STEP 2: The solution (WITH declare -A)**
-```bash
+```console
 $ declare -A config    # MANDATORY!
 $ config[host]="localhost"
 $ config[port]="8080"
@@ -342,7 +358,7 @@ $ # Now it works correctly!
 ```
 
 **STEP 3: Iterating through hash**
-```bash
+```console
 $ for key in "${!config[@]}"; do
 >     echo "$key = ${config[$key]}"
 > done
@@ -367,23 +383,23 @@ port = 8080
 
 ### LC3.1: Fragile Script Demonstration (5 min)
 
-```bash
+```console
 $ cat > fragile.sh << 'EOF'
 #!/bin/bash
 # FRAGILE script - DO NOT do this!
 
 cd "$1"
-rm -rf temp/*
+printf 'Would remove: %s/temp/*\n' "$PWD"  # Non-destructive plan
 echo "Cleanup done in $1"
 EOF
 
 $ # What happens if $1 is empty or directory does not exist?
 $ ./fragile.sh ""
-# rm -rf temp/* runs in CURRENT directory!
+# printf 'Would remove: %s/temp/*\n' "$PWD"  # Non-destructive plan runs in CURRENT directory!
 # DISASTER!
 
 $ ./fragile.sh /nonexistent
-# cd fails SILENTLY, rm runs in current directory!
+# cd writes a diagnostic to stderr; the unguarded script continues in its previous directory!
 ```
 
 ---
@@ -391,23 +407,23 @@ $ ./fragile.sh /nonexistent
 ### LC3.2: Adding set -euo pipefail (10 min)
 
 **STEP 1: set -e**
-```bash
+```console
 $ cat > robust1.sh << 'EOF'
 #!/bin/bash
-set -e    # Exit on first error
+set -e    # Exit on eligible failure
 
 cd "$1"
-rm -rf temp/*
+printf 'Would remove: %s/temp/*\n' "$PWD"  # Non-destructive plan
 echo "Cleanup done"
 EOF
 
 $ ./robust1.sh /nonexistent
 # Script stops at cd (error)
-# rm does NOT execute - we are safe!
+# The plan is not reached in this direct call; explicit checks remain necessary in tested contexts.
 ```
 
 **STEP 2: set -u**
-```bash
+```console
 $ cat > robust2.sh << 'EOF'
 #!/bin/bash
 set -eu    # + undefined variables = error
@@ -421,7 +437,7 @@ $ ./robust2.sh
 ```
 
 **STEP 3: pipefail**
-```bash
+```console
 $ # Without pipefail
 $ false | true
 $ echo $?
@@ -429,7 +445,6 @@ $ echo $?
 
 $ # With pipefail
 
-*(Pipes are Unix genius. Combine simple commands to solve complex problems.)*
 
 $ set -o pipefail
 $ false | true
@@ -437,14 +452,16 @@ $ echo $?
 1    # Error is propagated!
 ```
 
+*(Pipes are Unix genius. Combine simple commands to solve complex problems.)*
+
 **STEP 4: The complete combination**
-```bash
+```console
 $ cat > robust.sh << 'EOF'
 #!/bin/bash
-set -euo pipefail    # The magic triad
-IFS=$'\n\t'          # Safe IFS
+set -euo pipefail    # Options with documented exceptions
+IFS=$'\n\t'          # Parsing choice, not a universal safety measure
 
-# Now the script is solid!
+# Explicit validation, ownership and failure tests are still required.
 EOF
 ```
 
@@ -452,7 +469,7 @@ EOF
 
 ### LC3.3: ATTENTION - When set -e Does NOT Work! (5 min)
 
-```bash
+```console
 $ cat > trap.sh << 'EOF'
 #!/bin/bash
 set -e
@@ -483,7 +500,7 @@ $ # Do not rely 100% on it - explicitly verify important errors
 
 ### LC4.1: Trap EXIT for Cleanup
 
-```bash
+```console
 $ cat > cleanup.sh << 'EOF'
 #!/bin/bash
 set -euo pipefail
@@ -492,10 +509,10 @@ TEMP_FILE=""
 
 cleanup() {
     echo "🧹 Cleanup executed!"
-    [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+    if [[ -n ${TEMP_FILE:-} ]]; then rm -f -- "$TEMP_FILE"; fi
 }
 
-trap cleanup EXIT    # Executes ALWAYS on exit
+trap cleanup EXIT    # Shell exit; not SIGKILL or machine failure
 
 TEMP_FILE=$(mktemp)
 echo "Working with: $TEMP_FILE"
@@ -522,7 +539,7 @@ $ # Temporary file was deleted automatically
 
 ### LC5.1: Building the Template Step by Step
 
-```bash
+```console
 $ cat > template.sh << 'EOF'
 #!/bin/bash
 #
@@ -601,11 +618,11 @@ Argument: test
 If time is short, use scripts from `scripts/demo/`:
 
 ```bash
-./S05_02_demo_functions.sh    # Functions
-./S05_03_demo_arrays.sh       # Arrays
-./S05_04_demo_robust.sh       # set -euo pipefail
-./S05_05_demo_logging.sh      # Logging
-./S05_06_demo_debug.sh        # Debugging
+bash "$SEMINAR_DIR/scripts/demo/S05_02_demo_functions.sh"    # Functions
+bash "$SEMINAR_DIR/scripts/demo/S05_03_demo_arrays.sh"       # Arrays
+bash "$SEMINAR_DIR/scripts/demo/S05_04_demo_robust.sh"       # set -euo pipefail
+bash "$SEMINAR_DIR/scripts/demo/S05_05_demo_logging.sh"      # Logging
+bash -x "$SEMINAR_DIR/scripts/demo/S05_02_demo_functions.sh"  # Debugging trace of a shipped demo
 ```
 
 ---

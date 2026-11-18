@@ -63,7 +63,7 @@ Unified manager for scheduled tasks: simplified interface for cron and systemd t
 
 ## CLI Interface
 
-```bash
+```text
 ./taskman.sh <command> [options]
 
 Commands:
@@ -273,76 +273,37 @@ M09_Scheduled_Tasks_Manager/
 ### Parsing schedule expressions
 
 ```bash
-parse_schedule() {
-    local expr="$1"
-    
-    # Simple expressions
-    case "$expr" in
-        "every minute")     echo "* * * * *" ;;
-        "every 5 minutes")  echo "*/5 * * * *" ;;
-        "hourly")           echo "0 * * * *" ;;
-        "daily")            echo "0 0 * * *" ;;
-        "daily at "*)
-            local time="${expr#daily at }"
-            local hour="${time%:*}"
-            local min="${time#*:}"
-            echo "$min $hour * * *"
-            ;;
-        "weekly")           echo "0 0 * * 0" ;;
-        *)
-            # Assume valid cron expression
-            if validate_cron "$expr"; then
-                echo "$expr"
-            else
-                return 1
-            fi
-            ;;
-    esac
-}
-
-validate_cron() {
-    local expr="$1"
-    local fields
-    read -ra fields <<< "$expr"
-    
-    [[ ${#fields[@]} -eq 5 ]] || return 1
-    
-    # Simplified validation
-    # In practice, use a library or complex regex
-    return 0
-}
+: "${SCHEDULE_HELPER:?Path to 04_PROJECTS/reference/schedule_reference.py}"
+parse_schedule() { python3 "$SCHEDULE_HELPER" parse "$1"; }
+validate_cron() { parse_schedule "$1" >/dev/null; }
 ```
 
 ### Creating cron job
 
 ```bash
+# Generation is separate from installing live jobs. This snippet writes only OUTPUT_DIR.
+# TASK_RUNNER_PATH is a trusted executable wrapper: 'run NAME' loads the validated
+# task definition and calls run_task_with_logging (including timeout/retries/env).
 add_cron_job() {
-    local name="$1"
-    local schedule="$2"
-    local command="$3"
-    local user="${4:-$(whoami)}"
-    
-    local cron_file="/etc/cron.d/taskman-${name}"
-    local log_file="/var/log/taskman/${name}.log"
-    
-    # Wrapper for logging
-    local wrapper_cmd="( $command ) >> $log_file 2>&1"
-    
-    cat > "$cron_file" << EOF
-# Managed by taskman - do not edit manually
-# Task: $name
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-$schedule $user $wrapper_cmd
-EOF
-    
-    chmod 644 "$cron_file"
+    local name="$1" schedule="$2" command="$3" user="${4:-$(id -un)}"
+    [[ $name =~ ^[A-Za-z0-9_-]+$ && $user =~ ^[A-Za-z0-9_-]+$ ]] || return 2
+    [[ ${TASK_RUNNER_PATH:-} =~ ^/[A-Za-z0-9_./-]+$ ]] || return 2
+    schedule=$(parse_schedule "$schedule") || return 2
+    # Store command as data in the task definition, never interpolate it into cron syntax.
+    save_task_definition "$name" "$command" "$user" || return 1
+    local cron_file="${OUTPUT_DIR:?Choose a generated-files directory}/taskman-$name"
+    mkdir -p -- "$OUTPUT_DIR" || return 1
+    { printf 'SHELL=/bin/bash\nPATH=/usr/local/bin:/usr/bin:/bin\n';
+      printf 'CRON_TZ=%s\n' "${TASK_TIMEZONE:?Choose and validate a shared timezone}";
+      printf '%s %s %s run %s\n' "$schedule" "$user" "$TASK_RUNNER_PATH" "$name";
+    } > "$cron_file" || return 1
+    chmod 644 -- "$cron_file"
 }
 
 remove_cron_job() {
     local name="$1"
-    rm -f "/etc/cron.d/taskman-${name}"
+    [[ $name =~ ^[A-Za-z0-9_-]+$ ]] || return 2
+    rm -f -- "${OUTPUT_DIR:?}/taskman-$name"
 }
 ```
 
@@ -350,72 +311,55 @@ remove_cron_job() {
 
 ```bash
 create_systemd_timer() {
-    local name="$1"
-    local schedule="$2"
-    local command="$3"
-    
-    local service_file="/etc/systemd/system/taskman-${name}.service"
-    local timer_file="/etc/systemd/system/taskman-${name}.timer"
-    
-    # Service unit
-    cat > "$service_file" << EOF
+    local name="$1" schedule="$2" command="$3" user="${4:-$(id -un)}" calendar
+    [[ $name =~ ^[A-Za-z0-9_-]+$ && $user =~ ^[A-Za-z0-9_-]+$ ]] || return 2
+    [[ ${TASK_RUNNER_PATH:-} =~ ^/[A-Za-z0-9_./-]+$ ]] || return 2
+    calendar=$(cron_to_calendar "$schedule") || return 2
+    save_task_definition "$name" "$command" "$user" || return 1
+    mkdir -p -- "${OUTPUT_DIR:?Choose a generated-files directory}" || return 1
+    local service_file="$OUTPUT_DIR/taskman-$name.service" timer_file="$OUTPUT_DIR/taskman-$name.timer"
+    cat > "$service_file" <<EOF
 [Unit]
 Description=TaskMan: $name
-
 [Service]
 Type=oneshot
-ExecStart=$command
-StandardOutput=append:/var/log/taskman/${name}.log
-StandardError=append:/var/log/taskman/${name}.log
+User=$user
+ExecStart=$TASK_RUNNER_PATH run $name
 EOF
-
-    # Timer unit (convert cron to OnCalendar)
-    local calendar
-    calendar=$(cron_to_calendar "$schedule")
-    
-    cat > "$timer_file" << EOF
-[Unit]
-Description=TaskMan Timer: $name
-
-[Timer]
-OnCalendar=$calendar
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable "taskman-${name}.timer"
-    systemctl start "taskman-${name}.timer"
+    {
+        printf '[Unit]\nDescription=TaskMan Timer: %s\n[Timer]\n' "$name"
+        while IFS= read -r line; do printf 'OnCalendar=%s\n' "$line"; done <<< "$calendar"
+        printf 'Persistent=true\n[Install]\nWantedBy=timers.target\n'
+    } > "$timer_file" || return 1
+    # Validate generated units before an independently authorised installation.
+    systemd-analyze verify "$service_file" "$timer_file"
 }
 
 cron_to_calendar() {
-    local cron="$1"
-    read -r min hour dom mon dow <<< "$cron"
-    
-    # Simplified conversion
-    # For complete conversion, see systemd.time(7)
-    
-    if [[ "$min" == "0" && "$hour" == "0" && "$dom" == "*" && "$mon" == "*" && "$dow" == "*" ]]; then
-        echo "daily"
-    elif [[ "$min" == "0" && "$hour" == "*" ]]; then
-        echo "hourly"
-    else
-        # Generic format
-        echo "*-*-* ${hour}:${min}:00"
-    fi
+    python3 "$SCHEDULE_HELPER" calendar "$1" "${TASK_TIMEZONE:?Shared timezone required}"
 }
 ```
+
+The [numeric reference converter](../reference/schedule_reference.py) preserves
+all five fields, including the cron union when both day-of-month and weekday are
+restricted; it emits multiple `OnCalendar` lines where needed. Unsupported syntax
+is rejected. `every 6 hours` is explicitly wall-clock aligned (00, 06, 12, 18),
+not six elapsed hours after completion. A monotonic schedule needs a separate
+`OnUnitActiveSec` contract. Validate calendar strings with
+`systemd-analyze calendar`; the cron backend requires a daemon supporting
+`CRON_TZ`. See [systemd.time](https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html).
+`save_task_definition` and the runner are explicit student integration points;
+if absent, generation fails instead of bypassing the common executor. Neither
+backend executes arbitrary command text directly as `ExecStart`.
 
 ### Execution logging
 
 ```bash
-run_task_with_logging() {
+run_task_with_logging() (
     local name="$1"
     local command="$2"
     
-    local log_dir="/var/log/taskman"
+    local log_dir="${TASK_LOG_DIR:?Choose a writable task log directory}"
     local log_file="${log_dir}/${name}.log"
     local run_file="${log_dir}/${name}.last"
     
@@ -429,7 +373,8 @@ run_task_with_logging() {
     # Execute and capture output
     local exit_code
     set +e
-    ( eval "$command" ) >> "$log_file" 2>&1
+    # Explicit trusted shell-program mode; task input is never inserted into source.
+    timeout "${TASK_TIMEOUT:-3600}" bash -c 'exec bash -c "$1"' _ "$command" >> "$log_file" 2>&1
     exit_code=$?
     set -e
     
@@ -452,8 +397,8 @@ EOF
         send_notification "$name" "FAILED" "Exit code: $exit_code"
     fi
     
-    return $exit_code
-}
+    return "$exit_code"
+)
 ```
 
 ---

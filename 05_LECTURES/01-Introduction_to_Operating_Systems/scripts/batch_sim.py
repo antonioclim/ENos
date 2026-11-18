@@ -1,6 +1,5 @@
-/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
-
 #!/usr/bin/env python3
+# Historical translation annotation: FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ
 """
 Simplified simulation of "Batch Processing" (introductory level).
 
@@ -21,6 +20,7 @@ It is not a complete model (does not include I/O burst etc.), but it is sufficie
 from __future__ import annotations
 
 import argparse
+import math
 from dataclasses import dataclass
 from statistics import mean
 
@@ -46,9 +46,14 @@ def parse_args() -> argparse.Namespace:
         default=[2.0, 1.0, 3.5, 0.5],
         help="Job durations (seconds). Example: 2 1 3.5 0.5",
     )
-    return p.parse_args()
+    args = p.parse_args()
+    if not args.durations or any(not math.isfinite(d) or d < 0 for d in args.durations):
+        p.error("durations must be finite and nonnegative; zero-duration jobs are permitted")
+    return args
 
 def simulate_fcfs(jobs: list[Job]) -> list[JobResult]:
+    if any(not math.isfinite(j.duration_s) or j.duration_s < 0 for j in jobs):
+        raise ValueError("Durations must be finite and nonnegative")
     t = 0.0
     out: list[JobResult] = []
     for j in jobs:

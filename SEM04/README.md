@@ -1,5 +1,7 @@
 # Seminar 4: Text Processing - Regex, GREP, SED, AWK
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](homework/ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > Operating Systems | Bucharest University of Economic Studies - CSIE  
 > Version: 1.0 | Date: January 2025  
 > Author: OS Educational Materials
@@ -8,17 +10,17 @@
 
 ## Table of Contents
 
-1. [Description](#-description)
-2. [Learning Objectives](#-learning-objectives)
-3. [Why This Seminar Matters](#-why-this-seminar-matters)
-4. [Package Structure](#-package-structure)
-5. [Usage Guide](#-usage-guide)
-6. [For Instructors](#-for-instructors)
-7. [For Students](#-for-students)
-8. [Technical Requirements](#️-technical-requirements)
-9. [Installation and Configuration](#-installation-and-configuration)
-10. [Frequently Encountered Issues](#-frequently-encountered-issues)
-11. [Additional Resources](#-additional-resources)
+1. [Description](#description)
+2. [Learning Objectives](#learning-objectives)
+3. [Why This Seminar Matters](#why-this-seminar-matters)
+4. [Package Structure](#package-structure)
+5. [Usage Guide](#usage-guide)
+6. [For Instructors](#for-instructors)
+7. [For Students](#for-students)
+8. [Technical Requirements](#technical-requirements)
+9. [Installation and Configuration](#installation-and-configuration)
+10. [Frequently Encountered Issues](#frequently-encountered-issues)
+11. [Additional Resources](#additional-resources)
 
 ---
 
@@ -52,7 +54,7 @@ Additionally, the seminar covers:
 ### Conceptual Transition
 
 ```
-SEM01-06                          SEM07-08
+SEM01–03                          SEM04
 ═══════════════════              ═══════════════════════════
 Simple commands       →          Complex patterns
 Individual filters    →          Powerful pipelines
@@ -127,7 +129,7 @@ SQL:        WHERE column REGEXP '^[A-Z]'
 ## Package Structure
 
 ```
-SEM07-08_COMPLET/
+SEM04/
 │
 ├── 📄 README.md                    ← YOU ARE HERE
 │
@@ -197,8 +199,8 @@ SEM07-08_COMPLET/
 
 ```bash
 # Extract the package
-unzip SEM07-08_COMPLET.zip
-cd SEM07-08_COMPLET
+unzip ENos.zip
+cd ENos/SEM04  # adapt only the extracted top-level directory name
 
 # Verify the structure
 ls -la
@@ -364,7 +366,7 @@ done
 ### Method 1: Automatic Script (Recommended)
 
 ```bash
-cd SEM07-08_COMPLET
+cd SEM04
 chmod +x scripts/bash/S04_01_setup_seminar.sh
 ./scripts/bash/S04_01_setup_seminar.sh
 ```

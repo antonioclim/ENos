@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socket API Flow Visualizer | Lecture 15 - OS Networking</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Socket API Flow Visualiser | Lecture 15 - OS Networking</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #0a0e17;
@@ -181,7 +181,84 @@
             background: var(--accent-blue);
             border-radius: 3px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
@@ -193,7 +270,7 @@
                         <i class="fas fa-network-wired text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">Socket API Flow Visualizer</h1>
+                        <h1 class="text-xl font-bold">Socket API Flow Visualiser</h1>
                         <p class="text-sm text-gray-400">Lecture 15 • Networking in the Operating System</p>
                     </div>
                 </div>
@@ -207,7 +284,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Socket and transport scope</h2><p>Server is on the left and client on the right. The model separates the listening descriptor, kernel-established queue and accepted descriptor. Client connect can finish before server accept. Buffers represent bytes (capacity 512), receive drains queued bytes and cumulative counters describe application payload only. Closing one endpoint releases that descriptor; TCP close states persist separately. This one-connection trace omits retransmissions, timeouts, simultaneous close and real socket I/O.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Main Visualization Area -->
@@ -463,14 +540,14 @@
                         <button id="btnServerRecv" class="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-left flex items-center justify-between group disabled:opacity-50" disabled>
                             <div>
                                 <span class="mono text-sm text-green-400">recv()</span>
-                                <p class="text-xs text-gray-500 mt-1">Receives data de la client</p>
+                                <p class="text-xs text-gray-500 mt-1">Receives data from the client</p>
                             </div>
                             <i class="fas fa-chevron-right text-gray-600 group-hover:text-green-400 transition"></i>
                         </button>
                         <button id="btnServerSend" class="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-left flex items-center justify-between group disabled:opacity-50" disabled>
                             <div>
                                 <span class="mono text-sm text-green-400">send()</span>
-                                <p class="text-xs text-gray-500 mt-1">Sends response la client</p>
+                                <p class="text-xs text-gray-500 mt-1">Sends a response to the client</p>
                             </div>
                             <i class="fas fa-chevron-right text-gray-600 group-hover:text-green-400 transition"></i>
                         </button>
@@ -627,6 +704,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State Management
         const state = {
             server: {
@@ -829,7 +942,23 @@
         }
 
         // Server Actions
-        async function serverSocket() {
+        function socketLink(){if(!state.link)state.link={phase:'idle',pending:false,serverBytes:0,clientBytes:0,clientClosed:false,serverClosed:false,activeCloser:null};return state.link;}
+function socketBuffers(){const l=socketLink();elements.serverRecvSize.textContent=l.serverBytes+' bytes';elements.clientRecvSize.textContent=l.clientBytes+' bytes';elements.serverRecvBuffer.style.width=Math.min(100,l.serverBytes/512*100)+'%';elements.clientRecvBuffer.style.width=Math.min(100,l.clientBytes/512*100)+'%';}
+function completeAccept(){const l=socketLink();if(!l.pending||!state.server.accepting)return;l.pending=false;state.server.accepting=false;state.server.connected=true;elements.serverConnFD.classList.remove('opacity-50','border-dashed');elements.serverConnFD.classList.add('connected');elements.serverRemoteAddr.textContent='192.168.1.50:49152';elements.backlogQueue.children[0]?.classList.remove('bg-green-500');setServerState('LISTEN + accepted fd');elements.serverSocketState.textContent='LISTEN (fd 3); accepted fd 4 ESTABLISHED';elements.btnServerAccept.disabled=true;elements.btnServerRecv.disabled=false;elements.btnServerSend.disabled=false;elements.btnServerClose.disabled=false;log('accept consumes the queued connection and returns a new descriptor; listener stays open.','success');}
+async function closeEndpoint(side){
+ const l=socketLink(),local=state[side];if(!local.connected||l[side+'Closed'])return;
+ l[side+'Closed']=true;local.connected=false;local.dataSent=false;
+ if(side==='client'){state.client.socketCreated=false;elements.clientSocketFD.classList.remove('active','connected');elements.clientSocketFD.classList.add('opacity-50','border-dashed');elements.btnClientSend.disabled=elements.btnClientRecv.disabled=elements.btnClientClose.disabled=true;}
+ else {elements.serverConnFD.classList.remove('connected');elements.serverConnFD.classList.add('opacity-50','border-dashed');elements.btnServerSend.disabled=elements.btnServerRecv.disabled=elements.btnServerClose.disabled=true;}
+ if(!l.activeCloser){l.activeCloser=side;l.phase='closing';if(side==='client'){setClientState('FIN_WAIT_1');setServerState('LISTEN; connection CLOSE_WAIT');}else{setServerState('LISTEN; connection FIN_WAIT_1');setClientState('CLOSE_WAIT');}}
+ await animatePacket('fin',side==='client'?'left':'right');await animatePacket('ack',side==='client'?'right':'left');
+ if(!(l.serverClosed&&l.clientClosed)){if(side==='client')setClientState('FIN_WAIT_2');else setServerState('LISTEN; connection FIN_WAIT_2');log('Active close acknowledged; peer application must close its direction.','network');return;}
+ l.phase='time-wait';if(l.activeCloser==='client'){setClientState('TIME_WAIT');setServerState('LISTEN');}else{setServerState('LISTEN; old connection TIME_WAIT');setClientState('CLOSED');}
+ log('Only the active closer enters TIME_WAIT in this chosen non-simultaneous-close trace. Delay is illustrative.','network');await sleep(1000);
+ l.phase='closed';state.server.connected=false;state.server.accepting=false;state.client.connecting=false;elements.serverRemoteAddr.textContent='-';elements.clientLocalAddr.textContent='-';elements.clientRemoteAddr.textContent='-';elements.clientSocketState.textContent='CLOSED';elements.serverSocketState.textContent='LISTEN';setClientState('CLOSED');setServerState('LISTEN');elements.btnClientSocket.disabled=false;elements.btnServerAccept.disabled=false;
+}
+
+async function serverSocket() {
             if (state.server.socketCreated) return;
             
             log('Server: socket(AF_INET, SOCK_STREAM, 0)', 'server');
@@ -865,7 +994,7 @@
             elements.serverSocketState.textContent = 'BOUND';
             
             setServerState('BOUND');
-            log('→ Port 8080 asociat cu succes', 'success');
+            log('→ Port 8080 bound successfully in the model.', 'success');
             
             elements.btnServerBind.disabled = true;
             elements.btnServerListen.disabled = false;
@@ -899,165 +1028,26 @@
             elements.btnServerAccept.disabled = false;
         }
 
-        async function serverAccept() {
-            if (!state.server.listening) return;
-            
-            log('Server: accept(sockfd, ...) - BLOCKING', 'server');
-            highlightCodeLine('codeLine4');
-            setServerState('ACCEPTING');
-            state.server.accepting = true;
-            
-            log('→ Server waiting for client connection...', 'warning');
-            
-            // Check if client is trying to connect
-            if (state.client.connecting) {
-                await performHandshake();
-            }
-        }
+        async function serverAccept(){if(!state.server.listening||state.server.connected)return;state.server.accepting=true;setServerState('ACCEPTING');highlightCodeLine('codeLine4');if(socketLink().pending)completeAccept();else log('accept waits for an established connection in the kernel queue.','server');}
 
-        async function performHandshake() {
-            elements.handshakeIndicator.classList.remove('hidden');
-            
-            // SYN
-            log('Network: Client → SYN (seq=100)', 'network');
-            document.getElementById('hs1').classList.add('bg-blue-500');
-            await animatePacket('syn', 'right');
-            await sleep(200);
-            
-            // SYN-ACK
-            log('Network: Server → SYN-ACK (seq=300, ack=101)', 'network');
-            document.getElementById('hs2').classList.add('bg-green-500');
-            await animatePacket('syn-ack', 'left');
-            await sleep(200);
-            
-            // ACK
-            log('Network: Client → ACK (ack=301)', 'network');
-            document.getElementById('hs3').classList.add('bg-purple-500');
-            await animatePacket('ack', 'right');
-            
-            state.stats.rtt = 45;
-            updateStats();
-            
-            // Connection established
-            await sleep(300);
-            
-            state.server.connected = true;
-            state.server.accepting = false;
-            state.client.connected = true;
-            state.client.connecting = false;
-            
-            // Update server
-            elements.serverConnFD.classList.remove('opacity-50', 'border-dashed');
-            elements.serverConnFD.classList.add('connected');
-            elements.serverRemoteAddr.textContent = '192.168.1.50:49152';
-            elements.serverRemoteAddr.className = 'text-purple-400';
-            elements.serverSocketState.textContent = 'ESTABLISHED';
-            elements.serverSocketState.className = 'text-purple-400';
-            setServerState('ESTABLISHED');
-            
-            // Add to backlog briefly then remove
-            const firstSlot = elements.backlogQueue.children[0];
-            firstSlot.classList.add('bg-green-500');
-            await sleep(200);
-            firstSlot.classList.remove('bg-green-500');
-            
-            // Update client
-            elements.clientLocalAddr.textContent = '192.168.1.50:49152';
-            elements.clientLocalAddr.className = 'text-blue-400';
-            elements.clientRemoteAddr.textContent = '192.168.1.100:8080';
-            elements.clientRemoteAddr.className = 'text-purple-400';
-            elements.clientSocketState.textContent = 'ESTABLISHED';
-            elements.clientSocketState.className = 'text-purple-400';
-            setClientState('ESTABLISHED');
-            
-            log('✓ CONNECTION ESTABLISHED', 'success');
-            
-            elements.btnServerAccept.disabled = true;
-            elements.btnServerRecv.disabled = false;
-            elements.btnClientConnect.disabled = true;
-            elements.btnClientSend.disabled = false;
-        }
+        async function performHandshake(){
+ elements.handshakeIndicator.classList.remove('hidden');
+ for(const [i,type,direction] of [[1,'syn','left'],[2,'syn-ack','right'],[3,'ack','left']]){document.getElementById('hs'+i).classList.add('bg-blue-500');await animatePacket(type,direction);}
+ const l=socketLink();l.phase='established';l.pending=true;state.client.connected=true;state.client.connecting=false;state.stats.rtt=45;updateStats();
+ elements.clientLocalAddr.textContent='192.168.1.50:49152';elements.clientRemoteAddr.textContent='192.168.1.100:8080';elements.clientSocketState.textContent='ESTABLISHED';setClientState('ESTABLISHED');
+ elements.backlogQueue.children[0]?.classList.add('bg-green-500');elements.btnClientConnect.disabled=true;elements.btnClientSend.disabled=false;elements.btnClientClose.disabled=false;
+ log('Kernel handshake complete; connect returns independently of application accept. RTT 45 ms is a fixed model input.','success');if(state.server.accepting)completeAccept();
+}
 
-        async function serverRecv() {
-            if (!state.server.connected) return;
-            
-            log('Server: recv(connfd, buf, SIZE, 0)', 'server');
-            highlightCodeLine('codeLine5');
-            
-            if (state.client.dataSent) {
-                await sleep(300);
-                elements.serverRecvBuffer.style.width = '60%';
-                elements.serverRecvSize.textContent = '256 KB';
-                state.stats.bytesRecv += 256;
-                updateStats();
-                
-                log('→ Primit: "Hello, Server!" (256 bytes)', 'success');
-                state.client.dataSent = false;
-                
-                elements.btnServerRecv.disabled = true;
-                elements.btnServerSend.disabled = false;
-            } else {
-                log('→ Buffer empty, waiting for data from client...', 'warning');
-            }
-        }
+        async function serverRecv(){const l=socketLink();if(!state.server.connected||l.serverClosed)return;const count=l.serverBytes;if(!count){log('recv would block until data or EOF in this step model.','warning');return;}l.serverBytes=0;state.client.dataSent=false;state.stats.bytesRecv+=count;socketBuffers();updateStats();log('Server recv consumed '+count+' bytes.','server');elements.btnServerSend.disabled=false;}
 
-        async function serverSend() {
-            if (!state.server.connected) return;
-            
-            log('Server: send(connfd, "Hello, Client!", ...)', 'server');
-            highlightCodeLine('codeLine6');
-            
-            await sleep(200);
-            elements.serverSendBuffer.style.width = '40%';
-            elements.serverSendSize.textContent = '128 KB';
-            
-            await animatePacket('data', 'left');
-            
-            elements.clientRecvBuffer.style.width = '40%';
-            elements.clientRecvSize.textContent = '128 KB';
-            
-            state.stats.bytesSent += 128;
-            updateStats();
-            
-            elements.serverSendBuffer.style.width = '0%';
-            elements.serverSendSize.textContent = '0 KB';
-            
-            log('→ sent: "Hello, Client!" (128 bytes)', 'success');
-            state.server.dataSent = true;
-            
-            elements.btnServerSend.disabled = true;
-            elements.btnServerClose.disabled = false;
-            elements.btnClientRecv.disabled = false;
-        }
+        async function serverSend(){const l=socketLink();if(!state.server.connected||l.serverClosed||l.serverSending)return;if(l.clientBytes+128>512){log('Model receiver buffer full; send would wait.','warning');return;}l.serverSending=true;elements.serverSendBuffer.style.width='25%';elements.serverSendSize.textContent='128 bytes';await animatePacket('data','right');l.clientBytes+=128;state.stats.bytesSent+=128;state.server.dataSent=true;l.serverSending=false;elements.serverSendBuffer.style.width='0%';elements.serverSendSize.textContent='0 bytes';socketBuffers();updateStats();elements.btnClientRecv.disabled=false;log('Server queued a synthetic 128-byte payload at the client.','server');}
 
-        async function serverClose() {
-            log('Server: close(connfd)', 'server');
-            highlightCodeLine('codeLine7');
-            
-            setServerState('FIN_WAIT');
-            await animatePacket('fin', 'left');
-            
-            await sleep(500);
-            
-            setServerState('TIME_WAIT');
-            log('→ FIN sent, waiting for TIME_WAIT...', 'warning');
-            
-            await sleep(1000);
-            
-            elements.serverConnFD.classList.remove('connected');
-            elements.serverConnFD.classList.add('opacity-50', 'border-dashed');
-            elements.serverRemoteAddr.textContent = '-';
-            elements.serverRemoteAddr.className = 'text-gray-500';
-            
-            setServerState('LISTEN');
-            log('→ Connection closed, server returns to LISTEN', 'success');
-            
-            elements.btnServerClose.disabled = true;
-        }
+        async function serverClose(){return closeEndpoint('server');}
 
         // Client Actions
         async function clientSocket() {
-            if (state.client.socketCreated) return;
+            if (state.client.socketCreated || (state.link && ['closing','time-wait'].includes(state.link.phase))) return;
             
             log('Client: socket(AF_INET, SOCK_STREAM, 0)', 'client');
             highlightCodeLine('codeLineC1');
@@ -1078,96 +1068,16 @@
             elements.btnClientConnect.disabled = false;
         }
 
-        async function clientConnect() {
-            if (!state.client.socketCreated || state.client.connected) return;
-            
-            log('Client: connect(sockfd, {192.168.1.100:8080}, ...)', 'client');
-            highlightCodeLine('codeLineC2');
-            
-            setClientState('SYN_SENT');
-            state.client.connecting = true;
-            
-            if (state.server.accepting) {
-                await performHandshake();
-            } else {
-                log('→ Server not in accept(), handshake pending...', 'warning');
-            }
-        }
+        async function clientConnect(){if(!state.client.socketCreated||state.client.connected||state.client.connecting)return;if(!state.server.listening){log('connect fails in this model: no listening socket.','error');return;}state.link={phase:'handshake',pending:false,serverBytes:0,clientBytes:0,clientClosed:false,serverClosed:false,activeCloser:null};state.client.connecting=true;setClientState('SYN_SENT');highlightCodeLine('codeLineC2');await performHandshake();}
 
-        async function clientSend() {
-            if (!state.client.connected) return;
-            
-            log('Client: send(sockfd, "Hello, Server!", ...)', 'client');
-            highlightCodeLine('codeLineC3');
-            
-            await sleep(200);
-            elements.clientSendBuffer.style.width = '60%';
-            elements.clientSendSize.textContent = '256 KB';
-            
-            await animatePacket('data', 'right');
-            
-            state.stats.bytesSent += 256;
-            updateStats();
-            
-            elements.clientSendBuffer.style.width = '0%';
-            elements.clientSendSize.textContent = '0 KB';
-            
-            log('→ sent: "Hello, Server!" (256 bytes)', 'success');
-            state.client.dataSent = true;
-            
-            elements.btnClientSend.disabled = true;
-            elements.btnServerRecv.disabled = false;
-        }
+        async function clientSend(){const l=socketLink();if(!state.client.connected||l.clientClosed||l.clientSending)return;if(l.serverBytes+256>512){log('Model receiver buffer full; send would wait.','warning');return;}l.clientSending=true;elements.clientSendBuffer.style.width='50%';elements.clientSendSize.textContent='256 bytes';await animatePacket('data','left');l.serverBytes+=256;state.stats.bytesSent+=256;state.client.dataSent=true;l.clientSending=false;elements.clientSendBuffer.style.width='0%';elements.clientSendSize.textContent='0 bytes';socketBuffers();updateStats();elements.btnServerRecv.disabled=!state.server.connected;log('Client queued a synthetic 256-byte payload at the server.','client');}
 
-        async function clientRecv() {
-            if (!state.client.connected) return;
-            
-            log('Client: recv(sockfd, response, SIZE, 0)', 'client');
-            highlightCodeLine('codeLineC4');
-            
-            if (state.server.dataSent) {
-                await sleep(300);
-                state.stats.bytesRecv += 128;
-                updateStats();
-                
-                elements.clientRecvBuffer.style.width = '0%';
-                elements.clientRecvSize.textContent = '0 KB';
-                
-                log('→ Primit: "Hello, Client!" (128 bytes)', 'success');
-                
-                elements.btnClientRecv.disabled = true;
-                elements.btnClientClose.disabled = false;
-            } else {
-                log('→ Buffer empty, waiting for data from server...', 'warning');
-            }
-        }
+        async function clientRecv(){const l=socketLink();if(!state.client.connected||l.clientClosed)return;const count=l.clientBytes;if(!count){log('recv would block until data or EOF in this step model.','warning');return;}l.clientBytes=0;state.server.dataSent=false;state.stats.bytesRecv+=count;socketBuffers();updateStats();log('Client recv consumed '+count+' bytes.','client');}
 
-        async function clientClose() {
-            log('Client: close(sockfd)', 'client');
-            highlightCodeLine('codeLineC5');
-            
-            setClientState('FIN_WAIT');
-            await animatePacket('fin', 'right');
-            
-            await sleep(500);
-            setClientState('TIME_WAIT');
-            
-            await sleep(1000);
-            
-            elements.clientSocketFD.classList.remove('active');
-            elements.clientSocketFD.classList.add('opacity-50', 'border-dashed');
-            elements.clientLocalAddr.textContent = '-';
-            elements.clientRemoteAddr.textContent = '-';
-            elements.clientSocketState.textContent = '-';
-            elements.clientSocketState.className = 'text-gray-500';
-            
-            setClientState('CLOSED');
-            log('→ Client connection closed', 'success');
-            
-            elements.btnClientClose.disabled = true;
-        }
+        async function clientClose(){return closeEndpoint('client');}
 
         function resetAll() {
+            enosTimers.cancel();state.link=null;state.isAutoDemo=false;elements.packetContainer.innerHTML='';elements.btnAutoDemo.disabled=false;elements.btnAutoDemo.textContent='Auto Demo';
             // Reset state
             state.server = {
                 socketCreated: false,
@@ -1199,8 +1109,8 @@
             elements.serverSocketState.className = 'text-gray-500';
             elements.serverRecvBuffer.style.width = '0%';
             elements.serverSendBuffer.style.width = '0%';
-            elements.serverRecvSize.textContent = '0 KB';
-            elements.serverSendSize.textContent = '0 KB';
+            elements.serverRecvSize.textContent = '0 bytes';
+            elements.serverSendSize.textContent = '0 bytes';
             
             // Reset backlog
             const backlogSlots = elements.backlogQueue.children;
@@ -1219,8 +1129,8 @@
             elements.clientSocketState.className = 'text-gray-500';
             elements.clientRecvBuffer.style.width = '0%';
             elements.clientSendBuffer.style.width = '0%';
-            elements.clientRecvSize.textContent = '0 KB';
-            elements.clientSendSize.textContent = '0 KB';
+            elements.clientRecvSize.textContent = '0 bytes';
+            elements.clientSendSize.textContent = '0 bytes';
             
             // Reset handshake indicator
             elements.handshakeIndicator.classList.add('hidden');
@@ -1258,11 +1168,11 @@
 
         async function autoDemo() {
             if (state.isAutoDemo) return;
-            state.isAutoDemo = true;
-            elements.btnAutoDemo.disabled = true;
-            elements.btnAutoDemo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+
+
+
             
-            resetAll();
+            resetAll();state.isAutoDemo=true;elements.btnAutoDemo.disabled=true;elements.btnAutoDemo.textContent='Running...';
             await sleep(500);
             
             log('═══ Auto Demo: Complete Client-Server Exchange ═══', 'info');
@@ -1344,6 +1254,27 @@
 
         // Initialize
         log('System ready. Use the buttons to simulate the Socket API flow.', 'info');
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

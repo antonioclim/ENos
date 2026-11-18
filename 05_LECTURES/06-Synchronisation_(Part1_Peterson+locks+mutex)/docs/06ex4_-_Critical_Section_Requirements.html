@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>06ex4 - Critical Section Requirements | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
@@ -153,7 +153,84 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -169,13 +246,13 @@
                             <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                                 Critical Section Requirements
                             </h1>
-                            <p class="text-slate-400 text-sm">Course 06 • Synchronisation Part 1 • Cerintele Solutiilor Correcte</p>
+                            <p class="text-slate-400 text-sm">Course 06 • Synchronisation Part 1 • Requirements for Correct Solutions</p>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        <i class="fas fa-lock mr-1"></i> 3 Proprietati
+                        <i class="fas fa-lock mr-1"></i> 3 Properties
                     </span>
                 </div>
             </div>
@@ -186,7 +263,7 @@
         <!-- Three Requirements -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h2 class="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
-                <i class="fas fa-list-check"></i> The 3 Requirements Esentiale
+                <i class="fas fa-list-check"></i> The 3 Essential Requirements
             </h2>
             
             <div class="grid md:grid-cols-3 gap-4">
@@ -198,35 +275,35 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-blue-400">Mutual Exclusion</h3>
-                            <span class="text-xs text-slate-500">Excludere Mutuala</span>
+                            <span class="text-xs text-slate-500">Mutual Exclusion</span>
                         </div>
                     </div>
                     <p class="text-sm text-slate-300 mb-3">
-                        If un process P<sub>i</sub> execute in sectiunea critical, <strong>niciun other proces</strong> not can fi in sectiunea sa critical.
+                        If process P<sub>i</sub> executes in its critical section, <strong>no other process</strong> may enter the same protected critical section.
                     </p>
                     <div id="meStatus" class="text-xs p-2 rounded bg-slate-700/50">
                         <span class="text-slate-400">Status: </span>
-                        <span class="text-slate-500">Select un algoritm</span>
+                        <span class="text-slate-500">Select an algorithm</span>
                     </div>
                 </div>
 
-                <!-- Progresss -->
-                <div id="reqProgresss" class="requirement-card p-5 rounded-xl bg-slate-800/50 border-2 border-slate-700">
+                <!-- Progress -->
+                <div id="reqProgress" class="requirement-card p-5 rounded-xl bg-slate-800/50 border-2 border-slate-700">
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-10 h-10 rounded-lg bg-amber-600/30 flex items-center justify-center">
                             <i class="fas fa-forward text-amber-400 text-lg"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-amber-400">Progresss</h3>
+                            <h3 class="font-bold text-amber-400">Progress</h3>
                             <span class="text-xs text-slate-500">Progress</span>
                         </div>
                     </div>
                     <p class="text-sm text-slate-300 mb-3">
-                        If niciun process not e in CS and unele procese vor to intre, decizia <strong>not can fi amanata at infinit</strong>.
+                        If no process is in the critical section and some request entry, selection <strong>must not be postponed indefinitely</strong>.
                     </p>
                     <div id="progressStatus" class="text-xs p-2 rounded bg-slate-700/50">
                         <span class="text-slate-400">Status: </span>
-                        <span class="text-slate-500">Select un algoritm</span>
+                        <span class="text-slate-500">Select an algorithm</span>
                     </div>
                 </div>
 
@@ -238,15 +315,15 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-purple-400">Bounded Waiting</h3>
-                            <span class="text-xs text-slate-500">Waiting Limitata</span>
+                            <span class="text-xs text-slate-500">Bounded Waiting</span>
                         </div>
                     </div>
                     <p class="text-sm text-slate-300 mb-3">
-                        Exists o <strong>limita superioara</strong> for of cate ori other procese intra in CS after ce un process a cerut intrarea.
+                        There is an <strong>upper bound</strong> on how often other processes enter after a process requests entry.
                     </p>
                     <div id="bwStatus" class="text-xs p-2 rounded bg-slate-700/50">
                         <span class="text-slate-400">Status: </span>
-                        <span class="text-slate-500">Select un algoritm</span>
+                        <span class="text-slate-500">Select an algorithm</span>
                     </div>
                 </div>
             </div>
@@ -255,7 +332,7 @@
         <!-- Algorithm Selector -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h2 class="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
-                <i class="fas fa-coof text-cyan-400"></i> Select Algorithmul
+                <i class="fas fa-coof text-cyan-400"></i> Select an Algorithm
             </h2>
             
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -327,7 +404,7 @@
                                 <span class="font-medium">Process 0</span>
                             </div>
                             <div id="p0State" class="text-xs text-slate-400">Remainder Section</div>
-                            <div id="p0Waits" class="text-xs text-slate-500 mt-1">Asteptari: 0</div>
+                            <div id="p0Waits" class="text-xs text-slate-500 mt-1">Blocked Checks: 0</div>
                         </div>
                         
                         <div id="process1" class="process-block remainder p-4 rounded-xl border-2">
@@ -336,7 +413,7 @@
                                 <span class="font-medium">Process 1</span>
                             </div>
                             <div id="p1State" class="text-xs text-slate-400">Remainder Section</div>
-                            <div id="p1Waits" class="text-xs text-slate-500 mt-1">Asteptari: 0</div>
+                            <div id="p1Waits" class="text-xs text-slate-500 mt-1">Blocked Checks: 0</div>
                         </div>
                     </div>
                     
@@ -360,14 +437,14 @@
         <!-- Interactive Quiz -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h2 class="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
-                <i class="fas fa-question-circle text-amber-400"></i> Quiz Interactiv
+                <i class="fas fa-question-circle text-amber-400"></i> Interactive Quiz
             </h2>
             
             <div id="quizContainer">
                 <div class="quiz-question mb-6" data-question="0">
                     <p class="text-lg mb-4">
                         <span class="text-amber-400 font-bold">Q1:</span> 
-                        Care proprietate is incalcata if doua procese pot fi simultan in sectiunea critical?
+                        Which property is violated if two processes can enter the critical section simultaneously?
                     </p>
                     <div class="space-y-2">
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="me">
@@ -376,7 +453,7 @@
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="progress">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
-                            Progresss
+                            Progress
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="bw">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
@@ -389,7 +466,7 @@
                 <div class="quiz-question mb-6" data-question="1">
                     <p class="text-lg mb-4">
                         <span class="text-amber-400 font-bold">Q2:</span> 
-                        Algorithmul "Strict Alternation" incalca:
+                        Which property does strict alternation violate?
                     </p>
                     <div class="space-y-2">
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="me">
@@ -398,7 +475,7 @@
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="progress">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
-                            Progresss
+                            Progress
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="bw">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
@@ -411,7 +488,7 @@
                 <div class="quiz-question mb-6" data-question="2">
                     <p class="text-lg mb-4">
                         <span class="text-amber-400 font-bold">Q3:</span> 
-                        Un process waits at infinit in timp ce altele intra repetat in CS. Ce is incalcat?
+                        A process waits indefinitely while others repeatedly enter the critical section. Which requirement is violated?
                     </p>
                     <div class="space-y-2">
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="me">
@@ -420,7 +497,7 @@
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="progress">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
-                            Progresss
+                            Progress
                         </div>
                         <div class="quiz-option p-3 rounded-lg bg-slate-800/50 border-2 border-slate-700" data-answer="bw">
                             <i class="fas fa-circle text-xs mr-2 text-slate-600"></i>
@@ -441,7 +518,7 @@
         <!-- Algorithm Comparison Table -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h2 class="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
-                <i class="fas fa-table text-cyan-400"></i> Comparison Algorithmi
+                <i class="fas fa-table text-cyan-400"></i> Algorithm Comparison
             </h2>
             
             <div class="overflow-x-auto">
@@ -450,9 +527,9 @@
                         <tr class="border-b border-slate-700">
                             <th class="text-left py-3 px-4 text-slate-400">Algorithm</th>
                             <th class="text-center py-3 px-4 text-blue-400">ME</th>
-                            <th class="text-center py-3 px-4 text-amber-400">Progresss</th>
+                            <th class="text-center py-3 px-4 text-amber-400">Progress</th>
                             <th class="text-center py-3 px-4 text-purple-400">Bounded Wait</th>
-                            <th class="text-center py-3 px-4 text-slate-400">Problema</th>
+                            <th class="text-center py-3 px-4 text-slate-400">Problem</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
@@ -468,14 +545,14 @@
                             <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i></td>
                             <td class="py-3 px-4 text-center text-red-400"><i class="fas fa-times"></i></td>
                             <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i></td>
-                            <td class="py-3 px-4 text-center text-amber-400">Busy waiting inutil</td>
+                            <td class="py-3 px-4 text-center text-amber-400">Unnecessary waiting</td>
                         </tr>
                         <tr>
                             <td class="py-3 px-4 font-medium">Flags Only</td>
                             <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i></td>
                             <td class="py-3 px-4 text-center text-red-400"><i class="fas fa-times"></i></td>
                             <td class="py-3 px-4 text-center text-red-400"><i class="fas fa-times"></i></td>
-                            <td class="py-3 px-4 text-center text-red-400">Deadlock posibil</td>
+                            <td class="py-3 px-4 text-center text-red-400">Deadlock is possible</td>
                         </tr>
                         <tr class="bg-emerald-900/20">
                             <td class="py-3 px-4 font-medium text-emerald-400">Peterson</td>
@@ -504,12 +581,66 @@
         </div>
     </footer>
 
-    <script>
+    <script>let csEngine={pc:[0,0],flag:[false,false],turn:0,lock:false,waits:[0,0],next:0,timer:null};
+function csReset(){enosTimers.cancel();csEngine={pc:[0,0],flag:[false,false],turn:0,lock:false,waits:[0,0],next:0,timer:null};document.getElementById('btnAuto').textContent='Auto';csRender();}
+function csRender(){
+ const a=state.selectedAlgo;const cs=(i)=>csEngine.pc[i]===(a==='simple-lock'||a==='peterson'?3:a==='dekker'?4:2);
+ for(let i=0;i<2;i++){const el=document.getElementById('process'+i);el.classList.remove('in-cs','waiting','remainder');el.classList.add(cs(i)?'in-cs':csEngine.pc[i]?'waiting':'remainder');document.getElementById('p'+i+'State').textContent=cs(i)?'Critical section':csEngine.pc[i]?'Entry protocol':'Remainder';document.getElementById('p'+i+'Waits').textContent='Blocked checks: '+csEngine.waits[i];}
+ document.getElementById('varsDisplay').textContent=JSON.stringify({lock:csEngine.lock,flag:csEngine.flag,turn:csEngine.turn,programCounters:csEngine.pc});
+}
+function csStep(chosen){
+ if(!state.selectedAlgo){alert('Select an algorithm first.');return;}
+ const e=csEngine,i=Number.isInteger(chosen)?chosen:e.next,j=1-i;e.next=j;const pc=e.pc[i],a=state.selectedAlgo;let blocked=false;
+ if(a==='simple-lock'){if(pc===0)e.pc[i]=1;else if(pc===1){if(e.lock)blocked=true;else e.pc[i]=2;}else if(pc===2){e.lock=true;e.pc[i]=3;}else {e.lock=false;e.pc[i]=0;}}
+ else if(a==='strict-alternation'){if(pc===0)e.pc[i]=1;else if(pc===1){if(e.turn!==i)blocked=true;else e.pc[i]=2;}else{e.turn=j;e.pc[i]=0;}}
+ else if(a==='flags-only'){if(pc===0){e.flag[i]=true;e.pc[i]=1;}else if(pc===1){if(e.flag[j])blocked=true;else e.pc[i]=2;}else{e.flag[i]=false;e.pc[i]=0;}}
+ else if(a==='peterson'){if(pc===0){e.flag[i]=true;e.pc[i]=1;}else if(pc===1){e.turn=j;e.pc[i]=2;}else if(pc===2){if(e.flag[j]&&e.turn===j)blocked=true;else e.pc[i]=3;}else{e.flag[i]=false;e.pc[i]=0;}}
+ else if(a==='dekker'){if(pc===0){e.flag[i]=true;e.pc[i]=1;}else if(pc===1){if(!e.flag[j])e.pc[i]=4;else if(e.turn!==i){e.flag[i]=false;e.pc[i]=2;}else blocked=true;}else if(pc===2){if(e.turn!==i)blocked=true;else{e.flag[i]=true;e.pc[i]=1;}}else{e.turn=j;e.flag[i]=false;e.pc[i]=0;}}
+ if(blocked)e.waits[i]++;csRender();
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Algorithm definitions
         const algorithms = {
             'simple-lock': {
                 name: 'Simple Lock (Incorrect)',
-                code: `// variable partajata
+                code: `// shared variable
 lock = false;
 
 // Process i
@@ -522,12 +653,12 @@ while (true) {
     lock = false;
     // remainder section
 }`,
-                violations: { me: true, progress: false, bw: false },
-                problem: 'Race condition: doua procese pot citi lock=false simultan and ambele intra in CS!'
+                violations: { me: true, progress: false, bw: true },
+                problem: 'Race: both processes can read lock=false before either sets it, then both enter the critical section.'
             },
             'strict-alternation': {
                 name: 'Strict Alternation',
-                code: `// variable partajata
+                code: `// shared variable
 turn = 0;
 
 // Process 0             // Process 1
@@ -540,11 +671,11 @@ while (true) {          while (true) {
     // remainder            // remainder
 }                       }`,
                 violations: { me: false, progress: true, bw: false },
-                problem: 'Progresss incalcat: P0 not can intra of 2 ori consecutiv chiar if P1 not vrea!'
+                problem: 'Progress violated: P0 cannot enter twice consecutively even when P1 does not request entry.'
             },
             'flags-only': {
                 name: 'Flags Only (Deadlock)',
-                code: `// variables partajate
+                code: `// shared variables
 flag[2] = {false, false};
 
 // Process i (for i = 0, 1)
@@ -558,18 +689,18 @@ while (true) {
     // remainder section
 }`,
                 violations: { me: false, progress: true, bw: true },
-                problem: 'Deadlock: if ambele seteaza flag=true simultan, ambele waits at infinit!'
+                problem: 'Deadlock: if both set their flags before checking the other, both wait indefinitely.'
             },
             'peterson': {
                 name: 'Peterson (Correct)',
-                code: `// variables partajate
+                code: `// shared variables
 flag[2] = {false, false};
 turn = 0;
 
 // Process i (for i = 0, 1)
 while (true) {
     flag[i] = true;
-    turn = 1 - i;  // cedeaza politicos
+    turn = 1 - i;  // favour the other participant
     while (flag[1-i] && turn == 1-i) { }
     
     // CRITICAL SECTION
@@ -582,7 +713,7 @@ while (true) {
             },
             'dekker': {
                 name: 'Dekker (Correct)',
-                code: `// variables partajate
+                code: `// shared variables
 flag[2] = {false, false};
 turn = 0;
 
@@ -608,7 +739,7 @@ while (true) {
         // Quiz answers
         const quizAnswers = {
             0: 'me',      // Q1: Two in CS = ME violation
-            1: 'progress', // Q2: Strict alternation = Progresss violation
+            1: 'progress', // Q2: Strict alternation = Progress violation
             2: 'bw'       // Q3: Infinite wait = Bounded Waiting violation
         };
 
@@ -654,12 +785,14 @@ while (true) {
             
             // Update variables display
             updateVariablesDisplay(algo);
+        
+            csReset();
         }
 
         function updateRequirements(violations) {
             const requirements = [
                 { id: 'reqME', statusId: 'meStatus', violated: violations.me, name: 'Mutual Exclusion' },
-                { id: 'reqProgresss', statusId: 'progressStatus', violated: violations.progress, name: 'Progresss' },
+                { id: 'reqProgress', statusId: 'progressStatus', violated: violations.progress, name: 'Progress' },
                 { id: 'reqBW', statusId: 'bwStatus', violated: violations.bw, name: 'Bounded Waiting' }
             ];
             
@@ -671,7 +804,7 @@ while (true) {
                 
                 if (req.violated) {
                     card.classList.add('violated');
-                    status.innerHTML = `<span class="text-red-400"><i class="fas fa-times-circle mr-1"></i> INCALCAT!</span>`;
+                    status.innerHTML = `<span class="text-red-400"><i class="fas fa-times-circle mr-1"></i> VIOLATED!</span>`;
                 } else {
                     card.classList.add('satisfied');
                     status.innerHTML = `<span class="text-emerald-400"><i class="fas fa-check-circle mr-1"></i> Satisfied</span>`;
@@ -730,10 +863,10 @@ while (true) {
                 feedbackEl.className = 'mt-3 p-3 rounded-lg text-sm bg-red-900/30 border border-red-500 text-red-400';
                 const correctAnswer = {
                     'me': 'Mutual Exclusion',
-                    'progress': 'Progresss',
+                    'progress': 'Progress',
                     'bw': 'Bounded Waiting'
                 }[quizAnswers[questionIndex]];
-                feedbackEl.innerHTML = `<i class="fas fa-times-circle mr-1"></i> Incorrect. answer corect: ${correctAnswer}`;
+                feedbackEl.innerHTML = `<i class="fas fa-times-circle mr-1"></i> Incorrect. Correct answer: ${correctAnswer}`;
             }
             
             document.getElementById('scoreValue').textContent = state.quizScoree;
@@ -762,6 +895,31 @@ while (true) {
             document.getElementById('p0State').textContent = 'Remainder Section';
             document.getElementById('p1State').textContent = 'Remainder Section';
         });
-    </script>
+    
+ document.getElementById('btnStep').addEventListener('click',()=>csStep());
+ document.getElementById('btnAuto').addEventListener('click',()=>{if(csEngine.timer){clearInterval(csEngine.timer);csEngine.timer=null;document.getElementById('btnAuto').textContent='Auto';}else{csEngine.timer=setInterval(()=>csStep(),500);document.getElementById('btnAuto').textContent='Pause';}});
+ document.getElementById('btnReset').addEventListener('click',csReset);
+
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

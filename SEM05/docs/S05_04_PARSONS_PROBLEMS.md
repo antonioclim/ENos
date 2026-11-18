@@ -15,6 +15,10 @@ Parsons Problems are exercises where students receive shuffled lines of code and
 - Are excellent for active learning
 - Can be done quickly (2-5 minutes each)
 
+Equivalent dependency-preserving orders are accepted; the displayed solution is one valid order.
+Learner block labels were reproducibly shuffled (seed 5500 + problem number).
+Explain dependencies rather than guessing an alphabetical sequence.
+
 ### Difficulty Levels
 
 | Level | Characteristics |
@@ -36,19 +40,19 @@ Context: Create a function that counts characters from a string without affectin
 Lines to arrange:
 
 ```
-A) count_chars() {
-B) local count=${#1}
-C) echo "Characters: $count"
-D) }
-E) count=100
-F) count_chars "hello"
-G) echo "Global count: $count"
+A) count_chars "hello"
+B) echo "Global count: $count"
+C) count_chars() {
+D) count=100
+E) }
+F) local count=${#1}
+G) echo "Characters: $count"
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: E, A, B, C, D, F, G
+One valid order: D, C, F, G, E, A, B
 
 ```bash
 count=100
@@ -81,14 +85,14 @@ Context: Create a function that calculates the sum and returns it correctly.
 Lines to arrange:
 
 ```
-A) get_sum() {
-B) local a=$1
-C) local b=$2
-D) echo $((a + b))
+A) echo "Sum: $result"
+B) result=$(get_sum 5 3)
+C) }
+D) get_sum() {
 E) return 0
-F) }
-G) result=$(get_sum 5 3)
-H) echo "Sum: $result"
+F) local b=$2
+G) local a=$1
+H) echo $((a + b))
 ```
 
 Distractor (not used):
@@ -99,7 +103,7 @@ X) result=get_sum 5 3
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H
+One valid order: D, G, F, H, E, C, B, A
 
 ```bash
 get_sum() {
@@ -116,7 +120,7 @@ Output: `Sum: 8`
 
 Notes:
 - `return 0` is optional (implicit if function succeeds)
-- Distractor X would make `result="get_sum"` (literal string)
+- Distractor X supplies a temporary `result=get_sum` assignment to a command named `5`; it does not call `get_sum`
 - `$()` captures the function's stdout
 
 </details>
@@ -130,17 +134,17 @@ Objective: Understanding recursion in Bash.
 Lines to arrange:
 
 ```
-A) factorial() {
-B) local n=$1
-C) if [ "$n" -le 1 ]; then
-D) echo 1
-E) return
-F) fi
-G) local prev
-H) prev=$(factorial $((n - 1)))
-I) echo $((n * prev))
-J) }
-K) echo "5! = $(factorial 5)"
+A) prev=$(factorial $((n - 1)))
+B) echo "5! = $(factorial 5)"
+C) fi
+D) return
+E) local prev
+F) echo 1
+G) local n=$1
+H) echo $((n * prev))
+I) }
+J) factorial() {
+K) if [ "$n" -le 1 ]; then
 ```
 
 Distractors:
@@ -152,7 +156,7 @@ Y) prev=factorial $((n - 1))
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I, J, K
+One valid order: J, G, K, F, D, C, E, A, H, I, B
 
 ```bash
 factorial() {
@@ -172,7 +176,7 @@ Output: `5! = 120`
 
 Why distractors are wrong:
 - X: `return 1` would indicate error, not value 1
-- Y: Without `$()`, prev becomes string "factorial"
+- Y: The assignment prefixes a command named by `$((n - 1))`; it does not call factorial
 
 </details>
 
@@ -187,17 +191,17 @@ Objective: Correct creation and iteration through indexed array.
 Lines to arrange:
 
 ```
-A) fruits=("apple" "banana" "cherry")
-B) for fruit in "${fruits[@]}"; do
+A) done
+B) echo "Total: ${#fruits[@]}"
 C) echo "Fruit: $fruit"
-D) done
-E) echo "Total: ${#fruits[@]}"
+D) for fruit in "${fruits[@]}"; do
+E) fruits=("apple" "banana" "cherry")
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E
+One valid order: E, D, C, A, B
 
 ```bash
 fruits=("apple" "banana" "cherry")
@@ -228,13 +232,13 @@ Objective: Correct creation and usage of associative arrays.
 Lines to arrange:
 
 ```
-A) declare -A config
+A) for key in "${!config[@]}"; do
 B) config[host]="localhost"
 C) config[port]="8080"
-D) config[user]="admin"
-E) for key in "${!config[@]}"; do
-F) echo "$key = ${config[$key]}"
-G) done
+D) echo "$key = ${config[$key]}"
+E) declare -A config
+F) done
+G) config[user]="admin"
 ```
 
 Distractor:
@@ -245,7 +249,7 @@ X) config=()
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G
+One valid order: E, B, C, G, A, D, F
 
 ```bash
 declare -A config
@@ -274,14 +278,14 @@ Context: Filter even numbers from an array.
 Lines to arrange:
 
 ```
-A) numbers=(1 2 3 4 5 6 7 8 9 10)
-B) even=()
+A) done
+B) fi
 C) for n in "${numbers[@]}"; do
 D) if (( n % 2 == 0 )); then
-E) even+=("$n")
-F) fi
-G) done
-H) echo "Even: ${even[*]}"
+E) even=()
+F) echo "Even: ${even[*]}"
+G) even+=("$n")
+H) numbers=(1 2 3 4 5 6 7 8 9 10)
 ```
 
 Distractors:
@@ -294,7 +298,7 @@ Z) if [ n % 2 == 0 ]; then
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H
+One valid order: H, E, C, D, G, B, A, F
 
 ```bash
 numbers=(1 2 3 4 5 6 7 8 9 10)
@@ -328,18 +332,18 @@ Objective: Basic structure for a solid script.
 Lines to arrange:
 
 ```
-A) #!/bin/bash
-B) set -euo pipefail
-C) IFS=$'\n\t'
-D) echo "Robust script started"
-E) # Safe processing here
-F) echo "Script finished"
+A) set -euo pipefail
+B) echo "Robust script started"
+C) # Safe processing here
+D) echo "Script finished"
+E) IFS=$'\n\t'
+F) #!/bin/bash
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F
+One valid order: F, A, E, B, C, D
 
 ```bash
 #!/bin/bash
@@ -350,7 +354,7 @@ echo "Robust script started"
 echo "Script finished"
 ```
 
-Key point: `set -euo pipefail` must be immediately after shebang.
+Key point: establish the intended options before operations that rely on them; comments may precede them.
 
 </details>
 
@@ -363,21 +367,21 @@ Objective: Correct usage of default values with set -u.
 Lines to arrange:
 
 ```
-A) #!/bin/bash
-B) set -u
-C) INPUT="${1:-default_input.txt}"
-D) OUTPUT="${2:-}"
-E) VERBOSE="${VERBOSE:-0}"
+A) VERBOSE="${VERBOSE:-0}"
+B) if [[ -n "$OUTPUT" ]]; then
+C) OUTPUT="${2:-}"
+D) echo "Output: $OUTPUT"
+E) #!/bin/bash
 F) echo "Input: $INPUT"
-G) if [[ -n "$OUTPUT" ]]; then
-H) echo "Output: $OUTPUT"
-I) fi
+G) fi
+H) set -u
+I) INPUT="${1:-default_input.txt}"
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I
+One valid order: E, H, I, C, A, F, B, D, G
 
 ```bash
 #!/bin/bash
@@ -407,21 +411,21 @@ Objective: The die() pattern for fatal errors.
 Lines to arrange:
 
 ```
-A) #!/bin/bash
-B) set -euo pipefail
-C) die() {
-D) echo "FATAL: $*" >&2
-E) exit 1
-F) }
-G) [ $# -ge 1 ] || die "Usage: $0 <filename>"
-H) [ -f "$1" ] || die "File not found: $1"
-I) echo "Processing: $1"
+A) echo "FATAL: $*" >&2
+B) [ -f "$1" ] || die "File not found: $1"
+C) }
+D) exit 1
+E) die() {
+F) #!/bin/bash
+G) set -euo pipefail
+H) echo "Processing: $1"
+I) [ $# -ge 1 ] || die "Usage: $0 <filename>"
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I
+One valid order: F, G, E, A, D, C, I, B, H
 
 ```bash
 #!/bin/bash
@@ -451,23 +455,23 @@ Lines to arrange:
 
 ```
 A) #!/bin/bash
-B) set -euo pipefail
-C) TEMP_FILE=""
-D) cleanup() {
-E) local exit_code=$?
-F) [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
-G) exit $exit_code
-H) }
-I) trap cleanup EXIT
-J) TEMP_FILE=$(mktemp)
-K) echo "Working with $TEMP_FILE"
-L) # At exit, cleanup() executes automatically
+B) # At exit, cleanup() executes automatically
+C) cleanup() {
+D) [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+E) TEMP_FILE=$(mktemp)
+F) TEMP_FILE=""
+G) trap cleanup EXIT
+H) echo "Working with $TEMP_FILE"
+I) set -euo pipefail
+J) }
+K) exit $exit_code
+L) local exit_code=$?
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I, J, K, L
+One valid order: A, I, F, C, L, D, K, J, G, E, H, B
 
 ```bash
 #!/bin/bash
@@ -502,24 +506,24 @@ Objective: Advanced debugging with trap ERR.
 Lines to arrange:
 
 ```
-A) #!/bin/bash
-B) set -euo pipefail
-C) error_handler() {
-D) local line=$1
-E) local cmd=$2
-F) local code=$3
-G) echo "Error at line $line: '$cmd' returned $code" >&2
-H) }
-I) trap 'error_handler $LINENO "$BASH_COMMAND" $?' ERR
-J) echo "Starting..."
-K) false
-L) echo "This won't print"
+A) }
+B) local line=$1
+C) local code=$3
+D) error_handler() {
+E) echo "Error at line $line: '$cmd' returned $code" >&2
+F) trap 'error_handler $LINENO "$BASH_COMMAND" $?' ERR
+G) echo "Starting..."
+H) echo "This won't print"
+I) local cmd=$2
+J) false
+K) set -euo pipefail
+L) #!/bin/bash
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I, J, K, L
+One valid order: L, K, D, B, I, C, E, A, F, G, J, H
 
 ```bash
 #!/bin/bash
@@ -557,51 +561,51 @@ Objective: Complete structure of a production script.
 Lines to arrange (main sections only):
 
 ```
-A) #!/bin/bash
-B) set -euo pipefail
-C) IFS=$'\n\t'
-D) readonly SCRIPT_NAME=$(basename "$0")
-E) readonly SCRIPT_VERSION="1.0.0"
-F) VERBOSE="${VERBOSE:-0}"
-G) usage() {
+A) readonly SCRIPT_NAME=$(basename "$0")
+B) readonly SCRIPT_VERSION="1.0.0"
+C) main "$@"
+D) #!/bin/bash
+E) usage() {
    cat << EOF
    $SCRIPT_NAME v$SCRIPT_VERSION
    Usage: $SCRIPT_NAME [options] <file>
    EOF
    }
-H) die() { echo "FATAL: $*" >&2; exit 1; }
-I) cleanup() {
-   local exit_code=$?
-   # cleanup code
-   exit $exit_code
-   }
-J) trap cleanup EXIT
-K) parse_args() {
+F) parse_args() {
    while [[ $# -gt 0 ]]; do
        case $1 in
            -h|--help) usage; exit 0 ;;
-           -v|--verbose) ((VERBOSE++)); shift ;;
+           -v|--verbose) VERBOSE=$((VERBOSE+1)); shift ;;
            *) break ;;
        esac
    done
    [[ $# -ge 1 ]] || die "Missing argument"
    INPUT="$1"
    }
-L) validate() {
-   [[ -f "$INPUT" ]] || die "File not found: $INPUT"
+G) set -euo pipefail
+H) IFS=$'\n\t'
+I) trap cleanup EXIT
+J) VERBOSE="${VERBOSE:-0}"
+K) cleanup() {
+   local exit_code=$?
+   # cleanup code
+   exit $exit_code
    }
-M) main() {
+L) main() {
    parse_args "$@"
    validate
    echo "Processing: $INPUT"
    }
-N) main "$@"
+M) validate() {
+   [[ -f "$INPUT" ]] || die "File not found: $INPUT"
+   }
+N) die() { echo "FATAL: $*" >&2; exit 1; }
 ```
 
 <details>
 <summary>📋 Solution</summary>
 
-Correct order: A, B, C, D, E, F, G, H, I, J, K, L, M, N
+One valid order: D, G, H, A, B, J, E, N, K, I, F, M, L, C
 
 ```bash
 #!/bin/bash
@@ -632,7 +636,7 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help) usage; exit 0 ;;
-            -v|--verbose) ((VERBOSE++)); shift ;;
+            -v|--verbose) VERBOSE=$((VERBOSE+1)); shift ;;
             *) break ;;
         esac
     done

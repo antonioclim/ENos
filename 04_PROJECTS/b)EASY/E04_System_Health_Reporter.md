@@ -42,7 +42,7 @@ Develop a tool that generates comprehensive reports about system health status: 
 
 ## Interface
 
-```bash
+```text
 ./health_reporter.sh [OPTIONS]
 
 Options:
@@ -65,6 +65,8 @@ Examples:
 ---
 
 ## Output Example
+
+These are synthetic illustrations, not measured runs or acceptance evidence. The illustrated configuration uses `--mem-threshold 75 --services nginx,mysql,ssh,redis`; it does not use the default 90% memory threshold.
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗

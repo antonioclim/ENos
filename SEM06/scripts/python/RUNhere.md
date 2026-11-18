@@ -1,162 +1,22 @@
-# 📁 Python Tools — SEM06
+# Python entry points — SEM06
 
-> **Location:** `SEM06/scripts/python/`  
-> **Purpose:** Automated grading, generation, and analysis tools  
-> **Python version:** ≥ 3.10 required
+This directory contains this guide; the earlier `S06_01_autograder.py`, `S06_02_quiz_generator.py` and `S06_03_report_generator.py` command examples referred to files that are not shipped. They must not be treated as successful or available grading workflows.
 
-## Contents
+## Available tools
 
-| Tool | Purpose | CLI |
-|------|---------|-----|
-| `S06_01_autograder.py` | Automated grading | Yes |
-
-## Installation
-
-```bash
-# Install dependencies
-cd SEM06/
-pip install -r requirements.txt
-
-# Or install individually
-pip install pyyaml pytest
-```
-
----
-
-## S06_01_autograder.py
-
-**Purpose:** Automated homework evaluation with detailed feedback
-
-### Usage
+| Purpose | Maintained source |
+|---|---|
+| Formative YAML practice | [formative/quiz_runner.py](../../formative/quiz_runner.py), with [actual options](../../formative/RUNhere.md) |
+| Project checks | [tests/test_capstone.py](../../tests/test_capstone.py), [runtime semantic tests](../../tests/test_runtime_semantics.py) |
+| Teaching helper regressions | [test_teaching_examples.py](../../tests/test_teaching_examples.py) |
+| Literal configuration data | [config_data.py](../projects/config_data.py) |
+| Backup-chain retention/validation | [backup library](../projects/backup/lib/) |
+| Local project diagnostics and human score review | [SEM07 toolkit](../../../SEM07/README.md) |
 
 ```bash
-python3 S06_01_autograder.py <submission> [options]
-
-Arguments:
-  submission       Path to submission directory or file
-
-Options:
-  --rubric PATH    Custom rubric file
-  --output FILE    Output file for grades (CSV)
-  --verbose        Detailed scoring breakdown
-  --batch          Process entire directory of submissions
-  --timeout SEC    Per-test timeout (default: 30)
+# From the repository root, in the declared Python environment:
+python3 -m pytest SEM06/tests
+python3 SEM06/formative/quiz_runner.py --help
 ```
 
-### Examples
-
-```bash
-# Grade single submission
-python3 S06_01_autograder.py ~/submissions/student123/
-
-# Grade all submissions with report
-python3 S06_01_autograder.py ~/submissions/ --batch --output grades.csv
-
-# Verbose grading
-python3 S06_01_autograder.py submission/ --verbose
-```
-
-### Grading Criteria
-
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Correctness | 60% | Passes test cases |
-| Style | 20% | shellcheck compliance |
-| Documentation | 20% | Comments, README |
-
----
-
-## S06_02_quiz_generator.py
-
-**Purpose:** Generate randomized quizzes from question bank
-
-### Usage
-
-```bash
-python3 S06_02_quiz_generator.py [options]
-
-Options:
-  --count N        Number of unique quizzes to generate
-  --questions N    Questions per quiz (default: 10)
-  --seed N         Random seed for reproducibility
-  --output DIR     Output directory for generated quizzes
-  --format FMT     Output format: yaml, json, pdf, moodle
-```
-
-### Examples
-
-```bash
-# Generate 5 unique quizzes
-python3 S06_02_quiz_generator.py --count 5 --output quizzes/
-
-# Reproducible generation
-python3 S06_02_quiz_generator.py --seed 42 --count 3
-
-# Export for Moodle
-python3 S06_02_quiz_generator.py --format moodle --output moodle_quiz.xml
-```
-
----
-
-## S06_03_report_generator.py
-
-**Purpose:** Generate PDF/HTML reports from grading data
-
-### Usage
-
-```bash
-python3 S06_03_report_generator.py <grades_file> [options]
-
-Arguments:
-  grades_file      CSV file with grades data
-
-Options:
-  --format FMT     Output format: pdf, html, md (default: pdf)
-  --individual     Generate per-student reports
-  --summary        Include class statistics
-  --output DIR     Output directory
-```
-
-### Examples
-
-```bash
-# Generate summary report
-python3 S06_03_report_generator.py grades.csv --summary
-
-# Individual student reports
-python3 S06_03_report_generator.py grades.csv --individual --output reports/
-```
-
-
-
----
-
-## Common Options
-
-All Python tools support:
-
-| Option | Description |
-|--------|-------------|
-| `--help` | Show detailed help |
-| `--version` | Show tool version |
-| `--quiet` | Suppress non-essential output |
-| `--debug` | Enable debug logging |
-
-## PYTHONPATH Setup
-
-For importing shared `lib/` modules:
-
-```bash
-# Add to your .bashrc or run before scripts
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/../.."
-
-# Or run with path
-PYTHONPATH="../.." python3 S06_01_autograder.py submission/
-```
-
----
-
-*See also: [`../../lib/`](../../lib/) for shared utilities*  
-*See also: [`../../tests/`](../../tests/) for test suite*
-
-*Last updated: January 2026*
+Python3.10+ is required. Install dependencies in the declared project environment as a separate setup action; these commands do not install packages. The [shared library](../../../lib/) belongs to the repository root. No `--batch`, Moodle/QTI, PDF, per-student feedback or marking-weight contract is invented here. See [the teaching contract](../../docs/TEACHING_CONTRACT.md) before interpreting diagnostics as assessment evidence.

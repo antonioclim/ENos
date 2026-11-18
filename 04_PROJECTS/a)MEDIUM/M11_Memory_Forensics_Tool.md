@@ -61,7 +61,7 @@ Tool for memory analysis and forensics: per-process memory usage investigation, 
 
 ## CLI Interface
 
-```bash
+```text
 ./memtool.sh <command> [options]
 
 Commands:
@@ -95,6 +95,8 @@ Examples:
 ---
 
 ## Output Examples
+
+Synthetic illustrations. Mapping lengths are virtual sizes; RSS/PSS/private resident figures require their own measurement source and are not interchangeable.
 
 ### System Overview
 
@@ -168,13 +170,13 @@ MEMORY SUMMARY
   Virtual Size (VSZ):     2.4 GB
   Resident Set (RSS):     1.2 GB     ← Actually in RAM
   Shared Memory:          45 MB
-  Private Memory:         1.15 GB    ← Process-specific
+  Private resident:       1.15 GB    ← Illustrative smaps Private_Clean + Private_Dirty
   Swap Usage:             0 MB
   
   Peak RSS:               1.8 GB (at 14:30)
   Current vs Peak:        66% of peak
 
-MEMORY MAP BREAKDOWN
+VIRTUAL MEMORY MAP BREAKDOWN
 ───────────────────────────────────────────────────────────────────────────────
   Category          Size        Count    Description
   ─────────────────────────────────────────────────────────────────────────────
@@ -214,7 +216,7 @@ LEAK DETECTION
   Observations:
   - RSS increased 400 MB over 8 hours
   - Heap grew from 600 MB to 890 MB
-  - No corresponding decrease
+  - A decrease followed the peak; sustained retention is not established
   
   Recommendation:
   - Profile with: valgrind --leak-check=full
@@ -247,8 +249,8 @@ ANALYSIS
 ───────────────────────────────────────────────────────────────────────────────
   ⚠️ Warning: Heap grew 15 MB in 60 seconds
   
-  Leak rate: ~15 MB/minute = 900 MB/hour
-  At this rate, OOM in: ~45 minutes
+  Observed RSS growth over this interval: ~15 MB/minute (not proof of a leak)
+  OOM forecast: unavailable without headroom, cgroup limits and a validated growth model
   
   Likely causes:
   - Unbounded cache growth
@@ -334,7 +336,10 @@ get_process_memory() {
     
     echo "RSS: $((resident * page_size / 1024)) kB"
     echo "Shared: $((shared * page_size / 1024)) kB"
-    echo "Private: $(( (resident - shared) * page_size / 1024)) kB"
+    echo "RSS minus shared-backed resident estimate: $(( (resident - shared) * page_size / 1024)) KiB (not uniquely private memory)"
+    if [[ -r /proc/$pid/smaps_rollup ]]; then
+        awk '/^Private_(Clean|Dirty):/ {sum+=$2} END {print "Private resident:",sum,"KiB"}' "/proc/$pid/smaps_rollup"
+    fi
 }
 ```
 
@@ -356,18 +361,18 @@ parse_maps() {
         
         # Categorise
         case "$pathname" in
-            "[heap]")   ((categories[heap]+=$size)) ;;
-            "[stack]")  ((categories[stack]+=$size)) ;;
+            "[heap]")   categories[heap]=$((${categories[heap]:-0} + size)) ;;
+            "[stack]")  categories[stack]=$((${categories[stack]:-0} + size)) ;;
             "[vdso]"|"[vvar]"|"[vsyscall]") 
-                        ((categories[kernel]+=$size)) ;;
-            "")         ((categories[anon]+=$size)) ;;
-            *.so*)      ((categories[libs]+=$size)) ;;
-            *)          ((categories[files]+=$size)) ;;
+                        categories[kernel]=$((${categories[kernel]:-0} + size)) ;;
+            "")         categories[anon]=$((${categories[anon]:-0} + size)) ;;
+            *.so*)      categories[libs]=$((${categories[libs]:-0} + size)) ;;
+            *)          categories[files]=$((${categories[files]:-0} + size)) ;;
         esac
     done < "$maps"
     
     for cat in "${!categories[@]}"; do
-        echo "$cat: ${categories[$cat]} KB"
+        echo "$cat: ${categories[$cat]} KiB virtual mapping"
     done
 }
 ```
@@ -376,42 +381,42 @@ parse_maps() {
 
 ```bash
 snapshot_memory() {
-    local pid="$1"
-    local snapshot_file="/tmp/memtool_${pid}_$(date +%s).snap"
-    
-    # Save all relevant data
-    {
-        echo "timestamp=$(date +%s)"
-        echo "rss=$(awk '/VmRSS/ {print $2}' /proc/$pid/status)"
-        echo "heap_size=$(awk '/\[heap\]/ {
-            split($1, a, "-"); 
-            print strtonum("0x"a[2]) - strtonum("0x"a[1])
-        }' /proc/$pid/maps)"
-        echo "maps_hash=$(md5sum /proc/$pid/maps | cut -d' ' -f1)"
-    } > "$snapshot_file"
-    
-    echo "$snapshot_file"
+    local pid="$1" directory="${SNAPSHOT_DIR:?Choose a private snapshot directory}"
+    python3 - "$pid" "$directory" <<'PYSNAPSHOT'
+import hashlib,json,os,tempfile,time,sys
+from pathlib import Path
+pid=int(sys.argv[1]); root=Path(sys.argv[2]); root.mkdir(mode=0o700,parents=True,exist_ok=True)
+if root.is_symlink() or root.stat().st_uid!=os.getuid(): raise SystemExit("Snapshot directory is not owned")
+proc=Path('/proc')/str(pid)
+def identity(): return proc.joinpath('stat').read_text().rsplit(') ',1)[1].split()[19]
+start=identity(); status={line.split(':',1)[0]:line.split(':',1)[1].strip() for line in proc.joinpath('status').read_text().splitlines()}
+maps=proc.joinpath('maps').read_bytes(); heap_bytes=0
+for line in maps.decode().splitlines():
+    if line.endswith('[heap]'):
+        begin,end=(int(part,16) for part in line.split()[0].split('-')); heap_bytes+=end-begin
+if identity()!=start: raise SystemExit("Process identity changed")
+record={'schema_version':1,'timestamp_ns':time.time_ns(),'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),'pid':pid,'start_ticks':start,
+        'rss_kib':int(status.get('VmRSS','0 kB').split()[0]),'heap_virtual_bytes':heap_bytes,'maps_sha256':hashlib.sha256(maps).hexdigest()}
+fd,name=tempfile.mkstemp(prefix=f'memtool_{pid}_',suffix='.json',dir=root)
+with os.fdopen(fd,'w') as stream: json.dump(record,stream)
+print(name)
+PYSNAPSHOT
 }
 
 compare_snapshots() {
-    local snap1="$1"
-    local snap2="$2"
-    
-    source "$snap1"
-    local rss1=$rss heap1=$heap_size
-    
-    source "$snap2"
-    local rss2=$rss heap2=$heap_size
-    
-    local rss_delta=$((rss2 - rss1))
-    local heap_delta=$((heap2 - heap1))
-    
-    echo "RSS delta: $rss_delta KB"
-    echo "Heap delta: $heap_delta KB"
-    
-    if ((rss_delta > 10240)); then  # > 10MB
-        echo "⚠️ Significant memory growth detected"
-    fi
+    python3 - "$1" "$2" <<'PYCOMPARE'
+import json,sys
+with open(sys.argv[1]) as stream: first=json.load(stream)
+with open(sys.argv[2]) as stream: last=json.load(stream)
+if any(first.get(k)!=last.get(k) for k in ('schema_version','boot_id','pid','start_ticks')) or first.get('schema_version')!=1:
+    raise SystemExit("Incompatible snapshot identity/schema")
+seconds=(last['timestamp_ns']-first['timestamp_ns'])/1e9
+if seconds<=0: raise SystemExit("Snapshot order/time is invalid")
+print(f"Interval: {seconds:.6f} s")
+print('RSS delta:',last['rss_kib']-first['rss_kib'],'KiB')
+print('Heap virtual delta:',(last['heap_virtual_bytes']-first['heap_virtual_bytes'])/1024,'KiB')
+print('Growth alone does not establish a leak or predict OOM.')
+PYCOMPARE
 }
 ```
 

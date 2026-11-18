@@ -45,7 +45,7 @@
             .page {
                 page-break-after: always;
                 height: 297mm;
-                width: 210mm;
+                width: min(210mm, 100%);
                 padding: 8mm;
             }
             .page:last-child {
@@ -64,7 +64,7 @@
             }
             .page {
                 background: white;
-                width: 210mm;
+                width: min(210mm, 100%);
                 min-height: 297mm;
                 margin: 20px auto;
                 padding: 12mm;
@@ -227,6 +227,8 @@
         
         /* Diagrams */
         .diagram {
+            white-space: pre;
+            overflow-x: auto;
             font-family: 'Consolas', monospace;
             font-size: 7pt;
             line-height: 1.2;
@@ -286,6 +288,104 @@
             margin: 2px 0;
         }
     </style>
+
+<style id="seminar-accessible-print">
+button.quiz-option, button.tab { font: inherit; color: inherit; text-align: left; }
+button.quiz-option { width: 100%; }
+button.nav-dot { padding: 0; border: 1px solid currentColor; }
+button:focus-visible, input:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+@media print {
+  .presentation, .slide-container { display: block !important; height: auto !important; }
+  .slide { height: auto !important; min-height: 0 !important; overflow: visible !important; animation: none !important; }
+  .slide-content { overflow: visible !important; }
+  .nav, .nav-bar, .shortcuts, .keyboard-info, .search-container, .tabs, .filter-tabs, .stats, .print-btn { display: none !important; }
+  .slide *, .card *, .header *, .example *, .diagram * { color: #000 !important; -webkit-text-fill-color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+  .card, .card.hidden, .card[style], .quiz-option { display: block !important; background: #fff !important; color: #000 !important; border: 1px solid #777 !important; }
+  .card-header, .example, .terminal, .terminal-header, .terminal-body, .diagram, .column, .quiz-question { background: #fff !important; color: #000 !important; }
+  .grid { display: block !important; }
+  .card { margin-bottom: 8mm; break-inside: avoid; }
+  pre, code, .example, .diagram {
+            white-space: pre;
+            overflow-x: auto; white-space: pre-wrap !important; overflow: visible !important; }
+  h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+}
+</style>
+<style>@media print { @page { size: A4; margin: 0; } .page { width: 210mm; height: auto; min-height: 297mm; margin: 0; box-shadow: none; } } @media screen and (max-width: 700px) { .columns { grid-template-columns: 1fr; } .page { width: 100%; padding: 12px; } }</style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <button class="print-btn no-print" onclick="window.print()">🖨️ Print A4</button>
@@ -385,7 +485,7 @@
                     </tr>
                     <tr>
                         <td><code>2</code></td>
-                        <td>❌ Misuse</td>
+                        <td>❌ Command-specific failure; consult its documentation</td>
                     </tr>
                     <tr>
                         <td><code>126</code></td>
@@ -482,8 +582,8 @@
                                 <td>stderr → file (append)</td>
                             </tr>
                             <tr>
-                                <td><code>&></code> / <code>>&</code></td>
-                                <td>stdout+stderr → file</td>
+                                <td><code>&amp;&gt;</code> / <code>&amp;&gt;&gt;</code></td>
+                                <td>stdout+stderr → file (overwrite / append)</td>
                             </tr>
                             <tr>
                                 <td><code>2>&1</code></td>
@@ -504,12 +604,12 @@
                                 <td>file → stdin</td>
                             </tr>
                             <tr>
-                                <td><code><<EOF</code></td>
+                                <td><code>&lt;&lt;EOF</code></td>
                                 <td>Here document (multi-line)</td>
                             </tr>
                             <tr>
                                 <td><code><<<</code></td>
-                                <td>Here string (single-line)</td>
+                                <td>Here string (string, possibly containing newlines)</td>
                             </tr>
                         </table>
                         

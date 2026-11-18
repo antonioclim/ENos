@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Starvation Demonstrator | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -77,7 +77,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -89,7 +166,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Starvation Demonstrator</h1>
-                    <p class="text-xs text-stone-500">Intelegerea and Prevenirea Starvation</p>
+                    <p class="text-xs text-stone-500">Understanding and Preventing Starvation</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
@@ -108,10 +185,10 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-sm">SJF Starvation</h3>
-                        <p class="text-xs text-stone-500">Procese scurte vs lung</p>
+                        <p class="text-xs text-stone-500">Short Processes vs a Long Process</p>
                     </div>
                 </div>
-                <p class="text-xs text-stone-600">Procesul lung P1 este mereu depasit de procese scurte care sosesc continuu.</p>
+                <p class="text-xs text-stone-600">Long process P1 is repeatedly overtaken by a continuing stream of short processes.</p>
             </div>
             
             <div id="card-priority" class="scenario-card bg-white rounded-xl shadow-sm border border-stone-200 p-4 cursor-pointer" onclick="selectScenario('priority')">
@@ -121,10 +198,10 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-sm">Priority Starvation</h3>
-                        <p class="text-xs text-stone-500">Priority joasa ignorata</p>
+                        <p class="text-xs text-stone-500">Low Priority Denied Service</p>
                     </div>
                 </div>
-                <p class="text-xs text-stone-600">P_low cu prioritate 10 este ignorat de procesele cu prioritate mare.</p>
+                <p class="text-xs text-stone-600">P_low (priority 10) waits while higher-priority processes keep arriving.</p>
             </div>
             
             <div id="card-aging" class="scenario-card bg-white rounded-xl shadow-sm border border-stone-200 p-4 cursor-pointer" onclick="selectScenario('aging')">
@@ -133,11 +210,11 @@
                         <i class="fas fa-chart-line text-green-600"></i>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-sm">solution: Aging</h3>
-                        <p class="text-xs text-stone-500">Priority creste cu timpul</p>
+                        <h3 class="font-semibold text-sm">Response: Ageing</h3>
+                        <p class="text-xs text-stone-500">Priority increases with waiting time</p>
                     </div>
                 </div>
-                <p class="text-xs text-stone-600">Prioritya proceselor creste progresiv cu timpul de waiting.</p>
+                <p class="text-xs text-stone-600">Waiting processes gradually receive higher priority.</p>
             </div>
         </div>
 
@@ -145,8 +222,8 @@
         <div id="starvationWarning" class="hidden warning-banner mb-6 bg-red-100 border border-red-300 rounded-xl p-4 flex items-center gap-4">
             <div class="text-4xl">🚨</div>
             <div>
-                <h3 class="font-bold text-red-800">STARVATION DETECTAT!</h3>
-                <p class="text-sm text-red-700">Procesul <span id="starvingProcess" class="font-bold">P1</span> waits de <span id="starvingTime" class="font-bold mono">0</span> unitati de timp!</p>
+                <h3 class="font-bold text-red-800">PROLONGED WAIT DETECTED</h3>
+                <p class="text-sm text-red-700">Process <span id="starvingProcess" class="font-bold">P1</span> has waited <span id="starvingTime" class="font-bold mono">0</span> time units!</p>
             </div>
             <div id="starvationCounter" class="ml-auto text-5xl font-bold mono text-red-600">0</div>
         </div>
@@ -159,7 +236,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-list text-blue-500"></i>
-                            Procese and Timp de Waiting
+                            Processes and Waiting Time
                         </h2>
                         <div class="text-sm">
                             Timp: <span id="currentTime" class="mono font-bold text-blue-600">0</span>
@@ -185,7 +262,7 @@
                 <!-- Waiting Time Chart -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-chart-line text-red-500 mr-2"></i>Timp de Waiting in Timp
+                        <i class="fas fa-chart-line text-red-500 mr-2"></i>Waiting Time over Time
                     </h3>
                     <div style="height: 200px;">
                         <canvas id="waitingChart"></canvas>
@@ -195,15 +272,15 @@
                 <!-- Comparison Table -->
                 <div id="comparisonSection" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 hidden">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-table text-green-500 mr-2"></i>Comparison: Without Aging vs Cu Aging
+                        <i class="fas fa-table text-green-500 mr-2"></i>Comparison: Without Ageing vs With Ageing
                     </h3>
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-stone-50">
-                                <th class="p-2 text-left">Metrica</th>
-                                <th class="p-2 text-center">Without Aging</th>
-                                <th class="p-2 text-center">Cu Aging</th>
-                                <th class="p-2 text-center">Diferenta</th>
+                                <th class="p-2 text-left">Metric</th>
+                                <th class="p-2 text-center">Without Ageing</th>
+                                <th class="p-2 text-center">With Ageing</th>
+                                <th class="p-2 text-center">Difference</th>
                             </tr>
                         </thead>
                         <tbody id="comparisonBody">
@@ -218,7 +295,7 @@
                 <!-- Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Controale Simulare
+                        <i class="fas fa-gamepad text-blue-500 mr-2"></i>Simulation Controls
                     </h3>
                     <div class="grid grid-cols-4 gap-2 mb-3">
                         <button id="btnPlay" onclick="togglePlay()" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
@@ -235,7 +312,7 @@
                         </button>
                     </div>
                     <div>
-                        <label class="text-xs text-stone-500 block mb-1">Speed simulare</label>
+                        <label class="text-xs text-stone-500 block mb-1">Simulation Speed</label>
                         <input type="range" id="speedSlider" min="50" max="500" value="200" class="w-full h-2 bg-stone-200 rounded-lg">
                     </div>
                 </div>
@@ -243,19 +320,19 @@
                 <!-- Aging Configuration -->
                 <div id="agingConfig" class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-sliders-h text-green-500 mr-2"></i>configuration Aging
+                        <i class="fas fa-sliders-h text-green-500 mr-2"></i>Ageing Configuration
                     </h3>
                     <div class="space-y-3">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="agingEnabled" class="w-4 h-4 text-green-600 rounded" onchange="toggleAging()">
-                            <span class="text-sm text-stone-600">Activeaza Aging</span>
+                            <span class="text-sm text-stone-600">Enable Ageing</span>
                         </label>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Interval Aging (unitati de timp)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Ageing Interval (time units)</label>
                             <input type="number" id="agingInterval" value="5" min="1" max="20" class="w-full p-2 border border-stone-300 rounded-lg text-sm mono">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Crestere Priority</label>
+                            <label class="text-xs text-stone-500 block mb-1">Priority Increment</label>
                             <input type="number" id="agingAmount" value="1" min="1" max="5" class="w-full p-2 border border-stone-300 rounded-lg text-sm mono">
                         </div>
                     </div>
@@ -264,7 +341,7 @@
                 <!-- Current Scenario Info -->
                 <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-200 p-4">
                     <h3 class="text-sm font-semibold text-amber-800 mb-3">
-                        <i class="fas fa-info-circle text-amber-500 mr-2"></i>Scenariu Curent
+                        <i class="fas fa-info-circle text-amber-500 mr-2"></i>Current Scenario
                     </h3>
                     <div id="scenarioInfo" class="text-xs text-amber-700 space-y-2">
                         <!-- Scenario info will be rendered here -->
@@ -302,7 +379,7 @@
                         <i class="fas fa-terminal"></i> Event Log
                     </h3>
                     <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// Select un scenariu for a start</div>
+                        <div class="text-stone-500">// Select a scenario to start</div>
                     </div>
                 </div>
             </div>
@@ -316,18 +393,18 @@
                     What is Starvation?
                 </h3>
                 <div class="space-y-3 text-sm text-stone-600">
-                    <p><strong>Starvation</strong> (infometare) apare when un proces nu primeste niciodata acces la CPU, desi este gata de executie.</p>
+                    <p><strong>Starvation</strong> occurs when a ready process is indefinitely denied CPU service.</p>
                     <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
-                        <strong>Cauze comune:</strong>
+                        <strong>Common Causes:</strong>
                         <ul class="list-disc list-inside mt-1 text-red-700">
-                            <li>SJF: Procese scurte sosesc continuu</li>
-                            <li>Priority: Procese cu prioritate mai mare sosesc mereu</li>
-                            <li>MLFQ without boost: Procese coboara and nu mai urca</li>
+                            <li>SJF: short processes keep arriving</li>
+                            <li>Priority scheduling: higher-priority processes keep arriving</li>
+                            <li>MLFQ without boosting: demoted processes may remain at low priority</li>
                         </ul>
                     </div>
                     <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
-                        <strong>Diferenta fata de Deadlock:</strong>
-                        <p class="text-amber-700">In starvation, procesul may fi executat teoretic, dar nu primeste niciodata sansa. In deadlock, procesele sunt blocate permanent asteptand resurse.</p>
+                        <strong>Difference from Deadlock:</strong>
+                        <p class="text-amber-700">A starved process is eligible to run but is repeatedly denied service. Deadlocked processes cannot progress because their resource dependencies cannot be resolved.</p>
                     </div>
                 </div>
             </div>
@@ -339,20 +416,20 @@
                 </h3>
                 <div class="space-y-3 text-sm text-stone-600">
                     <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
-                        <strong>1. Aging</strong>
-                        <p class="text-green-700">Creste progresiv prioritatea proceselor care waits mult. after suficient timp, orice proces devine prioritar.</p>
+                        <strong>1. Ageing</strong>
+                        <p class="text-green-700">Gradually increase the priority of waiting processes. Eventual service also requires finite load and fair tie handling.</p>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                         <strong>2. Round Robin</strong>
-                        <p class="text-blue-700">Garanteaza ca fiecare proces primeste CPU periodic, indiferent de burst time or prioritate.</p>
+                        <p class="text-blue-700">With a finite ready queue and finite quantum/switch costs, RR gives each ready process recurring CPU service.</p>
                     </div>
                     <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                        <strong>3. MLFQ cu Boost</strong>
-                        <p class="text-purple-700">Periodic, toate procesele sunt mutate inapoi in coada de prioritate maxima.</p>
+                        <strong>3. MLFQ with Boosting</strong>
+                        <p class="text-purple-700">Periodically move processes back to the highest-priority queue and reset their allotments.</p>
                     </div>
                     <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
                         <strong>4. Fair Share Scheduling</strong>
-                        <p class="text-amber-700">Garanteaza ca fiecare user/grup primeste o cota echitabila de CPU.</p>
+                        <p class="text-amber-700">Allocate CPU shares to users or groups according to an explicit policy; the allocation depends on runnable demand.</p>
                     </div>
                 </div>
             </div>
@@ -367,6 +444,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== Constants ====================
         const PROCESS_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
         const STARVATION_THRESHOLD = 10;
@@ -376,7 +498,7 @@
             sjf: {
                 name: 'SJF Starvation',
                 algorithm: 'SJF',
-                description: 'Procesul P1 (burst=100) este ignorat de procesele scurte care sosesc continuu.',
+                description: 'Process P1 (burst=30) waits behind a continuing stream of short processes.',
                 processes: [
                     { name: 'P1', arrival: 0, burst: 30, priority: 1 },
                     { name: 'P2', arrival: 1, burst: 2, priority: 1 },
@@ -392,7 +514,7 @@
             priority: {
                 name: 'Priority Starvation',
                 algorithm: 'PRIORITY',
-                description: 'P_low (prioritate=10) este ignorat de procesele cu prioritate mare (1-3).',
+                description: 'P_low (priority=10) waits behind higher-priority processes (1–3).',
                 processes: [
                     { name: 'P_low', arrival: 0, burst: 15, priority: 10 },
                     { name: 'P_hi1', arrival: 1, burst: 3, priority: 1 },
@@ -406,7 +528,7 @@
             aging: {
                 name: 'solution Aging',
                 algorithm: 'PRIORITY_AGING',
-                description: 'Cu aging activat, prioritatea P_low creste progresiv pana when devine executat.',
+                description: 'With ageing enabled, P_low gradually gains priority until it is selected in this model.',
                 processes: [
                     { name: 'P_low', arrival: 0, burst: 10, priority: 10 },
                     { name: 'P_hi1', arrival: 1, burst: 3, priority: 1 },
@@ -459,12 +581,14 @@
             `;
             
             resetSimulation();
-            log(`Scenariu selectat: ${scenarioData.name}`);
+            log(`Selected scenario: ${scenarioData.name}`);
         }
 
         function initProcesses() {
-            const scenarioData = SCENARIOS[currentScenario];
-            processes = scenarioData.processes.map((p, i) => ({
+            const scenarioData=SCENARIOS[currentScenario==='aging'?'priority':currentScenario];
+            let competitorArrival=0;
+            const workload=scenarioData.processes.map((p,i)=>{if(i===0)return {...p};const q={...p,arrival:competitorArrival};competitorArrival+=p.burst;return q;});
+            processes = workload.map((p, i) => ({
                 ...p,
                 id: i + 1,
                 color: PROCESS_COLORS[i % PROCESS_COLORS.length],
@@ -488,8 +612,8 @@
         function stepSimulation() {
             const scenarioData = SCENARIOS[currentScenario];
             const agingEnabled = document.getElementById('agingEnabled')?.checked && scenarioData.agingAvailable;
-            const agingInterval = parseInt(document.getElementById('agingInterval').value);
-            const agingAmount = parseInt(document.getElementById('agingAmount').value);
+            const agingInterval=enosInteger(document.getElementById('agingInterval').value,1,100,'Ageing interval');if(agingInterval===null){stopSimulation();return;}
+            const agingAmount=enosInteger(document.getElementById('agingAmount').value,1,10,'Ageing increment');if(agingAmount===null){stopSimulation();return;}
             
             // Get ready processes
             const readyProcesses = processes.filter(p => 
@@ -501,10 +625,10 @@
             // Apply aging
             if (agingEnabled) {
                 readyProcesses.forEach(p => {
-                    if (simulation.time > 0 && (simulation.time - p.lastAging) >= agingInterval) {
+                    if (simulation.time > 0 && (p.waitingTime - p.lastAging) >= agingInterval) {
                         const oldPriority = p.currentPriority;
                         p.currentPriority = Math.max(1, p.currentPriority - agingAmount);
-                        p.lastAging = simulation.time;
+                        p.lastAging = p.waitingTime;
                         
                         if (oldPriority !== p.currentPriority) {
                             log(`t=${simulation.time}: ${p.name} AGED: priority ${oldPriority} → ${p.currentPriority}`);
@@ -519,19 +643,6 @@
                     }
                 });
             }
-            
-            // Update waiting times
-            readyProcesses.forEach(p => {
-                p.waitingTime++;
-            });
-            
-            // Record waiting history
-            processes.forEach(p => {
-                simulation.waitingHistory[p.name].push({
-                    time: simulation.time,
-                    waiting: p.waitingTime
-                });
-            });
             
             // Select next process if none running
             if (!simulation.currentProcess) {
@@ -553,6 +664,9 @@
                 }
             }
             
+            // Charge only jobs that wait during this interval, after dispatch.
+            readyProcesses.filter(p=>p!==simulation.currentProcess).forEach(p=>p.waitingTime++);
+            processes.forEach(p=>simulation.waitingHistory[p.name].push({time:simulation.time,waiting:p.waitingTime}));
             // Execute current process
             if (simulation.currentProcess) {
                 const p = simulation.currentProcess;
@@ -594,7 +708,7 @@
             // Check if done
             if (simulation.completed === processes.length) {
                 stopSimulation();
-                log('=== Simulare completa! ===');
+                log('=== Simulation complete ===');
                 calculateFairness();
             }
         }
@@ -653,6 +767,7 @@
         }
 
         function resetSimulation() {
+            enosTimers.cancel();
             stopSimulation();
             
             simulation = {
@@ -675,7 +790,7 @@
             initChart();
             updateStats();
             
-            document.getElementById('eventLog').innerHTML = '<div class="text-stone-500">// Simulare resetata</div>';
+            document.getElementById('eventLog').innerHTML = '<div class="text-stone-500">// Simulation reset</div>';
         }
 
         // ==================== Rendering ====================
@@ -720,7 +835,7 @@
             const timeAxis = document.getElementById('ganttTimeAxis');
             
             if (simulation.ganttSegments.length === 0) {
-                container.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 text-sm">Gantt chart va aparea aici</div>';
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 text-sm">The Gantt chart will appear here</div>';
                 timeAxis.innerHTML = '';
                 return;
             }
@@ -839,7 +954,7 @@
         }
 
         function toggleAging() {
-            log(`Aging ${document.getElementById('agingEnabled').checked ? 'ACTIVAT' : 'DEZACTIVAT'}`);
+            log(`Aging ${document.getElementById('agingEnabled').checked ? 'ENABLED' : 'DISABLED'}`);
         }
 
         // ==================== Logging ====================
@@ -866,6 +981,27 @@
 
         // ==================== Initialization ====================
         selectScenario('sjf');
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

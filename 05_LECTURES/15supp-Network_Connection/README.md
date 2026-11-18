@@ -1,3 +1,24 @@
+# Lecture 15supp — Network Connection
+
+## Learning and demonstration materials
+
+- [Lesson Plan](docs/C15_01_LESSON_PLAN.md)
+- [Concept Map](docs/C15_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C15_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C15_04_STUDY_GUIDE.md)
+- [15ex1 - Socket API Flow](docs/15ex1_-_Socket_API_Flow.html)
+- [15ex2 - TCP vs UDP](docs/15ex2_-_TCP_vs_UDP.html)
+- [15ex3 - IO Multiplexing](docs/15ex3_-_IO_Multiplexing.html)
+- [Formative question bank](docs/C15_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demo Scripts — Lesson 15 Supplementary: Network Connection
 

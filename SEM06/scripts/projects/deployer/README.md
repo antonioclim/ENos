@@ -1,765 +1,177 @@
-# SysDeployer - Advanced Deployment System
+# SysDeployer — deployment teaching application
 
-CAPSTONE Project - Seminar 6 Operating Systems
+CAPSTONE Project — Seminar 6, Operating Systems.
 
-SysDeployer is a complete deployment system for applications and services, implemented in Bash. It supports multiple deployment strategies, systemd service management, Docker containers, advanced health checks and automatic rollback.
+SysDeployer demonstrates explicit status handling, local file deployment, systemd/container adapters, bounded health checks and rollback bookkeeping. The routing and metrics adapters for blue-green/canary need a concrete integration; missing adapters fail. It is not a complete production platform or a measured zero-downtime guarantee.
 
 ## Contents
 
-- [Features](#-features)
-- [System Requirements](#-system-requirements)
-- [Installation](#-installation)
-- [Quick Usage](#-quick-usage)
-- [Available Actions](#-available-actions)
-- [Configuration](#-configuration)
-- [Deployment Strategies](#-deployment-strategies)
-- [Health Checks](#-health-checks)
-- [Hooks System](#-hooks-system)
-- [Manifest-Based Deployment](#-manifest-based-deployment)
-- [Rollback](#-rollback)
-- [Advanced Examples](#-advanced-examples)
-- [Architecture](#-architecture)
-- [Testing](#-testing)
-- [Troubleshooting](#-troubleshooting)
+- [Features](#features)
+- [System Requirements](#system-requirements)
+- [Installation](#installation)
+- [Quick Usage](#quick-usage)
+- [Available Actions](#available-actions)
+- [Configuration](#configuration)
+- [Deployment Strategies](#deployment-strategies)
+- [Health Checks](#health-checks)
+- [Hooks System](#hooks-system)
+- [Manifest-Based Deployment](#manifest-based-deployment)
+- [Rollback](#rollback)
+- [Advanced Examples](#advanced-examples)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
 
 ## Features
 
-### Core Features
-- Multiple Deployment Strategies: Rolling, Blue-Green, Canary
-- Service Management: Native systemd support (start, stop, restart, enable)
-- Container Support: Docker containers with build, pull, run, stop
-- Health Checks: HTTP, TCP, Process, Custom Command
-- Automatic Rollback: Automatic revert to previous version on failure
-- Version Management: Tracking and management of deployment versions
+| Mechanism | Current scope and limitation |
+|---|---|
+| Local files | Copy into an owned staging sibling, back up existing destination, replace with checked renames; not a one-operation directory exchange |
+| systemd | Check/restart an explicitly selected service; optional service-file input comes from a flat manifest |
+| Docker | Pull/run/stop a selected image/container with explicit status checks; not Compose/Kubernetes or a complete container-definition restore |
+| Rolling | Sequential checked targets/batches; first failed target stops later targets |
+| Blue-green | Inactive service suffix, required smoke-test and traffic-switch hooks; availability depends on actual integration/capacity |
+| Canary | Strict increasing stages ending at 100, checked weights and available numeric metrics; no fabricated healthy rate |
+| Manifests | Restricted flat `key: scalar` grammar; no nested service graph or general YAML |
+| Rollback | In-process service-file/previous-image bookkeeping; no claim that a later independent CLI invocation reconstructs an unsaved history |
+| Notifications | Optional explicit mail/Slack transport, encoded payload and bounded timeout; no external calls in local fixture tests |
 
-### Advanced Features
-- Hooks System: Pre/post hooks for each deployment phase
-- Manifest Deployment: Declarative deployment from YAML files
-- Parallel Execution: Support for parallel deployment (configurable)
-- Notifications: Email and Slack for deployment status
-- Complete Logging: Multi-level with automatic rotation
-- Lock Management: Prevention of concurrent deployments on same service
+The historical README also described parallel deployment, protected versions, image builds, arbitrary environment/volume flags, live traffic routers and a nested YAML stack. These are extension designs, not current supported CLI features.
 
 ## System Requirements
 
-### Required
-- **Bash** >= 4.0
-- **coreutils**: date, mkdir, cp, mv, rm, cat, etc.
-- **systemd** (for service management) or alternative
-- **curl** (for HTTP health checks and notifications)
+Bash 4.4+, Python 3.10+, coreutils, flock and the relevant local tool. Real service actions require systemd; container actions require a working Docker daemon. Curl is needed for HTTP/Slack, mail/sendmail only for configured email. Python handles literal config and JSON encoding; no yq/jq-based nested-manifest capability is implied.
 
-### Optional
-- Docker >= 20.0 (for containers)
-- **jq** (for JSON processing)
-- **yq** or **python3-yaml** (for YAML manifest)
-- nc/netcat (for TCP health checks)
-- mail/sendmail (for email notifications)
-
-### Requirements Check
 ```bash
-# Complete check
-./deployer.sh --check-deps
-
-# Specific check
-command -v systemctl && echo "systemd: OK"
-command -v docker && echo "docker: OK"
-command -v curl && echo "curl: OK"
+bash SEM06/scripts/projects/deployer/deployer.sh --help
+command -v bash python3 tar flock curl
 ```
+
+`--check-deps` is not an option. Checking that a command exists is not acceptance of its daemon, permissions or endpoint.
 
 ## Installation
 
-### Local Installation (Development)
-```bash
-# Clone or copy
-cd deployer/
-
-# Create necessary directories
-mkdir -p var/{log,run,backups,deployments}
-chmod +x deployer.sh bin/sysdeploy
-
-# Test
-./deployer.sh --help
-```
-
-### System Installation
-```bash
-# Copy to /opt
-sudo mkdir -p /opt/deployer
-sudo cp -r . /opt/deployer/
-sudo chmod +x /opt/deployer/deployer.sh
-
-# Create symlink
-sudo ln -sf /opt/deployer/bin/sysdeploy /usr/local/bin/sysdeploy
-
-# Create runtime directories
-sudo mkdir -p /var/log/deployer /var/run/deployer
-sudo chown $USER:$USER /var/log/deployer /var/run/deployer
-```
-
-### Initial Configuration
-```bash
-# Copy configuration
-sudo cp etc/deployer.conf /etc/deployer/deployer.conf
-
-# Edit configuration
-sudo nano /etc/deployer/deployer.conf
-```
+Keep the whole `deployer/` project and its shared sibling config_data.py when copying this kit. The tracked wrapper invokes Bash and resolves its main source. Local inspection needs no global symlink, root account, service restart or upload. System installation under `/opt` and runtime directory ownership are separate authorised host choices; do not blindly recursively change ownership of existing deployment trees.
 
 ## Quick Usage
 
-### Deploy Service
-```bash
-# Deploy simple web application
-./deployer.sh deploy --service myapp \
-    --source /path/to/myapp \
-    --target /opt/myapp \
-    --health-check http://localhost:8080/health
+From the repository root, a complete local files-only fixture:
 
-# Deploy with rolling strategy
-./deployer.sh deploy --service api \
-    --source ./api-v2.0 \
-    --strategy rolling \
-    --instances 3
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+program=$(realpath -- SEM06/scripts/projects/deployer/deployer.sh)
+work=
+trap '[[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+work=$(mktemp -d)
+mkdir -- "$work/source"
+printf 'local version one\n' > "$work/source/index.html"
+cat > "$work/app.yaml" <<EOF
+name: teaching-app
+version: v1
+type: files
+source: $work/source
+destination: $work/live
+EOF
+cat > "$work/deployer.conf" <<EOF
+DEPLOY_ROOT="$work/deployments"
+BACKUP_DIR="$work/backups"
+LOG_DIR="$work/logs"
+RUN_DIR="$work/run"
+HOOKS_DIR="$work/hooks"
+NOTIFY_EMAIL=""
+SLACK_WEBHOOK=""
+EOF
+bash "$program" --config "$work/deployer.conf" --manifest "$work/app.yaml" --dry-run deploy
+[[ ! -e $work/live ]]
+bash "$program" --config "$work/deployer.conf" --manifest "$work/app.yaml" --no-notify --force deploy
+cmp -- "$work/source/index.html" "$work/live/index.html"
 ```
 
-### Deploy Container
-```bash
-# Deploy container from image
-./deployer.sh deploy --container webapp \
-    --image nginx:latest \
-    --port 8080:80 \
-    --health-check http://localhost:8080/
-
-# Deploy container with local build
-./deployer.sh deploy --container myapi \
-    --build ./Dockerfile \
-    --port 3000:3000 \
-    --env NODE_ENV=production
-```
-
-### Status and Monitoring
-```bash
-# Specific service status
-./deployer.sh status myapp
-
-# List all deployments
-./deployer.sh list
-
-# Global health check
-./deployer.sh health
-```
-
-### Rollback
-```bash
-# Rollback to previous version
-./deployer.sh rollback myapp
-
-# Rollback to specific version
-./deployer.sh rollback myapp --version 1.2.0
-```
+`--force` only bypasses this program's interactive confirmation; it does not confer authority for an external service or endpoint. Dry-run validates configuration and manifests before returning without directories, hooks, locks, mail or service changes.
 
 ## Available Actions
 
-| Action | Description | Example |
-|--------|-------------|---------|
-| `deploy` | Deploy new service/container | `deploy --service myapp --source ./app` |
-| `rollback` | Revert to previous version | `rollback myapp` |
-| `status` | Specific service status | `status myapp` |
-| `list` | List all deployments | `list [--format json]` |
-| `health` | Health check all services | `health [--service myapp]` |
-| `stop` | Stop service | `stop myapp` |
-| `start` | Start service | `start myapp` |
-| `restart` | Restart service | `restart myapp` |
-| `logs` | Display deployment logs | `logs myapp [--lines 100]` |
-| `cleanup` | Clean up old deployments | `cleanup [--keep 5]` |
+| Action | Actual interface |
+|---|---|
+| deploy | `deploy --service NAME`, `--container IMAGE[:TAG]` or `--manifest FILE` |
+| rollback | `rollback --service NAME` or `--container NAME`; current unsaved history limits described below |
+| status | `status --service NAME` / `--container NAME` |
+| list | `list`; host-dependent service/container and manifest listing |
+| health | `health --service NAME` / `--container NAME` |
+
+Options include `--config FILE`, `--env NAME`, `--deploy-root DIR`, `--backup-dir DIR`, `--strategy rolling|blue-green|canary|in-place`, `--dry-run`, `--force`, `--no-backup`, `--no-rollback`, `--skip-health-check`, `--health-retries N`, `--health-interval N`, `--health-timeout N`, `--registry URL`, `--pull`, `--no-pull`, `--notify-email ADDRESS`, `--slack-webhook URL`, `--notify-success`, `--no-notify`, `--output text|json` and `--log-file FILE`. Read `--help` for short forms. JSON is the final deployment/rollback report, not an advertised JSON schema for every status/list output.
+
+There are no standalone start/stop/restart/logs/cleanup/protect/unprotect/tag actions, no --source/--target/--instances/--image/--port/--build/--volume/--only/--versions/--force-unlock switches and no `--version VALUE` rollback selection. These are not accepted merely because older text showed them.
 
 ## Configuration
 
-### Main Configuration File
-```bash
-# /etc/deployer/deployer.conf
+Literal KEY=VALUE settings are loaded from the explicit file or the documented search locations; CLI values override the file. Unknown keys fail instead of silently pretending to be effective. Supported keys are DEPLOY_ROOT, BACKUP_DIR, LOG_DIR, RUN_DIR, ENVIRONMENT, STRATEGY, ROLLBACK_ON_FAILURE, HEALTH_CHECK_ENABLED, HEALTH_CHECK_RETRIES, HEALTH_CHECK_INTERVAL, HEALTH_CHECK_TIMEOUT, SERVICE_RESTART_DELAY, SERVICE_STOP_TIMEOUT, SERVICE_START_TIMEOUT, DOCKER_REGISTRY, DOCKER_PULL_TIMEOUT, CONTAINER_STOP_TIMEOUT, NOTIFY_ON_SUCCESS, NOTIFY_ON_FAILURE, NOTIFY_EMAIL, SLACK_WEBHOOK, LOG_LEVEL, LOG_FILE, HOOKS_DIR, DRY_RUN, VERBOSE, PARALLEL and comma-separated SERVICES, CONTAINERS, MANIFESTS. PARALLEL is a historical accepted setting; current target execution is sequential.
 
-#---------------------------------------
-# Directories
-#---------------------------------------
-DEPLOY_BASE_DIR="/opt/deployments"
-BACKUP_DIR="/var/backups/deployer"
-LOG_DIR="/var/log/deployer"
-RUN_DIR="/var/run/deployer"
-
-#---------------------------------------
-# Deployment Settings
-#---------------------------------------
-DEFAULT_STRATEGY="rolling"          # rolling, blue-green, canary
-KEEP_VERSIONS=5                     # Versions kept for rollback
-DEPLOYMENT_TIMEOUT=300              # Deployment timeout (seconds)
-PARALLEL_DEPLOYMENTS=false          # Enable parallel deployment
-MAX_PARALLEL=3                      # Max simultaneous deployments
-
-#---------------------------------------
-# Health Checks
-#---------------------------------------
-HEALTH_CHECK_ENABLED=true
-HEALTH_CHECK_RETRIES=3
-HEALTH_CHECK_INTERVAL=10            # Seconds between attempts
-HEALTH_CHECK_TIMEOUT=30             # Timeout per check
-AUTO_ROLLBACK_ON_FAILURE=true
-
-#---------------------------------------
-# Docker Settings
-#---------------------------------------
-DOCKER_REGISTRY=""                  # Private registry (optional)
-DOCKER_NETWORK="bridge"
-DOCKER_RESTART_POLICY="unless-stopped"
-DOCKER_PULL_ALWAYS=false
-
-#---------------------------------------
-# Notifications
-#---------------------------------------
-NOTIFY_EMAIL=""                     # admin@example.com
-NOTIFY_SLACK_WEBHOOK=""             # https://hooks.slack.com/...
-NOTIFY_ON_SUCCESS=true
-NOTIFY_ON_FAILURE=true
-
-#---------------------------------------
-# Logging
-#---------------------------------------
-LOG_LEVEL="INFO"                    # DEBUG, INFO, WARN, ERROR
-LOG_MAX_SIZE=10485760               # 10MB
-LOG_RETENTION_DAYS=30
-```
-
-### Environment Variables
-```bash
-# Override configuration via environment
-export DEPLOYER_CONFIG="/custom/path/deployer.conf"
-export DEPLOYER_LOG_LEVEL="DEBUG"
-export DEPLOYER_DRY_RUN="true"
-
-./deployer.sh deploy --service myapp --source ./app
-```
+Do not use old DEPLOYER_CONFIG/DEPLOYER_LOG_LEVEL prefixes, DEPLOY_BASE_DIR, DEFAULT_STRATEGY or AUTO_ROLLBACK_ON_FAILURE names. Quotes are literal-value syntax; this is not a shell program. Main config and container settings are not sourced as code. The optional `DEPLOY_ROOT/containers/NAME.conf` supports only CONTAINER_PORTS, CONTAINER_VOLUMES and CONTAINER_RESTART as literal single values; multiple mappings need a deliberate tested extension, not arbitrary injected shell text.
 
 ## Deployment Strategies
 
-### Rolling Deployment
-Gradual deployment, replacing instances one by one.
+Rolling checks each selected target before advancing. Batch/delay values are bounded and failure prevents later service, container or manifest actions. Rollback failure remains failure; it cannot establish a successful restoration.
 
-```bash
-./deployer.sh deploy --service api \
-    --strategy rolling \
-    --instances 4 \
-    --batch-size 1 \
-    --batch-delay 30
-```
+Blue-green requires prepared `service-blue`/`service-green` units, an executable `smoke-test` and `switch-traffic` hook under HOOKS_DIR. Service status, routing, draining, shared database compatibility and capacity are separate conditions. The old environment is retained as a recovery target; a two-environment diagram does not prove zero downtime or a universal 2× resource cost.
 
-Flow:
-1. Stop instance 1 → Deploy v2 → Health check → OK
-2. Stop instance 2 → Deploy v2 → Health check → OK
-3. ... continues until all instances are updated
-
-### Blue-Green Deployment
-Two identical environments, instant switch between them.
-
-```bash
-./deployer.sh deploy --service webapp \
-    --strategy blue-green \
-    --port 8080
-```
-
-Flow:
-1. Deploy v2 in "green" environment (inactive)
-2. Health checks on green
-3. Switch traffic from "blue" to "green"
-4. Blue becomes backup for rollback
-
-### Canary Deployment
-Gradual deployment to a subset of users.
-
-```bash
-./deployer.sh deploy --service api \
-    --strategy canary \
-    --canary-percent 10 \
-    --canary-duration 300
-```
-
-Flow:
-1. Deploy v2 on 10% of instances
-2. Monitor for 5 minutes
-3. If OK → complete deployment
-4. If errors → automatic rollback
+Canary requires executable `set-canary-weight` and a concrete get_canary_error_rate implementation returning a finite 0–100 rate. The provided default explicitly fails as unconfigured. Stages must increase to 100; unavailable/invalid metrics trigger failure/rollback before promotion. Traffic percentage is not the fraction of server capacity. The separate `scripts/examples/deploy_strategies.sh` supports isolated algorithm fixtures; it does not activate a real router.
 
 ## Health Checks
 
-### HTTP Health Check
-```bash
-# Simple GET request
-./deployer.sh deploy --service api \
-    --health-check http://localhost:8080/health
+Library functions provide checked HTTP status, TCP connection and process/custom-command checks. The entry-point service adapter checks systemd active state; the container adapter checks running state and a published port when present. No undocumented --health-check URL or --health-expected-body option is parsed by the CLI. Tests inject explicit local fixtures. A running PID/open port/HTTP 200 alone does not establish application correctness.
 
-# With custom parameters
-./deployer.sh deploy --service api \
-    --health-check http://localhost:8080/api/status \
-    --health-expected-code 200 \
-    --health-expected-body '"status":"ok"'
-```
-
-### TCP Health Check
-```bash
-# Check port is open
-./deployer.sh deploy --service db \
-    --health-check tcp://localhost:5432 \
-    --health-timeout 10
-```
-
-### Process Health Check
-```bash
-# Check process is running
-./deployer.sh deploy --service worker \
-    --health-check process://worker.py \
-    --health-check-user www-data
-```
-
-### Custom Command Health Check
-```bash
-# Custom command
-./deployer.sh deploy --service cache \
-    --health-check 'command://redis-cli ping | grep PONG'
-```
-
-### Advanced Health Check Configuration
-```bash
-# Multiple health checks
-./deployer.sh deploy --service api \
-    --health-check http://localhost:8080/health \
-    --health-check tcp://localhost:8080 \
-    --health-retries 5 \
-    --health-interval 15 \
-    --health-timeout 60
-```
+Use finite retry counts and per-attempt timeouts. Custom commands are trusted executable argv, not a user-supplied shell program. Real endpoints must be selected by the operator; localhost is not automatically disposable infrastructure.
 
 ## Hooks System
 
-Hooks allow execution of custom scripts at different phases of deployment.
+Hook filenames have no implicit `.sh` suffix: pre-deploy, post-deploy, pre-service, post-service, pre-rollback and post-rollback. Strategy adapters additionally require smoke-test, switch-traffic or set-canary-weight. Optional missing hooks are skipped; a present non-executable hook fails. A required integration hook must exist and be executable.
 
-### Available Hooks
-| Hook | Execution Moment |
-|------|------------------|
-| `pre-deploy` | Before deployment starts |
-| `post-deploy` | After successful deployment |
-| `pre-start` | Before service starts |
-| `post-start` | After service starts |
-| `pre-stop` | Before service stops |
-| `post-stop` | After service stops |
-| `pre-rollback` | Before rollback |
-| `post-rollback` | After rollback |
-| `on-failure` | On any error |
-
-### Creating a Hook
-```bash
-# hooks/pre-deploy.sh
-#!/bin/bash
-SERVICE_NAME="$1"
-VERSION="$2"
-SOURCE_DIR="$3"
-
-echo "Preparing deployment for $SERVICE_NAME v$VERSION"
-
-# Pre-deployment validation
-if [[ ! -f "$SOURCE_DIR/package.json" ]]; then
-    echo "ERROR: package.json missing!"
-    exit 1
-fi
-
-# Notify team
-curl -X POST "$SLACK_WEBHOOK" \
-    -d "{\"text\": \"🚀 Starting deployment: $SERVICE_NAME v$VERSION\"}"
-
-exit 0
-```
-
-### Enabling Hooks
-```bash
-# Hooks from standard directory
-./deployer.sh deploy --service api \
-    --hooks-dir ./hooks
-
-# Individual hook
-./deployer.sh deploy --service api \
-    --pre-deploy "./scripts/validate.sh" \
-    --post-deploy "./scripts/notify.sh"
-```
+Hooks receive the arguments used by their call site. In particular pre-service gets target and `deploy`; post-service gets target and success/failed; routing hooks receive the target environment or percentage. Deployment counters/state are exported. Version and source directory are not invented positional arguments. A failing post-service hook prevents that target's success record. Hooks can perform consequential operations, so create only a bounded local fixture during teaching verification.
 
 ## Manifest-Based Deployment
 
-Complex deployment using YAML manifest file.
-
-### Manifest Example
 ```yaml
-# deploy-manifest.yaml
-name: production-stack
-version: "2.0.0"
-
-services:
-  api:
-    type: service
-    source: ./api
-    target: /opt/api
-    strategy: rolling
-    instances: 3
-    health_check:
-      type: http
-      url: http://localhost:3000/health
-      interval: 10
-      retries: 3
-    hooks:
-      pre_deploy: ./hooks/api-pre.sh
-      post_deploy: ./hooks/api-post.sh
-    env:
-      NODE_ENV: production
-      DB_HOST: localhost
-
-  frontend:
-    type: container
-    image: myregistry/frontend:2.0.0
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /data/static:/usr/share/nginx/html
-    health_check:
-      type: http
-      url: http://localhost:80/
-    depends_on:
-      - api
-
-  worker:
-    type: container
-    build: ./worker/Dockerfile
-    environment:
-      - QUEUE_URL=redis://localhost:6379
-    restart: always
-
-settings:
-  parallel: true
-  max_parallel: 2
-  notify:
-    slack: https://hooks.slack.com/...
-    on_success: true
-    on_failure: true
+name: teaching-app
+version: v1
+type: files
+source: ./source
+destination: ./live
 ```
 
-### Using Manifest
-```bash
-# Deploy from manifest
-./deployer.sh deploy --manifest deploy-manifest.yaml
+Required keys: name, version, type. Types: `files` requires source/destination; `container` requires image; `service` optionally supplies service_file (default NAME.service beside the manifest). Optional description is literal text. Keys are flat, unknown/duplicate keys fail and state is cleared before each parse. Relative sources resolve beside the manifest; relative destinations resolve under DEPLOY_ROOT/ENVIRONMENT. This restricted format is not a general YAML parser: nested `services`, sequences, dependencies, environment maps and inline YAML semantics are rejected.
 
-# Dry-run for validation
-./deployer.sh deploy --manifest deploy-manifest.yaml --dry-run
+## Rollback
 
-# Deploy specific service from manifest
-./deployer.sh deploy --manifest deploy-manifest.yaml --only api
-```
+The current runtime registers rollback values in an associative array for the active process. Automatic rollback can restore a saved service file or selected previous image while that state exists. A new CLI process does not possess that history and fails if no record is available. It does not guess by version sorting or directory mtime.
 
-## ↩ Rollback
-
-### Automatic Rollback
-Enabled by default when health check fails.
-
-```bash
-# Configuration
-AUTO_ROLLBACK_ON_FAILURE=true
-
-# During deployment, if health check fails:
-# 1. Failure is detected
-# 2. Previous version is restored
-# 3. Service is restarted
-# 4. Health is verified
-# 5. Notification is sent (if configured)
-```
-
-### Manual Rollback
-```bash
-# Rollback to immediately previous version
-./deployer.sh rollback myapp
-
-# Rollback to specific version
-./deployer.sh rollback myapp --version 1.5.2
-
-# List versions available for rollback
-./deployer.sh list --service myapp --versions
-
-# Forced rollback (without confirmation)
-./deployer.sh rollback myapp --force
-```
-
-### Rollback Protection
-```bash
-# Set version as "protected" (cannot be deleted)
-./deployer.sh protect myapp --version 1.0.0
-
-# Disable protection
-./deployer.sh unprotect myapp --version 1.0.0
-```
+Container image restoration does not reconstruct every old Docker flag, environment, secret, volume, network or data state. File-backup paths are retained for deliberate restore but are not a complete persistent cross-process rollback journal. Do not call this full transactional application recovery. For local immutable release/history teaching, use `scripts/examples/release_reference.py` and its owned release demo; its transition journal is separate from this entry point.
 
 ## Advanced Examples
 
-### Complete Web Stack Deploy
-```bash
-#!/bin/bash
-# deploy-stack.sh
-
-# 1. Deploy database (without initial health check)
-./deployer.sh deploy --service postgres \
-    --container \
-    --image postgres:15 \
-    --port 5432:5432 \
-    --env POSTGRES_PASSWORD=secret \
-    --volume /data/postgres:/var/lib/postgresql/data \
-    --health-check tcp://localhost:5432
-
-# 2. Deploy Redis cache
-./deployer.sh deploy --service redis \
-    --container \
-    --image redis:7-alpine \
-    --port 6379:6379 \
-    --health-check 'command://docker exec redis redis-cli ping'
-
-# 3. Deploy API (depends on DB and Redis)
-./deployer.sh deploy --service api \
-    --source ./api \
-    --target /opt/api \
-    --strategy rolling \
-    --pre-deploy "./scripts/wait-for-deps.sh" \
-    --health-check http://localhost:3000/health \
-    --env DB_HOST=localhost \
-    --env REDIS_URL=redis://localhost:6379
-
-# 4. Deploy Frontend
-./deployer.sh deploy --service frontend \
-    --container \
-    --build ./frontend/Dockerfile \
-    --port 80:80 \
-    --port 443:443 \
-    --health-check http://localhost:80/
-```
-
-### CI/CD Integration
-```bash
-# .gitlab-ci.yml or GitHub Actions
-deploy_production:
-  script:
-    - |
-      ./deployer.sh deploy \
-        --service $SERVICE_NAME \
-        --source ./dist \
-        --strategy canary \
-        --canary-percent 5 \
-        --canary-duration 600 \
-        --health-check $HEALTH_URL \
-        --notify-slack $SLACK_WEBHOOK \
-        --tag "build-$CI_PIPELINE_ID"
-```
-
-### Blue-Green with Load Balancer
-```bash
-#!/bin/bash
-# blue-green-deploy.sh
-
-SERVICE="webapp"
-NEW_VERSION="2.0.0"
-
-# Deploy to green
-./deployer.sh deploy --service ${SERVICE}-green \
-    --source ./app-${NEW_VERSION} \
-    --health-check http://localhost:8081/health
-
-# Additional verification
-sleep 30
-curl -f http://localhost:8081/health || exit 1
-
-# Switch in load balancer (nginx)
-sudo sed -i 's/upstream_blue/upstream_green/' /etc/nginx/sites-enabled/webapp
-sudo nginx -t && sudo nginx -s reload
-
-# Mark blue as backup
-./deployer.sh tag ${SERVICE}-blue --role backup
-./deployer.sh tag ${SERVICE}-green --role active
-
-echo "Deployment complete. Green is active."
-```
+A stack pipeline must stop when a dependency fails, before deploying dependants. Keep build, database migration, service deployment, health, approval and routing adapters explicit; use local mocks to test failed staging, rejected approval, unavailable metrics and failed rollback. Never put secrets in a command line or claim an unavailable feature succeeded. Production CI activation, Git writes, Docker operations and router changes are separate operations, not a consequence of running documentation checks.
 
 ## Architecture
 
-### Directory Structure
-```
-deployer/
-├── deployer.sh           # Main script (entry point)
-├── bin/
-│   └── sysdeploy         # Wrapper for system installation
-├── lib/
-│   ├── core.sh           # Core functions (logging, errors, locks)
-│   ├── utils.sh          # Utilities (services, containers, health)
-│   └── config.sh         # Configuration and CLI parsing
-├── etc/
-│   └── deployer.conf     # Default configuration
-├── hooks/                # Hook scripts (optional)
-│   ├── pre-deploy.sh
-│   └── post-deploy.sh
-├── tests/
-│   └── test_deployer.sh  # Test suite
-└── var/
-    ├── log/              # Deployment logs
-    ├── run/              # PID files, locks
-    ├── backups/          # Backups for rollback
-    └── deployments/      # Deployment metadata
-```
+The entry point loads core/utils/config; validates inputs; performs a no-write dry-run branch when selected; creates owned temporary state and acquires a stable lock; then executes the chosen action and serialises its final report. Errors stop the relevant workflow. Temporary path registration survives command substitution by using an owned parent workspace. Lock paths are not removed while another process could rely on their inode.
 
-### Deployment Flow
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     DEPLOYMENT FLOW                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  [Start] ──► [Validate Config] ──► [Acquire Lock]           │
-│                                          │                   │
-│                                          ▼                   │
-│  [Pre-Deploy Hook] ◄──────────── [Create Backup]            │
-│         │                                                    │
-│         ▼                                                    │
-│  [Deploy Files/Container] ──► [Configure Service]           │
-│                                          │                   │
-│                                          ▼                   │
-│  [Post-Deploy Hook] ◄──────────── [Start Service]           │
-│         │                                                    │
-│         ▼                                                    │
-│  [Health Check] ──► [Success?] ──► YES ──► [Notify] ──► [End]│
-│                          │                                   │
-│                          NO                                  │
-│                          │                                   │
-│                          ▼                                   │
-│  [Rollback] ◄───── [On-Failure Hook]                        │
-│         │                                                    │
-│         ▼                                                    │
-│  [Restore Backup] ──► [Restart Service] ──► [Notify Failure]│
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Exit Codes
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Configuration/parameter error |
-| 2 | Partial deployment (some services failed) |
-| 3 | Fatal error (deployment completely failed) |
-| 4 | Health check failed |
-| 5 | Lock exists (deployment in progress) |
-| 6 | Rollback failed |
-| 10 | Timeout exceeded |
+Exit 0 is successful completion of the selected operation, 1 configuration/operation error, 2 failed deployment, 3 fatal library/setup error, 4 failed health action and 5 lock acquisition failure. Review the report's actual state and error detail; a rollback helper may return 1 and notification failure is separate from whether files were changed.
 
 ## Testing
 
-### Run Complete Tests
 ```bash
-cd deployer/
-./tests/test_deployer.sh
+bash SEM06/scripts/projects/deployer/tests/test_deployer.sh
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest SEM06/tests/test_runtime_semantics.py SEM06/tests/test_teaching_examples.py -q
 ```
 
-### Specific Tests
-```bash
-# Core tests only
-./tests/test_deployer.sh --filter core
-
-# Integration tests only
-./tests/test_deployer.sh --filter integration
-
-# Verbose mode
-./tests/test_deployer.sh --verbose
-```
-
-### Coverage
-```bash
-# Generate coverage report
-./tests/test_deployer.sh --coverage
-
-# Output:
-# Core Functions: 45/45 (100%)
-# Utils Functions: 38/40 (95%)
-# Config Functions: 22/22 (100%)
-# Integration Tests: 15/15 (100%)
-```
+The Bash harness has no implemented --filter/--coverage contract. Old “45/45, 38/40, 22/22, 15/15” figures were illustrative and are not current coverage measurements. Native Docker/systemd/HTTP-router acceptance is not established by unit mocks, fixture copying or Bash parsing. Tests assert stop-on-failure, source/destination non-nesting, config isolation, literal values and missing-adapter failure.
 
 ## Troubleshooting
 
-### Common Problems
+A lock file's presence does not indicate a stale active lock; flock applies to an open inode. Do not unlink it or use an imaginary force-unlock switch. Inspect the owner/operation and retry deliberately.
 
-Deployment blocked
-```bash
-# Check lock
-ls -la var/run/*.lock
-
-# Manual lock release (only if certain nothing is running)
-./deployer.sh --force-unlock myapp
-
-# Or direct deletion
-rm var/run/myapp.lock
-```
-
-Health check timeout
-```bash
-# Increase timeout
-./deployer.sh deploy --service api \
-    --health-timeout 120 \
-    --health-retries 10
-
-# Debug health check
-curl -v http://localhost:8080/health
-```
-
-Permission denied
-```bash
-# Check permissions
-ls -la /opt/deployments/
-ls -la /var/log/deployer/
-
-# Fix
-sudo chown -R $USER:$USER /opt/deployments
-```
-
-Container won't start
-```bash
-# Container logs
-docker logs myapp 2>&1 | tail -50
-
-# Check image
-docker images | grep myapp
-
-# Forced rebuild
-./deployer.sh deploy --container myapp \
-    --build ./Dockerfile \
-    --no-cache
-```
-
-### Debug Mode
-```bash
-# Enable complete debug
-./deployer.sh --debug deploy --service api --source ./app
-
-# Or via environment
-DEPLOYER_LOG_LEVEL=DEBUG ./deployer.sh deploy ...
-```
-
-### Logs
-```bash
-# Current deployment logs
-tail -f var/log/deployer.log
-
-# Specific service logs
-./deployer.sh logs myapp --lines 200
-
-# Logs with filter
-grep "ERROR\|WARN" var/log/deployer.log
-```
+For permission errors, review the intended owned directories and configured account. For health failures, preserve the failed status and inspect the actual adapter; increasing timeout is not evidence of health. --debug raises diagnostic detail without enabling shell xtrace that could reveal secrets. Status/list results depend on the host; failure or unavailable tools must remain distinguishable from an empty healthy inventory.
 
 ## Licence
 
@@ -768,7 +180,7 @@ Seminar 6 Operating Systems
 Faculty of Cybernetics, Statistics and Economic Informatics  
 Bucharest University of Economic Studies
 
-This project is intended exclusively for educational purposes.
+This project is a teaching example. Eligible original ENos code is MIT and original documentation is CC BY 4.0 under [the component policy](../../../../LICENCE.md). The attribution above and the author line below are retained. Student, institutional or other third-party contributions whose rights are not confirmed remain outside the new grant. The educational context is not an additional restriction on eligible original code licensed under MIT.
 
 ---
 

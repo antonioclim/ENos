@@ -8,13 +8,15 @@
 
 ---
 
+> **Current scope and author decisions:** [Teaching contract](docs/TEACHING_CONTRACT.md). The project scripts and runnable helpers are distinct from extension designs and student TODOs. Assessment weights, bonus rules, identifier collection and historical empirical claims remain explicitly open.
+
 ## Why Is SEM06 Different?
 
 | Aspect | SEM01-SEM05 | SEM06 (CAPSTONE) |
 |--------|-------------|------------------|
 | Focus | Individual concepts | Complete integration |
 | Structure | docs/ with 11 standard files | docs/ + docs/projects/ |
-| Scripts | Simple demos | 3 Complete Projects (~7500 lines) |
+| Scripts | Simple demos | 3 maintained teaching projects; see their bounded runtime contracts |
 | Assessment | Punctual exercises | Semester project + Live demo |
 | Complexity | Progressive | Professional |
 
@@ -86,7 +88,7 @@ SEM06/
 │   ├── S06_04_Deployer.html
 │   └── S06_05_Testing_ErrorHandling.html
 │
-├── 📂 scripts/                     # Source code (~680K)
+├── 📂 scripts/                     # Source code and teaching helpers
 │   └── 📂 projects/                # ⭐ THE 3 CAPSTONE PROJECTS
 │       ├── monitor/                # 🖥️ System Monitor
 │       │   ├── monitor.sh          #    Entry point
@@ -105,7 +107,7 @@ SEM06/
 │
 ├── 📂 formative/                   # Assessment materials
 │   ├── quiz.yaml                   # Source quiz (23 questions)
-│   ├── quiz_lms.json               # LMS export
+│   ├── quiz_lms.json               # ENos local JSON export (not Moodle/QTI)
 │   └── quiz_runner.py              # Interactive runner
 │
 ├── 📂 homework/                    # Student assignments
@@ -155,30 +157,31 @@ Incremental backup with compression, checksum verification and automatic rotatio
 
 ```bash
 # Run backup
-./scripts/projects/backup/backup.sh
+bash scripts/projects/backup/backup.sh --help
 
 # List existing backups
-./scripts/projects/backup/backup.sh --list
+bash scripts/projects/backup/backup.sh --config /dev/null --dest "$OWNED_BACKUP_DIR" --list
 
 # Restore specific version
-./scripts/projects/backup/backup.sh --restore v1.0.0
+bash scripts/projects/backup/backup.sh --config /dev/null --restore "$ARCHIVE_PATH" --restore-dir "$EMPTY_OWNED_RESTORE_DIR"
 ```
 
-**Key concepts:** find -newer, tar compression, checksums, retention policies
+Set the uppercase path placeholders explicitly in an owned fixture; the live coding guide supplies one complete example.
+
+**Key concepts:** GNU tar parent chains including deletion/rename, compression, checksums, retention policies
 
 ### 🚀 Application Deployer
 
 Automated deployment with rollback support and health checks.
 
 ```bash
-# Deploy latest
-./scripts/projects/deployer/deployer.sh deploy
+# Inspect supported options
+bash scripts/projects/deployer/deployer.sh --help
 
-# Rollback to previous
-./scripts/projects/deployer/deployer.sh rollback
+# Validate a supplied flat manifest without changes
+bash scripts/projects/deployer/deployer.sh --config /dev/null --dry-run deploy --manifest "$MANIFEST_PATH"
 
-# Check status
-./scripts/projects/deployer/deployer.sh status
+# Actual deployment requires explicit target and reviewed paths; see its README.
 ```
 
 **Key concepts:** deployment strategies (rolling, blue-green), health checks, atomic operations
@@ -213,7 +216,7 @@ Automated deployment with rollback support and health checks.
 ### Prerequisites
 
 - Ubuntu 22.04 (WSL2, VM or native)
-- Bash 5.0+
+- Bash 4.4+ and Python 3.10+
 - Standard utilities: `curl`, `tar`, `find`, `grep`
 - Optional: `shellcheck` for linting
 
@@ -235,7 +238,7 @@ chmod +x tests/run_all_tests.sh
 
 ```bash
 make help       # Show available targets
-make setup      # Install dependencies
+make check      # Check dependencies; no installation
 make test       # Run all tests
 make lint       # Check code quality
 make quiz       # Run interactive quiz
@@ -245,6 +248,8 @@ make clean      # Remove temporary files
 ---
 
 ## Practical Assignments
+
+The following historical point/scope proposal is preserved pending alignment with the brief, rubric and SEM07 aggregation policy.
 
 ### Assignment Overview
 
@@ -287,7 +292,7 @@ Evaluation rubric: `homework/S06_02_EVALUATION_RUBRIC.md`
 
 See `CHANGELOG.md` for detailed version history.
 
-**Current version:** 2.0.0 (January 2025)  
+**Historical SEM06 version note:** 2.0.0 (January 2025); repository baseline is v5.5.0 and Phase 5 changes are tracked separately.  
 - Standardised documentation structure
 - Added pedagogical analysis and traceability
 - Improved code quality patterns

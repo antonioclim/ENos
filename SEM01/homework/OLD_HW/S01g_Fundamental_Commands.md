@@ -211,8 +211,8 @@ cp -r source/ destination/
 
 # Important options
 cp -a source/ dest/           # archive (preserve all)
-cp -v source/ dest/           # verbose
-cp -i source/ dest/           # interactive
+cp -rv source/ dest/          # recursive and verbose
+cp -ri source/ dest/          # recursive, confirm overwriting existing files
 ```
 
 ---
@@ -308,7 +308,7 @@ stat file.txt
 ### 6.3 du - Disk Usage
 
 ```bash
-du file.txt                   # file size
+du file.txt                   # allocated disk usage
 du -h file.txt                # human-readable
 du -s directory/              # total only (summary)
 du -sh directory/             # total human-readable
@@ -361,7 +361,7 @@ wc -l file.txt                # lines only
 wc -w file.txt                # words only
 wc -c file.txt                # bytes only
 wc -m file.txt                # characters only
-wc -L file.txt                # length of longest line
+wc -L file.txt                # maximum display width (tabs/wide characters affect it)
 
 # For multiple files
 wc -l *.txt                   # lines in each + total
@@ -474,9 +474,9 @@ less file           # paginated
 # INFORMATION
 file name           # file type
 stat name           # complete statistics
-du -sh dir/         # directory size
+du -sh dir/         # allocated directory disk usage
 df -h               # disk space
-wc file             # lines/words/chars
+wc file             # lines/words/bytes
 
 # HELP
 man CMD             # manual
@@ -508,15 +508,25 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 
 *By Revolvix for OPERATING SYSTEMS class | restricted licence 2017-2030*
+
+### Measurement contract
+
+`wc` without options reports newline, word and byte counts. In a UTF-8 locale, `printf 'é\n' | wc -c` reports 3 bytes and `printf 'é\n' | wc -m` reports 2 characters. `wc -L` measures display width, which is a different quantity. `du` normally reports allocated disk usage; `stat -c %s file` (GNU) or `du --apparent-size -B1 file` reports logical length/apparent size. Sparse files demonstrate why these values can differ. GNU `find -mtime n` rounds age down to completed 24-hour periods, not calendar dates.

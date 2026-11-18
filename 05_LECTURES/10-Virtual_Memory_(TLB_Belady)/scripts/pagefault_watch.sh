@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -16,6 +16,8 @@ Examples:
 EOF
 }
 
+if [[ "${1:-}" == -- ]]; then shift; fi
+if [[ "${1:-}" == -h || "${1:-}" == --help ]]; then usage; exit 0; fi
 if [[ $# -lt 1 ]]; then
   usage
   exit 2

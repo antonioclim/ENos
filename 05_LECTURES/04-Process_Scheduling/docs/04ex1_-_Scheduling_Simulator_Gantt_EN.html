@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scheduling Simulator CPU - Gantt Chart | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -95,7 +95,84 @@
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -107,14 +184,14 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Scheduling Simulator CPU</h1>
-                    <p class="text-xs text-stone-500">Vizualizare Gantt Chart</p>
+                    <p class="text-xs text-stone-500">Gantt Chart Visualisation</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                 <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
             </span>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Scheduling assumptions</h2><p>One CPU, known service times and no context-switch cost are assumed. Non-preemptive SJF minimises average waiting for a known simultaneous batch under those assumptions; it is not universally optimal with arbitrary arrivals. Example: P1 arrives at 0 with burst 10 and P2 at 1 with burst 1; work-conserving SJF starts P1 and P2 waits 9 units, whereas permitted idling until 1 changes the optimum. SRTF is preemptive and relies on known remaining service.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -144,7 +221,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-sm font-semibold text-stone-700">
-                            <i class="fas fa-table text-green-500 mr-2"></i>Tabela de Procese
+                            <i class="fas fa-table text-green-500 mr-2"></i>Process Table
                         </h3>
                         <button onclick="addProcess()" class="text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded transition-colors">
                             <i class="fas fa-plus mr-1"></i>Add
@@ -154,7 +231,7 @@
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="bg-stone-50">
-                                    <th class="p-2 text-left">Proces</th>
+                                    <th class="p-2 text-left">Process</th>
                                     <th class="p-2 text-center">Arrival</th>
                                     <th class="p-2 text-center">Burst</th>
                                     <th class="p-2 text-center">Priority</th>
@@ -168,13 +245,13 @@
                     </div>
                     <div class="mt-3 flex gap-2">
                         <button onclick="loadPreset('simple')" class="flex-1 text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-2 py-2 rounded transition-colors">
-                            Set Simplu
+                            Simple Set
                         </button>
                         <button onclick="loadPreset('complex')" class="flex-1 text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-2 py-2 rounded transition-colors">
-                            Set Complex
+                            Complex Set
                         </button>
                         <button onclick="loadPreset('priority')" class="flex-1 text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-2 py-2 rounded transition-colors">
-                            Set Prioritati
+                            Priority Set
                         </button>
                     </div>
                 </div>
@@ -182,7 +259,7 @@
                 <!-- Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-play-circle text-purple-500 mr-2"></i>Controale Simulare
+                        <i class="fas fa-play-circle text-purple-500 mr-2"></i>Simulation Controls
                     </h3>
                     <div class="grid grid-cols-4 gap-2 mb-3">
                         <button id="btnPlay" onclick="togglePlay()" class="btn-action p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium flex items-center justify-center">
@@ -199,11 +276,11 @@
                         </button>
                     </div>
                     <div>
-                        <label class="text-xs text-stone-500 block mb-1">Speed animatie</label>
+                        <label class="text-xs text-stone-500 block mb-1">Animation Speed</label>
                         <input type="range" id="speedSlider" min="100" max="1500" value="500" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
                         <div class="flex justify-between text-xs text-stone-400 mt-1">
-                            <span>Rapid</span>
-                            <span>Lent</span>
+                            <span>Fast</span>
+                            <span>Slow</span>
                         </div>
                     </div>
                 </div>
@@ -211,7 +288,7 @@
                 <!-- Formulas -->
                 <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-sm border border-blue-200 p-4">
                     <h3 class="text-sm font-semibold text-blue-800 mb-3">
-                        <i class="fas fa-calculator text-blue-500 mr-2"></i>Formule
+                        <i class="fas fa-calculator text-blue-500 mr-2"></i>Formulae
                     </h3>
                     <div class="space-y-2 text-xs text-blue-700 mono">
                         <div class="p-2 bg-white/50 rounded"><strong>Turnaround Time</strong> = Finish - Arrival</div>
@@ -232,7 +309,7 @@
                             Gantt Chart
                         </h2>
                         <div class="flex items-center gap-2 text-sm">
-                            <span class="text-stone-500">Timp curent:</span>
+                            <span class="text-stone-500">Current time:</span>
                             <span id="currentTime" class="mono font-bold text-blue-600">0</span>
                         </div>
                     </div>
@@ -264,20 +341,20 @@
                         <i class="fas fa-list-ol text-amber-500 mr-2"></i>Ready Queue (t = <span id="queueTime">0</span>)
                     </h3>
                     <div id="readyQueue" class="flex gap-2 min-h-[50px] bg-stone-50 rounded-lg p-3 overflow-x-auto items-center">
-                        <span class="text-stone-400 text-sm italic">Simularea nu a started</span>
+                        <span class="text-stone-400 text-sm italic">The simulation has not started</span>
                     </div>
                 </div>
 
                 <!-- Metrics Table -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-table text-green-500 mr-2"></i>Metrici de Performanta
+                        <i class="fas fa-table text-green-500 mr-2"></i>Performance Metrics
                     </h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="bg-stone-50">
-                                    <th class="p-2 text-left">Proces</th>
+                                    <th class="p-2 text-left">Process</th>
                                     <th class="p-2 text-center">Arrival</th>
                                     <th class="p-2 text-center">Burst</th>
                                     <th class="p-2 text-center">Start</th>
@@ -288,11 +365,11 @@
                                 </tr>
                             </thead>
                             <tbody id="metricsTable">
-                                <tr><td colspan="8" class="p-4 text-center text-stone-400">Run simularea for a vedea metricile</td></tr>
+                                <tr><td colspan="8" class="p-4 text-center text-stone-400">Run the simulation to view metrics</td></tr>
                             </tbody>
                             <tfoot id="metricsFooter" class="bg-blue-50 font-semibold hidden">
                                 <tr>
-                                    <td class="p-2" colspan="5">Medii:</td>
+                                    <td class="p-2" colspan="5">Averages:</td>
                                     <td id="avgWaiting" class="p-2 text-center">-</td>
                                     <td id="avgTurnaround" class="p-2 text-center">-</td>
                                     <td id="avgResponse" class="p-2 text-center">-</td>
@@ -306,7 +383,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 cursor-pointer" onclick="toggleEducation()">
                         <i class="fas fa-book-open text-purple-500 mr-2"></i>
-                        about Algoritmul Curent
+                        About the Current Algorithm
                         <i id="eduToggle" class="fas fa-chevron-down ml-2 text-stone-400 transition-transform"></i>
                     </h3>
                     <div id="algorithmInfo" class="text-sm text-stone-600 space-y-2">
@@ -320,7 +397,7 @@
                         <i class="fas fa-terminal"></i> Event Log
                     </h3>
                     <div id="logConsole" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// Scheduler ready. Select un algoritm and apasa Play.</div>
+                        <div class="text-stone-500">// Scheduler ready. Select an algorithm and press Play.</div>
                     </div>
                 </div>
             </div>
@@ -335,6 +412,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         const PROCESS_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
         
@@ -354,6 +467,8 @@
 
         // ==================== Process Management ====================
         function addProcess(arrival = 0, burst = 1, priority = 1) {
+if (simulation.time > 0 || simulation.running) resetSimulation();
+ if (enosInteger(arrival,0,50,'Arrival') === null || enosInteger(burst,1,20,'Burst') === null || enosInteger(priority,1,10,'Priority') === null) return null;
             processCounter++;
             const process = {
                 id: processCounter,
@@ -374,18 +489,22 @@
         }
 
         function removeProcess(id) {
+resetSimulation();
             processes = processes.filter(p => p.id !== id);
             renderProcessTable();
             renderLegend();
         }
 
         function updateProcess(id, field, value) {
-            const process = processes.find(p => p.id === id);
-            if (process) {
-                process[field] = parseInt(value) || 0;
-                process.remaining = process.burst;
-            }
-        }
+ const bounds = {arrival:[0,50], burst:[1,20], priority:[1,10]};
+ if (!bounds[field]) return;
+ const valid = enosInteger(value, ...bounds[field], field);
+ if (valid === null) { renderProcessTable(); return; }
+ resetSimulation();
+ const process = processes.find(p => p.id === id);
+ if (process) { process[field] = valid; process.remaining = process.burst; }
+ resetSimulation(); renderProcessTable();
+}
 
         function renderProcessTable() {
             const tbody = document.getElementById('processTable');
@@ -459,7 +578,7 @@
                     break;
             }
             resetSimulation();
-            log(`Preset "${type}" loaded cu ${processes.length} procese`);
+            log(`Preset "${type}" loaded with ${processes.length} processes`);
         }
 
         // ==================== Scheduling Algorithms ====================
@@ -520,6 +639,8 @@
         }
 
         function stepSimulation() {
+if (!processes.length) return;
+ if (enosInteger(document.getElementById('quantum').value,1,20,'Quantum') === null) { simulation.running=false; clearInterval(simulation.interval); return; }
             if (simulation.complete) return;
             
             const algorithm = document.getElementById('algorithm').value;
@@ -606,7 +727,7 @@
                     simulation.interval = null;
                 }
                 document.getElementById('btnPlay').innerHTML = '<i class="fas fa-play"></i>';
-                log(`Simulare completa! Toate cele ${processes.length} procese au finished.`);
+                log(`Simulation complete. All ${processes.length} processes have finished.`);
             }
             
             renderGantt();
@@ -626,32 +747,35 @@
                 btn.innerHTML = '<i class="fas fa-pause"></i>';
                 const speed = parseInt(document.getElementById('speedSlider').value);
                 simulation.interval = setInterval(stepSimulation, speed);
-                log('Simulare pornita');
+                log('Simulation started');
             } else {
                 btn.innerHTML = '<i class="fas fa-play"></i>';
                 if (simulation.interval) {
                     clearInterval(simulation.interval);
                     simulation.interval = null;
                 }
-                log('Simulare oprita');
+                log('Simulation stopped');
             }
         }
 
         function runComplete() {
-            resetSimulation();
-            while (!simulation.complete) {
-                stepSimulation();
-            }
-        }
+ if (!processes.length) { alert('Add at least one process.'); return; }
+ if (enosInteger(document.getElementById('quantum').value,1,20,'Quantum') === null) return;
+ resetSimulation();
+ const bound = Math.max(...processes.map(p => p.arrival)) + processes.reduce((s,p) => s+p.burst,0) + 1;
+ for (let count=0; count<bound && !simulation.complete; count++) stepSimulation();
+ if (!simulation.complete) { simulation.running=false; log('Simulation stopped: progress invariant failed.'); }
+}
 
         function resetSimulation() {
+            enosTimers.cancel();
             if (simulation.interval) {
                 clearInterval(simulation.interval);
                 simulation.interval = null;
             }
             document.getElementById('btnPlay').innerHTML = '<i class="fas fa-play"></i>';
             initSimulation();
-            log('Simulare resetata');
+            log('Simulation reset');
         }
 
         // ==================== Rendering ====================
@@ -661,7 +785,7 @@
             const nowLine = document.getElementById('nowLine');
             
             if (simulation.ganttSegments.length === 0) {
-                timeline.innerHTML = '<div class="text-stone-400 text-sm italic p-4">Gantt chart-ul va aparea aici</div>';
+                timeline.innerHTML = '<div class="text-stone-400 text-sm italic p-4">The Gantt chart will appear here</div>';
                 timeAxis.innerHTML = '';
                 nowLine.classList.add('hidden');
                 return;
@@ -707,7 +831,7 @@
             const queue = document.getElementById('readyQueue');
             
             if (simulation.readyQueue.length === 0 && !simulation.currentProcess) {
-                queue.innerHTML = '<span class="text-stone-400 text-sm italic">Coada goala</span>';
+                queue.innerHTML = '<span class="text-stone-400 text-sm italic">Empty queue</span>';
                 return;
             }
             
@@ -743,7 +867,7 @@
             const completed = processes.filter(p => p.finishTime !== null);
             
             if (completed.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-stone-400">Run simularea for a vedea metricile</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-stone-400">Run the simulation to view metrics</td></tr>';
                 footer.classList.add('hidden');
                 return;
             }
@@ -817,57 +941,57 @@
             
             const descriptions = {
                 'FCFS': `
-                    <p><strong>First Come First Served</strong> — Cel mai simplu algoritm de planificare.</p>
+                    <p><strong>First Come First Served</strong> — A simple arrival-order scheduling algorithm.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
                         <li>Processes are executed in arrival order</li>
-                        <li>Non-preemptive: odata pornit, un proces run pana la final</li>
-                        <li>Simple to implement, dar may cauza "convoy effect"</li>
-                        <li>Average waiting time may fi mare</li>
+                        <li>Non-preemptive: the selected CPU burst runs until completion or blocking</li>
+                        <li>Simple to implement, but can cause a convoy effect</li>
+                        <li>Mean waiting time can be high</li>
                     </ul>
                 `,
                 'SJF': `
-                    <p><strong>Shortest Job First (Non-preemptive)</strong> — Optim for minimizarea timpului mediu de waiting.</p>
+                    <p><strong>Shortest Job First (Non-preemptive)</strong> — Minimises mean waiting under the stated known-burst model and arrival assumptions.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>Select procesul cu cel mai mic burst time</li>
-                        <li>Minimizeaza timpul mediu de waiting</li>
-                        <li>Can cause starvation for procese lungi</li>
-                        <li>Necesita cunoasterea in avans a burst time-ului</li>
+                        <li>Select the ready process with the shortest CPU burst</li>
+                        <li>Minimises mean waiting for a known simultaneous batch</li>
+                        <li>Can starve long processes under continuing short-job arrivals</li>
+                        <li>Requires CPU-burst knowledge or an explicit prediction model</li>
                     </ul>
                 `,
                 'SRTF': `
-                    <p><strong>Shortest Remaining Time First (Preemptive)</strong> — Versiunea preemptive a SJF.</p>
+                    <p><strong>Shortest Remaining Time First (Preemptive)</strong> — The preemptive shortest-remaining-time policy.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>Preempteaza procesul curent if soseste unul cu timp ramas mai mic</li>
-                        <li>Optim for minimizarea timpului mediu de waiting</li>
-                        <li>Mai multe context switch-uri than SJF</li>
-                        <li>Risc crescut de starvation</li>
+                        <li>Preempt the current process when a process with less remaining time arrives</li>
+                        <li>Minimises mean waiting in the ideal known-size, zero-overhead preemptive model</li>
+                        <li>Can require more context switches than non-preemptive SJF</li>
+                        <li>Continuing preferred arrivals can cause starvation</li>
                     </ul>
                 `,
                 'RR': `
-                    <p><strong>Round Robin</strong> — Algoritm fair, bazat pe time slicing.</p>
+                    <p><strong>Round Robin</strong> — Time slicing with cyclic ready-queue service.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>Fiecare proces primeste un time quantum fix</li>
-                        <li>after expirarea quantum-ului, procesul merge la sfarsitul cozii</li>
-                        <li>Timp de answer good for procese interactive</li>
-                        <li>Performanta depinde de alegerea quantum-ului</li>
+                        <li>Each process receives a fixed time quantum</li>
+                        <li>After its quantum expires, the process moves to the back of the ready queue</li>
+                        <li>A small quantum can improve initial response, subject to queue length and overhead</li>
+                        <li>Performance depends on the quantum and workload</li>
                     </ul>
                 `,
                 'PRIORITY_NP': `
-                    <p><strong>Priority Scheduling (Non-preemptive)</strong> — Bazat pe prioritati asignate.</p>
+                    <p><strong>Priority Scheduling (Non-preemptive)</strong> — Uses assigned priorities.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>Procesul cu prioritatea cea mai mare (number mic) run first</li>
-                        <li>Non-preemptive: procesul curent nu este intrerupt</li>
-                        <li>Can cause starvation for procese cu prioritate mica</li>
-                        <li>solution: aging (cresterea progresiva a prioritatii)</li>
+                        <li>The highest-priority ready process runs first (smaller number means higher priority)</li>
+                        <li>Non-preemptive: a newly ready process does not interrupt the current CPU burst</li>
+                        <li>Can starve lower-priority processes</li>
+                        <li>Mitigation: ageing gradually raises waiting tasks’ priority</li>
                     </ul>
                 `,
                 'PRIORITY_P': `
-                    <p><strong>Priority Scheduling (Preemptive)</strong> — Priority cu preemption.</p>
+                    <p><strong>Priority Scheduling (Preemptive)</strong> — Priority scheduling with preemption.</p>
                     <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li>Un proces nou cu prioritate mai mare preempteaza procesul curent</li>
-                        <li>answer rapid for procese de prioritate inalta</li>
-                        <li>Risc mare de starvation</li>
-                        <li>Mai multe context switch-uri</li>
+                        <li>A newly ready process with higher priority preempts the current process</li>
+                        <li>Prompt service for higher-priority ready tasks, subject to higher/equal-priority load</li>
+                        <li>Lower-priority tasks can starve</li>
+                        <li>Can require more context switches</li>
                     </ul>
                 `
             };
@@ -891,6 +1015,27 @@
         // Load default preset
         loadPreset('simple');
         updateAlgorithmInfo();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

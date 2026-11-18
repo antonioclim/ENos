@@ -17,6 +17,17 @@
 
 ---
 
+## Status of This Historical Plan
+
+The original filenames, approximate line counts, star ratings, misconception
+frequencies, 70%/30% level split and expected gains below are retained planning
+material from January 2025. No cohort dataset or measurement method accompanies
+them; they are not current inventory/acceptance evidence. The current directory
+contains both Nano teaching and an optional archived Vim chapter. English is the
+instructional language for this programme. Quality gates must be re-established
+on the corrected sources; the checklist is not proof of native Ubuntu/browser
+execution. Timing is 100 contact + 10 break = 110 elapsed minutes.
+
 ## 1. EVALUATION OF CURRENT MATERIALS
 
 ### 1.1 Inventory of Received Materials
@@ -116,11 +127,11 @@ Why are we replacing Vim with Nano?
 
 | Criterion | Vim | Nano | Winner |
 |-----------|-----|------|--------|
-| Learning curve | Steep (hours/days) | Zero (minutes) | Nano |
+| Initial interaction | Modal commands | Visible shortcut hints | Nano chosen for this route |
 | Intuitive interface | Hidden modes | Commands displayed | Nano |
 | Focus on content | Distracted by editor | On task | Nano |
 | Initial experience | Frustrating | Positive | Nano |
-| Availability | Universal | Universal | Equal |
+| Availability | Verify installed command | Verify installed command | Neither guaranteed in minimal images |
 | Efficiency (advanced) | Superior | Adequate | Vim |
 
 Conclusion: For an introductory OS course where editing is auxiliary (not the main purpose), Nano is the optimal choice.
@@ -149,12 +160,12 @@ Conclusion: For an introductory OS course where editing is auxiliary (not the ma
 |----|---------------|-----------|-------------|---------------|
 | M1.1 | "`*` means any character" | 70% | Confusion with shell globbing | `*` = zero or more of the precedent; `.*` = anything |
 | M1.2 | "`.` matches newline too" | 50% | Incomplete patterns | `.` does not match `\n` by default |
-| M1.3 | "BRE and ERE are identical" | 60% | Syntax errors | BRE: `\+`, ERE: `+` |
+| M1.3 | "BRE and ERE are identical" | 60% | Syntax errors | GNU BRE extension: `\+`; ERE: `+` |
 | M1.4 | "`[^abc]` means start of line" | 55% | Context confusion for `^` | In `[]`, `^` = negation; solo, `^` = start |
 | M1.5 | "Quantifiers are lazy by default" | 40% | Matches too long | They are **greedy** by default |
 | M1.6 | "`\d` works in grep" | 65% | Wrong patterns | `\d` is PCRE; in ERE use `[0-9]` |
 | M1.7 | "Space in regex is ignored" | 35% | Wrong matches | Space is a literal character |
-| M1.8 | "`[a-Z]` includes all letters" | 45% | Includes special characters too | Correct: `[a-zA-Z]` |
+| M1.8 | "`[A-z]` includes only letters" | 45% | Includes punctuation in the C locale | Use `[A-Za-z]`; reversed `[a-Z]` is an invalid C-locale range |
 | M1.9 | "Regex are optionally case-sensitive" | 30% | Ignores -i flag | They are case-sensitive by default |
 
 ### 2.2 Misconceptions about GREP
@@ -175,11 +186,11 @@ Conclusion: For an introductory OS course where editing is auxiliary (not the ma
 |----|---------------|-----------|-------------|---------------|
 | M3.1 | "sed modifies the file directly" | 75% | File unchanged | Writes to **stdout**; `-i` for in-place |
 | M3.2 | "`s/old/new/` replaces all" | 80% | Only first changed | Without `/g`, only first per line |
-| M3.3 | "sed -i is safe" | 45% | Data loss | No backup = risk; use `-i.bak` |
+| M3.3 | "sed -i is safe" | 45% | Data loss | Use an owned fixture and check that `.bak` does not already exist |
 | M3.4 | "Delimiter must be `/`" | 35% | Complicated escaping | Any character works: `s|old|new|` |
 | M3.5 | "`&` in replacement is literal" | 60% | Wrong replacements | `&` = the entire match |
 | M3.6 | "sed processes entire file simultaneously" | 40% | Wrong expectations | Processes line by line |
-| M3.7 | "I can use `\d` in sed" | 45% | Regex errors | sed uses BRE; `\d` does not exist |
+| M3.7 | "I can use `\d` in sed" | 45% | Regex errors | GNU sed uses BRE/ERE, not PCRE; use `[0-9]` |
 
 ### 2.4 Misconceptions about AWK
 
@@ -299,8 +310,8 @@ We will generate the following files for exercises:
 
 #### access.log (simulated)
 ```
-192.168.1.100 - - [10/Jan/2025:10:15:32] "GET /index.html HTTP/1.1" 200 1234
-192.168.1.101 - - [10/Jan/2025:10:15:33] "POST /api/login HTTP/1.1" 401 89
+192.168.1.100 - - [10/Jan/2025:10:15:32 +0200] "GET /index.html HTTP/1.1" 200 1234
+192.168.1.101 - - [10/Jan/2025:10:15:33 +0200] "POST /api/login HTTP/1.1" 401 89
 ...
 ```
 
@@ -370,18 +381,18 @@ Invalid: not-an-email
 #### Critical Criteria
 - [ ] All examples tested on Ubuntu 24.04 LTS
 - [ ] BRE/ERE difference explained and demonstrated consistently — and related to this, [ ] Sample data provided and correctly referenced
-- [ ] NANO used instead of vim everywhere
+- [ ] Nano used on the main route; optional archived Vim material linked and clearly labelled
 - [ ] Complete cheat sheet for the material density
 
 #### Quality Criteria
 - [ ] All .md files have consistent header
-- [ ] ASCII diagrams for complex concepts and also [ ] Examples based on real data (logs, CSVs)
+- [ ] ASCII diagrams for complex concepts and also [ ] Synthetic fixtures explicitly labelled; no invented real-world provenance
 - [ ] Deliberate errors documented in live coding
 - [ ] Solutions available for all exercises
 
 #### Consistency Criteria
 - [ ] S04_ prefix on all new files
-- [ ] Romanian language with technical terminology in English
+- [ ] English instructional text for the English-language programme; preserve proper names and provenance
 - [ ] Consistent formatting (emoji, tables, code)
 - [ ] Correct cross-references between documents
 

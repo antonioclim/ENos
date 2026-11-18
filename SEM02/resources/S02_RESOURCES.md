@@ -1,23 +1,25 @@
-# Resources and References - Seminar 3-4
+# Resources and References — Seminar 02
 ## Operating Systems | ASE Bucharest - CSIE
 
-> Version: 1.0 | Updated: January 2025  
+> Historical version: 1.0 (January 2025); corrected candidate: 17 November 2026  
 > Purpose: Curated collection of resources for deepening concepts from Seminar 2
 
 ---
 
+External resources retain their original educational purpose. Access, paid plans and current platform catalogues were not comprehensively revalidated. The POSIX links identify the existing Issue 7 edition; use the installed utility documentation for implementation-specific behaviour.
+
 ## Table of Contents
 
-1. [Official Documentation](#-official-documentation)
-2. [Interactive Tutorials](#-interactive-tutorials)
-3. [Books and Manuals](#-books-and-manuals)
-4. [Cheat Sheets and Quick References](#-cheat-sheets-and-quick-references)
-5. [Videos and Online Courses](#-videos-and-online-courses)
-6. [Practice and Exercises](#-practice-and-exercises)
-7. [Tools and Utilities](#-tools-and-utilities)
-8. [Communities and Forums](#-communities-and-forums)
-9. [Articles and Blog Posts](#-articles-and-blog-posts)
-10. [Resources in Romanian](#-resources-in-romanian)
+1. [Official Documentation](#official-documentation)
+2. [Interactive Tutorials](#interactive-tutorials)
+3. [Books and Manuals](#books-and-manuals)
+4. [Cheat Sheets and Quick References](#cheat-sheets-and-quick-references)
+5. [Videos and Online Courses](#videos-and-online-courses)
+6. [Practice and Exercises](#practice-and-exercises)
+7. [Tools and Utilities](#tools-and-utilities)
+8. [Communities and Forums](#communities-and-forums)
+9. [Articles and Blog Posts](#articles-and-blog-posts)
+10. [Resources in Romanian](#resources-in-romanian)
 
 ---
 
@@ -29,7 +31,7 @@
 - Sections relevant to seminar:
   - 3.2.4 Lists of Commands (operators `;`, `&&`, `||`)
   - 3.6 Redirections (all redirection forms)
-  - 3.2.6 GNU Parallel
+  - GNU Parallel (a separate command discussed by the Bash manual; section numbering depends on the manual edition)
   - 3.5.1 Brace Expansion
   - 4.1 Bourne Shell Builtins (`break`, `continue`)
 - Use `man` or `--help` when in doubt
@@ -95,7 +97,7 @@
 
 #### The Linux Command Line (William Shotts)
 - Link: https://linuxcommand.org/tlcl.php
-- Format: Free PDF, 500+ pages
+- Edition note: the Fifth Internet Edition (2019) is an existing edition and differs from the print edition. Use the edition-specific chapter names when following an archived course reference; the author page may now offer a newer edition.
 - Relevant chapters:
   - Part 1: Learning the Shell
   - Chapter 6: Redirection
@@ -107,12 +109,12 @@
 - Link: https://tldp.org/LDP/abs/html/
 - Description: Complete guide for advanced Bash
 - Relevant chapters:
-  - Chapter 16: I/O Redirection
+  - [Chapter 20: I/O Redirection](https://tldp.org/LDP/abs/html/io-redirection.html)
   - Chapter 11: Loops and Branches
   - Chapter 7: Tests
 
 #### Bash Guide for Beginners
-- Link: https://tldp.org/ldp/bash-beginners-guide/html/
+- Link: https://tldp.org/LDP/Bash-Beginners-Guide/html/
 - Level: Beginner
 - Style: Accessible, with many examples
 
@@ -139,7 +141,7 @@
 
 ## Cheat Sheets and Quick References
 
-### Official Cheat Sheets
+### Community Cheat Sheets
 
 #### Devhints - Bash Cheat Sheet
 - Link: https://devhints.io/bash
@@ -206,7 +208,7 @@
 
 #### Udemy - "Bash Shell Scripting"
 - Instructor: Jason Cannon
-- Notes: Wait for sales (frequently at $10-15)
+- Historical suggestion: wait for a sale. Current price, access terms and syllabus have not been verified.
 
 ---
 
@@ -267,7 +269,7 @@
 #### bat (cat with syntax highlighting)
 - Link: https://github.com/sharkdp/bat
 - Installation: `sudo apt install bat`
-- Recommended alias: `alias cat='batcat'` (on Ubuntu)
+- Ubuntu package executable: `batcat`. Invoke it explicitly for interactive viewing; retain ordinary `cat` semantics in scripts.
 
 ### For Debugging
 
@@ -334,9 +336,10 @@ set +x  # Disable
 
 ### Foundational Articles
 
-#### "Pipes: A Brief Introduction" - Linus Torvalds
-- Context: The Unix philosophy of pipes
-- Link: Various online archives
+#### "Pipes: A Brief Introduction" — The Linux Information Project (LINFO)
+- Context: A historical introduction to Unix pipes (updated 23 August 2006). The source does not substantiate the former attribution to Linus Torvalds.
+- Link: https://www.linfo.org/pipes.html
+- Read critically: the page contains an erroneous `tempfile1 > less` example; use `less < tempfile1` or `less tempfile1`. Identifying the source is not an endorsement of every command on it.
 
 #### "The Art of Command Line" ⭐ must-read!
 - Link: https://github.com/jlevy/the-art-of-command-line
@@ -439,8 +442,8 @@ set +x  # Disable
 ## Contact and Support
 
 ### For Technical Questions
-- Laboratory: WSL Ubuntu (user: stud, password: stud)
-- Portainer: localhost:9000 (user: stud, password: studstudstud)
+- Current setup and account instructions: use [01_INIT_SETUP](../../01_INIT_SETUP/README.md).
+- Historical lab examples used shared `stud` credentials and a Portainer instance on port 9000. They do not establish current account policy, installed service availability or a credential to reuse.
 
 ### Additional Course Resources
 - Check the eLearning platform for updated materials
@@ -453,6 +456,7 @@ set +x  # Disable
 | Date | Change |
 |------|--------|
 | Jan 2025 | Initial version |
+| 17 Nov 2026 | SEM02 identity, canonical resources, attribution and bounded access/prerequisite claims |
 
 ---
 
@@ -461,4 +465,4 @@ set +x  # Disable
 
 ---
 
-*Document generated for Seminar 3-4 SO | ASE Bucharest - CSIE | 2025*
+*Resources for Seminar 02 OS | ASE Bucharest - CSIE. Original 2025 collection retained with the corrections recorded above.*

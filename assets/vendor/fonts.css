@@ -1,0 +1,1297 @@
+/* ENos local font aggregation. Original package CSS and licence files are retained. */
+/* jetbrains-mono-latin-300-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-300-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-300-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-300-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-300-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-400-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-400-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-400-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-400-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-400-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-500-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-500-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-500-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-500-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-500-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-600-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-600-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-600-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-600-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-600-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-700-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-700-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-700-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-700-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-700-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-800-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-800-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-800-normal.woff) format('woff');
+}
+/* jetbrains-mono-latin-ext-800-normal */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/jetbrains-mono/5.3.0/files/jetbrains-mono-latin-ext-800-normal.woff) format('woff');
+}
+/* inter-latin-300-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-300-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-300-normal.woff) format('woff');
+}
+/* inter-latin-ext-300-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-300-normal.woff) format('woff');
+}
+/* inter-latin-400-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-400-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-400-normal.woff) format('woff');
+}
+/* inter-latin-ext-400-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-400-normal.woff) format('woff');
+}
+/* inter-latin-500-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-500-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-500-normal.woff) format('woff');
+}
+/* inter-latin-ext-500-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-500-normal.woff) format('woff');
+}
+/* inter-latin-600-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-600-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-600-normal.woff) format('woff');
+}
+/* inter-latin-ext-600-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-600-normal.woff) format('woff');
+}
+/* inter-latin-700-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-700-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-700-normal.woff) format('woff');
+}
+/* inter-latin-ext-700-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-700-normal.woff) format('woff');
+}
+/* inter-latin-800-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-800-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-800-normal.woff) format('woff');
+}
+/* inter-latin-ext-800-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/inter/5.3.0/files/inter-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/inter/5.3.0/files/inter-latin-ext-800-normal.woff) format('woff');
+}
+/* exo-2-latin-300-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-300-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-300-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-300-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-300-normal.woff) format('woff');
+}
+/* exo-2-latin-400-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-400-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-400-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-400-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-400-normal.woff) format('woff');
+}
+/* exo-2-latin-500-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-500-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-500-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-500-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-500-normal.woff) format('woff');
+}
+/* exo-2-latin-600-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-600-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-600-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-600-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-600-normal.woff) format('woff');
+}
+/* exo-2-latin-700-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-700-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-700-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-700-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-700-normal.woff) format('woff');
+}
+/* exo-2-latin-800-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-800-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-800-normal.woff) format('woff');
+}
+/* exo-2-latin-ext-800-normal */
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/exo-2/5.3.0/files/exo-2-latin-ext-800-normal.woff) format('woff');
+}
+/* nunito-latin-300-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-300-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-300-normal.woff) format('woff');
+}
+/* nunito-latin-ext-300-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-300-normal.woff) format('woff');
+}
+/* nunito-latin-400-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-400-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-400-normal.woff) format('woff');
+}
+/* nunito-latin-ext-400-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-400-normal.woff) format('woff');
+}
+/* nunito-latin-500-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-500-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-500-normal.woff) format('woff');
+}
+/* nunito-latin-ext-500-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-500-normal.woff) format('woff');
+}
+/* nunito-latin-600-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-600-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-600-normal.woff) format('woff');
+}
+/* nunito-latin-ext-600-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-600-normal.woff) format('woff');
+}
+/* nunito-latin-700-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-700-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-700-normal.woff) format('woff');
+}
+/* nunito-latin-ext-700-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-700-normal.woff) format('woff');
+}
+/* nunito-latin-800-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-800-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-800-normal.woff) format('woff');
+}
+/* nunito-latin-ext-800-normal */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/nunito/5.3.0/files/nunito-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/nunito/5.3.0/files/nunito-latin-ext-800-normal.woff) format('woff');
+}
+/* outfit-latin-300-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-300-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-300-normal.woff) format('woff');
+}
+/* outfit-latin-ext-300-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-300-normal.woff) format('woff');
+}
+/* outfit-latin-400-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-400-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-400-normal.woff) format('woff');
+}
+/* outfit-latin-ext-400-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-400-normal.woff) format('woff');
+}
+/* outfit-latin-500-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-500-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-500-normal.woff) format('woff');
+}
+/* outfit-latin-ext-500-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-500-normal.woff) format('woff');
+}
+/* outfit-latin-600-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-600-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-600-normal.woff) format('woff');
+}
+/* outfit-latin-ext-600-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-600-normal.woff) format('woff');
+}
+/* outfit-latin-700-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-700-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-700-normal.woff) format('woff');
+}
+/* outfit-latin-ext-700-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-700-normal.woff) format('woff');
+}
+/* outfit-latin-800-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-800-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-800-normal.woff) format('woff');
+}
+/* outfit-latin-ext-800-normal */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/outfit/5.3.0/files/outfit-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/outfit/5.3.0/files/outfit-latin-ext-800-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-300-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-300-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-300-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-300-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-300-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-400-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-400-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-400-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-400-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-400-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-500-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-500-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-500-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-500-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-500-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-600-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-600-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-600-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-600-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-600-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-700-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-700-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-700-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-700-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-700-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-800-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-800-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-800-normal.woff) format('woff');
+}
+/* plus-jakarta-sans-latin-ext-800-normal */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/plus-jakarta-sans/5.3.0/files/plus-jakarta-sans-latin-ext-800-normal.woff) format('woff');
+}
+/* rajdhani-latin-300-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-300-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-300-normal.woff) format('woff');
+}
+/* rajdhani-latin-ext-300-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-300-normal.woff) format('woff');
+}
+/* rajdhani-latin-400-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-400-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-400-normal.woff) format('woff');
+}
+/* rajdhani-latin-ext-400-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-400-normal.woff) format('woff');
+}
+/* rajdhani-latin-500-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-500-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-500-normal.woff) format('woff');
+}
+/* rajdhani-latin-ext-500-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-500-normal.woff) format('woff');
+}
+/* rajdhani-latin-600-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-600-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-600-normal.woff) format('woff');
+}
+/* rajdhani-latin-ext-600-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-600-normal.woff) format('woff');
+}
+/* rajdhani-latin-700-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-700-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-700-normal.woff) format('woff');
+}
+/* rajdhani-latin-ext-700-normal */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/rajdhani/5.3.0/files/rajdhani-latin-ext-700-normal.woff) format('woff');
+}
+/* sora-latin-300-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-300-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-300-normal.woff) format('woff');
+}
+/* sora-latin-ext-300-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-300-normal.woff) format('woff');
+}
+/* sora-latin-400-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-400-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-400-normal.woff) format('woff');
+}
+/* sora-latin-ext-400-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-400-normal.woff) format('woff');
+}
+/* sora-latin-500-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-500-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-500-normal.woff) format('woff');
+}
+/* sora-latin-ext-500-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-500-normal.woff) format('woff');
+}
+/* sora-latin-600-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-600-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-600-normal.woff) format('woff');
+}
+/* sora-latin-ext-600-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-600-normal.woff) format('woff');
+}
+/* sora-latin-700-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-700-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-700-normal.woff) format('woff');
+}
+/* sora-latin-ext-700-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-700-normal.woff) format('woff');
+}
+/* sora-latin-800-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-800-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-800-normal.woff) format('woff');
+}
+/* sora-latin-ext-800-normal */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/sora/5.3.0/files/sora-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/sora/5.3.0/files/sora-latin-ext-800-normal.woff) format('woff');
+}
+/* space-grotesk-latin-300-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-300-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-300-normal.woff) format('woff');
+}
+/* space-grotesk-latin-ext-300-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-300-normal.woff) format('woff');
+}
+/* space-grotesk-latin-400-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-400-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-400-normal.woff) format('woff');
+}
+/* space-grotesk-latin-ext-400-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-400-normal.woff) format('woff');
+}
+/* space-grotesk-latin-500-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-500-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-500-normal.woff) format('woff');
+}
+/* space-grotesk-latin-ext-500-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-500-normal.woff) format('woff');
+}
+/* space-grotesk-latin-600-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-600-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-600-normal.woff) format('woff');
+}
+/* space-grotesk-latin-ext-600-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-600-normal.woff) format('woff');
+}
+/* space-grotesk-latin-700-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-700-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-700-normal.woff) format('woff');
+}
+/* space-grotesk-latin-ext-700-normal */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/space-grotesk/5.3.0/files/space-grotesk-latin-ext-700-normal.woff) format('woff');
+}
+/* dm-sans-latin-300-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-300-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-300-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-300-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-300-normal.woff) format('woff');
+}
+/* dm-sans-latin-400-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-400-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-400-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-400-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-400-normal.woff) format('woff');
+}
+/* dm-sans-latin-500-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-500-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-500-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-500-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-500-normal.woff) format('woff');
+}
+/* dm-sans-latin-600-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-600-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-600-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-600-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-600-normal.woff) format('woff');
+}
+/* dm-sans-latin-700-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-700-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-700-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-700-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-700-normal.woff) format('woff');
+}
+/* dm-sans-latin-800-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-800-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-800-normal.woff) format('woff');
+}
+/* dm-sans-latin-ext-800-normal */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/dm-sans/5.3.0/files/dm-sans-latin-ext-800-normal.woff) format('woff');
+}
+/* lexend-latin-300-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-300-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-300-normal.woff) format('woff');
+}
+/* lexend-latin-ext-300-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-300-normal.woff) format('woff');
+}
+/* lexend-latin-400-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-400-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-400-normal.woff) format('woff');
+}
+/* lexend-latin-ext-400-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-400-normal.woff) format('woff');
+}
+/* lexend-latin-500-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-500-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-500-normal.woff) format('woff');
+}
+/* lexend-latin-ext-500-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-500-normal.woff) format('woff');
+}
+/* lexend-latin-600-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-600-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-600-normal.woff) format('woff');
+}
+/* lexend-latin-ext-600-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-600-normal.woff) format('woff');
+}
+/* lexend-latin-700-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-700-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-700-normal.woff) format('woff');
+}
+/* lexend-latin-ext-700-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-700-normal.woff) format('woff');
+}
+/* lexend-latin-800-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-800-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-800-normal.woff) format('woff');
+}
+/* lexend-latin-ext-800-normal */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/lexend/5.3.0/files/lexend-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/lexend/5.3.0/files/lexend-latin-ext-800-normal.woff) format('woff');
+}
+/* poppins-latin-300-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-300-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-300-normal.woff) format('woff');
+}
+/* poppins-latin-ext-300-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-300-normal.woff) format('woff');
+}
+/* poppins-latin-400-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-400-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-400-normal.woff) format('woff');
+}
+/* poppins-latin-ext-400-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-400-normal.woff) format('woff');
+}
+/* poppins-latin-500-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-500-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-500-normal.woff) format('woff');
+}
+/* poppins-latin-ext-500-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-500-normal.woff) format('woff');
+}
+/* poppins-latin-600-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-600-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-600-normal.woff) format('woff');
+}
+/* poppins-latin-ext-600-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-600-normal.woff) format('woff');
+}
+/* poppins-latin-700-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-700-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-700-normal.woff) format('woff');
+}
+/* poppins-latin-ext-700-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-700-normal.woff) format('woff');
+}
+/* poppins-latin-800-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-800-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-800-normal.woff) format('woff');
+}
+/* poppins-latin-ext-800-normal */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/poppins/5.3.0/files/poppins-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/poppins/5.3.0/files/poppins-latin-ext-800-normal.woff) format('woff');
+}
+/* rubik-latin-300-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-300-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-300-normal.woff) format('woff');
+}
+/* rubik-latin-ext-300-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-300-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-300-normal.woff) format('woff');
+}
+/* rubik-latin-400-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-400-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-400-normal.woff) format('woff');
+}
+/* rubik-latin-ext-400-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-400-normal.woff) format('woff');
+}
+/* rubik-latin-500-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-500-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-500-normal.woff) format('woff');
+}
+/* rubik-latin-ext-500-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-500-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-500-normal.woff) format('woff');
+}
+/* rubik-latin-600-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-600-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-600-normal.woff) format('woff');
+}
+/* rubik-latin-ext-600-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-600-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-600-normal.woff) format('woff');
+}
+/* rubik-latin-700-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-700-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-700-normal.woff) format('woff');
+}
+/* rubik-latin-ext-700-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-700-normal.woff) format('woff');
+}
+/* rubik-latin-800-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-800-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-800-normal.woff) format('woff');
+}
+/* rubik-latin-ext-800-normal */
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fontsource/rubik/5.3.0/files/rubik-latin-ext-800-normal.woff2) format('woff2'), url(fontsource/rubik/5.3.0/files/rubik-latin-ext-800-normal.woff) format('woff');
+}
+/* montserrat-latin-700-normal */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/montserrat/5.3.0/files/montserrat-latin-700-normal.woff2) format('woff2'), url(fontsource/montserrat/5.3.0/files/montserrat-latin-700-normal.woff) format('woff');
+}
+/* montserrat-latin-ext-700-normal */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/montserrat/5.3.0/files/montserrat-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/montserrat/5.3.0/files/montserrat-latin-ext-700-normal.woff) format('woff');
+}
+/* open-sans-latin-400-normal */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-400-normal.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-400-normal.woff) format('woff');
+}
+/* open-sans-latin-ext-400-normal */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-normal.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-normal.woff) format('woff');
+}
+/* open-sans-latin-700-normal */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-700-normal.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-700-normal.woff) format('woff');
+}
+/* open-sans-latin-ext-700-normal */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-normal.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-normal.woff) format('woff');
+}
+/* open-sans-latin-400-italic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-400-italic.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-400-italic.woff) format('woff');
+}
+/* open-sans-latin-ext-400-italic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-italic.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-400-italic.woff) format('woff');
+}
+/* open-sans-latin-700-italic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-700-italic.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-700-italic.woff) format('woff');
+}
+/* open-sans-latin-ext-700-italic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-italic.woff2) format('woff2'), url(fontsource/open-sans/5.3.0/files/open-sans-latin-ext-700-italic.woff) format('woff');
+}

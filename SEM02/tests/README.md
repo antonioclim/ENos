@@ -19,14 +19,10 @@
 ## Usage
 
 ```bash
-# Run all tests
-./run_all_tests.sh
+# Run the shipped Python unit suite from SEM02/.
+python3 -m pytest tests/test_autograder.py
 
-# Run individual test
-./test_01_operators.sh
-
-# Syntax check
-bash -n test_*.sh
+# The shell tests listed above are TODO examples, not distributed executables.
 ```
 
 ---
@@ -51,9 +47,11 @@ test_or_operator() {
 ### Redirection
 ```bash
 test_stdout_redirect() {
-    echo "test" > /tmp/test_out.txt
-    [[ "$(cat /tmp/test_out.txt)" == "test" ]] && pass "stdout >" || fail "stdout >"
-    rm -f /tmp/test_out.txt
+    local output
+    output=$(mktemp "${TMPDIR:-/tmp}/enos-redirection.XXXXXX") || return 1
+    printf 'test\n' > "$output"
+    [[ "$(cat "$output")" == "test" ]] && pass "stdout >" || fail "stdout >"
+    rm -f -- "$output"
 }
 
 test_stderr_redirect() {

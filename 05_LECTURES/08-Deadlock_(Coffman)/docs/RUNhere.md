@@ -49,18 +49,17 @@ xdg-open 08ex1_-_RAG_Visualizer_EN.html
 ```
 
 **Features:**
-- Self-contained (no server required)
+- No server required; optional web fonts/chart assets may need internet, with a textual chart fallback offline
 - Interactive controls and visualizations  
 - Step-by-step execution modes
 - Reset buttons to restart simulations
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the lecture self-assessment from this `docs/` directory (Python with PyYAML):
 
 ```bash
-cd ../../SEM01/formative/
-python3 quiz_runner.py --file ../../05_LECTURES/08-Deadlock_(Coffman)/docs/C08_05_EVALUARE_FORMATIVA.yaml
+python3 ../../quiz_runner.py "C08_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42
 ```
 
 **Or manually review:**
@@ -89,7 +88,7 @@ python3 quiz_runner.py --file ../../05_LECTURES/08-Deadlock_(Coffman)/docs/C08_0
 
 - **Parent:** [`../README.md`](../README.md) — Lecture unit overview
 - **Scripts:** [`../scripts/`](../scripts/) — Demo scripts (if available)
-- **Diagrams:** [`../../00_SUPPLEMENTARY/diagrams_png/`](../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
+- **Diagrams:** [`../../../00_SUPPLEMENTARY/diagrams_png/`](../../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
 
 ---
 

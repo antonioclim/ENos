@@ -1,10 +1,10 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use ENos, cite this software and identify the exact version or commit used."
 authors:
   - family-names: "Clim"
     given-names: "Antonio"
     affiliation: "Bucharest University of Economic Studies"
 title: "ENos — OPERATING SYSTEMS: Educational Kit"
 type: software
-version: "5.4.0"
+version: "6.0.0"
 url: "https://github.com/antonioclim/ENos"

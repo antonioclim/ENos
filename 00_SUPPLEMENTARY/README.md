@@ -1,69 +1,61 @@
 # Supplementary Materials — Exam Preparation
 
 > Operating Systems | ASE Bucharest — CSIE  
-> Version: 1.0 | January 2026
+> ENos 6.0.0 | 18 November 2026\
+> Author: ing. dr. Antonio Clim
 
 ## Purpose
 
-This folder contains comprehensive revision materials for the Operating Systems final examination, covering all 14 course weeks with exercises, diagrams and model answers.
+These revision materials cover the fourteen core course weeks, with exercises, diagrams and model answers. Supplementary lecture diagrams also cover topics beyond the core weeks. Public availability makes the included questions suitable for practice; their role in an assessed examination remains subject to the author's [assessment and bank decisions](../AUTHOR_DECISIONS.md).
 
 ## Contents
 
 | Resource | Description | Coverage |
-|----------|-------------|----------|
-| `Exam_Exercises_Part1.md` | Exercises and diagrams | Weeks 1–4: OS Intro, Syscalls, Processes, Scheduling |
-| `Exam_Exercises_Part2.md` | Exercises and diagrams | Weeks 5–8: Threads, Synchronisation, Deadlock |
-| `Exam_Exercises_Part3.md` | Exercises and diagrams | Weeks 9–14: Memory, File Systems, Security, Virtualisation |
-| `REFERENCES.md` | Scholarly bibliography | 12 seminal papers with DOI links |
-| `diagrams_png/` | Pre-rendered concept diagrams | 26 high-resolution PNG files |
+|---|---|---|
+| [Exam_Exercises_Part1.md](Exam_Exercises_Part1.md) | Exercises, model assumptions and worked answers | Weeks 1–4: introduction, system calls, processes, scheduling |
+| [Exam_Exercises_Part2.md](Exam_Exercises_Part2.md) | Exercises and worked answers | Weeks 5–8: threads, synchronisation, deadlock |
+| [Exam_Exercises_Part3.md](Exam_Exercises_Part3.md) | Exercises and worked answers | Weeks 9–14: memory, file systems, security, virtualisation |
+| [REFERENCES.md](REFERENCES.md) | Scholarly bibliography | Source-specific DOI links |
+| [QUICK_REFERENCE_CARD.md](QUICK_REFERENCE_CARD.md) | Compact revision reference | Explicit models and units |
+| [diagrams_png/manifest.json](diagrams_png/manifest.json) | Source/include/output hashes and dimensions | 39 native PlantUML PNG outputs |
 
-## How to Use
+## How to use
 
-1. **Before lectures:** Skim the relevant week's diagrams to preview concepts
-2. **After lectures:** Work through exercises without looking at solutions
-3. **Before exam:** Time yourself on exam-style questions (target: 5 min per question)
+Preview the relevant diagrams before lectures, solve exercises before reading the answers and then compare each step under the stated assumptions. Suggested times and difficulty markers are planning aids, not measured completion-time distributions or assessment rules.
 
-## Diagram Regeneration
+## Diagram regeneration
 
-If you modify PlantUML sources in `diagrams_common/`, regenerate PNGs:
+The canonical diagrams are in `../05_LECTURES/**/diagrams/*.puml`. Their shared style is `diagrams_common/skin.puml`. To list all current source/output mappings without a compiler, network access or writes, run `python3 00_SUPPLEMENTARY/generate_diagrams.py --dry-run` from the repository root. This checks discovery only. For rendering, use Java and Graphviz, and supply the exact PlantUML compiler recorded in `generate_diagrams.py`:
 
 ```bash
-# Requires Java and internet connection (auto-downloads PlantUML JAR)
-python3 generate_diagrams.py --output diagrams_png/ --dpi 200
+# From the repository root; no network access in this invocation.
+python3 00_SUPPLEMENTARY/generate_diagrams.py \
+  --jar /path/to/plantuml-1.2026.10.jar \
+  --output 00_SUPPLEMENTARY/diagrams_png --dpi 140 --clean
+python3 00_SUPPLEMENTARY/validate.py
 ```
 
-## Bloom's Taxonomy Distribution
+The compiler SHA-256 is `e9bc9e6b2eb715e8c0c929f3dcb5fc1923be13f37599b09c293c66d354e88686`. The generator checks it before execution. `--download` is an explicit alternative that downloads the pinned release when missing; ordinary runs do not download a compiler. Compilation is staged so that an unsuccessful source cannot be reported as a successful stale PNG. `--clean` removes only obsolete outputs named by the previous manifest, after successful generation.
 
-These materials deliberately progress through cognitive levels:
+`validate.py` checks current source/dependency/output hashes, PNG dimensions and manifest coverage. It does not run teaching examples, contact a service, grade material quality or certify every viewer.
 
-| Level | Proportion | Example Exercise Types |
-|-------|------------|------------------------|
-| Remember | ~15% | Definitions, terminology matching |
-| Understand | ~25% | Concept explanations, comparisons |
-| Apply | ~40% | Calculations, algorithm traces |
-| Analyse | ~20% | Diagram interpretation, trade-off analysis |
+## Learning levels and difficulty
 
-## Exercise Difficulty Legend
+The historical design allocation was approximately 15% remembering, 25% understanding, 40% applying and 20% analysing. These figures are an intended design distribution, not a newly measured coding of all questions. A reproducible classification would be required to report actual proportions.
 
-| Symbol | Level | Typical Time |
-|--------|-------|--------------|
-| ⭐ | Easy | 3–5 min |
-| ⭐⭐ | Medium | 5–10 min |
-| ⭐⭐⭐ | Hard | 10–15 min |
-| ⭐⭐⭐⭐ | Expert | 15–20 min |
+| Marker | Intended level | Suggested planning time |
+|---|---|---|
+| ⭐ | Easy | 3–5 minutes |
+| ⭐⭐ | Medium | 5–10 minutes |
+| ⭐⭐⭐ | Hard | 10–15 minutes |
+| ⭐⭐⭐⭐ | Expert | 15–20 minutes |
 
-## Common Exam Pitfalls
+## Common conceptual distinctions
 
-> 💡 **Tip:** Students often confuse "page fault" with "segmentation fault". The first is a normal demand paging mechanism; the second is a fatal error!
+A page fault is a processor exception which may be handled successfully, for example by demand paging; it can also reflect an invalid or prohibited access. A user-space segmentation fault signal commonly reports an access that the operating system cannot satisfy. They are not interchangeable names for a universally benign or fatal event.
 
-> ⚠️ **Warning:** The Coffman conditions question appears in nearly every exam session. Memorise them in order: **M**utual exclusion, **H**old & wait, **N**o preemption, **C**ircular wait.
+The Coffman conditions are mutual exclusion, hold and wait, no pre-emption and circular wait. Their significance follows from the resource/deadlock model. The historical assertion that they appear in nearly every exam session is not supported here by an examination-frequency dataset and is not an exam prediction.
 
 ## Support
 
-- **Course forum:** Check Moodle for announcements
-- **Office hours:** See course schedule
-- **Instructor:** ing. dr. Antonio Clim
-
----
-
-*Materials developed for ASE Bucharest — CSIE*
+Use the current course Moodle announcements and published office hours. No new schedule, eligibility condition or institutional policy is established by this release.

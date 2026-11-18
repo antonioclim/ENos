@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algorithm Comparator Planificare | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Scheduling Algorithm Comparator | Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -69,7 +69,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -80,28 +157,28 @@
                     <i class="fas fa-balance-scale text-white text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-stone-800">Algorithm Comparator Planificare</h1>
-                    <p class="text-xs text-stone-500">Toate algoritmele simultan</p>
+                    <h1 class="text-xl font-bold text-stone-800">Scheduling Algorithm Comparator</h1>
+                    <p class="text-xs text-stone-500">Compare All Algorithms</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
                 <i class="fas fa-graduation-cap mr-1"></i> Operating Systems
             </span>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Scheduling assumptions</h2><p>One CPU, known service times and no context-switch cost are assumed. Non-preemptive SJF minimises average waiting for a known simultaneous batch under those assumptions; it is not universally optimal with arbitrary arrivals. Example: P1 arrives at 0 with burst 10 and P2 at 1 with burst 1; work-conserving SJF starts P1 and P2 waits 9 units, whereas permitted idling until 1 changes the optimum. SRTF is preemptive and relies on known remaining service.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Controls Row -->
         <div class="mb-6 bg-white rounded-xl shadow-sm border border-stone-200 p-4">
             <div class="flex flex-wrap items-center gap-4">
                 <div class="flex-1 min-w-[200px]">
-                    <label class="text-xs text-stone-500 block mb-1">Set de Procese</label>
+                    <label class="text-xs text-stone-500 block mb-1">Process Set</label>
                     <select id="presetSelect" class="w-full p-2 border border-stone-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-teal-500">
-                        <option value="simple">Set Simplu (4 procese)</option>
-                        <option value="complex">Set Complex (5 procese)</option>
-                        <option value="belady">Set Bélády Anomaly</option>
-                        <option value="starvation">Set Demonstrare Starvation</option>
-                        <option value="custom">Personalizat...</option>
+                        <option value="simple">Simple Set (4 processes)</option>
+                        <option value="complex">Complex Set (5 processes)</option>
+                        <option value="belady">Long/Short Burst Workload</option>
+                        <option value="starvation">Starvation Demonstration Set</option>
+                        <option value="custom">Custom...</option>
                     </select>
                 </div>
                 <div class="w-32">
@@ -110,7 +187,7 @@
                 </div>
                 <div class="flex gap-2 items-end">
                     <button onclick="runComparison()" class="btn-action px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg text-sm font-medium flex items-center gap-2">
-                        <i class="fas fa-play"></i> Run Comparatia
+                        <i class="fas fa-play"></i> Run Comparison
                     </button>
                     <button onclick="toggleAnimation()" id="btnAnimate" class="btn-action px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                         <i class="fas fa-film"></i> Animatie
@@ -126,7 +203,7 @@
                 <table class="w-full text-xs">
                     <thead>
                         <tr class="bg-stone-50">
-                            <th class="p-2 text-left">Proces</th>
+                            <th class="p-2 text-left">Process</th>
                             <th class="p-2 text-center">Arrival Time</th>
                             <th class="p-2 text-center">Burst Time</th>
                             <th class="p-2 text-center">Priority</th>
@@ -138,14 +215,14 @@
                     </tbody>
                 </table>
                 <button onclick="addProcess()" class="mt-2 text-xs bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded transition-colors">
-                    <i class="fas fa-plus mr-1"></i>Add Process
+                    <i class="fas fa-plus mr-1"></i>Add Processs
                 </button>
             </div>
         </div>
 
         <!-- Current Time Display -->
         <div class="mb-4 flex items-center justify-center gap-4 text-sm">
-            <span class="text-stone-500">Timp curent:</span>
+            <span class="text-stone-500">Current time:</span>
             <span id="currentTime" class="mono font-bold text-2xl text-teal-600">0</span>
             <div class="flex items-center gap-2 ml-4">
                 <label class="text-xs text-stone-500">Speed:</label>
@@ -164,21 +241,21 @@
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <i class="fas fa-trophy text-amber-500"></i>
-                    Clasament Final
+                    Final Ranking
                 </h3>
                 <div id="rankingTable" class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-stone-50">
                                 <th class="p-2 text-left">Rank</th>
-                                <th class="p-2 text-left">Algoritm</th>
+                                <th class="p-2 text-left">Algorithm</th>
                                 <th class="p-2 text-center">Avg Wait</th>
                                 <th class="p-2 text-center">Avg TAT</th>
                                 <th class="p-2 text-center">Avg Response</th>
                             </tr>
                         </thead>
                         <tbody id="rankingBody">
-                            <tr><td colspan="5" class="p-4 text-center text-stone-400">Run comparatia for results</td></tr>
+                            <tr><td colspan="5" class="p-4 text-center text-stone-400">Run the comparison to view results</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -188,7 +265,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <i class="fas fa-chart-bar text-blue-500"></i>
-                    Comparison Vizuala
+                    Visual Comparison
                 </h3>
                 <canvas id="comparisonChart" height="250"></canvas>
             </div>
@@ -198,7 +275,7 @@
         <div id="insights" class="mt-6 bg-gradient-to-br from-teal-50 to-green-50 rounded-xl shadow-sm border border-teal-200 p-6 hidden">
             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-lightbulb text-amber-500"></i>
-                Analiza Automata
+                Automatic Analysis
             </h3>
             <div id="insightsContent" class="space-y-2 text-sm text-stone-700">
                 <!-- Auto-generated insights will appear here -->
@@ -209,28 +286,28 @@
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-stone-200 p-6">
             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-book-open text-purple-500"></i>
-                When to folosesti fiecare algoritm?
+                When should each algorithm be considered?
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                 <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                     <h4 class="font-semibold text-blue-800 mb-2">FCFS</h4>
-                    <p class="text-blue-700">Sisteme batch simple, where ordinea de sosire conteaza. Simplu, dar ineficient for procese interactive.</p>
+                    <p class="text-blue-700">Simple batch systems where arrival order matters. Long bursts ahead can delay interactive requests.</p>
                 </div>
                 <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
                     <h4 class="font-semibold text-green-800 mb-2">SJF / SRTF</h4>
-                    <p class="text-green-700">Minimizeaza timpul de waiting. Ideal when burst time-ul may fi estimat. Atentie la starvation!</p>
+                    <p class="text-green-700">Consider when burst lengths can be known or estimated. The optimum depends on model assumptions; continuing short arrivals can starve long jobs.</p>
                 </div>
                 <div class="p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
                     <h4 class="font-semibold text-amber-800 mb-2">Round Robin</h4>
-                    <p class="text-amber-700">Sisteme interactive and time-sharing. Fair for all utilizatorii. Alegerea quantum-ului e critical.</p>
+                    <p class="text-amber-700">Interactive and time-sharing workloads. RR cycles through the ready queue; quantum choice and queue length determine the response/overhead trade-off.</p>
                 </div>
                 <div class="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
                     <h4 class="font-semibold text-purple-800 mb-2">Priority</h4>
-                    <p class="text-purple-700">When anumite procese sunt mai importante. Foloseste aging for a preveni starvation.</p>
+                    <p class="text-purple-700">When some processes need higher priority. Age waiting tasks to reduce starvation under the stated scheduling assumptions.</p>
                 </div>
                 <div class="p-4 bg-red-50 rounded-lg border-l-4 border-red-500 md:col-span-2">
                     <h4 class="font-semibold text-red-800 mb-2">Trade-offs</h4>
-                    <p class="text-red-700">Nu exists algoritm "cel mai good" universal. Alegerea depinde de: tipul sistemului (batch/interactive), distributia proceselor, obiectivele de performanta (throughput vs. response time vs. fairness).</p>
+                    <p class="text-red-700">There is no universally best algorithm. The choice depends on the system (batch or interactive), workload distribution and objectives such as throughput, response time and fairness.</p>
                 </div>
             </div>
         </div>
@@ -244,6 +321,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== Constants ====================
         const ALGORITHMS = [
             { id: 'FCFS', name: 'FCFS', fullName: 'First Come First Served', color: '#3b82f6' },
@@ -284,11 +406,15 @@
         }
 
         function updateProcess(id, field, value) {
-            const process = processes.find(p => p.id === id);
-            if (process) {
-                process[field] = parseInt(value) || 0;
-            }
-        }
+ const bounds = {arrival:[0,50], burst:[1,20], priority:[1,10]};
+ if (!bounds[field]) return;
+ const valid = enosInteger(value, ...bounds[field], field);
+ if (valid === null) { renderProcessTable(); return; }
+ resetAll();
+ const process = processes.find(p => p.id === id);
+ if (process) { process[field] = valid; process.remaining = process.burst; }
+ resetAll(); renderProcessTable();
+}
 
         function renderProcessTable() {
             const tbody = document.getElementById('processTable');
@@ -375,7 +501,8 @@
             let time = 0;
             let completed = 0;
             let quantumRemaining = quantum;
-            const maxTime = 100;
+            if (!procs.length || !Number.isInteger(quantum) || quantum < 1 || procs.some(p => !Number.isInteger(p.arrival) || p.arrival < 0 || !Number.isInteger(p.burst) || p.burst < 1)) throw new Error('Invalid finite scheduling workload');
+            const maxTime = Math.max(...processes.map(p => p.arrival)) + processes.reduce((sum,p) => sum+p.burst,0) + 1;
             
             while (completed < processes.length && time < maxTime) {
                 // Add arriving processes
@@ -432,6 +559,7 @@
                 time++;
             }
             
+            if (completed !== processes.length) throw new Error('Incomplete schedule: progress invariant failed');
             // Calculate metrics
             let totalWait = 0, totalTAT = 0, totalResponse = 0;
             processes.forEach(p => {
@@ -533,11 +661,13 @@
 
         function runComparison() {
             if (processes.length === 0) {
-                alert('Add cel putin un proces!');
+                alert('Add at least one process.');
                 return;
             }
             
+            if (enosInteger(document.getElementById('quantum').value,1,20,'Quantum') === null) return;
             stopAnimation();
+            currentTime=0;
             const quantum = parseInt(document.getElementById('quantum').value);
             
             // Run all simulations
@@ -678,24 +808,24 @@
             const worstSim = simulations[worst.id];
             
             let html = `
-                <p><strong>🏆 Castigator:</strong> <span class="text-teal-700">${best.fullName}</span> cu cel mai mic timp mediu de waiting (${bestSim.metrics.avgWait} unitati)</p>
+                <p><strong>🏆 Lowest mean waiting time:</strong> <span class="text-teal-700">${best.fullName}</span> with the lowest mean waiting time (${bestSim.metrics.avgWait} units)</p>
             `;
             
             if (parseFloat(worstSim.metrics.avgWait) > parseFloat(bestSim.metrics.avgWait) * 2) {
-                html += `<p><strong>⚠️ Atentie:</strong> ${worst.name} a performat semnificativ mai slab (${worstSim.metrics.avgWait} vs ${bestSim.metrics.avgWait})</p>`;
+                html += `<p><strong>⚠️ Note:</strong> ${worst.name} has a higher mean waiting time in this run (${worstSim.metrics.avgWait} vs ${bestSim.metrics.avgWait})</p>`;
             }
             
             // Check for starvation indicators
             const hasLongProcess = processes.some(p => p.burst > 10);
             if (hasLongProcess && (best.id === 'SJF' || best.id === 'SRTF')) {
-                html += `<p><strong>📊 Observatie:</strong> SJF/SRTF au performat bine, dar pot cauza starvation for procese lungi in scenarii reale.</p>`;
+                html += `<p><strong>📊 Observation:</strong> SJF/SRTF performed well on these inputs; continuing short arrivals can still starve long tasks.</p>`;
             }
             
             // RR quantum advice
             const quantum = parseInt(document.getElementById('quantum').value);
             const avgBurst = processes.reduce((sum, p) => sum + p.burst, 0) / processes.length;
             if (quantum < avgBurst / 2) {
-                html += `<p><strong>💡 Sfat:</strong> Quantum-ul RR (${quantum}) este mic comparativ cu burst-ul mediu (${avgBurst.toFixed(1)}). Aceasta may cauza multe context switch-uri.</p>`;
+                html += `<p><strong>💡 Tip:</strong> The RR quantum (${quantum}) is small relative to the mean burst (${avgBurst.toFixed(1)}). This can cause frequent context switches.</p>`;
             }
             
             content.innerHTML = html;
@@ -715,7 +845,8 @@
                 runComparison();
             }
             
-            currentTime = 0;
+            if (!simulations[ALGORITHMS[0].id]) return;
+            if (currentTime >= simulations[ALGORITHMS[0].id].normalizedMaxTime) currentTime=0;
             const maxTime = simulations[ALGORITHMS[0].id].normalizedMaxTime;
             const speed = parseInt(document.getElementById('speedSlider').value);
             
@@ -733,7 +864,7 @@
                 }
             }, speed);
             
-            document.getElementById('btnAnimate').innerHTML = '<i class="fas fa-pause"></i> Pauza';
+            document.getElementById('btnAnimate').innerHTML = '<i class="fas fa-pause"></i> Pause';
         }
 
         function stopAnimation() {
@@ -745,13 +876,14 @@
         }
 
         function resetAll() {
+            enosTimers.cancel();
             stopAnimation();
             simulations = {};
             currentTime = 0;
             document.getElementById('currentTime').textContent = '0';
             
             ALGORITHMS.forEach(algo => {
-                document.getElementById(`gantt-${algo.id}`).innerHTML = '<div class="now-line hidden"></div>';
+                document.getElementById(`gantt-${algo.id}`).innerHTML = `<div id="now-${algo.id}" class="now-line hidden"></div>`;
                 document.getElementById(`wait-${algo.id}`).textContent = '-';
                 document.getElementById(`tat-${algo.id}`).textContent = '-';
                 document.getElementById(`resp-${algo.id}`).textContent = '-';
@@ -759,7 +891,7 @@
                 document.getElementById(`card-${algo.id}`).classList.remove('winner');
             });
             
-            document.getElementById('rankingBody').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400">Run comparatia for results</td></tr>';
+            document.getElementById('rankingBody').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400">Run the comparison to view results</td></tr>';
             document.getElementById('insights').classList.add('hidden');
             
             if (comparisonChart) {
@@ -778,6 +910,27 @@
         
         renderAlgoCards();
         loadPreset('simple');
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 Demo (Week 7): Producer–Consumer with `queue.Queue` (monitor-like) and semaphores.
 
@@ -42,7 +42,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--consumers", type=int, default=2, help="Number of consumers")
     p.add_argument("--items", type=int, default=20, help="Total number of items")
     p.add_argument("--buf", type=int, default=5, help="Buffer size")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.producers < 1 or args.consumers < 1 or args.buf < 1 or args.items < 0:
+        p.error("producers, consumers and buffer must be positive; items must be nonnegative")
+    return args
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

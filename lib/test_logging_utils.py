@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 # Import the module under test
-from logging_utils import setup_logging, get_logger, ColouredFormatter
+from lib.logging_utils import setup_logging, get_logger, ColouredFormatter
 
 
 # =============================================================================

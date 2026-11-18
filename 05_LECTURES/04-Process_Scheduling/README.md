@@ -1,3 +1,29 @@
+# Lecture 04 — Process Scheduling
+
+## Learning and demonstration materials
+
+- [Lecture Plan](docs/C04_01_LECTURE_PLAN.md)
+- [Concept Map](docs/C04_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C04_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C04_04_STUDY_GUIDE.md)
+- [Lecture Plan](docs/L04_01_LECTURE_PLAN.md)
+- [Concept Map](docs/L04_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/L04_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/L04_04_STUDY_GUIDE.md)
+- [04ex1 - Scheduling Simulator Gantt EN](docs/04ex1_-_Scheduling_Simulator_Gantt_EN.html)
+- [04ex2 - Scheduling Comparator EN](docs/04ex2_-_Scheduling_Comparator_EN.html)
+- [04ex3 - MLFQ Simulator EN](docs/04ex3_-_MLFQ_Simulator_EN.html)
+- [04ex4 - Starvation Demonstrator EN](docs/04ex4_-_Starvation_Demonstrator_EN.html)
+- [Formative question bank](docs/C04_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 04
 

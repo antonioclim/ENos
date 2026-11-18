@@ -1,5 +1,7 @@
 # Seminar 3: Advanced Utilities, Professional Scripts and Automation
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](homework/ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > Operating Systems | Bucharest University of Economic Studies - CSIE  
 > Version: 1.1 | Date: January 2025  
 > Issues: Open an issue in GitHub

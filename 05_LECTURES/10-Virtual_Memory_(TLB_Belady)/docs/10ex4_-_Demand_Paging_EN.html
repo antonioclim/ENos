@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulare Demand Paging | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Demand-Paging Simulation | Operating Systems</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -64,7 +64,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -93,7 +170,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-table text-blue-500"></i>
-                        Page Table (Page Table)
+                        Page Table
                     </h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -104,8 +181,8 @@
                                     <th class="p-2 text-center">Frame #</th>
                                     <th class="p-2 text-center">Dirty</th>
                                     <th class="p-2 text-center">Referenced</th>
-                                    <th class="p-2 text-center">Locatie</th>
-                                    <th class="p-2 text-center">Actiune</th>
+                                    <th class="p-2 text-center">Location</th>
+                                    <th class="p-2 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pageTable">
@@ -127,7 +204,7 @@
                             <!-- Frame cells will be rendered here -->
                         </div>
                         <div class="mt-3 text-xs text-stone-500">
-                            Capacitate: <span id="frameCapacity">8</span> frame-uri
+                            Capacity: <span id="frameCapacity">8</span> frame-uri
                         </div>
                     </div>
                     
@@ -135,7 +212,7 @@
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-hdd text-amber-500"></i>
-                            Spatiu Swap (Disk)
+                            Swap Space (Disc)
                         </h3>
                         <div id="swapSpace" class="grid grid-cols-4 gap-2">
                             <!-- Swap cells will be rendered here -->
@@ -179,7 +256,7 @@
                             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
                                 <i class="fas fa-memory text-green-600"></i>
                             </div>
-                            <div>4. Incarca Frame</div>
+                            <div>4. Load Frame</div>
                         </div>
                         <div class="flex-1 h-0.5 bg-stone-300 mx-2"></div>
                         <div class="text-center p-2">
@@ -190,7 +267,7 @@
                         </div>
                     </div>
                     <div id="currentStep" class="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
-                        Select o pagina for a accesa
+                        Select a page to access
                     </div>
                 </div>
 
@@ -200,7 +277,7 @@
                         <i class="fas fa-terminal"></i> Event Log
                     </h3>
                     <div id="eventLog" class="h-32 overflow-y-auto text-xs mono text-green-300 space-y-1">
-                        <div class="text-stone-500">// Sistem initializat. Toate paginile sunt invalide (demand paging).</div>
+                        <div class="text-stone-500">// System initialised. All model pages are initially non-resident (demand paging).</div>
                     </div>
                 </div>
 
@@ -234,17 +311,17 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Pagini (Virtual)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Pages (Virtual)</label>
                             <input type="number" id="numPages" value="16" min="8" max="32" 
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Frame-uri (Fizic)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Frames (Physical)</label>
                             <input type="number" id="numFrames" value="8" min="4" max="16" 
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <button onclick="initSystem()" class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">
-                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitialise
                         </button>
                     </div>
                 </div>
@@ -252,11 +329,11 @@
                 <!-- Quick Access -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Acces Rapid
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Quick Access
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Page</label>
+                            <label class="text-xs text-stone-500 block mb-1">Page Number</label>
                             <input type="number" id="accessPage" value="0" min="0" 
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
@@ -269,10 +346,10 @@
                             </button>
                         </div>
                         <button onclick="randomAccess()" class="btn-action w-full p-2 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm">
-                            <i class="fas fa-random mr-1"></i> Acces Random
+                            <i class="fas fa-random mr-1"></i> Random Access
                         </button>
                         <button onclick="sequentialAccess()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
-                            <i class="fas fa-arrow-right mr-1"></i> Acces Secvential
+                            <i class="fas fa-arrow-right mr-1"></i> Sequential Access
                         </button>
                     </div>
                 </div>
@@ -280,14 +357,14 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('coldStart')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-snowflake text-blue-500 mr-2"></i>Cold Start (toate invalide)
+                            <i class="fas fa-snowflake text-blue-500 mr-2"></i>Cold Start (all non-resident)
                         </button>
                         <button onclick="loadScenario('warmStart')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-fire text-orange-500 mr-2"></i>Warm Start (unele in RAM)
+                            <i class="fas fa-fire text-orange-500 mr-2"></i>Warm Start (some resident)
                         </button>
                         <button onclick="loadScenario('locality')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Spatial Locality
@@ -301,12 +378,12 @@
                         <i class="fas fa-info-circle text-emerald-500 mr-2"></i>Demand Paging
                     </h3>
                     <div class="space-y-2 text-xs text-emerald-700">
-                        <p>Paginile sunt incarcate in memorie only when sunt accesate for first data.</p>
+                        <p>Pages are brought into memory on demand when accessed and not already resident.</p>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>Avantaje:</strong> Pornire rapida, memorie economisita
+                            <strong>Potential benefits:</strong> Less eager loading and memory use
                         </div>
                         <div class="p-2 bg-white/50 rounded">
-                            <strong>Dezavantaje:</strong> Latenta la first acces
+                            <strong>Trade-off:</strong> A non-resident first access incurs a page fault
                         </div>
                     </div>
                 </div>
@@ -330,7 +407,7 @@
                             <span class="mono">~10 ms</span>
                         </div>
                         <div class="p-2 bg-amber-50 rounded text-center">
-                            <span class="font-bold">Raport: 1 : 1000 : 100000</span>
+                            <span class="font-bold">Ratio of these illustrative inputs: 1 : 1000 : 100000</span>
                         </div>
                     </div>
                 </div>
@@ -345,7 +422,44 @@
         </div>
     </footer>
 
-    <script>
+    <script>let demandBusy=false;
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let numPages = 16;
         let numFrames = 8;
@@ -363,6 +477,7 @@
 
         // ==================== Initialization ====================
         function initSystem() {
+            enosTimers.cancel(); demandBusy=false;
             numPages = parseInt(document.getElementById('numPages').value);
             numFrames = parseInt(document.getElementById('numFrames').value);
             
@@ -390,15 +505,17 @@
             stats = { pageFaults: 0, pageHits: 0, diskReads: 0, diskWrites: 0 };
             
             renderAll();
-            log('Sistem initializat cu demand paging. Toate paginile sunt invalide.');
+            log('Demand-paging model initialised. All pages are initially non-resident.');
         }
 
         // ==================== Page Access ====================
         async function accessPage(mode) {
-            const pageNum = parseInt(document.getElementById('accessPage').value);
+            if(demandBusy){log('A page access is in progress; wait for it to complete.');return;}
+            const pageNum=enosInteger(document.getElementById('accessPage').value,0,numPages-1,'Page');if(pageNum===null)return;
+            demandBusy=true;const owner=enosTimers.generation;try{
             
             if (pageNum < 0 || pageNum >= numPages) {
-                log(`error: Pagina ${pageNum} nu exists!`);
+                log(`Error: page ${pageNum} does not exist.`);
                 return;
             }
             
@@ -414,22 +531,24 @@
                     page.dirty = true;
                 }
                 
-                log(`✓ PAGE HIT! Pagina ${pageNum} este in frame-ul ${page.frameNum}`);
+                log(`✓ PAGE HIT: page ${pageNum} is in frame ${page.frameNum}.`);
                 highlightFrame(page.frameNum, 'hit');
-                updateStep(`Page Hit: Pagina ${pageNum} gasita in frame-ul ${page.frameNum}`);
+                updateStep(`Page Hit: page ${pageNum} gasita in frame-ul ${page.frameNum}`);
             } else {
                 // Page FAULT
                 stats.pageFaults++;
-                log(`✗ PAGE FAULT! Pagina ${pageNum} nu este in memorie.`);
+                log(`✗ PAGE FAULT: page ${pageNum} is not resident.`);
                 
                 await handlePageFault(pageNum, mode);
             }
             
             renderAll();
+        
+            } finally {if(owner===enosTimers.generation)demandBusy=false;}
         }
 
         async function handlePageFault(pageNum, mode) {
-            updateStep('1. Page Fault detectat! search frame liber...');
+            updateStep('1. Page fault detected: search for a free frame...');
             await sleep(300);
             
             // Find a free frame
@@ -437,22 +556,22 @@
             
             if (targetFrame === -1) {
                 // Need to replace a page
-                updateStep('2. Memorie plina! Selectare victima (FIFO)...');
+                updateStep('2. Memory full: select a victim with FIFO...');
                 await sleep(300);
                 
                 targetFrame = fifoQueue.shift();
                 const victimPageNum = physicalMemory[targetFrame];
                 const victimPage = pageTable[victimPageNum];
                 
-                log(`Victima selectata: Pagina ${victimPageNum} in frame-ul ${targetFrame}`);
+                log(`Selected victim: Page ${victimPageNum} in frame-ul ${targetFrame}`);
                 highlightFrame(targetFrame, 'fault');
                 
                 // Write back if dirty
                 if (victimPage.dirty) {
-                    updateStep('3. Pagina victima este dirty - scriere pe disk...');
+                    updateStep('3. The victim is dirty: write it to disc...');
                     stats.diskWrites++;
                     await animateDiskWrite();
-                    log(`Pagina ${victimPageNum} scrisa pe disk (dirty)`);
+                    log(`Page ${victimPageNum} written to disc because it was dirty`);
                     victimPage.dirty = false;
                 }
                 
@@ -461,12 +580,12 @@
                 victimPage.frameNum = null;
                 victimPage.inSwap = true;
             } else {
-                updateStep(`2. Frame liber gasit: ${targetFrame}`);
+                updateStep(`2. Free frame found: ${targetFrame}`);
                 await sleep(300);
             }
             
             // Read page from disk
-            updateStep(`3. Read pagina ${pageNum} de pe disk...`);
+            updateStep(`3. Read page ${pageNum} from disc...`);
             stats.diskReads++;
             await animateDiskRead();
             
@@ -484,9 +603,9 @@
                 page.dirty = true;
             }
             
-            updateStep(`4. Pagina ${pageNum} incarcata in frame-ul ${targetFrame}`);
+            updateStep(`4. Page ${pageNum} incarcata in frame-ul ${targetFrame}`);
             highlightFrame(targetFrame, 'loading');
-            log(`✓ Pagina ${pageNum} incarcata in frame-ul ${targetFrame}`);
+            log(`✓ Page ${pageNum} incarcata in frame-ul ${targetFrame}`);
         }
 
         function randomAccess() {
@@ -632,7 +751,7 @@
             
             switch(type) {
                 case 'coldStart':
-                    log('Scenariu Cold Start: Toate paginile sunt invalide.');
+                    log('Cold-start scenario: all pages are initially non-resident.');
                     break;
                     
                 case 'warmStart':
@@ -646,11 +765,11 @@
                         fifoQueue.push(i);
                     }
                     renderAll();
-                    log('Scenariu Warm Start: Primele pagini pre-incarcate.');
+                    log('Warm-start scenario: the first pages are preloaded.');
                     break;
                     
                 case 'locality':
-                    log('Scenariu Localitate: Access pagini apropiate.');
+                    log('Locality scenario: access nearby pages.');
                     setTimeout(() => {
                         const start = Math.floor(numPages / 4);
                         for (let i = 0; i < 5; i++) {
@@ -679,6 +798,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', initSystem);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

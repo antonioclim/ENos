@@ -228,7 +228,8 @@ class GradeReport:
     warnings: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
     ai_indicators: List[AIIndicatorResult] = field(default_factory=list)
-    ai_penalty_applied: float = 0.0
+    ai_penalty_applied: Optional[float] = None
+    assessment_status: str = 'PENDING_POLICY'
 
 
 # ============================================================================
@@ -291,7 +292,7 @@ def check_ai_indicators(student_dir: Path) -> List[AIIndicatorResult]:
     Check for AI generation indicators.
     
     These are heuristics, not proof. But when multiple indicators fire,
-    it's worth a closer look. Added penalty system in v2.0.
+    it's worth a closer look. No penalty is applied; the assessment policy remains pending.
     """
     results = []
     all_content = ""
@@ -323,7 +324,7 @@ def check_ai_indicators(student_dir: Path) -> List[AIIndicatorResult]:
                 ))
     
     # Comment-to-code ratio check
-    # Real students under-comment; AI over-comments
+    # Count comments as descriptive evidence only; this does not establish authorship.
     lines = all_content.split('\n')
     comment_lines = sum(1 for l in lines if l.strip().startswith('#') 
                        and not l.strip().startswith('#!'))
@@ -340,7 +341,7 @@ def check_ai_indicators(student_dir: Path) -> List[AIIndicatorResult]:
             ))
     
     # Style consistency check
-    # Beginners have inconsistent formatting; AI is suspiciously uniform
+    # Formatting consistency is an observation, not evidence of misconduct.
     indent_styles = set()
     for filename in EXPECTED_FILES.keys():
         filepath = student_dir / filename
@@ -369,48 +370,23 @@ def check_ai_indicators(student_dir: Path) -> List[AIIndicatorResult]:
 
 
 def apply_ai_penalty(report: GradeReport) -> None:
-    """
-    Apply graduated penalty based on AI indicator count.
-    
-    New in v2.0. The philosophy: we don't ban AI, but we penalise
-    obvious copy-paste without understanding. Light touch for minor
-    signals, heavier for obvious AI dumps.
-    """
-    count = len(report.ai_indicators)
-    
-    if count == 0:
-        return
-    elif count <= 2:
-        # Minor signals - just warn, no penalty
+    """Retain observations for manual review; no sanction policy is adopted."""
+    report.ai_penalty_applied = None
+    if report.ai_indicators:
         report.warnings.append(
-            "Minor AI patterns detected. Ensure you understand the code."
-        )
-    elif count <= 4:
-        # Moderate signals - 5% penalty
-        penalty = report.max_score * 0.05
-        report.total_score = max(0, report.total_score - penalty)
-        report.ai_penalty_applied = penalty
-        report.warnings.append(
-            f"AI patterns detected: -{penalty:.1f} points. Review recommended."
-        )
-    else:
-        # Strong signals - 10% penalty + mandatory review
-        penalty = report.max_score * 0.10
-        report.total_score = max(0, report.total_score - penalty)
-        report.ai_penalty_applied = penalty
-        report.warnings.append(
-            f"Significant AI patterns: -{penalty:.1f} points. Manual review scheduled."
+            "MANUAL_REVIEW_REQUIRED: style observations do not establish authorship. "
+            "No penalty applied; the assessment policy and evidence require author review."
         )
 
 
 def print_ai_indicators(indicators: List[AIIndicatorResult], penalty: float) -> None:
     """Display AI detection results."""
     if not indicators:
-        print(f"  {Colours.GREEN}✓{Colours.RESET} No significant AI indicators detected")
+        print(f"  {Colours.GREEN}✓{Colours.RESET} No listed style patterns found; this does not establish authorship")
         return
     
-    print(f"  {Colours.YELLOW}⚠ AI PATTERNS DETECTED{Colours.RESET}")
-    if penalty > 0:
+    print(f"  {Colours.YELLOW}LEXICAL STYLE OBSERVATIONS — MANUAL REVIEW REQUIRED{Colours.RESET}")
+    if penalty is not None and penalty > 0:
         print(f"  {Colours.RED}Penalty applied: -{penalty:.1f} points{Colours.RESET}")
     print()
     
@@ -423,7 +399,7 @@ def print_ai_indicators(indicators: List[AIIndicatorResult], penalty: float) -> 
                 print(f"      {Colours.DIM}Example: {sample_short}{Colours.RESET}")
         print()
     
-    print(f"  {Colours.DIM}These are heuristic signals. Verify via Part 6 oral check.{Colours.RESET}")
+    print(f"  {Colours.DIM}These lexical observations do not establish authorship. Any review and assessment policy remain pending.{Colours.RESET}")
 
 
 # ============================================================================
@@ -832,6 +808,10 @@ def grade_submission(student_dir: str) -> GradeReport:
         report.errors.append(f"Directory {student_path} does not exist!")
         return report
     
+    # Accept the generated package root and the legacy exercise-only directory.
+    if (student_path / 'exercises').is_dir():
+        student_path = student_path / 'exercises'
+    report.warnings.append('Diagnostic score only; final assessment policy remains pending.')
     all_checks: List[CheckResult] = []
     
     # 1. Structure
@@ -840,6 +820,14 @@ def grade_submission(student_dir: str) -> GradeReport:
         print_check(check)
         all_checks.append(check)
     
+    # The declared syntax category is 20 points across the five required files.
+    for filename in EXPECTED_FILES:
+        path = student_path / filename
+        ok, message = check_syntax(str(path)) if path.is_file() else (False, 'Missing required file')
+        check = CheckResult(f'Syntax: {filename}', ok, 4.0 if ok else 0.0, 4.0, message)
+        all_checks.append(check)
+        print_check(check)
+
     # 2. Exercise 1
     print_subheader("⚡ EXERCISE 1: OPERATORS")
     for check in check_ex1_operators(student_path / 'ex1_operators.sh'):
@@ -889,19 +877,8 @@ def grade_submission(student_dir: str) -> GradeReport:
     # Final percentage and grade
     report.percentage = (report.total_score / report.max_score * 100) if report.max_score > 0 else 0
     
-    if report.percentage >= 90:
-        report.grade = "A"
-    elif report.percentage >= 80:
-        report.grade = "B"
-    elif report.percentage >= 70:
-        report.grade = "C"
-    elif report.percentage >= 60:
-        report.grade = "D"
-    elif report.percentage >= 50:
-        report.grade = "E"
-    else:
-        report.grade = "F"
-    
+    report.grade = 'PENDING_POLICY'
+
     return report
 
 
@@ -922,12 +899,12 @@ def print_final_report(report: GradeReport) -> None:
         Colours.YELLOW if report.percentage >= 50 else Colours.RED)
     
     print(f"  {Colours.WHITE}Score:{Colours.RESET}     {report.total_score:.1f} / {report.max_score:.1f}")
-    if report.ai_penalty_applied > 0:
+    if report.ai_penalty_applied is not None and report.ai_penalty_applied > 0:
         print(f"  {Colours.RED}AI Penalty:{Colours.RESET} -{report.ai_penalty_applied:.1f}")
     print(f"  {Colours.WHITE}Percentage:{Colours.RESET} {colour}{report.percentage:.1f}%{Colours.RESET}")
     print(f"  {Colours.WHITE}Progress:{Colours.RESET}  [{colour}{bar}{Colours.RESET}]")
     print()
-    print(f"  {Colours.WHITE}FINAL GRADE:{Colours.RESET}  {colour}{Colours.WHITE}{report.grade}{Colours.RESET}")
+    print(f"  {Colours.WHITE}ASSESSMENT STATUS:{Colours.RESET}  {colour}{Colours.WHITE}{report.grade}{Colours.RESET}")
     
     if report.warnings:
         print(f"\n  {Colours.YELLOW}⚠ WARNINGS:{Colours.RESET}")
@@ -951,6 +928,7 @@ def save_report(report: GradeReport, output_path: str) -> None:
         'max_score': report.max_score,
         'percentage': report.percentage,
         'grade': report.grade,
+        'assessment_status': report.assessment_status,
         'ai_penalty_applied': report.ai_penalty_applied,
         'warnings': report.warnings,
         'errors': report.errors,
@@ -1005,7 +983,7 @@ Examples:
         save_report(report, args.output)
         logger.info(f"Report saved: {args.output}")
     
-    logger.info(f"Final grade: {report.grade} ({report.final_score:.1f}/100)")
+    logger.info(f"Final grade: {report.grade} ({report.total_score:.1f}/100)")
     
     # Exit code based on grade
     if report.grade in ['A', 'B', 'C']:

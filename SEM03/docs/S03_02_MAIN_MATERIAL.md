@@ -27,7 +27,7 @@ At the end of this material, you will be able to:
 2. [Module 2: Parameters and Options in Scripts](#module-2-parameters-and-options-in-scripts)
 3. [Module 3: The Unix Permissions System](#module-3-the-unix-permissions-system)
 4. [Module 4: Automation with Cron](#module-4-automation-with-cron)
-5. [Summary and Extended Cheat Sheet](#-summary-and-extended-cheat-sheet)
+5. [Summary and Extended Cheat Sheet](#summary-and-extended-cheat-sheet)
 
 ---
 
@@ -144,7 +144,7 @@ Syntax: `-size [+-]N[cwbkMG]`
 
 | Prefix | Meaning |
 |--------|---------|
-| (none) | Exactly that size |
+| (none) | Exactly N units after rounding the byte size up |
 | `+` | Greater than |
 | `-` | Less than |
 
@@ -152,20 +152,23 @@ Syntax: `-size [+-]N[cwbkMG]`
 # Examples
 find . -size 100c        # Exactly 100 bytes
 find . -size +10M        # Greater than 10 MB
-find . -size -1k         # Less than 1 KB
+find . -size -1024c      # Fewer than 1024 bytes (exact byte threshold)
 find . -size +1G         # Greater than 1 GB
 
 # Size range
-find . -size +10M -size -100M   # Between 10 and 100 MB
+find . -size +10M -size -100M   # Rounded MiB count >10 and <100 (bytes >10 MiB and <=99 MiB)
 
 # Empty files
 find . -empty                    # Empty files or directories
 
-*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*
 
 find . -type f -empty            # Only empty files
 find . -type d -empty            # Only empty directories
 ```
+
+*(`find` combined with `-exec` is extremely useful. Once you master it, you can't do without it.)*
+
+GNU `find` rounds size **up** to the selected unit. Thus `-size -1k` matches only empty files; use `-size -1024c` for byte lengths 0–1023. `M` and `G` are binary MiB/GiB, not decimal MB/GB.
 
 ### SUBGOAL 1.3.2: Search by time
 
@@ -174,8 +177,8 @@ Timestamp types in Unix:
 | Timestamp | Description | Updated when |
 |-----------|-------------|--------------|
 | `mtime` | Modification time | Content changes |
-| `atime` | Access time | File is read |
-| `ctime` | Change time | Metadata changes (permissions, owner) |
+| `atime` | Access time | Reads, subject to mount options such as relatime/noatime |
+| `ctime` | Inode change time | Metadata changes and writes to file content; not creation time |
 
 Time options:
 
@@ -183,16 +186,16 @@ Time options:
 |--------|------|---------|
 | `-mtime N` | Days | `-mtime -7` (last 7 days) |
 | `-mmin N` | Minutes | `-mmin -60` (last hour) |
-| `-atime N` | Days (access) | `-atime +30` (not accessed > 30 days) |
+| `-atime N` | Days (access) | `-atime +30` (age at least 31 complete days) |
 | `-amin N` | Minutes (access) | `-amin -10` |
-| `-ctime N` | Days (change) | `-ctime 0` (today) |
+| `-ctime N` | Days (change) | `-ctime 0` (last 24 hours) |
 | `-newer FILE` | Comparison | Newer than FILE |
 
 ```bash
 # Examples
 find . -mtime 0          # Modified in last 24h
 find . -mtime -7         # Modified in last 7 days
-find . -mtime +30        # Modified more than 30 days ago
+find . -mtime +30        # Modification age at least 31 complete days
 find . -mmin -60         # Modified in last hour
 find . -newer reference.txt  # Newer than reference.txt
 
@@ -200,6 +203,8 @@ find . -newer reference.txt  # Newer than reference.txt
 find /var/log -name "*.log" -mtime +30  # Old logs
 find . -type f -mmin -5                  # Recent modifications
 ```
+
+GNU `find` rounds nonnegative ages **down** to whole units. For days, `-mtime N` selects `[N,N+1)` days, `+N` selects at least `N+1` complete days and `-N` selects less than N days. Calendar-day examples need an explicit boundary (for example GNU `-daystart` before the predicate); the default is relative to the invocation time.
 
 ### SUBGOAL 1.3.3: Search by permissions and owner
 
@@ -302,7 +307,7 @@ find . -type f -printf "%m %u %p\n"              # Permissions, owner, path
 Syntax:
 ```
 -exec command {} \;    # Execute for EACH file (one process per file)
--exec command {} +     # Execute ONCE with all files as arguments
+-exec command {} +     # One or more size-bounded argument batches
 ```
 
 ```bash
@@ -324,7 +329,7 @@ Performance comparison:
 # Slow (100 files = 100 cat processes)
 find . -name "*.txt" -exec cat {} \;
 
-# Fast (100 files = 1 cat process with 100 arguments)
+# Batched (often 1 process for 100 short names, but more if limits require)
 find . -name "*.txt" -exec cat {} +
 ```
 
@@ -350,11 +355,11 @@ find . -name "*.bak" -ok rm -v {} \;
 
 ### SUBGOAL 1.6.1: Why xargs?
 
-Problem: The shell has limits for command line length. With very many files, `find -exec` with `+` can fail.
+Both `find -exec ... {} +` and `xargs` build size-bounded batches within command-line limits. They do not promise a single invocation; an individually overlong argument or an execution error can still fail.
 
 Solution: `xargs` reads from stdin and builds commands efficiently.
 
-> 💡 *Personal note: The choice between `find -exec {} \;` and `find | xargs` confuses students every semester. My rule of thumb: use `-exec {} +` for simplicity, switch to `xargs -0` with `-print0` only when dealing with filenames containing spaces or special characters. The performance difference is negligible for most practical cases.*
+> 💡 *Personal note: The choice between `find -exec {} \;` and `find | xargs` confuses students every semester. My rule of thumb: use `-exec {} +` for simplicity, use `xargs -0` with `-print0` when its separate batching or parallelism controls are needed. Both this pair and `-exec ... {} +` preserve filename boundaries. Performance depends on the workload; no benchmark is supplied here.*
 
 ```bash
 # Conceptual difference
@@ -369,7 +374,7 @@ echo "file1 file2 file3" | xargs cat # cat file1 file2 file3
 | `-n N` | Maximum N arguments per execution | `xargs -n 2` |
 | `-I{}` | Custom placeholder | `xargs -I{} cp {} backup/` |
 | `-0` | NULL delimiter (for -print0) | `xargs -0` |
-| `-P N` | Parallel execution (N processes) | `xargs -P 4` |
+| `-P N` | At most N concurrent child processes | `xargs -P 4` |
 | `-t` | Display command before execution | `xargs -t` |
 | `-p` | Request confirmation | `xargs -p` |
 
@@ -382,17 +387,17 @@ echo "1 2 3 4 5 6" | xargs -n 2 echo
 # 5 6
 
 # Placeholder
-find . -name "*.txt" | xargs -I{} cp {} backup/
-find . -name "*.jpg" | xargs -I FILE convert FILE FILE.png
+find . -type f -name "*.txt" -print0 | xargs -0 -r -I{} cp -- {} backup/
+find . -type f -name "*.jpg" -print0 | xargs -0 -r -I FILE convert FILE FILE.png
 
-# Parallel execution (4 simultaneous processes)
-find . -name "*.jpg" | xargs -P 4 -I{} convert {} {}.png
+# Parallel execution (at most 4 concurrent child processes)
+find . -type f -name "*.jpg" -print0 | xargs -0 -r -P 4 -I{} convert {} {}.png
 
 # Verbose (displays command)
-find . -name "*.tmp" | xargs -t rm
+find . -type f -name "*.tmp" -print0 | xargs -0 -r -t printf '%s\n'
 
 # With confirmation
-find . -name "*.bak" | xargs -p rm
+find . -type f -name "*.bak" -print0 | xargs -0 -r -p rm --
 ```
 
 ### SUBGOAL 1.6.3: find | xargs combinations
@@ -407,7 +412,7 @@ find . -name "*.txt" | xargs rm
 # Error: files don't exist!
 
 # CORRECT - use -print0 and -0
-find . -name "*.txt" -print0 | xargs -0 rm
+find . -type f -name "*.txt" -print0 | xargs -0 -r rm --
 # -print0: separates with NULL instead of newline
 # -0: xargs reads with NULL delimiter
 ```
@@ -415,13 +420,14 @@ find . -name "*.txt" -print0 | xargs -0 rm
 Common patterns:
 ```bash
 # Count lines in files
-find . -name "*.py" | xargs wc -l
+find . -type f -name "*.py" -print0 | xargs -0 -r wc -l
 
 # Search pattern in code
 find . -name "*.c" -print0 | xargs -0 grep "main"
 
 # Archive files
-find . -name "*.log" -mtime +30 | xargs tar -cvf old_logs.tar
+find . -type f -name "*.log" -mtime +30 -print0 |
+    tar --null -T - -cvf old_logs.tar
 
 # Parallel processing
 find . -name "*.mp4" -print0 | xargs -0 -P 4 -I{} ffmpeg -i {} {}.mp3
@@ -474,7 +480,7 @@ Special variables for arguments:
 | `$@` | All arguments (as list) | Iteration in for |
 | `$*` | All arguments (as string) | Single string |
 | `$?` | Exit code of last command | 0 = success |
-| `$$` | PID of current process | For temporary files |
+| `$$` | PID of the invoking Bash shell (unchanged in a subshell) | Use mktemp for unique temporary files |
 
 ```bash
 #!/bin/bash
@@ -592,7 +598,7 @@ shift 3    # Remove first 3
 |--------|-------------|--------|
 | `${VAR:-default}` | Use default if VAR is empty/unset | Does not modify VAR |
 | `${VAR:=default}` | Set VAR to default if empty/unset | Modifies VAR |
-| `${VAR:+alt}` | Use alt if VAR is set | - |
+| `${VAR:+alt}` | Use alt if VAR is set and nonempty | - |
 | `${VAR:?message}` | Error if VAR is empty/unset | Exit with message |
 
 ```bash
@@ -617,7 +623,7 @@ echo "Count: $COUNT"
 
 ### SUBGOAL 2.4.1: getopts syntax
 
-```bash
+```text
 while getopts "optstring" variable; do
     case $variable in
         ...
@@ -698,11 +704,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -o|--output)
+            [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty output value" >&2; exit 1; }
             OUTPUT="$2"
             shift 2
             ;;
         --output=*)
             OUTPUT="${1#*=}"    # Extract value after =
+            [[ -n $OUTPUT ]] || { echo "Empty output value" >&2; exit 1; }
             shift
             ;;
         --)
@@ -726,78 +734,60 @@ done
 
 ## 2.6 Best Practices for CLI
 
-### SUBGOAL 2.6.1: Professional script template
+### SUBGOAL 2.6.1: Checked script template
+
+`set -e` has conditional exceptions (including commands tested by `if`, `&&` and `||`). It does not replace explicit status checks. Optional log functions return success when quiet; counters use assignments when zero is a valid value.
 
 ```bash
 #!/bin/bash
 set -euo pipefail
-
-readonly VERSION="1.0"
-readonly SCRIPT_NAME=$(basename "$0")
-
-# Default values
+VERSION=1.0
+SCRIPT_NAME=${0##*/}
 VERBOSE=false
 DRY_RUN=false
 OUTPUT=""
-
 usage() {
-    cat << EOF
-$SCRIPT_NAME v$VERSION - Short description
-
-Usage: $SCRIPT_NAME [options] <input>
-
-Options:
-    -h, --help      Display this help
-    -V, --version   Display version
-    -v, --verbose   Verbose mode
-    -n, --dry-run   Simulation (does not execute actions)
-    -o, --output    Output file
-
-Examples:
-    $SCRIPT_NAME -v input.txt
-    $SCRIPT_NAME --output=result.txt data.csv
-EOF
-    exit 1
+    printf 'Usage: %s [-h|--help] [-V|--version] [-v|--verbose] [-n|--dry-run] [-o|--output FILE] INPUT\n' "$SCRIPT_NAME"
 }
-
-log() { $VERBOSE && echo "[INFO] $*" >&2; }
-error() { echo "[ERROR] $*" >&2; exit 1; }
-warn() { echo "[WARN] $*" >&2; }
-
+log() { if "$VERBOSE"; then printf '[INFO] %s\n' "$*" >&2; fi; return 0; }
+error() { printf '[ERROR] %s\n' "$*" >&2; exit 1; }
 parse_args() {
-    while [[ $# -gt 0 ]]; do
+    while (($#)); do
         case $1 in
-            -h|--help) usage ;;
-            -V|--version) echo "$VERSION"; exit 0 ;;
+            -h|--help) usage; exit 0 ;;
+            -V|--version) printf '%s\n' "$VERSION"; exit 0 ;;
             -v|--verbose) VERBOSE=true; shift ;;
             -n|--dry-run) DRY_RUN=true; shift ;;
-            -o|--output) OUTPUT="$2"; shift 2 ;;
-            --output=*) OUTPUT="${1#*=}"; shift ;;
+            -o|--output)
+                [[ $# -ge 2 && -n $2 ]] || error "Missing nonempty output value"
+                OUTPUT=$2; shift 2 ;;
+            --output=*) OUTPUT=${1#*=}; [[ -n $OUTPUT ]] || error "Empty output value"; shift ;;
             --) shift; break ;;
             -*) error "Unknown option: $1" ;;
             *) break ;;
         esac
     done
-    
-    [[ $# -ge 1 ]] || error "Missing input argument"
-    INPUT="$1"
+    [[ $# == 1 ]] || error "Exactly one input file is required"
+    INPUT=$1
+    [[ -f $INPUT && -r $INPUT ]] || error "Unreadable regular input: $INPUT"
+    if [[ -n $OUTPUT && -e $OUTPUT && $INPUT -ef $OUTPUT ]]; then
+        error "Input and output must differ"
+    fi
+    return 0
 }
-
 main() {
     parse_args "$@"
-    
     log "Processing: $INPUT"
     log "Output: ${OUTPUT:-stdout}"
-    
-    # Main logic here
-    if $DRY_RUN; then
-        echo "[DRY-RUN] Would process $INPUT"
+    if "$DRY_RUN"; then
+        printf '[DRY-RUN] Would copy %q to %q\n' "$INPUT" "${OUTPUT:-stdout}"
+    elif [[ -n $OUTPUT ]]; then
+        # noclobber prevents replacing an existing result in this teaching template.
+        (set -C; cat -- "$INPUT" > "$OUTPUT") || error "Copy failed (existing output is not replaced)"
     else
-        # Real processing
-        cat "$INPUT"
+        cat -- "$INPUT" || error "Read failed"
     fi
 }
-
 main "$@"
 ```
 
@@ -833,12 +823,15 @@ Meaning on files:
 | Permission | On FILE | On DIRECTORY |
 |------------|---------|--------------|
 | r (read) | Read content | Can list with `ls` |
-| w (write) | Modify content | Can create/delete files |
-| x (execute) | Run as programme | Can access with `cd` |
+| w (write) | Modify content | Create/remove directory entries when search is also allowed |
+| x (execute) | Run as programme | Search/traverse known names, including `cd` |
+
+Search permission is needed on **every parent directory**. Directory mode does not determine whether an already accessible regular file can be edited; that depends on the file mode/ACL. The following owned example assumes an ordinary unprivileged user.
 
 ```bash
-# Practical example
+# Practical example, from a fresh owned workspace
 mkdir test_dir
+printf 'example\n' > test_dir/file.txt
 chmod 700 test_dir      # rwx------
 
 chmod 600 test_dir      # rw------- (without x)
@@ -848,7 +841,9 @@ ls test_dir             # Works (has r)
 chmod 100 test_dir      # --x------
 cd test_dir             # Works (has x)
 ls                      # ERROR: doesn't have r
-cat test_dir/file.txt   # Works if you know the exact name!
+cat file.txt            # Now inside test_dir; also requires read permission on file.txt
+cd ..
+chmod 700 test_dir       # Restore access in this owned example
 ```
 
 ---
@@ -922,10 +917,10 @@ chmod -R 755 directory/      # Recursive
 
 # PROBLEM: 755 on files makes them executable!
 
-# SOLUTION: X (capital) = execute only for directories
+# X grants execute/search to directories OR regular files already executable by anyone
 chmod -R u=rwX,g=rX,o=rX directory/
 
-# Or more explicitly:
+# To require 755 directories and 644 files regardless of previous execute bits:
 find directory/ -type d -exec chmod 755 {} \;
 find directory/ -type f -exec chmod 644 {} \;
 ```
@@ -961,20 +956,20 @@ sudo chown --reference=model.txt target.txt
 
 ⚠️ umask REMOVES bits, does not set!
 
+```text
+Ordinary requested modes: 0666 for new files, 0777 for new directories.
+Without a default ACL: final mode = requested_mode & ~umask (bitwise removal).
+Mask    File mode             Directory mode
+0022    0666 & ~0022 = 0644    0777 & ~0022 = 0755
+0027    0666 & ~0027 = 0640    0777 & ~0027 = 0750
+0077    0666 & ~0077 = 0600    0777 & ~0077 = 0700
+0177    0666 & ~0177 = 0600    0777 & ~0177 = 0600
+0001    0666 & ~0001 = 0666    0777 & ~0001 = 0776
 ```
-Default for new files: 666 (rw-rw-rw-)
-Default for new directories: 777 (rwxrwxrwx)
 
-Final permissions = Default - umask
-
-Examples with umask 022:
-  Files: 666 - 022 = 644 (rw-r--r--)
-  Directories: 777 - 022 = 755 (rwxr-xr-x)
-
-Examples with umask 077:
-  Files: 666 - 077 = 600 (rw-------)
-  Directories: 777 - 077 = 700 (rwx------)
-```
+Arithmetic subtraction fails for masks containing bits absent from the requested mode.
+A programme can request a more restrictive mode. A directory default ACL changes
+creation rules; these examples assume no inherited default ACL.
 
 ```bash
 umask              # Display current value
@@ -991,7 +986,7 @@ echo "umask 022" >> ~/.bashrc
 
 ### SUBGOAL 3.6.1: SUID (4xxx)
 
-The file executes with owner's permissions, not the person running it.
+For a supported executable binary, SUID changes the effective user ID to the file owner, subject to platform and mount restrictions. Linux ignores SUID on interpreter scripts; it is not a way to make a Bash script run as root.
 
 ```bash
 ls -l /usr/bin/passwd
@@ -1023,7 +1018,7 @@ sudo chmod 2775 /projects/team1
 
 ### SUBGOAL 3.6.3: Sticky Bit (1xxx)
 
-On directories: Only the file owner can delete it, even if the directory is writable by all.
+On directories: removing or renaming an entry additionally requires ownership of the file or directory, or appropriate privilege. Ordinary directory write and search permissions still apply.
 
 ```bash
 ls -ld /tmp
@@ -1031,7 +1026,7 @@ ls -ld /tmp
 # ^-- 't' instead of 'x'
 
 # Everyone can create files in /tmp
-# But each can only delete their OWN files
+# File owner, directory owner or a suitably privileged process can remove entries
 
 chmod +t directory    # Set sticky
 chmod 1777 directory  # Octal
@@ -1044,7 +1039,7 @@ chmod 1777 directory  # Octal
 ```
 ⚠️ GOLDEN RULES:
 
-1. NEVER chmod 777 - there's always a better solution
+1. Avoid granting world write without a specific need; shared sticky directories are a distinct case
 2. Principle of "least privilege" - give minimum necessary permissions
 3. Test in sandbox before recursive chmod
 4. Check with ls -la before modifying
@@ -1118,20 +1113,21 @@ sudo crontab -u user -e  # Edit for another user
 
 ### SUBGOAL 4.4.1: Execution environment
 
-Cron does NOT have your environment variables!
+Target: the Debian/Ubuntu cron family used by this course. Jobs do not inherit an interactive shell session. Cron normally sets HOME from the account and executes commands with /bin/sh unless SHELL is configured. Set required variables explicitly. Unredirected output is normally mailed when a mail transport is configured; it is not automatically /dev/null.
 
-```bash
+```cron
 # In crontab, set PATH explicitly
 PATH=/usr/local/bin:/usr/bin:/bin
 SHELL=/bin/bash
-MAILTO=Issues: Open an issue in GitHub
+MAILTO=""
+# No automatic mail in this example; a real recipient needs an explicitly configured policy.
 
 0 3 * * * /full/path/to/script.sh
 ```
 
 ### SUBGOAL 4.4.2: Logging and debugging
 
-```bash
+```cron
 # Redirect output
 0 3 * * * /path/script.sh >> /var/log/myscript.log 2>&1
 
@@ -1142,21 +1138,19 @@ MAILTO=Issues: Open an issue in GitHub
 0 3 * * * /path/script.sh > /dev/null 2>&1
 ```
 
+Redirecting both streams to a file leaves no output for cron's automatic mail. `%` is special in crontab command text and must be escaped there (for example `date +\%F`); inside an ordinary script use `date +%F` with no cron escape. POSIX `/bin/sh` supports `$(...)`.
+
 ### SUBGOAL 4.4.3: Prevent multiple executions
 
 ```bash
 #!/bin/bash
-LOCKFILE="/tmp/myscript.lock"
-
-if [ -f "$LOCKFILE" ]; then
-    echo "Script already running"
-    exit 1
-fi
-
-echo $$ > "$LOCKFILE"
-trap "rm -f $LOCKFILE" EXIT
-
-# Your logic here
+# Precondition: WORK_DIR is an existing private directory owned by this user.
+: "${WORK_DIR:?Set an owned workspace}"
+[[ -d $WORK_DIR && -O $WORK_DIR && ! -L $WORK_DIR ]] || exit 1
+exec 9>"$WORK_DIR/job.lock" || exit 1
+flock -n 9 || { echo "Another invocation holds the lock" >&2; exit 2; }
+# Your logic here. The descriptor lock is released when this process exits.
+# Do not unlink the lock file: its existence alone does not mean it is locked.
 ```
 
 ---
@@ -1192,12 +1186,12 @@ find . -print0 | xargs -0 cmd           # Safe for spaces
 cmd | xargs                             # Build arguments
 cmd | xargs -n 1                        # One argument at a time
 cmd | xargs -I{} action {}              # Placeholder
-cmd | xargs -P 4                        # 4 parallel processes
+cmd | xargs -P 4                        # At most 4 concurrent children
 find . -print0 | xargs -0               # For spaces
 ```
 
 ## Script Parameters
-```bash
+```text
 $0                    # Script name
 $1-$9                 # Arguments 1-9
 ${10}                 # Argument 10+
@@ -1219,7 +1213,7 @@ chmod 1777 dir        # Sticky
 ```
 
 ## cron
-```bash
+```cron
 * * * * *             # Every minute
 */5 * * * *           # Every 5 minutes
 0 3 * * *             # Daily 3 AM

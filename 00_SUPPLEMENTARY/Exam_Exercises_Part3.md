@@ -2,6 +2,12 @@
 
 ## Part 3: Weeks 9–14 (Memory, File Systems, Security, Virtualisation)
 
+**Units and model scope:** memory/page/block calculations use binary units:
+1 KiB = 1024 bytes, 1 MiB = 1024 KiB, 1 GiB = 1024 MiB and 1 TiB = 1024 GiB.
+Legacy labels KB/MB/GB/TB within the drawn arithmetic mean those binary units;
+decimal device-capacity specifications must be converted separately. Timing
+figures are exercise inputs unless a measured configuration is explicitly cited.
+
 > by Revolvix | ASE Bucharest — CSIE
 
 ### Difficulty Legend
@@ -22,6 +28,16 @@
 ## Detailed ASCII Diagrams
 
 ### Diagram 9.1: Complete Virtual Address Space
+
+This is an illustrative x86-64 **four-level, 48-bit canonical-address** layout
+with a non-PIE executable. ASLR changes placement; five-level paging uses a
+different address map. Kernel mappings depend on configuration, including KPTI.
+The low 4 MiB shown unmapped here are not a universal reservation. Stack limits
+are configured, not universally 8 MiB. The `brk` boundary is the **upper** end
+of the brk-managed heap; `malloc` can also obtain separate `mmap` regions.
+String literals/read-only constants normally belong in read-only sections, not
+writable DATA. The `/proc` sample is illustrative, not newly captured output.
+Reference: [Linux x86-64 memory maps](https://docs.kernel.org/arch/x86/x86_64/mm.html).
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -75,12 +91,11 @@ Address                                                              Size
                    │              │                                  │
                    │              ▲                                  │
                    │ ┌───────────────────────────────────────────┐  │
-                   │ │              HEAP                          │  │
+                   │ │  brk → upper end of brk-managed HEAP       │  │
                    │ │  • malloc(), new                          │  │  Variable
                    │ │  • Dynamic allocation                     │  │
                    │ │                    ↑ grows upward          │  │
                    │ └───────────────────────────────────────────┘  │
-                   │ ─ ─ ─ ─ ─ ─ program break (brk) ─ ─ ─ ─ ─ ─ ─ │
                    │ ┌───────────────────────────────────────────┐  │
                    │ │              BSS                           │  │
                    │ │  • Uninitialised global variables         │  │  Fixed
@@ -89,7 +104,7 @@ Address                                                              Size
                    │ ┌───────────────────────────────────────────┐  │
                    │ │              DATA                          │  │
                    │ │  • Initialised global variables           │  │  Fixed
-                   │ │  • String constants                       │  │
+                   │ │  • Writable initialised objects           │  │
                    │ └───────────────────────────────────────────┘  │
                    │ ┌───────────────────────────────────────────┐  │
                    │ │              TEXT (CODE)                   │  │
@@ -206,11 +221,11 @@ PHYSICAL MEMORY VISUALISATION:
 
 Physical Memory (Frames):
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  Frame 0   │  Frame 1   │  ...  │ Frame 247  │  ...  │  Frame N   │     │
+│ Frame 165  │ Frame 291  │  ...  │ Frame 247  │  ...  │  Frame N   │     │
 │  (0x0A5)   │  (0x123)   │       │  (0x0F7)   │       │            │     │
 │            │            │       │            │       │            │     │
 │ ┌────────┐ │ ┌────────┐ │       │ ┌────────┐ │       │            │     │
-│ │  P0    │ │ │  P1    │ │       │ │  P0    │ │       │            │     │
+│ │  P0    │ │ │  P0    │ │       │ │  P0    │ │       │            │     │
 │ │  pg 0  │ │ │  pg 1  │ │       │ │  pg 3  │ │       │            │     │
 │ └────────┘ │ └────────┘ │       │ └────────┘ │       │            │     │
 │            │            │       │     ↑      │       │            │     │
@@ -220,6 +235,11 @@ Physical Memory (Frames):
 ```
 
 ### Diagram 9.3: Multi-Level Page Table
+
+The 12 KiB example below assumes a 4 KiB directory and exactly two allocated
+4 KiB lower-level tables: an aligned contiguous 8 MiB mapping spanning two
+4 MiB directory regions. An arbitrary or unaligned 8 MiB allocation can touch
+more regions and require more tables. Unmapped regions need no lower table.
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -313,11 +333,11 @@ VIRTUAL ADDRESS (32 bits):
 ADVANTAGE: MEMORY SAVINGS
 ═══════════════════════════════════════════════════════════════════════════
 
-Process using only 8MB of memory:
+Process mapping an aligned contiguous 8 MiB within two 4 MiB regions:
 - With one level: 4MB page table (1M entries) — and related to this, with two levels:
   - 1 Page Directory: 4KB
-  - ~2 Page Tables for 8MB: 2 × 4KB = 8KB
-  - Total: ~12KB instead of 4MB!
+  - Exactly 2 lower tables here: 2 × 4 KiB = 8 KiB
+  - Total: 12 KiB instead of 4 MiB, under the alignment assumption.
 
 Page Tables for unused regions: NOT ALLOCATED!
 ```
@@ -395,7 +415,13 @@ Solution:
    = 4,194,304 bytes
    = 4 MB
 
-ANSWER: 4 MB per process (just for page table!)
+3. Backup copy requested in the problem:
+   Primary table + one full backup = 2 × 4 MiB = 8 MiB
+   = 8,388,608 bytes per process in this flat-table model.
+
+ANSWER: 4 MiB for the active table; 8 MiB including the requested backup.
+The backup is an exercise assumption, not an assertion that Linux maintains
+one complete duplicate page table for each process.
 
 Note: This is the main problem that motivates:
 - Multi-level page tables
@@ -434,7 +460,7 @@ Model answer:
 | Cause | Allocation in fixed blocks | Allocation/deallocation in varying size blocks |
 | Example | Process requests 3.5KB, gets 4KB page → 0.5KB lost | 10MB free but in 1MB pieces; can't allocate 5MB contiguously |
 | Solution | Variable sizes (but increases complexity) | Compaction (costly) or Paging |
-| With paging | Exists (last page partially used) | Completely eliminated! |
+| With paging | Exists (last page partially used) | Base-page allocation need not be contiguous; huge pages and contiguous physical allocations can still suffer external fragmentation |
 
 ---
 
@@ -443,6 +469,10 @@ Model answer:
 ## Detailed ASCII Diagrams
 
 ### Diagram 10.1: TLB and Memory Access
+
+EAT calculations here use serial TLB lookup and memory accesses, no page-walk
+cache, no overlapping work and no page faults. A TLB miss is a translation-cache
+miss, not necessarily a page fault. Real systems require additional modelling.
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
@@ -544,81 +574,107 @@ Without TLB: 200 ns (2 memory accesses)
 With TLB: 103 ns → ~49% reduction!
 ```
 
-### Diagram 10.2: Page Replacement Algorithms - Comparison
+### Diagram 10.2: Page Replacement Algorithms — Comparison
 
-```
-═══════════════════════════════════════════════════════════════════════════
-            PAGE REPLACEMENT ALGORITHMS - COMPARATIVE EXAMPLE
-═══════════════════════════════════════════════════════════════════════════
+Reference string: `7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`.
+Number of frames: 3.
 
-Reference String: 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1
-Number of frames: 3
+All frames start empty. Fill the lowest-numbered empty frame first.
+FIFO advances its replacement pointer on insertion/replacement, not on hits;
+LRU updates recency on every reference; OPT replaces the page whose next use is
+farthest away (never used again counts as infinity). For an OPT tie choose the
+lowest frame index. A hit leaves frame contents unchanged. Frame indices are
+storage positions, not a sorted recency list.
 
-═══════════════════════════════════════════════════════════════════════════
-FIFO (First-In, First-Out):
-═══════════════════════════════════════════════════════════════════════════
+#### FIFO, 3 frames
 
-Ref: 7  0  1  2  0  3  0  4  2  3  0  3  2  1  2  0  1  7  0  1
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │7 │7 │7 │2 │2 │2 │2 │4 │4 │4 │0 │0 │0 │1 │1 │1 │1 │7 │7 │7 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F1: │- │0 │0 │0 │0 │3 │3 │3 │2 │2 │2 │2 │2 │2 │2 │0 │0 │0 │0 │0 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F2: │- │- │1 │1 │1 │1 │0 │0 │0 │3 │3 │3 │3 │3 │3 │3 │1 │1 │1 │1 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-    PF:✓  ✓  ✓  ✓     ✓  ✓  ✓  ✓  ✓  ✓        ✓     ✓  ✓  ✓      
+| Step | Reference | F0 | F1 | F2 | Result |
+|---:|---:|---:|---:|---:|---|
+| 1 | 7 | 7 | — | — | Fault |
+| 2 | 0 | 7 | 0 | — | Fault |
+| 3 | 1 | 7 | 0 | 1 | Fault |
+| 4 | 2 | 2 | 0 | 1 | Fault |
+| 5 | 0 | 2 | 0 | 1 | Hit |
+| 6 | 3 | 2 | 3 | 1 | Fault |
+| 7 | 0 | 2 | 3 | 0 | Fault |
+| 8 | 4 | 4 | 3 | 0 | Fault |
+| 9 | 2 | 4 | 2 | 0 | Fault |
+| 10 | 3 | 4 | 2 | 3 | Fault |
+| 11 | 0 | 0 | 2 | 3 | Fault |
+| 12 | 3 | 0 | 2 | 3 | Hit |
+| 13 | 2 | 0 | 2 | 3 | Hit |
+| 14 | 1 | 0 | 1 | 3 | Fault |
+| 15 | 2 | 0 | 1 | 2 | Fault |
+| 16 | 0 | 0 | 1 | 2 | Hit |
+| 17 | 1 | 0 | 1 | 2 | Hit |
+| 18 | 7 | 7 | 1 | 2 | Fault |
+| 19 | 0 | 7 | 0 | 2 | Fault |
+| 20 | 1 | 7 | 0 | 1 | Fault |
 
-Total Page Faults: 15
+**Page faults: 15.**
 
-═══════════════════════════════════════════════════════════════════════════
-OPT (Optimal - Knows the Future):
-═══════════════════════════════════════════════════════════════════════════
+#### OPT, 3 frames
 
-Ref: 7  0  1  2  0  3  0  4  2  3  0  3  2  1  2  0  1  7  0  1
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │7 │7 │7 │2 │2 │2 │2 │2 │2 │2 │2 │2 │2 │2 │2 │2 │2 │7 │7 │7 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F1: │- │0 │0 │0 │0 │0 │0 │4 │4 │3 │3 │3 │3 │1 │1 │1 │1 │1 │1 │1 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F2: │- │- │1 │1 │1 │3 │3 │3 │3 │3 │0 │0 │0 │0 │0 │0 │0 │0 │0 │0 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-    PF:✓  ✓  ✓  ✓     ✓     ✓     ✓  ✓        ✓              ✓      
+| Step | Reference | F0 | F1 | F2 | Result |
+|---:|---:|---:|---:|---:|---|
+| 1 | 7 | 7 | — | — | Fault |
+| 2 | 0 | 7 | 0 | — | Fault |
+| 3 | 1 | 7 | 0 | 1 | Fault |
+| 4 | 2 | 2 | 0 | 1 | Fault |
+| 5 | 0 | 2 | 0 | 1 | Hit |
+| 6 | 3 | 2 | 0 | 3 | Fault |
+| 7 | 0 | 2 | 0 | 3 | Hit |
+| 8 | 4 | 2 | 4 | 3 | Fault |
+| 9 | 2 | 2 | 4 | 3 | Hit |
+| 10 | 3 | 2 | 4 | 3 | Hit |
+| 11 | 0 | 2 | 0 | 3 | Fault |
+| 12 | 3 | 2 | 0 | 3 | Hit |
+| 13 | 2 | 2 | 0 | 3 | Hit |
+| 14 | 1 | 2 | 0 | 1 | Fault |
+| 15 | 2 | 2 | 0 | 1 | Hit |
+| 16 | 0 | 2 | 0 | 1 | Hit |
+| 17 | 1 | 2 | 0 | 1 | Hit |
+| 18 | 7 | 7 | 0 | 1 | Fault |
+| 19 | 0 | 7 | 0 | 1 | Hit |
+| 20 | 1 | 7 | 0 | 1 | Hit |
 
-Total Page Faults: 9 (OPTIMAL - minimum possible)
+**Page faults: 9.**
 
-═══════════════════════════════════════════════════════════════════════════
-LRU (Least Recently Used):
-═══════════════════════════════════════════════════════════════════════════
+#### LRU, 3 frames
 
-Ref: 7  0  1  2  0  3  0  4  2  3  0  3  2  1  2  0  1  7  0  1
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │7 │7 │7 │2 │2 │2 │2 │4 │4 │4 │0 │0 │0 │1 │1 │1 │1 │1 │1 │1 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F1: │- │0 │0 │0 │0 │0 │0 │0 │2 │2 │2 │2 │2 │2 │2 │0 │0 │0 │0 │0 │
-    ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
-F2: │- │- │1 │1 │1 │3 │3 │3 │3 │3 │3 │3 │3 │3 │3 │3 │3 │7 │7 │7 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-    PF:✓  ✓  ✓  ✓     ✓     ✓  ✓     ✓        ✓     ✓     ✓      
+| Step | Reference | F0 | F1 | F2 | Result |
+|---:|---:|---:|---:|---:|---|
+| 1 | 7 | 7 | — | — | Fault |
+| 2 | 0 | 7 | 0 | — | Fault |
+| 3 | 1 | 7 | 0 | 1 | Fault |
+| 4 | 2 | 2 | 0 | 1 | Fault |
+| 5 | 0 | 2 | 0 | 1 | Hit |
+| 6 | 3 | 2 | 0 | 3 | Fault |
+| 7 | 0 | 2 | 0 | 3 | Hit |
+| 8 | 4 | 4 | 0 | 3 | Fault |
+| 9 | 2 | 4 | 0 | 2 | Fault |
+| 10 | 3 | 4 | 3 | 2 | Fault |
+| 11 | 0 | 0 | 3 | 2 | Fault |
+| 12 | 3 | 0 | 3 | 2 | Hit |
+| 13 | 2 | 0 | 3 | 2 | Hit |
+| 14 | 1 | 1 | 3 | 2 | Fault |
+| 15 | 2 | 1 | 3 | 2 | Hit |
+| 16 | 0 | 1 | 0 | 2 | Fault |
+| 17 | 1 | 1 | 0 | 2 | Hit |
+| 18 | 7 | 1 | 0 | 7 | Fault |
+| 19 | 0 | 1 | 0 | 7 | Hit |
+| 20 | 1 | 1 | 0 | 7 | Hit |
 
-Total Page Faults: 12
+**Page faults: 12.**
 
-═══════════════════════════════════════════════════════════════════════════
-COMPARATIVE SUMMARY:
-═══════════════════════════════════════════════════════════════════════════
+| Algorithm | Faults | Interpretation |
+|---|---:|---|
+| FIFO | 15 | Simple insertion order; may exhibit Belady's anomaly |
+| OPT | 9 | Offline minimum for this trace, requiring future knowledge |
+| LRU | 12 | Uses past recency; it does not reproduce OPT in general |
 
-┌───────────┬────────────┬─────────────────────────────────────────────────┐
-│ Algorithm │ Page Faults│ Characteristics                                 │
-├───────────┼────────────┼─────────────────────────────────────────────────┤
-│  FIFO     │     15     │ Simple, but can evict useful pages             │
-├───────────┼────────────┼─────────────────────────────────────────────────┤
-│  OPT      │      9     │ Theoretically optimal, but practically impossible│
-├───────────┼────────────┼─────────────────────────────────────────────────┤
-│  LRU      │     12     │ Good approximation of OPT, implementation overhead│
-└───────────┴────────────┴─────────────────────────────────────────────────┘
-
-LRU improvement vs FIFO: (15-12)/15 = 20% fewer page faults
-LRU is 12/9 = 1.33x more faults than OPT (33% overhead)
-```
+More frames cannot increase OPT or exact LRU faults (stack algorithms).
+FIFO lacks that property, as the short example below demonstrates.
 
 ### Diagram 10.3: Clock Algorithm (Second Chance)
 
@@ -738,6 +794,9 @@ Preference for evicting CLEAN pages (don't need to be written to disc):
 
 ### Exercise 10.1: EAT Calculation with Multi-Level TLB
 
+This is a single TLB in front of a two-level page table, under the serial,
+no-page-fault assumptions stated above; it is not a hierarchy of multiple TLBs.
+
 Problem: A system has:
 - 2-level page table
 - TLB access: 2 ns
@@ -776,41 +835,49 @@ Comparison:
 
 ### Exercise 10.2: FIFO and LRU Simulation
 
-Problem: Reference string: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
-Frames: 3
-Calculate page faults for FIFO and LRU.
+Problem: simulate FIFO and LRU with three initially empty frames for
+`1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5`. Use the policies stated in Diagram 10.2.
 
-Solution:
+#### FIFO, 3 frames
 
-```
-FIFO:
-═════
-Ref: 1  2  3  4  1  2  5  1  2  3  4  5
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │1 │1 │1 │4 │4 │4 │5 │5 │5 │5 │5 │5 │
-F1: │- │2 │2 │2 │1 │1 │1 │1 │1 │3 │3 │3 │
-F2: │- │- │3 │3 │3 │2 │2 │2 │2 │2 │4 │4 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-PF:  ✓  ✓  ✓  ✓  ✓  ✓  ✓        ✓  ✓    
+| Step | Reference | F0 | F1 | F2 | Result |
+|---:|---:|---:|---:|---:|---|
+| 1 | 1 | 1 | — | — | Fault |
+| 2 | 2 | 1 | 2 | — | Fault |
+| 3 | 3 | 1 | 2 | 3 | Fault |
+| 4 | 4 | 4 | 2 | 3 | Fault |
+| 5 | 1 | 4 | 1 | 3 | Fault |
+| 6 | 2 | 4 | 1 | 2 | Fault |
+| 7 | 5 | 5 | 1 | 2 | Fault |
+| 8 | 1 | 5 | 1 | 2 | Hit |
+| 9 | 2 | 5 | 1 | 2 | Hit |
+| 10 | 3 | 5 | 3 | 2 | Fault |
+| 11 | 4 | 5 | 3 | 4 | Fault |
+| 12 | 5 | 5 | 3 | 4 | Hit |
 
-FIFO Page Faults: 9
+**Page faults: 9.**
 
-LRU:
-════
-Ref: 1  2  3  4  1  2  5  1  2  3  4  5
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │1 │1 │1 │4 │4 │4 │5 │5 │5 │3 │3 │3 │
-F1: │- │2 │2 │2 │1 │1 │1 │1 │1 │1 │4 │4 │
-F2: │- │- │3 │3 │3 │2 │2 │2 │2 │2 │2 │5 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-PF:  ✓  ✓  ✓  ✓  ✓  ✓  ✓        ✓  ✓  ✓
+#### LRU, 3 frames
 
-LRU Page Faults: 10
+| Step | Reference | F0 | F1 | F2 | Result |
+|---:|---:|---:|---:|---:|---|
+| 1 | 1 | 1 | — | — | Fault |
+| 2 | 2 | 1 | 2 | — | Fault |
+| 3 | 3 | 1 | 2 | 3 | Fault |
+| 4 | 4 | 4 | 2 | 3 | Fault |
+| 5 | 1 | 4 | 1 | 3 | Fault |
+| 6 | 2 | 4 | 1 | 2 | Fault |
+| 7 | 5 | 5 | 1 | 2 | Fault |
+| 8 | 1 | 5 | 1 | 2 | Hit |
+| 9 | 2 | 5 | 1 | 2 | Hit |
+| 10 | 3 | 3 | 1 | 2 | Fault |
+| 11 | 4 | 3 | 4 | 2 | Fault |
+| 12 | 5 | 3 | 4 | 5 | Fault |
 
-SURPRISE! In this case FIFO (9) < LRU (10)!
-(This is not Belady's anomaly - this is just a particular situation
-where FIFO happened to perform better for this pattern)
-```
+**Page faults: 10.**
+
+FIFO has 9 faults and LRU 10 on this trace. LRU need not beat FIFO on each
+individual trace; its stack property compares LRU with itself at different capacities.
 
 ---
 
@@ -824,39 +891,32 @@ where FIFO happened to perform better for this pattern)
 
 ---
 
-10.2 (7p) Explain Belady's anomaly and demonstrate it with an example.
+10.2 (7p) Explain and demonstrate Belady's anomaly using FIFO for
+`1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5`.
 
-Answer:
+The three-frame run above has 9 faults. The same reference string with four
+initially empty frames gives the following complete state sequence:
 
-```
-BELADY'S ANOMALY: With FIFO, MORE frames can cause MORE page faults!
+#### FIFO, 4 frames
 
-Demonstration with reference string: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
+| Step | Reference | F0 | F1 | F2 | F3 | Result |
+|---:|---:|---:|---:|---:|---:|---|
+| 1 | 1 | 1 | — | — | — | Fault |
+| 2 | 2 | 1 | 2 | — | — | Fault |
+| 3 | 3 | 1 | 2 | 3 | — | Fault |
+| 4 | 4 | 1 | 2 | 3 | 4 | Fault |
+| 5 | 1 | 1 | 2 | 3 | 4 | Hit |
+| 6 | 2 | 1 | 2 | 3 | 4 | Hit |
+| 7 | 5 | 5 | 2 | 3 | 4 | Fault |
+| 8 | 1 | 5 | 1 | 3 | 4 | Fault |
+| 9 | 2 | 5 | 1 | 2 | 4 | Fault |
+| 10 | 3 | 5 | 1 | 2 | 3 | Fault |
+| 11 | 4 | 4 | 1 | 2 | 3 | Fault |
+| 12 | 5 | 4 | 5 | 2 | 3 | Fault |
 
-With 3 frames (calculated above): 9 page faults
+**Page faults: 10.**
 
-With 4 frames:
-═══════════════
-Ref: 1  2  3  4  1  2  5  1  2  3  4  5
-    ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-F0: │1 │1 │1 │1 │1 │1 │5 │5 │5 │5 │5 │5 │
-F1: │- │2 │2 │2 │2 │2 │2 │1 │1 │1 │1 │1 │
-F2: │- │- │3 │3 │3 │3 │3 │3 │2 │2 │2 │2 │
-F3: │- │- │- │4 │4 │4 │4 │4 │4 │3 │3 │3 │
-    └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
-PF:  ✓  ✓  ✓  ✓        ✓  ✓  ✓  ✓  ✓  ✓
-
-Page Faults with 4 frames: 10
-
-CONCLUSION: 3 frames → 9 faults, 4 frames → 10 faults!
-More resources = worse performance (counterintuitive!)
-
-CAUSE: FIFO doesn't consider access frequency/recency.
-Can evict a frequently used page just because it was 
-loaded first.
-
-SOLUTION: LRU and OPT do NOT have Belady's anomaly (they are "stack algorithms").
-```
+Increasing FIFO capacity from 3 to 4 increases faults from 9 to 10 here.
 
 ---
 
@@ -864,91 +924,47 @@ SOLUTION: LRU and OPT do NOT have Belady's anomaly (they are "stack algorithms")
 
 ## Detailed ASCII Diagrams
 
-### Diagram 11.1: Inode Structure
+### Diagram 11.1: Inode Structure and Alternative Block Mappings
 
-```
-═══════════════════════════════════════════════════════════════════════════
-                    INODE STRUCTURE (ext4)
-═══════════════════════════════════════════════════════════════════════════
+An inode stores metadata and block mapping information; a directory maps a
+name to an inode number. The following metadata are an illustrative regular
+file, not an actual inspected filesystem:
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           INODE #12345                                  │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐ │
-│  │  METADATA (does not include file name!)                           │ │
-│  ├───────────────────────────────────────────────────────────────────┤ │
-│  │  Type & Mode:    -rw-r--r-- (regular file, 0644)                 │ │
-│  │  Owner UID:      1000 (user)                                      │ │
-│  │  Owner GID:      1000 (group)                                     │ │
-│  │  Size:           15,847 bytes                                     │ │
-│  │  Link Count:     2 (2 hard links point here)                      │ │
-│  │                                                                    │ │
-│  │  Timestamps:                                                       │ │
-│  │    atime:  2024-01-15 10:30:00 (last access)                      │ │
-│  │    mtime:  2024-01-14 15:20:00 (last modification)                │ │
-│  │    ctime:  2024-01-14 15:20:00 (last inode change)                │ │
-│  │    crtime: 2024-01-10 09:00:00 (creation time - ext4 only)        │ │
-│  │                                                                    │ │
-│  │  Block Count:    16 (512-byte blocks = 8KB allocated)            │ │
-│  │  Flags:          0x00080000 (extents used)                        │ │
-│  └───────────────────────────────────────────────────────────────────┘ │
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐ │
-│  │  BLOCK POINTERS (data block addresses)                            │ │
-│  ├───────────────────────────────────────────────────────────────────┤ │
-│  │                                                                    │ │
-│  │  DIRECT BLOCKS (12 pointers):                                     │ │
-│  │  ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐               │ │
-│  │  │100│101│102│103│104│105│106│107│108│109│110│111│               │ │
-│  │  └─┬─┴─┬─┴─┬─┴─┬─┴───┴───┴───┴───┴───┴───┴───┴───┘               │ │
-│  │    │   │   │   │                                                   │ │
-│  │    │   │   │   └──► Block 103 (4KB data)                          │ │
-│  │    │   │   └──────► Block 102 (4KB data)                          │ │
-│  │    │   └──────────► Block 101 (4KB data)                          │ │
-│  │    └──────────────► Block 100 (4KB data)                          │ │
-│  │                                                                    │ │
-│  │  12 direct × 4KB = 48KB maximum with direct blocks                │ │
-│  │                                                                    │ │
-│  │  ─────────────────────────────────────────────────────────────    │ │
-│  │                                                                    │ │
-│  │  SINGLE INDIRECT POINTER:                                         │ │
-│  │  ┌───┐                                                            │ │
-│  │  │200│──────► Block 200 contains pointers:                        │ │
-│  │  └───┘        ┌────┬────┬────┬────┬─────┐                        │ │
-│  │               │1000│1001│1002│1003│ ... │                        │ │
-│  │               └──┬─┴──┬─┴──┬─┴──┬─┴─────┘                        │ │
-│  │                  │    │    │    │                                  │ │
-│  │                  ▼    ▼    ▼    ▼                                  │ │
-│  │               Data  Data  Data  Data                               │ │
-│  │                                                                    │ │
-│  │  1 indirect block × 1024 pointers × 4KB = 4MB additional          │ │
-│  │                                                                    │ │
-│  │  ─────────────────────────────────────────────────────────────    │ │
-│  │                                                                    │ │
-│  │  DOUBLE INDIRECT POINTER:                                         │ │
-│  │  ┌───┐                                                            │ │
-│  │  │300│──► Block with pointers → Blocks with pointers → Data       │ │
-│  │  └───┘                                                            │ │
-│  │                                                                    │ │
-│  │  1024 × 1024 × 4KB = 4GB additional                               │ │
-│  │                                                                    │ │
-│  │  ─────────────────────────────────────────────────────────────    │ │
-│  │                                                                    │ │
-│  │  TRIPLE INDIRECT POINTER:                                         │ │
-│  │  ┌───┐                                                            │ │
-│  │  │400│──► 3 levels of indirection                                 │ │
-│  │  └───┘                                                            │ │
-│  │                                                                    │ │
-│  │  1024 × 1024 × 1024 × 4KB = 4TB additional                       │ │
-│  │                                                                    │ │
-│  └───────────────────────────────────────────────────────────────────┘ │
-│                                                                         │
-│  MAXIMUM FILE SIZE (4KB blocks):                                       │
-│  12×4KB + 1024×4KB + 1024²×4KB + 1024³×4KB ≈ 4TB                       │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+| Field | Example | Meaning |
+|---|---|---|
+| Inode number | 12345 | Filesystem-local object identifier |
+| Mode | 0100644 | Regular file, rw-r--r-- |
+| UID/GID | 1000/1000 | Owner and group |
+| Size | 15,847 bytes | Logical length |
+| Link count | 1 | Directory links to this inode |
+| Blocks | 32 units of 512 bytes | 16 KiB allocated in this non-sparse 4 KiB-block example |
+| Times | atime, mtime, ctime; birth time where supported | ctime is metadata-change time, not creation time |
+| Mapping flags | EXTENTS flag clear in the legacy example | The extent and pointer interpretations are alternatives |
+
+**Legacy direct/indirect model (classical ext2/ext3).** For this small file,
+the first four direct pointers could be 100, 101, 102 and 103; the remaining
+eight direct pointers and all three indirect pointers are zero. The following
+table describes *capacity when a file grows*, not additional blocks allocated
+to the 15,847-byte example. Pointers occupy 4 bytes and blocks 4 KiB.
+
+| Inode slot | Mapping | Additional data addressability |
+|---|---|---:|
+| 0–11 | Direct pointers to data blocks | 12 × 4 KiB = 48 KiB |
+| 12 | One block of 1024 data-block pointers | 4 MiB |
+| 13 | Pointer block → pointer blocks → data | 4 GiB |
+| 14 | Three pointer-block levels → data | 4 TiB |
+
+The sum is a pointer-tree addressability calculation, not a general filesystem
+maximum; pointer width, logical block limits and implementation constraints
+must also be checked.
+
+**Ext4 extent alternative.** With `EXT4_EXTENTS_FL` (0x80000), `i_block` holds
+the root of an extent tree. It must not be simultaneously interpreted as the
+12-direct-plus-three-indirect array. A contiguous run can be described by an
+extent instead of one pointer per data block. Extent records and tree nodes
+have their own format and limits. Birth timestamps are not exclusive to ext4.
+
+Reference: [Linux ext4 inode block mappings](https://docs.kernel.org/filesystems/ext4/ifork.html).
 
 ### Diagram 11.2: Hard Link vs Symbolic Link
 
@@ -1052,7 +1068,7 @@ COMPARISON:
 
 ### Exercise 11.1: Maximum File Size Calculation
 
-Problem: Calculate the maximum file size in ext4 with:
+Problem: Calculate the theoretical data addressability of this legacy direct/indirect pointer-tree model:
 
 - Block size: 4KB
 - Pointer size: 4 bytes
@@ -1072,10 +1088,12 @@ Double Indirect: 1024 × 1024 × 4KB = 4 GB
 
 Triple Indirect: 1024 × 1024 × 1024 × 4KB = 4 TB
 
-Maximum total = 48KB + 4MB + 4GB + 4TB ≈ 4TB
+Total addressability = 48 KiB + 4 MiB + 4 GiB + 4 TiB
+                     = 4,402,345,721,856 bytes
 
-(In practice, ext4 uses extents for greater efficiency
-and supports files up to 16TB with 4KB blocks)
+This arithmetic does not establish a filesystem's supported maximum file
+size. Ext4 extent-based files use a different mapping; implementation,
+logical-block and filesystem limits must be checked for a real configuration.
 ```
 
 ---
@@ -1090,34 +1108,30 @@ and supports files up to 16TB with 4KB blocks)
 
 ---
 
-11.2 (5p) Explain the journaling mechanism and the 3 modes in ext4.
+11.2 (5p) Explain the journaling mechanism and the three modes in ext4.
 
 Answer:
 
-```
-JOURNALING: Technique for file system integrity
+For a write-ahead redo journal, first persist the transaction records in the
+journal, then persist its commit record. Only after that durable commit may
+checkpointing overwrite the corresponding home locations. Once checkpointing
+is durable, the old journal space can be reused. Recovery replays committed
+transactions as needed and discards incomplete/uncommitted records; a crash
+during checkpointing can therefore be recovered from the journal.
 
-Mechanism:
-1. Before modification: Write intention to journal
-2. Perform the modification
-3. Mark transaction complete in journal
-4. On crash: Recover from journal (replay or discard)
+| ext4 mode | Journalled contents | Data ordering and limits |
+|---|---|---|
+| `data=journal` | File data and metadata | Both pass through the journal; additional writes can affect performance |
+| `data=ordered` (usual default) | Metadata | Associated data is written before committing the metadata transaction; this is not a promise that every application write is durable |
+| `data=writeback` | Metadata | File-data ordering relative to journalled metadata is weaker |
 
-ext4 MODES:
-┌──────────────┬────────────────────────────────┬────────┬──────────┐
-│     Mode     │        What is journaled        │ Speed  │ Safety   │
-├──────────────┼────────────────────────────────┼────────┼──────────┤
-│   journal    │ Metadata + Data (everything!)   │  Slow  │  Maximum │
-├──────────────┼────────────────────────────────┼────────┼──────────┤
-│   ordered    │ Metadata, but data is written   │ Medium │   Good   │
-│   (default)  │ BEFORE commit                   │        │          │
-├──────────────┼────────────────────────────────┼────────┼──────────┤
-│   writeback  │ Only metadata (data anytime)    │  Fast  │  Minimum │
-└──────────────┴────────────────────────────────┴────────┴──────────┘
-
-ordered: Good compromise - new data is guaranteed on disc before
-metadata points to it (avoids "garbage" in files).
-```
+The performance and crash outcomes depend on the workload, configuration and
+storage guarantees. Journaling provides filesystem crash consistency, not an
+application transaction, a backup or automatic durability of every `write`.
+Applications must use appropriate `fsync`/directory synchronisation protocols
+when their persistence requirements demand them. The ordering is log → durable
+commit → checkpoint, not home overwrite → commit.
+Reference: [Linux ext4 journal documentation](https://docs.kernel.org/filesystems/ext4/journal.html).
 
 ---
 
@@ -1159,35 +1173,25 @@ c) Command:
 
 ### Exercise 14.1: Containers vs VMs
 
-Problem: Compare boot time, memory overhead and isolation for VM vs Container for running a web application.
+Problem: compare boot time, memory overhead and isolation for a VM and a
+container running a web application.
 
-Solution:
+| Aspect | VM | Container |
+|---|---|---|
+| Execution boundary | Separate guest kernel on virtualised hardware | Processes ordinarily share the host kernel |
+| Startup work | Guest/kernel/services plus application, unless restored from a snapshot | Container setup plus application; image download/build is a separate stage |
+| Memory | Guest kernel and services plus application; sharing/ballooning can change cost | Application, libraries and per-container kernel/accounting costs; sharing can change cost |
+| Storage | Guest image and writable state; sparse and shared images are possible | Image layers and writable state; volumes/logs need separate accounting |
+| Isolation | Hypervisor and guest boundaries; escapes/misconfiguration remain possible | Namespaces/cgroups plus configured security controls; shared-kernel risks remain |
+| Use cases | Different kernels, stronger separation requirements | Shared-kernel applications, repeatable application environments |
 
-```
-┌────────────────────┬──────────────────────┬──────────────────────┐
-│      Aspect        │         VM           │      Container       │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Boot time          │ 30-60 seconds        │ 1-5 seconds          │
-│                    │ (loads entire OS)    │ (just the process)   │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Memory overhead    │ 500MB-2GB            │ 10-100MB             │
-│                    │ (complete guest OS)  │ (only app + libs)    │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Disc footprint     │ 5-50GB               │ 100MB-1GB            │
-│                    │ (OS image)           │ (image layers)       │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Isolation          │ COMPLETE             │ PROCESS              │
-│                    │ (virtual hardware)   │ (shared kernel)      │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Security           │ Very good            │ Good (but kernel     │
-│                    │ (escape difficult)   │ exploits = risk)     │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Density            │ ~10-20 VMs/host      │ ~100-1000 cont/host  │
-├────────────────────┼──────────────────────┼──────────────────────┤
-│ Use case           │ Strict isolation,    │ Microservices,       │
-│                    │ different OSes       │ CI/CD, rapid scaling │
-└────────────────────┴──────────────────────┴──────────────────────┘
-```
+For comparison exercises only, the earlier figures may be treated as
+**hypothetical inputs**: VM/container startup 30–60 s / 1–5 s, overhead
+500 MiB–2 GiB / 10–100 MiB, image size 5–50 GiB / 100 MiB–1 GiB and density
+10–20 / 100–1000 instances per host. No benchmark provenance supports these
+ranges here. They must not be quoted as general performance facts or used to
+exclude another architecture. Specify workload, host, images, runtime versions,
+cache state and measurement boundaries, then measure the quantities required.
 
 ---
 
@@ -1197,50 +1201,33 @@ Final.1 (10p) Synthesis question: Describe step by step what happens when you ty
 
 Model answer:
 
-```
-1. SHELL (parent process):
-   - Reads command from stdin
-   - Parses: "./program" with arguments
-   
-2. FORK:
+1. **Shell:** reads and parses the command and arguments. A conventional
+   external-command path creates a child with `fork`; shells may also use
+   `posix_spawn`, optimise an `exec`, or run a builtin without a new process.
+2. **Child creation:** in the fork path, the child has a new PID and initially
+   inherits the prescribed resources/mappings. `fork` returns 0 in the child
+   and the child's PID in the parent. The child may run before the parent resumes.
+3. **Exec in that child:** `execve` checks executable access and format and
+   replaces the same process's image. The PID is preserved. ELF load segments
+   establish code/data mappings, BSS is zero-initialised as specified and the
+   initial stack carries arguments/environment and auxiliary information.
+4. **First user entry:** for a dynamically linked ELF with `PT_INTERP`, the
+   initial user entry can be the dynamic linker. It loads/relocates dependencies
+   before transferring to the executable's entry. A static ELF has a different
+   startup path. The first instruction is not generally `main`.
+5. **Scheduling and translation:** the task must be selected on a CPU and can
+   block or be preempted during startup. Successful exec does not inherently
+   create a second task or mandate a new READY transition. Linux fair scheduling
+   began moving from CFS selection towards EEVDF in 6.6; the exact kernel/version
+   matters. Context switches preserve task register state; MMU/TLB/page tables
+   translate addresses and faults may cause further kernel work.
+6. **Runtime:** startup code (commonly `_start` plus runtime support) performs
+   the language/runtime initialisation and eventually calls `main` for this C
+   programme. Other executable formats and runtimes need their own path.
 
-Three things matter here: the shell calls fork(), the kernel creates a child process and the child receives 0 whilst the parent receives the child's PID.
-
-
-3. EXEC (in child):
-   - Child calls execve("./program", argv, envp)
-   - Kernel:
-     • Opens file "./program"
-     • Reads ELF header (executable format)
-     • Verifies permissions (x)
-     • Releases old address space
-     • Creates new address space:
-       - TEXT: Maps code from file
-       - DATA: Initialises global variables
-       - BSS: Zero-initialised
-       - STACK: Allocated, places argv/envp
-       - HEAP: Prepared for malloc
-     • Sets PC (program counter) to entry point
-
-4. SCHEDULING:
-   - New process is placed in READY queue
-   - Scheduler (CFS in Linux) eventually selects it
-   - Context switch:
-     • Saves current process state
-     • Loads new process state (registers, PC)
-
-5. EXECUTION:
-   - CPU in user mode
-   - Fetch first instruction from entry point
-   - MMU translates virtual address (using TLB/page table)
-   - Instruction executes
-   
-6. RUNTIME:
-   - _start() from libc runs
-   - Initialises C runtime
-   - Calls main() from programme
-   - Programme begins actual execution
-```
+References: [execve](https://man7.org/linux/man-pages/man2/execve.2.html),
+[ELF format](https://man7.org/linux/man-pages/man5/elf.5.html) and
+[Linux EEVDF documentation](https://docs.kernel.org/scheduler/sched-eevdf.html).
 
 ---
 
@@ -1262,11 +1249,14 @@ Throughput = Number of Processes / Total Time
 
 MEMORY:
 ────────
-Number of pages = Virtual address / Page size
+Number of pages = ceil(Address-space size / Page size)
+Virtual page number = floor(Virtual address / Page size)
+Offset = Virtual address mod Page size
 Offset bits = log₂(Page size)
 Page number bits = Total address bits - Offset bits
 
-Page Table Size = Number of pages × Entry size
+Flat Page Table Size = Number of pages × Entry size
+Flat Table + one full backup = 2 × Flat Page Table Size
 
 TLB:
 ────
@@ -1327,64 +1317,33 @@ Consider:
 5. Recovery time after crash
 
 **Model Answer:**
-```
-ANALYSIS:
 
-1. Read Performance (80% of workload):
-   - ext4: Good (simple, low overhead)
-   - XFS: Good (optimised for parallel reads)
-   - Btrfs: Moderate (CoW overhead on read paths minimal)
-   - ZFS: Good (ARC cache excellent for repeated reads)
-   
-   Winner: XFS or ZFS (both optimised for parallel I/O)
+The stated 80% reads / 20% writes and 32 TB storage workload do not determine
+a universal filesystem winner. Pin kernel/filesystem versions, redundancy,
+device characteristics, working set, queue depth, sync frequency, compression
+and free space before comparing designs.
 
-2. Write Amplification (critical for SSD longevity):
-   - ext4: Low (in-place updates with journaling)
-   - XFS: Low (similar to ext4)
-   - Btrfs: HIGH (CoW means every write creates new blocks)
-   - ZFS: HIGH (CoW architecture)
-   
-   Winner: ext4 or XFS
-   
-   Note: CoW file systems can reduce SSD lifespan by 2-3× due to
-   write amplification. With 20% writes on 32TB, this matters.
+| Criterion | Evidence needed and design differences |
+|---|---|
+| Read performance | Benchmark representative sizes, concurrency and cache state. ext4, XFS, Btrfs and ZFS cannot be ranked from the read fraction alone. |
+| Write amplification and SSD life | Measure host and device writes with the same durability/redundancy settings. CoW, journaling, compression and the SSD controller all affect amplification. The earlier 2–3× lifetime reduction is an **unverified hypothesis**, not an established multiplier. |
+| Integrity | Distinguish metadata checksums, file-data checksums, redundancy and repair. Btrfs/ZFS data checksumming can detect corruption; repair requires a valid redundant copy. Journaling alone is not end-to-end data integrity. |
+| Operations | Compare team expertise, supported features, recovery tooling, backups and integration with the chosen platform. Do not label whole filesystems mature/unstable without a pinned feature and evidence. |
+| Crash recovery | Test interruption and recovery with the actual data/durability workload. A journal or CoW tree does not establish a universal recovery-time ranking; crash consistency differs from restoring accidentally deleted or corrupted data. |
 
-3. Data Integrity:
-   - ext4: Basic (journal protects metadata only)
-   - XFS: Basic (similar to ext4)
-   - Btrfs: Strong (checksums on data and metadata)
-   - ZFS: Strongest (end-to-end checksums, self-healing with mirrors)
-   
-   Winner: ZFS > Btrfs > ext4 ≈ XFS
+**Conditional recommendation:** evaluate XFS as a candidate when established
+Linux operations and parallel workloads fit the team's requirements. Compare
+it with ext4 on the same workload. Evaluate Btrfs or ZFS when their checksumming,
+snapshot and redundant repair features address requirements that outweigh
+their operational costs. Application checksums may complement filesystem
+checksums; they are not automatically cheaper or an equivalent repair scheme.
+Backups remain necessary for every option. The final selection, unsupported
+performance multiplier and any author-supplied measurements remain open until
+the configuration and evidence are provided.
 
-4. Operational Complexity:
-   - ext4: Lowest (standard Linux, all tools work)
-   - XFS: Low (well-documented, enterprise proven)
-   - Btrfs: Medium (less mature, some features unstable)
-   - ZFS: Medium-High (separate toolchain, licensing concerns)
-   
-   Winner: ext4 > XFS > ZFS > Btrfs
-
-5. Crash Recovery:
-   - ext4: Fast (journal replay)
-   - XFS: Fast (parallel journal replay)
-   - Btrfs: Slow (tree reconstruction)
-   - ZFS: Medium (transaction group replay)
-   
-   Winner: XFS > ext4 > ZFS > Btrfs
-
-RECOMMENDATION: XFS
-
-Rationale:
-- Best balance of read performance and SSD longevity
-- Proven at scale (used by Red Hat, many cloud providers)
-- Fast recovery (critical for high availability)
-- For data integrity, implement checksums at application layer
-  (cheaper than ZFS overhead, more flexible)
-
-Alternative: If data integrity is paramount and write amplification
-is acceptable (e.g., archival storage), ZFS would be preferred.
-```
+Primary feature references: [ext4 journal](https://docs.kernel.org/filesystems/ext4/journal.html),
+[Btrfs checksums](https://btrfs.readthedocs.io/en/latest/Checksumming.html) and
+[OpenZFS documentation](https://openzfs.github.io/openzfs-docs/).
 
 ---
 
@@ -1412,120 +1371,109 @@ d) Design the network topology for guest internet access
 e) Propose a snapshot/reset mechanism for lab sessions
 
 **Model Answer:**
+
+**a) Architecture.** Containers are a candidate because the question explicitly
+allows process-level isolation, not because educational users are inherently
+trusted. Confirm the exercises' kernel/privilege requirements and threat model.
+Full VMs and a hybrid remain alternatives when separate kernels or stronger
+boundaries are needed. The listed host capacity does not exclude VMs; boot
+time must be measured for either design. No <2 s container or >30 s VM guarantee
+follows from the architecture name. A sandbox runtime or micro-VM changes the
+compatibility/performance boundary and requires its own evaluation.
+
+**b) Technology/configuration candidate.** On this single host, a locally built
+Ubuntu 24.04 teaching image plus a Docker bridge and a small inventory/reset
+script can be sufficient. The image includes gcc, Python, vim and git and a
+defined long-running entrypoint. Its assumed 500 MiB size is illustrative.
+Pin its digest for a real course release. To enforce a 10 GiB writable-layer
+quota in the example below, require the **classic overlay2 driver on XFS with
+project quotas and supported d_type**, not an arbitrary ext4 backing store or
+the newer containerd image-store snapshotter. The administrator must configure
+and verify that storage before using the example; it does not reformat or
+reconfigure the host.
+
+**c) Resource calculations.** For this exercise take RAM limits as GiB and the
+500 MB example image as 500 MiB; convert the nominal 2 TB device capacity before
+planning. Guest CPU quotas total `30×2=60`, so requested CPU/64 is `0.9375×`.
+This quota is time sharing, not a reservation of 60 dedicated physical cores.
+With 16 GiB reserved for the host, RAM is `30×2=60 GiB` of 240 GiB, ratio `0.25×`.
+An optional 4 GiB limit would be a changed configuration, not an automatic burst.
+The worst-case student writable allocation is `30×10=300 GiB`, plus base images,
+filesystem metadata, bounded logs and host space. The earlier average-state
+estimate `500 MiB + 30×2 GiB` is about 60.49 GiB, but cannot replace worst-case
+quota planning. These same totals do not by themselves rule out VMs.
+
+**d) Network.** Use a preconfigured dedicated bridge `lab-network`, subnet
+`172.20.0.0/16`, with student01 at `.0.10`, student02 at `.0.11` through student30
+at `.0.39`: last octet is `9+i` for `i=1..30`. Outbound routing/NAT is configured
+by the administrator and verified against campus policy. Do not assume a host
+interface is named eth0. SSH exposure, authentication and permitted inbound
+traffic remain explicit course/administrator decisions; this example publishes
+no host ports and does not choose those policies.
+
+**e) Reset example.** Keep a versioned base image and recreate only containers
+owned by this lab. Recreating a writable layer is not a backup or preservation
+of student work. Retention/export requirements must be decided before a reset.
+The code refuses an incompatible storage backend or unlabelled existing target
+before deletion. Its quota covers the container's writable root layer, not
+arbitrary volumes, host binds, images or the separately capped daemon logs.
+The image must not declare volumes; this example adds no host binds. Runtime
+temporary filesystems and shared memory consume separately bounded memory.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+# Illustrative administrator reset: --apply discards labelled container state.
+# The operator must first apply the lab's explicitly chosen retention policy.
+[[ ${1:-} == --apply ]] || { echo 'Usage: reset_lab.sh --apply (destructive reset of labelled lab containers)' >&2; exit 2; }
+BASE_IMAGE=${BASE_IMAGE:-ase-os-lab:2024}
+LABEL='enos.lab=exam-example'
+fail() { echo "$*" >&2; exit 1; }
+command -v docker >/dev/null || fail 'Docker CLI required'
+command -v findmnt >/dev/null || fail 'findmnt required'
+[[ $(docker info --format '{{.Driver}}') == overlay2 ]] || fail 'Requires classic overlay2 storage driver'
+root=$(docker info --format '{{.DockerRootDir}}')
+[[ $(findmnt -n -o FSTYPE -T "$root") == xfs ]] || fail 'Requires XFS backing filesystem'
+options=$(findmnt -n -o OPTIONS -T "$root")
+[[ ,$options, == *,pquota,* || ,$options, == *,prjquota,* ]] || fail 'Requires XFS project quotas'
+docker image inspect "$BASE_IMAGE" >/dev/null || fail 'Base image must already exist locally; no pull performed'
+volumes=$(docker image inspect --format '{{json .Config.Volumes}}' "$BASE_IMAGE")
+[[ $volumes == null || $volumes == '{}' ]] || fail 'Image VOLUMEs would bypass the writable-layer quota'
+subnets=$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}} {{end}}' lab-network)
+[[ $subnets == '172.20.0.0/16 ' ]] || fail 'Requires the preconfigured dedicated lab subnet'
+# Check ownership of every existing target before the first removal.
+for ((i=1; i<=30; i++)); do
+    printf -v student 'student%02d' "$i"
+    if docker container inspect "$student" >/dev/null 2>&1; then
+        owner=$(docker container inspect --format '{{index .Config.Labels "enos.lab"}}' "$student")
+        [[ $owner == exam-example ]] || fail "Refusing to reset unowned container: $student"
+    fi
+done
+for ((i=1; i<=30; i++)); do
+    printf -v student 'student%02d' "$i"
+    if docker container inspect "$student" >/dev/null 2>&1; then
+        docker container rm --force "$student"
+    fi
+    docker create --pull never --name "$student" --hostname "$student" \
+        --label "$LABEL" --memory 2g --memory-swap 2g --cpus 2 \
+        --storage-opt size=10G --log-opt max-size=10m --log-opt max-file=2 \
+        --network lab-network --ip "172.20.0.$((9+i))" \
+        "$BASE_IMAGE"
+    docker start "$student"
+done
 ```
-a) Architecture Choice: CONTAINERS (with enhanced isolation)
 
-   Justification:
-   - Boot time: Containers < 2s vs VMs > 30s
-   - Memory efficiency: Shared kernel saves ~1GB per instance
-   - Storage efficiency: Layered images, only deltas stored
-   - Process isolation sufficient for educational (trusted) users
-   
-   NOT full VMs because:
-   - 30 × 2GB = 60GB RAM just for guests (before OS overhead)
-   - VMs would need 30 × 10GB = 300GB storage minimum
-   - Boot time would exceed 10s target
-   
-   Enhanced isolation via: gVisor or Kata Containers if stronger
-   isolation needed (hybrid approach).
+The reset is deliberately an administrator action with explicit `--apply`.
+No Docker daemon, network or container was operated to validate this text.
+Syntax and simulated CLI-contract checks do not demonstrate enforcement on
+XFS or completion of 30 resets in 60 seconds. That former time is an unverified
+target. Measure startup/reset and verify CPU, memory and writable-layer limits
+on the intended host before treating this as a deployed lab. Update the image
+on a course-approved schedule and keep the exact image/configuration recorded.
 
-b) Technology Stack:
-
-   Container Runtime: Docker with containerd
-   - Mature, well-documented, students already familiar
-   
-   Orchestration: Docker Compose + custom scripts
-   - Kubernetes overkill for single-host lab
-   - Simple bash scripts for start/stop/reset
-   
-   Image: Custom Ubuntu 24.04 minimal (~500MB)
-   - Pre-installed: gcc, python3, vim, git
-   - Read-only base layer
-   
-   Storage Driver: overlay2
-   - Best performance on ext4/xfs
-   - Efficient layer sharing
-
-c) Resource Calculation:
-
-   CPU:
-   - Host: 64 cores
-   - Guests: 30 × 2 vCPU = 60 vCPU requested
-   - Overcommit ratio: 60/64 = 0.94× (acceptable, CPU is time-shared)
-   
-   Memory:
-   - Host: 256GB, reserve 16GB for host OS
-   - Available: 240GB
-   - Guests: 30 × 2GB = 60GB
-   - Overcommit ratio: 60/240 = 0.25× (very conservative, good)
-   - Can burst to 4GB per guest if needed
-   
-   Storage:
-   - Base image: 500MB (shared via overlay2)
-   - Per-student writable layer: ~2GB average
-   - Total: 500MB + (30 × 2GB) = 60.5GB
-   - Host has 2TB → plenty of headroom
-
-d) Network Topology:
-
-   ┌─────────────────────────────────────────────────────┐
-   │ HOST: Ubuntu 24.04                                   │
-   │                                                      │
-   │  ┌─────────────────────────────────────────────┐    │
-   │  │ Docker Bridge: lab-network (172.20.0.0/16)  │    │
-   │  │                                              │    │
-   │  │  ┌──────┐ ┌──────┐ ┌──────┐      ┌──────┐  │    │
-   │  │  │ S01  │ │ S02  │ │ S03  │ ...  │ S30  │  │    │
-   │  │  │.0.10 │ │.0.11 │ │.0.12 │      │.0.39 │  │    │
-   │  │  └──────┘ └──────┘ └──────┘      └──────┘  │    │
-   │  └─────────────────────┬───────────────────────┘    │
-   │                        │                             │
-   │  ┌─────────────────────┴────────────────────────┐   │
-   │  │ iptables NAT: MASQUERADE to eth0             │   │
-   │  └─────────────────────┬────────────────────────┘   │
-   │                        │                             │
-   └────────────────────────┼─────────────────────────────┘
-                            │
-                   [University Network]
-   
-   Features:
-   - Each student gets predictable IP: 172.20.0.(10+N)
-   - NAT for outbound internet access
-   - Optional: Port forwarding for SSH access from outside
-
-e) Snapshot/Reset Mechanism:
-
-   #!/bin/bash
-   # reset_lab.sh - Reset all student containers
-   
-   BASE_IMAGE="ase-os-lab:2024"
-   
-   for i in $(seq 1 30); do
-       STUDENT="student$(printf '%02d' $i)"
-       
-       # Stop and remove existing container
-       docker stop $STUDENT 2>/dev/null
-       docker rm $STUDENT 2>/dev/null
-       
-       # Create fresh container from base image
-       docker create \
-           --name $STUDENT \
-           --hostname $STUDENT \
-           --memory 2g \
-           --cpus 2 \
-           --network lab-network \
-           --ip 172.20.0.$((10 + i)) \
-           $BASE_IMAGE
-       
-       docker start $STUDENT
-   done
-   
-   Workflow:
-   - Start of lab: run reset_lab.sh (30 fresh containers in ~60s)
-   - During lab: students work freely
-   - End of lab: optionally export student work, then reset
-   - Base image updated semesterly with new tools
-```
+References: [Docker writable-layer size option](https://docs.docker.com/reference/cli/docker/container/run/#set-storage-driver-options-per-container),
+[overlay2 prerequisites](https://docs.docker.com/engine/storage/drivers/overlayfs-driver/)
+and [Docker resource constraints](https://docs.docker.com/engine/containers/resource_constraints/).
 
 ---
 

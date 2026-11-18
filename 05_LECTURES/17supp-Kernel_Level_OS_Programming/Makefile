@@ -8,7 +8,7 @@
 # Configuration
 COURSE_NUM := 17
 COURSE_NAME := eBPF and Kernel Programming (Suppl.)
-PLANTUML_JAR := /usr/share/plantuml/plantuml.jar
+PLANTUML_JAR ?= /usr/share/plantuml/plantuml.jar
 
 # Colours for output
 GREEN := \033[0;32m
@@ -36,48 +36,42 @@ check:
 # Generate PlantUML diagrams
 # ─────────────────────────────────────────────────────────────────────────────
 diagrams:
-	@echo "$(YELLOW)Generating PlantUML diagrams...$(NC)"
-	@if [ -d diagrams ] && ls diagrams/*.puml 1> /dev/null 2>&1; then \
-		for f in diagrams/*.puml; do \
-			echo "  Processing $$f..."; \
-			java -jar $(PLANTUML_JAR) -tpng "$$f" 2>/dev/null || \
-			plantuml -tpng "$$f" 2>/dev/null || \
-			echo "$(YELLOW)  ⚠ PlantUML is not installed$(NC)"; \
-		done; \
-		echo "$(GREEN)✓ Diagrams processed$(NC)"; \
-	else \
-		echo "$(YELLOW)  ⚠ No diagrams/*.puml files exist$(NC)"; \
-	fi
+	@status=0; count=0; \
+	if [ -f "$(PLANTUML_JAR)" ] && command -v java >/dev/null 2>&1; then renderer=jar; \
+	elif command -v plantuml >/dev/null 2>&1; then renderer=command; \
+	else echo "ERROR: PlantUML unavailable; no diagrams generated." >&2; exit 2; fi; \
+	for f in diagrams/*.puml; do \
+		[ -f "$$f" ] || continue; count=$$((count + 1)); \
+		if [ "$$renderer" = jar ]; then java -jar "$(PLANTUML_JAR)" -failfast2 -tpng "$$f" || status=1; \
+		else plantuml -failfast2 -tpng "$$f" || status=1; fi; \
+	done; \
+	[ "$$count" -gt 0 ] || { echo "ERROR: no diagram sources" >&2; exit 2; }; \
+	[ "$$status" -eq 0 ] && echo "Rendered $$count diagram sources."; exit $$status
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Validate YAML quiz
 # ─────────────────────────────────────────────────────────────────────────────
 quiz:
-	@echo "$(YELLOW)Validating formative assessment YAML...$(NC)"
-	@if ls docs/C*_05_FORMATIVE_ASSESSMENT.yaml 1> /dev/null 2>&1; then \
-		for f in docs/C*_05_FORMATIVE_ASSESSMENT.yaml; do \
-			python3 -c "import yaml; yaml.safe_load(open('$$f'))" && \
-			echo "$(GREEN)✓ $$f valid$(NC)"; \
-		done; \
-	else \
-		echo "$(YELLOW)  ⚠ No assessment YAML files exist$(NC)"; \
-	fi
+	@status=0; count=0; \
+	for f in docs/*05*.yaml; do \
+		[ -f "$$f" ] || continue; count=$$((count + 1)); \
+		if python3 -c 'import pathlib,sys,yaml; yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))' "$$f"; then echo "YAML syntax PASS: $$f"; else status=1; fi; \
+	done; \
+	[ "$$count" -gt 0 ] || { echo "ERROR: no quiz YAML" >&2; exit 2; }; exit $$status
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test scripts
 # ─────────────────────────────────────────────────────────────────────────────
 test-scripts:
-	@echo "$(YELLOW)Verifying script syntax...$(NC)"
-	@if [ -d scripts ]; then \
-		for f in scripts/*.py 2>/dev/null; do \
-			[ -f "$$f" ] && python3 -m py_compile "$$f" && echo "$(GREEN)  ✓ $$f$(NC)"; \
-		done; \
-		for f in scripts/*.sh 2>/dev/null; do \
-			[ -f "$$f" ] && bash -n "$$f" && echo "$(GREEN)  ✓ $$f$(NC)"; \
-		done; \
-	else \
-		echo "$(YELLOW)  ⚠ No scripts/ directory exists$(NC)"; \
-	fi
+	@status=0; \
+	for f in scripts/*.py; do \
+		[ -f "$$f" ] || continue; \
+		if python3 -c 'import ast,pathlib,sys; p=pathlib.Path(sys.argv[1]); ast.parse(p.read_bytes(), filename=str(p))' "$$f"; then echo "PASS: $$f"; else echo "FAIL: $$f" >&2; status=1; fi; \
+	done; \
+	for f in scripts/*.sh; do \
+		[ -f "$$f" ] || continue; \
+		if bash -n "$$f"; then echo "PASS: $$f"; else echo "FAIL: $$f" >&2; status=1; fi; \
+	done; exit $$status
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Clean

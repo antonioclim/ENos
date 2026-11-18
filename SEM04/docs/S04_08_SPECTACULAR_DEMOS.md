@@ -8,6 +8,26 @@
 
 ---
 
+## Working Scope and Evidence
+
+These are synthetic local demonstrations, not incident findings, measured speed
+benchmarks or proof of teaching effects. Retained anecdotes remain author
+observations. Start from the repository root and prepare an owned session:
+
+```bash
+SEM04_DIR=$(cd SEM04 && pwd) || exit 1
+SHOW_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-show.XXXXXX") || exit 1
+export SHOW_DIR SEM04_DIR
+ENOS_SEM04_DATA_DIR="$SHOW_DIR/data" ENOS_SEM04_RESOURCE_DIR="$SHOW_DIR/generated" \
+    bash "$SEM04_DIR/scripts/bash/S04_01_setup_seminar.sh" || exit 1
+cd -- "$SHOW_DIR/data" || exit 1
+```
+
+The terminal commands below are local; none contacts the domains/IPs displayed
+inside sample text. Interactive `watch`, `tail -f`, nano and browser behaviour
+require their actual installed tools and can be stopped with Ctrl+C. Copy the
+current owned path explicitly into a second terminal rather than guessing it.
+
 ## Demo Philosophy
 
 ### Why "Wow Factor"?
@@ -49,7 +69,7 @@ Spectacular demos serve multiple pedagogical purposes:
 
 ```bash
 # Generate a realistic access.log (2000+ lines)
-cd ~/demo_sem4/data
+cd -- "$SHOW_DIR/data" || exit 1
 
 # Script for generation (run BEFORE the seminar)
 cat > generate_realistic_log.sh << 'SCRIPT'
@@ -70,7 +90,7 @@ for i in $(seq 1 2000); do
     path=${paths[$RANDOM % ${#paths[@]}]}
     code=${codes[$RANDOM % ${#codes[@]}]}
     size=${sizes[$RANDOM % ${#sizes[@]}]}
-    date=$(date -d "-$((RANDOM % 1440)) minutes" '+%d/%b/%Y:%H:%M:%S +0000')
+    date=$(LC_ALL=C date -u -d "-$((RANDOM % 1440)) minutes" '+%d/%b/%Y:%H:%M:%S +0000')
     
     echo "$ip - - [$date] \"$method $path HTTP/1.1\" $code $size"
 done
@@ -91,19 +111,17 @@ head access.log
 # Show the structure
 ```
 
-**[SAY]**: "2000 lines of log. Manually it would take hours. Let us see in a few seconds..."
+**[SAY]**: "2000 synthetic log lines. Inspect the pipeline output; no timed comparison is claimed."
 
-### Step 2: Top Attackers (1 min)
+### Step 2: Most Frequent Source Addresses (1 min)
 
 ```bash
-
-*(Bash has an ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
 # Magic one-liner
 awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5
 ```
 
-**[SAY]**: "Instant! The most active IPs. This could be the attacker."
+**[SAY]**: "These are the most active addresses in the synthetic fixture. Frequency alone does not establish malicious intent."
 
 ### Step 3: What Did They Try to Access? (1 min)
 
@@ -112,7 +130,7 @@ awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5
 grep -E '(admin|config|\.env|phpmyadmin)' access.log | awk '{print $7}' | sort | uniq -c | sort -rn
 ```
 
-**[SAY]**: "Vulnerability scanning! Looking for admin panels and config files."
+**[SAY]**: "The selected path names resemble scanning targets; the fixture does not establish intent or a real incident."
 
 ### Step 4: Attack Timeline (1 min)
 
@@ -121,28 +139,34 @@ grep -E '(admin|config|\.env|phpmyadmin)' access.log | awk '{print $7}' | sort |
 awk '{print $4}' access.log | cut -d: -f1-2 | sort | uniq -c | sort -k2
 ```
 
-**[SAY]**: "We can see WHEN the attack intensified."
+**[SAY]**: "We can inspect the synthetic request distribution by hour, with UTC explicitly applied."
 
 ### Step 5: Complete Report (1.5 min)
 
 ```bash
 
+
+# Completed local report: a zero grep count must not stop subsequent sections.
+set -o pipefail
+count_matches() {
+    local pattern=$1 result rc
+    result=$(grep -cE -- "$pattern" access.log); rc=$?
+    case $rc in 0|1) printf '%s\n' "$result" ;; *) return "$rc" ;; esac
+}
+printf '=== SYNTHETIC LOG REPORT ===\n\nTop 5 Source IPs:\n'
+awk '{print $1}' access.log | sort | uniq -c | sort -rn | sed -n '1,5p'
+printf '\nRequests with selected path text:\n'
+count_matches '(admin|config|\.env|wp-)' || exit 1
+printf '\nFailed Requests (4xx/5xx):\n'
+count_matches '" [45][0-9]{2} ' || exit 1
+printf '\nPeak hour (first in a declared lexical tie order):\n'
+awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -k1,1nr -k2,2 | sed -n '1p'
+
+```
+
 *Personal note: I prefer Bash scripts for simple automations and Python when the logic becomes complex. It is a matter of pragmatism.*
-
-# EPIC one-liner
-echo "=== SECURITY INCIDENT REPORT ===" && \
-echo -e "\n📊 Top 5 Source IPs:" && \
-awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5 && \
-echo -e "\n🚨 Suspicious Requests:" && \
-grep -cE '(admin|config|\.env|wp-)' access.log && \
-
 > 💡 In previous labs, I have seen that the most frequent mistake is forgetting quotes around variables with spaces.
 
-echo -e "\n❌ Failed Requests (4xx/5xx):" && \
-grep -cE '" [45][0-9]{2} ' access.log && \
-echo -e "\n⏰ Peak Hour:" && \
-awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -rn | head -1
-```
 
 **[DRAMATIC PAUSE]**
 
@@ -153,9 +177,13 @@ awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -rn | head -1
 # DEMO 2: CSV TO HTML TABLE
 
 ## The Story
-> "You have a CSV with data and need to transform it into an HTML page for a presentation. No Excel, no Python - just the terminal."
+> "You have a CSV with data and need to transform it into an HTML page for a presentation. Choose a parser that matches the input contract; the small AWK example demonstrates simple fields."
 
 ## Demo
+
+This AWK example accepts the supplied simple CSV only: unquoted commas and one
+record per line. It escapes cell text for HTML. For arbitrary quoted CSV, use a
+CSV parser; `-F,` cannot recover embedded commas or multiline fields.
 
 ```bash
 # Input
@@ -163,8 +191,20 @@ cat employees.csv
 
 # Magic transformation
 awk -F',' '
+function html(value, out,i,c) {
+    out=""
+    for(i=1;i<=length(value);i++) {
+        c=substr(value,i,1)
+        if(c=="&") out=out "&amp;"
+        else if(c=="<") out=out "&lt;"
+        else if(c==">") out=out "&gt;"
+        else if(c=="\"") out=out "&quot;"
+        else out=out c
+    }
+    return out
+}
 BEGIN {
-    print "<!DOCTYPE html><html><head><style>"
+    print "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Employee Report</title><style>"
     print "table {border-collapse: collapse; width: 100%;}"
     print "th, td {border: 1px solid black; padding: 8px; text-align: left;}"
     print "th {background-color: #4CAF50; color: white;}"
@@ -173,18 +213,18 @@ BEGIN {
 }
 NR == 1 {
     print "<tr>"
-    for (i=1; i<=NF; i++) print "<th>" $i "</th>"
+    for (i=1; i<=NF; i++) print "<th scope=\"col\">" html($i) "</th>"
     print "</tr>"
     next
 }
 {
     print "<tr>"
-    for (i=1; i<=NF; i++) print "<td>" $i "</td>"
+    for (i=1; i<=NF; i++) print "<td>" html($i) "</td>"
     print "</tr>"
 }
 END {
     print "</table></body></html>"
-}' employees.csv > report.html
+}' employees.csv > report.html || exit 1
 
 # Show the result
 echo "Generated report.html"
@@ -218,31 +258,33 @@ while true; do
     if [ $((RANDOM % 10)) -eq 0 ]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: High memory usage detected"
 
-> 💡 I have observed that students who draw the diagram on paper before writing the code have much better results.
 
     fi
 done >> live.log
 ```
 
+> 💡 I have observed that students who draw the diagram on paper before writing the code have much better results.
+
+
 ### Terminal 2: Monitoring with Highlighting
 
 ```bash
 # Watch for errors with colour
-tail -f live.log | grep --color=always -E 'ERROR|WARNING|$'
+tail -f live.log | grep --line-buffered --color=always -E 'ERROR|WARNING|$'
 ```
 
 ### Advanced Version with awk
 
 ```bash
 tail -f live.log | awk '
-/ERROR/   { print "\033[31m" $0 "\033[0m"; next }
-/WARNING/ { print "\033[33m" $0 "\033[0m"; next }
-/INFO/    { print "\033[32m" $0 "\033[0m"; next }
-          { print }
+/ERROR/   { print "\033[31m" $0 "\033[0m"; fflush(); next }
+/WARNING/ { print "\033[33m" $0 "\033[0m"; fflush(); next }
+/INFO/    { print "\033[32m" $0 "\033[0m"; fflush(); next }
+          { print; fflush() }
 '
 ```
 
-**[SAY]**: "Real-time monitoring with colour coding. This runs on any Linux server!"
+**[SAY]**: "Real-time monitoring with colour coding. Check installed tool options, locale and output buffering in the target lab environment."
 
 ---
 
@@ -279,7 +321,7 @@ EOF
 
 ## Demo
 
-### Extract All URLs
+### Extract URL-shaped Substrings from the Exact Fixture
 
 ```bash
 grep -oE 'https?://[^"<>]+' webpage.html | sort -u
@@ -293,7 +335,7 @@ https://docs.company.com/guide
 https://github.com/company/repo
 ```
 
-### Extract All Emails
+### Extract Email-shaped Substrings from the Exact Fixture
 
 ```bash
 grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' webpage.html | sort -u
@@ -329,7 +371,10 @@ grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' webpage.html | sort -u
 
 ```bash
 # Create test files
-mkdir -p rename_demo && cd rename_demo
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 for i in {1..10}; do
     touch "Document $(date -d "-$i days" +%Y%m%d) - Copy ($i).txt"
 done
@@ -350,15 +395,17 @@ Document 20250118 - Copy (2).txt
 
 ```bash
 # Preview (dry run)
+shopt -s nullglob
 for f in *.txt; do
-    new=$(echo "$f" | sed -E 's/Document ([0-9]+) - Copy \(([0-9]+)\)/doc_\1_v\2/')
+    new=$(printf '%s\n' "$f" | sed -E 's/Document ([0-9]+) - Copy \(([0-9]+)\)/doc_\1_v\2/')
     echo "$f -> $new"
 done
 
 # Actual execution
 for f in *.txt; do
-    new=$(echo "$f" | sed -E 's/Document ([0-9]+) - Copy \(([0-9]+)\)/doc_\1_v\2/')
-    mv "$f" "$new"
+    new=$(printf '%s\n' "$f" | sed -E 's/Document ([0-9]+) - Copy \(([0-9]+)\)/doc_\1_v\2/')
+    [[ ! -e "$new" && ! -L "$new" ]] || { echo "Destination exists: $new" >&2; exit 1; }
+    mv -- "$f" "$new" || exit 1
 done
 ls
 ```
@@ -370,7 +417,7 @@ doc_20250118_v2.txt
 ...
 ```
 
-**[SAY]**: "50 files renamed in seconds. Imagine doing this manually!"
+**[SAY]**: "Ten owned fixture files have been renamed. Inspect their names; no elapsed-time benchmark is claimed."
 
 ---
 
@@ -380,6 +427,13 @@ doc_20250118_v2.txt
 > "You have a config format and need to transform it into another format for a different application."
 
 ## Demo: INI to JSON
+
+The earlier AWK formatter split values at every `=`, omitted JSON escaping and
+could print invalid leading-zero numbers. A serializer now preserves embedded
+`=`, quotes/backslashes and empty values. Empty input yields `{}`; `008` remains
+a string, while canonical nonnegative integers and exact `true`/`false` values
+are converted. This explicit demonstration rule is not an inferred application
+schema. No value is evaluated as shell code.
 
 ```bash
 cat > app.ini << 'EOF'
@@ -398,30 +452,35 @@ level=info
 file=/var/log/app.log
 EOF
 
-# Transform into JSON
-awk '
-BEGIN { print "{"; first_section=1 }
-/^\[.*\]$/ {
-    if (!first_section) print "  },"
-    first_section=0
-    section=$0
-    gsub(/[\[\]]/, "", section)
-    printf "  \"%s\": {\n", section
-    first_item=1
-    next
-}
-/=/ {
-    if (!first_item) print ","
-    first_item=0
-    split($0, arr, "=")
-    key=arr[1]; value=arr[2]
-    if (value ~ /^[0-9]+$/ || value == "true" || value == "false")
-        printf "    \"%s\": %s", key, value
-    else
-        printf "    \"%s\": \"%s\"", key, value
-}
-END { print "\n  }\n}" }
-' app.ini
+# Parse the declared INI subset and serialise JSON with Python standard library.
+# Interpolation is disabled; duplicate sections/keys are rejected. A key before
+# any section is invalid. Keys preserve case. Values are trimmed by ConfigParser.
+python3 - app.ini <<'PYJSON'
+import configparser
+import json
+import re
+import sys
+from pathlib import Path
+
+parser = configparser.ConfigParser(interpolation=None, strict=True)
+parser.optionxform = str
+parser.read_string(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if parser.defaults():
+    raise SystemExit("DEFAULT inheritance is outside this demonstration contract")
+result = {}
+for section in parser.sections():
+    result[section] = {}
+    for key, value in parser.items(section, raw=True):
+        if value in ("true", "false"):
+            converted = value == "true"
+        elif re.fullmatch(r"0|[1-9][0-9]*", value):
+            converted = int(value)
+        else:
+            converted = value
+        result[section][key] = converted
+print(json.dumps(result, ensure_ascii=False, indent=2))
+PYJSON
+
 ```
 
 ---
@@ -429,6 +488,12 @@ END { print "\n  }\n}" }
 # DEMO 7: MARKDOWN TO HTML (Mini Compiler)
 
 ## Demo
+
+This is a trusted-fixture substitution exercise, not a complete Markdown compiler
+or a safe HTML renderer for arbitrary input. It outputs fragments, does not build
+paragraph/list containers and does not resolve nested syntax or escape arbitrary
+HTML/URL contexts. Use a real Markdown parser for a published document; do not
+present this pedagogical subset as general conversion.
 
 ```bash
 cat > sample.md << 'EOF'
@@ -460,7 +525,7 @@ sed -E '
 ' sample.md
 ```
 
-**[SAY]**: "A mini Markdown compiler in a few lines of sed. That is what regex does!"
+**[SAY]**: "These substitutions illustrate a small trusted Markdown-like subset; compare the gaps with a real parser."
 
 ---
 
@@ -486,8 +551,8 @@ echo ""
 echo "💾 Top Memory:"
 ps aux --sort=-%mem | head -4 | awk "NR>1 {printf \"  %-15s %5s%%\n\", \$11, \$4}"
 echo ""
-echo "🌐 Network Connections:"
-ss -tuln 2>/dev/null | grep LISTEN | wc -l | xargs echo "  Listening ports:"
+echo "🌐 Local TCP listening sockets:"
+if sockets=$(ss -H -ltn); then printf "%s\n" "$sockets" | awk "NF{n++}END{print n+0}"; else echo "Socket inventory failed" >&2; fi
 '
 ```
 
@@ -551,3 +616,8 @@ EOF
 ---
 
 *Spectacular Demos for Operating Systems Seminar 4 | ASE Bucharest - CSIE*
+
+
+## Retained Author Notes
+
+*(Bash has an ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*

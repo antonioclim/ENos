@@ -1,179 +1,42 @@
-# 📁 Grade Aggregation — Final Grade Calculator
+# Component aggregation and explicit policy
 
-> **Location:** `SEM07/grade_aggregation/`  
-> **Purpose:** Calculate weighted final grades from all components  
-> **Audience:** Instructors only
+The author has adopted descriptive component review. Official grading remains deferred. An explicitly supplied policy is an unverified scenario, not an institutional approval. Historical numerical policies are retained separately in [GRADING_POLICY_HISTORY.md](GRADING_POLICY_HISTORY.md).
 
-## Contents
 
-| File | Purpose |
-|------|---------|
-| `final_grade_calculator_EN.py` | Main grade calculation script |
-| `GRADING_POLICY.md` | Official grading policy documentation |
-| `templates/` | CSV templates for grade input |
-
----
-
-## final_grade_calculator_EN.py
-
-### Usage
+`final_grade_calculator_EN.py` validates three CSV inputs and writes CSV, JSON and Markdown using an output **prefix**. Without `--policy`, final grades remain blank/null and reports say `PENDING_POLICY`. A reviewed zero remains zero; missing evidence is not silently replaced by zero.
 
 ```bash
-python3 final_grade_calculator_EN.py [options]
-
-Options:
-  --homework FILE      Homework grades CSV
-  --project FILE       Project grades CSV  
-  --exam FILE          Exam grades CSV
-  --output FILE        Output file for final grades
-  --weights W1,W2,W3   Custom weights (default: 0.3,0.4,0.3)
-  --policy FILE        Custom grading policy
-  --format FMT         Output format: csv, xlsx, json
-```
-
-### Standard Usage
-
-```bash
-# Using default file locations
-python3 final_grade_calculator_EN.py
-
-# With explicit files
+python3 final_grade_calculator_EN.py --help
 python3 final_grade_calculator_EN.py \
-    --homework homework_grades.csv \
-    --project project_grades.csv \
-    --exam exam_grades.csv \
-    --output final_grades.csv
+    --homework /path/to/homework_grades.csv \
+    --project /path/to/project_grades.csv \
+    --tests /path/to/test_grades.csv --output component_review
 ```
 
-### Custom Weights
+Options are `-hw/--homework`, `-p/--project`, `-t/--tests`, `-o/--output`, `-v/--verbose` and `--policy`. All three CSV files are required; a component with no data can have its valid header and no rows. There are no `--exam`, `--weights`, `--format`, `--missing-as-zero`, bonus or publication options.
 
-```bash
-# Homework 20%, Project 50%, Exam 30%
-python3 final_grade_calculator_EN.py --weights 0.2,0.5,0.3
+## Report files and preservation
 
-# No exam (coursework only)
-python3 final_grade_calculator_EN.py --weights 0.4,0.6,0.0 --exam none
-```
+An output prefix such as `component_review` produces `component_review.csv`, `component_review.json` and `component_review.md`. All three destinations must be new. Existing files, directories or symbolic links are rejected; choose a new prefix for another review. A destination must not coincide with any input CSV or the policy file, including resolved symbolic-link and hard-link aliases. The implementation reserves each file exclusively, so an output created after the initial check is not silently overwritten.
 
----
+The JSON report has `schema_version: 1`, `policy_status`, `policy_supplied`, `policy_approval`, `status_counts` and a `students` array. Each student record retains the component values, counts, `weighted_score`, `final_grade`, `status`, `elimination_reason` and `issues`. Missing numerical evidence remains JSON `null`; a reviewed zero remains numerical `0.0`. CSV and Markdown display missing numerical cells as blank. A supplied policy is labelled `SUPPLIED_POLICY_UNVERIFIED`: its presence does not establish author or institutional approval.
 
-## Input File Formats
+The reports are prepared before any output is opened. A caught write failure attempts to remove only the files created by that invocation; pre-existing files are preserved. This is not a multi-file transaction or a crash/power-loss guarantee. Treat a failed command or an incomplete set of reports as an unfinished export. Files are created with owner-only permissions where the host honours POSIX modes. No Windows-native file-system acceptance is implied by local Linux checks.
 
-### homework_grades.csv
+## Input contract
 
-```csv
-student_id,hw1,hw2,hw3,hw4,hw5,hw6,total,percentage
-ABC123,95,88,92,85,90,88,538,89.7
-DEF456,78,82,75,80,85,79,479,79.8
-...
-```
+| Input | Required fields and meaning |
+|---|---|
+| Homework | `student_id,student_name,student_group,seminar,homework_id,final_score,late_days,signature_valid`; distinct assignments, score already human-reviewed/adjusted |
+| Project | `student_id,student_name,student_group,auto_score,manual_score,eligible`; finite non-negative components, sum at most10; explicit eligibility or missing state |
+| Tests | `student_id,student_name,student_group,test_id,score`; distinct tests, score0–10 or -1 for absence |
 
-### project_grades.csv
+Required headers are checked even when a table has no data rows. An empty file, missing required columns, blank or repeated column names, a malformed CSV record or a row with a different number of fields from its header is an error. Missing scores must use explicit empty cells under the valid header. Duplicate columns are never resolved by silently choosing the first or last value. A valid header-only table remains a supported empty component.
 
-```csv
-student_id,functionality,style,documentation,testing,total,percentage
-ABC123,35,18,15,12,80,80.0
-DEF456,40,16,18,14,88,88.0
-...
-```
+Optional project catalogue/repository and test date/notes columns are retained as input context but do not prove eligibility. CSV templates contain **synthetic illustrative names and values**, not verified people, repositories or assessment results. They do not prescribe course subweights.
 
-### exam_grades.csv
+## Policy choices
 
-```csv
-student_id,q1,q2,q3,q4,q5,total,percentage
-ABC123,20,18,15,12,10,75,75.0
-DEF456,18,20,14,15,13,80,80.0
-...
-```
+A supplied policy must specify all consequential choices listed in [the current contract](../homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md): weights, thresholds and denominators, late-work participation, grade boundaries, pass boundary, elimination grade and whether project eligibility is required. No approved default is bundled. Positive-weight components require usable evidence; zero-weight missing components remain null with non-blocking notes.
 
----
-
-## Output Format
-
-### final_grades.csv
-
-```csv
-student_id,homework,project,exam,weighted_total,letter_grade,passed
-ABC123,89.7,80.0,75.0,80.91,B,true
-DEF456,79.8,88.0,80.0,82.74,B+,true
-GHI789,65.0,55.0,45.0,54.00,F,false
-...
-```
-
----
-
-## Grading Scale
-
-Default scale (configurable in `GRADING_POLICY.md`):
-
-| Percentage | Letter | Points |
-|------------|--------|--------|
-| 90-100 | A | 4.0 |
-| 85-89 | B+ | 3.5 |
-| 80-84 | B | 3.0 |
-| 75-79 | C+ | 2.5 |
-| 70-74 | C | 2.0 |
-| 65-69 | D+ | 1.5 |
-| 60-64 | D | 1.0 |
-| < 60 | F | 0.0 |
-
-Passing threshold: 60% (configurable)
-
----
-
-## Features
-
-### Handling Missing Grades
-
-```bash
-# Skip students with incomplete records
-python3 final_grade_calculator_EN.py --skip-incomplete
-
-# Treat missing as zero
-python3 final_grade_calculator_EN.py --missing-as-zero
-
-# Flag incomplete for manual review
-python3 final_grade_calculator_EN.py --flag-incomplete
-```
-
-### Bonus Points
-
-```bash
-# Add bonus column from separate file
-python3 final_grade_calculator_EN.py --bonus bonus_points.csv
-
-# Cap total at 100%
-python3 final_grade_calculator_EN.py --bonus bonus.csv --cap 100
-```
-
-### Statistics
-
-```bash
-# Generate class statistics
-python3 final_grade_calculator_EN.py --stats
-
-# Output includes:
-# - Mean, median, std dev
-# - Grade distribution histogram
-# - Pass/fail rates
-```
-
----
-
-## Templates
-
-Use provided templates for consistent formatting:
-
-```bash
-ls templates/
-# homework_grades_template.csv
-# project_grades_template.csv
-# test_grades_template.csv
-```
-
----
-
-*See also: [`GRADING_POLICY.md`](GRADING_POLICY.md) for official policy*  
-*See also: [`../homework_evaluation/`](../homework_evaluation/) for grading criteria*
-
-*Last updated: January 2026*
+[GRADING_POLICY.md](GRADING_POLICY.md) preserves conflicting historical proposals for author reconciliation. Changing that Markdown alone does not configure the calculator. Resolve one versioned policy before calculating authoritative results or publishing them. Duplicate rows, conflicting identity, non-finite marks and invalid scales produce errors rather than arbitrary first/last-row selection.

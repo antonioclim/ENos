@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 Demo (Week 9/10): observing RSS growth and page faults (min/maj) for the current process.
 
@@ -36,7 +36,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--mb", type=int, default=200, help="Total MB to allocate")
     p.add_argument("--step", type=int, default=20, help="Step size in MB")
     p.add_argument("--sleep", type=float, default=0.2, help="Pause between steps")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.mb < 0 or args.step <= 0 or not __import__('math').isfinite(args.sleep) or args.sleep < 0:
+        p.error("--mb must be nonnegative, --step positive and --sleep finite/nonnegative")
+    return args
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -118,9 +121,14 @@ def main() -> int:
 
     print_header(args)
 
-    for allocated in range(0, args.mb + 1, args.step):
+    checkpoints = list(range(0, args.mb + 1, args.step))
+    if checkpoints[-1] != args.mb:
+        checkpoints.append(args.mb)
+    previous = 0
+    for allocated in checkpoints:
         if allocated > 0:
-            allocate_and_touch(blocks, args.step)
+            allocate_and_touch(blocks, allocated - previous)
+        previous = allocated
 
         rss, minflt, majflt = get_memory_stats()
         print_status(allocated, rss, minflt, majflt)

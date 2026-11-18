@@ -1,4 +1,4 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml
 !theme plain
 skinparam backgroundColor #FEFEFE
@@ -47,18 +47,21 @@ note bottom of S
   **Mathematical invariant:**
   S = S₀ - #wait_completed + #signal_completed
   
-  **Binary semaphore:** S ∈ {0, 1} (equivalent to mutex)
+  **Binary discipline:** initialise to 0/1; prohibit unmatched posts above 1.
+  A semaphore has no mutex-style ownership; another thread may post.
+  A mutex is unlocked by its owner under its specified API.
   **Counting semaphore:** S ∈ {0, 1, 2, ...} (multiple resources)
 end note
 
 note bottom of Q
   **Queue implementation:**
-  - FIFO: guarantees bounded waiting
+  - FIFO: limits overtaking if wakeup/acquisition and scheduling are fair
   - LIFO: possible starvation
   
   **Atomicity:**
-  - Disable interrupts (uniprocessor)
-  - Spinlock + disable (SMP)
+  - Queue insertion and sleep must be atomic with the condition check.
+  - Release the internal lock before sleeping; reacquire before rechecking.
+  - Kernel implementations differ; this is conceptual pseudocode.
 end note
 
 @enduml

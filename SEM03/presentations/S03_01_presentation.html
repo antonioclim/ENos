@@ -62,6 +62,7 @@
         .slide.active {
             display: block;
         }
+        .slide.title-slide.active, .slide.section-slide.active { display: flex; }
         
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(30px); }
@@ -106,7 +107,7 @@
         
         /* Title slide specific */
         .title-slide {
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -179,7 +180,7 @@
         
         .keyword { color: #c678dd; }
         .string { color: #98c379; }
-        .comment { color: #5c6370; font-style: italic; }
+        .comment { color: #aeb7c2; font-style: italic; }
         .variable { color: #e5c07b; }
         .command { color: #61afef; }
         .flag { color: #56b6c2; }
@@ -384,7 +385,7 @@
         
         /* Section divider slide */
         .section-slide {
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -448,9 +449,9 @@
             font-weight: bold;
         }
         
-        .perm-r { background: #74b9ff; color: white; }
-        .perm-w { background: #ff7675; color: white; }
-        .perm-x { background: #00b894; color: white; }
+        .perm-r { background: #74b9ff; color: #17212b; }
+        .perm-w { background: #ff7675; color: #17212b; }
+        .perm-x { background: #00b894; color: #17212b; }
         .perm-none { background: #dfe6e9; color: #636e72; }
         
         /* Cron field visualization */
@@ -591,6 +592,101 @@
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
     </style>
+
+<style id="seminar-accessible-print">
+button.quiz-option, button.tab { font: inherit; color: inherit; text-align: left; }
+button.quiz-option { width: 100%; }
+button.nav-dot { padding: 0; border: 1px solid currentColor; }
+button:focus-visible, input:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+@media print {
+  .presentation, .slide-container { display: block !important; height: auto !important; }
+  .slide { height: auto !important; min-height: 0 !important; overflow: visible !important; animation: none !important; }
+  .slide-content { overflow: visible !important; }
+  .nav, .nav-bar, .shortcuts, .keyboard-info, .search-container, .tabs, .filter-tabs, .stats, .print-btn { display: none !important; }
+  .slide *, .card *, .header *, .example *, .diagram * { color: #000 !important; -webkit-text-fill-color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+  .card, .card.hidden, .card[style], .quiz-option { display: block !important; background: #fff !important; color: #000 !important; border: 1px solid #777 !important; }
+  .card-header, .example, .terminal, .terminal-header, .terminal-body, .diagram, .column, .quiz-question { background: #fff !important; color: #000 !important; }
+  .grid { display: block !important; }
+  .card { margin-bottom: 8mm; break-inside: avoid; }
+  pre, code, .example, .diagram { white-space: pre-wrap !important; overflow: visible !important; }
+  h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+}
+</style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="presentation">
@@ -612,17 +708,17 @@
                 <h1>Learning Objectives</h1>
                 <p>At the end of this seminar, you will be able to:</p>
                 <ol>
-                    <li><strong>Construct complex searches</strong> cu <code>find</code> and process results with <code>xargs</code></li>
+                    <li><strong>Construct complex searches</strong> with <code>find</code> and process results with <code>xargs</code></li>
                     <li><strong>Write professional scripts</strong> that accept arguments and options (<code>$@</code>, <code>getopts</code>)</li>
                     <li><strong>Understand the Unix permissions system</strong> - rwx for files vs directories</li>
-                    <li><strong>Manage permissions</strong> cu <code>chmod</code> (octal and symbolic), <code>chown</code>, <code>umask</code></li>
+                    <li><strong>Manage permissions</strong> with <code>chmod</code> (octal and symbolic), <code>chown</code>, <code>umask</code></li>
                     <li><strong>Use special permissions</strong>: SUID, SGID, Sticky Bit</li>
-                    <li><strong>Automate tasks</strong> cu <code>cron</code> și <code>at</code></li>
+                    <li><strong>Automate tasks</strong> with <code>cron</code> and <code>at</code></li>
                 </ol>
                 
                 <div class="info-box info">
                     <div class="title">📚 Prerequisites</div>
-                    This seminar assumes you have completed SEM01-04: navigation, variables, operators, redirection, filters and loops.
+                    This seminar assumes you have completed SEM01–02: navigation, variables, operators, redirection, filters and loops.
                 </div>
             </div>
 
@@ -683,7 +779,7 @@
                 <p><code>find</code> searches for files in the directory hierarchy based on various criteria.</p>
                 
                 <h2>General Syntax</h2>
-                <pre data-lang="bash"><code><span class="command">find</span> <span class="variable">[cale]</span> <span class="flag">[expresii]</span> <span class="flag">[acțiuni]</span></code></pre>
+                <pre data-lang="bash"><code><span class="command">find</span> <span class="variable">[path]</span> <span class="flag">[expressions]</span> <span class="flag">[actions]</span></code></pre>
                 
                 <div class="columns">
                     <div class="column">
@@ -748,19 +844,19 @@
 
             <!-- ===== SLIDE 7: find -size, -mtime ===== -->
             <div class="slide" id="slide-7">
-                <h1>find - Size and Time</h1>
+                <h1>find - Size and Time</h1><p>GNU find rounds sizes up in the chosen unit; use -size -1024c for fewer than 1024 bytes. Time predicates truncate elapsed time into complete units.</p>
                 
                 <h2>Search by Size</h2>
                 <pre data-lang="bash"><code><span class="comment"># Files larger than 100MB</span>
 <span class="command">find</span> /var <span class="flag">-size</span> <span class="number">+100M</span>
 
-<span class="comment"># Files smaller than 1KB</span>
+<span class="comment"># Empty files: -size -1k rounds every non-empty file up</span>
 <span class="command">find</span> . <span class="flag">-size</span> <span class="number">-1k</span>
 
 <span class="comment"># Files exactly 0 bytes (empty)</span>
 <span class="command">find</span> . <span class="flag">-size</span> <span class="number">0</span> <span class="flag">-type f</span></code></pre>
                 
-                <p><strong>Suffixes:</strong> <code>c</code>=bytes, <code>k</code>=KB, <code>M</code>=MB, <code>G</code>=GB</p>
+                <p><strong>Suffixes:</strong> <code>c</code>=bytes, <code>k</code>=KiB (1024 bytes), <code>M</code>=MiB, <code>G</code>=GiB</p>
                 
                 <h2>Search by Modification Time</h2>
                 <pre data-lang="bash"><code><span class="comment"># Modified in the last 24 hours</span>
@@ -774,7 +870,7 @@
                 
                 <div class="info-box info">
                     <div class="title">📌 Interpreting -mtime</div>
-                    <code>-mtime -N</code> = last N days | <code>-mtime +N</code> = older than N days | <code>-mtime N</code> = exactly N days
+                    <code>-mtime -N</code> = fewer than N complete 24-hour periods | <code>-mtime +N</code> = at least N+1 complete 24-hour periods old | <code>-mtime N</code> = between N and N+1 complete 24-hour periods
                 </div>
             </div>
 
@@ -807,7 +903,7 @@
                 
                 <div class="info-box warning">
                     <div class="title">⚠️ Watch the parentheses!</div>
-                    Parentheses must be escaped with <code>\(</code> și <code>\)</code> or put in quotes.
+                    Parentheses must be escaped with <code>\(</code> and <code>\)</code> or put in quotes.
                 </div>
             </div>
 
@@ -823,12 +919,12 @@
 <span class="comment"># \; = terminates the command (escaped ;)</span></code></pre>
                 
                 <h2>Batch Execution (more efficient)</h2>
-                <pre data-lang="bash"><code><span class="comment"># Sends ALL files as arguments at once</span>
+                <pre data-lang="bash"><code><span class="comment"># Sends paths in one or more batches within argument limits</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-exec</span> <span class="command">wc</span> <span class="flag">-l</span> {} <span class="keyword">+</span></code></pre>
                 
                 <div class="diagram">
-  -exec cmd {} \;    →  cmd file1; cmd file2; cmd file3;  (3 procese)
-  -exec cmd {} +     →  cmd file1 file2 file3;            (1 proces)
+  -exec cmd {} \;    →  cmd file1; cmd file2; cmd file3;  (3 processes for this example)
+  -exec cmd {} +     →  cmd file1 file2 file3;            (one or more processes)
                 </div>
                 
                 <h2>With Confirmation (-ok)</h2>
@@ -870,75 +966,77 @@
 
             <!-- ===== SLIDE 11: xargs intro ===== -->
             <div class="slide" id="slide-11">
-                <h1>xargs - Procesare Batch</h1>
+                <h1>xargs - Batch processing</h1>
                 
-                <p><code>xargs</code> construiește și executes comenzi din input standard.</p>
+                <p><code>xargs</code> constructs and executes commands from standard input.</p>
                 
                 <h2>Why xargs?</h2>
                 <ul>
-                    <li>Shell-ul are o <strong>limită</strong> pentru lungimea unei comenzi (~2MB)</li>
-                    <li><code>xargs</code> împarte automat în bucăți gestionabile</li>
-                    <li>Mai eficient decât <code>-exec {} \;</code></li>
+                    <li>The operating system imposes a <strong>limit</strong> on argument and environment size (platform-dependent)</li>
+                    <li><code>xargs</code> splits input into bounded batches</li>
+                    <li>Fewer process launches than <code>-exec {} \;</code></li>
                 </ul>
                 
-                <h2>Utilizare de Bază</h2>
-                <pre data-lang="bash"><code><span class="comment"># Numără linii în toate fișierele .txt</span>
+                <h2>Basic use</h2>
+                <pre data-lang="bash"><code><span class="comment"># Count lines in all .txt files</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="command">wc</span> <span class="flag">-l</span>
 
-<span class="comment"># Displays conținut</span>
+<span class="comment"># Display content</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.conf"</span> | <span class="command">xargs</span> <span class="command">cat</span>
 
-<span class="comment"># Caută text în fișiere găsite</span>
+<span class="comment"># Search text in selected files</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.py"</span> | <span class="command">xargs</span> <span class="command">grep</span> <span class="string">"import"</span></code></pre>
             </div>
 
-            <!-- ===== SLIDE 12: xargs cu spații ===== -->
+            <!-- ===== SLIDE 12: xargs with spații ===== -->
             <div class="slide" id="slide-12">
-                <h1>xargs - Problema Spațiilor</h1>
+                <h1>xargs - Filename boundaries</h1>
                 
                 <div class="info-box danger">
                     <div class="title">🐛 Common Problem</div>
                     Files with spaces in their names "break" xargs by default!
                 </div>
                 
-                <pre data-lang="bash"><code><span class="comment"># Crează fișier cu spații</span>
+                <pre data-lang="bash"><code><span class="comment"># Create a filename containing spaces</span>
 <span class="command">touch</span> <span class="string">"My Document.txt"</span>
 
-<span class="comment"># ❌ GREȘIT - tratează "My" și "Document.txt" separat</span>
+<span class="comment"># ❌ GREȘIT - tratează "My" and "Document.txt" separat</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="command">rm</span>
 <span class="comment"># rm: cannot remove 'My': No such file</span></code></pre>
                 
-                <h2>Soluția: Delimitator NULL</h2>
-                <pre data-lang="bash"><code><span class="comment"># ✅ CORRECT - folosește NULL ca delimitator</span>
+                <h2>Solution: NUL delimiter</h2>
+                <pre data-lang="bash"><code><span class="comment"># ✅ CORRECT - use NUL as the delimiter</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> <span class="flag">-print0</span> | <span class="command">xargs</span> <span class="flag">-0</span> <span class="command">rm</span>
 
-<span class="comment"># -print0 = output separat cu NULL (\0)</span>
-<span class="comment"># -0 = xargs citește delimitatori NULL</span></code></pre>
+<span class="comment"># -print0 = output separated by NUL (\0)</span>
+<span class="comment"># -0 = xargs reads NUL delimiters</span></code></pre>
                 
                 <div class="info-box tip">
-                    <div class="title">💡 Rule de Aur</div>
-                    Întotdeauna folosește <code>find -print0 | xargs -0</code> pentru robustețe!
+                    <div class="title">💡 Rule of thumb</div>
+                    Use <code>find -print0 | xargs -0</code> to preserve pathname boundaries.
                 </div>
             </div>
 
             <!-- ===== SLIDE 13: xargs avansat ===== -->
             <div class="slide" id="slide-13">
-                <h1>xargs - Opțiuni Avansate</h1>
+                <h1>xargs - Advanced options</h1>
                 
-                <h2>Placeholder Personalizat (-I)</h2>
-                <pre data-lang="bash"><code><span class="comment"># {} va fi înlocuit cu fiecare fișier</span>
-<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.txt"</span> | <span class="command">xargs</span> <span class="flag">-I{}</span> <span class="command">cp</span> {} backup/{}</code></pre>
+                <h2>Custom placeholder (-I)</h2>
+                <pre><code># Preserve relative directories; exclude the destination from the traversal.
+mkdir -p -- backup
+find . -path ./backup -prune -o -type f -name &#x27;*.txt&#x27; -print0 |
+    xargs -0 -r -I{} sh -c &#x27;mkdir -p -- &quot;backup/$(dirname -- &quot;$1&quot;)&quot; &amp;&amp; cp -- &quot;$1&quot; &quot;backup/$1&quot;&#x27; sh {}</code></pre>
                 
-                <h2>Limitare Argumente (-n)</h2>
-                <pre data-lang="bash"><code><span class="comment"># Procesează câte 2 fișiere odată</span>
+                <h2>Argument limits (-n)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Process at most two files per invocation</span>
 <span class="command">find</span> . <span class="flag">-type f</span> | <span class="command">xargs</span> <span class="flag">-n 2</span> <span class="command">echo</span></code></pre>
                 
-                <h2>Execuție Paralelă (-P)</h2>
-                <pre data-lang="bash"><code><span class="comment"># 4 procese paralele pentru compresi</span>
-<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.log"</span> | <span class="command">xargs</span> <span class="flag">-P 4</span> <span class="command">gzip</span></code></pre>
+                <h2>Parallel execution (-P)</h2>
+                <pre data-lang="bash"><code><span class="comment"># up to 4 concurrent compression jobs; -n 1 limits each job to one file</span>
+<span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.log"</span> | <span class="command">xargs</span> <span class="flag">-n 1 -P 4</span> <span class="command">gzip</span></code></pre>
                 
-                <h2>Confirmare (-p)</h2>
-                <pre data-lang="bash"><code><span class="comment"># Cere confirmare înainte</span>
+                <h2>Confirmation (-p)</h2>
+                <pre data-lang="bash"><code><span class="comment"># Ask for confirmation first</span>
 <span class="command">find</span> . <span class="flag">-name</span> <span class="string">"*.tmp"</span> | <span class="command">xargs</span> <span class="flag">-p</span> <span class="command">rm</span></code></pre>
             </div>
 
@@ -946,25 +1044,25 @@
             <div class="slide" id="slide-14">
                 <h1>locate - Fast Search</h1>
                 
-                <p><code>locate</code> searches într-o <strong>bază de date pre-indexată</strong>, nu în sistemul de fișiere live.</p>
+                <p><code>locate</code> searches a <strong>pre-indexed database</strong>, rather than the live filesystem.</p>
                 
                 <div class="columns">
                     <div class="column">
                         <h4>find</h4>
                         <ul>
-                            <li>Caută în timp real</li>
-                            <li>Întotdeauna actual</li>
-                            <li>Mai lent (citește disk)</li>
-                            <li>Filtre complexe</li>
+                            <li>Searches the live filesystem</li>
+                            <li>Observes paths as they are visited</li>
+                            <li>May scan the disk</li>
+                            <li>Complex predicates</li>
                         </ul>
                     </div>
                     <div class="column">
                         <h4>locate</h4>
                         <ul>
-                            <li>Caută în database</li>
-                            <li>Poate fi outdated</li>
-                            <li>Foarte rapid</li>
-                            <li>Doar nume fișier</li>
+                            <li>Searches the database</li>
+                            <li>May be outdated</li>
+                            <li>Usually fast</li>
+                            <li>Indexed filenames</li>
                         </ul>
                     </div>
                 </div>
@@ -972,14 +1070,14 @@
                 <pre data-lang="bash"><code><span class="comment"># Quick search</span>
 <span class="command">locate</span> <span class="string">"passwd"</span>
 
-<span class="comment"># Actualizează baza de date (root)</span>
+<span class="comment"># Update the database (requires appropriate privileges)</span>
 <span class="command">sudo</span> <span class="command">updatedb</span>
 
 <span class="comment"># Case-insensitive</span>
 <span class="command">locate</span> <span class="flag">-i</span> <span class="string">"readme"</span></code></pre>
                 
                 <div class="info-box warning">
-                    <div class="title">⚠️ CAPCANĂ!</div>
+                    <div class="title">⚠️ PITFALL!</div>
                     Recently created files do NOT appear in <code>locate</code> until the next <code>updatedb</code>!
                 </div>
             </div>
@@ -989,23 +1087,23 @@
                 <h1>Peer Instruction: find & xargs</h1>
                 
                 <div class="quiz-question">
-                    <h3>What will the following command display?</h3>
+                    <h3>Assume this filename did not exist in the locate database and it is not rebuilt between commands. What does locate display?</h3>
                     <pre style="background: rgba(0,0,0,0.3);"><code>touch ~/new_file.txt
 locate new_file.txt</code></pre>
                     
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>A)</strong> /home/user/new_file.txt
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, true)">
                             <strong>B)</strong> Nothing (database not updated)
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>C)</strong> Error: file not found
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>D)</strong> List of all .txt files
-                        </div>
+                        </button>
                     </div>
                 </div>
                 
@@ -1066,9 +1164,9 @@ locate new_file.txt</code></pre>
                 
                 <pre data-lang="bash"><code><span class="comment">#!/bin/bash</span>
 <span class="command">echo</span> <span class="string">"Script: $0"</span>
-<span class="command">echo</span> <span class="string">"Argumente: $#"</span>
-<span class="command">echo</span> <span class="string">"Primul: $1"</span>
-<span class="command">echo</span> <span class="string">"Al doilea: $2"</span></code></pre>
+<span class="command">echo</span> <span class="string">"Arguments: $#"</span>
+<span class="command">echo</span> <span class="string">"First: $1"</span>
+<span class="command">echo</span> <span class="string">"Second: $2"</span></code></pre>
             </div>
 
             <!-- ===== SLIDE 18: $@ vs $* ===== -->
@@ -1095,8 +1193,8 @@ locate new_file.txt</code></pre>
 <span class="comment"># [hello world test]</span></code></pre>
                 
                 <div class="diagram">
-  "$@" = "arg1" "arg2" "arg3"   →  3 elemente separate
-  "$*" = "arg1 arg2 arg3"       →  1 string concatenat
+  "$@" = "arg1" "arg2" "arg3"   →  3 elements separate
+  "$*" = "arg1 arg2 arg3"       →  1 concatenated string
                 </div>
                 
                 <div class="info-box tip">
@@ -1180,7 +1278,7 @@ locate new_file.txt</code></pre>
 <span class="variable">verbose</span>=<span class="number">0</span>
 <span class="variable">output</span>=<span class="string">""</span>
 
-<span class="keyword">while</span> <span class="command">getopts</span> <span class="string">"hvo:"</span> <span class="variable">opt</span>; <span class="keyword">do</span>
+<span class="keyword">while</span> <span class="command">getopts</span> <span class="string">":hvo:"</span> <span class="variable">opt</span>; <span class="keyword">do</span>
     <span class="keyword">case</span> <span class="variable">$opt</span> <span class="keyword">in</span>
         h)
             <span class="command">echo</span> <span class="string">"Usage: $0 [-h] [-v] [-o file] args..."</span>
@@ -1192,8 +1290,8 @@ locate new_file.txt</code></pre>
         o)
             <span class="variable">output</span>=<span class="string">"$OPTARG"</span>  <span class="comment"># OPTARG = the argument value</span>
             ;;
-        \?)
-            <span class="command">echo</span> <span class="string">"Invalid option: -$OPTARG"</span> >&2
+        :|\?)
+            <span class="command">echo</span> <span class="string">"Invalid option or missing argument: -$OPTARG"</span> >&2
             <span class="keyword">exit</span> <span class="number">1</span>
             ;;
     <span class="keyword">esac</span>
@@ -1228,9 +1326,9 @@ locate new_file.txt</code></pre>
                 <div class="diagram">
   ./script.sh -v -o out.txt file1.txt file2.txt
               ↑   ↑   ↑      ↑
-              1   2   3      OPTIND=4 după parsare
+              1   2   3      OPTIND=4 after parsing
               
-  După shift $((OPTIND-1)):
+  After shift $((OPTIND-1)):
   $1 = file1.txt
   $2 = file2.txt
                 </div>
@@ -1253,18 +1351,18 @@ echo "Argument 10: $10"
 # Run: ./script.sh a b c d e f g h i j k</code></pre>
                     
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>A)</strong> j
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, true)">
                             <strong>B)</strong> a0
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>C)</strong> Syntax error
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>D)</strong> k
-                        </div>
+                        </button>
                     </div>
                 </div>
                 
@@ -1281,22 +1379,22 @@ echo "Argument 10: $10"
                 <p style="font-size: 1.3em; opacity: 0.9;">chmod • chown • umask • SUID/SGID</p>
             </div>
 
-            <!-- ===== SLIDE 25: Permisiuni intro ===== -->
+            <!-- ===== SLIDE 25: Permissions intro ===== -->
             <div class="slide" id="slide-25">
-                <h1>Sistemul de Unix Permissions</h1>
+                <h1>Unix permission model</h1>
                 
-                <p>Fiecare fișier/director are 3 seturi de permisiuni pentru 3 categorii de utilizatori:</p>
+                <p>Each file or directory has three basic permission classes: owner, group and others.</p>
                 
                 <div class="diagram">
   -rwxr-xr--  1  user  group  4096  Jan 15 10:00  file.txt
   │└┬┘└┬┘└┬┘
-  │ │  │  └── Others (o) - toți ceilalți
-  │ │  └───── Group (g) - membrii grupului
-  │ └──────── User/Owner (u) - proprietarul
-  └────────── Tip fișier (- = regular, d = dir, l = link)
+  │ │  │  └── Others (o) - everyone else
+  │ │  └───── Group (g) - group members
+  │ └──────── User/Owner (u) - the owner
+  └────────── File type (- = regular, d = dir, l = link)
                 </div>
                 
-                <h2>Semnificația rwx</h2>
+                <h2>Meaning of rwx</h2>
                 <table>
                     <tr>
                         <th>Permission</th>
@@ -1316,31 +1414,31 @@ echo "Argument 10: $10"
                     <tr>
                         <td><strong>x</strong> (execute)</td>
                         <td>Execute as program</td>
-                        <td><strong>Accesează</strong> (cd)</td>
+                        <td><strong>Traverse/search</strong> (cd)</td>
                     </tr>
                 </table>
             </div>
 
             <!-- ===== SLIDE 26: x pe director ===== -->
             <div class="slide" id="slide-26">
-                <h1>x pe Directory - ATENȚIE!</h1>
+                <h1>x on a directory - CAUTION!</h1>
                 
                 <div class="info-box danger">
                     <div class="title">🎯 Critical Misconception</div>
-                    <code>x</code> pe director NU înseamnă "pot executa fișierele din el"!
+                    <code>x</code> on a directory permits pathname search; it does not grant file execution or reading.
                 </div>
                 
                 <div class="columns">
                     <div class="column">
-                        <h4>Fără x pe director</h4>
+                        <h4>Without directory search permission</h4>
                         <pre data-lang="bash"><code><span class="command">chmod</span> <span class="number">640</span> mydir/
 <span class="comment"># rw-r-----</span>
 <span class="command">cd</span> mydir/  <span class="comment"># Permission denied!</span>
 <span class="command">cat</span> mydir/file.txt  <span class="comment"># Permission denied!</span>
-<span class="command">ls</span> mydir/  <span class="comment"># Funcționează (r)</span></code></pre>
+<span class="command">ls</span> mydir/  <span class="comment"># Lists names when r is available</span></code></pre>
                     </div>
                     <div class="column">
-                        <h4>Cu x pe director</h4>
+                        <h4>With directory search permission</h4>
                         <pre data-lang="bash"><code><span class="command">chmod</span> <span class="number">750</span> mydir/
 <span class="comment"># rwxr-x---</span>
 <span class="command">cd</span> mydir/  <span class="comment"># OK</span>
@@ -1350,16 +1448,16 @@ echo "Argument 10: $10"
                 </div>
                 
                 <div class="diagram">
-  Directory cu r-- (doar read):
-  ✓ ls dir/           (vezi lista de nume)
-  ✗ ls -l dir/        (nu poți accesa metadata)
-  ✗ cd dir/           (nu poți intra)
-  ✗ cat dir/file      (nu poți accesa fișierele)
+  Directory with r-- (read only):
+  ✓ ls dir/           (can list names)
+  ✗ ls -l dir/        (cannot access entry metadata)
+  ✗ cd dir/           (cannot enter)
+  ✗ cat dir/file      (cannot access contained files)
   
-  Directory cu --x (doar execute):
-  ✗ ls dir/           (nu poți lista)
-  ✓ cd dir/           (poți intra)
-  ✓ cat dir/file      (dacă știi numele exact)
+  Directory with --x (search only):
+  ✗ ls dir/           (cannot list names)
+  ✓ cd dir/           (can enter)
+  ✓ cat dir/file      (if the exact name is known AND the file is readable)
                 </div>
             </div>
 
@@ -1387,7 +1485,7 @@ echo "Argument 10: $10"
                     <tr>
                         <th>Octal</th>
                         <th>Binary</th>
-                        <th>Permisiuni</th>
+                        <th>Permissions</th>
                         <th>Meaning</th>
                     </tr>
                     <tr><td>7</td><td>111</td><td>rwx</td><td>Full access</td></tr>
@@ -1402,7 +1500,7 @@ echo "Argument 10: $10"
 <span class="command">chmod</span> <span class="number">600</span> secret.key  <span class="comment"># rw-------</span></code></pre>
             </div>
 
-            <!-- ===== SLIDE 28: chmod simbolic ===== -->
+            <!-- ===== SLIDE 28: chmod symbolic ===== -->
             <div class="slide" id="slide-28">
                 <h1>chmod - Symbolic Mode</h1>
                 
@@ -1443,7 +1541,7 @@ echo "Argument 10: $10"
 
             <!-- ===== SLIDE 29: chmod X vs x ===== -->
             <div class="slide" id="slide-29">
-                <h1>chmod Recursive: X vs x</h1>
+                <h1>chmod Recursivee: X vs x</h1>
                 
                 <div class="info-box danger">
                     <div class="title">⚠️ Common Problem</div>
@@ -1454,7 +1552,7 @@ echo "Argument 10: $10"
                 <pre data-lang="bash"><code><span class="comment"># ❌ WRONG: makes everything executable</span>
 <span class="command">chmod</span> <span class="flag">-R</span> <span class="flag">a+x</span> myproject/
 
-<span class="comment"># ✅ CORRECT: X = execute doar pentru directoare</span>
+<span class="comment"># ✅ CORRECT: X = execute for directories</span>
 <span class="comment"># and files that already have x for someone</span>
 <span class="command">chmod</span> <span class="flag">-R</span> <span class="flag">a+X</span> myproject/</code></pre>
                 
@@ -1482,17 +1580,17 @@ echo "Argument 10: $10"
     Directories: 777 (rwxrwxrwx)
   
   umask 022:
-    Files:    666 - 022 = 644 (rw-r--r--)
-    Directories: 777 - 022 = 755 (rwxr-xr-x)
+    Files:    0666 &amp; ~0022 = 0644 (rw-r--r--)
+    Directories: 0777 &amp; ~0022 = 0755 (rwxr-xr-x)
     
   umask 077:
-    Files:    666 - 077 = 600 (rw-------)
-    Directories: 777 - 077 = 700 (rwx------)
+    Files:    0666 &amp; ~0077 = 0600 (rw-------)
+    Directories: 0777 &amp; ~0077 = 0700 (rwx------)
                 </div>
                 
                 <pre data-lang="bash"><code><span class="comment"># Check current umask</span>
 <span class="command">umask</span>         <span class="comment"># Displays 0022</span>
-<span class="command">umask</span> <span class="flag">-S</span>      <span class="comment"># Displays simbolic: u=rwx,g=rx,o=rx</span>
+<span class="command">umask</span> <span class="flag">-S</span>      <span class="comment"># Displays symbolic: u=rwx,g=rx,o=rx</span>
 
 <span class="comment"># Set umask for session</span>
 <span class="command">umask</span> <span class="number">077</span>     <span class="comment"># Very restrictive</span>
@@ -1508,10 +1606,10 @@ echo "Argument 10: $10"
                 <pre data-lang="bash"><code><span class="comment"># Change the owner</span>
 <span class="command">sudo</span> <span class="command">chown</span> <span class="variable">newuser</span> file.txt
 
-<span class="comment"># Change the owner și grupul</span>
+<span class="comment"># Change the owner and group</span>
 <span class="command">sudo</span> <span class="command">chown</span> <span class="variable">newuser:newgroup</span> file.txt
 
-<span class="comment"># Recursive</span>
+<span class="comment"># Recursivee</span>
 <span class="command">sudo</span> <span class="command">chown</span> <span class="flag">-R</span> <span class="variable">www-data:www-data</span> /var/www/</code></pre>
                 
                 <h2>Change Group Only</h2>
@@ -1536,7 +1634,7 @@ echo "Argument 10: $10"
                 <pre data-lang="bash"><code><span class="command">ls</span> <span class="flag">-l</span> /usr/bin/passwd
 <span class="comment"># -rwsr-xr-x 1 root root ... /usr/bin/passwd</span>
 <span class="comment">#    ↑</span>
-<span class="comment">#    s în loc de x = SUID activat</span></code></pre>
+<span class="comment">#    s in the execute position = SUID plus execute</span></code></pre>
                 
                 <h2>Why does it exist?</h2>
                 <p><code>/usr/bin/passwd</code> needs to modify <code>/etc/shadow</code> (owned by root). SUID allows normal users to change their password.</p>
@@ -1551,7 +1649,7 @@ echo "Argument 10: $10"
                 </div>
             </div>
 
-            <!-- ===== SLIDE 33: SGID și Sticky ===== -->
+            <!-- ===== SLIDE 33: SGID and Sticky ===== -->
             <div class="slide" id="slide-33">
                 <h1>SGID and Sticky Bit</h1>
                 
@@ -1563,13 +1661,13 @@ echo "Argument 10: $10"
 <span class="command">chmod</span> <span class="number">2775</span> /shared/project/  <span class="comment"># 2 = SGID</span>
 
 <span class="command">ls</span> <span class="flag">-ld</span> /shared/project/
-<span class="comment"># drwxrwsr-x ... (s în poziția group x)</span></code></pre>
+<span class="comment"># drwxrwsr-x ... (s in the group execute position)</span></code></pre>
                 
                 <h2>Sticky Bit on Directories</h2>
-                <p>Only the <strong>file owner</strong> can delete the file (e.g.: /tmp).</p>
+                <p>The file owner, directory owner or a privileged process may remove or rename it, subject to normal permissions (e.g.: /tmp).</p>
                 
                 <pre data-lang="bash"><code><span class="command">ls</span> <span class="flag">-ld</span> /tmp
-<span class="comment"># drwxrwxrwt ... (t în poziția others x)</span>
+<span class="comment"># drwxrwxrwt ... (t in the others execute position)</span>
 <span class="comment">#          ↑</span>
 <span class="comment">#          t = Sticky bit</span>
 
@@ -1612,21 +1710,21 @@ echo "Argument 10: $10"
                 
                 <div class="quiz-question">
                     <h3>A directory has the permissions: drwxr-x---</h3>
-                    <p>What can a user from the group NOT do?</p>
+                    <p>Assume the user is not the owner, has no overriding ACL or privileges and all contained files are readable. What can a group member NOT do?</p>
                     
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>A)</strong> cd into the directory
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>B)</strong> ls the directory
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, true)">
                             <strong>C)</strong> Create new files in the directory
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>D)</strong> Read the files in the directory
-                        </div>
+                        </button>
                     </div>
                 </div>
                 
@@ -1685,7 +1783,7 @@ echo "Argument 10: $10"
                 <div class="cron-visual">
                     <div class="cron-field">
                         <div class="cron-value">*</div>
-                        <div class="cron-label">Minute<br>(0-59)</div>
+                        <div class="cron-label">Minutee<br>(0-59)</div>
                     </div>
                     <div class="cron-field">
                         <div class="cron-value">*</div>
@@ -1756,13 +1854,13 @@ echo "Argument 10: $10"
                 
                 <div class="info-box danger">
                     <div class="title">🎯 Misconception #1: Execution environment</div>
-                    Cron runs with a <strong>minimal</strong> environment - it does NOT have access to your variables (customised PATH, HOME, etc.)!
+                    Cron runs with a <strong>minimal</strong> environment - it does NOT have access to your variables (interactive shell customisations; HOME is normally set by cron)!
                 </div>
                 
                 <pre data-lang="crontab"><code><span class="comment"># ❌ WRONG - python may not be in PATH</span>
 * * * * * python script.py
 
-<span class="comment"># ✅ CORRECT - calea completă</span>
+<span class="comment"># ✅ CORRECT - full path</span>
 * * * * * /usr/bin/python3 /home/user/script.py</code></pre>
                 
                 <div class="info-box warning">
@@ -1775,7 +1873,7 @@ echo "Argument 10: $10"
                 
                 <h2>Best Practice: Logging</h2>
                 <pre data-lang="crontab"><code><span class="comment"># Redirect stdout and stderr to log</span>
-0 3 * * * /home/user/backup.sh >> /var/log/backup.log 2>&1</code></pre>
+0 3 * * * /home/user/backup.sh >> /home/user/backup.log 2>&1</code></pre>
             </div>
 
             <!-- ===== SLIDE 41: at command ===== -->
@@ -1793,7 +1891,7 @@ echo "Argument 10: $10"
 <span class="command">at</span> <span class="number">14:30</span> <span class="flag">-f</span> commands.txt
 
 <span class="comment"># Time specifications</span>
-<span class="command">at</span> now + 10 minutess
+<span class="command">at</span> now + 10 minutes
 <span class="command">at</span> midnight
 <span class="command">at</span> tomorrow
 <span class="command">at</span> 10:00 AM Dec 25</code></pre>
@@ -1814,18 +1912,18 @@ echo "Argument 10: $10"
                     <h3>What does this mean: <code>*/5 * * * *</code>?</h3>
                     
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="checkQuiz(this, true)">
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, true)">
                             <strong>A)</strong> Every 5 minutes (0, 5, 10, 15...)
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>B)</strong> 5 minutes after the last execution
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>C)</strong> At minute 5 of every hour
-                        </div>
-                        <div class="quiz-option" onclick="checkQuiz(this, false)">
+                        </button>
+                        <button type="button" class="quiz-option" onclick="checkQuiz(this, false)">
                             <strong>D)</strong> 5 times per hour, at random intervals
-                        </div>
+                        </button>
                     </div>
                 </div>
                 
@@ -1877,11 +1975,11 @@ find . -print0 | xargs -0 cmd</code></pre>
                         
                         <h4>Parameters</h4>
                         <pre><code>$0 $1-$9 ${10}+ $# "$@"
-while getopts "hvo:" opt
+while getopts ":hvo:" opt
 shift $((OPTIND - 1))</code></pre>
                     </div>
                     <div class="column">
-                        <h4>Permisiuni</h4>
+                        <h4>Permissions</h4>
                         <pre><code>chmod 755 (rwxr-xr-x)
 chmod u+x,g-w file
 chown user:group file
@@ -1969,9 +2067,10 @@ umask 077</code></pre>
 
     <script>
         let currentSlide = 1;
-        const totalSlides = 46;
+        const totalSlides = document.querySelectorAll('.slide').length;
         
         function showSlide(n) {
+            if (!Number.isInteger(n)) n = 1;
             // Bounds check
             if (n < 1) n = 1;
             if (n > totalSlides) n = totalSlides;
@@ -1995,7 +2094,7 @@ umask 077</code></pre>
             document.getElementById('next-btn').disabled = (n === totalSlides);
             
             // Save position
-            localStorage.setItem('sem03-slide', n);
+            try { localStorage.setItem('sem03-slide', String(n)); } catch (_) { /* storage is optional */ }
         }
         
         function nextSlide() {
@@ -2042,6 +2141,9 @@ umask 077</code></pre>
         
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
+            const target = e.target;
+            if (target && (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName) || target.isContentEditable)) return;
+
             switch(e.key) {
                 case 'ArrowRight':
                 case 'PageDown':
@@ -2070,10 +2172,9 @@ umask 077</code></pre>
         
         // Restore position on load
         document.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('sem03-slide');
-            if (saved) {
-                showSlide(parseInt(saved));
-            }
+            let saved = null;
+            try { saved = localStorage.getItem('sem03-slide'); } catch (_) { /* storage is optional */ }
+            showSlide(saved === null ? 1 : Number(saved));
         });
         
         // Touch support for mobile

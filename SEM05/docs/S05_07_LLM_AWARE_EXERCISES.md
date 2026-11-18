@@ -6,6 +6,24 @@
 
 ---
 
+## Evidence and author decisions
+
+Personalisation varies inputs; it does not authenticate the author, prove a run or
+prevent AI assistance. Public hashes can be reproduced by anyone with the inputs,
+and truncated hashes are not unique identifiers. Evaluate demonstrated reasoning
+and reproducible behaviour. Style, fluent English, zero warnings or unfamiliar
+constructs do not establish misconduct; any institutional response requires its
+approved evidence and procedure.
+
+The historical personal-data requirement remains **pending author approval**.
+Option A (recommended): assign a non-sensitive exercise seed and retain equivalent
+variation without collecting birthdates. Option B: retain the stated fields only
+after specifying necessity, access, retention and the applicable course policy.
+The examples below use synthetic parameters for local verification; no new
+institutional collection or misconduct policy is adopted. Historical first-person
+case studies, star ratings and percentages are retained as author-provided claims
+whose underlying records/provenance have not been verified in this repository.
+
 ## LLM-Aware Philosophy
 
 In the ChatGPT/Claude/Copilot era, traditional assessment ("write a script that...") becomes problematic. Students can generate functional code without understanding what it does.
@@ -28,11 +46,11 @@ In the ChatGPT/Claude/Copilot era, traditional assessment ("write a script that.
 
 ## Exercise Type 7: PERSONALISED DEBUGGING (NEW)
 
-> ⚠️ **Anti-AI Strategy:** These exercises use YOUR unique data. AI cannot generate "your" student ID or birthdate.
+> **Parameter variation:** These exercises require reasoning about supplied values. They are not evidence of authorship or AI resistance.
 
 ### E7.1: Your Birthday Bug Hunt
 
-Using YOUR student ID and birthdate, create and debug a script:
+Use the synthetic values below to practise; the author must resolve the personal-data requirement before assigning real identifiers:
 
 ```bash
 #!/bin/bash
@@ -43,21 +61,24 @@ set -euo pipefail
 # Replace the placeholders with YOUR actual data
 # ═══════════════════════════════════════════════════════════════════
 
-STUDENT_ID="[YOUR_FULL_STUDENT_ID]"         # e.g., "12345678"
-BIRTH_DAY="[YOUR_BIRTH_DAY_01-31]"          # e.g., "15"
-BIRTH_MONTH="[YOUR_BIRTH_MONTH_01-12]"      # e.g., "03"
+STUDENT_ID="12345600"  # Synthetic edge-case fixture
+BIRTH_DAY="08"         # Synthetic, not personal data
+BIRTH_MONTH="09"
 
-# Extract last 2 digits of student ID for array size
-ARRAY_SIZE="${STUDENT_ID: -2}"
+# Validate/normalise before entering the intentionally broken region.
+[[ $STUDENT_ID =~ ^[0-9]{8}$ && $BIRTH_DAY =~ ^[0-9]{2}$ && $BIRTH_MONTH =~ ^[0-9]{2}$ ]] || exit 2
+BIRTH_DAY=$((10#$BIRTH_DAY)); BIRTH_MONTH=$((10#$BIRTH_MONTH)); STUDENT_ID_DEC=$((10#$STUDENT_ID))
+((BIRTH_DAY>=1 && BIRTH_DAY<=31 && BIRTH_MONTH>=1 && BIRTH_MONTH<=12)) || exit 2
+ARRAY_SIZE=$((10#${STUDENT_ID: -2}+1))  # 1..100, including suffix 00
 
 # Create array with that many elements
-declare -a items
+declare -a items=()
 for ((i=0; i<ARRAY_SIZE; i++)); do
-    items+=("item_$i")
+    items+=("item $i")
 done
 
 # ═══════════════════════════════════════════════════════════════════
-# BUG ZONE: There are 3 bugs below. Find and fix them.
+# BUG ZONE: identify the three behavioural requirements below, then repair the code.
 # ═══════════════════════════════════════════════════════════════════
 
 # Bug 1: Something wrong with this index calculation
@@ -68,19 +89,19 @@ echo "Element at combined index: ${items[$target_index]}"
 
 # Bug 3: This loop has a quoting issue
 for item in ${items[@]}; do
-    if [[ $item == item_${BIRTH_DAY} ]]; then
+    if [[ $item == "item $BIRTH_DAY" ]]; then
         echo "Found your birthday item!"
     fi
 done
 
 echo "Total items: ${#items[@]}"
-echo "Your personalised checksum: $((STUDENT_ID % 97))"
+echo "Your personalised checksum: $((STUDENT_ID_DEC % 97))"
 ```
 
 **Tasks:**
-1. Fill in YOUR actual student ID and birthdate
-2. Identify the 3 bugs
-3. Explain WHY each is a bug
+1. Start with the synthetic fixture; also test suffixes 08, 09 and 00
+2. Define a valid index mapping into 0..ARRAY_SIZE-1 and a guarded access
+3. Preserve every array element, including its space, and explain the observed failure
 4. Fix each bug
 5. Run the script and paste your personalised output
 
@@ -105,11 +126,7 @@ My output:
 [paste your terminal output here]
 ```
 
-**Why this works against AI:**
-- Each student has unique parameters → unique array sizes, unique indices
-- AI cannot predict "your" output without knowing your student ID
-- The bugs interact with personal data, so fixes must be context-aware
-- Checksum at the end verifies you actually ran the code
+**What this evidence establishes:** parameters vary the array and index cases. The checksum is a deterministic arithmetic result; it does not prove who executed the program or whether it was executed at all.
 
 ---
 
@@ -129,7 +146,9 @@ YOUR_INITIALS="[FIRST_LAST_INITIALS]"    # e.g., "AC" for Antonio Clim
 STUDENT_ID="[YOUR_STUDENT_ID]"
 
 # Config file path uses your initials
-CONFIG_FILE="/tmp/${YOUR_INITIALS}_${STUDENT_ID}.conf"
+WORKSPACE=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$WORKSPACE"' EXIT
+CONFIG_FILE="$WORKSPACE/config.conf"
 
 # ═══════════════════════════════════════════════════════════════════
 # IMPLEMENT THESE FUNCTIONS
@@ -184,11 +203,7 @@ echo ""
 echo "5. Verification hash: $(md5sum "$CONFIG_FILE" | cut -d' ' -f1)"
 ```
 
-**Why this works against AI:**
-- Config file path is unique to each student
-- Output includes your initials and ID — easy to verify authenticity
-- MD5 hash at end proves the script ran with YOUR specific data
-- Functions must handle YOUR specific data structure
+**What this evidence establishes:** the digest relates to the resulting file bytes. It does not authenticate the student or prove the origin of those bytes. The owned workspace prevents collisions between runs.
 
 ---
 
@@ -202,7 +217,7 @@ process() {
     local -n ref=$1
     local count=0
     for item in "${ref[@]}"; do
-        [[ "$item" =~ ^[0-9]+$ ]] && ((count++))
+        [[ "$item" =~ ^[0-9]+$ ]] && count=$((count+1))
     done
     echo $count
 }
@@ -471,7 +486,7 @@ config[output]="results"
 Bug 4: `count=$count+1` - string concatenation, not arithmetic
 ```bash
 # Correct:
-((count++))
+count=$((count+1))
 # or
 count=$((count + 1))
 ```
@@ -503,7 +518,7 @@ config[output]="results"
 process() {
     local count=0
     for file in "${FILES[@]}"; do
-        ((count++))
+        count=$((count+1))
         echo "Processing $file" >&2
     done
     echo $count
@@ -535,6 +550,7 @@ Running:
 ```bash
 $ ./backup.sh
 Starting backup...
+./backup.sh: line 5: cd: /backup/location: No such file or directory
 $
 ```
 
@@ -549,7 +565,7 @@ Questions:
 
 1. Why it doesn't appear: `cd /backup/location` probably fails (directory doesn't exist). With `set -e` the script stops immediately.
 
-2. Why no error appears: `cd` fails SILENTLY (only returns exit code ≠ 0). `set -e` stops the script but doesn't display why.
+2. Bash normally prints a `cd` diagnostic on stderr. The displayed transcript omits stderr; investigate redirection/capture rather than assuming the command is silent.
 
 3. Diagnosis:
    ```bash
@@ -640,7 +656,8 @@ if [[ ${#log_files[@]} -eq 0 ]]; then
 fi
 
 for log_file in "${log_files[@]}"; do
-    count=$(grep -c "ERROR" "$log_file" 2>/dev/null || echo 0)
+    if count=$(grep -c 'ERROR' -- "$log_file"); then :
+    else status=$?; ((status==1)) || exit "$status"; fi
     echo "$log_file: $count errors"
 done
 ```
@@ -816,7 +833,7 @@ Submission format:
 
 ### E7.3: Your Unique Hash Chain (Advanced)
 
-> ⚠️ **Maximum AI Resistance:** This exercise creates a verification chain that is mathematically unique to you.
+> **Deterministic hash-chain exercise:** the public computation checks byte transformations. It provides neither uniqueness nor authentication.
 
 Create a script that generates a personalised verification code:
 
@@ -863,12 +880,7 @@ echo "This code MUST appear in your submission."
 echo "Instructor can verify by re-running with your data."
 ```
 
-**Why this defeats AI:**
-- The hash chain depends on YOUR specific personal data
-- Intermediate values are cryptographically unpredictable
-- AI cannot guess what your verification code will be
-- Instructor can verify authenticity by re-running with your student ID
-- Changing any input value produces a completely different code
+**Interpretation:** anyone with the inputs can reproduce every intermediate and final value, including with AI-assisted code. Re-running verifies consistency with those inputs. Truncation permits collisions, and hashing does not establish authorship, execution time or identity.
 
 **Submission requirement:**
 Your homework README must include:
@@ -925,7 +937,7 @@ Student: [types for 90 seconds] "Like this? I added a variable
 
 **Outcome:** Full marks minus shellcheck penalties. Clearly understood their own code.
 
-### Key Differentiators
+### Historical observations requiring contextual evidence
 
 | Indicator | Likely AI-Generated | Likely Authentic |
 |-----------|---------------------|------------------|
@@ -953,7 +965,7 @@ Student: [types for 90 seconds] "Like this? I added a variable
 
 ### Detecting AI Usage — Expanded Checklist
 
-**Code-level signals:**
+**Discussion prompts, not validated detectors or proof of misconduct:**
 - Perfect shellcheck compliance (beginners make mistakes)
 - Features not yet taught (check syllabus progression)
 - Unusual constructs for the task (over-engineering)
@@ -976,7 +988,7 @@ Student: [types for 90 seconds] "Like this? I added a variable
 
 1. **Document observations** — specific lines, specific behaviours
 2. **Ask increasingly specific questions** — not accusations
-3. **Request live modification** — authentic students adapt; copiers freeze
+3. **Request an appropriate live modification** — assess the demonstrated skill; difficulty or hesitation alone does not establish misconduct
 4. **Compare with in-class work** — dramatic skill difference is a signal
 5. **Consult colleagues** — get second opinion before escalating
 

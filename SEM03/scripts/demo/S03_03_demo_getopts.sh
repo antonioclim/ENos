@@ -27,7 +27,8 @@ set -e
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-DEMO_DIR="$HOME/getopts_demo_lab"
+DEMO_DIR="$(mktemp -d "${TMPDIR:-/tmp}/enos-getopts.XXXXXXXX")"
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
 INTERACTIVE=false
 RUN_SECTION=""
 SPECIFIC_DEMO=""
@@ -113,7 +114,9 @@ run_script_demo() {
     echo -e "${GREEN}▶${NC} ${BOLD}./script.sh $script_args${NC}"
     [[ -n "$description" ]] && echo -e "  ${GRAY}↳ $description${NC}"
     echo -e "${DIM}─────────── OUTPUT ───────────${NC}"
-    bash "$tmp_script" $script_args 2>&1 || true
+    local -a demo_args=()
+    mapfile -d '' -t demo_args < <(python3 -c 'import shlex, sys; sys.stdout.buffer.write(b"\0".join(x.encode() for x in shlex.split(sys.argv[1])) + (b"\0" if sys.argv[1] else b""))' "$script_args")
+    bash "$tmp_script" "${demo_args[@]}" 2>&1 || true
     echo -e "${DIM}──────────────────────────────${NC}"
     
     rm -f "$tmp_script"
@@ -398,7 +401,7 @@ counter=1
 while [[ $# -gt 0 ]]; do
     echo "  Argument $counter: $1"
     shift
-    ((counter++))
+    counter=$((counter + 1))
 done
 echo "Done! No more arguments."'
     
@@ -943,7 +946,8 @@ log() {
 }
 
 log_verbose() {
-    [[ "$VERBOSE" == true ]] && log "$@"
+    if [[ "$VERBOSE" == true ]]; then log "$@"; fi
+    return 0
 }
 
 error() {
@@ -1203,6 +1207,7 @@ parse_args() {
 
 main() {
     parse_args "$@"
+    setup_demo
     
     if [[ -n "$RUN_SECTION" ]]; then
         case "$RUN_SECTION" in

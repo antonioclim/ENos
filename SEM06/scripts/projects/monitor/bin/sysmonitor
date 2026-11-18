@@ -8,7 +8,8 @@
 # INSTALLATION:
 #   sudo ln -sf /path/to/monitor/monitor.sh /usr/local/bin/sysmonitor
 #   or
-#   cp /path/to/monitor/bin/sysmonitor ~/bin/
+#   ln -s /path/to/monitor/bin/sysmonitor ~/bin/sysmonitor
+# Copying this wrapper alone does not install the application.
 #
 # USAGE:
 #   sysmonitor              # Single-shot check
@@ -35,13 +36,5 @@ if [[ ! -f "$MONITOR_SCRIPT" ]]; then
     exit 1
 fi
 
-# Check execution permissions
-if [[ ! -x "$MONITOR_SCRIPT" ]]; then
-    chmod +x "$MONITOR_SCRIPT" 2>/dev/null || {
-        echo "ERROR: Cannot set execution permissions for: $MONITOR_SCRIPT" >&2
-        exit 1
-    }
-fi
-
-# Execute main script with all arguments
-exec "$MONITOR_SCRIPT" "$@"
+# Invoke Bash without modifying tracked file permissions.
+exec bash "$MONITOR_SCRIPT" "$@"

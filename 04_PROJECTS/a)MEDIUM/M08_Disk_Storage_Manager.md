@@ -62,7 +62,7 @@ Intelligent storage manager: real-time space monitoring, automatic cleanup (temp
 
 ## CLI Interface
 
-```bash
+```text
 ./diskman.sh <command> [options]
 
 Commands:
@@ -98,6 +98,8 @@ Examples:
 ---
 
 ## Output Examples
+
+Synthetic illustrations. Actual deletion plans must be generated from configured owned scopes and explicit exclusions; application state cannot be inferred from file age.
 
 ### Status Dashboard
 
@@ -321,55 +323,53 @@ get_large_files() {
 ### Cleanup functions
 
 ```bash
-cleanup_temp() {
-    local days="${1:-1}"
-    local dry_run="${2:-true}"
-    
-    local temp_dirs=(/tmp /var/tmp "$HOME/.cache/tmp")
-    
-    for dir in "${temp_dirs[@]}"; do
-        [[ -d "$dir" ]] || continue
-        
-        if [[ "$dry_run" == "true" ]]; then
-            find "$dir" -type f -atime "+$days" -exec ls -lh {} \;
-        else
-            find "$dir" -type f -atime "+$days" -delete
+# Preview and execution consume the same NUL-delimited candidate plan.
+# Caller supplies owned/quiescent roots and explicit state-file exclusions.
+# Global recent-file/current-month/state exclusions win over every profile,
+# including 'aggressive'; no implicit override is allowed by these helpers.
+cleanup_scope() (
+    local directory="$1" days="$2" dry_run="$3" kind="$4" plan file cutoff month_start
+    [[ $days =~ ^[0-9]+$ && ( $dry_run == true || $dry_run == false ) ]] || return 2
+    [[ -d "$directory" && ! -L "$directory" && "$directory" != / ]] || return 2
+    [[ -r ${STATE_EXCLUDE_FILE:-} ]] || { echo "State-file exclusion list required" >&2; return 2; }
+    cutoff=$(( $(date +%s) - days*86400 ))
+    month_start=$(date -d "$(date +%Y-%m)-01 00:00:00" +%s) || return 1
+    plan=$(mktemp) || return 1
+    trap 'rm -f -- "$plan"' EXIT
+    local -a excludes=()
+    while IFS= read -r pattern; do [[ -z "$pattern" ]] || excludes+=(! -path "$pattern"); done < "$STATE_EXCLUDE_FILE"
+    # GNU find compares exact timestamps; no +N day-rounding ambiguity.
+    local -a predicates=(-type f -uid "$UID" ! -newermt "@$cutoff" ! -newermt '24 hours ago')
+    if [[ $kind == logs ]]; then predicates+=(-name '*.gz' ! -newermt "@$month_start"); fi
+    find "$directory" -xdev "${predicates[@]}" "${excludes[@]}" -print0 > "$plan" || return 1
+    while IFS= read -r -d '' file; do
+        if [[ $dry_run == true ]]; then printf 'Would delete: %q\n' "$file"
+        else rm -- "$file" || return 1
         fi
-    done
+    done < "$plan"
+)
+
+cleanup_temp() {
+    local days="${1:-1}" dry_run="${2:-true}" directory
+    [[ ${#TEMP_DIRS[@]} -gt 0 ]] || return 2
+    for directory in "${TEMP_DIRS[@]}"; do cleanup_scope "$directory" "$days" "$dry_run" temp || return 1; done
 }
 
 cleanup_logs() {
-    local days="${1:-30}"
-    local dry_run="${2:-true}"
-    
-    # Compressed logs
-    if [[ "$dry_run" == "true" ]]; then
-        find /var/log -name "*.gz" -mtime "+$days" -ls
-    else
-        find /var/log -name "*.gz" -mtime "+$days" -delete
-    fi
-    
-    # Journald (keep last N days)
-    if [[ "$dry_run" != "true" ]]; then
-        sudo journalctl --vacuum-time="${days}d"
-    fi
+    local days="${1:-30}" dry_run="${2:-true}" directory
+    [[ ${#LOG_DIRS[@]} -gt 0 ]] || return 2
+    for directory in "${LOG_DIRS[@]}"; do cleanup_scope "$directory" "$days" "$dry_run" logs || return 1; done
+    printf 'Journald vacuum is a separate explicit action; not performed by this file plan.\n'
 }
 
 cleanup_package_cache() {
     local dry_run="${1:-true}"
-    
-    if [[ "$dry_run" == "true" ]]; then
-        echo "APT cache: $(du -sh /var/cache/apt/archives 2>/dev/null | cut -f1)"
-    else
-        sudo apt-get clean
-    fi
-    
-    # pip cache
-    if command -v pip &>/dev/null; then
-        if [[ "$dry_run" != "true" ]]; then
-            pip cache purge
-        fi
-    fi
+    printf 'Action plan: apt-get clean; pip cache purge (configured current user).\n'
+    [[ $dry_run == false ]] || return 0
+    # Explicit action selection; no privilege escalation is hidden in this helper.
+    [[ ${ALLOW_PACKAGE_CACHE_ACTIONS:-false} == true ]] || return 2
+    apt-get clean || return 1
+    if command -v pip >/dev/null; then pip cache purge || return 1; fi
 }
 ```
 
@@ -377,91 +377,76 @@ cleanup_package_cache() {
 
 ```bash
 find_duplicates() {
-    local path="${1:-.}"
-    local min_size="${2:-1M}"
-    
-    # Group files by size, then verify hash
-    find "$path" -type f -size "+$min_size" -printf "%s %p\n" 2>/dev/null | \
-        sort -n | \
-        awk '{
-            if ($1 == prev_size) {
-                print prev_path
-                print $2
-            }
-            prev_size = $1
-            prev_path = $2
-        }' | \
-        xargs -I {} md5sum {} 2>/dev/null | \
-        sort | \
-        awk '{
-            if ($1 == prev_hash) {
-                print prev_path
-                print $2
-                dupes++
-            }
-            prev_hash = $1
-            prev_path = $2
-        }'
+    local path="${1:-.}" min_size="${2:-1048576}"  # Explicit bytes, not find size syntax.
+    python3 - "$path" "$min_size" <<'PYDUP'
+import collections, filecmp, hashlib, json, os, sys
+from pathlib import Path
+minimum=int(sys.argv[2]); assert minimum>=0
+sizes=collections.defaultdict(list); seen=set()
+for directory, _, names in os.walk(sys.argv[1], followlinks=False):
+    for name in names:
+        path=Path(directory)/name
+        if path.is_symlink() or not path.is_file(): continue
+        st=path.stat(); identity=(st.st_dev,st.st_ino)
+        if identity in seen or st.st_size<minimum: continue
+        seen.add(identity); sizes[st.st_size].append(path)
+for size, paths in sizes.items():
+    if len(paths)<2: continue
+    hashes=collections.defaultdict(list)
+    for path in paths:
+        with path.open('rb') as stream: digest=hashlib.file_digest(stream,'sha256').hexdigest()
+        hashes[digest].append(path)
+    for digest, group in hashes.items():
+        while group:
+            first,*rest=group
+            identical=[path for path in rest if filecmp.cmp(first,path,shallow=False)]
+            if identical: print(json.dumps({'sha256':digest,'size_bytes':size,'paths':[str(first),*map(str,identical)]}))
+            group=[path for path in rest if path not in identical]
+PYDUP
 }
 
-# Replace duplicates with hard links
-deduplicate() {
-    local file1="$1"
-    local file2="$2"
-    
-    # Verify they are on the same filesystem
-    local dev1 dev2
-    dev1=$(stat -c '%d' "$file1")
-    dev2=$(stat -c '%d' "$file2")
-    
-    if [[ "$dev1" != "$dev2" ]]; then
-        echo "Files on different filesystems, cannot hard link"
-        return 1
-    fi
-    
-    # Create hard link
-    rm "$file2"
-    ln "$file1" "$file2"
-}
+# Only in a quiescent, explicitly approved scope: a hard link shares future writes
+# and inode metadata. Different ownership/modes/ACLs/timestamps require a policy decision.
+deduplicate() (
+    local file1="$1" file2="$2" stage
+    [[ -f "$file1" && -f "$file2" && ! -L "$file1" && ! -L "$file2" ]] || return 2
+    [[ ! "$file1" -ef "$file2" ]] || return 2
+    [[ $(stat -c '%d:%u:%g:%a:%y' -- "$file1") == "$(stat -c '%d:%u:%g:%a:%y' -- "$file2")" ]] || return 2
+    cmp -s -- "$file1" "$file2" || return 1
+    # Extended attributes (including POSIX ACLs) must match too.
+    python3 - "$file1" "$file2" <<'PYMETA'
+import os, sys
+def attrs(path): return {name:os.getxattr(path,name) for name in os.listxattr(path)}
+raise SystemExit(0 if attrs(sys.argv[1])==attrs(sys.argv[2]) else 1)
+PYMETA
+    [[ $? -eq 0 ]] || return 2
+    stage=$(mktemp -d "$(dirname -- "$file2")/.dedup.XXXXXX") || return 1
+    trap 'rm -rf -- "$stage"' EXIT
+    ln -- "$file1" "$stage/replacement" || return 1
+    cmp -s -- "$file1" "$file2" || return 1
+    mv -Tf -- "$stage/replacement" "$file2" || return 1
+)
 ```
 
 ### Usage prediction
 
 ```bash
 predict_full_date() {
-    local partition="$1"
-    local db="$DISKMAN_DB"
-    
-    # Get data from last 30 days
-    local data
-    data=$(sqlite3 "$db" "
-        SELECT date, used_bytes 
-        FROM disk_usage 
-        WHERE partition='$partition' 
-        AND date > date('now', '-30 days')
-        ORDER BY date
-    ")
-    
-    # Calculate growth rate (simplified: linear regression)
-    # In practice, use a Python script for more accurate calculation
-    
-    local growth_per_day
-    growth_per_day=$(echo "$data" | awk -F'|' '
-        NR==1 {first=$2; first_day=NR}
-        END {
-            diff = $2 - first
-            days = NR - first_day
-            if (days > 0) print diff / days
-        }
-    ')
-    
-    local free_bytes
-    free_bytes=$(df --output=avail "$partition" | tail -1)
-    
-    local days_until_full
-    days_until_full=$(echo "scale=0; $free_bytes / $growth_per_day" | bc)
-    
-    echo "$days_until_full"
+    local partition="$1" free_bytes
+    free_bytes=$(df -B1 --output=avail -- "$partition" | awk 'NR==2 {print $1}') || return 1
+    [[ $free_bytes =~ ^[0-9]+$ ]] || return 1
+    python3 - "$DISKMAN_DB" "$partition" "$free_bytes" <<'PYPREDICT'
+import datetime as dt, math, sqlite3, sys
+with sqlite3.connect(sys.argv[1]) as db:
+    rows=db.execute("SELECT date,used_bytes FROM disk_usage WHERE partition=? AND date>date('now','-30 days') ORDER BY date",(sys.argv[2],)).fetchall()
+if len(rows)<2: raise SystemExit("Unavailable: fewer than two samples")
+first,last=rows[0],rows[-1]
+days=(dt.datetime.fromisoformat(last[0])-dt.datetime.fromisoformat(first[0])).total_seconds()/86400
+if days<=0: raise SystemExit("Unavailable: no elapsed time")
+growth=(last[1]-first[1])/days
+if not math.isfinite(growth) or growth<=0: raise SystemExit("No finite positive-growth forecast")
+print(f"{int(sys.argv[3])/growth:.2f} days (endpoint slope, constant-growth assumption)")
+PYPREDICT
 }
 ```
 

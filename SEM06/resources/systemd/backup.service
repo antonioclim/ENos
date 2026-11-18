@@ -1,47 +1,26 @@
-# Systemd Service for Backup (used with backup.timer)
-# Save as: /etc/systemd/system/backup.service
-
+# Example bounded job; source/destination, account and configuration require review.
+# /etc/capstone/backup.conf is literal data and must contain the intended owned paths.
 [Unit]
-Description=Automated Backup Service
-Documentation=man:backup(1)
-After=network.target local-fs.target
+Description=ENos CAPSTONE Backup example
+After=local-fs.target
 
 [Service]
 Type=oneshot
-
-# User and group (adjust for your setup)
-User=root
-Group=root
-
-# Working directory
-WorkingDirectory=/opt/capstone/backup
-
-# Main script with arguments
-ExecStart=/opt/capstone/backup/backup.sh create \
-    --source=/var/www \
-    --dest=/backup \
-    --type=incremental \
-    --compress=gz \
-    --retention=7
-
-# Pre and post scripts
-ExecStartPre=/bin/mkdir -p /backup
-ExecStartPost=/usr/bin/logger "Backup completed successfully"
-
-# Timeout (backups can take a while)
+User=capstone
+Group=capstone
+WorkingDirectory=/opt/ENos/SEM06/scripts/projects/backup
+ExecStart=/bin/bash /opt/ENos/SEM06/scripts/projects/backup/backup.sh --config /etc/capstone/backup.conf --source /srv/capstone/source --dest /var/lib/capstone-backup --type daily --incremental --compression gz --retention-daily 7 --log-file /dev/stderr
+RuntimeDirectory=capstone-backup
+StateDirectory=capstone-backup
+Environment="LOCK_FILE=/run/capstone-backup/backup.lock"
 TimeoutStartSec=3600
-
-# Logging
-StandardOutput=append:/var/log/backup/backup.log
-StandardError=append:/var/log/backup/backup_error.log
-
-# Environment
-Environment="BACKUP_NOTIFY_EMAIL=admin@example.com"
-Environment="LOG_LEVEL=INFO"
-
-# Security (more relaxed for backup that reads entire system)
+StandardOutput=journal
+StandardError=journal
 NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
 PrivateTmp=true
+ReadWritePaths=/run/capstone-backup /var/lib/capstone-backup
 
 [Install]
 WantedBy=multi-user.target

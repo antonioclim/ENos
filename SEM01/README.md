@@ -1,5 +1,7 @@
 # Seminar 1: Bash Shell - Complete Package
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](homework/ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > **Version:** 2.1 | **Updated:** January 2025
 
@@ -22,7 +24,7 @@
 
 This package contains all the materials needed for **Seminar 1: Bash Shell** from the Operating Systems course.
 
-> I developed these materials over 5+ years of teaching at ASE. The structure reflects exactly the mistakes I've seen from students and the solutions that actually work. If you find errors or have suggestions, they are welcome!
+> If you find errors or have suggestions, they are welcome!
 
 The package includes:
 

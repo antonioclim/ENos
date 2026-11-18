@@ -100,14 +100,13 @@
 │  │                                                              │    │
 │  │  drwxrwxrwt (t instead of x for others)                     │    │
 │  │                                                              │    │
-│  │  • Only the file owner can delete/rename                    │    │
+│  │  • File owner, directory owner or privilege may remove entries                    │    │
 │  │  • Used on public directories (/tmp)                        │    │
 │  │                                                              │    │
 │  │  $ ls -ld /tmp                                              │    │
 │  │  drwxrwxrwt 15 root root ... /tmp                           │    │
 │  │          ^                                                   │    │
-│  │  Everyone can create files, but each can only delete their  │    │
-│  │  own                                                         │    │
+│  │  Sticky adds an ownership check to directory write/search.    │    │
 │  │                                                              │    │
 │  │  chmod +t directory    or    chmod 1777 directory           │    │
 │  └─────────────────────────────────────────────────────────────┘    │
@@ -180,6 +179,11 @@
 
 ### Exercise 1: Shared Project Directory Configuration
 
+This is an administrator-only deployment scenario for a disposable VM, not a
+learner-workspace setup. Group/ownership operations need authorised accounts.
+Directory traversal and inherited ACLs must be tested for each role. SUID on Linux
+interpreter scripts is ignored; use mode inspection without privileged execution.
+
 **Requirement:** Configure a team directory with correct permissions.
 
 ```bash
@@ -203,8 +207,9 @@ sudo mkdir -p /projects/webapp/{src,docs,tests,config}
 # Step 5: Set ownership
 sudo chown -R root:developers /projects/webapp
 
-# Step 6: Set base permissions (owner=rwx, group=rwx, others=---)
-sudo chmod -R 770 /projects/webapp
+# Step 6: Set directory and regular-file modes separately
+sudo find /projects/webapp -type d -exec chmod 770 {} +
+sudo find /projects/webapp -type f -exec chmod 660 {} +
 
 # Step 7: Set SGID on directories (new files inherit the group)
 sudo find /projects/webapp -type d -exec chmod g+s {} \;
@@ -220,6 +225,7 @@ ls -la /projects/webapp/
 # Step 9: Test as alice
 su - alice
 cd /projects/webapp/src
+umask 007  # Set before creation; SGID alone does not grant group write.
 touch test_file.py
 ls -l test_file.py
 # -rw-rw---- 1 alice developers 0 Jan 10 12:01 test_file.py
@@ -236,167 +242,93 @@ echo "umask 007" >> ~/.bashrc
 
 ```bash
 #!/bin/bash
-#
-# Script: backup_tool.sh
-# Description: Backup tool with complete options
-#
-
+# backup_tool.sh: complete short/long parser and owned local backup example.
 set -euo pipefail
-
-# === CONSTANTS ===
-readonly VERSION="1.0.0"
-readonly SCRIPT_NAME=$(basename "$0")
-
-# === DEFAULT VARIABLES ===
-VERBOSE=false
-DRY_RUN=false
-COMPRESS=false
-OUTPUT_DIR="./backup"
-RETENTION_DAYS=7
-SOURCE=""
-
-# === FUNCTIONS ===
-usage() {
-    cat << EOF
-$SCRIPT_NAME v$VERSION - Backup tool
-
-USAGE:
-    $SCRIPT_NAME [options] <source>
-
-OPTIONS:
-    -h, --help              Display this message
-    -V, --version           Display version
-    -v, --verbose           Verbose mode
-    -n, --dry-run           Simulation (does not execute)
-    -c, --compress          Compress the backup (tar.gz)
-    -o, --output DIR        Output directory (default: ./backup)
-    -r, --retention DAYS    Keep backups for DAYS days (default: 7)
-
-EXAMPLES:
-    $SCRIPT_NAME /home/user/documents
-    $SCRIPT_NAME -v -c -o /backup /var/www
-    $SCRIPT_NAME --dry-run --retention 30 /data
-
-EOF
-    exit 0
-}
-
-version() {
-    echo "$SCRIPT_NAME version $VERSION"
-    exit 0
-}
-
-log() {
-    if $VERBOSE; then
-        echo "[$(date '+%H:%M:%S')] $*"
-    fi
-}
-
-error() {
-    echo "ERROR: $*" >&2
-    exit 1
-}
-
-# === ARGUMENT PARSING ===
+VERSION=1.0.1
+VERBOSE=false; DRY_RUN=false; COMPRESS=false
+OUTPUT_DIR=./backup; RETENTION_DAYS=7; SOURCE=""
+usage() { echo "Usage: $0 [-h|-V] [-v] [-n|--dry-run] [-c|--compress] [-o DIR] [-r DAYS] SOURCE"; }
+error() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+log() { if "$VERBOSE"; then printf '[INFO] %s\n' "$*" >&2; fi; return 0; }
 parse_args() {
-    while [[ $# -gt 0 ]]; do
+    while (($#)); do
         case $1 in
-            -h|--help)
-                usage
-                ;;
-            -V|--version)
-                version
-                ;;
-            -v|--verbose)
-                VERBOSE=true
-                shift
-                ;;
-            -n|--dry-run)
-                DRY_RUN=true
-                shift
-                ;;
-            -c|--compress)
-                COMPRESS=true
-                shift
-                ;;
-            -o|--output)
-                [[ -z "${2:-}" ]] && error "Option -o requires an argument"
-                OUTPUT_DIR="$2"
-                shift 2
-                ;;
-            --output=*)
-                OUTPUT_DIR="${1#*=}"
-                shift
-                ;;
-            -r|--retention)
-                [[ -z "${2:-}" ]] && error "Option -r requires an argument"
-                RETENTION_DAYS="$2"
-                shift 2
-                ;;
-            --retention=*)
-                RETENTION_DAYS="${1#*=}"
-                shift
-                ;;
-            --)
-                shift
-                SOURCE="${1:-}"
-                break
-                ;;
-            -*)
-                error "Unknown option: $1"
-                ;;
-            *)
-                SOURCE="$1"
-                shift
-                ;;
+            -h|--help) usage; exit 0 ;;
+            -V|--version) echo "$VERSION"; exit 0 ;;
+            -v|--verbose) VERBOSE=true; shift ;;
+            -n|--dry-run) DRY_RUN=true; shift ;;
+            -c|--compress) COMPRESS=true; shift ;;
+            -o|--output) [[ $# -ge 2 && -n $2 ]] || error 'Missing output'; OUTPUT_DIR=$2; shift 2 ;;
+            --output=*) OUTPUT_DIR=${1#*=}; shift ;;
+            -r|--retention) [[ $# -ge 2 && -n $2 ]] || error 'Missing retention'; RETENTION_DAYS=$2; shift 2 ;;
+            --retention=*) RETENTION_DAYS=${1#*=}; shift ;;
+            --) shift; break ;;
+            -*) error "Unknown option: $1" ;;
+            *) break ;;
         esac
     done
-
-    # Validation
-    [[ -z "$SOURCE" ]] && error "Missing source for backup"
-    [[ ! -e "$SOURCE" ]] && error "Source does not exist: $SOURCE"
-    [[ ! "$RETENTION_DAYS" =~ ^[0-9]+$ ]] && error "Retention must be a number"
+    [[ $# == 1 && -e $1 && -n $OUTPUT_DIR ]] || error 'One existing source and nonempty output are required'
+    [[ $RETENTION_DAYS =~ ^[0-9]{1,4}$ ]] || error 'Retention must be 0–9999 whole days'
+    RETENTION_DAYS=$((10#$RETENTION_DAYS))
+    SOURCE=$(realpath -e -- "$1")
+    OUTPUT_DIR=$(realpath -m -- "$OUTPUT_DIR")
+    [[ $SOURCE != / && $OUTPUT_DIR != / ]] || error 'Root paths are not permitted'
+    case "$OUTPUT_DIR/" in "$SOURCE/"*) error 'Destination must be outside source';; esac
+    if [[ -e $OUTPUT_DIR ]]; then
+        [[ -d $OUTPUT_DIR && -O $OUTPUT_DIR && ! -L $OUTPUT_DIR && -f $OUTPUT_DIR/.enos-backup-root && ! -L $OUTPUT_DIR/.enos-backup-root ]] || error 'Existing output is not this tool-owned backup root'
+    fi
+    return 0
 }
-
-# === MAIN LOGIC ===
 do_backup() {
-    local timestamp=$(date +%Y%m%d_%H%M%S)
-    local backup_name="backup_$(basename "$SOURCE")_$timestamp"
-    
-    mkdir -p "$OUTPUT_DIR"
-    
-    log "Source: $SOURCE"
-    log "Output: $OUTPUT_DIR"
-    log "Compression: $COMPRESS"
-    
-    if $DRY_RUN; then
-        echo "[DRY RUN] Would create backup: $OUTPUT_DIR/$backup_name"
+    if "$DRY_RUN"; then
+        printf '[DRY RUN] Would create a %s backup of %q under %q\n' "$COMPRESS" "$SOURCE" "$OUTPUT_DIR"
+        printf '[DRY RUN] Would retain incomplete/unmarked items and remove completed owned backups aged at least %d complete days after success\n' "$((RETENTION_DAYS+1))"
         return 0
     fi
-    
-    if $COMPRESS; then
-        tar czf "$OUTPUT_DIR/${backup_name}.tar.gz" -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")"
-        log "Created: $OUTPUT_DIR/${backup_name}.tar.gz"
-    else
-        cp -r "$SOURCE" "$OUTPUT_DIR/$backup_name"
-        log "Created: $OUTPUT_DIR/$backup_name"
+    if [[ ! -e $OUTPUT_DIR ]]; then
+        mkdir -- "$OUTPUT_DIR" || error 'Cannot create output root (parent must exist)'
+        : > "$OUTPUT_DIR/.enos-backup-root"
     fi
-    
-    # Old cleanup
-    log "Deleting backups older than $RETENTION_DAYS days..."
-    find "$OUTPUT_DIR" -name "backup_*" -mtime +$RETENTION_DAYS -delete 2>/dev/null || true
-    
-    echo "Backup complete!"
+    [[ ! -L $OUTPUT_DIR/.lock ]] || error 'Invalid lock path'
+    exec 9>"$OUTPUT_DIR/.lock"
+    flock -n 9 || error 'Another backup holds the lock'
+    local dest item list
+    dest=$(mktemp -d "$OUTPUT_DIR/backup_XXXXXXXX")
+    if "$COMPRESS"; then
+        tar -czf "$dest/content.tar.gz" -C "$(dirname -- "$SOURCE")" -- "$(basename -- "$SOURCE")" || error "Archive failed; incomplete evidence: $dest"
+        tar -tzf "$dest/content.tar.gz" > /dev/null || error 'Archive verification failed'
+    else
+        cp -a -- "$SOURCE" "$dest/content" || error "Copy failed; incomplete evidence: $dest"
+    fi
+    : > "$dest/.enos-complete-v1"
+    touch -- "$dest"
+    log "Created $dest"
+    # This teaching contract uses GNU find's complete-day buckets: +N means >=N+1.
+    list=$(mktemp "$OUTPUT_DIR/.retention.XXXXXX")
+    trap 'rm -f -- "$list"' RETURN
+    find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -type d -name 'backup_*' -mtime +"$RETENTION_DAYS" -print0 > "$list" || error 'Retention traversal failed'
+    while IFS= read -r -d '' item; do
+        [[ $item != "$dest" && -O $item && ! -L $item && -f $item/.enos-complete-v1 && ! -L $item/.enos-complete-v1 ]] || continue
+        rm -rf -- "$item" || error "Retention failed: $item"
+        log "Removed completed backup $item"
+    done < "$list"
+    rm -f -- "$list"
+    trap - RETURN
+    printf 'Backup complete: %s\n' "$dest"
 }
-
-# === MAIN ===
-main() {
-    parse_args "$@"
-    do_backup
-}
-
-main "$@"
+parse_args "$@"
+do_backup
 ```
+
+The output root is dedicated to this example; existing unmarked directories are
+rejected. A dry-run creates nothing, including no lock or log. Complete compressed
+and uncompressed backups have the same uniquely named container and completion
+marker; retention considers only those owned containers after a successful backup.
+Failures retain their incomplete container for diagnosis and skip retention. No
+restoration/service/account operation is performed. The example assumes a private
+local destination with no concurrent hostile path replacement.
+
+
 
 ### Exercise 3: Complete Cron Job with Logging
 
@@ -419,17 +351,14 @@ sudo tee /usr/local/bin/daily_backup.sh << 'SCRIPT'
 #
 
 LOG_FILE="/var/log/backup/backup_$(date +%Y%m%d).log"
-LOCK_FILE="/tmp/daily_backup.lock"
+LOCK_FILE="/var/log/backup/daily_backup.lock"
+set -euo pipefail
+failed=0
 
-# Prevent simultaneous executions
-if [ -f "$LOCK_FILE" ]; then
-    echo "$(date): Backup already running" >> "$LOG_FILE"
-    exit 1
-fi
-
-# Create lock
-echo $$ > "$LOCK_FILE"
-trap "rm -f $LOCK_FILE" EXIT
+# Private administrator-owned state; flock acquisition is atomic.
+exec 9>"$LOCK_FILE"
+flock -n 9 || { echo 'Another backup holds the lock' >&2; exit 2; }
+# Never unlink a live descriptor lock file.
 
 # Logging function
 log() {
@@ -444,7 +373,7 @@ log "Backup documents..."
 if /usr/local/bin/backup_tool -c -o /backup/docs /home 2>> "$LOG_FILE"; then
     log "Documents: OK"
 else
-    log "Documents: ERROR"
+    log "Documents: ERROR"; failed=1
 fi
 
 # Backup 2: System configurations
@@ -452,26 +381,30 @@ log "Backup configurations..."
 if /usr/local/bin/backup_tool -c -o /backup/config /etc 2>> "$LOG_FILE"; then
     log "Configurations: OK"
 else
-    log "Configurations: ERROR"
+    log "Configurations: ERROR"; failed=1
 fi
 
-# Backup 3: Databases (example)
-log "Backup MySQL..."
-if mysqldump --all-databases | gzip > "/backup/db/mysql_$(date +%Y%m%d).sql.gz" 2>> "$LOG_FILE"; then
-    log "MySQL: OK"
+# Backup 3: Database example, with an explicitly configured local client.
+# No mail recipient or notification service is selected by this worksheet.
+DB_DIR=/backup/db
+mkdir -p -- "$DB_DIR"
+PARTIAL=$(mktemp "$DB_DIR/.mysql-partial.XXXXXX")
+trap 'rm -f -- "$PARTIAL"' EXIT
+if mysqldump --all-databases 2>> "$LOG_FILE" | gzip > "$PARTIAL"; then
+    if gzip -t -- "$PARTIAL"; then
+        mv -- "$PARTIAL" "$DB_DIR/mysql_$(date +%Y%m%d_%H%M%S)_${PARTIAL##*.}.sql.gz"
+        log 'MySQL: archive created; a restore test is separate'
+    else
+        log 'MySQL: ERROR archive validation'; failed=1
+    fi
 else
-    log "MySQL: ERROR (or not installed)"
+    log 'MySQL: ERROR dump/compression'; failed=1
 fi
-
-# Cleanup old logs (keep 30 days)
-find /var/log/backup -name "backup_*.log" -mtime +30 -delete
-
-log "=== Backup complete ==="
-
-# Send email if there were errors
-if grep -q "ERROR" "$LOG_FILE"; then
-    mail -s "Backup Warning $(date +%Y-%m-%d)" Issues: Open an issue in GitHub < "$LOG_FILE"
-fi
+if ((failed)); then log 'Backup incomplete; retention skipped'; exit 1; fi
+# Rotate only owned completed backup logs after success; deployment policy may differ.
+find /var/log/backup -maxdepth 1 -type f -name 'backup_*.log' -mtime +30 -delete
+log 'Backup commands completed'
+# An approved local notification channel may be configured separately.
 SCRIPT
 
 sudo chmod +x /usr/local/bin/daily_backup.sh
@@ -481,7 +414,7 @@ sudo chmod +x /usr/local/bin/daily_backup.sh
 echo "0 3 * * * root /usr/local/bin/daily_backup.sh" | sudo tee /etc/cron.d/daily_backup
 
 # Step 5: Verify
-sudo crontab -l -u root
+# /etc/cron.d entries are separate from root's per-user crontab.
 cat /etc/cron.d/daily_backup
 ```
 
@@ -516,7 +449,6 @@ cat /etc/cron.d/daily_backup
 
 ---
 *Supplementary material for the Operating Systems course | Bucharest UES - CSIE*
--e 
 
 ---
 

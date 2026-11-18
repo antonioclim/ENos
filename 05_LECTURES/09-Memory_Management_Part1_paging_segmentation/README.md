@@ -1,3 +1,24 @@
+# Lecture 09 — Memory Management Part1 paging segmentation
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C09_01_COURSE_PLAN.md)
+- [Concept Map](docs/C09_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C09_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C09_04_STUDY_GUIDE.md)
+- [09ex1 - Memory Partitioning EN](docs/09ex1_-_Memory_Partitioning_EN.html)
+- [09ex2 - Paging Visualizer EN](docs/09ex2_-_Paging_Visualizer_EN.html)
+- [09ex3 - Segmentation Visualizer EN](docs/09ex3_-_Segmentation_Visualizer_EN.html)
+- [Formative question bank](docs/C09_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 09
 

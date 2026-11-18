@@ -67,13 +67,13 @@ declare -a GREP_QUESTIONS=(
 )
 
 declare -a SED_QUESTIONS=(
-    "The basic syntax for substitution in sed is...|s/old/new|r/old/new|c/old/new|x/old/new|A|s = substitute."
+    "The basic syntax for substitution in sed is...|s/old/new/|r/old/new/|c/old/new/|x/old/new/|A|s = substitute."
     "What does the /g flag do in sed s///g?|Global (all)|Get|Grep|Generate|A|/g replaces ALL occurrences per line."
     "sed by default writes to...|File|stdout|stderr|/dev/null|B|sed writes to stdout, does NOT modify the file!"
     "What does sed -i do?|Input|Inverse|In-place|Ignore|C|-i edits the file directly (DANGEROUS without backup!)."
     "What does & do in sed replacement?|And logic|Entire match|Append|Anchor|B|& represents everything that was matched."
     "What does the d command do in sed?|Duplicate|Delete line|Display|Divide|B|d deletes matching lines."
-    "What delimiter is VALID in sed?|Only /|Only #|Any character|Only | and /|C|You can use anything: s|old|new| or s#old#new#."
+    "Which substitution uses # as its delimiter in GNU sed?|s/old/new/|s:old:new:|s#old#new#|s;old;new;|C|The keyed command uses # after s and around both operands."
     "sed '/^#/d' does...|Delete all lines|Delete comments|Delete empty lines|Delete first line|B|Deletes lines that START with #."
 )
 
@@ -152,11 +152,11 @@ ask_question() {
         echo -e "${RED}Please enter A, B, C or D${NC}"
     done
     
-    ((TOTAL++))
+    TOTAL=$((TOTAL + 1))
     
     if [[ "$answer" == "$correct" ]]; then
         echo -e "${GREEN}✓ CORRECT!${NC}"
-        ((SCORE++))
+        SCORE=$((SCORE + 1))
     else
         echo -e "${RED}✗ WRONG! The correct answer was: $correct${NC}"
     fi

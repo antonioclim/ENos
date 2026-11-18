@@ -51,7 +51,7 @@ def display_question(q: dict, index: int, total: int, use_color: bool) -> None:
     print(colorize(q['text'], Colours.YELLOW, use_color))
     print()
     
-    for opt in q['options']:
+    for opt in q.get('options', []):
         print(f"  {opt}")
 
 
@@ -100,7 +100,7 @@ def show_quiz_header(meta: dict, total: int, use_color: bool) -> None:
 
 def show_final_score(score: int, total: int, use_color: bool) -> None:
     """Display the final score with appropriate message."""
-    percentage = (score / total) * 100
+    percentage = (score / total) * 100 if total else 0
     print("\n" + "═" * 60)
     
     if percentage >= 80:
@@ -134,15 +134,29 @@ def run_quiz(quiz: dict, shuffle: bool, limit: Optional[int], use_color: bool) -
     input("\nPress ENTER to begin...")
     
     score = 0
+    automatically_marked = 0
+    manual_answers = []
     for i, q in enumerate(questions, 1):
         display_question(q, i, total, use_color)
-        answer = get_answer(len(q['options']))
-        if show_feedback(q, answer, use_color):
-            score += 1
+        if q.get('type') == 'open' or not q.get('options'):
+            answer = input("\nYour response (review manually): ").strip()
+            manual_answers.append((q.get('id', str(i)), answer))
+            print("Response recorded for this session; excluded from the automatic score.")
+            if q.get('explanation'):
+                print(f"Review guidance: {q['explanation']}")
+        else:
+            answer = get_answer(len(q['options']))
+            automatically_marked += 1
+            if show_feedback(q, answer, use_color):
+                score += 1
         if i < total:
             input("\nPress ENTER for the next question...")
     
-    show_final_score(score, total, use_color)
+    show_final_score(score, automatically_marked, use_color)
+    if manual_answers:
+        print(f"Open responses requiring manual review: {len(manual_answers)}")
+        for question_id, answer in manual_answers:
+            print(f"  {question_id}: {answer}")
 
 
 def main() -> None:
@@ -153,7 +167,7 @@ def main() -> None:
     parser.add_argument(
         'quiz_file',
         nargs='?',
-        default='quiz.yaml',
+        default=str(Path(__file__).with_name('quiz.yaml')),
         help='Path to the quiz file (default: quiz.yaml)'
     )
     parser.add_argument('--shuffle', action='store_true', help='Shuffle the questions')

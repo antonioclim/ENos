@@ -6,6 +6,21 @@ Version: 2.0 | Date: January 2025
 
 ---
 
+## Status and evidence boundary
+
+This is the preserved January 2025 planning analysis, not a fresh empirical
+validation report. Historical percentages and checked claims about Ubuntu tests
+or framework validation remain author statements; their underlying observations
+and full protocols are not included here. Current machine checks are documented
+separately. See [the misconception catalogue](MISCONCEPTION_CATALOGUE.md) for
+stable IDs and [assessment status](../homework/ASSESSMENT_STATUS.md) for unresolved
+weights and oral policy.
+
+The timetable below contains 100 contact minutes plus a 10-minute break: 110
+elapsed minutes. The alternative 100-minute elapsed route in the live-coding
+guide allocates less contact time. Choosing the institutional duration and
+mandatory activity set remains an author decision; neither is silently adopted.
+
 ## 1. EVALUATION OF CURRENT MATERIALS
 
 ### 1.1 Existing Structure
@@ -126,10 +141,10 @@ Seminar 1_IMPROVED/
 └── 10_SELF_ASSESSMENT_REFLECTION.md    <- Metacognitive checkpoints
 ```
 
-### 3.2 Time Mapping for 100-Minute Seminar
+### 3.2 Planned 100 Contact Minutes (110 Elapsed with the Break)
 
 ```
-OPTIMAL STRUCTURE - 100 minutes (2 x 50 min with break)
+PLANNING OPTION - 100 contact minutes + 10-minute break = 110 elapsed
 ===================================================================
 
 FIRST PART (50 min)
@@ -138,7 +153,7 @@ FIRST PART (50 min)
 ├── [0:10-0:25]  Live Coding: Navigation and basic commands
 │                 └── With predictions at each step
 ├── [0:25-0:30]  Parsons Problem #1 (warmup)
-├── [0:30-0:45]  Sprint #1: Create project structure
+├── [0:30-0:45]  Sprint S2: Create project structure
 │                 └── Pair programming, switch at 7 min
 ├── [0:45-0:50]  Peer Instruction Q2: Quoting
 
@@ -149,7 +164,7 @@ SECOND PART (50 min)
 ├── [0:05-0:20]  Live Coding: Variables and .bashrc
 │                 └── Deliberate error demonstration
 ├── [0:20-0:25]  Peer Instruction Q3: Local vs export variables
-├── [0:25-0:40]  Sprint #2: Personalised environment configuration
+├── [0:25-0:40]  Sprint S3: Personalised environment configuration
 │                 └── Pair programming, with reflection
 ├── [0:40-0:48]  LLM Exercise: Generate and critique aliases
 ├── [0:48-0:50]  Reflection Checkpoint + Next week preview
@@ -161,11 +176,11 @@ At the end of the seminar, the student will be able to:
 
 | # | Objective | Bloom Level | Verifiable Through |
 |---|-----------|-------------|-------------------|
-| O1 | Navigate the Linux file system using cd, ls, pwd | Apply | Sprint #1 |
+| O1 | Navigate the Linux file system using cd, ls, pwd | Apply | Sprint S1 |
 | O2 | Distinguish between shell, terminal and kernel | Understand | PI Q1 |
-| O3 | Create directory structures using mkdir -p and brace expansion | Apply | Sprint #1 |
+| O3 | Create directory structures using mkdir -p and brace expansion | Apply | Sprint S2 |
 | O4 | Predict the output of commands with variables and quoting | Analyse | PI Q2, Q3 |
-| O5 | Configure .bashrc with aliases and personalised PATH | Apply | Sprint #2 |
+| O5 | Configure .bashrc with aliases and personalised PATH | Apply | Sprint S3 |
 | O6 | Evaluate LLM-generated Bash code for correctness | Evaluate | LLM Exercise |
 | O7 | Explain the difference between local and environment variables | Understand | PI Q3 |
 | O8 | Debug common quoting and assignment errors | Analyse | Debugging Ex |

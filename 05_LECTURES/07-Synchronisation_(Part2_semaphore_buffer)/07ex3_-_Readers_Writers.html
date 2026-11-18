@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>07ex3 - Readers-Writers Problem | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/lecture_utilities.css">
+    <script src="../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
@@ -162,7 +162,84 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -222,8 +299,8 @@
                         <i class="fas fa-balance-scale text-blue-400 text-xl"></i>
                         <span class="font-semibold">Fair (FIFO)</span>
                     </div>
-                    <p class="text-xs text-slate-400">Arrival order. No starvation.</p>
-                    <p class="text-xs text-emerald-400 mt-1"><i class="fas fa-check mr-1"></i> Corect</p>
+                    <p class="text-xs text-slate-400">Arrival order. No indefinite queue bypass under the stated finite-service assumptions.</p>
+                    <p class="text-xs text-emerald-400 mt-1"><i class="fas fa-check mr-1"></i> Correct</p>
                 </div>
             </div>
         </section>
@@ -442,7 +519,7 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>A Writer has exclusive access (nici readers, nici writers)</span>
+                            <span>A Writer has exclusive access (no readers and no other writers)</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
@@ -464,13 +541,13 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-balance-scale text-blue-400 mt-1"></i>
-                            <span><strong>Fair</strong>: FIFO order, no starvation</span>
+                            <span><strong>Fair</strong>: FIFO admission with finite service; no indefinite queue bypass</span>
                         </li>
                     </ul>
                 </div>
             </div>
         </section>
-    </main>
+    <section class="max-w-7xl mx-auto p-4 text-sm"><h2>Admission policy</h2><p>Logical lock acquisition is atomic in this model. Reader priority admits waiting readers whenever no writer owns the lock; writer priority stops new readers while a writer waits; fair admission serves the FIFO request queue, batching adjacent readers. Changing policy affects subsequent grants and does not revoke active holders. The reader-count pseudocode illustrates the reader-priority protocol; the other policies add the admission queue described here.</p></section></main>
 
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto mt-8 text-center text-slate-500 text-sm pb-4">
@@ -479,7 +556,78 @@
         </div>
     </footer>
 
-    <script>
+    <script>function rwRequests() { return state.requests || (state.requests=[]); }
+function rwRefresh() {
+ state.readCount=state.activeReaders.length;
+ state.writeCount=rwRequests().filter(r=>r.kind==='writer').length;
+ state.rwMutex=state.activeWriter || state.activeReaders.length ? 0 : 1;
+ state.mutex=1;
+ updateDisplay();
+}
+function rwDrain() {
+ const queue=rwRequests(); if(state.activeWriter || !queue.length){rwRefresh();return;}
+ let selected=[];
+ if(state.strategy==='readers') {
+  selected=queue.filter(r=>r.kind==='reader');
+  if(!selected.length && !state.activeReaders.length)selected=[queue[0]];
+ } else if(state.strategy==='writers') {
+  const writer=queue.find(r=>r.kind==='writer');
+  if(writer) { if(!state.activeReaders.length)selected=[writer]; }
+  else selected=queue.filter(r=>r.kind==='reader');
+ } else {
+  if(queue[0].kind==='writer') { if(!state.activeReaders.length)selected=[queue[0]]; }
+  else { for(const request of queue){ if(request.kind!=='reader')break; selected.push(request); } }
+ }
+ for(const request of selected) {
+  queue.splice(queue.indexOf(request),1);
+  request.actor.state=request.kind==='reader'?'reading':'writing';
+  if(request.kind==='reader')state.activeReaders.push(request.actor);else state.activeWriter=request.actor;
+  request.resolve();
+ }
+ rwRefresh();
+}
+function rwEnqueue(actor,kind) {
+ actor.state='waiting'; actor.queuedAt=Date.now();
+ return new Promise(resolve=>{rwRequests().push({actor,kind,resolve});rwDrain();});
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             strategy: 'readers',
@@ -577,19 +725,10 @@
         }
 
         function checkStarvation() {
-            const waitingWriters = state.writers.filter(w => w.state === 'waiting').length;
-            const waitingReaders = state.readers.filter(r => r.state === 'waiting').length;
-            
-            if (state.strategy === 'readers' && waitingWriters > 0 && state.activeReaders.length > 0 && state.writerWaitTime > 3) {
-                elements.starvationWarning.classList.remove('hidden');
-                elements.starvationText.textContent = `Writer starvation! ${waitingWriters} writer(s) waiting while readers continue...`;
-            } else if (state.strategy === 'writers' && waitingReaders > 0 && waitingWriters > 0 && state.activeWriter) {
-                elements.starvationWarning.classList.remove('hidden');
-                elements.starvationText.textContent = `Reader starvation risk! ${waitingReaders} reader(s) waiting...`;
-            } else {
-                elements.starvationWarning.classList.add('hidden');
-            }
-        }
+ const waiting=rwRequests().filter(r=>Date.now()-r.actor.queuedAt>=10000);
+ elements.starvationWarning.classList.toggle('hidden',!waiting.length);
+ if(waiting.length)elements.starvationText.textContent='A request has waited at least 10 seconds. This finite trace indicates prolonged waiting, not proof of starvation.';
+}
 
         function highlightCode(type, lineNum, isBlocked = false) {
             const prefix = type === 'reader' ? 'r' : 'w';
@@ -615,7 +754,7 @@
                 semaphore: 'text-cyan-400'
             };
             
-            const entry = document.createdeElement('div');
+            const entry = document.createElement('div');
             entry.className = colors[type];
             entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
             elements.operationLog.appendChild(entry);
@@ -643,149 +782,31 @@
         }
 
         async function readerEnter(reader) {
-            reader.state = 'waiting';
-            updateDisplay();
-            
-            // wait(mutex)
-            highlightCode('reader', 1);
-            addLog(`R${reader.id}: wait(mutex)`, 'semaphore');
-            await sleep(state.speed / 2);
-            state.mutex--;
-            updateDisplay();
-            
-            // read_count++
-            highlightCode('reader', 2);
-            state.readCount++;
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // if first reader, lock rw_mutex
-            highlightCode('reader', 3);
-            if (state.readCount === 1) {
-                highlightCode('reader', 4);
-                addLog(`R${reader.id}: First reader, wait(rw_mutex)`, 'semaphore');
-                
-                if (state.rwMutex <= 0 || state.activeWriter) {
-                    highlightCode('reader', 4, true);
-                    addLog(`R${reader.id}: BLOCKED - Writer active`, 'blocked');
-                    // Wait for writer to finish
-                    while (state.activeWriter) {
-                        await sleep(100);
-                    }
-                }
-                
-                state.rwMutex--;
-                updateDisplay();
-            }
-            await sleep(state.speed / 2);
-            
-            // signal(mutex)
-            highlightCode('reader', 5);
-            state.mutex++;
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // READ
-            highlightCode('reader', 6);
-            reader.state = 'reading';
-            state.activeReaders.push(reader);
-            state.totalReads++;
-            updateDisplay();
-            addLog(`R${reader.id}: READING data...`, 'reader');
-            await sleep(state.speed * 2);
-            
-            // Exit
-            await readerExit(reader);
-        }
+ if(reader.pending)return;reader.pending=true;const owner=enosTimers.generation;
+ await rwEnqueue(reader,'reader'); if(owner!==enosTimers.generation)return;
+ state.totalReads++;highlightCode('reader',6);addLog(`R${reader.id}: READING`,'reader');rwRefresh();
+ await sleep(state.speed*2);if(owner!==enosTimers.generation)return;await readerExit(reader);
+}
 
         async function readerExit(reader) {
-            // wait(mutex)
-            highlightCode('reader', 7);
-            state.mutex--;
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // read_count--
-            highlightCode('reader', 8);
-            state.readCount--;
-            state.activeReaders = state.activeReaders.filter(r => r.id !== reader.id);
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // if last reader, unlock rw_mutex
-            highlightCode('reader', 9);
-            if (state.readCount === 0) {
-                highlightCode('reader', 10);
-                state.rwMutex++;
-                state.writerWaitTime = 0;
-                addLog(`R${reader.id}: Last reader, signal(rw_mutex)`, 'semaphore');
-            }
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // signal(mutex)
-            highlightCode('reader', 11);
-            state.mutex++;
-            reader.state = 'done';
-            updateDisplay();
-            addLog(`R${reader.id}: Done reading`, 'reader');
-            
-            // Remove reader
-            state.readers = state.readers.filter(r => r.id !== reader.id);
-            updateDisplay();
-            highlightCode('reader', 0);
-        }
+ state.activeReaders=state.activeReaders.filter(r=>r!==reader);
+ state.readers=state.readers.filter(r=>r!==reader);reader.state='done';
+ addLog(`R${reader.id}: released read lock`,'reader');highlightCode('reader',0);rwDrain();
+}
 
         async function writerEnter(writer) {
-            writer.state = 'waiting';
-            state.writeCount++;
-            updateDisplay();
-            
-            // wait(rw_mutex)
-            highlightCode('writer', 1);
-            addLog(`W${writer.id}: wait(rw_mutex)`, 'semaphore');
-            
-            if (state.rwMutex <= 0 || state.activeReaders.length > 0 || state.activeWriter) {
-                highlightCode('writer', 1, true);
-                addLog(`W${writer.id}: BLOCKED - ${state.activeReaders.length} readers active`, 'blocked');
-                
-                while (state.activeReaders.length > 0 || state.activeWriter) {
-                    await sleep(100);
-                    state.writerWaitTime++;
-                    updateDisplay();
-                }
-            }
-            
-            state.rwMutex--;
-            updateDisplay();
-            await sleep(state.speed / 2);
-            
-            // WRITE
-            highlightCode('writer', 2);
-            writer.state = 'writing';
-            state.activeWriter = writer;
-            state.totalWrites++;
-            updateDisplay();
-            addLog(`W${writer.id}: WRITING data...`, 'writer');
-            await sleep(state.speed * 2);
-            
-            // signal(rw_mutex)
-            highlightCode('writer', 3);
-            state.rwMutex++;
-            state.activeWriter = null;
-            state.writeCount--;
-            writer.state = 'done';
-            updateDisplay();
-            addLog(`W${writer.id}: Done writing, signal(rw_mutex)`, 'semaphore');
-            
-            // Remove writer
-            state.writers = state.writers.filter(w => w.id !== writer.id);
-            updateDisplay();
-            highlightCode('writer', 0);
-        }
+ if(writer.pending)return;writer.pending=true;const owner=enosTimers.generation;
+ await rwEnqueue(writer,'writer');if(owner!==enosTimers.generation)return;
+ state.totalWrites++;highlightCode('writer',2);addLog(`W${writer.id}: WRITING`,'writer');rwRefresh();
+ await sleep(state.speed*2);if(owner!==enosTimers.generation)return;
+ state.activeWriter=null;state.writers=state.writers.filter(w=>w!==writer);writer.state='done';
+ addLog(`W${writer.id}: released write lock`,'writer');highlightCode('writer',0);rwDrain();
+}
 
         function reset() {
+            enosTimers.cancel();
             stopAuto();
+            state.requests=[];
             state.readers = [];
             state.writers = [];
             state.activeReaders = [];
@@ -876,6 +897,27 @@
 
         // Initialize
         updateDisplay();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Working Set Model | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -43,7 +43,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -55,7 +132,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Working Set Model</h1>
-                    <p class="text-xs text-stone-500">Modelul Setului de Lucru</p>
+                    <p class="text-xs text-stone-500">Working-Set Model</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
@@ -72,14 +149,14 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-stream text-blue-500"></i>
-                        Sir de Reference cu Window (Δ = <span id="windowDisplay">5</span>)
+                        Reference String with Window (Δ = <span id="windowDisplay">5</span>)
                     </h3>
                     <div class="relative">
                         <div id="referenceContainer" class="flex flex-wrap gap-1 mb-2">
                             <!-- Reference items with window highlight -->
                         </div>
                         <div id="windowIndicator" class="text-xs text-blue-600 mt-2">
-                            Fereastra curenta: [<span id="windowStart">0</span> - <span id="windowEnd">0</span>]
+                            Current window: [<span id="windowStart">0</span> - <span id="windowEnd">0</span>]
                         </div>
                     </div>
                 </div>
@@ -89,14 +166,14 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold text-stone-700 flex items-center gap-2">
                             <i class="fas fa-layer-group text-green-500"></i>
-                            Working Set la Momentul t = <span id="currentTime">0</span>
+                            Working Set at Reference t = <span id="currentTime">0</span>
                         </h3>
                         <div class="text-sm">
                             |WS(t, Δ)| = <span id="wsSize" class="mono font-bold text-green-600">0</span>
                         </div>
                     </div>
                     <div id="workingSet" class="flex flex-wrap gap-2 min-h-[60px] p-4 bg-green-50 rounded-lg border border-green-200">
-                        <span class="text-stone-400 text-sm italic">Working set gol</span>
+                        <span class="text-stone-400 text-sm italic">Empty working set</span>
                     </div>
                 </div>
 
@@ -104,7 +181,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-chart-line text-purple-500"></i>
-                        Evolutie |WS(t, Δ)| in Time
+                        Working-Set Size over References
                     </h3>
                     <div class="h-48">
                         <canvas id="wsChart"></canvas>
@@ -115,7 +192,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-table text-indigo-500"></i>
-                        Timeline Detaliat
+                        Detailed Timeline
                     </h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
@@ -138,19 +215,19 @@
                 <!-- Statistics -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">WS Minim</div>
+                        <div class="text-xs text-stone-500 mb-1">Minimum WS</div>
                         <div id="minWS" class="text-2xl font-bold text-green-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">WS Maxim</div>
+                        <div class="text-xs text-stone-500 mb-1">Maximum WS</div>
                         <div id="maxWS" class="text-2xl font-bold text-red-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">WS Mediu</div>
+                        <div class="text-xs text-stone-500 mb-1">Mean WS</div>
                         <div id="avgWS" class="text-2xl font-bold text-blue-600">0</div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 text-center">
-                        <div class="text-xs text-stone-500 mb-1">Pagini Unice</div>
+                        <div class="text-xs text-stone-500 mb-1">Unique Pages</div>
                         <div id="uniquePages" class="text-2xl font-bold text-purple-600">0</div>
                     </div>
                 </div>
@@ -165,12 +242,12 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Sir de Reference</label>
+                            <label class="text-xs text-stone-500 block mb-1">Reference String</label>
                             <input type="text" id="refStringInput" value="1 2 3 2 1 4 5 2 1 3 4 5 1 2"
                                    class="w-full p-2 border border-stone-300 rounded text-sm mono">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Size Window (Δ)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Window Size (Δ)</label>
                             <input type="range" id="windowSize" min="2" max="10" value="5" class="w-full" oninput="updateWindowSize()">
                             <div class="flex justify-between text-xs text-stone-400">
                                 <span>2</span>
@@ -212,14 +289,14 @@
                 <!-- Presets -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadPreset('locality')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Good Locality
                         </button>
                         <button onclick="loadPreset('poor')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-random text-red-500 mr-2"></i>Localitate Slaba
+                            <i class="fas fa-random text-red-500 mr-2"></i>Poor Locality
                         </button>
                         <button onclick="loadPreset('phases')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-layer-group text-blue-500 mr-2"></i>Execution Phases
@@ -234,26 +311,26 @@
                     </h3>
                     <div class="space-y-2 text-xs text-teal-700">
                         <div class="p-2 bg-white/50 rounded mono">
-                            WS(t, Δ) = {pagini referentiate in [t-Δ+1, t]}
+                            WS(t, Δ) = {pages referenced in [t-Δ+1, t]}
                         </div>
-                        <p>Setul de lucru la momentul <strong>t</strong> cu fereastra <strong>Δ</strong> contains toate paginile distincte accesate in ultimele Δ references.</p>
+                        <p>The working set at reference <strong>t</strong>, with window <strong>Δ</strong>, contains the distinct pages accessed in the last Δ references.</p>
                     </div>
                 </div>
 
                 <!-- Key Concepts -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-lightbulb text-amber-500 mr-2"></i>Concepte Cheie
+                        <i class="fas fa-lightbulb text-amber-500 mr-2"></i>Key Concepts
                     </h3>
                     <div class="space-y-2 text-xs text-stone-600">
                         <div class="p-2 bg-green-50 rounded-lg">
-                            <strong>Principiul localitatii:</strong> Programele tind to acceseze un set mic de pagini intr-o perioada scurta.
+                            <strong>Locality Principle:</strong> Many programmes access a relatively small page set over a short interval; locality varies with workload.
                         </div>
                         <div class="p-2 bg-blue-50 rounded-lg">
-                            <strong>WSS (Working Set Size):</strong> |WS(t, Δ)| - numarul de pagini in setul de lucru.
+                            <strong>WSS (Working Set Size):</strong> |WS(t, Δ)| - the number of pages in the working set.
                         </div>
                         <div class="p-2 bg-amber-50 rounded-lg">
-                            <strong>Alegerea Δ:</strong> Prea mic → WS incomplet. Prea mare → include pagini nefolosite.
+                            <strong>Choosing Δ:</strong> Too small can miss a locality phase; too large can retain pages no longer in current use.
                         </div>
                     </div>
                 </div>
@@ -269,6 +346,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let referenceString = [];
         let windowSize = 5;
@@ -279,10 +401,7 @@
         let wsChart = null;
 
         // ==================== Initialization ====================
-        function init() {
-            applyConfig();
-            initChart();
-        }
+        function init() { initChart(); applyConfig(); }
 
         function applyConfig() {
             const input = document.getElementById('refStringInput').value.trim();
@@ -301,6 +420,8 @@
             windowSize = parseInt(document.getElementById('windowSize').value);
             document.getElementById('windowDisplay').textContent = windowSize;
             document.getElementById('windowValue').textContent = windowSize;
+        
+            computeAllWorkingSets();renderAll();
         }
 
         function initChart() {
@@ -397,7 +518,7 @@
             const container = document.getElementById('workingSet');
             
             if (currentTime < 0 || currentTime >= wsHistory.length) {
-                container.innerHTML = '<span class="text-stone-400 text-sm italic">Working set gol</span>';
+                container.innerHTML = '<span class="text-stone-400 text-sm italic">Empty working set</span>';
                 document.getElementById('wsSize').textContent = '0';
                 return;
             }
@@ -406,7 +527,7 @@
             document.getElementById('wsSize').textContent = ws.size;
             
             if (ws.size === 0) {
-                container.innerHTML = '<span class="text-stone-400 text-sm italic">Working set gol</span>';
+                container.innerHTML = '<span class="text-stone-400 text-sm italic">Empty working set</span>';
                 return;
             }
             
@@ -485,6 +606,7 @@
         }
 
         function resetSimulation() {
+            enosTimers.cancel();
             pauseSimulation();
             currentTime = -1;
             renderAll();
@@ -511,6 +633,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', init);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -1,160 +1,36 @@
-# 📁 Bash Utilities — SEM01
+# Bash utilities — Seminar 1
 
-> **Location:** `SEM01/scripts/bash/`  
-> **Purpose:** Seminar setup, validation, and interactive tools
+Run from this directory. Explicit `bash` invocation works without changing executable permissions.
 
-## Contents
+## Setup
 
-| Script | Purpose | Sudo Required? |
-|--------|---------|----------------|
-| `S01_01_setup_seminar.sh` | Install dependencies, create workspace | Yes (first run) |
-| `S01_02_interactive_quiz.sh` | CLI quiz with instant feedback | No |
-| `S01_03_validator.sh` | Validate homework submissions | No |
-
-## Quick Start
+`S01_01_setup_seminar.sh` accepts `--full`, `--minimal`, `--clean` and `--help`. With no argument it runs minimal setup, creates files under `~/laborator_so/seminar01` and backs up `.bashrc`. `--full` also attempts package installation. `--clean` removes the seminar workspace after its prompt. Unknown options fail before creating it.
 
 ```bash
-# Make all scripts executable (once)
-chmod +x *.sh
-
-# Setup seminar environment
-./S01_01_setup_seminar.sh
-
-# Take a practice quiz
-./S01_02_interactive_quiz.sh
-
-# Validate your homework
-./S01_03_validator.sh ~/my_homework/
+bash S01_01_setup_seminar.sh --help
 ```
 
----
+Read the chosen setup mode before execution: setup writes its documented workspace; full installation may invoke the system package manager.
 
-## S01_01_setup_seminar.sh
+## Formative quiz
 
-**Purpose:** Prepares your system with all required tools and creates the seminar workspace.
-
-### Usage
+The quiz is a fixed ten-question session with no timed/shuffle/count flags.
 
 ```bash
-./S01_01_setup_seminar.sh [options]
-
-Options:
-  --minimal     Skip optional packages (faster)
-  --force       Reinstall even if packages exist
-  --workspace   Create workspace directory only
-  --check       Verify installation without installing
+bash S01_02_interactive_quiz.sh
+bash S01_02_interactive_quiz.sh --help
 ```
 
-### What It Installs
-
-- Required system packages
-- Python dependencies from `requirements.txt`
-- Workspace directories (`~/os_seminar_sem01/`)
-- Sample files for exercises
-
-### Example
+## Submission diagnostics
 
 ```bash
-# Full installation
-./S01_01_setup_seminar.sh
-
-# Quick check if everything is ready
-./S01_01_setup_seminar.sh --check
+bash S01_03_validator.sh /path/to/submission
 ```
 
----
+The validator takes the directory as a positional argument. It does not implement --strict, --fix, --quiet or --report. The previously documented generic flags were not part of this interface. It returns a failing status for failed structural or execution checks.
 
-## S01_02_interactive_quiz.sh
+A runtime timeout is not a sandbox. The checks can execute submitted scripts; inspect them and use the designated exercise environment. Diagnostic results are not a final grade: see the [assessment contract](../../homework/ASSESSMENT_STATUS.md).
 
-**Purpose:** Terminal-based quiz for self-assessment with immediate feedback.
+Dependencies include Bash and ordinary Unix command-line tools. Python tools and ShellCheck have their own requirements; consult their actual help before use.
 
-### Usage
-
-```bash
-./S01_02_interactive_quiz.sh [options]
-
-Options:
-  --timed         30-second limit per question
-  --shuffle       Randomize question order
-  --hard-only     Show only difficult questions
-  --count N       Limit to N questions
-```
-
-### Features
-
-- Coloured output for correct/incorrect
-- Running score display
-- Detailed explanations after each answer
-- Summary statistics at end
-
-### Example
-
-```bash
-# Standard quiz
-./S01_02_interactive_quiz.sh
-
-# Timed challenge mode
-./S01_02_interactive_quiz.sh --timed --shuffle
-```
-
----
-
-## S01_03_validator.sh
-
-**Purpose:** Checks homework submissions against requirements.
-
-### Usage
-
-```bash
-./S01_03_validator.sh <submission_dir> [options]
-
-Options:
-  --strict      Fail on warnings (for final check)
-  --report      Generate detailed report file
-  --fix         Attempt to auto-fix common issues
-  --quiet       Minimal output
-```
-
-### What It Validates
-
-| Check | Severity |
-|-------|----------|
-| Required files present | ERROR |
-| Script syntax (bash -n) | ERROR |
-| Shellcheck compliance | WARNING |
-| Proper shebang lines | WARNING |
-| No hardcoded paths | WARNING |
-| Executable permissions | WARNING |
-
-### Example
-
-```bash
-# Basic validation
-./S01_03_validator.sh ~/homework/
-
-# Strict mode before submission
-./S01_03_validator.sh ~/homework/ --strict --report
-```
-
----
-
-## Dependencies
-
-- `bash` ≥ 4.0
-- `shellcheck` (for validation)
-- Standard Unix tools (`grep`, `sed`, `awk`)
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| "Permission denied" | Run `chmod +x *.sh` |
-| "shellcheck not found" | Run setup script or `sudo apt install shellcheck` |
-| Quiz won't start | Check terminal supports ANSI colours |
-
----
-
-*See also: [`../demo/`](../demo/) for live coding demonstrations*  
-*See also: [`../python/`](../python/) for automated grading tools*
-
-*Last updated: January 2026*
+See [demonstrations](../demo/) and [Python tools](../python/).

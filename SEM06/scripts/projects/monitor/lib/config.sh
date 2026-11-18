@@ -17,6 +17,15 @@
 #==============================================================================
 
 readonly CONFIG_VERSION="1.0.0"
+# Capture explicitly exported values before defaults/file loading.
+declare -gA MONITOR_ENV_OVERRIDES=()
+for _key in THRESHOLD_CPU THRESHOLD_MEM THRESHOLD_DISK THRESHOLD_SWAP THRESHOLD_LOAD_MULT MONITOR_INTERVAL LOG_FILE LOG_LEVEL LOG_MAX_SIZE LOG_ROTATE_COUNT LOG_USE_COLORS NOTIFY_EMAIL NOTIFY_SLACK_WEBHOOK NOTIFY_ON_RECOVERY DRY_RUN VERBOSE DAEMON_MODE OUTPUT_FORMAT LOCK_FILE LOG_DIR RUN_DIR; do
+    if [[ "$(declare -p "$_key" 2>/dev/null || true)" == "declare -x "* ]]; then
+        MONITOR_ENV_OVERRIDES["$_key"]="${!_key}"
+    fi
+done
+unset _key
+
 
 #------------------------------------------------------------------------------
 # DEFAULT VALUES
@@ -77,32 +86,13 @@ _detect_script_dir() {
 
 # Set paths based on script location
 _setup_paths() {
-    # If SCRIPT_DIR is not set, detect it
-    if [[ -z "${SCRIPT_DIR:-}" ]]; then
-        SCRIPT_DIR=$(_detect_script_dir)
-        readonly SCRIPT_DIR
-    fi
-    
-    # Derived paths
-    readonly PROJECT_DIR="${SCRIPT_DIR}"
-    readonly LIB_DIR="${PROJECT_DIR}/lib"
-    readonly ETC_DIR="${PROJECT_DIR}/etc"
-    readonly VAR_DIR="${PROJECT_DIR}/var"
-    readonly LOG_DIR="${VAR_DIR}/log"
-    readonly RUN_DIR="${VAR_DIR}/run"
-    
-    # Default configuration file
-    readonly DEFAULT_CONFIG_FILE="${ETC_DIR}/monitor.conf"
-    
-    # Default lock file
-    if [[ -z "$LOCK_FILE" ]]; then
-        LOCK_FILE="${RUN_DIR}/monitor.pid"
-    fi
-    
-    # Default log file
-    if [[ -z "$LOG_FILE" ]]; then
-        LOG_FILE="${LOG_DIR}/monitor.log"
-    fi
+    : "${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+    : "${PROJECT_DIR:=$SCRIPT_DIR}" "${LIB_DIR:=$SCRIPT_DIR/lib}"
+    : "${ETC_DIR:=$SCRIPT_DIR/etc}" "${VAR_DIR:=$SCRIPT_DIR/var}"
+    : "${LOG_DIR:=$VAR_DIR/log}" "${RUN_DIR:=$VAR_DIR/run}"
+    : "${DEFAULT_CONFIG_FILE:=$ETC_DIR/monitor.conf}"
+    : "${LOCK_FILE:=$RUN_DIR/monitor.lock}" "${LOG_FILE:=$LOG_DIR/monitor.log}"
+    return 0
 }
 
 #------------------------------------------------------------------------------
@@ -112,47 +102,20 @@ _setup_paths() {
 # Load configuration from a file
 # File format: KEY=value (shell-style)
 load_config_file() {
-    local config_file="${1:-$DEFAULT_CONFIG_FILE}"
-    
-    if [[ ! -f "$config_file" ]]; then
-        log_debug "Configuration file does not exist: $config_file"
-        return 0
+    local config_file="${1:-$DEFAULT_CONFIG_FILE}" parsed key value
+    [[ -r "$config_file" ]] || { log_error "Cannot read config: $config_file"; return 1; }
+    parsed=$(mktemp) || return 1
+    if ! python3 "$(dirname "${BASH_SOURCE[0]}")/../../config_data.py" "$config_file" THRESHOLD_CPU THRESHOLD_MEM THRESHOLD_DISK THRESHOLD_SWAP THRESHOLD_LOAD_MULT MONITOR_INTERVAL LOG_FILE LOG_LEVEL LOG_MAX_SIZE LOG_ROTATE_COUNT LOG_USE_COLORS NOTIFY_EMAIL NOTIFY_SLACK_WEBHOOK NOTIFY_ON_RECOVERY DRY_RUN VERBOSE DAEMON_MODE OUTPUT_FORMAT LOCK_FILE LOG_DIR RUN_DIR DISK_EXCLUDE_MOUNTS[] > "$parsed"; then
+        rm -f -- "$parsed"; return 1
     fi
-    
-    if [[ ! -r "$config_file" ]]; then
-        log_warn "Cannot read configuration file: $config_file"
-        return 1
-    fi
-    
-    log_info "Loading configuration from: $config_file"
-    
-    # Read line by line, ignore comments and empty lines
-    while IFS= read -r line || [[ -n "$line" ]]; do
-        # Skip comments and empty lines
-        [[ "$line" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "${line// /}" ]] && continue
-        
-        # Clean whitespace
-        line="${line#"${line%%[![:space:]]*}"}"
-        line="${line%"${line##*[![:space:]]}"}"
-        
-        # Extract KEY=VALUE
-        if [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
-            local key="${BASH_REMATCH[1]}"
-            local value="${BASH_REMATCH[2]}"
-            
-            # Remove quotes
-            value="${value#\"}"
-            value="${value%\"}"
-            value="${value#\'}"
-            value="${value%\'}"
-            
-            # Set variable
-            export "$key=$value"
-            log_debug "Config: $key = $value"
-        fi
-    done < "$config_file"
-    
+    while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+        case "$key" in
+            DISK_EXCLUDE_MOUNTS__RESET) DISK_EXCLUDE_MOUNTS=() ;;
+            DISK_EXCLUDE_MOUNTS) DISK_EXCLUDE_MOUNTS+=("$value") ;;
+            *) printf -v "$key" '%s' "$value" ;;
+        esac
+    done < "$parsed"
+    rm -f -- "$parsed"
     return 0
 }
 
@@ -160,6 +123,10 @@ load_config_file() {
 # Usage: parse_args "$@"
 parse_args() {
     while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -c|--config|--cpu-threshold|--mem-threshold|--disk-threshold|-i|--interval|-l|--log-file|--log-level|-e|--email|-o|--output|--exclude-mount)
+                [[ $# -ge 2 && -n "$2" ]] || { log_error "Missing value for $1"; return 1; } ;;
+        esac
         case "$1" in
             -c|--config)
                 CONFIG_FILE="$2"
@@ -252,22 +219,25 @@ validate_config() {
         local value="${!threshold_var}"
         if ! is_integer "$value" || ! in_range "$value" 0 100; then
             log_error "Invalid value for $threshold_var: $value (must be 0-100)"
-            ((errors++))
+            errors=$((errors + 1))
         fi
     done
     
     # Validate interval
     if ! is_integer "$MONITOR_INTERVAL" || [[ $MONITOR_INTERVAL -lt 1 ]]; then
         log_error "Invalid monitoring interval: $MONITOR_INTERVAL (must be >= 1)"
-        ((errors++))
+        errors=$((errors + 1))
     fi
     
+    if ! is_integer "$THRESHOLD_LOAD_MULT" || (( THRESHOLD_LOAD_MULT < 1 )); then
+        log_error "Invalid load multiplier"; errors=$((errors + 1))
+    fi
     # Validate log level
     case "$LOG_LEVEL" in
         DEBUG|INFO|WARN|ERROR|FATAL) ;;
         *)
             log_error "Invalid logging level: $LOG_LEVEL"
-            ((errors++))
+            errors=$((errors + 1))
             ;;
     esac
     
@@ -276,7 +246,7 @@ validate_config() {
         text|json|csv) ;;
         *)
             log_error "Invalid output format: $OUTPUT_FORMAT (must be: text, json, csv)"
-            ((errors++))
+            errors=$((errors + 1))
             ;;
     esac
     
@@ -290,7 +260,7 @@ validate_config() {
         if [[ ! -d "$dir" ]]; then
             mkdir -p "$dir" 2>/dev/null || {
                 log_error "Cannot create directory: $dir"
-                ((errors++))
+                errors=$((errors + 1))
             }
         fi
     done
@@ -328,7 +298,7 @@ LOGGING:
 
 NOTIFICATIONS:
   Email:      ${NOTIFY_EMAIL:-<not set>}
-  Slack:      ${NOTIFY_SLACK_WEBHOOK:+<set>}${NOTIFY_SLACK_WEBHOOK:-<not set>}
+  Slack:      $(if [[ -n "$NOTIFY_SLACK_WEBHOOK" ]]; then printf '<set>'; else printf '<not set>'; fi)
   Recovery:   ${NOTIFY_ON_RECOVERY}
 
 PATHS:
@@ -437,7 +407,7 @@ export_config_json() {
   },
   "notifications": {
     "email": "${NOTIFY_EMAIL}",
-    "slack_webhook": "${NOTIFY_SLACK_WEBHOOK:+true}${NOTIFY_SLACK_WEBHOOK:-false}",
+    "slack_webhook": $(if [[ -n "$NOTIFY_SLACK_WEBHOOK" ]]; then printf true; else printf false; fi),
     "notify_on_recovery": ${NOTIFY_ON_RECOVERY}
   }
 }
@@ -451,35 +421,30 @@ EOF
 # Complete initialisation function
 # Usage: init_config "$@"
 init_config() {
-    # 1. Setup paths
     _setup_paths
-    
-    # 2. Load default configuration file
-    if [[ -f "$DEFAULT_CONFIG_FILE" ]]; then
-        load_config_file "$DEFAULT_CONFIG_FILE"
+    local args=("$@") i key
+    for i in "${args[@]}"; do
+        case "$i" in -h|--help) show_help; exit 0;; --version) show_version; exit 0;; esac
+    done
+    for ((i=0; i<${#args[@]}; i++)); do
+        if [[ "${args[i]}" == -c || "${args[i]}" == --config ]]; then
+            ((i + 1 < ${#args[@]})) || { log_error "Missing configuration path"; return 1; }
+            CONFIG_FILE="${args[i+1]}"
+        fi
+    done
+    if [[ -n "${CONFIG_FILE:-}" ]]; then
+        load_config_file "$CONFIG_FILE" || return 1
+    elif [[ -f "$DEFAULT_CONFIG_FILE" ]]; then
+        load_config_file "$DEFAULT_CONFIG_FILE" || return 1
+    elif [[ -f /etc/sysmonitor.conf ]]; then
+        load_config_file /etc/sysmonitor.conf || return 1
     fi
-    
-    # 3. Parse arguments (can override config file)
-    parse_args "$@"
-    
-    # 4. Load specified configuration file
-    if [[ -n "${CONFIG_FILE:-}" ]] && [[ "$CONFIG_FILE" != "$DEFAULT_CONFIG_FILE" ]]; then
-        load_config_file "$CONFIG_FILE"
-    fi
-    
-    # 5. Validate final configuration
-    if ! validate_config; then
-        log_error "Invalid configuration"
-        return 1
-    fi
-    
-    # 6. Verbose settings
-    if [[ "$VERBOSE" == "true" ]]; then
-        LOG_LEVEL="DEBUG"
-        show_config
-    fi
-    
-    log_debug "Configuration initialised successfully"
+    for key in "${!MONITOR_ENV_OVERRIDES[@]}"; do
+        printf -v "$key" '%s' "${MONITOR_ENV_OVERRIDES[$key]}"
+    done
+    parse_args "${args[@]}" || return 1
+    validate_config || return 1
+    [[ "$VERBOSE" != true ]] || show_config >&2
     return 0
 }
 

@@ -64,21 +64,22 @@ deploy_service() {
     local service=$1
     local source_path=${2:-""}
     
-    ((DEPLOY_SERVICES_TOTAL++))
+    DEPLOY_SERVICES_TOTAL=$((DEPLOY_SERVICES_TOTAL + 1))
     
     log_subheader "Deploying service: $service"
     
     # Pre-service hook
     run_hook "pre-service" "$service" "deploy" || {
         log_error "Pre-service hook failed for: $service"
-        ((DEPLOY_SERVICES_FAILED++))
+        DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
         return 1
     }
     
     # Check if service exists
     if ! has_systemd; then
-        log_warn "Systemd not available, skipping service: $service"
-        return 0
+        log_error "Systemd not available; service not deployed: $service"
+        DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
+        return 1
     fi
     
     local service_status
@@ -87,13 +88,13 @@ deploy_service() {
     # Backup current configuration if it exists
     if [[ "$NO_BACKUP" != "true" && -f "/etc/systemd/system/${service}.service" ]]; then
         local backup_file="$BACKUP_DIR/services/${service}.service.$(get_short_timestamp)"
-        mkdir -p "$BACKUP_DIR/services"
+        mkdir -p "$BACKUP_DIR/services" || return 1
         
         if [[ "$DRY_RUN" == "true" ]]; then
             log_info "[DRY RUN] Would backup: ${service}.service -> $backup_file"
         else
-            cp "/etc/systemd/system/${service}.service" "$backup_file"
-            register_rollback "service_${service}_backup" "$backup_file"
+            cp -- "/etc/systemd/system/${service}.service" "$backup_file" || return 1
+            register_rollback "service_${service}_backup" "$backup_file" || return 1
             log_debug "Backup created: $backup_file"
         fi
     fi
@@ -103,8 +104,8 @@ deploy_service() {
         if [[ "$DRY_RUN" == "true" ]]; then
             log_info "[DRY RUN] Would copy: $source_path -> /etc/systemd/system/${service}.service"
         else
-            cp "$source_path" "/etc/systemd/system/${service}.service"
-            systemctl daemon-reload
+            cp -- "$source_path" "/etc/systemd/system/${service}.service" || return 1
+            systemctl daemon-reload || return 1
         fi
     fi
     
@@ -115,21 +116,21 @@ deploy_service() {
         if [[ "$service_status" == "active" ]]; then
             restart_service "$service" || {
                 log_error "Failed to restart service: $service"
-                ((DEPLOY_SERVICES_FAILED++))
+                DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
                 run_hook "post-service" "$service" "failed"
                 return 1
             }
         else
             start_service "$service" || {
                 log_error "Failed to start service: $service"
-                ((DEPLOY_SERVICES_FAILED++))
+                DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
                 run_hook "post-service" "$service" "failed"
                 return 1
             }
         fi
         
         # Wait for stabilisation
-        sleep "$SERVICE_RESTART_DELAY"
+        sleep "$SERVICE_RESTART_DELAY" || return 1
     fi
     
     # Health check
@@ -141,7 +142,7 @@ deploy_service() {
         
         if [[ "$new_status" != "active" ]]; then
             log_error "Service not active after deploy: $service (status: $new_status)"
-            ((DEPLOY_SERVICES_FAILED++))
+            DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
             run_hook "post-service" "$service" "failed"
             return 1
         fi
@@ -150,8 +151,8 @@ deploy_service() {
     fi
     
     # Success
-    register_deployed_service "$service" "latest" ""
-    run_hook "post-service" "$service" "success"
+    run_hook "post-service" "$service" "success" || { DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED+1)); return 1; }
+    register_deployed_service "$service" "latest" "" || return 1
     log_info "${SYMBOL_SUCCESS} Service deployed: $service"
     
     return 0
@@ -163,22 +164,21 @@ deploy_container() {
     local container=$1
     local version=${2:-"latest"}
     
-    ((DEPLOY_SERVICES_TOTAL++))
+    DEPLOY_SERVICES_TOTAL=$((DEPLOY_SERVICES_TOTAL + 1))
     
     # Separate container name from image
     local container_name
     local image
     
-    if [[ "$container" =~ : ]]; then
-        # Format: image:tag
-        image="$container"
-        container_name=$(echo "$container" | cut -d: -f1 | tr '/:' '_')
-        version=$(echo "$container" | cut -d: -f2)
+    [[ "$container" =~ ^[A-Za-z0-9][A-Za-z0-9._/:@-]*$ ]] || return 2
+    if [[ ${container##*/} == *:* || $container == *@* ]]; then
+        image=$container
+        version=${container##*:}
     else
-        container_name="$container"
         image="$container:$version"
     fi
-    
+    container_name=$(normalise_container_name "$image") || return 2
+
     # Add registry if configured
     if [[ -n "$DOCKER_REGISTRY" && ! "$image" =~ / ]]; then
         image="${DOCKER_REGISTRY}/${image}"
@@ -189,14 +189,14 @@ deploy_container() {
     # Pre-service hook
     run_hook "pre-service" "$container_name" "deploy" || {
         log_error "Pre-service hook failed for: $container_name"
-        ((DEPLOY_SERVICES_FAILED++))
+        DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
         return 1
     }
     
     # Check Docker
     if ! docker_available; then
         log_error "Docker not available"
-        ((DEPLOY_SERVICES_FAILED++))
+        DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
         return 1
     fi
     
@@ -205,7 +205,7 @@ deploy_container() {
         local current_image
         current_image=$(docker inspect --format='{{.Config.Image}}' "$container_name" 2>/dev/null || echo "")
         if [[ -n "$current_image" ]]; then
-            register_rollback "container_${container_name}_image" "$current_image"
+            register_rollback "container_${container_name}_image" "$current_image" || return 1
             log_debug "Registered rollback image: $current_image"
         fi
     fi
@@ -218,7 +218,7 @@ deploy_container() {
             log_info "Pulling image: $image"
             if ! run_with_timeout "$DOCKER_PULL_TIMEOUT" docker pull "$image"; then
                 log_error "Failed to pull image: $image"
-                ((DEPLOY_SERVICES_FAILED++))
+                DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
                 run_hook "post-service" "$container_name" "failed"
                 return 1
             fi
@@ -230,8 +230,8 @@ deploy_container() {
         if [[ "$DRY_RUN" == "true" ]]; then
             log_info "[DRY RUN] Would stop container: $container_name"
         else
-            stop_container "$container_name" "$CONTAINER_STOP_TIMEOUT"
-            remove_container "$container_name"
+            stop_container "$container_name" "$CONTAINER_STOP_TIMEOUT" || return 1
+            remove_container "$container_name" || return 1
         fi
     fi
     
@@ -248,7 +248,7 @@ deploy_container() {
         local container_config="$DEPLOY_ROOT/containers/${container_name}.conf"
         if [[ -f "$container_config" ]]; then
             # shellcheck source=/dev/null
-            source "$container_config"
+            load_container_config "$container_config" || return 1
             # Container config can set: CONTAINER_PORTS, CONTAINER_VOLUMES, CONTAINER_ENV, etc.
             
             [[ -n "${CONTAINER_PORTS:-}" ]] && container_opts+=(-p "$CONTAINER_PORTS")
@@ -261,13 +261,13 @@ deploy_container() {
         
         if ! docker run -d --name "$container_name" "${container_opts[@]}" "$image" &>/dev/null; then
             log_error "Failed to start container: $container_name"
-            ((DEPLOY_SERVICES_FAILED++))
+            DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
             run_hook "post-service" "$container_name" "failed"
             return 1
         fi
         
         # Wait for startup
-        sleep 3
+        sleep 3 || return 1
     fi
     
     # Health check
@@ -283,7 +283,7 @@ deploy_container() {
                 log_debug "  $line"
             done
             
-            ((DEPLOY_SERVICES_FAILED++))
+            DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
             run_hook "post-service" "$container_name" "failed"
             return 1
         fi
@@ -295,7 +295,9 @@ deploy_container() {
         if [[ -n "$container_port" ]]; then
             if ! health_check_with_retry tcp "$HEALTH_CHECK_RETRIES" "$HEALTH_CHECK_INTERVAL" \
                     "localhost" "$container_port"; then
-                log_warn "Container port not responding, but container is running"
+                log_error "Container port health check failed"
+                DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
+                return 1
             fi
         fi
         
@@ -303,8 +305,8 @@ deploy_container() {
     fi
     
     # Success
-    register_deployed_service "$container_name" "$version" "$image"
-    run_hook "post-service" "$container_name" "success"
+    run_hook "post-service" "$container_name" "success" || { DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED+1)); return 1; }
+    register_deployed_service "$container_name" "$version" "$image" || return 1
     log_info "${SYMBOL_SUCCESS} Container deployed: $container_name"
     
     return 0
@@ -349,13 +351,20 @@ deploy_from_manifest() {
             local source_dir="${MANIFEST_SOURCE:-}"
             local dest_dir="${MANIFEST_DESTINATION:-}"
             
-            if [[ -n "$source_dir" && -n "$dest_dir" ]]; then
-                deploy_directory "$source_dir" "$dest_dir" "$BACKUP_DIR/files"
+            [[ "$source_dir" == /* ]] || source_dir="$(dirname "$manifest")/$source_dir"
+            [[ "$dest_dir" == /* ]] || dest_dir="$DEPLOY_ROOT/$ENVIRONMENT/$dest_dir"
+            DEPLOY_SERVICES_TOTAL=$((DEPLOY_SERVICES_TOTAL + 1))
+            if deploy_directory "$source_dir" "$dest_dir" "$BACKUP_DIR/files"; then
+                register_deployed_service "$name" "$version" "$dest_dir"
+            else
+                DEPLOY_SERVICES_FAILED=$((DEPLOY_SERVICES_FAILED + 1))
+                return 1
             fi
             ;;
             
         *)
-            log_warn "Unknown manifest type: $type"
+            log_error "Unknown manifest type: $type"
+            return 1
             ;;
     esac
 }
@@ -371,7 +380,7 @@ rollback_service() {
     
     log_subheader "Rolling back service: $service"
     
-    run_hook "pre-rollback" "$service"
+    run_hook "pre-rollback" "$service" || return 1
     
     # Get the backup
     local backup_file
@@ -381,14 +390,15 @@ rollback_service() {
         log_info "Restoring from backup: $backup_file"
         
         if [[ "$DRY_RUN" != "true" ]]; then
-            cp "$backup_file" "/etc/systemd/system/${service}.service"
-            systemctl daemon-reload
-            restart_service "$service"
+            cp -- "$backup_file" "/etc/systemd/system/${service}.service" || return 1
+            systemctl daemon-reload || return 1
+            restart_service "$service" || return 1
         else
             log_info "[DRY RUN] Would restore: $backup_file"
         fi
     else
-        log_warn "No backup found for service: $service"
+        log_error "No backup found for service: $service"
+        return 1
     fi
     
     run_hook "post-rollback" "$service"
@@ -398,10 +408,10 @@ rollback_service() {
 # Args: $1 = container name
 rollback_container() {
     local container=$1
-    
+    container=$(normalise_container_name "$container") || return 2
     log_subheader "Rolling back container: $container"
     
-    run_hook "pre-rollback" "$container"
+    run_hook "pre-rollback" "$container" || return 1
     
     # Get the previous image
     local previous_image
@@ -411,16 +421,17 @@ rollback_container() {
         log_info "Restoring to image: $previous_image"
         
         if [[ "$DRY_RUN" != "true" ]]; then
-            stop_container "$container" 10
-            remove_container "$container" true
+            stop_container "$container" 10 || return 1
+            remove_container "$container" true || return 1
             
             # Restart with the old image
-            docker run -d --name "$container" --restart unless-stopped "$previous_image" &>/dev/null
+            docker run -d --name "$container" --restart unless-stopped "$previous_image" &>/dev/null || return 1
         else
             log_info "[DRY RUN] Would restore to: $previous_image"
         fi
     else
-        log_warn "No previous image found for container: $container"
+        log_error "No previous image found for container: $container"
+        return 1
     fi
     
     run_hook "post-rollback" "$container"
@@ -429,22 +440,25 @@ rollback_container() {
 # Execute complete rollback
 do_rollback() {
     log_header "ROLLBACK"
-    DEPLOYMENT_STATE=$STATE_ROLLED_BACK
-    
-    run_hook "pre-rollback"
+    local rollback_failed=0
+    run_hook "pre-rollback" || return 1
     
     # Rollback services
     for service in "${SERVICES[@]}"; do
-        rollback_service "$service"
+        rollback_service "$service" || rollback_failed=1
     done
     
     # Rollback containers
     for container in "${CONTAINERS[@]}"; do
-        rollback_container "$container"
+        rollback_container "$container" || rollback_failed=1
     done
     
-    run_hook "post-rollback"
-    
+    run_hook "post-rollback" || rollback_failed=1
+    if (( rollback_failed )); then
+        log_error "Rollback incomplete; deployment requires review"
+        return 1
+    fi
+    DEPLOYMENT_STATE=$STATE_ROLLED_BACK
     log_info "Rollback completed"
 }
 
@@ -580,16 +594,13 @@ send_email_notification() {
     log_debug "Sending email notification to: $NOTIFY_EMAIL"
     
     if command_exists mail; then
-        echo "$body" | mail -s "$subject" "$NOTIFY_EMAIL" 2>/dev/null || true
+        printf '%s\n' "$body" | timeout 15 mail -s "$subject" -- "$NOTIFY_EMAIL" || return 1
     elif command_exists sendmail; then
-        {
-            echo "Subject: $subject"
-            echo ""
-            echo "$body"
-        } | sendmail "$NOTIFY_EMAIL" 2>/dev/null || true
+        printf 'To: %s\nSubject: %s\n\n%s\n' "$NOTIFY_EMAIL" "$subject" "$body" | timeout 15 sendmail -- "$NOTIFY_EMAIL" || return 1
     else
-        log_warn "No mail command available"
+        log_error "Configured mail transport is unavailable"; return 1
     fi
+    return 0
 }
 
 # Send Slack notification
@@ -604,25 +615,18 @@ send_slack_notification() {
     log_debug "Sending Slack notification"
     
     local payload
-    payload=$(cat <<EOF
-{
-    "attachments": [{
-        "color": "$color",
-        "text": "$message",
-        "footer": "SysDeployer | $(get_hostname)",
-        "ts": $(date +%s)
-    }]
+    payload=$(python3 - "$message" "$color" "$(get_hostname)" "$(date +%s)" <<'PYJSON'
+import json,sys
+print(json.dumps({'attachments':[{'color':sys.argv[2], 'text':sys.argv[1], 'footer':'SysDeployer | '+sys.argv[3], 'ts':int(sys.argv[4])}]}))
+PYJSON
+) || return 1
+    curl --fail --silent --show-error --connect-timeout 3 --max-time 15 \
+        --request POST --header 'Content-type: application/json' --data "$payload" -- "$SLACK_WEBHOOK" >/dev/null || return 1
+    return 0
 }
-EOF
-)
-    
-    curl -s -X POST -H 'Content-type: application/json' \
-        --data "$payload" "$SLACK_WEBHOOK" &>/dev/null || true
-}
-
 # Notify deployment result
 notify_deployment_result() {
-    local status=$1
+    local status=$1 delivery_failed=0
     
     local subject="[Deployment] $DEPLOYMENT_ID - $status"
     local message="Deployment $DEPLOYMENT_ID completed with status: $status"
@@ -632,12 +636,14 @@ notify_deployment_result() {
     message+="\nDuration: $(format_duration "$(get_deployment_duration)")"
     
     if [[ "$status" == "success" && "$NOTIFY_ON_SUCCESS" == "true" ]]; then
-        send_email_notification "$subject" "$message"
-        send_slack_notification "$message" "good"
+        send_email_notification "$subject" "$message" || delivery_failed=1
+        send_slack_notification "$message" "good" || delivery_failed=1
     elif [[ "$status" == "failed" && "$NOTIFY_ON_FAILURE" == "true" ]]; then
-        send_email_notification "$subject" "$message"
-        send_slack_notification "$message" "danger"
+        send_email_notification "$subject" "$message" || delivery_failed=1
+        send_slack_notification "$message" "danger" || delivery_failed=1
     fi
+    ((delivery_failed == 0)) || { log_error "Notification delivery failed"; return 1; }
+    return 0
 }
 
 # ==============================================================================
@@ -653,6 +659,7 @@ deploy_rolling() {
     local delay="${ROLLING_DELAY:-10}"
     local total=${#services[@]}
     local deployed=0
+    [[ "$batch_size" =~ ^[1-9][0-9]*$ && "$delay" =~ ^[0-9]+$ ]] || return 1
     
     log_info "Rolling deployment: ${total} services, batch size: ${batch_size}"
     
@@ -666,17 +673,17 @@ deploy_rolling() {
                 if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
                     log_warn "Rolling back deployed services..."
                     do_rollback
-                    return 1
                 fi
+                return 1
             fi
-            ((deployed++))
+            deployed=$((deployed + 1))
             log_info "Progress: ${deployed}/${total}"
         done
         
         # Delay between batches for stabilisation
         if ((i + batch_size < total)); then
             log_info "Waiting ${delay}s before next batch..."
-            sleep "$delay"
+            sleep "$delay" || return 1
         fi
     done
     
@@ -744,6 +751,20 @@ deploy_canary() {
     
     log_info "Canary deployment: stages: $stages, observe: ${observe_time}s"
     
+    local last=-1 percentage
+    local -a validated_stages=()
+    IFS=" " read -r -a validated_stages <<< "$stages"
+    [[ $observe_time =~ ^[0-9]{1,5}$ && $error_threshold =~ ^[0-9]{1,3}([.][0-9]+)?$ ]] || return 2
+    awk -v n="$error_threshold" 'BEGIN{exit !(n>=0 && n<=100)}' || return 2
+    ((${#validated_stages[@]} > 0)) || return 2
+    for percentage in "${validated_stages[@]}"; do
+        [[ $percentage =~ ^[0-9]{1,3}$ ]] || return 2
+        percentage=$((10#$percentage))
+        ((percentage > last && percentage <= 100)) || return 2
+        last=$percentage
+    done
+    ((last == 100)) || return 2
+    # Validate stage configuration before touching any service.
     # Deploy canary instances
     log_info "Deploying canary instances..."
     for service in "${services[@]}"; do
@@ -755,7 +776,11 @@ deploy_canary() {
     done
     
     # Gradual traffic increase
-    for percentage in $stages; do
+    local -a stage_values=()
+    IFS=" " read -r -a stage_values <<< "$stages"
+    [[ "$observe_time" =~ ^[0-9]+$ && "$error_threshold" =~ ^[0-9]+([.][0-9]+)?$ ]] || return 1
+    for percentage in "${stage_values[@]}"; do
+        [[ "$percentage" =~ ^[0-9]+$ && "$percentage" -le 100 ]] || return 1
         log_info "Setting canary weight: ${percentage}%"
         
         if ! set_canary_weight "$percentage"; then
@@ -766,13 +791,17 @@ deploy_canary() {
         
         if [[ "$percentage" -lt 100 ]]; then
             log_info "Observing for ${observe_time}s..."
-            sleep "$observe_time"
+            sleep "$observe_time" || return 1
             
             # Check metrics
             local error_rate
-            error_rate=$(get_canary_error_rate 2>/dev/null || echo "0")
+            if ! error_rate=$(get_canary_error_rate); then
+                log_error "Canary metrics unavailable"; rollback_canary; return 1
+            fi
+            [[ "$error_rate" =~ ^[0-9]+([.][0-9]+)?$ ]] || { rollback_canary; return 1; }
+            awk -v n="$error_rate" 'BEGIN{exit !(n>=0 && n<=100)}' || { rollback_canary; return 1; }
             
-            if (( $(echo "$error_rate > $error_threshold" | bc -l 2>/dev/null || echo 0) )); then
+            if awk -v rate="$error_rate" -v threshold="$error_threshold" 'BEGIN { exit !(rate > threshold) }'; then
                 log_error "Error rate too high: ${error_rate}% > ${error_threshold}%"
                 log_warn "Rolling back canary..."
                 rollback_canary
@@ -785,7 +814,7 @@ deploy_canary() {
     
     # Promote canary to stable
     log_info "Promoting canary to stable..."
-    promote_canary
+    promote_canary || return 1
     
     log_info "Canary deployment complete"
     return 0
@@ -796,14 +825,16 @@ switch_traffic() {
     local target_env="$1"
     # Implementation: update load balancer, DNS, or routing rules
     log_debug "Switching traffic to: $target_env"
-    # In production: nginx reload, HAProxy update, etc.
-    return 0
+    # Supply an explicit executable integration hook for the actual lab router.
+    [[ -x "$HOOKS_DIR/switch-traffic" ]] || { log_error "Missing traffic-switch integration hook"; return 1; }
+    run_hook switch-traffic "$target_env"
 }
 
 run_smoke_tests() {
     local env="$1"
     log_debug "Running smoke tests on: $env"
     # Run basic tests: health check, critical endpoints
+    [[ -x "$HOOKS_DIR/smoke-test" ]] || { log_error "Missing smoke-test hook"; return 1; }
     run_hook "smoke-test" "$env"
     return $?
 }
@@ -811,14 +842,15 @@ run_smoke_tests() {
 set_canary_weight() {
     local weight="$1"
     log_debug "Setting canary weight: ${weight}%"
-    # Implementation: update load balancer weights
-    return 0
+    [[ -x "$HOOKS_DIR/set-canary-weight" ]] || { log_error "Missing canary-weight integration hook"; return 1; }
+    run_hook set-canary-weight "$weight"
 }
 
 get_canary_error_rate() {
     # Read error rate from monitoring system
     # In production: Prometheus query, CloudWatch, etc.
-    echo "0"
+    log_error "Configure get_canary_error_rate for the lab metrics source"
+    return 1
 }
 
 rollback_canary() {
@@ -842,7 +874,7 @@ do_deploy() {
     log_header "DEPLOYMENT STARTED"
     
     # Generate deployment ID
-    set_deployment_id
+    set_deployment_id || return 1
     
     log_deploy "Environment: $ENVIRONMENT"
     log_deploy "Strategy: $STRATEGY"
@@ -888,18 +920,26 @@ do_deploy() {
                         
                         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
                             log_warn "Service deployment failed, initiating rollback"
-                            do_rollback
+                            do_rollback || return 1
                             DEPLOYMENT_STATE=$STATE_ROLLED_BACK
                             run_hook "post-deploy"
                             notify_deployment_result "rolled_back"
                             return 2
                         fi
+                        break
                     fi
                 done
                 ;;
         esac
     fi
     
+    # Stop on any failed service strategy; subsequent targets are untouched.
+    if [[ "$deploy_failed" == true ]]; then
+        DEPLOYMENT_STATE=$STATE_FAILED
+        notify_deployment_result failed
+        return 2
+    fi
+
     # Deploy containers
     for container in "${CONTAINERS[@]}"; do
         if ! deploy_container "$container"; then
@@ -907,24 +947,31 @@ do_deploy() {
             
             if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
                 log_warn "Container deployment failed, initiating rollback"
-                do_rollback
+                do_rollback || return 1
                 DEPLOYMENT_STATE=$STATE_ROLLED_BACK
                 run_hook "post-deploy"
                 notify_deployment_result "rolled_back"
                 return 2
             fi
+            break
         fi
     done
-    
+    if [[ "$deploy_failed" == true ]]; then
+        DEPLOYMENT_STATE=$STATE_FAILED
+        notify_deployment_result failed
+        return 2
+    fi
+
     # Deploy from manifests
     for manifest in "${MANIFESTS[@]}"; do
         if ! deploy_from_manifest "$manifest"; then
             deploy_failed=true
+            break
         fi
     done
     
     # Post-deploy hook
-    run_hook "post-deploy"
+    run_hook "post-deploy" || deploy_failed=true
     
     # Set final state
     if [[ "$deploy_failed" == "true" ]]; then
@@ -935,7 +982,7 @@ do_deploy() {
     else
         DEPLOYMENT_STATE=$STATE_SUCCESS
         log_info "${SYMBOL_SUCCESS} Deployment completed successfully"
-        notify_deployment_result "success"
+        notify_deployment_result "success" || return 1
         return 0
     fi
 }
@@ -951,6 +998,13 @@ main() {
     # Initialise configuration
     init_config "$@" || exit 1
     
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "[DRY RUN] Action: $ACTION; environment: $ENVIRONMENT; strategy: $STRATEGY"
+        for manifest in "${MANIFESTS[@]}"; do validate_manifest "$manifest" || return 1; done
+        log_info "[DRY RUN] Services: ${SERVICES[*]}; containers: ${CONTAINERS[*]}; manifests: ${MANIFESTS[*]}"
+        return 0
+    fi
+    initialise_temp_workspace || return 1
     # Acquire lock (except for status and list)
     if [[ "$ACTION" != "status" && "$ACTION" != "list" ]]; then
         if ! acquire_lock; then
@@ -978,22 +1032,19 @@ main() {
     
     case "$ACTION" in
         deploy)
-            do_deploy
-            exit_code=$?
+            do_deploy || exit_code=$?
             ;;
         rollback)
-            do_rollback
-            exit_code=$?
+            do_rollback || exit_code=$?
             ;;
         status)
-            show_status
+            show_status || exit_code=$?
             ;;
         list)
-            list_services
+            list_services || exit_code=$?
             ;;
         health)
-            do_health_checks
-            exit_code=$?
+            do_health_checks || exit_code=$?
             ;;
         *)
             log_error "Unknown action: $ACTION"
@@ -1003,11 +1054,11 @@ main() {
     
     # Generate final report
     if [[ "$ACTION" == "deploy" || "$ACTION" == "rollback" ]]; then
-        generate_deployment_report "${OUTPUT_FORMAT:-text}"
+        generate_deployment_report "${OUTPUT_FORMAT:-text}" || exit_code=1
     fi
     
     exit $exit_code
 }
 
-# Run main
-main "$@"
+# Run only when executed, so bounded library regression tests can source the file.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then main "$@"; fi

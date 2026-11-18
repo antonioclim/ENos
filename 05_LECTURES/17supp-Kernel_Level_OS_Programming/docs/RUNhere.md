@@ -7,20 +7,20 @@
 
 ### Interactive HTML Simulators
 
-| Fișier | Description |
+| File | Description |
 |------|-------------|
 | `17ex1_-_Kernel_Module_Lifecycle.html` | insmod/rmmod and module_init/exit |
 | `17ex2_-_Character_Device_Flow.html` | Device file I/O operations |
 
 ### Formative Assessment (YAML)
 
-| Fișier | Description |
+| File | Description |
 |------|-------------|
 | `C17_05_FORMATIVE_ASSESSMENT.yaml` | Formative assessment quiz (Bloom-distributed) |
 
 ### Pedagogical Documentation
 
-| Fișier | Purpose |
+| File | Purpose |
 |------|---------|
 | `C17_01_COURSE_PLAN.md` | Learning objectives and session timing |
 | `C17_02_CONCEPT_MAP.md` | Visual topic relationships |
@@ -43,18 +43,17 @@ xdg-open 17ex1_-_Kernel_Module_Lifecycle.html
 ```
 
 **Features:**
-- Self-contained (no server required)
+- No server required; optional web fonts/chart assets may need internet, with a textual chart fallback offline
 - Interactive controls and visualizations  
 - Step-by-step execution modes
 - Reset buttons to restart simulations
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the lecture self-assessment from this `docs/` directory (Python with PyYAML):
 
 ```bash
-cd ../../SEM01/formative/
-python3 quiz_runner.py --file ../../05_LECTURES/17supp-Kernel_Level_OS_Programming/docs/C17_05_FORMATIVE_ASSESSMENT.yaml
+python3 ../../quiz_runner.py "C17_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42
 ```
 
 **Or manually review:**
@@ -83,7 +82,7 @@ python3 quiz_runner.py --file ../../05_LECTURES/17supp-Kernel_Level_OS_Programmi
 
 - **Parent:** [`../README.md`](../README.md) — Lecture unit overview
 - **Scripts:** [`../scripts/`](../scripts/) — Demo scripts (if available)
-- **Diagrams:** [`../../00_SUPPLEMENTARY/diagrams_png/`](../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
+- **Diagrams:** [`../../../00_SUPPLEMENTARY/diagrams_png/`](../../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
 
 ---
 

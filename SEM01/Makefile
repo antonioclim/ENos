@@ -18,6 +18,8 @@ CYAN := \033[0;36m
 RED := \033[0;31m
 NC := \033[0m
 
+export STUDENT
+
 # Coverage threshold
 COVERAGE_THRESHOLD := 75
 
@@ -37,10 +39,10 @@ help:
 	@echo "  $(GREEN)validate$(NC)           Validate seminar structure"
 	@echo "  $(GREEN)ai-check$(NC)           Scan documentation for AI patterns"
 	@echo "  $(GREEN)plagiarism-check$(NC)   Run internal plagiarism detector"
-	@echo "  $(GREEN)moss-check$(NC)         Submit to MOSS (requires MOSS_USERID)"
-	@echo "  $(GREEN)jplag-check$(NC)        Run JPlag analysis (requires Java)"
+	@echo "  $(GREEN)moss-check$(NC)         Report unsupported MOSS/Bash integration"
+	@echo "  $(GREEN)jplag-check$(NC)        Report unsupported JPlag/Bash integration"
 	@echo "  $(GREEN)generate-homework$(NC)  Generate a personalised homework variant"
-	@echo "  $(GREEN)clean$(NC)              Remove temporary files"
+	@echo "  $(GREEN)clean$(NC)              Remove generated Python caches only"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make test"
@@ -52,16 +54,13 @@ help:
 
 setup:
 	@echo ">>> Installing dependencies..."
-	pip install -r requirements.txt --break-system-packages 2>/dev/null || pip install -r requirements.txt
+	python3 -m venv .venv
+	.venv/bin/python -m pip install -r requirements.txt
 	@echo "$(GREEN)[OK] Dependencies installed$(NC)"
 
 test:
 	@echo ">>> Running pytest..."
-	@pytest $(TESTS_DIR)/ -v --tb=short --color=yes; \
-		PYTEST_EXIT=$$?; \
-		if [ $$PYTEST_EXIT -ne 0 ] && [ $$PYTEST_EXIT -ne 5 ]; then \
-			echo "$(RED)[FAIL] pytest returned errors$(NC)"; \
-		fi
+	@python3 -m pytest --import-mode=importlib $(TESTS_DIR)/ -v --tb=short --color=yes
 	@echo ""
 	@echo ">>> Checking Bash syntax..."
 	@ERRORS=0; \
@@ -83,7 +82,7 @@ test:
 
 test-coverage:
 	@echo ">>> Running pytest with coverage threshold ($(COVERAGE_THRESHOLD)%)..."
-	@pytest $(TESTS_DIR)/ -v --tb=short \
+	@python3 -m pytest --import-mode=importlib $(TESTS_DIR)/ -v --tb=short \
 		--cov=$(FORMATIVE_DIR) \
 		--cov=$(SCRIPTS_DIR)/python \
 		--cov-report=term-missing \
@@ -113,7 +112,7 @@ lint:
 
 quiz:
 	@echo ">>> Starting interactive quiz..."
-	@python3 $(FORMATIVE_DIR)/quiz_runner.py
+	@python3 $(FORMATIVE_DIR)/quiz_runner.py $(FORMATIVE_DIR)/quiz.yaml
 
 validate:
 	@echo ">>> Validating seminar structure..."
@@ -165,41 +164,14 @@ else
 endif
 
 moss-check:
-ifndef MOSS_USERID
-	@echo "Usage: make moss-check MOSS_USERID=your_id SUBMISSIONS=path/"
-	@echo ""
-	@echo "To get a MOSS user ID:"
-	@echo "  1. Send email to moss@moss.stanford.edu"
-	@echo "  2. Subject and body: registeruser"
-	@echo "  3. You'll receive a Perl script with your ID"
-else ifndef SUBMISSIONS
-	@echo "Usage: make moss-check MOSS_USERID=your_id SUBMISSIONS=path/"
-else
-	@echo ">>> Submitting to MOSS..."
-	@if [ -f moss.pl ]; then \
-		perl moss.pl -l bash -u $(MOSS_USERID) -d $(SUBMISSIONS)/*/*.sh; \
-	else \
-		echo "$(RED)[ERROR] moss.pl not found - download from registration email$(NC)"; \
-	fi
-endif
+	@echo "MOSS integration is not validated for Bash; no upload is performed."
+	@echo "See docs/S01_11_EXTERNAL_PLAGIARISM_TOOLS.md; service/data policy remains open."
+	@exit 2
 
 jplag-check:
-ifndef SUBMISSIONS
-	@echo "Usage: make jplag-check SUBMISSIONS=path/"
-	@echo ""
-	@echo "Requires: java and jplag.jar in current directory"
-	@echo "Download: https://github.com/jplag/JPlag/releases"
-else
-	@echo ">>> Running JPlag..."
-	@if [ -f jplag.jar ] || [ -f jplag-*.jar ]; then \
-		JPLAG_JAR=$$(ls jplag*.jar 2>/dev/null | head -1); \
-		java -jar $$JPLAG_JAR -l bash -r jplag_results/ $(SUBMISSIONS)/; \
-		echo "$(GREEN)[OK] Results in jplag_results/index.html$(NC)"; \
-	else \
-		echo "$(RED)[ERROR] jplag.jar not found$(NC)"; \
-		echo "Download from: https://github.com/jplag/JPlag/releases"; \
-	fi
-endif
+	@echo "No supported Bash parser/CLI contract is supplied for the former JPlag v5 integration."
+	@echo "See docs/S01_11_EXTERNAL_PLAGIARISM_TOOLS.md; no result has been generated."
+	@exit 2
 
 generate-homework:
 ifndef STUDENT
@@ -207,8 +179,8 @@ ifndef STUDENT
 	@echo ""
 	@echo "Example: make generate-homework STUDENT=PopescuIon"
 else
-	@echo ">>> Generating homework variant for $(STUDENT)..."
-	@python3 $(SCRIPTS_DIR)/python/S01_04_assignment_generator.py $(STUDENT) --output $(HOMEWORK_DIR)/generated/
+	@echo ">>> Generating homework variant for the supplied identifier..."
+	@python3 $(SCRIPTS_DIR)/python/S01_04_assignment_generator.py "$$STUDENT" --output "$(HOMEWORK_DIR)/generated/"
 	@echo "$(GREEN)[OK] Homework generated$(NC)"
 endif
 
@@ -217,9 +189,4 @@ clean:
 	@find . -type f -name "*.pyc" -delete
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name ".DS_Store" -delete
-	@find . -type f -name "*.log" -delete
-	@find . -type d -name "glob_test_temp" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name "jplag_results" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "plagiarism_report_*.txt" -delete
-	@find . -type f -name "plagiarism_report_*.json" -delete
 	@echo "$(GREEN)[OK] Cleaned$(NC)"

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-AI Fingerprint Scanner - Detects typical LLM-generated patterns
+Lexical style scanner — historical filename retained
 Operating Systems | ASE Bucharest - CSIE
 
-Purpose: Scan documentation for obvious AI generation traces
+Purpose: Describe lexical patterns; no authorship probability, final grade or sanction.
 Usage: python3 S01_06_ai_fingerprint_scanner.py [directory_path]
 
 FAZA 5 UPDATE: Extended with HIGH_RISK, MEDIUM_RISK, and STRUCTURAL patterns
@@ -20,7 +20,7 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 # Logging setup — import shared utilities from kit lib
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'lib'))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / 'lib'))
 from logging_utils import setup_logging
 
 logger = setup_logging(__name__)
@@ -52,6 +52,7 @@ class ScanResults:
     medium_risk: List[Finding] = field(default_factory=list)
     structural: List[Finding] = field(default_factory=list)
     low_risk: List[Finding] = field(default_factory=list)
+    read_error: str = ""
     
     @property
     def total_count(self) -> int:
@@ -65,7 +66,7 @@ class ScanResults:
 # HIGH-RISK PATTERNS: Strong indicators of AI-generated content
 HIGH_RISK_PATTERNS: List[Tuple[str, str, str]] = [
     # Classic AI markers
-    (r'\bdelve\b', 'delve', 'explore, examine, look into'),
+    (r'\bdelv(?:e[sd]?|ing)\b', 'delve', 'explore, examine, look into'),
     (r'\bplethora\b', 'plethora', 'many, numerous, a lot of'),
     (r'\bmyriad\b', 'myriad', 'many, diverse, various'),
     (r'\bculminates?\b', 'culminate', 'ends with, leads to, results in'),
@@ -248,17 +249,26 @@ def scan_file(filepath: Path) -> ScanResults:
         lines = content.split('\n')
     except Exception as e:
         logger.error(f"Error reading {filepath}: {e}")
-        print(f"{Colours.RED}Error reading {filepath}: {e}{Colours.NC}")
+        print(f"{Colours.RED}Error reading {filepath}: {e}{Colours.NC}", file=sys.stderr)
+        results.read_error = str(e)
         return results
     
+    fence_char = None
+    fence_length = 0
     for line_num, line in enumerate(lines, 1):
-        # Skip code blocks and inline code
-        if line.strip().startswith('```') or '`' in line:
+        fence = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if fence:
+            marker, trailing = fence.groups()
+            if fence_char is None:
+                fence_char, fence_length = marker[0], len(marker)
+            elif marker[0] == fence_char and len(marker) >= fence_length and not trailing.strip():
+                fence_char = None
             continue
-        # Skip URLs
-        if 'http://' in line or 'https://' in line:
+        if fence_char is not None:
             continue
-            
+        # Mask inline code and URLs, retaining prose on the same line and line numbers.
+        line = re.sub(r"(`+).*?\1", lambda m: ' ' * len(m.group()), line)
+        line = re.sub(r"https?://[^\s<>()]+", lambda m: ' ' * len(m.group()), line)
         # Scan for each risk level
         results.high_risk.extend(
             scan_line_for_patterns(line, line_num, filepath, HIGH_RISK_PATTERNS, RiskLevel.HIGH)
@@ -295,18 +305,17 @@ def scan_directory(directory: Path, extensions: List[str] = None) -> Dict[Path, 
     for ext in extensions:
         for filepath in directory.rglob(f'*{ext}'):
             # Skip OLD_HW directories
-            if 'OLD_HW' in str(filepath):
+            if 'OLD_HW' in filepath.relative_to(directory).parts:
                 continue
             scan_result = scan_file(filepath)
-            if scan_result.total_count > 0:
-                results[filepath] = scan_result
+            results[filepath] = scan_result
     
     return results
 
 
 def calculate_authenticity_score(results: Dict[Path, ScanResults]) -> float:
     """
-    Calculate an authenticity score based on detected patterns.
+    Legacy style index retained for API compatibility; it is not authorship evidence.
     
     Args:
         results: Dict with scan results per file
@@ -358,17 +367,13 @@ def generate_summary_report(results: Dict[Path, ScanResults]) -> str:
     total_issues = high_count + medium_count + structural_count + low_count
     score = calculate_authenticity_score(results)
     
-    # Determine status
-    if score >= 9.0:
-        status = f"{Colours.GREEN}✅ PASS: Content appears authentic{Colours.NC}"
-    elif score >= 7.0:
-        status = f"{Colours.YELLOW}⚠️  REVIEW: Some AI patterns detected{Colours.NC}"
-    else:
-        status = f"{Colours.RED}❌ FAIL: Content likely contains significant AI-generated text{Colours.NC}"
-    
+    status = ("INCOMPLETE: one or more input files could not be read." if any(r.read_error for r in results.values()) else
+              "NO_APPLICABLE_FILES: no selected files were scanned." if not results else
+              "MANUAL_REVIEW_REQUIRED: lexical matches alone establish neither authorship nor misconduct.")
+
     report = f"""
 {Colours.BOLD}{'='*60}
-  AI FINGERPRINT ANALYSIS REPORT
+  LEXICAL STYLE OBSERVATIONS
 {'='*60}{Colours.NC}
 
 {Colours.RED}HIGH-RISK{Colours.NC} patterns found:      {high_count:3d}
@@ -378,7 +383,7 @@ def generate_summary_report(results: Dict[Path, ScanResults]) -> str:
 {'─'*40}
 TOTAL patterns detected:        {total_issues:3d}
 
-{Colours.BOLD}AUTHENTICITY SCORE: {score:.1f}/10{Colours.NC}
+{Colours.BOLD}LEGACY STYLE INDEX (not an authorship score): {score:.1f}/10{Colours.NC}
 
 {status}
 """
@@ -485,13 +490,19 @@ def generate_json_report(results: Dict[Path, ScanResults]) -> str:
             'structural_count': sum(len(r.structural) for r in results.values()),
             'low_risk_count': sum(len(r.low_risk) for r in results.values()),
             'authenticity_score': calculate_authenticity_score(results),
-            'files_with_issues': len(results)
+            'files_scanned': len(results),
+            'files_with_issues': sum(r.total_count > 0 for r in results.values()),
+            'assessment_status': ('INCOMPLETE' if any(r.read_error for r in results.values()) else 'MANUAL_REVIEW_REQUIRED' if results else 'NO_APPLICABLE_FILES'),
+            'read_errors': {str(p): r.read_error for p, r in results.items() if r.read_error},
+            'penalty': None,
+            'authenticity_score_note': 'Legacy style index only; no authorship inference or automatic sanction'
         },
         'results': {}
     }
     
     for filepath, scan_results in results.items():
         output['results'][str(filepath)] = {
+            'read_error': scan_results.read_error or None,
             'high_risk': [
                 {'line': f.line_num, 'pattern': f.pattern, 'context': f.context, 'suggestion': f.suggestion}
                 for f in scan_results.high_risk
@@ -516,7 +527,7 @@ def generate_json_report(results: Dict[Path, ScanResults]) -> str:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='AI Fingerprint Scanner - Detect LLM-generated patterns',
+        description='Describe lexical style patterns; no authorship inference or automatic sanctions',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -545,16 +556,14 @@ Examples:
     
     target_dir = Path(args.directory)
     
-    if not target_dir.exists():
-        logger.error(f"Directory '{target_dir}' does not exist!")
-        print(f"{Colours.RED}Error: Directory '{target_dir}' does not exist!{Colours.NC}")
-        sys.exit(1)
-    
+    if not target_dir.is_dir():
+        parser.error(f"Not a readable input directory: {target_dir}")
+
     extensions = [ext.strip() if ext.startswith('.') else f'.{ext.strip()}' 
                   for ext in args.extensions.split(',')]
     
-    logger.info(f"Scanning {target_dir} for AI patterns...")
-    print(f"{Colours.BLUE}Scanning {target_dir} for AI patterns...{Colours.NC}\n")
+    logger.info(f"Scanning {target_dir} for lexical patterns...")
+    print(f"{Colours.BLUE}Scanning {target_dir} for lexical patterns...{Colours.NC}\n")
     
     results = scan_directory(target_dir, extensions)
     
@@ -581,8 +590,8 @@ Examples:
     total_findings = sum(r.total_count for r in results.values())
     logger.info(f"Scan complete: {total_findings} patterns detected, score: {score:.1f}/10")
     
-    # Exit code: 0 if score >= 9.0, 1 otherwise
-    sys.exit(0 if score >= 9.0 else 1)
+    # Process success is independent of the uncalibrated historical style index.
+    sys.exit(1 if any(r.read_error for r in results.values()) else 0)
 
 
 if __name__ == '__main__':

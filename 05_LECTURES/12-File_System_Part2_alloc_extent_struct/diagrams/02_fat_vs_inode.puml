@@ -1,11 +1,11 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml
 !theme plain
 skinparam backgroundColor #FEFEFE
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 10
 
-title Comparison: FAT vs inode Allocation (ext4)
+title Comparison: FAT vs Classical Inode Pointer Allocation
 caption Course 12: File System Part 2 — Allocation Methods
 
 left to right direction
@@ -15,7 +15,7 @@ package "**FAT (File Allocation Table)**" as FAT_PKG #LightBlue {
     rectangle "filename.txt\nstart: 5\nsize: 10KB" as entry_fat
   }
   
-  rectangle "FAT Table\n(in memory)" as FAT_TABLE #LightYellow {
+  rectangle "FAT Table\n(on disk; blocks cached as needed)" as FAT_TABLE #LightYellow {
     rectangle "[5]→7\n[6]→EOF\n[7]→9\n[8]→free\n[9]→6" as fat_entries
   }
   
@@ -27,7 +27,7 @@ package "**FAT (File Allocation Table)**" as FAT_PKG #LightBlue {
   FAT_TABLE -down-> DATA_FAT : "chain:\n5→7→9→6→EOF"
 }
 
-package "**inode (ext4)**" as INODE_PKG #LightCoral {
+package "**Classical inode pointers**" as INODE_PKG #LightCoral {
   rectangle "Directory Entry" as DE_INODE #White {
     rectangle "filename.txt\ninode: 42" as entry_inode
   }
@@ -51,11 +51,11 @@ note bottom of FAT_PKG
   ✓ Easy to repair
   
   **FAT Disadvantages:**
-  ✗ FAT must be in RAM (overhead)
+  • FAT metadata blocks may be cached; the whole FAT need not fit in RAM
   ✗ Sequential access to find block
   ✗ Severe fragmentation
   ✗ No permissions/owner
-  ✗ 4GB/file limit (FAT32)
+  ✗ FAT32 maximum file length: 2^32−1 bytes
 end note
 
 note bottom of INODE_PKG
@@ -63,7 +63,7 @@ note bottom of INODE_PKG
   ✓ Fast O(1) access via direct pointers
   ✓ Per-file metadata (permissions, timestamps)
   ✓ Native hard links
-  ✓ Extents for large files (ext4)
+  • Modern ext4 normally uses an extent tree instead of these pointers
   ✓ Journal for consistency
   
   **Disadvantages:**

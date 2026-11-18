@@ -283,10 +283,112 @@
             .fragment { opacity: 1 !important; visibility: visible !important; }
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
+
+        /* Responsive reading route; slides expand with their content. */
+        body { overflow: auto; }
+        .presentation { width: 100%; height: auto; min-height: 100vh; }
+        .presentation:focus-visible, .nav-btn:focus-visible { outline: 3px solid #fbbf24; outline-offset: -3px; }
+        .slide { position: relative; height: auto; min-height: 100vh; padding: clamp(18px, 4vw, 60px) clamp(16px, 4vw, 60px) 110px; }
+        .slide-content, .two-columns > *, .box { min-width: 0; }
+        .slide-title, .title-slide .slide-title { font-size: clamp(1.6rem, 4vw, 3.5rem); overflow-wrap: anywhere; }
+        .code-block { white-space: normal; overflow-wrap: anywhere; }
+        td, th { overflow-wrap: anywhere; }
+        @media (max-width: 800px) {
+            .two-columns { grid-template-columns: 1fr; gap: 18px; }
+            .slide-content { font-size: 1rem; }
+            .code-block { font-size: .9rem; padding: 12px; }
+            .navigation { right: 8px; bottom: 12px; }
+            .nav-btn { padding: 10px 14px; }
+            .slide-counter { bottom: 62px; }
+        }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+        @media print {
+            .slide { height: auto !important; min-height: 0 !important; break-inside: auto !important; padding: 8mm !important; }
+            .slide-content, .two-columns { display: block !important; }
+            .box { margin-bottom: 5mm; }
+            .slide-counter, .navigation { display: none !important; }
+            pre, code, .code-block { height: auto !important; max-height: none !important; overflow: visible !important; overflow-wrap: anywhere !important; }
+            .slide * { animation: none !important; }
+        }
     </style>
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
-    <div class="presentation">
+    <div class="presentation" tabindex="0" role="region" aria-label="Seminar 4 slides; focus this region for arrow-key navigation">
         
         <!-- SLIDE 1: Title -->
         <div class="slide title-slide active" data-slide="1">
@@ -295,7 +397,7 @@
             <p class="slide-subtitle">Seminar 4: grep, sed, awk + Regular Expressions</p>
             <p style="margin-top: 40px; color: #64748b;">
                 Operating Systems | ASE Bucharest - CSIE<br>
-                <span style="font-size: 0.9rem;">Press → or Space to navigate</span>
+                <span style="font-size: 0.9rem;">Focus the slide area, then use ←, → or Space to navigate</span>
             </p>
         </div>
         
@@ -332,7 +434,7 @@
         <div class="slide" data-slide="3">
             <h2 class="slide-title">Why Text Processing?</h2>
             <div class="slide-content">
-                <p>In Linux, <strong>everything is a file</strong> and most files are <strong>text</strong>:</p>
+                <p>Linux exposes many resources through file interfaces. Common text-processing inputs include:</p>
                 <ul>
                     <li>Configuration files (/etc/*)</li>
                     <li>System and application logs</li>
@@ -341,7 +443,7 @@
                     <li>Command output</li>
                 </ul>
                 <div class="success-box">
-                    <strong>Superpower:</strong> With grep, sed and awk you can process in seconds what would take others hours!
+                    <strong>Superpower:</strong> grep, sed and awk provide composable tools for filtering and transforming text.
                 </div>
             </div>
         </div>
@@ -360,7 +462,7 @@
                 <div class="highlight-box">
                     <strong>⚠️ Regex ≠ Globbing!</strong><br>
                     • Globbing (shell): <code>*.txt</code> = files with the .txt extension<br>
-                    • Regex: <code>.*\.txt</code> = text ending with .txt
+                    • Regex: <code>.*\.txt$</code> = a line ending with .txt; file.txt matches, file.txt.bak does not
                 </div>
             </div>
         </div>
@@ -410,7 +512,7 @@
             <div class="slide-content">
                 <div class="two-columns">
                     <div class="box">
-                        <div class="box-title">BRE (grep default)</div>
+                        <div class="box-title">GNU grep BRE (default)</div>
                         <ul>
                             <li><code>\+</code> = 1 or more</li>
                             <li><code>\?</code> = 0 or 1</li>
@@ -430,7 +532,7 @@
                 </div>
                 <div class="warning-box">
                     <strong>🚨 Common mistake:</strong> <code>grep 'ab+c'</code> searches literally for "ab+c"!<br>
-                    <strong>Correct:</strong> <code>grep -E 'ab+c'</code> or <code>grep 'ab\+c'</code>
+                    <strong>For one or more:</strong> <code>grep -E 'ab+c'</code>; <code>grep 'ab\+c'</code> uses a GNU BRE extension. <code>\?</code> and <code>\|</code> are also GNU extensions, not portable POSIX BRE.
                 </div>
             </div>
         </div>
@@ -449,8 +551,8 @@
                         <strong>Variants:</strong>
                         <ul>
                             <li><code>grep</code> - BRE (basic)</li>
-                            <li><code>grep -E</code> / <code>egrep</code> - ERE</li>
-                            <li><code>grep -F</code> / <code>fgrep</code> - fixed string</li>
+                            <li><code>grep -E</code> - ERE (prefer this to the legacy egrep name)</li>
+                            <li><code>grep -F</code> - fixed strings (prefer this to the legacy fgrep name)</li>
                         </ul>
                     </div>
                     <div>
@@ -526,8 +628,8 @@
                 <table>
                     <tr><th>Flag</th><th>Effect</th></tr>
                     <tr><td><code>g</code></td><td>Global - all occurrences on a line</td></tr>
-                    <tr><td><code>i</code></td><td>Case insensitive</td></tr>
-                    <tr><td><code>n</code></td><td>The nth occurrence</td></tr>
+                    <tr><td><code>i</code></td><td>Case insensitive (GNU sed extension)</td></tr>
+                    <tr><td><code>number</code></td><td>A positive occurrence number, e.g. 2</td></tr>
                 </table>
                 <div class="code-block">
                     <span class="prompt">$ </span><span class="command">echo "cat cat cat" | sed 's/cat/dog/'</span><br>
@@ -560,7 +662,7 @@
         <div class="slide" data-slide="13">
             <h2 class="slide-title">AWK - Structured Processing</h2>
             <div class="slide-content">
-                <p>AWK treats each line as a <strong>record</strong> with separate <strong>fields</strong>.</p>
+                <p>With the default newline record separator, AWK treats each line as a <strong>record</strong> with separate <strong>fields</strong>.</p>
                 <div class="code-block">
                     <span class="prompt">$ </span><span class="command">echo "John Smith 30" | awk '{print $1}'</span><br>
                     <span class="output">John</span><br><br>
@@ -605,9 +707,11 @@
         
         <!-- SLIDE 15: AWK CSV -->
         <div class="slide" data-slide="15">
-            <h2 class="slide-title">AWK - CSV Processing</h2>
+            <h2 class="slide-title">AWK - Unquoted Comma-Delimited Data</h2>
             <div class="slide-content">
                 <div class="code-block">
+                    <span class="prompt"># </span><span class="command">Contract: one record per line, no quoted commas or embedded newlines.</span><br>
+                    <span class="prompt"># </span><span class="command">Use a CSV parser (for example Python csv) when quoting is supported.</span><br>
                     <span class="prompt"># </span><span class="command">Set separator to comma</span><br>
                     <span class="prompt">$ </span><span class="command">awk -F',' '{print $2}' employees.csv</span><br><br>
                     <span class="prompt"># </span><span class="command">Skip header (NR > 1)</span><br>
@@ -626,8 +730,8 @@
                 <div class="code-block">
                     <span class="prompt"># </span><span class="command">Top 5 IPs from log</span><br>
                     <span class="prompt">$ </span><span class="command">awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5</span><br><br>
-                    <span class="prompt"># </span><span class="command">Cleanup config</span><br>
-                    <span class="prompt">$ </span><span class="command">sed '/^#/d; /^$/d' config.txt | sort</span><br><br>
+                    <span class="prompt"># </span><span class="command">Remove full-line # comments and empty lines; preserve order</span><br>
+                    <span class="prompt">$ </span><span class="command">sed '/^#/d; /^$/d' config.txt</span><br><br>
                     <span class="prompt"># </span><span class="command">Unique errors with frequency</span><br>
                     <span class="prompt">$ </span><span class="command">grep -i error log.txt | awk '{print $NF}' | sort | uniq -c | sort -rn</span>
                 </div>
@@ -649,7 +753,7 @@
                     <tr><td><code>^G</code></td><td>Help</td></tr>
                 </table>
                 <div class="success-box">
-                    <strong>💡 Advantage:</strong> All commands are displayed in the bottom bar!
+                    <strong>💡 Advantage:</strong> The bottom bar shows common commands; ^G opens more help. Check the installed nano version and bindings.
                 </div>
             </div>
         </div>
@@ -670,9 +774,9 @@
                     <div class="box">
                         <div class="box-title">Mistakes to avoid</div>
                         <ul>
-                            <li>grep without -E for +, ?</li>
-                            <li>sed without /g</li>
-                            <li>awk print without comma</li>
+                            <li>Choose BRE, ERE or fixed strings deliberately.</li>
+                            <li>sed: first match by default; g when all matches are intended.</li>
+                            <li>awk: juxtaposition concatenates; a comma inserts OFS.</li>
                             <li>-c counts lines, not matches</li>
                         </ul>
                     </div>
@@ -703,7 +807,7 @@
     </div>
     
     <div class="progress" id="progress"></div>
-    <div class="slide-counter" id="counter">1 / 19</div>
+    <div class="slide-counter" id="counter" role="status" aria-live="polite">1 / 19</div>
     
     <script>
         let currentSlide = 1;
@@ -712,10 +816,13 @@
         function showSlide(n) {
             const slides = document.querySelectorAll('.slide');
             
-            if (n > totalSlides) currentSlide = 1;
-            if (n < 1) currentSlide = totalSlides;
+            if (!Number.isInteger(n) || !totalSlides) return;
+            currentSlide = ((n - 1) % totalSlides + totalSlides) % totalSlides + 1;
             
-            slides.forEach(slide => slide.classList.remove('active'));
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                slide.setAttribute('aria-hidden', String(index !== currentSlide - 1));
+            });
             slides[currentSlide - 1].classList.add('active');
             
             // Update progress
@@ -734,16 +841,18 @@
             showSlide(currentSlide);
         }
         
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
+        // Scope slide shortcuts to the focused presentation region. Native controls
+        // retain their own Space/Enter/arrow behaviour.
+        document.querySelector('.presentation').addEventListener('keydown', (e) => {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.target.isContentEditable ||
+                e.target.closest('button, a, input, textarea, select, [contenteditable="true"]')) return;
             if (e.key === 'ArrowRight' || e.key === ' ') {
-                e.preventDefault();
-                nextSlide();
+                e.preventDefault(); nextSlide();
             } else if (e.key === 'ArrowLeft') {
-                prevSlide();
+                e.preventDefault(); prevSlide();
             }
         });
-        
+
         // Initialize
         showSlide(currentSlide);
     </script>

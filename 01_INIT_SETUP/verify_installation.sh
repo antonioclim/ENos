@@ -35,17 +35,17 @@ WARNINGS=0
 #-------------------------------------------------------------------------------
 print_ok() {
     echo -e "  ${GREEN}[OK]${NC} $1"
-    ((PASSED++))
+    PASSED=$((PASSED + 1))
 }
 
 print_fail() {
     echo -e "  ${RED}[FAIL]${NC} $1"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
 }
 
 print_warn() {
     echo -e "  ${YELLOW}[WARN]${NC} $1"
-    ((WARNINGS++))
+    WARNINGS=$((WARNINGS + 1))
 }
 
 print_info() {
@@ -75,11 +75,11 @@ check_system_info() {
     hostname_val=$(hostname 2>/dev/null || echo "unknown")
     echo "  Hostname: ${hostname_val}"
     
-    # Validate hostname format (INITIALS_GROUP_SERIES)
-    if [[ "$hostname_val" =~ ^[A-Z]{2,4}_[0-9]{4}_[A-Z]$ ]]; then
+    # Validate the technical hostname mapping, separately from academic identity
+    if [[ "$hostname_val" =~ ^[a-z]{2,4}-[0-9]{4}-[a-z]$ ]]; then
         print_ok "Hostname format is correct"
     else
-        print_warn "Hostname format may be incorrect (expected: AP_1001_A)"
+        print_warn "Hostname format may be incorrect (example: ap-1001-a; academic identifier stored separately)"
     fi
     
     local user_val
@@ -127,7 +127,7 @@ check_network() {
     elif ping -c 1 -W 3 8.8.8.8 > /dev/null 2>&1; then
         print_warn "Internet works but DNS may have issues"
     else
-        print_fail "No internet connection"
+        print_warn "ICMP probes failed; internet connectivity is unconfirmed (ICMP may be filtered)"
     fi
 }
 
@@ -192,13 +192,15 @@ check_ssh() {
 # Check: Working folders
 #-------------------------------------------------------------------------------
 check_folders() {
+    local working_home="${1:-$HOME}"
+    local dir
     print_section "Working Folders"
     
     local folders=(Books HomeworksOLD Projects ScriptsSTUD test TXT)
     local missing_folders=()
     
     for dir in "${folders[@]}"; do
-        if [[ -d "$HOME/$dir" ]]; then
+        if [[ -d "$working_home/$dir" ]]; then
             print_ok "~/$dir"
         else
             print_fail "~/$dir — missing"
@@ -210,7 +212,9 @@ check_folders() {
     if [[ ${#missing_folders[@]} -gt 0 ]]; then
         echo ""
         print_info "Create missing folders with:"
-        echo "        mkdir -p ~/${missing_folders[*]// / ~/}"
+        printf "        mkdir -p"
+        for dir in "${missing_folders[@]}"; do printf " %q" "$working_home/$dir"; done
+        printf "\n"
     fi
 }
 
@@ -253,7 +257,7 @@ print_summary() {
     
     if [[ $FAILED -eq 0 ]]; then
         echo -e "${GREEN}${BOLD}  ✓ All critical checks passed!${NC}"
-        echo -e "  ${CYAN}You are ready for SEM01.${NC}"
+        echo -e "  ${CYAN}The implemented local checks passed. Host installation, interactive behaviour and course eligibility are separate checks.${NC}"
     else
         echo -e "${RED}${BOLD}  ✗ Some checks failed.${NC}"
         echo -e "  ${YELLOW}Review the failures above and fix them before SEM01.${NC}"
@@ -290,4 +294,4 @@ main() {
 }
 
 # Run main function
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then main "$@"; fi

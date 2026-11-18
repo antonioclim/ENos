@@ -1,6 +1,9 @@
 # Evaluation Rubric - Seminar 5 Assignment
 
-> **Document for instructor** | Not to be distributed to students before evaluation
+> **Author decision pending:** The assessment rules below are retained proposals. They conflict across the brief, rubric and oral guide, so no combined final-grade formula, penalty order, remote-proctoring rule or integrity inference is enacted. See [the exact alternatives, consequences and recommendation](../docs/TEACHING_CONTRACT.md). Technical exercises remain usable. Historical success rates and classroom claims are not independently verified.
+
+
+> **Historical instructor-copy label:** originally “Not to be distributed to students before evaluation”. The file is present in the distributed repository; publication/access boundaries require an explicit author decision.
 
 ---
 
@@ -12,7 +15,7 @@
 | **Pts (in tables)** | Relative points within section | 4 pts out of the 12% of the sub-section |
 | **Adjustment ±X%** | Percentage modification applied to final grade | Code quality: ±10% |
 
-> **Important note**: Points in table columns (Pts) are **relative points** that are added together to form the percentage of that section. Example: in REQUIREMENT 1 (40%), sub-sections of 12 + 12 + 8 + 8 = 40 relative points equate to 40% of the final grade.
+> **Important note**: Points in table columns (Pts) are **relative points** that are added together to form the percentage of that section. Example: in REQUIREMENT 1 (40%), sub-sections of 12 + 12 + 10 + 6 = 40 relative points equate to 40% of the final grade.
 
 ---
 
@@ -38,16 +41,16 @@
 | Criterion | Pts | Excellent | Satisfactory | Insufficient |
 |-----------|-----|-----------|--------------|--------------|
 | `set -euo pipefail` | 2 | Present in header | Missing but works | Missing + errors |
-| Argument parsing | 4 | getopts with -h, -v, -l, -o, --top | 3-4 options | Under 3 |
+| Argument parsing | 4 | Short-option parser plus explicit --top handling; getopts alone does not parse long options | 3-4 options | Under 3 |
 | Log line parsing | 4 | Regex/BASH_REMATCH correct | Works | Errors |
 | Input validation | 2 | Verifies file existence | Generic message | Crash |
 
 **Parsing solution:**
 ```bash
 if [[ "$line" =~ ^\[([^\]]+)\]\ \[([A-Z]+)\]\ (.*)$ ]]; then
-    local timestamp="${BASH_REMATCH[1]}"
-    local level="${BASH_REMATCH[2]}"
-    local message="${BASH_REMATCH[3]}"
+    timestamp="${BASH_REMATCH[1]}"
+    level="${BASH_REMATCH[2]}"
+    message="${BASH_REMATCH[3]}"
 fi
 ```
 
@@ -94,9 +97,9 @@ fi
 ```bash
 while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
-    if [[ "$line" =~ ^([^=]+)=(.*)$ ]]; then
-        local key="${BASH_REMATCH[1]// /}"
-        local value="${BASH_REMATCH[2]}"
+    if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*=[[:space:]]*(.*)$ ]]; then
+        key="${BASH_REMATCH[1]}"
+        value="${BASH_REMATCH[2]}"
         CONFIG["$key"]="$value"
     fi
 done < "$CONFIG_FILE"

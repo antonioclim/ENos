@@ -14,7 +14,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-readonly DEMO_DIR="/tmp/hook_demo_$$"
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/hook_demo.XXXXXX")
+readonly DEMO_DIR
 readonly FRAGILE_DIR="$DEMO_DIR/fragile"
 readonly ROBUST_DIR="$DEMO_DIR/robust"
 
@@ -39,7 +40,7 @@ banner() {
 
 pause() {
     echo ""
-    read -p "Press Enter to continue..."
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || true; fi
     echo ""
 }
 
@@ -149,13 +150,15 @@ IFS=$'\n\t'
 
 target_dir="${1:?Error: target directory required}"
 
+# This example accepts only a fresh, owned demonstration directory.
+[[ -f "$target_dir/.enos-demo-owned" && ! -L "$target_dir" ]] || exit 1
 # Check BEFORE acting
 [[ -d "$target_dir" ]] || { echo "Error: Not a directory: $target_dir" >&2; exit 1; }
 
 cd "$target_dir" || { echo "Error: Cannot cd to $target_dir" >&2; exit 1; }
 
-# ./* instead of * - prevents disaster if $PWD is something else
-rm -rf ./*
+# ./* instead of * - prevents a leading-hyphen name from becoming an option; it does not validate the directory
+rm -rf -- ./*
 
 echo "Cleanup completed in: $target_dir"
 SCRIPT
@@ -169,10 +172,9 @@ SCRIPT
     echo "1. Trying without argument:"
     echo -e "${YELLOW}   \${1:?Error: target directory required}${NC}"
     echo ""
-    (
-        set +e
-        dir="${1:?Error: target directory required}" 2>&1 || true
-    ) 2>&1 | head -1
+    local required_status=0
+    (dir="${1:?Error: target directory required}") 2>&1 || required_status=$?
+    echo "   Child status: $required_status"
     echo -e "${GREEN}   → Script stops immediately with a clear error${NC}"
     
     echo ""
@@ -193,7 +195,7 @@ SCRIPT
     echo ""
     echo "3. Using ./* instead of *:"
     echo -e "${YELLOW}   rm -rf ./*${NC}"
-    echo -e "${GREEN}   → Even if cd somehow failed, ./* cannot affect /${NC}"
+    echo -e "${GREEN}   → ./ avoids option-like names; a failed cd still leaves the wrong working directory.${NC}"
 }
 
 # ============================================================
@@ -213,7 +215,7 @@ demo_comparison() {
 │                                     │ [[ -d "$dir" ]] || exit 1           │
 │                                     │ cd "$dir" || exit 1                 │
 │                                     │                                     │
-│ rm -rf *                            │ rm -rf ./*                          │
+│ rm -rf *                            │ rm -rf -- ./* (owned target only)    │
 │                                     │                                     │
 │ process $file                       │ process "$file"                     │
 │                                     │                                     │
@@ -255,16 +257,15 @@ demo_set_options() {
     echo ""
     echo "   Without set -e:"
     (
+        set +e
         false
         echo "   Script continues after 'false' ← DANGEROUS!"
     )
     echo ""
     echo "   With set -e:"
-    (
-        set +e  # disable for demo in subshell
-        set -e
-        false || echo "   Script would have stopped here (demo in subshell)"
-    )
+    local errexit_status=0
+    bash -e -c 'false; echo "UNREACHABLE"' || errexit_status=$?
+    echo "   Child stopped with status $errexit_status"
     
     pause
     

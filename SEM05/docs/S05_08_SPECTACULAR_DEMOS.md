@@ -7,6 +7,9 @@
 
 ---
 
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Removed historical empirical assertions are preserved in [the provenance record](../../DECISION_PROVENANCE.json).
+
+
 ## Philosophy of Spectacular Demos
 
 Spectacular demos have a specific pedagogical purpose:
@@ -29,11 +32,14 @@ Each demo contrasts:
 
 ```bash
 # Create sandbox environment
-mkdir -p ~/demo_disaster/{important_project,backup,temp}
-echo "class User { ... }" > ~/demo_disaster/important_project/main.py
-echo "def calculate() { ... }" > ~/demo_disaster/important_project/utils.py
-echo "DATABASE_URL=..." > ~/demo_disaster/important_project/.env
-tree ~/demo_disaster
+DEMO_ROOT=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$DEMO_ROOT"' EXIT
+mkdir -p "$DEMO_ROOT"/{important_project,backup,temp}
+cd -- "$DEMO_ROOT" || exit 1
+echo "class User { ... }" > "$DEMO_ROOT"/important_project/main.py
+echo "def calculate() { ... }" > "$DEMO_ROOT"/important_project/utils.py
+echo "DATABASE_URL=..." > "$DEMO_ROOT"/important_project/.env
+tree "$DEMO_ROOT"
 ```
 
 ### FRAGILE Script (demo_fragile.sh)
@@ -46,15 +52,15 @@ cleanup_dir="$1"
 
 echo "🧹 Cleaning up: $cleanup_dir"
 cd $cleanup_dir
-rm -rf *
-echo "✓ Cleanup complete!"
+printf 'Would remove entries in: %s\n' "$PWD"  # Deliberately observe, do not delete
+echo "The fragile script reaches its misleading success message"
 ```
 
 ### Live Demonstration
 
-```bash
+```console
 # 1. Show the structure
-$ tree ~/demo_disaster
+$ tree "$DEMO_ROOT"
 demo_disaster/
 ├── important_project/
 │   ├── main.py
@@ -71,8 +77,8 @@ $ ./demo_fragile.sh /nonexistent/path
 ✓ Cleanup complete!
 
 # 3. DRAMA: Check what happened!
-$ ls ~/demo_disaster
-# EVERYTHING IS EMPTY! cd failed, rm ran in the current directory!
+$ ls "$DEMO_ROOT"
+# Files remain: this demonstration prints the wrong target instead of deleting it.
 
 # 4. Dramatic pause... let the information sink in
 ```
@@ -83,25 +89,17 @@ $ ls ~/demo_disaster
 #!/bin/bash
 set -euo pipefail
 
-cleanup_dir="${1:?Error: Directory required}"
+owned=
+trap '[[ -z ${owned:-} ]] || rm -rf -- "$owned"' EXIT
+owned=$(mktemp -d) || exit 1
+mkdir -- "$owned/cache"
+printf '%s\n' 'disposable data' > "$owned/cache/entry.txt"
+cleanup_dir=$(realpath -- "$owned/cache") || exit 1
+[[ $cleanup_dir == "$owned/cache" && -d $cleanup_dir && ! -L $cleanup_dir ]] || exit 1
+cd -- "$cleanup_dir" || exit 1
+rm -f -- ./*   # Owned fixture only; ./* does not validate the directory.
+printf '%s\n' 'Owned cache cleaned'
 
-echo "🧹 Cleaning up: $cleanup_dir"
-
-# EXPLICIT checks
-[[ -d "$cleanup_dir" ]] || {
-    echo "Error: Not a directory: $cleanup_dir" >&2
-    exit 1
-}
-
-# Prevent deleting root or home
-[[ "$cleanup_dir" == "/" || "$cleanup_dir" == "$HOME" ]] && {
-    echo "Error: Refusing to clean $cleanup_dir" >&2
-    exit 1
-}
-
-cd "$cleanup_dir" || exit 1
-rm -rf ./*
-echo "✓ Cleanup complete!"
 ```
 
 ### Key Lesson (on the board)
@@ -112,7 +110,7 @@ echo "✓ Cleanup complete!"
 │  cd $dir; rm -rf *                               │
 │                                                  │
 │  ALWAYS:                                         │
-│  set -e + directory check + absolute path        │
+│  explicit ownership + checked path + failure checks        │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -140,9 +138,8 @@ echo "Final total: $total"
 
 ### Demonstration
 
-```bash
+```console
 
-*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
 $ ./mystery.sh
 Adding 10, total=10
@@ -153,13 +150,14 @@ Final total: 0          # ???
 # Question: WHY?!
 ```
 
+*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
+
 ### Visual Explanation
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  MAIN PROCESS                                           │
 
-> 💡 From experience with groups from previous years, I've observed that students who practise daily progress significantly faster.
 
 │  total=0                                                │
 │  │                                                      │
@@ -180,12 +178,13 @@ Final total: 0          # ???
 └─────────────────────────────────────────────────────────┘
 ```
 
+> 💡 Practise the commands, explain each result and compare it with your prediction.
+
 ### Solution: Process Substitution
 
 ```bash
 #!/bin/bash
 
-*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 total=0
 
@@ -199,6 +198,8 @@ done < <(echo "10
 echo "Final total: $total"  # 60 - CORRECT!
 ```
 
+*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
+
 ---
 
 ## Demo 3: THE QUOTING DISASTER
@@ -207,10 +208,12 @@ echo "Final total: $total"  # 60 - CORRECT!
 
 ```bash
 # Create files with "weird" names
-mkdir -p ~/demo_quotes
-touch ~/demo_quotes/"my file.txt"
-touch ~/demo_quotes/"another file.txt"
-touch ~/demo_quotes/"file with  two spaces.txt"
+QUOTE_ROOT=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$QUOTE_ROOT"' EXIT
+mkdir -p "$QUOTE_ROOT"
+touch "$QUOTE_ROOT"/"my file.txt"
+touch "$QUOTE_ROOT"/"another file.txt"
+touch "$QUOTE_ROOT"/"file with  two spaces.txt"
 ```
 
 ### FRAGILE Script
@@ -220,7 +223,7 @@ touch ~/demo_quotes/"file with  two spaces.txt"
 # count_lines_bad.sh
 
 total=0
-for file in $(ls ~/demo_quotes); do
+for file in $(ls "$QUOTE_ROOT"); do
     lines=$(wc -l < "$file")
     total=$((total + lines))
     echo "Processed: $file"
@@ -230,7 +233,7 @@ echo "Total lines: $total"
 
 ### Demonstration
 
-```bash
+```console
 $ ./count_lines_bad.sh
 wc: my: No such file or directory
 wc: file.txt: No such file or directory
@@ -261,7 +264,7 @@ Loop sees 4 "files", not 2!
 set -euo pipefail
 
 total=0
-for file in ~/demo_quotes/*; do
+for file in "$QUOTE_ROOT"/*; do
     [[ -f "$file" ]] || continue
     lines=$(wc -l < "$file")
     total=$((total + lines))
@@ -286,7 +289,7 @@ echo "Total lines: $total"
 #!/bin/bash
 # Dangerous pipeline
 
-cat /etc/shadow |     # Probably fails (no permission)
+( printf 'Controlled source failure\n' >&2; exit 2 ) |
 grep "root" |
 cut -d: -f1 |
 head -1
@@ -297,9 +300,9 @@ echo "SUCCESS! 🎉"
 
 ### Demonstration
 
-```bash
+```console
 $ ./pipeline_bad.sh
-cat: /etc/shadow: Permission denied
+Controlled source failure
 Exit code: 0
 SUCCESS! 🎉
 
@@ -311,8 +314,8 @@ SUCCESS! 🎉
 ```
 Pipeline without pipefail:
 ┌─────────┐    ┌──────┐    ┌─────┐    ┌──────┐
-│ cat ❌  │───►│ grep │───►│ cut │───►│ head │
-│ exit=1  │    │      │    │     │    │exit=0│
+│ source❌│───►│ grep │───►│ cut │───►│ head │
+│ exit=2  │    │      │    │     │    │exit=0│
 └─────────┘    └──────┘    └─────┘    └──────┘
                                           │
                             $? = 0 ◄──────┘
@@ -320,11 +323,11 @@ Pipeline without pipefail:
 
 Pipeline WITH pipefail:
 ┌─────────┐    ┌──────┐    ┌─────┐    ┌──────┐
-│ cat ❌  │───►│ grep │───►│ cut │───►│ head │
-│ exit=1  │    │      │    │     │    │      │
+│ source❌│───►│ grep │───►│ cut │───►│ head │
+│ exit=2  │    │      │    │     │    │      │
 └─────────┘    └──────┘    └─────┘    └──────┘
       │
-      $? = 1 (first error!)
+      $? = 1 (rightmost non-zero: grep finds no match)
 ```
 
 ### ROBUST Script
@@ -333,7 +336,7 @@ Pipeline WITH pipefail:
 #!/bin/bash
 set -euo pipefail
 
-cat /etc/shadow |
+( printf 'Controlled source failure\n' >&2; exit 2 ) |
 grep "root" |
 cut -d: -f1 |
 head -1
@@ -341,9 +344,9 @@ head -1
 echo "SUCCESS! 🎉"
 ```
 
-```bash
+```console
 $ ./pipeline_good.sh
-cat: /etc/shadow: Permission denied
+Controlled source failure
 # Script stops, doesn't reach SUCCESS
 ```
 
@@ -387,7 +390,7 @@ Result:
 ═══ WITH declare -A ═══
 Setting: host=localhost, port=8080
 Result:
-  Keys: host port
+  Keys: host port  # One possible order; associative ordering is unspecified
   Values: localhost 8080
 ```
 
@@ -425,7 +428,7 @@ cleanup() {
     echo "🧹 Doing cleanup..."
     sleep 1
     echo "✓ Cleanup complete. Now I can leave."
-    exit 0
+    exit 130
 }
 
 trap cleanup INT
@@ -440,7 +443,7 @@ done
 
 ### Demonstration
 
-```bash
+```console
 $ ./immortal.sh
 PID: 12345
 Try to stop me with Ctrl+C!
@@ -482,7 +485,7 @@ echo "Total lines: $total"
 
 ### Activate "X-Ray Vision"
 
-```bash
+```console
 $ PS4='+ ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 $ bash -x ./debug_demo.sh
 

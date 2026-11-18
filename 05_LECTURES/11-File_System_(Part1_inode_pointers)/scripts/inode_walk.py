@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 Utility (Week 11): identifies files that share the same inode (hard links).
 
@@ -91,6 +91,8 @@ def print_hardlink_groups(root: Path, groups: list, max_display: int) -> None:
 def main() -> int:
     """Main entry point."""
     args = parse_args()
+    if not args.root.is_dir():
+        raise SystemExit(f"Root is not an existing directory: {args.root}")
     groups = scan_for_hardlinks(args.root)
     hardlink_groups = filter_hardlink_groups(groups)
     print_hardlink_groups(args.root, hardlink_groups, args.max)

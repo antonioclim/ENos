@@ -14,7 +14,6 @@ Run **BEFORE** the seminar on the presentation machine:
 
 ```bash
 
-*Personal note: I prefer Bash scripts for simple automation and Python when the logic becomes complex. It's a matter of pragmatism.*
 
 # Essential packages for demos
 sudo apt update && sudo apt install -y \
@@ -28,6 +27,9 @@ for cmd in figlet lolcat cmatrix cowsay fortune tree pv dialog; do
 done
 ```
 
+*Personal note: I prefer Bash scripts for simple automation and Python when the logic becomes complex. It's a matter of pragmatism.*
+
+
 ---
 
 ## DEMO 1:
@@ -36,15 +38,14 @@ done
 **Moment**: First 3 minutes of the seminar  
 **Purpose**: Capture attention, establish interactive tone
 
-> 💡 A student once asked me why we can't just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.
+> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.
 
 
 ### Complete Script:
 
-```bash
-
 *(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
 
+```bash
 #!/bin/bash
 # hook_opening.sh - Run at the beginning of the seminar
 
@@ -103,19 +104,23 @@ sleep 2
 ### Spectacular tree demo:
 
 ```bash
-# Prepare demo structure
-mkdir -p ~/demo_fhs/{bin,etc,home/{alice,bob},var/{log,cache},tmp}
-touch ~/demo_fhs/etc/{passwd,hosts,bashrc}
-touch ~/demo_fhs/home/alice/{.bashrc,document.txt}
-touch ~/demo_fhs/var/log/{syslog,auth.log}
+# Prepare a unique owned demo structure
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
+mkdir -p "$DEMO_DIR/fhs"/{bin,etc,home/{alice,bob},var/{log,cache},tmp}
+touch "$DEMO_DIR/fhs"/etc/{passwd,hosts,bashrc}
+touch "$DEMO_DIR/fhs"/home/alice/{.bashrc,document.txt}
+touch "$DEMO_DIR/fhs"/var/log/{syslog,auth.log}
 
 # Coloured visualisation
 echo "🌳 FILE SYSTEM STRUCTURE"
 echo "═══════════════════════════════════"
-tree -C ~/demo_fhs | lolcat
+tree -C "$DEMO_DIR/fhs" | lolcat
 
 # Cleanup
-rm -rf ~/demo_fhs
+rm -rf "$DEMO_DIR/fhs"
 ```
 
 ### Interactive ncdu demo:
@@ -149,8 +154,9 @@ pv -petra /dev/urandom | head -c 10M > /dev/null
 # Demo 2: Copy with visualisation
 echo ""
 echo "Now let's see a file copy..."
-dd if=/dev/zero bs=1M count=50 2>/dev/null | pv -s 50M > /tmp/test_file
-rm /tmp/test_file
+copy_demo=$(mktemp "${TMPDIR:-/tmp}/enos-copy.XXXXXX") || exit 1
+dd if=/dev/zero bs=1M count=50 2>/dev/null | pv -s 50M > "$copy_demo"
+rm -f -- "$copy_demo"
 ```
 
 ### Spectacular countdown:
@@ -182,13 +188,20 @@ clear
 # var_demo_interactive.sh
 
 # Collect data from user
-NAME=$(dialog --stdout --inputbox "What is your name?" 8 40)
-AGE=$(dialog --stdout --inputbox "How old are you?" 8 40)
-LANG=$(dialog --stdout --menu "Preferred language:" 12 40 4 \
+NAME=$(dialog --stdout --inputbox "What is your name?" 8 40) || exit 1
+AGE=$(dialog --stdout --inputbox "How old are you?" 8 40) || exit 1
+LANGUAGE_TAG=$(dialog --stdout --menu "Preferred language:" 12 40 4 \
     1 "Python" \
     2 "JavaScript" \
     3 "C/C++" \
-    4 "Bash")
+    4 "Bash") || exit 1
+case "$LANGUAGE_TAG" in
+    1) PREFERRED_LANGUAGE=Python ;;
+    2) PREFERRED_LANGUAGE=JavaScript ;;
+    3) PREFERRED_LANGUAGE='C/C++' ;;
+    4) PREFERRED_LANGUAGE=Bash ;;
+    *) printf 'No supported language selected\n' >&2; exit 2 ;;
+esac
 
 clear
 
@@ -198,16 +211,16 @@ echo "║        YOUR VARIABLES                  ║"
 echo "╠════════════════════════════════════════╣"
 echo "║  NAME = $NAME"
 echo "║  AGE  = $AGE"
-echo "║  LANG = $LANG"
+echo "║  LANGUAGE = $PREFERRED_LANGUAGE"
 echo "╚════════════════════════════════════════╝"
 
 # Demonstrate usage
 echo ""
 echo "Now we use them:"
-echo "  Hello, $NAME! You are $AGE years old and you like the $LANG language."
+echo "  Hello, $NAME! You are $AGE years old and you like the $PREFERRED_LANGUAGE language."
 ```
 
-### Export vs local demo:
+### Exported vs unexported shell-variable demo:
 
 ```bash
 echo "🔬 EXPERIMENT: LOCAL vs EXPORTED VARIABLES"
@@ -218,6 +231,7 @@ echo ""
 echo "Setting two variables:"
 echo -e "  \e[33mLOCAL=\"I am local\"\e[0m"
 echo -e "  \e[32mexport EXPORTED=\"I am exported\"\e[0m"
+unset LOCAL EXPORTED
 LOCAL="I am local"
 export EXPORTED="I am exported"
 
@@ -227,7 +241,7 @@ echo -e "  LOCAL = \e[33m$LOCAL\e[0m"
 echo -e "  EXPORTED = \e[32m$EXPORTED\e[0m"
 
 echo ""
-echo "In a SUBSHELL (bash -c):"
+echo "In a NEW INTERPRETER (bash -c):"
 bash -c 'echo -e "  LOCAL = \e[31m$LOCAL\e[0m (empty!)"'
 bash -c 'echo -e "  EXPORTED = \e[32m$EXPORTED\e[0m (works!)"'
 
@@ -266,6 +280,10 @@ echo "💡 Single quotes = LITERAL, Double quotes = EXPANDS"
 
 ---
 
+The dialog exercise uses a task-specific language variable; it does not change
+the process locale variable `LANG`. Cancellation returns without presenting a
+numeric tag as the chosen language.
+
 ## DEMO 6: System Monitor (Advanced Preview)
 **Moment**: End of seminar - "what you will be able to do"  
 **Purpose**: Motivation for the following weeks
@@ -287,8 +305,8 @@ while true; do
     echo "╠═══════════════════════════════════════════════════════╣"
     
     # CPU
-    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
-    printf "║ 🔥 CPU:     %-43s ║\n" "$CPU%"
+    CPU_USER_PERCENT=$(LC_ALL=C top -bn1 | awk '/Cpu\(s\)/ {print $2; exit}')
+    printf "║ 🔥 CPU user: %-39s ║\n" "${CPU_USER_PERCENT:-unavailable}%"
     
     # Memory
     MEM=$(free -h | awk '/^Mem/{print $3 "/" $2}')
@@ -299,7 +317,7 @@ while true; do
     printf "║ 💿 Disk:    %-43s ║\n" "$DISK"
     
     # Processes
-    PROCS=$(ps aux | wc -l)
+    PROCS=$(ps -e -o pid= | wc -l)
     printf "║ ⚙️  Processes: %-43s ║\n" "$PROCS"
     
     # Uptime
@@ -316,6 +334,10 @@ done
 
 ---
 
+The CPU field is the user-time percentage printed by `top` in the C locale,
+not total CPU utilisation. Process counts omit the header. These are separate
+snapshots taken at different instants, not an atomic system measurement.
+
 ## DEMO 7: Visual Heartbeat (One-liner)
 **Moment**: When demonstrating while loops  
 **Purpose**: Show the power of one-liners
@@ -330,7 +352,7 @@ while true; do
     printf "\r💓 Load: %s | Mem: %s | Procs: %s | %s   " \
         "$(cut -d' ' -f1 /proc/loadavg)" \
         "$(free -h | awk '/^Mem/{print $3"/"$2}')" \
-        "$(ps aux | wc -l)" \
+        "$(ps -e -o pid= | wc -l)" \
         "$(date +%H:%M:%S)"
     sleep 1
 done
@@ -356,7 +378,7 @@ done
 
 | Problem | Quick Solution |
 |---------|----------------|
-| lolcat not installed | `echo "text" \| sed 's/./\x1b[3$(($RANDOM%7))m&/g'` |
+| lolcat not installed | `printf '\033[32m%s\033[0m\n' 'text'` on an ANSI terminal; otherwise `printf '%s\n' 'text'` |
 | dialog not working | Use `read -p` |
 | cmatrix too long | `timeout 3 cmatrix` |
 | Terminal too small | Ctrl+Minus for smaller font |

@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml dining_philosophers
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Dining Philosophers Problem - Deadlock
 
 skinparam rectangle {
@@ -32,11 +32,11 @@ p3 -[hidden]down- table
 p4 -[hidden]down- table
 
 ' Holds (solid) - each has picked up left fork
-p0 -[#27AE60,bold]-> f0 : holds
-p1 -[#27AE60,bold]-> f1 : holds
-p2 -[#27AE60,bold]-> f2 : holds
-p3 -[#27AE60,bold]-> f3 : holds
-p4 -[#27AE60,bold]-> f4 : holds
+f0 -[#27AE60,bold]-> p0 : allocated to
+f1 -[#27AE60,bold]-> p1 : allocated to
+f2 -[#27AE60,bold]-> p2 : allocated to
+f3 -[#27AE60,bold]-> p3 : allocated to
+f4 -[#27AE60,bold]-> p4 : allocated to
 
 ' Waits (dashed) - each wants right fork
 p0 -[#E74C3C,dashed]-> f1 : waits
@@ -58,8 +58,8 @@ end note
 
 legend right
 |= Line |= Meaning |
-|<#27AE60> solid| Holds resource |
-|<#E74C3C> dashed| Waits for resource |
+|<#27AE60> solid| Resource → holder |
+|<#E74C3C> dashed| Requester → resource |
 endlegend
 
 @enduml

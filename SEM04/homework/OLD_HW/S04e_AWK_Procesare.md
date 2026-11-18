@@ -1,5 +1,7 @@
 # S04_TC04 - AWK - Structured Text Processing
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory Material - Seminar 4 (Redistributed)
 
@@ -35,11 +37,16 @@ At the end of this laboratory, the student will be able to:
 ---
 
 
+The `-F,` examples assume one record per line, unquoted commas, one header and
+numeric fields where arithmetic is used. They are not a general CSV parser.
+Check the declared grammar before aggregating external data. Personal comparisons
+of language length/productivity are author preferences, not timed benchmarks.
+
 ## 2. Fields and Built-in Variables
 
 ### 2.1 Fields
 
-```bash
+```text
 $0      # The entire line
 $1      # First field
 $2      # Second field
@@ -120,7 +127,7 @@ awk 'BEGIN { print "Header" }
 awk 'END { print NR " lines" }' file.txt
 
 # Calculate average
-awk '{ sum += $1 } END { print "Average:", sum/NR }' numbers.txt
+awk '{ sum += $1 } END { if(NR) print "Average:", sum/NR; else print "Average: undefined (0 records)" }' numbers.txt
 ```
 
 ---
@@ -177,7 +184,7 @@ awk -v min=10 -v max=100 '$1 >= min && $1 <= max' numbers.txt
 
 ### 5.2 Operators
 
-```bash
+```text
 # Arithmetic
 +  -  *  /  %  ^
 
@@ -253,7 +260,7 @@ awk '{ count[$1]++ } END { for (k in count) print k, count[k] }' file.txt | sort
 
 ### 8.1 String Functions
 
-```bash
+```text
 length(s)           # string length
 substr(s, start, len)   # substring
 index(s, target)    # position of target in s
@@ -266,7 +273,7 @@ toupper(s)          # uppercase
 
 ### 8.2 Mathematical Functions
 
-```bash
+```text
 int(x)      # integer part
 sqrt(x)     # square root
 sin(x), cos(x), atan2(y,x)
@@ -320,7 +327,7 @@ awk '{ for (i=NF; i>0; i--) printf "%s ", $i; print "" }' file.txt
 
 ## Cheat Sheet
 
-```bash
+```text
 # SYNTAX
 awk 'pattern { action }' file
 awk -F',' '{ print $2 }' file
@@ -371,14 +378,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

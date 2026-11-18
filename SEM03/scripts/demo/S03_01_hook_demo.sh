@@ -52,7 +52,7 @@ readonly EMOJI_TIME="⏱️"
 readonly EMOJI_STATS="📊"
 
 # Configuration
-DEMO_DIR="${1:-/usr}"
+DEMO_DIR="/usr"
 QUICK_MODE=false
 SILENT_MODE=false
 PAUSE_TIME=2
@@ -172,7 +172,7 @@ demo_spectacular_search() {
         local formatted_size=$(format_size "$size")
         printf "${WHITE}│  ${CYAN}#%-3d${NC}   ${YELLOW}%12s${NC}    ${GREEN}%-40s${NC} ${WHITE}│${NC}\n" \
             "$rank" "$formatted_size" "${path:0:40}"
-        ((rank++))
+        rank=$((rank + 1))
     done < <(find /usr -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -10)
     
     echo -e "${WHITE}└────────────────────────────────────────────────────────────────────┘${NC}"

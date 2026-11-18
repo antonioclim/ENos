@@ -25,19 +25,18 @@
   contents                    containing "error"            lines
   from file
 
-  TECHNICAL DETAIL:
-  ┌────────────────────────────────────────────────────────────────────┐
-  │  Process 1 (cat)          Process 2 (grep)        Process 3 (wc)  │
-  │  ┌─────────────┐          ┌─────────────┐         ┌─────────────┐ │
-  │  │ stdin  = 0 │          │ stdin  = 0 │◄────────│ stdin  = 0 │ │
-  │  │ stdout = 1 │──────────►│ stdout = 1 │──────────►│ stdout = 1 │ │
-  │  │ stderr = 2 │          │ stderr = 2 │         │ stderr = 2 │ │
-  │  └─────────────┘          └─────────────┘         └─────────────┘ │
-  │       │                        │                        │        │
-  │       │        KERNEL PIPE BUFFER (64KB default)        │        │
-  │       └────────────────────────┴────────────────────────┘        │
-  └────────────────────────────────────────────────────────────────────┘
 ```
+
+Technical descriptor connections are two distinct pipes:
+
+```mermaid
+flowchart LR
+    C["cat: reads file operand"] -->|"fd 1 → pipe 1 → fd 0"| G["grep error"]
+    G -->|"fd 1 → pipe 2 → fd 0"| W["wc -l"]
+    W -->|"fd 1"| O["Terminal or redirected output"]
+```
+
+Each process retains a separate fd 2 unless redirected. Each pipe has its own kernel buffer. Capacity depends on operating system, page size, configuration and resource limits; **64 KiB is not a universal default**. Pipe capacity is also distinct from `PIPE_BUF`, the bound relevant to atomic writes. See the [Linux pipe(7) manual](https://man7.org/linux/man-pages/man7/pipe.7.html).
 
 ### Control Operators
 
@@ -144,7 +143,9 @@
 
 ```bash
 # Create a test log
-cat > /tmp/access.log << 'EOF'
+LOG_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-log-example.XXXXXX") || exit 1
+trap 'rm -rf -- "$LOG_DIR"' EXIT
+cat > "$LOG_DIR/access.log" << 'EOF'
 192.168.1.100 - - [10/Jan/2025:10:00:01] "GET /page1" 200 1234
 192.168.1.101 - - [10/Jan/2025:10:00:02] "GET /page2" 404 567
 192.168.1.100 - - [10/Jan/2025:10:00:03] "GET /page3" 500 890
@@ -160,32 +161,32 @@ EOF
 # Step-by-step solution:
 
 # Step 1: Filter only errors (status 4xx and 5xx)
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log"
 # Output: 7 lines with errors
 
 # Step 2: Extract only the IPs (first field)
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log | cut -d' ' -f1
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log" | cut -d' ' -f1
 # Output: IPs, one per line
 
 # Step 3: Sort to group identical IPs
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log | cut -d' ' -f1 | sort
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log" | cut -d' ' -f1 | sort
 
 # Step 4: Count occurrences of each IP
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log | cut -d' ' -f1 | sort | uniq -c
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log" | cut -d' ' -f1 | sort | uniq -c
 
 # Step 5: Sort descending by count
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log" | cut -d' ' -f1 | sort | uniq -c | sort -rn
 
 # Step 6: Take only the first 5
-grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /tmp/access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5
+awk 'NF == 8 && $7 ~ /^[45][0-9][0-9]$/' "$LOG_DIR/access.log" | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -5
 
 # Final output:
-# 3 192.168.1.100
 # 3 192.168.1.101
+# 3 192.168.1.100
 # 1 10.0.0.50
 
 # Cleanup
-rm /tmp/access.log
+rm "$LOG_DIR/access.log"
 ```
 
 ### Exercise 2: Script with Loops and Conditions
@@ -304,7 +305,7 @@ echo "Empty with default: ${empty:-empty_replaced}"
 echo "Set default: ${newvar:=set_now}"
 echo "newvar is now: $newvar"
 
-# ${var:+alternate} - use alternate only if var is set
+# ${var:+alternate} - use alternate only if var is set and nonempty
 echo "If set: ${name:+SET}"
 echo "If empty: ${empty:+SET}"
 
@@ -378,7 +379,7 @@ echo "a++ = $a"
 | `head` | First N lines | `head -20 file` |
 | `tail` | Last N lines | `tail -f log` (follow) |
 | `tee` | Duplicate output | `cmd \| tee file` |
-| `xargs` | Build arguments | `find . \| xargs rm` |
+| `xargs` | Build arguments (GNU null-delimited example) | `find . -type f -print0 \| xargs -0 -r printf '%s\n'` |
 
 ---
 *Supplementary material for the Operating Systems course | ASE Bucharest - CSIE*

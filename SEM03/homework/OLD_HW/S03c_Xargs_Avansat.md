@@ -1,5 +1,7 @@
 # S03_TC02 - Advanced Xargs
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (NEW - Extended from TC2e)
 
@@ -36,6 +38,12 @@ At the end of this laboratory, the student will be able to:
 
 ## 2. Basic Usage
 
+Filesystem mutations below are exercises for a fresh owned workspace containing
+only disposable fixtures. `-I` and `-P` are compatible in GNU xargs. Both xargs and
+`find -exec ... {} +` may create multiple size-bounded batches, so never use them to
+repeatedly create (`tar -c`) the same archive; use one `tar --null -T -` invocation.
+Command-specific failures and concurrent output still require explicit handling.
+
 ### 2.1 Syntax
 
 ```bash
@@ -46,13 +54,13 @@ producer_command | xargs [options] consumer_command
 
 ```bash
 # Delete files
-find . -name "*.tmp" | xargs rm
+find . -type f -name "*.tmp" -print0 | xargs -0 -r rm
 
 # Count lines
-find . -name "*.py" | xargs wc -l
+find . -type f -name "*.py" -print0 | xargs -0 -r wc -l
 
 # Search text in files
-find . -name "*.c" | xargs grep "main"
+find . -type f -name "*.c" -print0 | xargs -0 -r grep "main"
 
 # Install packages
 echo "vim git curl" | xargs sudo apt install
@@ -71,12 +79,12 @@ Allows placing the argument anywhere in the command:
 xargs -I{} command {} other_arguments
 
 # Examples
-find . -name "*.txt" | xargs -I{} cp {} backup/
+find . -type f -name "*.txt" -print0 | xargs -0 -r -I{} cp {} backup/
 # Becomes: cp file1.txt backup/
 #          cp file2.txt backup/
 
 # With custom placeholder
-find . -name "*.jpg" | xargs -IFILE convert FILE FILE.png
+find . -type f -name "*.jpg" -print0 | xargs -0 -r -IFILE convert FILE FILE.png
 
 # Create directories based on files
 ls *.tar.gz | xargs -I{} mkdir -p extracted/{}
@@ -93,7 +101,7 @@ echo "1 2 3 4 5 6" | xargs -n 2 echo
 # 5 6
 
 # Utility: When command has argument limit
-find . -name "*.log" | xargs -n 100 gzip
+find . -type f -name "*.log" -print0 | xargs -0 -r -n 100 gzip
 
 # Individual processing
 cat urls.txt | xargs -n 1 wget
@@ -102,14 +110,14 @@ cat urls.txt | xargs -n 1 wget
 ### 3.3 Parallel Processing `-P`
 
 ```bash
-# Parallel execution (N processes)
-find . -name "*.jpg" | xargs -P 4 -I{} convert {} {}.png
+# At most N concurrent children; enough input batches are needed
+find . -type f -name "*.jpg" -print0 | xargs -0 -r -P 4 -I{} convert {} {}.png
 
 # Parallel download
 cat urls.txt | xargs -P 10 -n 1 wget
 
 # Parallel compression
-find . -name "*.log" | xargs -P $(nproc) gzip
+find . -type f -name "*.log" -print0 | xargs -0 -r -P $(nproc) gzip
 
 # Verification: nproc = number of cores
 echo "Cores: $(nproc)"
@@ -131,7 +139,7 @@ find . -name "*.txt" | xargs rm
 ```bash
 # find produces NULL-delimited output
 # xargs reads NULL-delimited input
-find . -name "*.txt" -print0 | xargs -0 rm
+find . -type f -name "*.txt" -print0 | xargs -0 -r rm --
 
 # Works for ANY filename:
 # - Spaces: "my file.txt"
@@ -143,19 +151,19 @@ find . -name "*.txt" -print0 | xargs -0 rm
 
 ```bash
 # Display commands (-t = trace)
-find . -name "*.tmp" | xargs -t rm
+find . -type f -name "*.tmp" -print0 | xargs -0 -r -t rm
 # Shows: rm ./file1.tmp ./file2.tmp
 
 # Interactive confirmation (-p = prompt)
-find . -name "*.bak" | xargs -p rm
+find . -type f -name "*.bak" -print0 | xargs -0 -r -p rm
 # Asks: rm ./file.bak ?...
 ```
 
 ### 3.6 Command Size Limit `-s`
 
 ```bash
-# Character limit per command line
-find . -name "*.log" | xargs -s 1024 cat
+# Byte-size limit per command line (includes command/arguments and terminators)
+find . -type f -name "*.log" -print0 | xargs -0 -r -s 1024 cat
 
 # Useful for systems with ARG_MAX limit
 getconf ARG_MAX  # See system limit
@@ -181,7 +189,7 @@ getconf ARG_MAX  # See system limit
 # find -exec {} \; - When you need individual output
 find . -name "*.sh" -exec echo "Processing: {}" \;
 
-# find -exec {} + - When it's simple and you don't have spaces in names
+# find -exec {} + - Simple batching, also safe for spaces/newlines in names
 find . -name "*.txt" -exec wc -l {} +
 
 # find | xargs - When you need:
@@ -200,9 +208,13 @@ find . -name "*.jpg" -print0 | xargs -0 -P 4 -I{} convert {} {}.png
 
 ```bash
 # Find, filter, process
-find . -name "*.log" -mtime +7 -print0 | \
-    xargs -0 grep -l "ERROR" | \
-    xargs -I{} mv {} ./errors/
+# Preview matching paths; GNU grep -Z emits NUL-terminated filenames.
+# grep status 1 means no matches, not a read error. Inspect errors before an action.
+find . -type f -name '*.log' -mtime +7 -print0 |
+    xargs -0 -r grep -lZ 'ERROR' |
+    xargs -0 -r -I{} printf 'Candidate: %s\n' '{}'
+# To move, preserve relative paths in a fresh destination and reject collisions.
+# Do not flatten equal basenames into an existing errors/ directory.
 ```
 
 ### 5.2 Processing with Script
@@ -248,13 +260,13 @@ find . -name "*.mp4" | parallel ffmpeg -i {} -c:v libx264 {.}.avi
 
 ```bash
 # Display without execution
-find . -name "*.tmp" | xargs echo
+find . -type f -name "*.tmp" -print0 | xargs -0 -r echo
 
 # Verbose mode
-find . -name "*.tmp" | xargs -t rm
+find . -type f -name "*.tmp" -print0 | xargs -0 -r -t rm
 
 # Custom dry-run
-find . -name "*.tmp" | xargs -I{} echo "Would delete: {}"
+find . -type f -name "*.tmp" -print0 | xargs -0 -r -I{} echo "Would delete: {}"
 ```
 
 ### 6.2 Common Problems
@@ -262,9 +274,9 @@ find . -name "*.tmp" | xargs -I{} echo "Would delete: {}"
 | Problem | Cause | Solution |
 |---------|-------|----------|
 | `xargs: argument line too long` | Too many arguments | Use `-n` or `-s` |
-| Files with spaces ignored | Default delimiter is space | Use `-print0 | xargs -0` |
-| Command doesn't execute | Empty stdin | Add `-r` (no-run-if-empty) |
-| Mixed output (parallel) | Concurrent processes | Use `--line-buffer` or reduce `-P` |
+| Files with spaces ignored | Default delimiter is space | Use `-print0 \| xargs -0` |
+| Command runs once on empty stdin | GNU xargs default empty invocation | Add `-r` to suppress that invocation; it does not make a command run |
+| Mixed output (parallel) | Concurrent processes | Use per-job output files and merge afterwards, or reduce `-P`; GNU xargs has no `--line-buffer` option |
 
 ### 6.3 Input Verification
 
@@ -274,7 +286,7 @@ find . -name "*.txt" | head -5 | cat -A
 # $ = end of line, ^I = tab, etc.
 
 # Test with echo before dangerous command
-find . -name "*.bak" | xargs echo rm
+find . -type f -name "*.bak" -print0 | xargs -0 -r echo rm
 ```
 
 ---
@@ -307,8 +319,8 @@ cmd | xargs -I{} action {}    # substitution
 find -print0 | xargs -0       # null-delimited
 
 # PARALLELISM
-cmd | xargs -P 4              # 4 parallel processes
-cmd | xargs -P $(nproc)       # all cores
+cmd | xargs -P 4              # At most 4 concurrent children
+cmd | xargs -P $(nproc)       # At most the available nproc count of concurrent children
 
 # DEBUG
 cmd | xargs -t action         # display command
@@ -316,7 +328,7 @@ cmd | xargs -p action         # interactive confirmation
 cmd | xargs echo              # dry-run
 
 # FREQUENT COMBINATIONS
-find . -name "*.x" -print0 | xargs -0 rm
+find . -type f -name "*.x" -print0 | xargs -0 -r rm --
 find . -name "*.x" -print0 | xargs -0 -I{} cp {} backup/
 find . -name "*.x" -print0 | xargs -0 -P 4 -n 1 process
 ```
@@ -343,14 +355,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

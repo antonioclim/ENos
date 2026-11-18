@@ -1,52 +1,19 @@
-# 📁 Homework — Find, Xargs & Permissions
+# Homework materials — Seminar 3
 
-> **Location:** `SEM03/homework/`  
-> **Purpose:** Assignment on file searching, batch processing, and permissions
+Read [the public task](S03_01_HOMEWORK.md), [rubric](S03_03_EVALUATION_RUBRIC.md) and [open assessment contract](ASSESSMENT_STATUS.md) together. Their grading conflict is not resolved by a generator or a structural diagnostic.
 
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `S03_01_HOMEWORK.md` | Assignment specification |
-| `S03_02_create_homework.sh` | Homework generator |
-| `S03_03_EVALUATION_RUBRIC.md` | Grading criteria |
-| `S03_04_ORAL_VERIFICATION_LOG.md` | Interview checklist |
-
----
-
-## S03_02_create_homework.sh
-
-**Purpose:** Generates personalized exercises for find, xargs, and permissions.
-
-### Usage
+## Generate personalised starter material
 
 ```bash
-./S03_02_create_homework.sh [options]
-
-Options:
-  --student-id ID    Generate for specific student
-  --batch FILE       Generate from student list
-  --seed N           Random seed for reproducibility
-  --output DIR       Output directory
+bash S03_02_create_homework.sh --help
+bash S03_02_create_homework.sh --preview students.csv
+bash S03_02_create_homework.sh --seed 42 --output /path/to/new-variants students.csv
 ```
 
-### Personalisation Elements
+Each CSV line has `SURNAME_FIRSTNAME,GROUP,EMAIL`. The input filename is positional, not --batch. The implemented options are --help, --output DIR, --seed NUM, --verbose, --preview, --zip and --all-in-one; the last uses the separate PDF dependency documented by the script. No --student-id interface is supplied. Generated TODOs are intentional work to complete.
 
-- Directory structures to search
-- File patterns and extensions
-- Permission scenarios
-- Expected outputs
+Generated permission fixtures use octal modes and feasible owner/group/other combinations. Run them only in the generated exercise directory. A preview is not submission completion.
 
----
+## Recording and review
 
-## Submission
-
-1. Complete exercises in `S03_01_HOMEWORK.md`
-2. Validate: `../../03_GUIDES/check_my_submission.sh`
-3. Record: `../../02_INIT_HOMEWORKS/record_homework_EN.sh`
-
----
-
-*See also: [`S03_03_EVALUATION_RUBRIC.md`](S03_03_EVALUATION_RUBRIC.md)*
-
-*Last updated: January 2026*
+Follow the [current recording contract](../../03_GUIDES/RECORDING_CONTRACT.md). Format checks do not authenticate identity or approve a final grade. Publishing answer keys, selecting assessment weights and setting verification policy remain author decisions.

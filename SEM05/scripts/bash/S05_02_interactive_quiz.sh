@@ -11,7 +11,7 @@
 # USAGE:
 #   ./S05_02_interactive_quiz.sh              # Full quiz
 #   ./S05_02_interactive_quiz.sh --topic functions  # Functions only
-#   ./S05_02_interactive_quiz.sh --quick      # Short version (5 questions)
+#   ./S05_02_interactive_quiz.sh --quick      # Short version (3 questions)
 #
 
 set -euo pipefail
@@ -64,8 +64,8 @@ print_progress() {
     local empty=$((20 - filled))
     
     printf "${CYAN}Progress: [${NC}"
-    printf "${GREEN}%${filled}s${NC}" | tr ' ' '█'
-    printf "${DIM}%${empty}s${NC}" | tr ' ' '░'
+    printf "${GREEN}%${filled}s${NC}" | sed 's/ /█/g'
+    printf "${DIM}%${empty}s${NC}" | sed 's/ /░/g'
     printf "${CYAN}] %d/%d${NC}\n" "$current" "$total"
 }
 
@@ -78,7 +78,7 @@ ask_question() {
     local correct="$6"
     local explanation="$7"
     
-    ((TOTAL++))
+    TOTAL=$((TOTAL + 1))
     
     echo ""
     echo -e "${BOLD}Question $TOTAL:${NC}"
@@ -93,7 +93,7 @@ ask_question() {
     
     local answer=""
     while [[ ! "$answer" =~ ^[AaBbCcDd]$ ]]; do
-        read -r -p "Your answer (A/B/C/D): " answer
+        read -r -p "Your answer (A/B/C/D): " answer || { printf "Input ended before the quiz was complete\n" >&2; return 1; }
     done
     
     answer=$(echo "$answer" | tr '[:lower:]' '[:upper:]')
@@ -101,7 +101,7 @@ ask_question() {
     
     echo ""
     if [[ "$answer" == "$correct" ]]; then
-        ((SCORE++))
+        SCORE=$((SCORE + 1))
         echo -e "${GREEN}✓ CORRECT!${NC}"
     else
         echo -e "${RED}✗ WRONG! The correct answer was: $correct${NC}"
@@ -111,7 +111,7 @@ ask_question() {
     echo -e "${DIM}Explanation: $explanation${NC}"
     echo ""
     
-    read -r -p "Press Enter to continue..." </dev/tty
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || return 1; fi
 }
 
 # ============================================================
@@ -235,7 +235,7 @@ quiz_robust() {
     ask_question \
 'What does "set -e" do in Bash?' \
         'Activates extended globbing' \
-        'The script stops at the first error' \
+        'Exits on an unhandled non-zero command, subject to syntactic exceptions' \
         'Exports all variables' \
         'Activates debug mode' \
         'B' \
@@ -272,10 +272,10 @@ What does it display WITHOUT pipefail?' \
 'When does a trap EXIT execute?' \
         'Only on exit 0 (success)' \
         'Only on errors' \
-        'ALWAYS on script exit' \
+        'On normal shell exit, including exit after an errexit failure' \
         'Only on Ctrl+C' \
         'C' \
-        'trap EXIT always executes: on normal completion, on errors, or on signals. Ideal for cleanup!'
+        'trap EXIT runs on normal shell exit, including exit triggered by errexit. SIGKILL and abrupt machine/process loss cannot run cleanup; arrange catchable signal handling explicitly.'
 }
 
 # ============================================================
@@ -345,13 +345,13 @@ print_results() {
     local empty=$((20 - filled))
     printf "["
     if [[ $pct -ge 70 ]]; then
-        printf "${GREEN}%${filled}s${NC}" | tr ' ' '█'
+        printf "${GREEN}%${filled}s${NC}" | sed 's/ /█/g'
     elif [[ $pct -ge 50 ]]; then
-        printf "${YELLOW}%${filled}s${NC}" | tr ' ' '█'
+        printf "${YELLOW}%${filled}s${NC}" | sed 's/ /█/g'
     else
-        printf "${RED}%${filled}s${NC}" | tr ' ' '█'
+        printf "${RED}%${filled}s${NC}" | sed 's/ /█/g'
     fi
-    printf "${DIM}%${empty}s${NC}" | tr ' ' '░'
+    printf "${DIM}%${empty}s${NC}" | sed 's/ /░/g'
     printf "]\n"
     echo ""
     
@@ -447,7 +447,7 @@ main() {
     echo "You will receive questions with 4 answer options."
     echo "Type the corresponding letter (A/B/C/D) and press Enter."
     echo ""
-    read -r -p "Press Enter to start..." </dev/tty
+    if [[ -t 0 ]]; then read -r -p "Press Enter to start..." || return 1; fi
     
     case "$topic" in
         functions)

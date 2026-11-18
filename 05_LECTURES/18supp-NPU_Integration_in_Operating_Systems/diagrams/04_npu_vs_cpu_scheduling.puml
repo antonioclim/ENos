@@ -30,11 +30,11 @@ rectangle "NPU SCHEDULING\n(Queue-based)" as npu_sched #F3E5F5 {
         rectangle "App B" as a2 #C8E6C9
     }
     
-    rectangle "Utilizator-space Runtime\n(OpenVINO, CoreML)" as runtime #FFF9C4
+    rectangle "User-space Runtime\n(OpenVINO, CoreML)" as runtime #FFF9C4
     
-    rectangle "Kernel Driver\n(Comandă Queue)" as driver #FFECB3
+    rectangle "Kernel Driver\n(Command Queue)" as driver #FFECB3
     
-    rectangle "NPU Hardware\n(Non-preemptive)" as npu_hw #D1C4E9
+    rectangle "NPU Hardware\n(preemption depends on device/driver)" as npu_hw #D1C4E9
     
     apps --> runtime
     runtime --> driver
@@ -42,13 +42,15 @@ rectangle "NPU SCHEDULING\n(Queue-based)" as npu_sched #F3E5F5 {
 }
 
 note bottom of cpu_sched
-  Preemption at any moment
+  Preemption at scheduler-safe points
   Rapid context switch
 end note
 
 note bottom of npu_sched
-  Job complete or checkpoint
-  Costly interruption
+  Illustrated boundary: job completion/checkpoint
+  Other devices may support finer preemption
+  Interruption cost is workload/device dependent
 end note
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

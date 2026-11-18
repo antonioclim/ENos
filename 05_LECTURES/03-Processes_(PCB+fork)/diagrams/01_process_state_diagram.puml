@@ -1,7 +1,7 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml process_state_diagram
-!include ../../diagrams_common/skin.puml
-title Process State Diagram
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Process State Diagram — abstract states with Linux exit/reaping example
 
 skinparam state {
     BackgroundColor #FAFAFA
@@ -9,7 +9,8 @@ skinparam state {
     FontSize 14
 }
 
-[*] --> NEW : fork()/exec()
+[*] --> NEW : fork() creates a child
+RUNNING --> RUNNING : successful exec() replaces the process image
 
 state NEW #E8F5E9 {
 }
@@ -33,7 +34,7 @@ state RUNNING #C8E6C9 {
 }
 note right of RUNNING
   Executing on CPU
-  (single process)
+  (one running task per logical CPU)
 end note
 
 RUNNING --> READY : **preemption**\n(timer/priority)
@@ -56,7 +57,7 @@ RUNNING --> TERMINATED : exit()
 state TERMINATED #FFCDD2 {
 }
 note right of TERMINATED
-  **ZOMBIE**
+  **ZOMBIE in the usual parent-reaping case**
   Waiting for wait()
   from parent
 end note

@@ -1,5 +1,9 @@
 # S07 Pedagogical Analysis Plan — Final Evaluation
 
+## Evidence boundary
+
+This is a planning proposal. The percentages, coverage claims and durations are targets, not measured attainment. The author must reconcile the assessment policy and confidential/public bank distribution before use. Formative observation and oral explanation do not establish authorship. Current tool behaviour is specified in [the assessment contract](../homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
+
 ## Overview
 
 | Aspect | Details |
@@ -11,7 +15,7 @@
 
 ## Learning Objectives Integration
 
-This evaluation session assesses ALL learning objectives from SEM01-SEM06:
+This evaluation is intended to sample learning objectives from SEM01-SEM06:
 
 ### SEM01: Shell Fundamentals
 - LO1.1-LO1.14: Basic shell operations, navigation, variables
@@ -35,7 +39,7 @@ This evaluation session assesses ALL learning objectives from SEM01-SEM06:
 
 1. **Authenticity** — All assessments test real-world applicable skills
 2. **Fairness** — Clear rubrics, consistent application
-3. **Anti-plagiarism** — Oral verification, randomisation, AI detection
+3. **Evidence review** — Code explanation, contextual similarity review and controlled task variants; no AI-authorship inference
 4. **Feedback** — Detailed feedback for learning improvement
 
 ## Bloom Taxonomy Distribution (Cumulative)

@@ -143,7 +143,7 @@ pwd  # Still in original directory
 ### 4.2 Grouping with `{ }`
 
 ```bash
-# Grouping WITHOUT subshell (runs in current shell)
+# Braces alone do not request a subshell, but a pipeline component normally runs in one.
 { echo "start"; cat file; echo "end"; } | wc -l
 
 # ATTENTION: space and ; are mandatory
@@ -154,8 +154,9 @@ pwd  # Still in original directory
 ### 4.3 Practical Difference
 
 ```bash
-# With subshell - variable doesn't persist
-(VAR="test"); echo $VAR  # empty
+# Parenthesised subshell inherits existing state; changes do not reach the parent.
+unset VAR
+(VAR="test"); echo "$VAR"  # empty in parent
 
 # With grouping - variable persists
 { VAR="test"; }; echo $VAR  # "test"
@@ -180,10 +181,9 @@ echo $?  # 0 (from last true)
 ```bash
 # PIPESTATUS contains exit codes for ALL commands
 cmd1 | cmd2 | cmd3
-echo "${PIPESTATUS[@]}"  # e.g.: "0 1 0"
-echo "${PIPESTATUS[0]}"  # exit code cmd1
-echo "${PIPESTATUS[1]}"  # exit code cmd2
-echo "${PIPESTATUS[2]}"  # exit code cmd3
+statuses=("${PIPESTATUS[@]}")  # capture before any echo/test changes PIPESTATUS
+printf 'All statuses: %s\n' "${statuses[*]}"
+printf 'cmd1=%s cmd2=%s cmd3=%s\n' "${statuses[0]}" "${statuses[1]}" "${statuses[2]}"
 ```
 
 ### 5.3 Complete Pipeline Verification
@@ -191,17 +191,22 @@ echo "${PIPESTATUS[2]}"  # exit code cmd3
 ```bash
 # Pattern for verification
 cat file.txt | grep "pattern" | wc -l
-if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-    echo "Error: file does not exist"
-elif [[ ${PIPESTATUS[1]} -ne 0 ]]; then
-    echo "Pattern not found"
+statuses=("${PIPESTATUS[@]}")
+if ((statuses[0] != 0)); then
+    echo "Cannot read input" >&2
+elif ((statuses[1] > 1)); then
+    echo "grep failed" >&2
+elif ((statuses[2] != 0)); then
+    echo "wc failed" >&2
+elif ((statuses[1] == 1)); then
+    echo "Pattern not found (normal zero-match result)"
 fi
 ```
 
 ### 5.4 set -o pipefail
 
 ```bash
-# With pipefail, pipeline returns first non-zero exit code
+# With pipefail, pipeline returns rightmost non-zero exit code
 set -o pipefail
 
 false | true | true
@@ -232,26 +237,28 @@ tee >(gzip > backup.gz) >(md5sum > checksum.txt)
 
 ```bash
 # Create named pipe
-mkfifo /tmp/mypipe
+FIFO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-fifo.XXXXXX") || exit 1
+mkfifo "$FIFO_DIR/mypipe"
+printf 'FIFO_DIR=%q\n' "$FIFO_DIR"
 
 # Terminal 1 (reads)
-cat /tmp/mypipe
+cat "$FIFO_DIR/mypipe"
 
-# Terminal 2 (writes)
-echo "message" > /tmp/mypipe
+# Terminal 2 (writes): first set FIFO_DIR to the exact path printed by terminal 1
+echo "message" > "$FIFO_DIR/mypipe"
 
 # Cleanup
-rm /tmp/mypipe
+rm "$FIFO_DIR/mypipe"
 ```
 
 ### 6.3 Pipeline with xargs
 
 ```bash
 # Powerful combination: pipe + xargs
-find . -name "*.log" | xargs grep "ERROR"
+find . -type f -name "*.log" -print0 | xargs -0 -r grep -h -- "ERROR"
 
 # With -I for substitution
-ls *.txt | xargs -I{} cp {} backup/
+find . -maxdepth 1 -type f -name "*.txt" -print0 | xargs -0 -r -I{} cp -- "{}" backup/
 ```
 
 ---
@@ -290,20 +297,19 @@ cmd1 | nl | cmd2  # Add line numbers for debug
 #!/bin/bash
 set -euo pipefail
 
-# Safe pipeline with logging
+# Checked pipeline; a zero-match grep is valid empty output.
 process_data() {
-    cat "$1" 2>/dev/null | \
-        grep -v "^#" | \
-        sort | \
-        uniq -c | \
-        tee "$2"
-    
-    # PIPESTATUS check
-    local status=("${PIPESTATUS[@]}")
-    if [[ ${status[0]} -ne 0 ]]; then
-        echo "Error: file does not exist" >&2
-        return 1
+    [[ $# == 2 ]] || { printf 'Usage: process_data INPUT OUTPUT\n' >&2; return 2; }
+    local -a status
+    if cat -- "$1" | grep -v '^#' | sort | uniq -c | tee -- "$2"; then
+        status=("${PIPESTATUS[@]}")
+    else
+        status=("${PIPESTATUS[@]}")
     fi
+    ((status[0] == 0)) || { printf 'Cannot read input\n' >&2; return 1; }
+    ((status[1] <= 1)) || { printf 'grep failed\n' >&2; return 1; }
+    ((status[2] == 0 && status[3] == 0 && status[4] == 0)) || { printf 'Pipeline output failed\n' >&2; return 1; }
+    return 0
 }
 ```
 
@@ -338,8 +344,8 @@ Compare the sorted contents of two directories using `diff` and `<()`.
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| `Broken pipe` | Command on the right terminated | Normal for `head`, `tail -n` |
-| stderr on screen | `|` doesn't redirect stderr | Use `|&` or `2>&1 |` |
+| `Broken pipe` | Command on the right terminated | Can be expected with bounded readers such as `head`; `tail -n` normally reads to EOF |
+| stderr on screen | `\|` does not redirect stderr | Use `\|&` or `2>&1 \|` |
 | Exit code 0 but errors | Pipeline returns last | Use `set -o pipefail` |
 | Incomplete data | Buffering | Add `stdbuf -oL` for line-buffered |
 
@@ -365,14 +371,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

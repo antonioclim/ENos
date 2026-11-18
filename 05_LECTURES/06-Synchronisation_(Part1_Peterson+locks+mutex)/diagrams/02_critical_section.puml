@@ -1,6 +1,6 @@
 @startuml critical_section
-!include ../../diagrams_common/skin.puml
-title Critical Section - Structure and Properties
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Critical Section - Repeated Protocol and Properties
 
 skinparam activity {
     BackgroundColor #FAFAFA
@@ -9,11 +9,11 @@ skinparam activity {
 
 start
 
-:while (true) {;
+repeat
 
 partition "**ENTRY SECTION**" #E3F2FD {
     :acquire(lock)
-    or wait(mutex);
+    or lock(mutex);
     note right
     Request access
     May **block**
@@ -32,7 +32,7 @@ partition "**CRITICAL SECTION**" #FFCDD2 {
 
 partition "**EXIT SECTION**" #C8E6C9 {
     :release(lock)
-    or signal(mutex);
+    or unlock(mutex);
     note right
     Release
     access
@@ -44,17 +44,16 @@ partition "**REMAINDER SECTION**" #FFFFFF {
     the shared resource;
 }
 
-:} // end while;
-
-stop
+repeat while (true) is (always)
+detach
 
 legend right
 **The 3 Necessary Properties:**
 
 |= Property |= Description |
 | **Mutual Exclusion** | Only one process in CS |
-| **Progress** | If CS is free, someone enters |
-| **Bounded Waiting** | Limit on how long one waits |
+| **Progress** | Contending processes can decide who enters |
+| **Bounded Waiting** | Bound on overtaking (under stated scheduling assumptions) |
 endlegend
 
 @enduml

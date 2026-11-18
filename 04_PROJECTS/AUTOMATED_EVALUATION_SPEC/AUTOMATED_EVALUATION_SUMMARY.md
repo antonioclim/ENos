@@ -1,6 +1,50 @@
 # EXECUTIVE SUMMARY: Automatic Evaluation System for OS Projects
 
-## Synthesis Document | Final Version
+## Status and executable boundary (Phase 5 correction)
+
+These are **author proposals**, not an adopted grading system or a measured
+automation result. Original points, percentages, time estimates and competing
+grade/penalty proposals are retained as planning history. `total_points` now
+equals the sum of the displayed case points; it is not an automatic rescaling to
+100. No final grade, bonus, deduction, disclosure or publication policy is selected.
+
+The implemented [local reference](../helpers/evaluation_reference.py) validates
+the finite structured predicates printed below and emits JSON once. Unknown
+operators, malformed values and duplicate JSON/YAML keys are errors. `all`, `any`
+and `not` are explicit; string lists do not have an implicit OR meaning. A `pending`
+predicate is a concrete unresolved adapter/author requirement: it reports NOT_RUN,
+never PASS, and prevents a purported complete percentage. Existing project CLI
+alternatives remain proposed interfaces until the author resolves their contract.
+
+Each explicitly authorised trusted local case uses a fresh owned project copy and
+`FIXTURE_ROOT`; inherited setup runs again before every case. Setup and cleanup
+share one shell; only explicitly exported variables reach the command child.
+Background fixtures must retain their parent, export their PID and be killed and
+waited for. The runner also terminates its own process group on timeout. Permission
+oracles require a non-root fixture user. No shared `/tmp` paths, host crontab,
+services, HOME directory or unrelated IPC objects are part of the local contract.
+
+This helper is **not a sandbox for untrusted submissions**. It supplies a wall-time
+and output bound for trusted fixtures, not CPU/RAM/PID/disk/network containment.
+`requires_platform` cases are reported NOT_RUN. A production isolation backend,
+archive intake, student execution, notifications and institutional acceptance are
+not implemented or executed by this repair. Use the regression tests for the
+implemented boundary, not the proposal's planning percentages as evidence.
+
+```bash
+# Validation does not execute setup or project commands; YAML requires PyYAML.
+python3 04_PROJECTS/helpers/evaluation_reference.py validate owned-suite.yaml
+# This opt-in is only for a trusted, owned fixture, never an untrusted submission.
+python3 04_PROJECTS/helpers/evaluation_reference.py run owned-suite.yaml --run-owned --project owned-fixture
+python3 -m unittest discover -s 04_PROJECTS/tests -p test_evaluation_spec.py -v
+```
+
+The local reference uses all-or-nothing points per asserted case only to demonstrate
+arithmetic. Partial credit and institutional consequences remain explicit author
+choices. See [the assessment/evidence contract](../ASSESSMENT_AND_EVIDENCE_CONTRACT.md).
+
+
+## Synthesis Document | Historical proposal with Phase 5 corrections
 
 ---
 
@@ -21,7 +65,7 @@
 ║                    EVALUABILITY BY CATEGORY                               ║
 ╠═══════════════════════════════════════════════════════════════════════════╣
 ║                                                                           ║
-║  FULLY AUTOMATIC (100%):                                                  ║
+║  FINITE AUTOMATIC CHECKS (coverage estimate, not proof):                                                  ║
 ║  ├── ✓ File structure (exists src/, README.md, etc.)                     ║
 ║  ├── ✓ Syntax (bash -n, ShellCheck)                                      ║
 ║  ├── ✓ Exit codes                                                         ║
@@ -29,7 +73,7 @@
 ║  ├── ✓ Files created/modified correctly                                   ║
 ║  ├── ✓ Timeouts respected                                                 ║
 ║  ├── ✓ C compilation (for ADVANCED)                                       ║
-║  └── ✓ Memory leaks (Valgrind)                                            ║
+║  └── ✓ Observed leaks on exercised paths (Valgrind)                                            ║
 ║                                                                           ║
 ║  PARTIALLY AUTOMATIC (50-80%):                                            ║
 ║  ├── ◐ Code quality (metrics, not semantics)                              ║
@@ -51,7 +95,7 @@
 
 ---
 
-## 2. Complete List: Criteria NOT EVALUABLE Automatically
+## 2. Complete List: Criteria Requiring Additional or Human Evidence
 
 ### 2.1 General Categories
 
@@ -61,7 +105,7 @@
 | **UX/Output** | Readability, formatting, colours | Subjective, preferences | Verify ANSI codes present |
 | **Code Quality** | Elegance, style, naming | Subjective | Metrics (LOC/function, comments) |
 | **Creativity** | Innovative solutions, extras | Cannot be quantified | Manual bonus |
-| **Robustness** | Rare edge cases | Impossible to anticipate all | Tests for common cases |
+| **Robustness** | Rare edge cases | A finite test set cannot establish universal correctness | Tests for common cases |
 | **Integrations** | External services, APIs | Requires infrastructure | Mocks |
 | **Security** | Subtle vulnerabilities | Requires expert audit | Basic checks |
 
@@ -253,7 +297,7 @@ A03 - File Sync
    └── Comparison with class average (optional)
 ```
 
-### 3.3 Docker Sandbox Specification
+### 3.3 Proposed Docker Image (not an implemented sandbox)
 
 ```dockerfile
 # Dockerfile for evaluation
@@ -287,7 +331,7 @@ RUN useradd -m -s /bin/bash evaluator
 USER evaluator
 WORKDIR /home/evaluator
 
-# Limits
+# Planning values only; runtime limits require a separate launcher
 ENV TIMEOUT_DEFAULT=60
 ENV TIMEOUT_MAX=300
 ENV MAX_MEMORY="512m"
@@ -325,19 +369,17 @@ PHASE 3 (Polish - 1-2 weeks):
 ```yaml
 test_maintenance_guidelines:
   versioning:
-    - Each test suite versioned
-    - Changelog for modifications
-    - Backward compatibility 2 versions
-    
+  - Each test suite versioned
+  - Changelog for modifications
+  - Backward compatibility 2 versions
   updates:
     trigger_new_tests:
-      - Bug in existing test
-      - New project requirement
-      - Discovered edge case
-      
+    - Bug in existing test
+    - New project requirement
+    - Discovered edge case
   deprecation:
-    - Announcement 2 weeks before
-    - Grace period for resubmit
+  - Announcement 2 weeks before
+  - Grace period for resubmit
 ```
 
 ### 4.3 Handling Edge Cases
@@ -377,7 +419,9 @@ COMMON PROBLEMS AND SOLUTIONS:
 FINAL_SCORE = (AUTO_SCORE × 0.85) + (MANUAL_SCORE × 0.15)
 
 Where:
-AUTO_SCORE = Σ(category_i × weight_i) - penalties + bonuses
+AUTO_SCORE = Σ(category_percentage_i × numeric_weight_i / 100)
+MANUAL_SCORE = 100 × sum(three manual marks from 0 to 10) / 30
+# Penalties/bonuses below are competing historical proposals, not applied rules.
 
 Default categories and weights:
 ├── Structural:        10%
@@ -416,13 +460,13 @@ Score    Grade   Description
 
 ---
 
-## 6. Conclusions
+## 6. Proposal implications and remaining acceptance
 
 ### What works well automatically:
 - Structure and syntax checks
 - Functional tests with defined input/output
 - Compilation and linking (C)
-- Memory safety (Valgrind)
+- Bounded observed memory diagnostics (Valgrind)
 - Performance (timeouts)
 
 ### What requires human evaluation:
@@ -433,7 +477,7 @@ Score    Grade   Description
 - Integrations with real systems
 
 ### Final recommendation:
-**Hybrid model 85% automatic + 15% manual** provides:
+**Historical 85% automatic + 15% manual proposal**, if adopted, is intended to support the following unmeasured benefits:
 - Fast feedback (under 15 minutes)
 - Consistency in evaluation
 - Scalability for large classes
@@ -442,3 +486,38 @@ Score    Grade   Description
 ---
 
 *Document generated for the Operating Systems course | ASE-CSIE | 2024-2025*
+
+
+## Open policy comparison and recommendation
+
+The main proposal's grade thresholds (90→10, 80→9, 70→8, 60→7,
+50→6, 40→5) conflict with the summary proposal (95→10, 90→9,
+80→8, 70→7, 60→6, 50→5). Both are retained as historical alternatives;
+neither is applied by the reference. Main-document penalties of −5% per ShellCheck
+error capped at −20% also conflict with summary −2% capped at −15%; bonuses differ
+between +5/+5 and +3/+2. The author must select one versioned policy, including
+rounding, caps, optional work and missing-platform treatment. The recommendation
+is one explicit machine-readable policy with boundary fixtures, after author
+approval. Until then reports contain observations and raw illustrative arithmetic,
+not a final grade. The historical 85/15 proposal is also not adopted implicitly.
+
+Automation percentages, test counts and durations in the planning tables have no
+measured denominator in this transfer. They are estimates, not achieved coverage,
+validated throughput or proof of universal correctness. Rare faults, races,
+recovery and parser edge cases can have bounded automated tests; each needs a
+declared oracle and evidence scope. Human judgement and platform acceptance remain
+separate. No student notification, external comparison service or publication is
+authorised by a proposed architecture diagram.
+
+### Technical references for the implemented boundary
+
+- [Python 3.12 subprocess documentation](https://docs.python.org/3.12/library/subprocess.html): literal argv, separate streams, process creation and POSIX session handling.
+- [Docker resource constraints](https://docs.docker.com/engine/containers/resource_constraints/): CPU/memory controls are runtime configuration, not ENV declarations. No Docker containment was exercised by this local repair.
+
+The current runner reports whole-case wall time (setup, command and cleanup), not
+a standalone program benchmark. Its sampled output cap can have a small overshoot;
+it is not a disk quota. A production backend must separately verify memory, CPU,
+PID, filesystem, disk, network and privilege containment with owned negative
+controls before any untrusted submission is considered. The Dockerfile remains a
+proposed image recipe; the submission entrypoint and isolation launcher are not
+implemented by the local helper.

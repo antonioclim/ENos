@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>05ex1 - Thread vs Process Memory Model | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
         body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height: 100vh; }
@@ -33,7 +33,84 @@
         .btn-interactive:active::after { width: 200%; height: 200%; }
         .comparison-table td, .comparison-table th { transition: background 0.2s ease; }
         .comparison-table tr:hover td { background: rgba(59, 130, 246, 0.1); }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <header class="max-w-7xl mx-auto mb-6">
@@ -56,7 +133,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Address sharing, atomicity and visibility</h2><p>This page serialises callbacks in one JavaScript event loop. It is a sequential illustration of shared storage, not a native thread test. In C/POSIX, counter++ is not automatically atomic: protect reads and writes with the same mutex, or use C atomics with appropriate ordering. For example, an unlock followed by a successful lock of the same mutex establishes the required ordering. Each thread can address shared storage, but that alone does not guarantee a defined instantaneous observation. See the race-condition and mutex lessons.</p></section>
     <div id="notification-area" class="fixed top-4 right-4 z-50 space-y-2"></div>
     <main class="max-w-7xl mx-auto">
         <div class="grid lg:grid-cols-2 gap-6 mb-6">
@@ -74,7 +151,7 @@
                         </div>
                         <div class="space-y-1">
                             <div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500">
-                                <div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Coof Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div>
+                                <div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Code Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div>
                             </div>
                             <div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500">
                                 <div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div>
@@ -96,7 +173,7 @@
                     </div>
                 </div>
                 <div class="mt-4 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                    <p class="text-xs text-slate-400"><i class="fas fa-info-circle text-blue-400 mr-1"></i><strong>fork()</strong> createdes a <span class="text-amber-400">COMPLETE COPY</span> of the address space (Copy-on-Write for optimisation). Processes do not share memory directly - communication requires IPC.</p>
+                    <p class="text-xs text-slate-400"><i class="fas fa-info-circle text-blue-400 mr-1"></i><strong>fork()</strong> creates a <span class="text-amber-400">SEPARATE VIRTUAL IMAGE</span> of the address space, with eligible physical pages initially shared using copy-on-write. Explicit shared mappings are also possible.</p>
                 </div>
             </section>
             <section class="glass-card rounded-2xl p-5">
@@ -112,7 +189,7 @@
                     </div>
                     <div class="space-y-1 mb-3">
                         <div class="memory-segment bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-3 border-l-4 border-amber-500">
-                            <div class="flex justify-between items-center"><span class="mono text-sm text-amber-300">Coof Segment</span><span class="text-xs px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 font-semibold">SHARED</span></div>
+                            <div class="flex justify-between items-center"><span class="mono text-sm text-amber-300">Code Segment</span><span class="text-xs px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 font-semibold">SHARED</span></div>
                         </div>
                         <div class="memory-segment bg-gradient-to-r from-amber-900/40 to-amber-800/20 rounded-lg p-3 border-l-4 border-amber-500">
                             <div class="flex justify-between items-center"><span class="mono text-sm text-amber-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 font-semibold">SHARED</span></div>
@@ -140,7 +217,7 @@
                     </div>
                 </div>
                 <div class="mt-4 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                    <p class="text-xs text-slate-400"><i class="fas fa-info-circle text-emerald-400 mr-1"></i>Threads share <span class="text-amber-400">code, data, heap and file descriptors</span>. Each thread has only <span class="text-purple-400">its own stack and registers</span>. Creation: ~μs vs ~ms for processes.</p>
+                    <p class="text-xs text-slate-400"><i class="fas fa-info-circle text-emerald-400 mr-1"></i>Threads share <span class="text-amber-400">code, data, heap and file descriptors</span>. Each thread has <span class="text-purple-400">its own stack, registers, thread-local storage and per-thread attributes</span>. Creation costs depend on implementation and workload; no native timings are measured here.</p>
                 </div>
             </section>
         </div>
@@ -150,20 +227,20 @@
                 <div class="bg-emerald-900/20 rounded-xl p-4 border border-emerald-500/30">
                     <h4 class="font-semibold text-emerald-400 mb-3 flex items-center gap-2"><i class="fas fa-stream"></i> Scenario 1: Threads</h4>
                     <div class="space-y-2 text-sm">
-                        <p class="text-slate-300">1. Global variable: <coof class="mono bg-slate-800 px-1 rounded">counter = <span id="demo-t-initial">0</span></code></p>
-                        <p class="text-slate-300">2. Thread 1 executes <coof class="mono bg-slate-800 px-1 rounded">counter++</code></p>
-                        <p class="text-slate-300">3. Thread 2 sees the new value <span class="text-emerald-400 font-semibold">immediately</span>!</p>
+                        <p class="text-slate-300">1. Global variable: <code class="mono bg-slate-800 px-1 rounded">counter = <span id="demo-t-initial">0</span></code></p>
+                        <p class="text-slate-300">2. Thread 1 executes <code class="mono bg-slate-800 px-1 rounded">counter++</code></p>
+                        <p class="text-slate-300">3. Thread 2 sees the new value <span class="text-emerald-400 font-semibold">after synchronisation</span>.</p>
                     </div>
-                    <div id="demo-thread-result" class="mt-3 p-2 rounded bg-emerald-800/30 text-emerald-300 text-sm hidden"><i class="fas fa-check-circle mr-1"></i> Change visible instantly in all threads!</div>
+                    <div id="demo-thread-result" class="mt-3 p-2 rounded bg-emerald-800/30 text-emerald-300 text-sm hidden"><i class="fas fa-check-circle mr-1"></i> Sequential illustration: all callbacks access the same stored value.</div>
                 </div>
                 <div class="bg-blue-900/20 rounded-xl p-4 border border-blue-500/30">
                     <h4 class="font-semibold text-blue-400 mb-3 flex items-center gap-2"><i class="fas fa-cubes"></i> Scenario 2: Processes</h4>
                     <div class="space-y-2 text-sm">
-                        <p class="text-slate-300">1. Global variable: <coof class="mono bg-slate-800 px-1 rounded">counter = 0</code></p>
+                        <p class="text-slate-300">1. Global variable: <code class="mono bg-slate-800 px-1 rounded">counter = 0</code></p>
                         <p class="text-slate-300">2. fork() → child modifies counter</p>
                         <p class="text-slate-300">3. Parent <span class="text-red-400 font-semibold">does NOT see</span> the change!</p>
                     </div>
-                    <div id="demo-process-result" class="mt-3 p-2 rounded bg-red-800/30 text-red-300 text-sm hidden"><i class="fas fa-times-circle mr-1"></i> Separate copies of the variable - complete isolation!</div>
+                    <div id="demo-process-result" class="mt-3 p-2 rounded bg-red-800/30 text-red-300 text-sm hidden"><i class="fas fa-times-circle mr-1"></i> Separate private copies of this variable; explicit shared mappings have different semantics.</div>
                 </div>
             </div>
         </section>
@@ -179,13 +256,13 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
-                        <tr><td class="py-3 px-4 text-slate-300">Coof Segment</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-amber-400 font-semibold">Shared</span></td></tr>
+                        <tr><td class="py-3 px-4 text-slate-300">Code Segment</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-amber-400 font-semibold">Shared</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Data Segment</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-amber-400 font-semibold">Shared</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Heap</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-amber-400 font-semibold">Shared</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Stack</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate (per thread)</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">File Descriptors</td><td class="py-3 px-4 text-center"><span class="text-purple-400">Separate</span></td><td class="py-3 px-4 text-center"><span class="text-amber-400 font-semibold">Shared</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">PID</td><td class="py-3 px-4 text-center"><span class="text-blue-300">Different</span></td><td class="py-3 px-4 text-center"><span class="text-emerald-300">Same</span></td></tr>
-                        <tr><td class="py-3 px-4 text-slate-300">Creation Time</td><td class="py-3 px-4 text-center"><span class="text-red-400">Slow (~ms)</span></td><td class="py-3 px-4 text-center"><span class="text-emerald-400">Fast (~μs)</span></td></tr>
+                        <tr><td class="py-3 px-4 text-slate-300">Creation Time</td><td class="py-3 px-4 text-center"><span class="text-red-400">Illustrative ms-scale input</span></td><td class="py-3 px-4 text-center"><span class="text-emerald-400">Illustrative μs-scale input</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Context Switch</td><td class="py-3 px-4 text-center"><span class="text-red-400">Slow</span></td><td class="py-3 px-4 text-center"><span class="text-emerald-400">Fast</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Communication</td><td class="py-3 px-4 text-center"><span class="text-amber-400">IPC required</span></td><td class="py-3 px-4 text-center"><span class="text-emerald-400">Direct memory</span></td></tr>
                         <tr><td class="py-3 px-4 text-slate-300">Crash Impact</td><td class="py-3 px-4 text-center"><span class="text-emerald-400">Isolated</span></td><td class="py-3 px-4 text-center"><span class="text-red-400">Entire process</span></td></tr>
@@ -206,6 +283,42 @@
     </main>
     <footer class="max-w-7xl mx-auto mt-8"><div class="glass-card rounded-xl p-4 text-center"><p class="text-slate-500 text-sm">By <span class="text-blue-400 font-semibold">Revolvix</span>, limited licence 2019-2030 | <span class="text-emerald-400">ASE-CSIE Bucharest</span></p></div></footer>
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         const state = { processes: [{ pid: 1, counter: 0 }], threads: [{ tid: 1 }], sharedCounter: 0, nextPid: 2, nextTid: 2, maxProcesses: 4, maxThreads: 6 };
         const processesContainer = document.getElementById('processes-container');
         const threadStacks = document.getElementById('thread-stacks');
@@ -214,7 +327,7 @@
 
         function showNotification(message, type = 'info') {
             const colors = { success: 'bg-emerald-600 border-emerald-400', error: 'bg-red-600 border-red-400', info: 'bg-blue-600 border-blue-400', warning: 'bg-amber-600 border-amber-400' };
-            const notification = document.createdeElement('div');
+            const notification = document.createElement('div');
             notification.className = `notification px-4 py-3 rounded-lg border-l-4 ${colors[type]} text-white text-sm shadow-lg`;
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>${message}`;
             notificationArea.appendChild(notification);
@@ -235,10 +348,10 @@
             const newPid = state.nextPid++;
             const parentCounter = state.processes[0].counter;
             state.processes.push({ pid: newPid, counter: parentCounter });
-            const processHTML = `<div class="process-box new" data-pid="${newPid}"><div class="flex items-center gap-2 mb-3"><span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">P${newPid}</span><span class="text-slate-300 font-medium">Process ${newPid} (PID: ${1000 + newPid})</span><span class="ml-auto text-xs text-emerald-400"><i class="fas fa-code-branch"></i> fork() from P1</span></div><div class="space-y-1"><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Coof Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div><div class="mt-2 flex items-center gap-2"><span class="text-xs text-slate-400">counter =</span><span class="variable-box mono text-sm px-2 py-0.5 rounded bg-slate-700 text-amber-400" data-var="p${newPid}-counter">${parentCounter}</span><span class="text-xs text-purple-400">(copied from P1)</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Heap</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Stack</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div></div><div class="mt-3 flex gap-2"><button class="btn-p-increment btn-interactive px-3 py-1 bg-amber-600/80 hover:bg-amber-500 rounded text-xs font-medium" data-pid="${newPid}"><i class="fas fa-plus mr-1"></i> counter++</button></div></div>`;
+            const processHTML = `<div class="process-box new" data-pid="${newPid}"><div class="flex items-center gap-2 mb-3"><span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">P${newPid}</span><span class="text-slate-300 font-medium">Process ${newPid} (PID: ${1000 + newPid})</span><span class="ml-auto text-xs text-emerald-400"><i class="fas fa-code-branch"></i> fork() from P1</span></div><div class="space-y-1"><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Code Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div><div class="mt-2 flex items-center gap-2"><span class="text-xs text-slate-400">counter =</span><span class="variable-box mono text-sm px-2 py-0.5 rounded bg-slate-700 text-amber-400" data-var="p${newPid}-counter">${parentCounter}</span><span class="text-xs text-purple-400">(copied from P1)</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Heap</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Stack</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">COPY</span></div></div></div><div class="mt-3 flex gap-2"><button class="btn-p-increment btn-interactive px-3 py-1 bg-amber-600/80 hover:bg-amber-500 rounded text-xs font-medium" data-pid="${newPid}"><i class="fas fa-plus mr-1"></i> counter++</button></div></div>`;
             processesContainer.insertAdjacentHTML('beforeend', processHTML);
             document.getElementById('demo-process-result').classList.remove('hidden');
-            showNotification(`Process ${newPid} createded! Completely NEW address space (CoW)`, 'success');
+            showNotification(`Process ${newPid} created! Separate virtual address space (CoW)`, 'success');
             updateStats();
         }
 
@@ -248,7 +361,7 @@
             state.threads.push({ tid: newTid });
             const threadHTML = `<div class="thread-stack new flex-1 min-w-[100px] bg-gradient-to-b from-purple-900/40 to-purple-800/20 rounded-lg p-3 border border-purple-500/50" data-tid="${newTid}"><div class="text-center"><span class="inline-block w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-sm leading-8 mb-1">T${newTid}</span><p class="mono text-xs text-purple-300">Stack T${newTid}</p><p class="text-xs text-slate-500">Regs, TID: ${newTid}</p><button class="btn-t-increment btn-interactive mt-2 px-2 py-1 bg-emerald-600/80 hover:bg-emerald-500 rounded text-xs" data-tid="${newTid}">counter++</button></div></div>`;
             threadStacks.insertAdjacentHTML('beforeend', threadHTML);
-            showNotification(`Thread ${newTid} createded! Shares: code, data, heap and files`, 'success');
+            showNotification(`Thread ${newTid} created! Shares: code, data, heap and files`, 'success');
             updateStats();
         }
 
@@ -271,13 +384,14 @@
             document.querySelectorAll('.thread-stack').forEach(stack => { highlightElement(stack); });
             document.getElementById('demo-thread-result').classList.remove('hidden');
             document.getElementById('demo-t-initial').textContent = state.sharedCounter;
-            showNotification(`T${tid}: counter=${state.sharedCounter} — ALL threads see the new value instantly!`, 'success');
+            showNotification(`T${tid}: counter=${state.sharedCounter} — shared storage updated in this sequential JavaScript illustration`, 'success');
             updateStats();
         }
 
         function resetSimulation() {
+            enosTimers.cancel();
             state.processes = [{ pid: 1, counter: 0 }]; state.threads = [{ tid: 1 }]; state.sharedCounter = 0; state.nextPid = 2; state.nextTid = 2;
-            processesContainer.innerHTML = `<div class="process-box" data-pid="1"><div class="flex items-center gap-2 mb-3"><span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">P1</span><span class="text-slate-300 font-medium">Process 1 (PID: 1001)</span><span class="ml-auto text-xs text-slate-500">Complete Address Space</span></div><div class="space-y-1"><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Coof Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div><div class="mt-2 flex items-center gap-2"><span class="text-xs text-slate-400">counter =</span><span class="variable-box mono text-sm px-2 py-0.5 rounded bg-slate-700 text-amber-400" data-var="p1-counter">0</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Heap <i class="fas fa-arrow-down text-xs ml-1"></i></span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Stack <i class="fas fa-arrow-up text-xs ml-1"></i></span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-lg p-2 border-l-4 border-slate-500"><div class="flex justify-between items-center"><span class="text-xs text-slate-400">File Descriptors, Signal Handlers</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div></div><div class="mt-3 flex gap-2"><button class="btn-p-increment btn-interactive px-3 py-1 bg-amber-600/80 hover:bg-amber-500 rounded text-xs font-medium" data-pid="1"><i class="fas fa-plus mr-1"></i> counter++</button></div></div>`;
+            processesContainer.innerHTML = `<div class="process-box" data-pid="1"><div class="flex items-center gap-2 mb-3"><span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">P1</span><span class="text-slate-300 font-medium">Process 1 (PID: 1001)</span><span class="ml-auto text-xs text-slate-500">Complete Address Space</span></div><div class="space-y-1"><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Code Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Data Segment</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div><div class="mt-2 flex items-center gap-2"><span class="text-xs text-slate-400">counter =</span><span class="variable-box mono text-sm px-2 py-0.5 rounded bg-slate-700 text-amber-400" data-var="p1-counter">0</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Heap <i class="fas fa-arrow-down text-xs ml-1"></i></span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-blue-900/50 to-blue-800/30 rounded-lg p-3 border-l-4 border-blue-500"><div class="flex justify-between items-center"><span class="mono text-sm text-blue-300">Stack <i class="fas fa-arrow-up text-xs ml-1"></i></span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div><div class="memory-segment bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-lg p-2 border-l-4 border-slate-500"><div class="flex justify-between items-center"><span class="text-xs text-slate-400">File Descriptors, Signal Handlers</span><span class="text-xs px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">PRIVATE</span></div></div></div><div class="mt-3 flex gap-2"><button class="btn-p-increment btn-interactive px-3 py-1 bg-amber-600/80 hover:bg-amber-500 rounded text-xs font-medium" data-pid="1"><i class="fas fa-plus mr-1"></i> counter++</button></div></div>`;
             threadStacks.innerHTML = `<div class="thread-stack flex-1 min-w-[100px] bg-gradient-to-b from-purple-900/40 to-purple-800/20 rounded-lg p-3 border border-purple-500/50" data-tid="1"><div class="text-center"><span class="inline-block w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-sm leading-8 mb-1">T1</span><p class="mono text-xs text-purple-300">Stack T1</p><p class="text-xs text-slate-500">Regs, TID: 1</p><button class="btn-t-increment btn-interactive mt-2 px-2 py-1 bg-emerald-600/80 hover:bg-emerald-500 rounded text-xs" data-tid="1">counter++</button></div></div>`;
             sharedCounterEl.textContent = '0';
             document.getElementById('demo-thread-result').classList.add('hidden');
@@ -295,6 +409,27 @@
             if (e.target.closest('.btn-t-increment')) { incrementSharedCounter(e.target.closest('.btn-t-increment').dataset.tid); }
         });
         updateStats();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

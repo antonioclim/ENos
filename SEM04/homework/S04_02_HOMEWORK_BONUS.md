@@ -7,6 +7,11 @@
 
 ---
 
+> **Assessment policy pending.** The 20% cap, cumulative exercise values, deadlines,
+> originality/AI consequences and extra merit below are retained historical
+> proposals. Other seminar documents give a 10% cap. No cap or sanction is adopted
+> here; consult [assessment status](ASSESSMENT_STATUS.md).
+
 ## Description
 
 This assignment is **optional** and offers bonus points for students who want to deepen their text processing skills. The exercises are more complex and require creative combination of multiple techniques.
@@ -21,9 +26,9 @@ This assignment is **optional** and offers bonus points for students who want to
 Create `bonus1_log_aggregator.sh` which processes logs in **different formats** and unifies them.
 
 The programme must:
-1. Automatically detect the format of each log file (Apache, Nginx, Syslog, JSON)
+1. Support the four exact formats illustrated below; offer `--format` to override detection. Reject ambiguous/mixed input with a line diagnostic instead of guessing silently
 2. Extract common information: timestamp, level, message, source IP (if present)
-3. Unify everything into a standard CSV format
+3. Emit UTF-8 RFC-style CSV with a header, quoted delimiters/quotes/newlines and explicit empty fields for unavailable values; never invent a missing syslog year or timezone
 4. Generate comparative statistics between sources
 
 ### Formats to Recognise
@@ -70,7 +75,7 @@ The programme must:
 1. Ignore whitespace differences (spaces, tabs, blank lines)
 2. Ignore casing differences in configured keywords
 3. Ignore comments (lines starting with `#`, `//`, `--`)
-4. Report only "real" content differences
+4. Report differences under a declared text-normalisation contract. This is not semantic equivalence of arbitrary programming languages: comment markers inside quoted strings and meaningful whitespace must be retained
 
 ### Usage
 ```bash
@@ -111,8 +116,8 @@ Significant differences found: 3
 Create `bonus3_html_report.sh` which transforms CSV data into interactive HTML reports.
 
 The programme must:
-1. Parse any CSV file (automatic detection of separator and header)
-2. Generate an HTML page with a sortable table
+1. Parse UTF-8 CSV using a documented single-character delimiter, standard double-quote escaping and quoted multiline fields. Provide `--delimiter` and `--header yes|no`; automatic guesses must report ambiguity and require an override
+2. Generate an HTML page with a sortable table; escape every data value for its HTML context and use text nodes for interactive updates
 3. Add simple charts (ASCII bars or inline SVG)
 4. Include CSS for professional styling
 
@@ -120,6 +125,15 @@ The programme must:
 ```bash
 ./bonus3_html_report.sh employees.csv -o report.html --chart salary --group-by department
 ```
+
+### Format and Missing-data Contract
+
+No parser can infer an arbitrary delimiter/header with certainty. Test commas in
+quoted fields, doubled quotes, embedded newlines, empty files, header-only data,
+missing/nonnumeric chart values and `<script>`/`&`/quote characters as data. A
+missing average is undefined, not zero; disclose any excluded-record count. A
+helper CSV/HTML serializer may be used where the agreed assignment tool contract
+permits it; this permission is not a new grading weight or accepted shortcut.
 
 ### HTML Output must contain
 - Table with all data, sortable by clicking on header
@@ -147,7 +161,8 @@ Reimplement grep from scratch using **only bash built-ins and sed**.
 
 ### Usage
 ```bash
-./bonus4_mygrep.sh -in "error|warning" server.log
+./bonus4_mygrep.sh -in 'error\|warning' server.log
+# GNU sed BRE extension; for POSIX BRE use separate patterns or define an ERE option explicitly.
 ```
 
 ### Restrictions
@@ -190,14 +205,14 @@ Checks to implement:
    password = secret123
    → Recommendation: Use environment variables
 
-⚠️ WARNING [line 22]: Non-standard port
+❌ ERROR [line 22]: Port outside the declared numeric range
    port = 99999
    → Must be between 1-65535
 
 ❌ ERROR [line 30]: Invalid IP
    host = 999.999.999.999
 
-📊 SUMMARY: 0 critical errors, 2 warnings, 1 error
+📊 SUMMARY: 0 critical errors, 1 warning, 2 errors
 ```
 
 ### Evaluation Criteria

@@ -1,4 +1,4 @@
-/* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
+<!-- Historical source annotation, preserved as provenance: /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */ -->
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -6,11 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kernel Architectures Comparator - Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
         
         body {
             font-family: 'Space Grotesk', sans-serif;
@@ -111,7 +111,84 @@
             0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
             100% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
@@ -120,8 +197,8 @@
             <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-red-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
                 <i class="fas fa-layer-group mr-3"></i>Kernel Architectures Comparator
             </h1>
-            <p class="text-gray-400 text-lg">Monolithic vs Smallrokernel vs Hybrid</p>
-        </header>
+            <p class="text-gray-400 text-lg">Monolithic vs Microkernel vs Hybrid</p>
+        </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Quantitative evidence boundary</h2><p>The radar scores and animation delays are fixed source constants with no established empirical measurement method. They are not universal security/performance rankings. A defensible comparison must identify service boundaries, request/reply transitions, workload, configuration and measured or explicitly hypothetical model. Whether to replace these values with a sourced dataset remains an author decision.</p></section>
 
         <!-- Tab Navigation -->
         <div class="flex flex-wrap justify-center gap-2 mb-8">
@@ -131,7 +208,7 @@
             </button>
             <button onclick="showTab('microkernel')" id="tab-microkernel" class="tab-btn px-6 py-3 rounded-xl border border-gray-700 transition-all duration-300 flex items-center gap-2">
                 <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span class="font-semibold">Smallrokernel</span>
+                <span class="font-semibold">Microkernel</span>
             </button>
             <button onclick="showTab('hybrid')" id="tab-hybrid" class="tab-btn px-6 py-3 rounded-xl border border-gray-700 transition-all duration-300 flex items-center gap-2">
                 <div class="w-3 h-3 rounded-full bg-purple-500"></div>
@@ -233,7 +310,7 @@
                                     </div>
                                     
                                     <div class="text-center text-xs text-white/60 mt-3">
-                                        ALL code runs in kernel mode
+                                        Core OS services shown here run in kernel mode
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +334,7 @@
                                     <i class="fas fa-tachometer-alt text-blue-400 mt-1"></i>
                                     <div>
                                         <span class="font-semibold">Efficient system calls</span>
-                                        <p class="text-sm text-gray-400">A single User→Kernel transition for any operation</p>
+                                        <p class="text-sm text-gray-400">This schematic syscall has one entry and one return; blocking and interrupts can add transitions</p>
                                     </div>
                                 </li>
                             </ul>
@@ -278,7 +355,7 @@
                                     <i class="fas fa-project-diagram text-orange-400 mt-1"></i>
                                     <div>
                                         <span class="font-semibold">High complexity</span>
-                                        <p class="text-sm text-gray-400">The kernel becomes huge and hard to maintain (Linux: ~30M lines cod)</p>
+                                        <p class="text-sm text-gray-400">The kernel becomes huge and hard to maintain (Linux: ~30 million lines of code (illustrative, unverified count))</p>
                                     </div>
                                 </li>
                             </ul>
@@ -299,13 +376,13 @@
                 </div>
             </div>
 
-            <!-- Smallrokernel Panel -->
+            <!-- Microkernel Panel -->
             <div id="panel-microkernel" class="panel hidden fade-in">
                 <div class="grid lg:grid-cols-2 gap-6">
                     <!-- Diagram -->
                     <div class="glass-card rounded-2xl p-6">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-blue-400">
-                            <i class="fas fa-cubes mr-2"></i>Architecture Smallrokernel
+                            <i class="fas fa-cubes mr-2"></i>Microkernel Architecture
                             <span class="ml-auto text-sm text-gray-400">MINIX, QNX, seL4</span>
                         </h3>
                         
@@ -400,7 +477,7 @@
                                     <i class="fas fa-shield-alt text-green-400 mt-1"></i>
                                     <div>
                                         <span class="font-semibold">Very stable</span>
-                                        <p class="text-sm text-gray-400">Isolated services - a crash in FS server does not affect the kernel</p>
+                                        <p class="text-sm text-gray-400">An isolated filesystem-server failure need not corrupt the kernel, but dependent services can still be disrupted</p>
                                     </div>
                                 </li>
                                 <li class="flex items-start gap-3">
@@ -542,7 +619,7 @@
                                     <i class="fas fa-balance-scale text-purple-400 mt-1"></i>
                                     <div>
                                         <span class="font-semibold">Performance/stability balance</span>
-                                        <p class="text-sm text-gray-400">Combines monolithic speed with microkernel modularity</p>
+                                        <p class="text-sm text-gray-400">Combines architectural choices; actual costs and isolation depend on service placement</p>
                                     </div>
                                 </li>
                                 <li class="flex items-start gap-3">
@@ -569,7 +646,7 @@
                                     <i class="fas fa-bug text-red-400 mt-1"></i>
                                     <div>
                                         <span class="font-semibold">Bugs in kernel are still dangerous</span>
-                                        <p class="text-sm text-gray-400">Componentele din kernel pot cauza crash</p>
+                                        <p class="text-sm text-gray-400">A faulty kernel component can crash the system</p>
                                     </div>
                                 </li>
                             </ul>
@@ -602,7 +679,7 @@
                                     <tr class="border-b border-gray-700">
                                         <th class="text-left py-3 px-2">Aspect</th>
                                         <th class="text-center py-3 px-2 text-red-400">Monolithic</th>
-                                        <th class="text-center py-3 px-2 text-blue-400">Smallrokernel</th>
+                                        <th class="text-center py-3 px-2 text-blue-400">Microkernel</th>
                                         <th class="text-center py-3 px-2 text-purple-400">Hybrid</th>
                                     </tr>
                                 </thead>
@@ -638,7 +715,7 @@
                                         <td class="text-center py-3 px-2"><span class="star-rating">★★☆</span></td>
                                     </tr>
                                     <tr>
-                                        <td class="py-3 px-2 font-medium">Size Kernel</td>
+                                        <td class="py-3 px-2 font-medium">Kernel Size</td>
                                         <td class="text-center py-3 px-2 text-red-300">Large</td>
                                         <td class="text-center py-3 px-2 text-green-300">Small</td>
                                         <td class="text-center py-3 px-2 text-yellow-300">Medium</td>
@@ -690,9 +767,9 @@
                             </div>
                         </div>
 
-                        <!-- Smallrokernel Path -->
+                        <!-- Microkernel Path -->
                         <div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4">
-                            <h4 class="text-blue-400 font-bold mb-4"><i class="fas fa-cubes mr-2"></i>Smallrokernel</h4>
+                            <h4 class="text-blue-400 font-bold mb-4"><i class="fas fa-cubes mr-2"></i>Microkernel</h4>
                             <div id="micro-steps" class="space-y-2">
                                 <div class="micro-step flex items-center gap-3 p-2 rounded-lg bg-gray-800/30">
                                     <span class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
@@ -701,7 +778,7 @@
                                 <div class="text-center text-gray-500"><i class="fas fa-arrow-down"></i></div>
                                 <div class="micro-step flex items-center gap-3 p-2 rounded-lg bg-gray-800/30">
                                     <span class="w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-xs">2</span>
-                                    <span class="text-sm">Smallrokernel → IPC → FS Server</span>
+                                    <span class="text-sm">Microkernel → IPC → FS Server</span>
                                 </div>
                                 <div class="text-center text-gray-500"><i class="fas fa-arrow-down"></i></div>
                                 <div class="micro-step flex items-center gap-3 p-2 rounded-lg bg-gray-800/30">
@@ -716,7 +793,7 @@
                                 <div class="text-center text-gray-500"><i class="fas fa-arrow-down"></i></div>
                                 <div class="micro-step flex items-center gap-3 p-2 rounded-lg bg-gray-800/30">
                                     <span class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">✓</span>
-                                    <span class="text-sm text-yellow-400 font-semibold">Done! (8+ transitions)</span>
+                                    <span class="text-sm text-yellow-400 font-semibold">Done! (illustrative multi-service path)</span>
                                 </div>
                             </div>
                         </div>
@@ -732,6 +809,51 @@
     </div>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // Tab switching
         function showTab(tabId) {
             // Hide all panels
@@ -777,7 +899,7 @@
                             pointBackgroundColor: 'rgba(220, 38, 38, 1)'
                         },
                         {
-                            label: 'Smallrokernel',
+                            label: 'Microkernel',
                             data: [50, 95, 90, 90, 70],
                             backgroundColor: 'rgba(37, 99, 235, 0.2)',
                             borderColor: 'rgba(37, 99, 235, 1)',
@@ -862,6 +984,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             showTab('monolithic');
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

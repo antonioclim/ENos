@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCP vs UDP Comparison | Lecture 15 - Networking in SO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>TCP vs UDP Comparison | Lecture 15 - OS Networking</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-dark: #0b0f19;
@@ -220,7 +220,84 @@
             background: #4b5563;
             border-radius: 2px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100 overflow-x-hidden">
     <!-- Header -->
@@ -233,7 +310,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold">TCP vs UDP Comparison</h1>
-                        <p class="text-sm text-gray-400">Lecture 15 • Protocoale de Transport</p>
+                        <p class="text-sm text-gray-400">Lecture 15 • Transport Protocols</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -246,7 +323,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Transport guarantees and workload provenance</h2><p>TCP offers an ordered reliable byte stream, with possible connection failure; it does not guarantee that every packet reaches its destination. UDP has an 8-byte header and applications can add ordering/reliability. QUIC runs over UDP and HTTP/3 uses QUIC, so reliable file/content delivery is not inherently TCP-only. Named-platform examples on this page are illustrative and are not verified current deployment claims. The charts evaluate fixed constants and animation settings, not network benchmarks. <a href="https://www.rfc-editor.org/rfc/rfc9293.html">TCP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9000.html">QUIC</a>, <a href="https://www.rfc-editor.org/rfc/rfc9114.html">HTTP/3</a>.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Controls Panel -->
@@ -387,7 +464,7 @@
                     </div>
                     <div class="metric-card">
                         <p class="text-2xl font-bold text-orange-400" id="tcpRetransmit">0</p>
-                        <p class="text-xs text-gray-400">Retransmittedsions</p>
+                        <p class="text-xs text-gray-400">Retransmissions</p>
                     </div>
                     <div class="metric-card">
                         <p class="text-2xl font-bold text-green-400" id="tcpReceived">0</p>
@@ -401,12 +478,12 @@
                 
                 <!-- Characteristics -->
                 <div class="mt-4 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                    <p class="text-xs font-semibold text-blue-400 mb-2">Caracteristici TCP:</p>
+                    <p class="text-xs font-semibold text-blue-400 mb-2">TCP Characteristics:</p>
                     <ul class="text-xs text-gray-300 space-y-1">
-                        <li><i class="fas fa-check text-green-400 mr-2"></i>Guarantees delivery of all packets</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Ordered reliable bytes, or a reported connection failure</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>Maintains packet order</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>Flow control & congestion control</li>
-                        <li><i class="fas fa-times text-red-400 mr-2"></i>Overhead mare (ACKs, retransmisii)</li>
+                        <li><i class="fas fa-times text-red-400 mr-2"></i>ACK and retransmission overhead depends on the path and workload</li>
                     </ul>
                 </div>
             </div>
@@ -420,7 +497,7 @@
                         </div>
                         <div>
                             <h2 class="font-bold text-lg text-green-400">UDP</h2>
-                            <p class="text-xs text-gray-400">User Yestagram Protocol</p>
+                            <p class="text-xs text-gray-400">User Datagram Protocol</p>
                         </div>
                     </div>
                     <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-semibold rounded-full">FAST</span>
@@ -497,9 +574,9 @@
                 
                 <!-- Characteristics -->
                 <div class="mt-4 p-3 bg-green-500/10 rounded-xl border border-green-500/20">
-                    <p class="text-xs font-semibold text-green-400 mb-2">Caracteristici UDP:</p>
+                    <p class="text-xs font-semibold text-green-400 mb-2">UDP Characteristics:</p>
                     <ul class="text-xs text-gray-300 space-y-1">
-                        <li><i class="fas fa-check text-green-400 mr-2"></i>Foarte rapid (no overhead)</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>8-byte UDP header; application and lower-layer overhead remain</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>Low latency</li>
                         <li><i class="fas fa-times text-red-400 mr-2"></i>Does not guarantee delivery</li>
                         <li><i class="fas fa-times text-red-400 mr-2"></i>Does not maintain order</li>
@@ -537,7 +614,7 @@
         <div class="glass-panel rounded-2xl p-5 mb-6">
             <h3 class="font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-table text-amber-400"></i>
-                Tabel Comparativ Detaliat
+                Detailed Comparison Table
             </h3>
             <div class="overflow-x-auto">
                 <table class="comparison-table w-full text-sm">
@@ -551,23 +628,23 @@
                     <tbody class="text-gray-300">
                         <tr>
                             <td class="p-3 font-medium">Connection</td>
-                            <td class="p-3">Orientat conexiune (3-way handshake)</td>
+                            <td class="p-3">Connection-oriented (three-way handshake)</td>
                             <td class="p-3">Connectionless</td>
                         </tr>
                         <tr>
                             <td class="p-3 font-medium">Reliability</td>
-                            <td class="p-3"><span class="text-green-400">Guaranteed</span> - ACK + retransmission</td>
+                            <td class="p-3"><span class="text-green-400">Reliable byte stream</span> - ACK + retransmission; failure remains possible</td>
                             <td class="p-3"><span class="text-red-400">Best-effort</span> - no guarantees</td>
                         </tr>
                         <tr>
-                            <td class="p-3 font-medium">Ordine pachete</td>
+                            <td class="p-3 font-medium">Delivery Ordering</td>
                             <td class="p-3"><span class="text-green-400">Maintained</span> (sequence numbers)</td>
                             <td class="p-3"><span class="text-red-400">Not guaranteed</span></td>
                         </tr>
                         <tr>
                             <td class="p-3 font-medium">Speed</td>
                             <td class="p-3"><span class="text-amber-400">Slower</span> (overhead ACKs)</td>
-                            <td class="p-3"><span class="text-green-400">Foarte rapid</span></td>
+                            <td class="p-3"><span class="text-green-400">Application/path-dependent</span></td>
                         </tr>
                         <tr>
                             <td class="p-3 font-medium">Header Size</td>
@@ -598,7 +675,7 @@
         <div class="glass-panel rounded-2xl p-5">
             <h3 class="font-semibold mb-4 flex items-center gap-2">
                 <i class="fas fa-lightbulb text-yellow-400"></i>
-                Scenarii Interactive - De ce conteaza?
+                Interactive Scenarios - Why Does It Matter?
             </h3>
             <div class="grid grid-cols-3 gap-4">
                 <!-- Video Streaming -->
@@ -615,11 +692,11 @@
                     <div class="space-y-2 text-xs">
                         <div class="flex items-start gap-2">
                             <span class="text-green-400 font-semibold">UDP:</span>
-                            <span class="text-gray-300">"Frame pierdut? Continue! Next frame!"</span>
+                            <span class="text-gray-300">"Lost media update? The application may continue with the next one."</span>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="text-blue-400 font-semibold">TCP:</span>
-                            <span class="text-gray-300">"Frame pierdut? Retransmit! Buffer stall..."</span>
+                            <span class="text-gray-300">"Missing stream bytes? Retransmission can delay later delivery."</span>
                         </div>
                     </div>
                     <div class="mt-3 px-3 py-2 bg-green-500/20 rounded-lg text-center">
@@ -641,15 +718,15 @@
                     <div class="space-y-2 text-xs">
                         <div class="flex items-start gap-2">
                             <span class="text-blue-400 font-semibold">TCP:</span>
-                            <span class="text-gray-300">"Fiecare byte conteaza! Retransmit until success"</span>
+                            <span class="text-gray-300">"Each byte matters: retransmit until acknowledged or the connection fails"</span>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="text-green-400 font-semibold">UDP:</span>
-                            <span class="text-gray-300">"file corupt if pierzi pachete"</span>
+                            <span class="text-gray-300">"A transfer must detect and recover missing/corrupt application data or fail."</span>
                         </div>
                     </div>
                     <div class="mt-3 px-3 py-2 bg-blue-500/20 rounded-lg text-center">
-                        <span class="text-blue-400 text-xs font-semibold">✓ TCP Required</span>
+                        <span class="text-blue-400 text-xs font-semibold">✓ Reliable application delivery required</span>
                     </div>
                 </div>
                 
@@ -667,11 +744,11 @@
                     <div class="space-y-2 text-xs">
                         <div class="flex items-start gap-2">
                             <span class="text-green-400 font-semibold">UDP:</span>
-                            <span class="text-gray-300">"Pozitia de acum 100ms nu mai conteaza"</span>
+                            <span class="text-gray-300">"A position update from 100 ms ago may no longer be useful"</span>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="text-blue-400 font-semibold">TCP:</span>
-                            <span class="text-gray-300">"Lag spikes la retransmission"</span>
+                            <span class="text-gray-300">"Retransmission can increase delay."</span>
                         </div>
                     </div>
                     <div class="mt-3 px-3 py-2 bg-green-500/20 rounded-lg text-center">
@@ -693,6 +770,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             lossRate: 10,
@@ -953,8 +1075,8 @@
             const totalPackets = state.packetCount;
             let tcpCompleted = 0;
             let udpCompleted = 0;
-            let tcpStartTime = Yeste.now();
-            let udpStartTime = Yeste.now();
+            let tcpStartTime = Date.now();
+            let udpStartTime = Date.now();
             let tcpEndTime = null;
             let udpEndTime = null;
             
@@ -967,7 +1089,7 @@
                 const sendTcpPacket = () => {
                     if (tcpCompleted >= totalPackets) {
                         if (tcpInFlight === 0) {
-                            tcpEndTime = Yeste.now();
+                            tcpEndTime = Date.now();
                             resolve();
                         }
                         return;
@@ -1012,7 +1134,7 @@
                 const sendUdpPacket = () => {
                     if (udpSent >= totalPackets) {
                         setTimeout(() => {
-                            udpEndTime = Yeste.now();
+                            udpEndTime = Date.now();
                             resolve();
                         }, 500);
                         return;
@@ -1112,7 +1234,7 @@
         }
 
         function reset() {
-            if (state.isRunning) return;
+            enosTimers.cancel();state.isRunning=false;elements.btnSendPackets.disabled=false;elements.btnSendPackets.textContent='Send '+state.packetCount+' Packets';
             resetMetrics();
             timeChart.data.datasets[0].data = [0, 0];
             timeChart.update();
@@ -1120,81 +1242,9 @@
 
         // Scenario Cards
         const scenarioDetails = {
-            streaming: {
-                title: 'Video Streaming (Netflix, YouTube, Twitch)',
-                content: `
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-                            <h5 class="text-green-400 font-semibold mb-2">✓ De ce UDP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Un frame video pierdut e irelevant after 33ms</li>
-                                <li>• Retransmittedia ar cauza buffering and stutter</li>
-                                <li>• Mai bine un mic artefact than freeze</li>
-                                <li>• Latency minima for live streaming</li>
-                            </ul>
-                        </div>
-                        <div class="p-3 bg-red-500/10 rounded-lg border border-red-500/30">
-                            <h5 class="text-red-400 font-semibold mb-2">✗ De ce nu TCP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Retransmittedia cauzeaza buffer underrun</li>
-                                <li>• Congestion control reduce bitrate-ul</li>
-                                <li>• Head-of-line blocking</li>
-                                <li>• Utilizatorul prefera continuitate vs perfectiune</li>
-                            </ul>
-                        </div>
-                    </div>
-                `
-            },
-            file: {
-                title: 'File Transfer (FTP, HTTP Downloads, Email)',
-                content: `
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
-                            <h5 class="text-blue-400 font-semibold mb-2">✓ De ce TCP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Fiecare byte din file e critic</li>
-                                <li>• Un byte lipsa = file corupt</li>
-                                <li>• Ordinea bytes conteaza (structura fisierului)</li>
-                                <li>• Preferam download mai lent vs file stricat</li>
-                            </ul>
-                        </div>
-                        <div class="p-3 bg-red-500/10 rounded-lg border border-red-500/30">
-                            <h5 class="text-red-400 font-semibold mb-2">✗ De ce nu UDP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Pachete pierdute = bytes lipsa</li>
-                                <li>• Ar trebui to reimplementam reliability</li>
-                                <li>• Checksum-ul UDP nu e suficient</li>
-                                <li>• No avem garantia ordinii</li>
-                            </ul>
-                        </div>
-                    </div>
-                `
-            },
-            gaming: {
-                title: 'Online Gaming (FPS, MOBA, Racing)',
-                content: `
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-                            <h5 class="text-green-400 font-semibold mb-2">✓ De ce UDP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Pozitia jucatorului de acum 100ms e irelevanta</li>
-                                <li>• Latency minima = answer instant</li>
-                                <li>• Game state se actualizeaza 60+ ori/sec</li>
-                                <li>• Client-side prediction compenseaza pierderi</li>
-                            </ul>
-                        </div>
-                        <div class="p-3 bg-red-500/10 rounded-lg border border-red-500/30">
-                            <h5 class="text-red-400 font-semibold mb-2">✗ De ce nu TCP?</h5>
-                            <ul class="text-xs text-gray-300 space-y-1">
-                                <li>• Retransmittedia = lag spike vizibil</li>
-                                <li>• Head-of-line blocking opreste toate update-urile</li>
-                                <li>• Nagle's algorithm add latency</li>
-                                <li>• Congestion control nepotrivit for real-time</li>
-                            </ul>
-                        </div>
-                    </div>
-                `
-            }
+ streaming:{title:'Live datagrams and buffered video',content:`<div class="grid grid-cols-2 gap-4"><div><h5>Deadline-sensitive media</h5><p>Late data may be less useful than the next frame. Applications can choose UDP with loss concealment, congestion control and selective reliability. The tolerance depends on the codec and stream.</p></div><div><h5>Buffered and on-demand media</h5><p>Reliable HTTP delivery can use TCP or QUIC over UDP. Retransmission and buffering are intentional design choices. This demonstration makes no current platform-specific deployment claim.</p></div></div>`},
+ file:{title:'Reliable file and content transfer',content:`<div class="grid grid-cols-2 gap-4"><div><h5>Completeness and integrity</h5><p>Every application byte must be delivered in the required order and validated, or the operation must fail. TCP supplies an ordered reliable stream; applications still handle interruption and integrity requirements.</p></div><div><h5>Transport alternatives</h5><p>UDP alone does not provide that contract. QUIC adds reliable streams over UDP and HTTP/3 uses them. Reliable transfer therefore does not imply exclusive use of TCP.</p></div></div>`},
+ gaming:{title:'Interactive state and reliable game messages',content:`<div class="grid grid-cols-2 gap-4"><div><h5>Frequently refreshed state</h5><p>Some position updates can supersede old ones. UDP-based designs can use prediction and application-controlled delivery, subject to congestion control and loss handling.</p></div><div><h5>Messages that must arrive</h5><p>Login, purchases and ordered events require appropriate reliability. TCP or reliable channels over UDP may be used. Latency depends on buffering and protocol settings; no transport guarantees instant delivery.</p></div></div>`}
         };
 
         document.querySelectorAll('.scenario-card').forEach(card => {
@@ -1236,6 +1286,27 @@
 
         // Initialize
         initCharts();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

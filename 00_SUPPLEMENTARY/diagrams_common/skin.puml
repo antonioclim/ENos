@@ -1,12 +1,12 @@
 ' ============================================================================
 ' OS Kit - Common Configuration for PlantUML Diagrams
 ' ============================================================================
-' Include this file in your diagrams with: !include ../common/skin.puml
+' Include this file in your diagrams with: !include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 ' ============================================================================
 
 ' Global settings for A4 and high resolution
-skinparam dpi 300
-skinparam defaultFontName "Segoe UI, Helvetica, Arial, sans-serif"
+' DPI is selected by generate_diagrams.py (default 140).
+skinparam defaultFontName "DejaVu Sans"
 skinparam defaultFontSize 12
 skinparam shadowing false
 

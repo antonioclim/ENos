@@ -1,7 +1,9 @@
 # Oral Verification Questions — Seminar 04
 
-> **Document for instructors only** — Do not distribute to students  
-> **Purpose:** Verify that students actually wrote and understand their code  
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
+> **Audience:** Instructor facilitation. This file is committed publicly; the label provides no confidentiality. A private release strategy remains an author decision.  
+> **Purpose:** Gather evidence of understanding. An oral response alone does not authenticate authorship or prove copying.  
 > **Duration:** 3–5 minutes per student  
 > **When:** During lab sessions or office hours after submission
 
@@ -10,7 +12,7 @@
 ## Procedure
 
 1. Student opens their submission on their own laptop
-2. Instructor selects 2–3 questions randomly (use dice, random.org or just pick)
+2. Instructor selects 2–3 questions using a documented local selection method, then records which were used
 3. Student must answer WITHOUT looking at external resources
 4. Partial credit for hints; zero if they clearly do not understand their own code
 
@@ -19,7 +21,11 @@
 
 ---
 
-## Scoring Guide
+## Retained Scoring Proposal — Not Applied
+
+The multipliers and escalation labels below require the author/institutional
+policy. Record observations separately from any final score or misconduct finding.
+The retained experience note is anecdotal, not a validated authorship classifier.
 
 | Response Quality | Score Adjustment |
 |------------------|------------------|
@@ -43,11 +49,11 @@
 #### A2. sort before uniq
 - "Why is `sort` before `uniq` in your pipeline?"
 - Expected: "uniq only removes adjacent duplicates, so data must be sorted first"
-- If wrong: instant red flag — this is fundamental
+- If incomplete: ask for a small counterexample and record the specific concept needing follow-up
 
 #### A3. Field separator
 - "What does `-F','` do in your awk?"
-- Expected: "Sets the field separator to comma for CSV parsing"
+- Expected: "Sets the separator for the simple unquoted CSV fixture; quoted CSV needs a parser"
 - Follow-up: "What would `$3` be without it?"
 
 #### A4. Global flag
@@ -87,7 +93,7 @@
 
 ---
 
-### Category C: Edge Cases (for grade > 8)
+### Category C: Edge Cases (historical grade >8 gate; pending policy)
 
 #### C1. Empty input
 - "What does your script output for an empty file?"
@@ -112,16 +118,16 @@
 
 ---
 
-### Category D: Live Modification (gold standard)
+### Category D: Live Modification
 
 These require the student to modify code on the spot:
 
 #### D1. Add a feature
 - "Add a percentage column to your output"
-- Watch: How they think, where they look and typing speed
+- Observe the explanation, changed behaviour and test evidence; typing speed is not an authorship measure
 
 #### D2. Fix a bug
-*Introduce a subtle bug in their code before asking:*
+*Work on a disposable copy, retaining the original submission unchanged:*
 - "I changed one character and now it does not work. Find and fix it."
 - Examples: 
   - `$3` → `$2`
@@ -134,7 +140,11 @@ These require the student to modify code on the spot:
 
 ---
 
-## Red Flags (investigate further)
+## Prompts for Technical Follow-up, Not Misconduct Findings
+
+The following historical observations are not proof of copying or AI use. Anxiety,
+language, disability, time pressure and prior preparation can affect performance.
+No automatic penalty or investigation is triggered by these cues alone.
 
 - Cannot navigate their own code quickly
 - Uses variable names they cannot explain ("what is `x` here?")
@@ -153,7 +163,7 @@ These require the student to modify code on the spot:
 Then for each line after the header — that is the NR > 1 part — I add the salary 
 which is column 4 to a running total. At the END I print the average."
 
-**Student (suspicious):** "It... calculates the salary. The awk thing processes 
+**Student (needs further explanation):** "It... calculates the salary. The awk thing processes 
 the file and then prints the result."
 
 **Instructor:** "Why column 4 specifically?"
@@ -161,9 +171,18 @@ the file and then prints the result."
 **Student (good):** "Because in the CSV, the columns are ID, Name, Department and Salary,
 so Salary is the 4th field."
 
-**Student (suspicious):** "That is... where the number is?"
+**Student (needs further explanation):** "That is... where the number is?"
 
 ---
+
+## Equivalent Technical Answers
+
+A correct AWK aggregation may replace grep/sort/uniq when the objective is the
+result. If a question specifically assesses one named tool or construct, state
+that restriction before the task and assess that objective separately. A longer
+pipeline is not automatically slower, and equivalent commands must not lose
+credit solely for differing from the reference spelling. Timing claims need a
+repeatable benchmark with the same input, environment and output contract.
 
 ## Documentation
 
@@ -173,7 +192,7 @@ After verification, note in your grading spreadsheet:
 MATRICOL | Q1 | Q2 | Q3 | VERDICT | NOTES
 123456   | A2 | B3 | -  | PASS    | solid understanding
 234567   | A1 | B1 | D1 | PASS-   | needed hints for B1
-345678   | A3 | B2 | -  | INVEST  | could not explain own regex
+345678   | A3 | B2 | -  | REVIEW  | regex explanation incomplete; no authorship verdict
 ```
 
 ---

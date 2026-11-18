@@ -76,12 +76,12 @@ run_test() {
     
     if eval "$test_cmd" >/dev/null 2>&1; then
         echo -e "${GREEN}[PASS]${NC}"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         return 0
     else
         echo -e "${RED}[FAIL]${NC}"
-        ((TESTS_FAILED++))
-        return 1
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 0  # Aggregate failures; main returns the final failure status.
     fi
 }
 
@@ -91,7 +91,7 @@ skip_test() {
     
     printf "  %-45s " "$test_name"
     echo -e "${YELLOW}[SKIP]${NC} - $reason"
-    ((TESTS_SKIPPED++))
+    TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ test_bash_syntax() {
     
     local bash_files=(
         "scripts/bash/S03_01_setup_seminar.sh"
-        "scripts/bash/S03_02_quiz_interactiv.sh"
+        "scripts/bash/S03_02_interactive_quiz.sh"
         "scripts/bash/S03_03_validator.sh"
         "scripts/demo/S03_01_hook_demo.sh"
         "scripts/demo/S03_02_demo_find_xargs.sh"
@@ -211,11 +211,11 @@ test_naming_consistency() {
     print_section "Naming Consistency"
     
     # Verify absence of incorrect references to "Seminar 3"
-    run_test "No 'Seminar 3' references in docs/" \
-        "[[ \$(grep -rE 'Seminar 3|sem56|SEM05-06' '$PROJECT_ROOT/docs/' 2>/dev/null | wc -l) -eq 0 ]]"
+    run_test "No obsolete seminar references in docs/" \
+        "[[ \$(grep -rE 'Seminar 5-6|sem56|SEM05-06' '$PROJECT_ROOT/docs/' 2>/dev/null | wc -l) -eq 0 ]]"
     
-    run_test "No 'Seminar 3' references in README" \
-        "[[ \$(grep -E 'Seminar 3|sem56|SEM05-06' '$PROJECT_ROOT/README.md' 2>/dev/null | wc -l) -eq 0 ]]"
+    run_test "No obsolete seminar references in README" \
+        "[[ \$(grep -E 'Seminar 5-6|sem56|SEM05-06' '$PROJECT_ROOT/README.md' 2>/dev/null | wc -l) -eq 0 ]]"
     
     # Verify absence of contact emails
     run_test "No contact emails (use GitHub Issues)" \
@@ -263,13 +263,13 @@ test_ai_patterns() {
     local ai_pattern="delve|leverage|comprehensive|seamless|cutting-edge|foster|cultivate|harness|pivotal|paramount"
     
     local ai_count
-    ai_count=$(grep -riE "$ai_pattern" "$PROJECT_ROOT/docs/" 2>/dev/null | wc -l || echo "0")
+    ai_count=$(grep -riE "$ai_pattern" "$PROJECT_ROOT/docs/" 2>/dev/null | wc -l || true)
     
     run_test "Low AI word count in docs/ (<5)" "[[ $ai_count -lt 5 ]]"
     
     # Verify absence of "Happy scripting!"
     run_test "No 'Happy scripting!' endings" \
-        "[[ \$(grep -ri 'happy scripting\\|scripting fericit' '$PROJECT_ROOT/' 2>/dev/null | wc -l) -eq 0 ]]"
+        "[[ \$(grep -ri 'happy scripting\\|scripting fericit' '$PROJECT_ROOT/docs/' 2>/dev/null | wc -l) -eq 0 ]]"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

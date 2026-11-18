@@ -9,7 +9,8 @@ Usage:
     python3 S04_05_similarity_checker.py ./submissions/
     python3 S04_05_similarity_checker.py --threshold 0.80 ./submissions/
     
-Note from instructor (2024 autumn session): This caught three students who 
+Author-provided historical note (2024 autumn session; not independently evidenced
+in this repository and not a validation of this tool): This caught three students who 
 submitted nearly identical code with just variable name changes. The oral 
 verification confirmed they had shared solutions. Worth running before grading.
 """
@@ -21,6 +22,7 @@ from difflib import SequenceMatcher
 from itertools import combinations
 from typing import Dict, List, Tuple
 import argparse
+import math
 
 #===============================================================================
 # CONFIGURATION
@@ -34,21 +36,13 @@ MIN_FILE_SIZE = 50  # Ignore files smaller than this (bytes)
 #===============================================================================
 
 def normalise_script(content: str) -> str:
+    """Conservatively remove comment-only lines and trim outer whitespace.
+
+    Inline # characters, quoted data and parameter expansions are preserved.
+    This is lexical comparison, not a Bash parser or proof of shared authorship.
     """
-    Remove comments and normalise whitespace for fair comparison.
-    
-    This strips away superficial differences like comment styles and 
-    blank lines, focusing on the actual logic.
-    """
-    lines = []
-    for line in content.split('\n'):
-        # Remove inline comments (but keep the code before #)
-        if '#' in line:
-            line = line.split('#')[0]
-        line = line.strip()
-        if line:
-            lines.append(line)
-    return '\n'.join(lines)
+    return '\n'.join(line.strip() for line in content.splitlines()
+                     if line.strip() and not line.lstrip().startswith('#'))
 
 
 def similarity(a: str, b: str) -> float:
@@ -80,7 +74,7 @@ def get_scripts_from_submissions(submissions_dir: Path) -> Dict[str, str]:
         for sh_file in folder.glob('*.sh'):
             try:
                 content = sh_file.read_text(errors='ignore')
-                if len(content) >= MIN_FILE_SIZE:
+                if len(content.encode('utf-8')) >= MIN_FILE_SIZE:
                     key = f"{folder.name}/{sh_file.name}"
                     scripts[key] = normalise_script(content)
             except Exception as e:
@@ -108,10 +102,10 @@ def check_submissions(
     scripts = get_scripts_from_submissions(submissions_dir)
     
     if not scripts:
-        print("No shell scripts found in submissions directory.")
+        print("No eligible shell scripts found in submissions directory.", file=sys.stderr)
         return []
     
-    print(f"Found {len(scripts)} scripts to compare...")
+    print(f"Found {len(scripts)} scripts to compare...", file=sys.stderr)
     
     flagged = []
     comparisons = 0
@@ -131,7 +125,7 @@ def check_submissions(
         if sim >= threshold:
             flagged.append((name1, name2, sim))
     
-    print(f"Performed {comparisons} comparisons.")
+    print(f"Performed {comparisons} comparisons.", file=sys.stderr)
     return flagged
 
 
@@ -140,9 +134,9 @@ def print_report(flagged: List[Tuple[str, str, float]], threshold: float) -> Non
     
     if not flagged:
         print("\n" + "=" * 60)
-        print("✓ NO SUSPICIOUS SIMILARITIES DETECTED")
+        print("NO ELIGIBLE PAIRS MEET THE DISPLAY THRESHOLD")
         print("=" * 60)
-        print(f"\nAll submission pairs are below {threshold*100:.0f}% similarity.")
+        print(f"\nAll compared eligible pairs are below {threshold*100:.0f}% similarity.")
         return
     
     print("\n" + "=" * 60)
@@ -181,8 +175,8 @@ Examples:
     %(prog)s --threshold 0.80 ./submissions/
     %(prog)s --all-pairs ./submissions/
 
-The tool normalises code by removing comments and whitespace before
-comparing, so superficial changes won't fool it.
+The tool compares conservative lexical normalisations. Common templates and
+short answers can produce high similarity; the score does not establish misconduct.
 
 Typical workflow:
     1. Run this before grading to flag suspicious submissions
@@ -227,6 +221,8 @@ Typical workflow:
         print(f"Error: Not a directory: {args.submissions_dir}")
         sys.exit(1)
     
+    if not math.isfinite(args.threshold) or not 0 <= args.threshold <= 1:
+        parser.error('--threshold must be a finite number in [0, 1]')
     flagged = check_submissions(
         args.submissions_dir,
         threshold=args.threshold,
@@ -236,6 +232,8 @@ Typical workflow:
     if args.json:
         import json
         output = {
+            "assessment_status": "MANUAL_REVIEW_REQUIRED",
+            "penalty": None,
             "threshold": args.threshold,
             "flagged_count": len(flagged),
             "flagged": [

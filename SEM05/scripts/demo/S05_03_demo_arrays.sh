@@ -18,11 +18,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Cleanup function for trap
-cleanup() {
-    rm -f /tmp/demo_array_*.tmp 2>/dev/null || true
-}
-trap cleanup EXIT
+# This demonstration creates no temporary files; no shared-path cleanup is needed.
 
 # ============================================================
 # CONSTANTS AND COLOURS
@@ -75,7 +71,7 @@ warning() {
 
 pause() {
     echo ""
-    read -r -p "Press Enter to continue..." </dev/tty 2>/dev/null || true
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || true; fi
     echo ""
 }
 
@@ -151,6 +147,8 @@ demo_indexed_basic() {
 # ============================================================
 
 demo_indexed_iteration() {
+    # Explicitly restore space splitting for the deliberately unquoted example.
+    local IFS=$' \t\n'
     header "INDEXED ARRAYS - CORRECT ITERATION"
     
     # Array with elements containing spaces - challenge!
@@ -168,7 +166,7 @@ demo_indexed_iteration() {
     local count=0
     # shellcheck disable=SC2068
     for f in ${files[@]}; do
-        ((count++))
+        count=$((count + 1))
         bad "[$count] -> $f"
     done
     echo ""
@@ -183,7 +181,7 @@ demo_indexed_iteration() {
     code_block '# Correct output - preserves elements'
     count=0
     for f in "${files[@]}"; do
-        ((count++))
+        count=$((count + 1))
         good "[$count] -> $f"
     done
     echo ""
@@ -214,6 +212,7 @@ demo_indexed_iteration() {
 # ============================================================
 
 demo_associative() {
+    local IFS=$' \t\n'
     header "ASSOCIATIVE ARRAYS (Hash / Dictionary)"
     
     subheader "⚠️ CRITICAL MISCONCEPTION: declare -A is MANDATORY!"
@@ -228,7 +227,7 @@ demo_associative() {
     
     # Demonstrate the problem (without executing to avoid setting wrong)
     info "What happens:"
-    echo "  - Bash interprets 'host' as a variable (undefined = 0)"
+    echo "  - Bash interprets 'host' as an arithmetic variable (unset is 0 only without nounset)"
     echo "  - wrong[0]=\"localhost\", wrong[0]=\"8080\" (overwrites!)"
     echo "  - Resulting indices: 0 (not host, port)"
     
@@ -290,9 +289,9 @@ demo_associative() {
     info "Text: $text"
     echo ""
     
-    code_block 'for word in $text; do ((word_count[$word]++)); done'
+    code_block 'for word in $text; do word_count["$word"]=$((${word_count["$word"]:-0} + 1)); done'
     for word in $text; do
-        ((word_count[$word]++))
+        word_count["$word"]=$((${word_count["$word"]:-0} + 1))
     done
     
     echo "Result (sorted):"
@@ -306,6 +305,7 @@ demo_associative() {
 # ============================================================
 
 demo_gotchas() {
+    local IFS=$' \t\n'
     header "GOTCHAS - COMMON MISTAKES WITH ARRAYS"
     
     subheader "1. Indexing from 0, not from 1"
@@ -465,7 +465,7 @@ demo_advanced() {
     IFS_OLD=$IFS
     IFS=','
     joined="${arr[*]}"
-    IFS=$'\n\t'
+    IFS=$IFS_OLD
     good "Joined: $joined"
     
     echo ""
@@ -490,10 +490,10 @@ demo_quiz() {
     echo "    a) 3"
     echo "    b) 1"
     echo "    c) abc"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "a" ]]; then
         good "Correct! It returns the number of elements."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. \${#arr[@]} returns the number of elements (3)."
     fi
@@ -504,10 +504,10 @@ demo_quiz() {
     echo "    a) Nothing special"
     echo "    b) declare -a"
     echo "    c) declare -A"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "c" ]]; then
         good "Correct! declare -A is mandatory for associative arrays."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. Without declare -A, Bash treats it as an indexed array."
     fi
@@ -518,10 +518,10 @@ demo_quiz() {
     echo "    a) 2"
     echo "    b) 3"
     echo "    c) Error"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "b" ]]; then
         good "Correct! Without quotes, \"a b\" becomes 2 separate elements."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. Without quotes, word splitting separates \"a b\" into \"a\" and \"b\"."
     fi
@@ -532,12 +532,12 @@ demo_quiz() {
     echo "    a) 0"
     echo "    b) 1"
     echo "    c) Depends on declaration"
-    read -r -p "Answer (a/b/c): " ans </dev/tty
+    read -r -p "Answer (a/b/c): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "a" ]]; then
         good "Correct! Arrays start at index 0."
-        ((score++))
+        score=$((score + 1))
     else
-        bad "Wrong. Arrays in Bash always start from 0."
+        bad "Wrong. Implicit indexed-array assignment starts at 0; explicit sparse indices may start elsewhere."
     fi
     echo ""
     
@@ -545,10 +545,10 @@ demo_quiz() {
     echo -e "${BOLD}Q5: After 'unset arr[2]', are indices automatically re-indexed?${NC}"
     echo "    a) Yes"
     echo "    b) No"
-    read -r -p "Answer (a/b): " ans </dev/tty
+    read -r -p "Answer (a/b): " ans || { echo "No quiz answer received" >&2; return 2; }
     if [[ "$ans" == "b" ]]; then
         good "Correct! unset creates a sparse array, indices are not re-indexed."
-        ((score++))
+        score=$((score + 1))
     else
         bad "Wrong. unset does NOT re-index - the array becomes sparse."
     fi

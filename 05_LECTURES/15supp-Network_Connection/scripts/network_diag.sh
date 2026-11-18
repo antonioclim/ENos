@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 #
 # network_diag.sh - Comprehensive network diagnostic script
 # Operating Systems | ASE Bucharest - CSIE | 2025-2026
@@ -184,7 +184,7 @@ check_connectivity() {
         # Extract statistics
         ping_output=$(ping -c "${PING_COUNT}" -W "${TIMEOUT}" "${TARGET}" 2>/dev/null)
         packet_loss=$(echo "$ping_output" | grep -oP '\d+(?=% packet loss)' || echo "N/A")
-        avg_rtt=$(echo "$ping_output" | grep -oP 'avg.*?=.*?/([\d.]+)/' | grep -oP '[\d.]+' | head -1 || echo "N/A")
+        avg_rtt=$(echo "$ping_output" | awk -F' = ' '/^(rtt|round-trip) / {split($2, values, "/"); print values[2]; exit}'  || echo "N/A")
         
         print_ok "Connectivity OK (loss: ${packet_loss}%, average RTT: ${avg_rtt}ms)"
     else

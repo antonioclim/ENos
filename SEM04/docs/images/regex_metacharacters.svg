@@ -1,121 +1,71 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 550">
-  <!-- Background -->
-  <rect width="850" height="550" fill="#f8fafc"/>
-  
-  <!-- Title -->
-  <text x="425" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#1e293b">Metacaractere Regex — Referință Vizuală</text>
-  
-  <!-- Section 1: Anchors -->
-  <rect x="20" y="60" width="250" height="140" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
-  <text x="145" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8">ANCHORS</text>
-  
-  <text x="40" y="115" font-family="monospace" font-size="16" font-weight="bold" fill="#1e40af">^</text>
-  <text x="70" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Început de linie</text>
-  <text x="40" y="135" font-family="monospace" font-size="11" fill="#64748b">^Hello → "Hello world"</text>
-  
-  <text x="40" y="165" font-family="monospace" font-size="16" font-weight="bold" fill="#1e40af">$</text>
-  <text x="70" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Sfârșit de linie</text>
-  <text x="40" y="185" font-family="monospace" font-size="11" fill="#64748b">end$ → "the end"</text>
-  
-  <!-- Section 2: Character Classes -->
-  <rect x="290" y="60" width="260" height="140" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
-  <text x="420" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#166534">CHARACTER CLASSES</text>
-  
-  <text x="310" y="115" font-family="monospace" font-size="16" font-weight="bold" fill="#166534">.</text>
-  <text x="340" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice caracter (1)</text>
-  <text x="310" y="135" font-family="monospace" font-size="11" fill="#64748b">a.c → abc, a1c, aXc</text>
-  
-  <text x="310" y="165" font-family="monospace" font-size="14" font-weight="bold" fill="#166534">[abc]</text>
-  <text x="370" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Unul din set</text>
-  <text x="310" y="185" font-family="monospace" font-size="11" fill="#64748b">[aeiou] → vocale</text>
-  
-  <!-- Section 3: Negation -->
-  <rect x="570" y="60" width="260" height="140" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
-  <text x="700" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c">NEGAȚIE</text>
-  
-  <text x="590" y="115" font-family="monospace" font-size="14" font-weight="bold" fill="#b91c1c">[^abc]</text>
-  <text x="660" y="115" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice EXCEPTÂND</text>
-  <text x="590" y="135" font-family="monospace" font-size="11" fill="#64748b">[^0-9] → non-cifre</text>
-  
-  <text x="590" y="165" font-family="monospace" font-size="14" font-weight="bold" fill="#b91c1c">[^#]</text>
-  <text x="650" y="165" font-family="Arial, sans-serif" font-size="12" fill="#475569">Orice exceptând #</text>
-  <text x="590" y="185" font-family="monospace" font-size="11" fill="#64748b">^[^#] → linii fără #</text>
-  
-  <!-- Section 4: Quantifiers -->
-  <rect x="20" y="220" width="400" height="160" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
-  <text x="220" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#a16207">QUANTIFICATORI</text>
-  
-  <text x="40" y="275" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">*</text>
-  <text x="70" y="275" font-family="Arial, sans-serif" font-size="12" fill="#475569">Zero sau mai multe</text>
-  <text x="200" y="275" font-family="monospace" font-size="11" fill="#64748b">ab*c → ac, abc, abbc</text>
-  
-  <text x="40" y="305" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">+</text>
-  <text x="70" y="305" font-family="Arial, sans-serif" font-size="12" fill="#475569">Unul sau mai multe</text>
-  <text x="200" y="305" font-family="monospace" font-size="11" fill="#64748b">ab+c → abc, abbc (nu ac)</text>
-  
-  <text x="40" y="335" font-family="monospace" font-size="16" font-weight="bold" fill="#a16207">?</text>
-  <text x="70" y="335" font-family="Arial, sans-serif" font-size="12" fill="#475569">Zero sau unu</text>
-  <text x="200" y="335" font-family="monospace" font-size="11" fill="#64748b">colou?r → color, colour</text>
-  
-  <text x="40" y="365" font-family="monospace" font-size="14" font-weight="bold" fill="#a16207">{n,m}</text>
-  <text x="100" y="365" font-family="Arial, sans-serif" font-size="12" fill="#475569">Între n și m</text>
-  <text x="200" y="365" font-family="monospace" font-size="11" fill="#64748b">a{2,4} → aa, aaa, aaaa</text>
-  
-  <!-- Section 5: BRE vs ERE -->
-  <rect x="440" y="220" width="390" height="160" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
-  <text x="635" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9">BRE vs ERE — DIFERENȚE CRITICE</text>
-  
-  <!-- Table header -->
-  <text x="480" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">Funcție</text>
-  <text x="580" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">BRE (grep)</text>
-  <text x="700" y="275" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4c1d95">ERE (grep -E)</text>
-  
-  <line x1="460" y1="285" x2="810" y2="285" stroke="#c4b5fd" stroke-width="1"/>
-  
-  <text x="480" y="305" font-family="Arial, sans-serif" font-size="11" fill="#475569">1+ repetări</text>
-  <text x="580" y="305" font-family="monospace" font-size="12" fill="#7c3aed">\+</text>
-  <text x="700" y="305" font-family="monospace" font-size="12" fill="#7c3aed">+</text>
-  
-  <text x="480" y="325" font-family="Arial, sans-serif" font-size="11" fill="#475569">0-1 repetări</text>
-  <text x="580" y="325" font-family="monospace" font-size="12" fill="#7c3aed">\?</text>
-  <text x="700" y="325" font-family="monospace" font-size="12" fill="#7c3aed">?</text>
-  
-  <text x="480" y="345" font-family="Arial, sans-serif" font-size="11" fill="#475569">Grupare</text>
-  <text x="580" y="345" font-family="monospace" font-size="12" fill="#7c3aed">\( \)</text>
-  <text x="700" y="345" font-family="monospace" font-size="12" fill="#7c3aed">( )</text>
-  
-  <text x="480" y="365" font-family="Arial, sans-serif" font-size="11" fill="#475569">Alternativă</text>
-  <text x="580" y="365" font-family="monospace" font-size="12" fill="#7c3aed">\|</text>
-  <text x="700" y="365" font-family="monospace" font-size="12" fill="#7c3aed">|</text>
-  
-  <!-- Section 6: Escape -->
-  <rect x="20" y="400" width="250" height="130" rx="10" fill="#fdf4ff" stroke="#d946ef" stroke-width="2"/>
-  <text x="145" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#a21caf">ESCAPE</text>
-  
-  <text x="40" y="455" font-family="monospace" font-size="16" font-weight="bold" fill="#a21caf">\</text>
-  <text x="70" y="455" font-family="Arial, sans-serif" font-size="12" fill="#475569">Escape caracter special</text>
-  
-  <text x="40" y="480" font-family="monospace" font-size="11" fill="#64748b">\. → punct literal</text>
-  <text x="40" y="500" font-family="monospace" font-size="11" fill="#64748b">\* → asterisc literal</text>
-  <text x="40" y="520" font-family="monospace" font-size="11" fill="#64748b">\[ → bracket literal</text>
-  
-  <!-- Section 7: Common Patterns -->
-  <rect x="290" y="400" width="540" height="130" rx="10" fill="#ecfeff" stroke="#06b6d4" stroke-width="2"/>
-  <text x="560" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0e7490">PATTERN-URI COMUNE</text>
-  
-  <text x="310" y="455" font-family="monospace" font-size="11" fill="#0891b2">[0-9]+</text>
-  <text x="400" y="455" font-family="Arial, sans-serif" font-size="11" fill="#475569">Numere</text>
-  
-  <text x="310" y="480" font-family="monospace" font-size="11" fill="#0891b2">[a-zA-Z]+</text>
-  <text x="400" y="480" font-family="Arial, sans-serif" font-size="11" fill="#475569">Cuvinte</text>
-  
-  <text x="310" y="505" font-family="monospace" font-size="11" fill="#0891b2">^$</text>
-  <text x="400" y="505" font-family="Arial, sans-serif" font-size="11" fill="#475569">Linie goală</text>
-  
-  <text x="520" y="455" font-family="monospace" font-size="11" fill="#0891b2">[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}</text>
-  <text x="520" y="475" font-family="Arial, sans-serif" font-size="11" fill="#475569">Adresă IP (simplificat)</text>
-  
-  <text x="520" y="505" font-family="monospace" font-size="11" fill="#0891b2">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</text>
-  <text x="520" y="525" font-family="Arial, sans-serif" font-size="11" fill="#475569">Email (simplificat)</text>
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 665" width="900" height="665" role="img" xml:lang="en" aria-labelledby="sem04-regex-metacharacters-title sem04-regex-metacharacters-desc">
+  <title id="sem04-regex-metacharacters-title">Regular Expressions — GNU grep BRE and ERE</title>
+  <desc id="sem04-regex-metacharacters-desc">The cards compare anchors, sets and quantifiers and explicitly distinguish GNU BRE extensions from ERE. A line beginning with a non-hash character differs from a whole line containing no hash. IP-shaped and email-shaped patterns are examples, not complete validators.</desc>
+  <defs>
+    <marker id="sem04-regex-metacharacters-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="900" height="665" fill="#f8fafc"/>
+  <text x="450.0" y="30" font-family="Arial, sans-serif" font-size="20" fill="#0f172a" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-1">Regular Expressions — GNU grep BRE and ERE</text>
+  <rect x="20" y="55" width="270" height="150" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="155.0" y="80" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-2">Anchors</text>
+  <text x="35" y="113" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-3">^</text>
+  <text x="35" y="133" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-4">Start of line: ^Hello</text>
+  <text x="35" y="165" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-5">$</text>
+  <text x="35" y="185" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-6">End of line: end$</text>
+  <rect x="310" y="55" width="280" height="150" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="450.0" y="80" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-7">Characters and sets</text>
+  <text x="325" y="113" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-8">.</text>
+  <text x="325" y="133" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-9">One character in a record</text>
+  <text x="325" y="165" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-10">[abc]</text>
+  <text x="325" y="185" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-11">One member of the set</text>
+  <rect x="610" y="55" width="270" height="150" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="745.0" y="80" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-12">Negated character sets</text>
+  <text x="625" y="113" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-13">[^abc]</text>
+  <text x="625" y="133" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-14">One character outside a, b, c</text>
+  <text x="625" y="165" font-family="monospace" font-size="15" fill="#1e40af" id="sem04-regex-metacharacters-text-15">[^#]</text>
+  <text x="625" y="185" font-family="Arial, sans-serif" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-16">One character other than #</text>
+  <rect x="20" y="220" width="430" height="170" rx="8" fill="#fffbeb" stroke="#a16207" stroke-width="1.5"/>
+  <text x="235" y="246" font-family="Arial, sans-serif" font-size="14" fill="#854d0e" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-17">ERE quantifiers</text>
+  <text x="35" y="276" font-family="monospace" font-size="13" fill="#854d0e" id="sem04-regex-metacharacters-text-18">*</text>
+  <text x="105" y="276" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-19">Zero or more</text>
+  <text x="240" y="276" font-family="monospace" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-20">ab*c → ac, abc, abbc</text>
+  <text x="35" y="306" font-family="monospace" font-size="13" fill="#854d0e" id="sem04-regex-metacharacters-text-21">+</text>
+  <text x="105" y="306" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-22">One or more</text>
+  <text x="240" y="306" font-family="monospace" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-23">ab+c → abc, abbc</text>
+  <text x="35" y="336" font-family="monospace" font-size="13" fill="#854d0e" id="sem04-regex-metacharacters-text-24">?</text>
+  <text x="105" y="336" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-25">Zero or one</text>
+  <text x="240" y="336" font-family="monospace" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-26">colou?r → color, colour</text>
+  <text x="35" y="366" font-family="monospace" font-size="13" fill="#854d0e" id="sem04-regex-metacharacters-text-27">{n,m}</text>
+  <text x="105" y="366" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-28">Between n and m</text>
+  <text x="240" y="366" font-family="monospace" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-29">a{2,4} → aa, aaa, aaaa</text>
+  <rect x="470" y="220" width="410" height="170" rx="8" fill="#f5f3ff" stroke="#6d28d9" stroke-width="1.5"/>
+  <text x="675" y="246" font-family="Arial, sans-serif" font-size="14" fill="#5b21b6" text-anchor="middle" font-weight="bold" id="sem04-regex-metacharacters-text-30">GNU grep BRE versus ERE</text>
+  <text x="490" y="270" font-family="Arial, sans-serif" font-size="11" fill="#334155" font-weight="bold" id="sem04-regex-metacharacters-text-31">Feature</text>
+  <text x="640" y="270" font-family="Arial, sans-serif" font-size="11" fill="#334155" font-weight="bold" id="sem04-regex-metacharacters-text-32">BRE</text>
+  <text x="770" y="270" font-family="Arial, sans-serif" font-size="11" fill="#334155" font-weight="bold" id="sem04-regex-metacharacters-text-33">ERE</text>
+  <text x="490" y="295" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-34">One or more</text>
+  <text x="640" y="295" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-35">\+</text>
+  <text x="770" y="295" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-36">+</text>
+  <text x="490" y="319" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-37">Zero or one</text>
+  <text x="640" y="319" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-38">\?</text>
+  <text x="770" y="319" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-39">?</text>
+  <text x="490" y="343" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-40">Group</text>
+  <text x="640" y="343" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-41">\( \)</text>
+  <text x="770" y="343" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-42">( )</text>
+  <text x="490" y="367" font-family="Arial, sans-serif" font-size="11" fill="#334155" id="sem04-regex-metacharacters-text-43">Alternation</text>
+  <text x="640" y="367" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-44">\|</text>
+  <text x="770" y="367" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-45">|</text>
+  <rect x="20" y="405" width="860" height="72" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.5"/>
+  <text x="40" y="431" font-family="monospace" font-size="13" fill="#334155" id="sem04-regex-metacharacters-text-46">^[^#]  matches a nonempty line whose first character is not # (a# matches).</text>
+  <text x="40" y="456" font-family="monospace" font-size="13" fill="#334155" id="sem04-regex-metacharacters-text-47">^[^#]*$  permits an empty line and excludes # anywhere in the line.</text>
+  <rect x="20" y="490" width="860" height="150" rx="8" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <text x="40" y="515" font-family="Arial, sans-serif" font-size="14" fill="#155e75" font-weight="bold" id="sem04-regex-metacharacters-text-48">Examples and limits (ERE unless stated otherwise)</text>
+  <text x="40" y="542" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-49">\.  literal dot;  \*  literal asterisk;  \[  literal opening bracket</text>
+  <text x="40" y="568" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-50">[0-9]+  digit sequence     [a-zA-Z]+  ASCII letters (LC_ALL=C)     ^$  empty line</text>
+  <text x="40" y="594" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-51">[0-9]{1,3}(\.[0-9]{1,3}){3}  IP-shaped substring; does not check octet bounds.</text>
+  <text x="40" y="620" font-family="monospace" font-size="12" fill="#334155" id="sem04-regex-metacharacters-text-52">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}  simplified email-shaped substring</text>
+  <text x="450" y="656" font-family="Arial, sans-serif" font-size="12" fill="#5b21b6" text-anchor="middle" id="sem04-regex-metacharacters-text-53">\+, \? and \| are GNU BRE extensions, not portable POSIX BRE operators.</text>
 </svg>

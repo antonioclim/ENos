@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# S02_01_setup_seminar.sh - Setup and Environment Verification for Seminar 3-4
+# S02_01_setup_seminar.sh - Setup and Environment Verification for Seminar 2
 #
 #
 # DESCRIPTION:
@@ -425,7 +425,7 @@ main() {
         esac
     done
     
-    print_header "SETUP SEMINAR 3-4: Operating Systems"
+    print_header "SETUP SEMINAR 2: Operating Systems"
     
     # Required checks
     check_os

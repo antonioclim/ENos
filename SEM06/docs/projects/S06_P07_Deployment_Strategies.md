@@ -8,6 +8,12 @@ This chapter comparatively analyses the main deployment strategies, highlighting
 
 ---
 
+## Example and acceptance boundary
+
+The comparison below describes illustrative architectures, not a universal ranking of deployment risk. Resource ratios, traffic thresholds, delays and metric limits are example inputs, not measured findings. Availability depends on spare capacity, health detection, routing acknowledgements, session draining and compatible data migrations. A filesystem rename is atomic only for the pathname replacement on one filesystem; it does not demonstrate uninterrupted request service.
+
+The source-only algorithms are shared conceptually with P04's `strategy_reference.sh`. Extract the corresponding modules before running examples. Adapters must be configured for an explicitly selected topology; missing routing, metrics, health or lifecycle adapters fail rather than selecting infrastructure automatically. No code in this chapter is a command to operate the reader's live services. Tests may supply local recording adapters and owned fixture directories. Native Docker/systemd/SSH/Nginx/HAProxy/Kubernetes operation remains a separate acceptance exercise.
+
 ## Taxonomy of Deployment Strategies
 
 ### Classification by Impact and Risk
@@ -63,266 +69,84 @@ Load Balancer: ═════════════════════�
 ### Deployer Implementation
 
 ```bash
-#!/bin/bash
-#===============================================================================
-# rolling_deploy.sh - Rolling Deployment Implementation
-#===============================================================================
+#!/usr/bin/env bash
+# Source-only algorithm module. Adapters are supplied explicitly; no auto-detected
+# /etc, service, SSH, cluster or load-balancer target is ever selected here.
 
-source "$(dirname "$0")/../lib/deployer_core.sh"
-source "$(dirname "$0")/../lib/deployer_utils.sh"
+require_adapter() { declare -F "$1" >/dev/null || { printf 'Missing adapter: %s\n' "$1" >&2; return 2; }; }
+positive_integer() { [[ ${1:-} =~ ^[1-9][0-9]{0,5}$ ]]; }
+nonnegative_integer() { [[ ${1:-} =~ ^[0-9]{1,5}$ ]]; }
 
-#-------------------------------------------------------------------------------
-# Configuration
-#-------------------------------------------------------------------------------
-declare -g BATCH_SIZE=1
-declare -g MAX_UNAVAILABLE=1
-declare -g HEALTH_CHECK_RETRIES=3
-declare -g HEALTH_CHECK_INTERVAL=10
-declare -g DRAIN_TIMEOUT=30
-
-#-------------------------------------------------------------------------------
-# Rolling Deployment Core
-#-------------------------------------------------------------------------------
 deploy_rolling() {
-    local release_path="$1"
-    local -a instances=("${@:2}")
-    
-    local total_instances=${#instances[@]}
-    local successful=0
-    local failed=0
-    
-    log_info "Starting rolling deployment to $total_instances instances"
-    log_info "Batch size: $BATCH_SIZE, Max unavailable: $MAX_UNAVAILABLE"
-    
-    # Process in batches
-    local batch_num=0
-    for ((i=0; i<total_instances; i+=BATCH_SIZE)); do
-        ((batch_num++))
-        local batch_end=$((i + BATCH_SIZE - 1))
-        [[ $batch_end -ge $total_instances ]] && batch_end=$((total_instances - 1))
-        
-        log_info "Processing batch $batch_num: instances $((i+1)) to $((batch_end+1))"
-        
-        # Process instances in batch
-        local batch_success=0
-        for ((j=i; j<=batch_end; j++)); do
-            local instance="${instances[$j]}"
-            
-            if deploy_to_instance "$instance" "$release_path"; then
-                ((successful++))
-                ((batch_success++))
-                log_info "Instance $instance updated successfully ($successful/$total_instances)"
+    local release=$1; shift
+    local -a instances=("$@")
+    local total=${#instances[@]} batch=${BATCH_SIZE:-1} limit=${MAX_UNAVAILABLE:-1}
+    local delay=${HEALTH_CHECK_INTERVAL:-10} i j end instance adapter
+    positive_integer "$batch" && positive_integer "$limit" && nonnegative_integer "$delay" || return 2
+    ((total > 0 && batch <= limit && limit <= total)) || return 2
+    for adapter in drain_instance wait_for_drain stop_application sync_release start_application wait_for_healthy enable_instance restore_previous_version; do
+        require_adapter "$adapter" || return 2
+    done
+    for ((i=0; i<total; i+=batch)); do
+        end=$((i+batch)); ((end <= total)) || end=$total
+        for ((j=i; j<end; j++)); do
+            instance=${instances[j]}
+            # A batch is a scheduling group; this reference updates instances sequentially.
+            if drain_instance "$instance" && wait_for_drain "$instance" "${DRAIN_TIMEOUT:-30}" &&
+               stop_application "$instance" && sync_release "$instance" "$release" &&
+               start_application "$instance" && wait_for_healthy "$instance" "${HEALTH_CHECK_RETRIES:-3}" "$delay" &&
+               enable_instance "$instance"; then :
             else
-                ((failed++))
-                log_error "Instance $instance failed to update"
-                
-                # Verify failure threshold
-                if [[ $failed -gt $MAX_UNAVAILABLE ]]; then
-                    log_fatal "Too many failures ($failed > $MAX_UNAVAILABLE). Aborting deployment."
-                    return 1
-                fi
+                # A successful recovery does not turn a failed deployment into success.
+                if restore_previous_version "$instance" && start_application "$instance" &&
+                   wait_for_healthy "$instance" "${HEALTH_CHECK_RETRIES:-3}" "$delay" && enable_instance "$instance"; then return 1
+                else return 3; fi
             fi
         done
-        
-        # Wait for stabilisation before next batch
-        if [[ $i + $BATCH_SIZE -lt $total_instances ]]; then
-            log_info "Waiting for stabilisation before next batch..."
-            sleep "$HEALTH_CHECK_INTERVAL"
-        fi
+        if ((i+batch < total)); then sleep "$delay" || return 1; fi
     done
-    
-    # Final summary
-    log_info "Rolling deployment completed: $successful successful, $failed failed"
-    
-    [[ $failed -eq 0 ]] && return 0 || return 1
-}
-
-#-------------------------------------------------------------------------------
-# Per-instance Deployment
-#-------------------------------------------------------------------------------
-deploy_to_instance() {
-    local instance="$1"
-    local release_path="$2"
-    
-    log_debug "Deploying to instance: $instance"
-    
-    # Step 1: Drain - remove instance from load balancer
-    log_debug "Draining instance from load balancer..."
-    if ! drain_instance "$instance"; then
-        log_error "Failed to drain instance $instance"
-        return 1
-    fi
-    
-    # Step 2: Wait for in-flight requests to complete
-    log_debug "Waiting for in-flight requests..."
-    wait_for_drain "$instance" "$DRAIN_TIMEOUT"
-    
-    # Step 3: Stop application
-    log_debug "Stopping application..."
-    if ! stop_application "$instance"; then
-        log_warn "Failed to stop gracefully, forcing..."
-        force_stop_application "$instance"
-    fi
-    
-    # Step 4: Deploy new version
-    log_debug "Deploying new release..."
-    if ! sync_release "$instance" "$release_path"; then
-        log_error "Failed to sync release to $instance"
-        # Rollback to previous version
-        restore_previous_version "$instance"
-        enable_instance "$instance"
-        return 1
-    fi
-    
-    # Step 5: Start application
-    log_debug "Starting application..."
-    if ! start_application "$instance"; then
-        log_error "Failed to start application on $instance"
-        restore_previous_version "$instance"
-        enable_instance "$instance"
-        return 1
-    fi
-    
-    # Step 6: Health check
-    log_debug "Performing health checks..."
-    if ! wait_for_healthy "$instance" "$HEALTH_CHECK_RETRIES" "$HEALTH_CHECK_INTERVAL"; then
-        log_error "Health check failed for $instance"
-        restore_previous_version "$instance"
-        start_application "$instance"
-        enable_instance "$instance"
-        return 1
-    fi
-    
-    # Step 7: Re-enable in load balancer
-    log_debug "Re-enabling instance in load balancer..."
-    if ! enable_instance "$instance"; then
-        log_error "Failed to re-enable $instance"
-        return 1
-    fi
-    
-    log_info "Instance $instance successfully updated"
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Load Balancer Helper Functions
-#-------------------------------------------------------------------------------
-drain_instance() {
-    local instance="$1"
-    
-    # Example for HAProxy via socket
-    if [[ -S "/var/run/haproxy/admin.sock" ]]; then
-        echo "set server backend/$instance state drain" | \
-            socat stdio /var/run/haproxy/admin.sock
-        return $?
-    fi
-    
-    # Example for nginx upstream
-    if [[ -f "/etc/nginx/conf.d/upstream.conf" ]]; then
-        sed -i "s/server ${instance}/server ${instance} down/" \
-            /etc/nginx/conf.d/upstream.conf
-        nginx -s reload
-        return $?
-    fi
-    
-    log_warn "No load balancer detected, skipping drain"
-    return 0
-}
-
-enable_instance() {
-    local instance="$1"
-    
-    if [[ -S "/var/run/haproxy/admin.sock" ]]; then
-        echo "set server backend/$instance state ready" | \
-            socat stdio /var/run/haproxy/admin.sock
-        return $?
-    fi
-    
-    if [[ -f "/etc/nginx/conf.d/upstream.conf" ]]; then
-        sed -i "s/server ${instance} down/server ${instance}/" \
-            /etc/nginx/conf.d/upstream.conf
-        nginx -s reload
-        return $?
-    fi
-    
     return 0
 }
 
 wait_for_drain() {
-    local instance="$1"
-    local timeout="$2"
-    
-    local elapsed=0
-    while [[ $elapsed -lt $timeout ]]; do
-        local connections
-        connections=$(get_active_connections "$instance")
-        
-        if [[ $connections -eq 0 ]]; then
-            log_debug "Instance $instance fully drained"
-            return 0
-        fi
-        
-        log_debug "Waiting for $connections connections to close..."
-        sleep 2
-        ((elapsed += 2))
+    local instance=$1 duration=$2 deadline connections pause
+    positive_integer "$duration" || return 2
+    require_adapter get_active_connections || return 2
+    deadline=$((SECONDS+duration))
+    while ((SECONDS < deadline)); do
+        connections=$(get_active_connections "$instance") || return 1
+        nonnegative_integer "$connections" || return 1
+        ((10#$connections != 0)) || return 0
+        pause=$((deadline-SECONDS)); ((pause <= 2)) || pause=2
+        ((pause > 0)) && sleep "$pause"
     done
-    
-    log_warn "Drain timeout reached, proceeding anyway"
-    return 0
+    return 1  # A timed-out drain is not permission to stop active requests.
 }
 
-#-------------------------------------------------------------------------------
-# Sync and Application Control
-#-------------------------------------------------------------------------------
-sync_release() {
-    local instance="$1"
-    local release_path="$2"
-    
-    # For local deploy
-    if [[ "$instance" == "localhost" || "$instance" == "127.0.0.1" ]]; then
-        cp -r "$release_path"/* "$DEPLOY_PATH/"
-        return $?
-    fi
-    
-    # For remote deploy via rsync
-    rsync -avz --delete \
-        --exclude='.git' \
-        --exclude='*.log' \
-        --exclude='tmp/*' \
-        "$release_path/" \
-        "${DEPLOY_USER}@${instance}:${DEPLOY_PATH}/"
-    
-    return $?
-}
 
-stop_application() {
-    local instance="$1"
-    
-    run_on_instance "$instance" "systemctl stop ${APP_SERVICE}"
-}
-
-start_application() {
-    local instance="$1"
-    
-    run_on_instance "$instance" "systemctl start ${APP_SERVICE}"
-}
-
-force_stop_application() {
-    local instance="$1"
-    
-    run_on_instance "$instance" "systemctl kill -s KILL ${APP_SERVICE}"
-}
-
+# Explicit application-control adapters. SERVICE_PROGRAM receives instance, action
+# and service as separate arguments; it decides the approved local/remote transport.
 run_on_instance() {
-    local instance="$1"
-    shift
-    local command="$*"
-    
-    if [[ "$instance" == "localhost" || "$instance" == "127.0.0.1" ]]; then
-        eval "$command"
-    else
-        ssh "${DEPLOY_USER}@${instance}" "$command"
-    fi
+    local instance=$1; shift
+    if [[ $instance == localhost || $instance == 127.0.0.1 ]]; then "$@"
+    else "${REMOTE_EXEC_PROGRAM:?Configure the approved remote argv transport}" "$instance" "$@"; fi
+}
+stop_application() { "${SERVICE_PROGRAM:?}" "$1" stop "${APP_SERVICE:?}"; }
+start_application() { "${SERVICE_PROGRAM:?}" "$1" start "${APP_SERVICE:?}"; }
+force_stop_application() { "${SERVICE_PROGRAM:?}" "$1" kill "${APP_SERVICE:?}"; }
+sync_release() { "${SYNC_RELEASE_PROGRAM:?Provide a transactional artefact-sync adapter}" "$1" "$2"; }
+restore_previous_version() { "${RESTORE_RELEASE_PROGRAM:?}" "$1"; }
+drain_instance() { "${ROUTING_PROGRAM:?}" drain "$1"; }
+enable_instance() { "${ROUTING_PROGRAM:?}" enable "$1"; }
+get_active_connections() { "${ROUTING_PROGRAM:?}" connections "$1"; }
+wait_for_healthy() {
+    local instance=$1 retries=$2 interval=$3 attempt
+    positive_integer "$retries" && nonnegative_integer "$interval" || return 2
+    for ((attempt=1; attempt<=retries; attempt++)); do
+        if "${INSTANCE_HEALTH_PROGRAM:?}" "$instance"; then return 0; fi
+        ((attempt == retries)) || sleep "$interval" || return 1
+    done
+    return 1
 }
 ```
 
@@ -330,7 +154,7 @@ run_on_instance() {
 
 | Strengths | Weaknesses |
 |-----------|------------|
-| Zero downtime | Mixed versions in production |
+| Availability can be maintained with sufficient healthy capacity | Mixed versions in production |
 | Partial rollback possible | Slower deployment |
 | Efficient resources | Complexity in tracking |
 | Progressive validation | Requires backward compatibility |
@@ -398,345 +222,114 @@ Blue-Green maintains two identical production environments (Blue and Green). At 
 ### Deployer Implementation
 
 ```bash
-#!/bin/bash
-#===============================================================================
-# blue_green_deploy.sh - Blue-Green Deployment Implementation
-#===============================================================================
-
-source "$(dirname "$0")/../lib/deployer_core.sh"
-source "$(dirname "$0")/../lib/deployer_utils.sh"
-
-#-------------------------------------------------------------------------------
-# Configuration
-#-------------------------------------------------------------------------------
-declare -g BLUE_ENV="blue"
-declare -g GREEN_ENV="green"
-declare -g ACTIVE_ENV_FILE="/var/run/deployer/active_env"
-declare -g SMOKE_TEST_TIMEOUT=60
-declare -g WARMUP_REQUESTS=100
-
-#-------------------------------------------------------------------------------
-# Determine active/inactive environment
-#-------------------------------------------------------------------------------
-get_active_env() {
-    if [[ -f "$ACTIVE_ENV_FILE" ]]; then
-        cat "$ACTIVE_ENV_FILE"
-    else
-        echo "$BLUE_ENV"  # Default to blue
-    fi
-}
-
-get_inactive_env() {
-    local active
-    active=$(get_active_env)
-    
-    if [[ "$active" == "$BLUE_ENV" ]]; then
-        echo "$GREEN_ENV"
-    else
-        echo "$BLUE_ENV"
-    fi
-}
-
-set_active_env() {
-    local env="$1"
-    echo "$env" > "$ACTIVE_ENV_FILE"
-}
-
+#!/usr/bin/env bash
+# Requires P04's strategy_reference.sh and release_teaching.py.
+# These are owned filesystem adapters; service/routing adapters are explicit programs.
 get_env_path() {
-    local env="$1"
-    echo "${DEPLOY_BASE_PATH}/${env}"
+    case $1 in blue|green) printf '%s/%s\n' "${DEPLOY_BASE_PATH:?}" "$1";; *) return 2;; esac
 }
-
 get_env_port() {
-    local env="$1"
-    
-    case "$env" in
-        blue)  echo "8001" ;;
-        green) echo "8002" ;;
+    case $1 in blue) printf '%s\n' "${BLUE_PORT:-8001}";; green) printf '%s\n' "${GREEN_PORT:-8002}";; *) return 2;; esac
+}
+get_active_env() {
+    python3 - "${ACTIVE_ENV_FILE:?}" <<'PY'
+import json,sys
+try:
+    value=json.load(open(sys.argv[1]))['active']
+    if value not in ('blue','green'): raise ValueError()
+    print(value)
+except (OSError,ValueError,KeyError): raise SystemExit(1)
+PY
+}
+set_active_env() {
+    python3 - "${ACTIVE_ENV_FILE:?}" "$1" <<'PY'
+import json,os,pathlib,sys,tempfile
+path=pathlib.Path(sys.argv[1]); value=sys.argv[2]
+if value not in ('blue','green'): raise SystemExit(2)
+fd,temporary=tempfile.mkstemp(prefix='.active.',dir=path.parent)
+try:
+    with os.fdopen(fd,'w') as output: json.dump({'active':value},output)
+    os.replace(temporary,path)
+finally:
+    if os.path.exists(temporary): os.unlink(temporary)
+PY
+}
+prepare_environment() {
+    local env=$1 path
+    path=$(get_env_path "$env") || return 2
+    [[ $env != "$(get_active_env)" ]] || return 1
+    # current is reserved for a symlink, never mkdir'd as a directory.
+    mkdir -p -- "$path/releases" "$path/shared" "$path/.deploy_state"
+}
+deploy_release() {
+    local source=$1 env=$2 path release_id
+    path=$(get_env_path "$env") || return 2
+    release_id=$(python3 "${RELEASE_ENGINE_PATH:?}" prepare "$source" "$path") || return 1
+    python3 "$RELEASE_ENGINE_PATH" activate "$path" "$release_id"
+}
+start_environment() { "${ENV_SERVICE_PROGRAM:?}" "$1" start; }
+stop_environment() { "${ENV_SERVICE_PROGRAM:?}" "$1" stop; }
+is_environment_healthy() {
+    local port; port=$(get_env_port "$1") || return 2
+    check_http "http://localhost:$port/health" 200 "${SMOKE_TEST_TIMEOUT:-10}"
+}
+run_smoke_tests() {
+    local port response; port=$(get_env_port "$1") || return 2
+    check_http "http://localhost:$port/health" 200 "${SMOKE_TEST_TIMEOUT:-10}" || return 1
+    check_http "http://localhost:$port/api/status" 200 "${SMOKE_TEST_TIMEOUT:-10}" || return 1
+    response=$(curl --fail --silent --show-error --connect-timeout 2 --max-time "${SMOKE_TEST_TIMEOUT:-10}" -- "http://localhost:$port/api/db/ping") || return 1
+    python3 -c 'import json,sys; raise SystemExit(0 if json.loads(sys.argv[1]).get("status")=="ok" else 1)' "$response"
+}
+warmup_application() {
+    local env=$1 requests=$2 port i
+    nonnegative_integer "$requests" || return 2
+    port=$(get_env_port "$env") || return 2
+    for ((i=0; i<requests; i++)); do check_http "http://localhost:$port/" 200 5 || return 1; done
+    return 0
+}
+switch_traffic() {
+    local target=$1 percentage
+    case $target in blue) percentage=0;; green) percentage=100;; *) return 2;; esac
+    case ${TRAFFIC_BACKEND:?Choose a routing backend explicitly} in
+        nginx)
+            python3 "${ROUTING_REFERENCE_PATH:?}" "$percentage" --stable-port "$(get_env_port blue)" --canary-port "$(get_env_port green)" \
+                --config "${NGINX_UPSTREAM_FILE:?}" --validator "${NGINX_VALIDATE_PROGRAM:?}" --reloader "${NGINX_RELOAD_PROGRAM:?}";;
+        haproxy) "${HAPROXY_ROUTE_PROGRAM:?Acknowledged route transaction adapter}" "$target";;
+        symlink)
+            # Valid only for a server that resolves this pathname when serving new requests.
+            python3 "${RELEASE_ENGINE_PATH:?}" switch "${DEPLOY_BASE_PATH:?}/live" "$(get_env_path "$target")/current";;
+        *) return 2;;
     esac
 }
-
-#-------------------------------------------------------------------------------
-# Blue-Green Deployment Core
-#-------------------------------------------------------------------------------
 deploy_blue_green() {
-    local release_path="$1"
-    
-    local active_env
-    local target_env
-    local target_path
-    local target_port
-    
-    active_env=$(get_active_env)
-    target_env=$(get_inactive_env)
-    target_path=$(get_env_path "$target_env")
-    target_port=$(get_env_port "$target_env")
-    
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  BLUE-GREEN DEPLOYMENT"
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  Active environment:  $active_env"
-    log_info "  Target environment:  $target_env"
-    log_info "  Target path:         $target_path"
-    log_info "  Target port:         $target_port"
-    log_info "═══════════════════════════════════════════════════════════"
-    
-    # Step 1: Prepare target environment
-    log_info "[1/6] Preparing target environment..."
-    prepare_environment "$target_env" "$target_path" || {
-        log_error "Failed to prepare environment"
-        return 1
-    }
-    
-    # Step 2: Deploy to target environment
-    log_info "[2/6] Deploying release to $target_env..."
-    deploy_release "$release_path" "$target_path" || {
-        log_error "Failed to deploy release"
-        return 1
-    }
-    
-    # Step 3: Start application in target
-    log_info "[3/6] Starting application in $target_env..."
-    start_environment "$target_env" || {
-        log_error "Failed to start $target_env environment"
-        return 1
-    }
-    
-    # Step 4: Smoke tests
-    log_info "[4/6] Running smoke tests..."
-    if ! run_smoke_tests "localhost:${target_port}"; then
-        log_error "Smoke tests failed!"
-        stop_environment "$target_env"
-        return 1
-    fi
-    
-    # Step 5: Warmup (optional)
-    log_info "[5/6] Warming up application..."
-    warmup_application "localhost:${target_port}" "$WARMUP_REQUESTS"
-    
-    # Step 6: Switch traffic
-    log_info "[6/6] Switching traffic to $target_env..."
-    if ! switch_traffic "$target_env"; then
-        log_error "Failed to switch traffic!"
-        # Rollback
-        stop_environment "$target_env"
-        return 1
-    fi
-    
-    # Update state
-    set_active_env "$target_env"
-    
-    # Stop old environment (optional - can be kept for rapid rollback)
-    log_info "Stopping old environment ($active_env)..."
-    stop_environment "$active_env"
-    
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  DEPLOYMENT SUCCESSFUL"
-    log_info "  New active environment: $target_env"
-    log_info "═══════════════════════════════════════════════════════════"
-    
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Environment Management
-#-------------------------------------------------------------------------------
-prepare_environment() {
-    local env="$1"
-    local path="$2"
-    
-    # Cleanup previous version
-    if [[ -d "$path" ]]; then
-        log_debug "Cleaning up previous deployment in $path"
-        rm -rf "${path:?}/"*
-    fi
-    
-    mkdir -p "$path"/{releases,shared,current}
-    
-    return 0
-}
-
-deploy_release() {
-    local source="$1"
-    local target="$2"
-    
-    log_debug "Copying release from $source to $target/releases/current"
-    cp -r "$source"/* "$target/releases/current/" || return 1
-    
-    # Symlink to current
-    rm -f "$target/current"
-    ln -sfn "$target/releases/current" "$target/current"
-    
-    return 0
-}
-
-start_environment() {
-    local env="$1"
-    local service_name="app-${env}"
-    
-    systemctl start "$service_name" || return 1
-    
-    # Wait until application is ready
-    local retries=30
-    while [[ $retries -gt 0 ]]; do
-        if systemctl is-active --quiet "$service_name"; then
-            return 0
-        fi
-        sleep 1
-        ((retries--))
+    local release=$1 active target adapter
+    for adapter in get_active_env prepare_environment deploy_release start_environment run_smoke_tests warmup_application switch_traffic set_active_env is_environment_healthy; do
+        require_adapter "$adapter" || return 2
     done
-    
-    return 1
+    active=$(get_active_env) || return 1
+    case $active in blue) target=green;; green) target=blue;; *) return 2;; esac
+    prepare_environment "$target" || return 1
+    deploy_release "$release" "$target" || return 1
+    start_environment "$target" || return 1
+    run_smoke_tests "$target" || return 1
+    warmup_application "$target" "${WARMUP_REQUESTS:-100}" || return 1
+    # Keep both pools running until route/state acknowledgement is complete.
+    switch_traffic "$target" || return 3
+    if is_environment_healthy "$target" && set_active_env "$target"; then return 0; fi
+    if start_environment "$active" && is_environment_healthy "$active" && switch_traffic "$active"; then return 1; fi
+    return 3
 }
 
-stop_environment() {
-    local env="$1"
-    local service_name="app-${env}"
-    
-    systemctl stop "$service_name" 2>/dev/null || true
-}
-
-#-------------------------------------------------------------------------------
-# Testing
-#-------------------------------------------------------------------------------
-run_smoke_tests() {
-    local endpoint="$1"
-    local start_time=$SECONDS
-    
-    log_debug "Running smoke tests against $endpoint"
-    
-    # Test 1: Health endpoint
-    if ! curl -sf "http://${endpoint}/health" > /dev/null; then
-        log_error "Health check failed"
-        return 1
-    fi
-    log_debug "  ✓ Health check passed"
-    
-    # Test 2: Basic functionality
-    if ! curl -sf "http://${endpoint}/api/status" > /dev/null; then
-        log_error "API status check failed"
-        return 1
-    fi
-    log_debug "  ✓ API status check passed"
-    
-    # Test 3: Database connectivity (via app)
-    local db_status
-    db_status=$(curl -sf "http://${endpoint}/api/db/ping" 2>/dev/null || echo "error")
-    if [[ "$db_status" != *"ok"* ]]; then
-        log_error "Database connectivity check failed"
-        return 1
-    fi
-    log_debug "  ✓ Database connectivity check passed"
-    
-    local duration=$((SECONDS - start_time))
-    log_info "All smoke tests passed in ${duration}s"
-    
-    return 0
-}
-
-warmup_application() {
-    local endpoint="$1"
-    local requests="$2"
-    
-    log_debug "Sending $requests warmup requests to $endpoint"
-    
-    for ((i=1; i<=requests; i++)); do
-        curl -sf "http://${endpoint}/" > /dev/null 2>&1 || true
-        
-        if (( i % 20 == 0 )); then
-            log_debug "  Warmup progress: $i/$requests"
-        fi
-    done
-    
-    log_debug "Warmup completed"
-}
-
-#-------------------------------------------------------------------------------
-# Traffic Switching
-#-------------------------------------------------------------------------------
-switch_traffic() {
-    local target_env="$1"
-    local target_port
-    target_port=$(get_env_port "$target_env")
-    
-    # Method 1: Nginx upstream
-    if [[ -f "/etc/nginx/conf.d/app-upstream.conf" ]]; then
-        cat > "/etc/nginx/conf.d/app-upstream.conf" <<EOF
-upstream app_backend {
-    server 127.0.0.1:${target_port};
-}
-EOF
-        nginx -t && nginx -s reload
-        return $?
-    fi
-    
-    # Method 2: HAProxy
-    if [[ -S "/var/run/haproxy/admin.sock" ]]; then
-        local old_env
-        old_env=$(get_active_env)
-        
-        # Disable old, enable new
-        echo "set server app_backend/${old_env} state maint" | \
-            socat stdio /var/run/haproxy/admin.sock
-        echo "set server app_backend/${target_env} state ready" | \
-            socat stdio /var/run/haproxy/admin.sock
-        return $?
-    fi
-    
-    # Method 3: Symlink switch
-    local live_path="${DEPLOY_BASE_PATH}/live"
-    local target_path
-    target_path=$(get_env_path "$target_env")
-    
-    rm -f "$live_path"
-    ln -sfn "$target_path/current" "$live_path"
-    
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Rollback
-#-------------------------------------------------------------------------------
 rollback_blue_green() {
-    local current_active
-    local previous_env
-    
-    current_active=$(get_active_env)
-    previous_env=$(get_inactive_env)
-    
-    log_warn "Initiating rollback from $current_active to $previous_env"
-    
-    # Verify that previous environment exists and is functional
-    if ! is_environment_healthy "$previous_env"; then
-        log_error "Previous environment $previous_env is not healthy!"
-        return 1
-    fi
-    
-    # Start previous environment if stopped
-    start_environment "$previous_env"
-    
-    # Switch traffic
-    switch_traffic "$previous_env" || {
-        log_error "Failed to switch traffic during rollback"
-        return 1
-    }
-    
-    # Update state
-    set_active_env "$previous_env"
-    
-    # Stop failed environment
-    stop_environment "$current_active"
-    
-    log_info "Rollback completed. Active environment: $previous_env"
-    return 0
-}
-
-is_environment_healthy() {
-    local env="$1"
-    local port
-    port=$(get_env_port "$env")
-    
-    curl -sf "http://localhost:${port}/health" > /dev/null 2>&1
+    local active previous
+    active=$(get_active_env) || return 1
+    case $active in blue) previous=green;; green) previous=blue;; *) return 2;; esac
+    # A stopped standby must start before probing it.
+    start_environment "$previous" || return 1
+    is_environment_healthy "$previous" || return 1
+    switch_traffic "$previous" || return 3
+    set_active_env "$previous" || return 3
+    return 0  # Stopping the failed pool is a separate, explicitly requested action.
 }
 ```
 
@@ -744,8 +337,8 @@ is_environment_healthy() {
 
 | Strengths | Weaknesses |
 |-----------|------------|
-| Instant rollback | Resource doubling |
-| Zero downtime | Infrastructure cost |
+| Rapid rollback when the previous pool is healthy | Resource doubling |
+| Availability can be maintained | Infrastructure cost |
 | Isolated testing | Complex data synchronisation |
 | Atomic switch | Doesn't detect gradual problems |
 
@@ -788,325 +381,147 @@ Canary deployment exposes the new version to only a small subset of users initia
 ### Deployer Implementation
 
 ```bash
-#!/bin/bash
-#===============================================================================
-# canary_deploy.sh - Canary Deployment Implementation
-#===============================================================================
+#!/usr/bin/env bash
+# Explicit illustrative parameters; the operator supplies/approves the real values.
+declare -a CANARY_STAGES=(5 25 50 75 100)
+STAGE_DURATION=300
+ERROR_THRESHOLD=1.0
+LATENCY_THRESHOLD=500
+CONSECUTIVE_FAILURE_LIMIT=3
+AUTO_PROMOTE=false
 
-source "$(dirname "$0")/../lib/deployer_core.sh"
-source "$(dirname "$0")/../lib/deployer_utils.sh"
-
-#-------------------------------------------------------------------------------
-# Configuration
-#-------------------------------------------------------------------------------
-declare -ga CANARY_STAGES=(5 25 50 75 100)
-declare -g STAGE_DURATION=300  # 5 minutes per stage
-declare -g ERROR_THRESHOLD=1.0  # 1% error rate
-declare -g LATENCY_THRESHOLD=500  # 500ms p99
-declare -g METRICS_ENDPOINT="http://localhost:9090"
-declare -g AUTO_PROMOTE=true
-
-#-------------------------------------------------------------------------------
-# Canary Deployment Core
-#-------------------------------------------------------------------------------
-deploy_canary() {
-    local release_path="$1"
-    
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  CANARY DEPLOYMENT"
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  Stages: ${CANARY_STAGES[*]}%"
-    log_info "  Stage duration: ${STAGE_DURATION}s"
-    log_info "  Error threshold: ${ERROR_THRESHOLD}%"
-    log_info "  Latency threshold: ${LATENCY_THRESHOLD}ms"
-    log_info "═══════════════════════════════════════════════════════════"
-    
-    # Step 1: Deploy canary instances
-    log_info "[1/3] Deploying canary instances..."
-    if ! deploy_canary_instances "$release_path"; then
-        log_error "Failed to deploy canary instances"
-        return 1
-    fi
-    
-    # Step 2: Progression through stages
-    log_info "[2/3] Starting canary progression..."
-    for percentage in "${CANARY_STAGES[@]}"; do
-        log_info "────────────────────────────────────────────────"
-        log_info "  STAGE: ${percentage}% traffic to canary"
-        log_info "────────────────────────────────────────────────"
-        
-        # Adjust traffic split
-        if ! set_canary_weight "$percentage"; then
-            log_error "Failed to set canary weight to $percentage%"
-            rollback_canary
-            return 1
-        fi
-        
-        # Monitor stage
-        if ! monitor_canary_stage "$percentage" "$STAGE_DURATION"; then
-            log_error "Canary failed at ${percentage}% stage"
-            rollback_canary
-            return 1
-        fi
-        
-        log_info "Stage ${percentage}% completed successfully"
-        
-        # At 100%, exit loop
-        [[ "$percentage" -eq 100 ]] && break
-        
-        # Pause between stages (for auto-promote)
-        if [[ "$AUTO_PROMOTE" == "true" ]]; then
-            log_info "Auto-promoting to next stage..."
-        else
-            log_info "Waiting for manual promotion..."
-            wait_for_promotion || {
-                log_warn "Promotion cancelled, initiating rollback"
-                rollback_canary
-                return 1
-            }
-        fi
-    done
-    
-    # Step 3: Finalisation
-    log_info "[3/3] Finalising deployment..."
-    finalize_canary_deployment || {
-        log_error "Failed to finalise deployment"
-        return 1
-    }
-    
-    log_info "═══════════════════════════════════════════════════════════"
-    log_info "  CANARY DEPLOYMENT SUCCESSFUL"
-    log_info "═══════════════════════════════════════════════════════════"
-    
-    return 0
+canary_values_valid() {
+    python3 - "$@" <<'PY'
+import math,sys
+try:
+    error,latency,error_limit,latency_limit=map(float,sys.argv[1:])
+    assert all(map(math.isfinite,(error,latency,error_limit,latency_limit)))
+    assert 0<=error<=100 and 0<=error_limit<=100 and latency>=0 and latency_limit>=0
+except (ValueError,AssertionError): raise SystemExit(2)
+raise SystemExit(0 if error<=error_limit and latency<=latency_limit else 1)
+PY
 }
 
-#-------------------------------------------------------------------------------
-# Canary Instance Management
-#-------------------------------------------------------------------------------
-deploy_canary_instances() {
-    local release_path="$1"
-    local canary_path="${DEPLOY_BASE_PATH}/canary"
-    
-    # Cleanup previous canary
-    rm -rf "$canary_path"
-    mkdir -p "$canary_path"
-    
-    # Copy release
-    cp -r "$release_path"/* "$canary_path/"
-    
-    # Start canary instances
-    for i in $(seq 1 "$CANARY_INSTANCE_COUNT"); do
-        local service="app-canary-${i}"
-        
-        systemctl start "$service" || {
-            log_error "Failed to start $service"
-            return 1
-        }
-    done
-    
-    # Wait for healthy
-    sleep 10
-    
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Traffic Management
-#-------------------------------------------------------------------------------
-set_canary_weight() {
-    local percentage="$1"
-    local stable_weight=$((100 - percentage))
-    
-    log_debug "Setting traffic: stable=${stable_weight}%, canary=${percentage}%"
-    
-    # Nginx upstream with weighted round-robin
-    if [[ -f "/etc/nginx/conf.d/app-upstream.conf" ]]; then
-        cat > "/etc/nginx/conf.d/app-upstream.conf" <<EOF
-upstream app_backend {
-    # Stable instances
-    server 127.0.0.1:8001 weight=${stable_weight};
-    
-    # Canary instances
-    server 127.0.0.1:8002 weight=${percentage};
-}
-EOF
-        nginx -t && nginx -s reload
-        return $?
-    fi
-    
-    # Istio VirtualService (for Kubernetes)
-    if command -v kubectl &>/dev/null; then
-        kubectl apply -f - <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: app-vs
-spec:
-  http:
-  - route:
-    - destination:
-        host: app-stable
-      weight: ${stable_weight}
-    - destination:
-        host: app-canary
-      weight: ${percentage}
-EOF
-        return $?
-    fi
-    
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Monitoring and Analysis
-#-------------------------------------------------------------------------------
 monitor_canary_stage() {
-    local percentage="$1"
-    local duration="$2"
-    local check_interval=30
-    local elapsed=0
-    
-    while [[ $elapsed -lt $duration ]]; do
-        # Collect metrics
-        local canary_error_rate
-        local canary_latency
-        local stable_error_rate
-        local stable_latency
-        
-        canary_error_rate=$(get_error_rate "canary")
-        canary_latency=$(get_p99_latency "canary")
-        stable_error_rate=$(get_error_rate "stable")
-        stable_latency=$(get_p99_latency "stable")
-        
-        log_debug "Metrics at ${elapsed}s:"
-        log_debug "  Canary - Error: ${canary_error_rate}%, Latency: ${canary_latency}ms"
-        log_debug "  Stable - Error: ${stable_error_rate}%, Latency: ${stable_latency}ms"
-        
-        # Compare with thresholds
-        if ! check_canary_health "$canary_error_rate" "$canary_latency" \
-                                  "$stable_error_rate" "$stable_latency"; then
-            log_error "Canary health check failed!"
-            return 1
+    local percentage=$1 duration=$2 interval=${METRICS_CHECK_INTERVAL:-10}
+    local deadline error latency rc bad=0 pause
+    positive_integer "$duration" && positive_integer "$interval" || return 2
+    deadline=$((SECONDS+duration))
+    while :; do
+        error=$(get_canary_error_rate) || return 1
+        latency=$(get_canary_latency) || return 1
+        if canary_values_valid "$error" "$latency" "${ERROR_THRESHOLD:?Set an explicit error threshold}" "${LATENCY_THRESHOLD:?Set an explicit latency threshold}"; then
+            bad=0
+        else
+            rc=$?; ((rc != 2)) || return 1  # No data/NaN is unavailable, not healthy.
+            bad=$((bad+1))                # One bad observation, even if both metrics fail.
+            ((bad < ${CONSECUTIVE_FAILURE_LIMIT:-3})) || return 1
         fi
-        
-        sleep "$check_interval"
-        ((elapsed += check_interval))
-        
-        # Progress indicator
-        local progress=$((elapsed * 100 / duration))
-        echo -ne "\r  Stage progress: ${progress}% (${elapsed}s/${duration}s)"
+        ((SECONDS < deadline)) || break
+        pause=$((deadline-SECONDS)); ((pause <= interval)) || pause=$interval
+        sleep "$pause" || return 1
     done
-    
-    echo ""
-    return 0
+    # An unfinished bad streak at the end is not a stable stage ready for promotion.
+    ((bad == 0))
 }
 
-get_error_rate() {
-    local version="$1"
-    
-    # Query Prometheus
-    local query="sum(rate(http_requests_total{status=~'5..',version='${version}'}[5m])) / sum(rate(http_requests_total{version='${version}'}[5m])) * 100"
-    
-    local result
-    result=$(curl -s "${METRICS_ENDPOINT}/api/v1/query" \
-        --data-urlencode "query=$query" \
-        | jq -r '.data.result[0].value[1] // "0"')
-    
-    echo "${result:-0}"
+deploy_canary() {
+    local release=$1 percentage previous=0 adapter
+    local -a stages=("${CANARY_STAGES[@]:-5 25 50 75 100}")
+    # The array must be explicitly initialised by the caller; no word-splitting fallback.
+    declare -p CANARY_STAGES &>/dev/null || return 2
+    stages=("${CANARY_STAGES[@]}")
+    ((${#stages[@]} > 0)) || return 2
+    for percentage in "${stages[@]}"; do
+        positive_integer "$percentage" || return 2
+        ((percentage > previous && percentage <= 100)) || return 2
+        previous=$percentage
+    done
+    ((previous == 100)) || return 2
+    positive_integer "${STAGE_DURATION:-}" && positive_integer "${CONSECUTIVE_FAILURE_LIMIT:-3}" || return 2
+    canary_values_valid 0 0 "${ERROR_THRESHOLD:-}" "${LATENCY_THRESHOLD:-}" || return 2
+    for adapter in deploy_canary_instances set_canary_weight get_canary_error_rate get_canary_latency rollback_canary finalize_canary_deployment; do
+        require_adapter "$adapter" || return 2
+    done
+    deploy_canary_instances "$release" || return 1
+    for percentage in "${stages[@]}"; do
+        if set_canary_weight "$percentage" && monitor_canary_stage "$percentage" "$STAGE_DURATION"; then :
+        else rollback_canary || return 3; return 1; fi
+        if ((percentage < 100)) && [[ ${AUTO_PROMOTE:-false} != true ]]; then
+            require_adapter wait_for_promotion || { rollback_canary || return 3; return 2; }
+            wait_for_promotion "$percentage" || { rollback_canary || return 3; return 1; }
+        fi
+    done
+    # 100% receives the same observation window before promotion.
+    finalize_canary_deployment || return 3
 }
 
-get_p99_latency() {
-    local version="$1"
-    
-    local query="histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{version='${version}'}[5m])) by (le)) * 1000"
-    
-    local result
-    result=$(curl -s "${METRICS_ENDPOINT}/api/v1/query" \
-        --data-urlencode "query=$query" \
-        | jq -r '.data.result[0].value[1] // "0"')
-    
-    echo "${result:-0}"
-}
 
-check_canary_health() {
-    local canary_error="$1"
-    local canary_latency="$2"
-    local stable_error="$3"
-    local stable_latency="$4"
-    
-    # Check absolute thresholds
-    if (( $(echo "$canary_error > $ERROR_THRESHOLD" | bc -l) )); then
-        log_error "Canary error rate ${canary_error}% exceeds threshold ${ERROR_THRESHOLD}%"
-        return 1
-    fi
-    
-    if (( $(echo "$canary_latency > $LATENCY_THRESHOLD" | bc -l) )); then
-        log_error "Canary latency ${canary_latency}ms exceeds threshold ${LATENCY_THRESHOLD}ms"
-        return 1
-    fi
-    
-    # Check relative (canary vs stable)
-    local error_ratio
-    error_ratio=$(echo "scale=2; $canary_error / ($stable_error + 0.001)" | bc -l)
-    
-    if (( $(echo "$error_ratio > 2.0" | bc -l) )); then
-        log_error "Canary error rate is ${error_ratio}x higher than stable"
-        return 1
-    fi
-    
-    return 0
-}
-
-#-------------------------------------------------------------------------------
-# Rollback and Finalisation
-#-------------------------------------------------------------------------------
+# Lifecycle adapters retain the old pool until rerouting is acknowledged.
+deploy_canary_instances() { "${CANARY_LIFECYCLE_PROGRAM:?}" prepare "$1"; }
 rollback_canary() {
-    log_warn "Initiating canary rollback..."
-    
-    # Redirect all traffic to stable
-    set_canary_weight 0
-    
-    # Stop canary instances
-    for i in $(seq 1 "$CANARY_INSTANCE_COUNT"); do
-        systemctl stop "app-canary-${i}" 2>/dev/null || true
-    done
-    
-    # Cleanup
-    rm -rf "${DEPLOY_BASE_PATH}/canary"
-    
-    log_info "Canary rollback completed"
+    set_canary_weight 0 || return 3
+    "${CANARY_LIFECYCLE_PROGRAM:?}" stop || return 1
+    # No deletion follows an unacknowledged route change.
 }
-
 finalize_canary_deployment() {
-    log_info "Promoting canary to stable..."
-    
-    # Copy canary to stable
-    local stable_path="${DEPLOY_BASE_PATH}/stable"
-    local canary_path="${DEPLOY_BASE_PATH}/canary"
-    
-    # Backup current stable
-    if [[ -d "$stable_path" ]]; then
-        mv "$stable_path" "${stable_path}.backup.$(date +%s)"
-    fi
-    
-    # Promote canary
-    mv "$canary_path" "$stable_path"
-    
-    # Restart stable instances with new version
-    for i in $(seq 1 "$STABLE_INSTANCE_COUNT"); do
-        systemctl restart "app-stable-${i}"
-    done
-    
-    # Redirect all traffic to stable
-    set_canary_weight 0
-    
-    # Stop canary-specific instances
-    for i in $(seq 1 "$CANARY_INSTANCE_COUNT"); do
-        systemctl stop "app-canary-${i}" 2>/dev/null || true
-    done
-    
-    return 0
+    # prepare-stable must start and verify the new stable pool without stopping canary.
+    "${CANARY_LIFECYCLE_PROGRAM:?}" prepare-stable || return 1
+    "${CANARY_LIFECYCLE_PROGRAM:?}" verify-stable || return 1
+    set_canary_weight 0 || return 3
+    "${CANARY_LIFECYCLE_PROGRAM:?}" stop || return 1
+}
+wait_for_promotion() { "${PROMOTION_PROGRAM:?Explicit promotion adapter required}" "$1"; }
+set_canary_weight() {
+    local percentage=$1
+    [[ $percentage =~ ^[0-9]{1,3}$ ]] && ((10#$percentage <= 100)) || return 2
+    case ${TRAFFIC_BACKEND:?Choose the routing backend} in
+        nginx)
+            python3 "${ROUTING_REFERENCE_PATH:?}" "$percentage" --config "${NGINX_UPSTREAM_FILE:?}" \
+                --validator "${NGINX_VALIDATE_PROGRAM:?}" --reloader "${NGINX_RELOAD_PROGRAM:?}";;
+        istio)
+            # The adapter must target an explicitly approved context/namespace and
+            # confirm the route; installed kubectl alone is not configuration.
+            "${ISTIO_ROUTE_PROGRAM:?}" "$percentage";;
+        *) return 2;;
+    esac
+}
+prometheus_value() {
+    local query=$1 response
+    response=$(curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
+        --get --data-urlencode "query=$query" -- "${METRICS_ENDPOINT:?}/api/v1/query") || return 1
+    python3 - "$response" <<'PY'
+import json,math,sys
+try:
+    d=json.loads(sys.argv[1]); assert d['status']=='success' and d['data']['resultType']=='vector'
+    rows=d['data']['result']; assert len(rows)==1
+    value=float(rows[0]['value'][1]); assert math.isfinite(value) and value>=0
+    print(value)
+except (ValueError,KeyError,IndexError,TypeError,AssertionError): raise SystemExit(1)
+PY
+}
+get_error_rate() {
+    local version=$1
+    [[ $version == stable || $version == canary ]] || return 2
+    prometheus_value "sum(rate(http_requests_total{status=~\"5..\",version=\"$version\"}[5m])) / sum(rate(http_requests_total{version=\"$version\"}[5m])) * 100"
+}
+get_p99_latency() {
+    local version=$1
+    [[ $version == stable || $version == canary ]] || return 2
+    prometheus_value "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{version=\"$version\"}[5m])) by (le)) * 1000"
+}
+get_canary_error_rate() { get_error_rate canary; }
+get_canary_latency() { get_p99_latency canary; }
+check_canary_health() {
+    local error=$1 latency=$2 stable_error=$3 stable_latency=$4
+    canary_values_valid "$error" "$latency" "$ERROR_THRESHOLD" "$LATENCY_THRESHOLD" || return 1
+    canary_values_valid "$stable_error" "$stable_latency" 100 1000000000 || return 1
+    python3 - "$error" "$stable_error" <<'PY'
+import sys
+error,stable=map(float,sys.argv[1:])
+# This optional relative gate retains the lesson's illustrative 2x/.001 rule.
+raise SystemExit(0 if error/(stable+.001)<=2 else 1)
+PY
 }
 ```
 
@@ -1121,13 +536,78 @@ finalize_canary_deployment() {
 
 ---
 
+## Checked routing configuration
+
+Save this module as `routing_reference.py`. Zero traffic uses a valid `weight=1 down` endpoint, not Nginx's invalid `weight=0`. Config replacement validates a staged file, retains the previous bytes and rolls the file back if reload fails. A failure to acknowledge restoration returns 3; do not stop or delete either application pool in that state. The configured validator must validate the fragment in its complete Nginx context. Weighted routing expresses a configuration target; finite observed traffic proportions can differ.
+
+```python
+#!/usr/bin/env python3
+"""Nginx upstream fragment generation and checked local config replacement.
+
+The caller supplies an owned config file and two executable adapters. The validator
+must validate this fragment in its complete Nginx context; the reload adapter must
+acknowledge the observed daemon outcome. Tests substitute local fixture programs.
+"""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+def render(percent,stable=8001,canary=8002):
+    if type(percent)!=int or not 0<=percent<=100 or not 1<=stable<=65535 or not 1<=canary<=65535:
+        raise ValueError('Invalid weight or port')
+    def server(port,weight):
+        return f'    server 127.0.0.1:{port} '+(f'weight={weight};' if weight else 'weight=1 down;')
+    return 'upstream app_backend {\n'+server(stable,100-percent)+'\n'+server(canary,percent)+'\n}\n'
+
+
+def apply(config,text,validator,reloader):
+    if not config.is_absolute() or config.is_symlink() or not config.is_file():
+        raise ValueError('Existing owned absolute configuration file required')
+    with tempfile.TemporaryDirectory(prefix='.route.',dir=config.parent) as directory:
+        directory=Path(directory); staged=directory/'candidate.conf'; backup=directory/'previous.conf'
+        staged.write_text(text); shutil.copy2(config,backup)
+        # Adapter validates the complete include context, not a bare upstream block as a main config.
+        subprocess.run([validator,str(staged)],check=True)
+        staged.chmod(config.stat().st_mode & 0o777)
+        os.replace(staged,config)
+        try: subprocess.run([reloader,str(config)],check=True)
+        except subprocess.CalledProcessError:
+            os.replace(backup,config)
+            try: subprocess.run([reloader,str(config)],check=True)
+            except subprocess.CalledProcessError: return 3  # Routing outcome is unknown: retain both pools.
+            return 1
+    return 0
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__); p.add_argument('percent',type=int)
+    p.add_argument('--stable-port',type=int,default=8001); p.add_argument('--canary-port',type=int,default=8002)
+    p.add_argument('--config',type=Path); p.add_argument('--validator'); p.add_argument('--reloader')
+    a=p.parse_args(); text=render(a.percent,a.stable_port,a.canary_port)
+    if a.config:
+        if not a.validator or not a.reloader: raise ValueError('Explicit validator/reloader adapters required')
+        return apply(a.config,text,a.validator,a.reloader)
+    print(text,end=''); return 0
+
+
+if __name__=='__main__':
+    try: raise SystemExit(main())
+    except (OSError,ValueError,subprocess.CalledProcessError) as error:
+        print(error,file=sys.stderr); raise SystemExit(1)
+```
+
 ## Synthetic Comparison
 
 ### Comparative Table
 
 | Criterion | Rolling | Blue-Green | Canary |
 |-----------|---------|------------|--------|
-| **Downtime** | Zero | Zero | Zero |
+| **Downtime** | Can be avoided with capacity/draining | Can be avoided with verified routing | Can be avoided with verified routing |
 | **Additional resources** | Minimal | 2x | ~10-20% |
 | **Complexity** | Medium | Medium | High |
 | **Deployment time** | Medium | Fast | Long |
@@ -1135,7 +615,7 @@ finalize_canary_deployment() {
 | **Risk** | Moderate | Low | Very low |
 | **Simultaneous versions** | Yes | No (momentarily) | Yes |
 | **Requires advanced LB** | No | No | Yes |
-| **Pre-live testing** | Partial | Complete | Partial |
+| **Pre-live testing** | Limited by the configured suite | Isolated candidate tests; coverage remains bounded | Limited before live traffic |
 
 ### Decision Tree
 
@@ -1235,8 +715,12 @@ Create a metrics visualisation system:
 
 ### Best Practices
 
-1. **Complete automation**: No manual steps in deployment
+1. **Explicit automation**: Automate the approved workflow and retain deliberate promotion or recovery decisions where required
 2. **Monitoring before deploy**: Setup alerting before any change
 3. **Tested rollback**: Verify that rollback works before deployment
 4. **Communication**: Notify the team about planned deployments
 5. **Post-mortems**: Analyse every failed deployment
+
+### Technical reference for the corrected examples
+
+The routing fragment uses documented [Nginx upstream server parameters](https://nginx.org/en/docs/http/ngx_http_upstream_module.html).

@@ -21,7 +21,7 @@ These are **archived assignments** from previous semesters. They are kept for:
 - Comparing approaches
 - Detecting resubmission of old work
 
-**Current students:** Use the current `S06_01_HOMEWORK.md` in the parent directory.
+**Current students:** Use the current `S06_01_HOMEWORK_CAPSTONE.md` in the parent directory.
 
 ---
 
@@ -35,6 +35,6 @@ These are **archived assignments** from previous semesters. They are kept for:
 
 ---
 
-*Do not submit old homework — plagiarism detection will flag it.*
+*Archive similarity is a review lead, not proof of misconduct. Current requirements and evidence review must follow the approved policy.*
 
 *Last updated: January 2026*

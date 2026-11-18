@@ -1,5 +1,7 @@
 # Introduction to Kubernetes for OS Projects
 
+> **Current status:** Numerical assessment, bonus and penalty rules below are historical proposals awaiting author reconciliation. Timings, anecdotes and experiential claims are retained with unverified provenance. See [ASSESSMENT_AND_EVIDENCE_CONTRACT.md](ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for the concrete choices, consequences and recommended resolution. No grade or publication policy is adopted by these examples.
+
 > **Optional Guide for Kubernetes Extensions**  
 > **Operating Systems** | ASE Bucharest - CSIE
 
@@ -84,7 +86,7 @@ kind: Pod
 metadata:
   name: myapp-pod
   labels:
-    app: myapp
+    app: myapp-demo-only
 spec:
   containers:
   - name: myapp-container
@@ -139,7 +141,7 @@ kubectl scale deployment myapp-deployment --replicas=5
 
 ### Service
 
-Exposes pods as a network service.
+Exposes serving nginx Pods selected by `app: myapp`. The standalone BusyBox example uses `app: myapp-demo-only`, so it is not an endpoint for this Service.
 
 ```yaml
 # service.yaml
@@ -176,7 +178,7 @@ data:
 ```
 
 ```yaml
-# secret.yaml (values are base64 encoded)
+# secret.yaml (synthetic teaching value; base64 is not encryption)
 apiVersion: v1
 kind: Secret
 metadata:
@@ -217,6 +219,8 @@ spec:
 ## Complete Example: Script Monitor Deployment
 
 Example of how an OS project (M02: Process Monitor) would look with a Kubernetes extension.
+
+This is a deployment design for a student implementation, not the runtime SEM06 monitor. The application must support the shown paths/configuration. Host `/proc` access exposes host process information and needs explicit authorisation; do not infer complete host monitoring from an ordinary container.
 
 ### File Structure
 
@@ -359,7 +363,7 @@ To receive the bonus, the project must include:
    - Deployment instructions
    - Verification commands
 
-### Optional (additional points)
+### Optional learning extensions (credit pending author decision)
 
 - CronJob for periodic tasks
 - PersistentVolume for storage

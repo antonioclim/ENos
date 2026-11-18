@@ -1,6 +1,8 @@
 # Assessment Rubric - Seminar 4 Assignment
 
-> **Instructor document** | Do not distribute to students before assessment
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
+> **Audience:** Assessor reference, currently committed publicly. This label does not establish confidentiality; publication strategy remains an author decision.
 
 ---
 
@@ -42,12 +44,12 @@
 | Counting | 2 | Complete statistics | Only total | Missing or incorrect |
 | Edge cases | 1 | Handles `.co.uk`, `+alias`, etc. | Handles simple cases | Crash on unexpected input |
 
-**Minimum acceptable regex:**
+**Historical teaching subset (not complete RFC validation; acceptance policy pending):**
 ```bash
 [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
 ```
 
-**Excellent regex (bonus):**
+**Broader illustrative regex (not complete RFC validation; bonus pending):**
 ```bash
 ^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$
 ```
@@ -61,9 +63,9 @@
 | Numeric sorting | 2 | `sort -t. -k1,1n -k2,2n...` | Alphabetic sorting | Unsorted |
 | Output | 1 | Clean format, one per line | Acceptable | Confusing |
 
-**Strict IP validation (bonus +1%):**
+**Octet-range validation of a complete candidate (historical +1% proposal pending):**
 ```bash
-grep -oE '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}'
+grep -xE '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}' candidates.txt
 ```
 
 ### 1.3 RO Phone Numbers (7%)
@@ -88,7 +90,8 @@ grep -oE '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-
 
 **Reference solution:**
 ```bash
-awk -F'[][]' '{count[$2]++} END {for(l in count) printf "%-10s %d\n", l, count[l]}'
+awk -F'[][]' '$4 ~ /^(INFO|WARNING|ERROR|DEBUG)$/ {count[$4]++;valid++;next} {bad++}
+END {for(l in count) printf "%-10s %d (%.2f%%)\n",l,count[l],100*count[l]/valid; if(!valid) print "No valid events; percentages undefined"; print "Excluded malformed records:",bad+0}' server.log
 ```
 
 ### 2.2 Failed Authentication (9%)
@@ -120,11 +123,14 @@ awk -F'[][]' '{count[$2]++} END {for(l in count) printf "%-10s %d\n", l, count[l
 | Salary format | 2 | $XX,XXX with thousands separator | $ only | Raw number |
 | Header/border | 2 | Box drawing characters | Simple lines | None |
 
-**Salary formatting solution:**
+**Salary formatting illustration (locale-dependent; canonical salary is column 4):**
 ```bash
-awk '{printf "$%\047d\n", $5}'  # or
-printf "%'d" $salary
+awk -F, 'NR>1 {printf "$%\047d\n", $4}' employees.csv  # or
+printf "%'d" "$salary"
 ```
+
+The corrected reference script provides locale-independent comma grouping. These
+models require the exact personalised CSV header and simple unquoted fields.
 
 ### 3.2 Department Statistics (8%)
 
@@ -137,10 +143,10 @@ printf "%'d" $salary
 **Reference solution:**
 ```bash
 awk -F',' 'NR>1 {
-    dept=$4; sal=$5
+    dept=$3; sal=$4
     count[dept]++; sum[dept]+=sal
-    if(!min[dept] || sal<min[dept]) min[dept]=sal
-    if(sal>max[dept]) max[dept]=sal
+    if(!(dept in min) || sal<min[dept]) min[dept]=sal
+    if(!(dept in max) || sal>max[dept]) max[dept]=sal
 } END {
     for(d in count) printf "%-12s %3d %8.0f %8d %8d\n", 
         d, count[d], sum[d]/count[d], min[d], max[d]
@@ -232,12 +238,12 @@ awk -F',' 'NR>1 {
 □ Ex4: sales_report.sh - runs on sales.csv
 □ Outputs generated in output/ folder
 □ Code commented and with header
-□ Checked for plagiarism (diff with other submissions)
+□ Similarity observations recorded with context; no automatic authorship/misconduct inference
 ```
 
 ---
 
-## Expected Grade Distribution
+## Historical Score Bands — No Empirical Distribution Established
 
 | Grade | Score Range | Description |
 |-------|-------------|-------------|

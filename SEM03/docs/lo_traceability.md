@@ -35,15 +35,19 @@ Upon completion of Seminar 03, students will be able to:
 
 ### 2.1 Coverage by Files
 
-| LO | Main Material | Peer Instruction | Live Coding | Sprint Ex. | LLM-Aware | Quiz |
-|:--:|:-------------:|:----------------:|:-----------:|:----------:|:---------:|:----:|
-| LO1 | S03_02 §2.1 | PI-01, PI-02 | LC-01 | Ex 1-3 | E1, E2 | Q01-Q04 |
-| LO2 | S03_02 §2.2 | PI-03, PI-04 | LC-02 | Ex 4-5 | E3 | Q05 |
-| LO3 | S03_02 §3 | PI-06, PI-07, PI-08 | LC-03 | Ex 6-8 | E4, E5 | Q06-Q08 |
-| LO4 | S03_02 §4 | PI-10, PI-11, PI-12 | LC-04 | Ex 9-12 | E6, E7 | Q09-Q12 |
-| LO5 | S03_02 §5 | PI-15, PI-16, PI-17 | LC-05 | Ex 13-15 | E8, E9 | Q13-Q15 |
-| LO6 | S03_02 §6 | PI-05, PI-09, PI-14 | LC-01, LC-04 | Ex 16-17 | E10 | Q11, Q16 |
-| LO7 | S03_02 §7 | PI-03 | LC-02 | Ex 18 | E11 | Q17 |
+| LO | Main Material | Peer Instruction | Live Coding | Sprint | LLM activity | Canonical quiz IDs |
+|:--:|---|---|---|---|---|---|
+| LO1 | Module 1 §§1.1–1.5 | PI-01/02/05 | LC-01 | F1/F2 | L1 | q01/q03/q04 |
+| LO2 | Module 1 §1.6 | PI-03/04 | LC-02 | F2 | L1/L6 | q05/q17 |
+| LO3 | Module 2 §§2.1–2.6 | PI-06…09 | LC-03 | S1/S2 | L2 | q06…08 |
+| LO4 | Module 3 §§3.1–3.6 | PI-10…14 | LC-04 | P1/P2 | L4/L5 | q09…12/tacit_02 |
+| LO5 | Module 4 §§4.1–4.4 | PI-15…18 | LC-05 | C1/C2 | L3 | q13…16/trap_03 |
+| LO6 | Modules 2–4 worked errors | PI-10/17 | LC-03/04/05 | S1/P2/C2 | L2/L3/L4 | q11/q16/trap_02/tacit_01/02 |
+| LO7 | Module 1 batching comparison | PI-03 | LC-02 | F2 discussion | L1/L6 | q17 |
+
+These are actual topic/identifier mappings, not proof that every outcome has been
+assessed. LO7 needs an explicit benchmark or justified cost comparison to establish
+performance; process-count reasoning alone is not a speed measurement.
 
 ### 2.2 Coverage by Activities
 
@@ -64,7 +68,7 @@ Upon completion of Seminar 03, students will be able to:
 
 ### PP-01: find script with old file deletion
 
-**Task:** Arrange the lines to create a script that deletes `.tmp` files older than 7 days from `/tmp`.
+**Task:** Arrange the lines to create a script that deletes `.tmp` files at least eight complete days old from an owned `./temp` fixture.
 
 **LOs covered:** LO1, LO2
 
@@ -72,18 +76,18 @@ Upon completion of Seminar 03, students will be able to:
 ```bash
 #!/bin/bash
 set -euo pipefail
-find /tmp -name "*.tmp" -type f -mtime +7 -print0 | xargs -0 rm -f
+find ./temp -name "*.tmp" -type f -mtime +7 -print0 | xargs -0 -r rm --
 echo "Cleanup complete"
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
-| `find /tmp -name "*.tmp" -mtime 7 -print` | Missing `+` at mtime, missing `-type f`, missing `-print0` | Confusion +/- sign at mtime |
-| `find /tmp -name *.tmp -type f -mtime +7` | Missing quotes at pattern | Shell expands wildcard prematurely |
+| `find ./temp -name "*.tmp" -mtime 7 -print` | Missing `+` at mtime, missing `-type f`, missing `-print0` | Confusion +/- sign at mtime |
+| `find ./temp -name *.tmp -type f -mtime +7` | Missing quotes at pattern | Shell expands wildcard prematurely |
 | `xargs rm -f` | Missing `-0` for null separator | Problems with spaces in names |
-| `find /tmp -type f "*.tmp" -mtime +7` | Incorrect syntax: `-name` missing | Confusion option order |
+| `find ./temp -type f "*.tmp" -mtime +7` | Incorrect syntax: `-name` missing | Confusion option order |
 
 **Solution with explanations:**
 ```bash
@@ -91,8 +95,8 @@ echo "Cleanup complete"
 # Shebang - mandatory first line
 set -euo pipefail
 # Strict mode: exit on error, undefined vars, pipe failures
-find /tmp -name "*.tmp" -type f -mtime +7 -print0 | xargs -0 rm -f
-# -name with quotes, -type f for files only, +7 = older than 7 days
+find ./temp -name "*.tmp" -type f -mtime +7 -print0 | xargs -0 -r rm --
+# -name with quotes, -type f for files only, +7 = at least eight complete days old
 # -print0 and -0 for correct handling of spaces in names
 echo "Cleanup complete"
 ```
@@ -119,13 +123,13 @@ while getopts "vf:" opt; do
 done
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
 | `while getopts "v:f:" opt; do` | `:` incorrect after `v` | v is flag, has no argument |
 | `while getopts "vf" opt; do` | Missing `:` after `f` | f requires argument |
-| `f) INPUT_FILE=$OPTARG ;;` | Missing quotes | Variables must be quoted |
+| `f) INPUT_FILE=$OPTARG ;;` | Valid alternative assignment; no splitting/globbing here | Distinguish assignment from command arguments |
 | `case "$opt" in` | Unnecessary quotes but not wrong | Not an error, but may confuse |
 | `INPUT_FILE = ""` | Spaces at assignment | Classic Bash error |
 
@@ -161,7 +165,7 @@ if [[ ! -x "$FILE" ]]; then
 fi
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
@@ -190,19 +194,22 @@ fi                               # Closes if
 **LOs covered:** LO5, LO6
 
 **Correct lines (correct order):**
-```bash
-# In crontab (crontab -e):
+```cron
 0 3 * * * /home/user/backup.sh >> /var/log/backup.log 2>&1
+```
 
+Script `backup.sh` (owned configured destination required):
+
+```bash
 # Script backup.sh:
 #!/bin/bash
 set -euo pipefail
-echo "[$(date '+\%Y-\%m-\%d \%H:\%M:\%S')] Backup started"
-tar -czf /backup/data_$(date +\%Y\%m\%d).tar.gz /home/user/data
-echo "[$(date '+\%Y-\%m-\%d \%H:\%M:\%S')] Backup completed"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup started"
+tar -czf /backup/data_$(date +%Y%m%d).tar.gz /home/user/data
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup completed"
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
@@ -212,14 +219,14 @@ echo "[$(date '+\%Y-\%m-\%d \%H:\%M:\%S')] Backup completed"
 | `0 3 * * 1-5 /home/user/backup.sh` | Runs only Monday-Friday | Confusion with "daily" |
 
 **Solution with explanations:**
-```bash
+```cron
 # Crontab: m h dom mon dow command
 0 3 * * * /home/user/backup.sh >> /var/log/backup.log 2>&1
 # 0=min, 3=hour, *=any day/month/day_of_week
 # >> = append, 2>&1 = stderr to stdout
 # ABSOLUTE PATH is mandatory!
 
-# In script, % must be escaped as \% in crontab
+# In crontab command text, escape % as \%; ordinary script date formats need no escape
 # Or put the logic in script and call the script from cron
 ```
 
@@ -237,7 +244,7 @@ echo "[$(date '+\%Y-\%m-\%d \%H:\%M:\%S')] Backup completed"
 set -euo pipefail
 DIR="${1:-.}"
 [[ -d "$DIR" ]] || { echo "Error: $DIR is not a directory" >&2; exit 1; }
-count=$(find "$DIR" -name "*.csv" -type f | wc -l)
+count=$(find "$DIR" -name "*.csv" -type f -printf . | wc -c)
 if [[ $count -eq 0 ]]; then
     echo "No .csv files exist in $DIR"
     exit 0
@@ -245,13 +252,13 @@ fi
 find "$DIR" -name "*.csv" -type f -exec wc -l {} +
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
 | `DIR="$1:-."`  | Missing braces at default | Parameter expansion syntax |
 | `[ -d $DIR ] || exit 1` | Missing quotes, message missing | Word splitting |
-| `if [ $count = 0 ]; then` | `=` for string, not numeric | Numeric vs string comparison |
+| `if [ "$count" = 0 ]; then` | Valid here for canonical nonnegative count strings | `-eq` expresses numeric intent |
 | `find "$DIR" -name "*.csv" -exec wc -l {} \;` | `\;` instead of `+` | Inefficiency: one wc per file |
 | `find $DIR -name *.csv` | Variable and pattern without quotes | Errors with spaces and expansion |
 
@@ -265,14 +272,14 @@ DIR="${1:-.}"                    # Default to current directory
 [[ -d "$DIR" ]] || { echo "Error: $DIR is not a directory" >&2; exit 1; }
 # [[ ]] does not require quotes, but it is good practice
 
-count=$(find "$DIR" -name "*.csv" -type f | wc -l)
+count=$(find "$DIR" -name "*.csv" -type f -printf . | wc -c)
 if [[ $count -eq 0 ]]; then      # -eq for numeric comparison
     echo "No .csv files exist in $DIR"
     exit 0
 fi
 
 find "$DIR" -name "*.csv" -type f -exec wc -l {} +
-# + groups files = efficient (a single wc)
+# + groups files into one or more bounded batches; each wc may emit its own total
 ```
 
 ---
@@ -301,16 +308,16 @@ done
 shift $((OPTIND - 1))
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
 | `while getopts "v:o:n:" opt; do` | `:` incorrect after `v` | v is flag, has no argument |
 | `while getopts "von" opt; do` | Missing `:` after `o` and `n` | Both o and n require arguments |
-| `n) COUNT=$OPTARG ;;` | Missing quotes around $OPTARG | Variable must be quoted |
+| `n) COUNT=$OPTARG ;;` | Valid alternative assignment; validate the numeric value separately | Assignment context does not split |
 | `shift OPTIND - 1` | Missing `$(( ))` for arithmetic | Arithmetic expansion syntax |
-| `OUTPUT_FILE= "$OPTARG"` | Space after `=` | Bash assignment syntax error |
-| `while getopts vo:n: opt; do` | Missing quotes around optstring | Optstring must be quoted |
+| `OUTPUT_FILE= "$OPTARG"` | Runs OPTARG as a command with an empty temporary OUTPUT_FILE | Syntactically valid, wrong operation |
+| `while getopts vo:n: opt; do` | Valid literal optstring on this shell | Quoting is permitted, not mandatory here |
 
 **Solution with explanations:**
 ```bash
@@ -364,13 +371,13 @@ tar -czf "$BACKUP_DIR/weekly_$(date +%Y%m%d).tar.gz" /home/user/data 2>> "$LOG_F
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup completed" >> "$LOG_FILE"
 ```
 
-**Distractors (incorrect lines):**
+**Candidate alternatives (see the explanation; some are valid):**
 
 | Incorrect line | Error | Targeted misconception |
 |----------------|-------|------------------------|
 | `if [ -f $LOG_FILE ] && [ $(stat -c%s $LOG_FILE) -gt 10485760 ]` | Missing quotes, [[ ]] preferred | Word splitting and safer syntax |
 | `available=$(df -m $BACKUP_DIR \| awk 'NR==2 {print $4}')` | Missing quotes around variable | Word splitting risk |
-| `if [ $available < $MIN_SPACE_MB ]; then` | `<` is string comparison, not numeric | Use `-lt` for numeric comparison |
+| `if [ $available < $MIN_SPACE_MB ]; then` | Unquoted `<` is a shell input redirection here | Use `-lt` for numeric comparison |
 | `echo "[$(date +%Y-%m-%d %H:%M:%S)]"` | Space in format not quoted properly | Format string handling |
 | `tar -czf $BACKUP_DIR/weekly_$(date +%Y%m%d).tar.gz` | Missing quotes around path | Word splitting with spaces |
 | `[[ $(stat -c%s "$LOG_FILE") > 10485760 ]]` | `>` is string comparison in [[ ]] | Use `-gt` for numeric |

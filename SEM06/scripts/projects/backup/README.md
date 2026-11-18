@@ -1,516 +1,117 @@
-# SysBackup - Professional Backup System
+# SysBackup — local backup and restore teaching application
 
-## Description
+SysBackup demonstrates multiple sources, compression, integrity checks, GNU tar incremental chains, graph-aware retention and explicit failure propagation. It is a bounded local tool. Consistent live-database snapshots, remote transport, automatic scheduling and crash-durable multi-file transactions require additional system design.
 
-SysBackup is a complete backup system written in Bash, demonstrating advanced
-scripting concepts for automating backup operations with support for multiple sources,
-configurable compression, automatic rotation and integrity verification.
+## Architecture and requirements
 
-The project is part of the teaching materials for the Operating Systems course
-(ASE Bucharest, CSIE) and illustrates professional shell script development techniques.
+`backup.sh` orchestrates separate core/config/utils libraries. `lib/retention.py` validates parent relationships, `lib/validate_archive.py` checks extraction member paths/types and the shared `../config_data.py` parses literal configuration. `bin/sysbackup` invokes the complete project through Bash. Use Bash 4.4+, Python 3.10+, GNU tar, coreutils, awk, find, flock and the selected compressor/checksum tool. Alternative compressors must actually be available; no successful fallback is inferred.
 
-## Features
+## Complete owned example
 
-### Core Functionality
-- **Multi-source backup**: support for multiple directories and files
-- **Flexible compression**: gzip, bzip2, xz, zstd (with auto-detection of availability) — and related to this, **Backup policies**: daily, weekly, monthly with configurable retention
-- **Integrity verification**: MD5/SHA1/SHA256 checksum for validation
-- **Automatic rotation**: by number or age, with differentiated policy support
-
-### Technical Features
-- **Modular architecture**: core/utils/config separation
-- **Solid error handling**: validation, retry, automatic cleanup
-- **Complete logging**: multi-level with colour output and file
-- **Lock files**: prevention of concurrent executions
-- **Daemon mode**: scheduled execution with configurable interval
-
-### Advanced Options
-- **Exclude patterns**: glob pattern support for exclusions
-- **Dry run**: backup simulation without modifications
-- **Notifications**: email on success/error
-- **Restore**: archive extraction and listing
-- **Statistics**: detailed post-backup reporting
-
-## Project Structure
-
-```
-backup/
-├── backup.sh           # Main script (entry point)
-├── bin/
-│   └── sysbackup       # Wrapper for system installation
-├── etc/
-│   └── backup.conf     # Configuration file
-├── lib/
-│   ├── core.sh         # Fundamental functions (logging, errors, locks)
-│   ├── utils.sh        # Backup functions (archiving, rotation, verification)
-│   └── config.sh       # Configuration and CLI parsing
-├── tests/
-│   └── test_backup.sh  # Unit and integration test suite
-└── var/
-    ├── log/            # Log files
-    └── run/            # PID and lock files
-```
-
-## Installation
-
-### Requirements
-- Bash 4.0+ (automatically verified)
-- Standard utilities: tar, gzip, find, date
-- Optional: bzip2, xz, zstd (for alternative compression)
-- Optional: md5sum/sha1sum/sha256sum (for integrity verification)
-
-### Quick Installation
+From the repository root, run this as one script:
 
 ```bash
-# Clone/copy to desired location
-cp -r backup/ /opt/sysbackup/
-
-# Configure permissions
-chmod +x /opt/sysbackup/backup.sh
-chmod +x /opt/sysbackup/bin/sysbackup
-
-# Symbolic link for global access
-sudo ln -s /opt/sysbackup/bin/sysbackup /usr/local/bin/sysbackup
-
-# Copy configuration
-sudo cp /opt/sysbackup/etc/backup.conf /etc/sysbackup.conf
+#!/usr/bin/env bash
+set -euo pipefail
+SEM06_DIR=$(realpath -- SEM06)
+work=
+trap '[[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+work=$(mktemp -d)
+mkdir -- "$work/source" "$work/backups" "$work/restored"
+printf 'version one\n' > "$work/source/document"
+printf 'remove later\n' > "$work/source/obsolete"
+printf 'rename later\n' > "$work/source/old-name"
+BACKUP_PROGRAM="$SEM06_DIR/scripts/projects/backup/backup.sh"
+source "$SEM06_DIR/scripts/examples/backup_examples.sh"
+create_full_backup "$work/source" "$work/backups"
+printf 'version two\n' > "$work/source/document"
+printf 'created later\n' > "$work/source/new"
+rm -- "$work/source/obsolete"
+mv -- "$work/source/old-name" "$work/source/new-name"
+create_incremental_backup "$work/source" "$work/backups"
+latest=$(cat -- "$work/backups/.latest")
+restore_incremental_chain "$work/backups/$latest" "$work/restored"
+diff -r -- "$work/source" "$work/restored/${work#/}/source"
 ```
 
-## Usage
+The helper uses `/dev/null` as an empty literal configuration, a destination-local lock and `/dev/null` logging unless an explicit BACKUP_CONFIG is supplied. It performs no email or remote transfer. Archives use canonical absolute source paths with the leading slash removed; this keeps multiple roots unambiguous. A destination inside a source and source `/` are refused.
 
-### Basic Commands
+## Supported command contract
 
-```bash
-# Simple backup (uses default configuration)
-./backup.sh
+Run `bash SEM06/scripts/projects/backup/backup.sh --help` for the current complete list. There is no `create`, `restore` or `rotate` subcommand: use options.
 
-# Backup specific source
-./backup.sh -s /home/user/documents
+| Operation | Arguments |
+|---|---|
+| Sources/destination | `--source PATH` repeatable, `--dest PATH`, positional sources |
+| Type | `--type auto|daily|weekly|monthly|full` |
+| Compression | `--compression gz|gzip|bz2|bzip2|xz|zstd|none|tar` |
+| Incremental chain | `--incremental`; explicit full/weekly/monthly start a new base; daily appends to matching current state |
+| Retention | `--retention-daily N`, `--retention-weekly N`, `--retention-monthly N` |
+| Exclusions/name | `--exclude PATTERN` repeatable; `--prefix NAME` |
+| List | `--list --dest DIRECTORY`; emits only archive rows, with JSON-quoted names, byte size and UTC mtime |
+| Restore | `--restore ARCHIVE --restore-dir EMPTY_DIRECTORY`; archive may be an exact name under --dest |
+| Structural check | `--verify-archive FILE`; this checks tar readability, not a signature |
+| Optional checks | `--no-verify`, `--no-checksum`; these weaken independent checks and do not claim equivalent assurance |
+| Other | `--config FILE`, `--log-file FILE`, `--log-level LEVEL`, `--verbose`, `--dry-run`, `--email ADDRESS` |
 
-# Backup multiple sources
-./backup.sh -s /home/user/documents -s /etc -s /var/www
+The CLI does not expose JSON/CSV, daemon mode, `--files`, `--debug`, `-q`, `--rotate-by-age`, `--max-age`, `--exclude-file`, `--checksum-algo`, `--force-rotate` or `--verify`. These old README interfaces were not implemented. Scheduling belongs in cron/systemd; `rotate_by_age` remains a library function, not a CLI option.
 
-# Specify destination
-./backup.sh -s /home/user -d /mnt/backup
+## Incremental state, retention and recovery
 
-# Specify compression type
-./backup.sh -s /home/user -d /mnt/backup --compression xz
-```
+GNU tar records directory changes, including deletion and rename effects. Each archive has a `.parent` link to the previous archive or an empty parent for a full base. Checksums are sidecars. An immutable `.snar` file holds that archive's GNU tar snapshot and `.state.json` atomically selects the next incremental base by archive, snapshot and source identity. Legacy `.snapshot`, `.latest` and `.sources` copies remain for display/compatibility; they are not the authoritative next-increment pointer. An old three-file state without `.state.json` starts a fresh full base.
 
-### Backup Policies
+The active chain and every ancestor of retained points are protected. Retention applies configured counts to complete chain roots matching the type; it does not promote a daily archive into a weekly/monthly archive merely by renaming it. Scheduled weekly/monthly runs create their own bases. `--type full` skips rotation. Missing parents/cycles cause retention to fail before deletion. Archive selection excludes checksum, parent and snapshot sidecars; associated sidecars are removed with a selected complete chain.
 
-```bash
-# Daily backup (default)
-./backup.sh -t daily
+Restore validates the complete parent sequence and its checksums before extraction, and rejects a populated or symlink destination. Member validation rejects absolute/parent-traversing paths, escaping symlink targets and unsupported special types. Safe relative links and GNU incremental directory metadata are supported. Quiescent archive files and an owned empty restore directory are preconditions; the check is not protection against a concurrent hostile archive writer. Python tarfile must support the selected compression for member inspection; on older Python versions `.tar.zst` inspection may remain unavailable even if GNU tar can create it, and restore then fails explicitly.
 
-# Weekly backup (kept longer)
-./backup.sh -t weekly
+A checksum detects byte disagreement with the sidecar; MD5/SHA1 are retained historical options, with SHA-256 the configured default. None authenticates a source or proves a consistent live-system snapshot. Atomic pointer publication protects normal state selection; fsync-based crash durability across all archive/sidecar/filesystem operations is not claimed.
 
-# Monthly backup (long-term archiving)
-./backup.sh -t monthly
+## Literal configuration and hooks
 
-# Auto-detect type based on current day
-./backup.sh -t auto
-# Sunday → weekly, First day of month → monthly, Otherwise → daily
-```
+The explicit `--config` file is loaded before CLI options; otherwise the project-relative `etc/backup.conf` is used. Shell-style quoted values and one-line arrays are literal data: `$()` and `$VAR` are never executed or expanded. CLI source options replace the file source array on first use. Exclude patterns use the GNU tar matching contract.
 
-### Retention Options
-
-```bash
-# Keep last 7 daily backups
-./backup.sh --retention-daily 7
-
-# Complete retention configuration
-./backup.sh --retention-daily 7 --retention-weekly 4 --retention-monthly 12
-
-# Rotation by age (days)
-./backup.sh --rotate-by-age --max-age 30
-```
-
-### Exclusions
-
-```bash
-# Exclude patterns
-./backup.sh -s /home/user -x "*.log" -x "*.tmp" -x "cache/"
-
-# Exclude from file
-./backup.sh -s /home/user --exclude-file /etc/backup-exclude.txt
-```
-
-### Verification and Restore
-
-```bash
-# Backup with integrity verification
-./backup.sh --verify
-
-# Save checksum
-./backup.sh --checksum --checksum-algo sha256
-
-# List archive contents
-./backup.sh --list /mnt/backup/backup_daily_20250120_120000.tar.gz
-
-# Complete restore
-./backup.sh --restore /mnt/backup/backup_daily_20250120_120000.tar.gz -d /tmp/restore
-
-# Restore specific files
-./backup.sh --restore /mnt/backup/backup.tar.gz -d /tmp/restore --files "etc/passwd etc/group"
-```
-
-### Execution Modes
-
-```bash
-# Dry run - simulation without actions
-./backup.sh -s /home/user -d /mnt/backup --dry-run
-
-# Verbose mode
-./backup.sh -v
-
-# Debug mode (very detailed)
-./backup.sh --debug
-
-# Silent mode (errors only)
-./backup.sh -q
-
-# Daemon mode (periodic execution)
-./backup.sh --daemon --interval 3600
-```
-
-### Output Formats
-
-```bash
-# Text output (default)
-./backup.sh --output text
-
-# JSON output (for parsing)
-./backup.sh --output json
-
-# CSV output (for reports)
-./backup.sh --output csv
-```
-
-## Configuration
-
-### Configuration File
-
-Locations searched (in order):
-1. `./etc/backup.conf` (relative to script)
-2. `~/.config/sysbackup/backup.conf`
-3. `/etc/sysbackup.conf`
-
-### Configuration Options
-
-```bash
-# ===== SOURCES AND DESTINATION =====
-BACKUP_SOURCES=("/home/user" "/etc" "/var/www")
-BACKUP_DEST="/mnt/backup"
-BACKUP_PREFIX="myserver"
-
-# ===== COMPRESSION =====
-# Options: gz, bz2, xz, zstd, none
-COMPRESSION="gz"
-# Compression level: 1-9 (where applicable)
-COMPRESSION_LEVEL=6
-
-# ===== RETENTION POLICIES =====
+```ini
+BACKUP_SOURCES=("/absolute/owned/source one" "/absolute/owned/source two")
+BACKUP_DEST="/absolute/owned/backups"
+BACKUP_PREFIX=backup
+COMPRESSION=gz
+INCREMENTAL=true
+BACKUP_TYPE=daily
 RETENTION_DAILY=7
 RETENTION_WEEKLY=4
 RETENTION_MONTHLY=12
-
-# ===== EXCLUSIONS =====
-EXCLUDE_PATTERNS=(
-    "*.log"
-    "*.tmp"
-    "*.swp"
-    "*~"
-    ".cache/"
-    "node_modules/"
-    "__pycache__/"
-)
-
-# ===== VERIFICATION =====
 VERIFY_BACKUP=true
 SAVE_CHECKSUM=true
-CHECKSUM_ALGORITHM="sha256"
-
-# ===== NOTIFICATIONS =====
-NOTIFY_EMAIL="admin@example.com"
-NOTIFY_ON_SUCCESS=false
-NOTIFY_ON_ERROR=true
-
-# ===== LOGGING =====
-LOG_LEVEL="INFO"
-LOG_FILE="/var/log/sysbackup/backup.log"
-
-# ===== ADVANCED =====
-NICE_LEVEL=19
-IONICE_CLASS=3
-MAX_PARALLEL_JOBS=2
+CHECKSUM_ALGORITHM=sha256
+VERIFY_ARCHIVE_LISTING=true
+PRE_BACKUP_SCRIPT=""
+POST_BACKUP_SCRIPT=""
+SCRIPT_TIMEOUT=300
+LOG_FILE="/absolute/owned/backup.log"
+LOG_DIR="/absolute/owned/log"
+LOCK_FILE="/absolute/owned/backup.lock"
+LOCK_TIMEOUT=60
+NOTIFY_EMAIL=false
 ```
 
-## System Integration
+A configured pre/post hook must be executable. It is invoked as an executable path, with the archive path passed to the post hook. Timeout/failure propagates; an existing archive after a failed hook is not a completed workflow. Hooks and mail are never exercised against real external services by local tests.
 
-### Cron Job
+Historical sample keys COMPRESSION_LEVEL, PRESERVE_PERMISSIONS, FOLLOW_SYMLINKS, MAX_FILE_SIZE, NICE_LEVEL, IONICE_CLASS, BACKUP_TIMEOUT, TIMESTAMP_FORMAT, WEEKLY_DAY and MONTHLY_DAY are retained in the distributed example for design history but do not change the current CLI implementation. The actual defaults use tar/compressor defaults, fixed Sunday/first-day classification and generated unique names. Do not present those inert settings as effective controls; extend the implementation and tests before relying on them. LOG_RETENTION_DAYS/USE_COLORS likewise do not establish automatic log retention. No MAX_PARALLEL_JOBS setting is accepted.
+
+## Failure and diagnostic contract
+
+Successful backup completion is printed only after creation, configured verification, retention and post hook succeed. Exit 1 covers configuration/environment/lock/pre-hook errors, 2 archive creation failure, 3 final verification failure; a post-hook's nonzero status is preserved. Missing sources fail the whole backup rather than quietly create a partial set. Missing/invalid archive selection and verification fail explicitly.
+
+Notifications are optional. A failed mail transport is visible; transport acceptance does not prove delivery. Keep notification failures separate from archive integrity when reviewing the final report. Do not delete a flock file to bypass a live lock. Examine permissions on owned paths rather than immediately escalating to root. Insufficient-space recovery requires deliberate retention/recovery choices; no hidden force-rotation switch exists.
+
+## Tests and automation
 
 ```bash
-# Edit crontab
-crontab -e
-
-# Daily backup at 2:00 AM
-0 2 * * * /opt/sysbackup/backup.sh -q >> /var/log/sysbackup/cron.log 2>&1
-
-# Weekly backup Sunday at 3:00 AM
-0 3 * * 0 /opt/sysbackup/backup.sh -t weekly -q
-
-# Monthly backup on first day of month
-0 4 1 * * /opt/sysbackup/backup.sh -t monthly -q
+bash SEM06/scripts/projects/backup/tests/test_backup.sh
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest SEM06/tests/test_runtime_semantics.py SEM06/tests/test_teaching_examples.py -q
 ```
 
-### Systemd Timer
-
-```ini
-# /etc/systemd/system/sysbackup.service
-[Unit]
-Description=System Backup Service
-After=network.target
-
-[Service]
-Type=oneshot
-ExecStart=/opt/sysbackup/backup.sh -q
-User=root
-Nice=19
-IOSchedulingClass=idle
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```ini
-# /etc/systemd/system/sysbackup.timer
-[Unit]
-Description=Daily System Backup Timer
-
-[Timer]
-OnCalendar=*-*-* 02:00:00
-Persistent=true
-RandomizedDelaySec=300
-
-[Install]
-WantedBy=timers.target
-```
-
-```bash
-# Enable timer
-sudo systemctl enable --now sysbackup.timer
-
-# Check status
-sudo systemctl list-timers sysbackup*
-```
-
-### Systemd Service (Daemon Mode)
-
-```ini
-# /etc/systemd/system/sysbackup-daemon.service
-[Unit]
-Description=System Backup Daemon
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/opt/sysbackup/backup.sh --daemon --interval 86400
-Restart=on-failure
-User=root
-
-[Install]
-WantedBy=multi-user.target
-```
-
-## Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| 0    | Success - backup completed without errors |
-| 1    | Configuration error (invalid source, inaccessible destination) |
-| 2    | Error during backup (archiving partially failed) |
-| 3    | Fatal error (missing dependencies, permissions) |
-| 4    | Verification error (checksum mismatch) |
-| 5    | Active lock (another instance running) |
-
-## Advanced Examples
-
-### Wrapper Script for Multiple Servers
-
-```bash
-#!/usr/bin/env bash
-# multi-backup.sh - Centralised backup for multiple servers
-
-SERVERS=("web1" "web2" "db1")
-BACKUP_ROOT="/mnt/central-backup"
-
-for server in "${SERVERS[@]}"; do
-    echo "=== Backup $server ==="
-    ./backup.sh \
-        -s "/srv/$server" \
-        -d "$BACKUP_ROOT/$server" \
-        --prefix "$server" \
-        --compression xz \
-        --verify \
-        --checksum \
-        -q
-    
-    if [[ $? -ne 0 ]]; then
-        echo "ERROR: Backup $server failed!"
-    fi
-done
-```
-
-### Backup with Slack Notification
-
-```bash
-#!/usr/bin/env bash
-# backup-notify.sh
-
-WEBHOOK_URL="https://hooks.slack.com/services/XXX/YYY/ZZZ"
-
-./backup.sh "$@"
-EXIT_CODE=$?
-
-if [[ $EXIT_CODE -eq 0 ]]; then
-    MESSAGE=":white_check_mark: Backup completed successfully"
-else
-    MESSAGE=":x: Backup failed with code $EXIT_CODE"
-fi
-
-curl -s -X POST -H 'Content-type: application/json' \
-    --data "{\"text\":\"$MESSAGE\"}" \
-    "$WEBHOOK_URL"
-
-exit $EXIT_CODE
-```
-
-### Simulated Incremental Backup
-
-```bash
-#!/usr/bin/env bash
-# incremental-backup.sh - Backup only recently modified files
-
-DAYS_AGO=${1:-1}
-SOURCE="/home/user"
-DEST="/mnt/backup/incremental"
-
-# Find modified files
-TEMP_LIST=$(mktemp)
-find "$SOURCE" -type f -mtime -"$DAYS_AGO" > "$TEMP_LIST"
-
-if [[ -s "$TEMP_LIST" ]]; then
-    tar -czf "$DEST/incremental_$(date +%Y%m%d).tar.gz" \
-        -T "$TEMP_LIST" \
-        --transform "s|^$SOURCE|.|"
-    echo "Incremental backup: $(wc -l < "$TEMP_LIST") files"
-else
-    echo "No files modified in the last $DAYS_AGO days"
-fi
-
-rm -f "$TEMP_LIST"
-```
-
-## Testing
-
-```bash
-# Run all tests
-./tests/test_backup.sh
-
-# Run specific tests
-./tests/test_backup.sh --filter "test_archive"
-
-# Verbose mode
-./tests/test_backup.sh -v
-
-# Output results
-# ==========================================
-# TEST RESULTS
-# ==========================================
-# Total: 45
-# Passed: 43
-# Failed: 2
-# Skipped: 0
-# Success Rate: 95.56%
-# ==========================================
-```
-
-## Troubleshooting
-
-### Common Problems
-
-**Error: "tar: Cannot open: Permission denied"**
-```bash
-# Check destination permissions
-ls -la /mnt/backup/
-# Run with sudo or adjust permissions
-sudo ./backup.sh
-```
-
-**Error: "Lock file exists"**
-```bash
-# Check active process
-cat /var/run/sysbackup/backup.pid
-ps aux | grep backup
-# If no process exists, delete lock
-rm -f /var/run/sysbackup/backup.lock
-```
-
-**Backup too slow**
-```bash
-# Reduce compression level
-./backup.sh --compression gz  # faster than xz
-# Or use parallel compression
-./backup.sh --compression zstd  # fast and efficient
-```
-
-**Insufficient space**
-```bash
-# Check available space
-df -h /mnt/backup/
-# Force rotation before backup
-./backup.sh --force-rotate --retention-daily 3
-```
-
-## Code Architecture
-
-### Execution Flow
-
-```
-backup.sh
-    │
-    ├─→ Load lib/core.sh (logging, errors, locks)
-    ├─→ Load lib/utils.sh (archive, rotate, verify)
-    ├─→ Load lib/config.sh (parse config, CLI)
-    │
-    ├─→ init_config() → load_config_file() → parse_args() → validate_config()
-    │
-    ├─→ acquire_lock()
-    │
-    ├─→ [For each source]
-    │       ├─→ create_exclude_file()
-    │       ├─→ create_archive()
-    │       ├─→ verify_backup_integrity() (optional)
-    │       └─→ calculate_checksum() (optional)
-    │
-    ├─→ rotate_backups() / rotate_by_age()
-    │
-    ├─→ generate_backup_report()
-    │
-    ├─→ send_notification() (optional)
-    │
-    └─→ release_lock() → cleanup() → exit
-```
-
-### Design Principles
-
-1. **Separation of responsibilities**: Each module has a clear purpose
-2. **Fail-safe defaults**: Safe behaviour in absence of configuration
-3. **Verbose errors**: Descriptive error messages with suggestions
-4. **Idempotent operations**: Repeated runs do not cause problems
-5. **Graceful degradation**: Works without optional components
+The Bash harness runs its complete suite; `--filter`, `--coverage` and printed historic 45/43/2 counts are not evidence from a current run. Current tests use isolated fixtures, including full+incremental restore. See [resource templates](../../../resources/README.md) for correctly spelled cron/systemd commands. Installation, timer activation, remote backup, database backup and notifications remain separately scoped operations.
 
 ## Licence
 
@@ -520,4 +121,4 @@ Free use for teaching and personal purposes.
 ## Author
 
 Teaching material created for the Operating Systems course.
-Seminars 11-12: CAPSTONE Bash Projects.
+Seminar 6: CAPSTONE Bash Projects.

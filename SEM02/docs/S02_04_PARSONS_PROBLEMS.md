@@ -36,36 +36,28 @@ Parsons Problems are exercises where you receive shuffled lines of code and must
 ### PP-01: Conditional Backup
 Level: ⭐ Easy | Time: 3 min | Mode: Individual
 
+Run in a new owned exercise directory containing `data.txt`; `backup/` need not exist. The source check and copy/creation failures have distinct messages. Arrange all five required lines below. The alternative `cp data.txt backup/; echo "Backup created successfully"` is syntactically valid but does not meet the failure-handling contract.
+
+```text
+    printf 'File not found\n' >&2; exit 1
+fi
+    mkdir -p backup && cp -- data.txt backup/ && printf 'Backup created successfully\n' || { printf 'Backup failed\n' >&2; exit 1; }
+if [ -f data.txt ]; then
+else
 ```
-╔══════════════════════════════════════════════════════════════════════╗
-║  🎯 OBJECTIVE: Create backup ONLY if source file exists              ║
-║                                                                      ║
-║  EXPECTED BEHAVIOUR:                                                 ║
-║  - If data.txt exists → copy to backup/ and display "Success"        ║
-║  - If data.txt does NOT exist → display "File not found"             ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  SHUFFLED LINES (one is DISTRACTOR):                                ║
-║  ────────────────────────────────────────────────────────────────   ║
-║     && cp data.txt backup/                                          ║
-║     && echo "Backup created successfully"                           ║
-║     || echo "File not found"                                        ║
-║     [ -f data.txt ]                                                 ║
-║     mkdir -p backup &&               ← DISTRACTOR                   ║
-║  ────────────────────────────────────────────────────────────────   ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-```
+
+There are **five physical lines**, including the compound command line; the order of independent actions is not artificially constrained.
 
 ✅ CORRECT SOLUTION:
 ```bash
-[ -f data.txt ] && cp data.txt backup/ && echo "Backup created successfully" || echo "File not found"
+if [ -f data.txt ]; then
+    mkdir -p backup && cp -- data.txt backup/ && printf 'Backup created successfully\n' || { printf 'Backup failed\n' >&2; exit 1; }
+else
+    printf 'File not found\n' >&2; exit 1
+fi
 ```
 
-Distractor explanation: `mkdir -p backup &&` would create the directory, but:
-1. Doesn't check if source file exists first
-2. Unnecessarily complicates the problem (backup/ may already exist)
-3. Would change the logic: mkdir succeeds → continues, but what if data.txt doesn't exist?
+`mkdir -p backup` is required in a fresh directory. It is not a distractor. The success branch runs only after the copy succeeds; a real script may use nested `if` statements when the success/reporting action can itself fail.
 
 ---
 
@@ -224,6 +216,8 @@ Distractor explanation: `< EOF` is input redirection from a file named EOF, not 
 ---
 
 ### PP-06: Tee Pipeline
+
+Fixture: `input/` contains only the regular files to count; names contain no newline. Write `list.txt` outside `input/`, so tee cannot change the population being listed. This is an entry-count exercise, not a general filename serialisation method.
 Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ```
@@ -238,7 +232,7 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 ║                                                                      ║
 ║  SHUFFLED LINES (one is DISTRACTOR):                                ║
 ║  ────────────────────────────────────────────────────────────────   ║
-║     ls -1                                                           ║
+║     ls -1 input/                                                           ║
 ║     | tee list.txt                                                  ║
 ║     | wc -l                                                         ║
 ║     | xargs echo "Total files:"                                     ║
@@ -250,7 +244,7 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ✅ CORRECT SOLUTION:
 ```bash
-ls -1 | tee list.txt | wc -l | xargs echo "Total files:"
+ls -1 input/ | tee list.txt | wc -l | xargs echo "Total files:"
 ```
 
 Distractor explanation: `> list.txt | wc -l` redirects to file but the pipe receives nothing (redirection consumes the output). `tee` duplicates the stream.
@@ -297,6 +291,8 @@ Distractor explanation: `| uniq -c | sort` has the wrong order - you MUST sort B
 ---
 
 ### PP-08: Log Analysis Pipeline
+
+Input contract: this synthetic format has exactly eight whitespace-separated fields, no timezone field and no HTTP-version token. Status is field 7. A path or byte count containing `404` is not a 404 response.
 Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ```
@@ -309,7 +305,7 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 ║                                                                      ║
 ║  SHUFFLED LINES (two are DISTRACTORS):                              ║
 ║  ────────────────────────────────────────────────────────────────   ║
-║     grep "404" access.log                                           ║
+║     awk 'NF == 8 && $7 == 404' access.log                                           ║
 ║     | cut -d' ' -f1                                                 ║
 ║     | sort                                                          ║
 ║     | uniq -c                                                       ║
@@ -324,7 +320,7 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ✅ CORRECT SOLUTION:
 ```bash
-grep "404" access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -3
+awk 'NF == 8 && $7 == 404' access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -3
 ```
 
 Distractor explanations:
@@ -338,6 +334,8 @@ Distractor explanations:
 ### PP-09: File Renamer
 Level: ⭐⭐ Medium | Time: 4 min | Mode: Individual
 
+Use an owned fixture directory. Preserve an existing `.backup` target and report only successful renames. `nullglob` makes an empty set a no-op; only regular files are selected.
+
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
 ║  🎯 OBJECTIVE: Rename all .txt files to .txt.backup                 ║
@@ -350,9 +348,12 @@ Level: ⭐⭐ Medium | Time: 4 min | Mode: Individual
 ║                                                                      ║
 ║  SHUFFLED LINES (one is DISTRACTOR):                                ║
 ║  ────────────────────────────────────────────────────────────────   ║
+║     shopt -s nullglob
+║     [[ -f $file ]] || continue
+║     [[ ! -e ${file}.backup && ! -L ${file}.backup ]] || exit 2
 ║     for file in *.txt; do                                           ║
 ║     done                                                            ║
-║     mv "$file" "${file}.backup"                                     ║
+║     mv -- "$file" "${file}.backup" || exit 1                                     ║
 ║     echo "Renamed: $file → ${file}.backup"                          ║
 ║     for file in *.txt                     ← DISTRACTOR              ║
 ║  ────────────────────────────────────────────────────────────────   ║
@@ -362,8 +363,11 @@ Level: ⭐⭐ Medium | Time: 4 min | Mode: Individual
 
 ✅ CORRECT SOLUTION:
 ```bash
+shopt -s nullglob
 for file in *.txt; do
-    mv "$file" "${file}.backup"
+    [[ -f $file ]] || continue
+    [[ ! -e ${file}.backup && ! -L ${file}.backup ]] || { printf 'Collision: %s\n' "${file}.backup" >&2; exit 2; }
+    mv -- "$file" "${file}.backup" || exit 1
     echo "Renamed: $file → ${file}.backup"
 done
 ```
@@ -373,6 +377,8 @@ Distractor explanation: `for file in *.txt` without `; do` at the end is incompl
 ---
 
 ### PP-10: Countdown
+
+For this ordering exercise, enter a decimal integer from 0 to 99 with no leading zero except `0`. Input validation is a separate extension: `[[ $N =~ ^(0|[1-9][0-9]?)$ ]] || exit 1`. The countdown includes zero.
 Level: ⭐⭐ Medium | Time: 4 min | Mode: Pairs
 
 ```
@@ -381,7 +387,7 @@ Level: ⭐⭐ Medium | Time: 4 min | Mode: Pairs
 ║                                                                      ║
 ║  BEHAVIOUR:                                                          ║
 ║  - Read N from user                                                  ║
-║  - Count down from N to 1                                           ║
+║  - Count down from N to 0                                           ║
 ║  - 1 second pause between numbers                                    ║
 ║  - At the end display "START!"                                       ║
 ╠══════════════════════════════════════════════════════════════════════╣
@@ -392,7 +398,7 @@ Level: ⭐⭐ Medium | Time: 4 min | Mode: Pairs
 ║     echo "START!"                                                   ║
 ║     done                                                            ║
 ║     sleep 1                                                         ║
-║     for ((i=N; i>=1; i--)); do                                      ║
+║     for ((i=N; i>=0; i--)); do                                      ║
 ║     echo $i                                                         ║
 ║     for i in {N..1}; do                   ← DISTRACTOR              ║
 ║     for i in {$N..1}; do                  ← DISTRACTOR              ║
@@ -404,7 +410,7 @@ Level: ⭐⭐ Medium | Time: 4 min | Mode: Pairs
 ✅ CORRECT SOLUTION:
 ```bash
 read -p "Enter N: " N
-for ((i=N; i>=1; i--)); do
+for ((i=N; i>=0; i--)); do
     echo $i
     sleep 1
 done
@@ -438,7 +444,7 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Individual
 ║     done < file.txt                                                 ║
 ║     [ -z "$line" ] && continue                                      ║
 ║     count=0                                                         ║
-║     ((count++))                                                     ║
+║     count=$((count + 1))                                                     ║
 ║     while IFS= read -r line; do                                     ║
 ║     echo "Total non-empty lines: $count"                            ║
 ║     cat file.txt | while read line; do  ← DISTRACTOR                ║
@@ -452,16 +458,18 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Individual
 count=0
 while IFS= read -r line; do
     [ -z "$line" ] && continue
-    ((count++))
+    count=$((count + 1))
 done < file.txt
 echo "Total non-empty lines: $count"
 ```
 
-Distractor explanation: `cat file.txt | while read line; do` creates subshell - variable `count` will NOT persist after the loop!
+Distractor explanation: with Bash `lastpipe` disabled (the assumed default here), the pipeline loop runs in a subshell and its `count` changes do not reach the parent. Use newline-terminated input for this item; the separate unterminated-final-line extension is `read -r line || [[ -n $line ]]`.
 
 ---
 
 ### PP-12: Complete Script - System Monitor
+
+Choose one of the two equivalent infinite-loop headers; `exit 0` is the only line incompatible with continued monitoring.
 Level: ⭐⭐⭐⭐ Expert | Time: 7 min | Mode: Pairs
 
 ```
@@ -475,7 +483,7 @@ Level: ⭐⭐⭐⭐ Expert | Time: 7 min | Mode: Pairs
 ║  - Can be stopped with Ctrl+C (trap for cleanup)                    ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                      ║
-║  SHUFFLED LINES (two are DISTRACTORS):                              ║
+║  SHUFFLED LINES (one valid alternative, one distractor):                              ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║     echo "=== $(date) ==="                                          ║
 ║     while true; do                                                  ║
@@ -484,7 +492,7 @@ Level: ⭐⭐⭐⭐ Expert | Time: 7 min | Mode: Pairs
 ║     ps aux --sort=-%mem | head -6                                   ║
 ║     done                                                            ║
 ║     sleep 2                                                         ║
-║     for ((;;)); do                        ← DISTRACTOR (valid but atypical) ║
+║     for ((;;)); do                        ← VALID ALTERNATIVE (choose one loop header) ║
 ║     exit 0                                ← DISTRACTOR              ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║                                                                      ║
@@ -547,12 +555,14 @@ echo "$NAME is $AGE years old"
 ```
 
 Distractor explanations:
-- `NAME = "Alice"` - spaces around `=` cause syntax error in Bash (interpreted as command with arguments)
+- `NAME = "Alice"` parses as a command named `NAME` with arguments; it does not assign the variable and ordinarily fails with command not found
 - `echo '$NAME is $AGE years old'` - single quotes do NOT expand variables (prints literal `$NAME`)
 
 ---
 
 ### PP-14: Test Brackets Trap
+
+Choose either of the two valid `[[ ... ]]` headers and all body lines; there is one invalid `[ ... ]` header. `config.txt` must be a trusted, owned shell fragment because `source` executes its contents.
 Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ```
@@ -564,14 +574,14 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 ║  - Otherwise → display error message                                ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                      ║
-║  SHUFFLED LINES (two are DISTRACTORS):                              ║
+║  SHUFFLED LINES (one valid alternative, one distractor):                              ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║     if [[ -f "config.txt" && -r "config.txt" ]]; then               ║
 ║         source config.txt                                           ║
 ║     else                                                            ║
 ║         echo "Error: config.txt not found or not readable"          ║
 ║     fi                                                              ║
-║     if [[ -f "config.txt"&& -r "config.txt" ]]; then  ← DISTRACTOR  ║
+║     if [[ -f "config.txt"&& -r "config.txt" ]]; then  ← VALID ALTERNATIVE  ║
 ║     if [ -f "config.txt" && -r "config.txt" ]; then   ← DISTRACTOR  ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║                                                                      ║
@@ -588,12 +598,14 @@ fi
 ```
 
 Distractor explanations:
-- `[[ -f "config.txt"&& ]]` - missing space before `&&` causes syntax error
-- `[ -f "config.txt" && -r "config.txt" ]` - `&&` inside `[ ]` is syntax error (use `-a` or `[[ ]]`)
+- `[[ -f "config.txt"&& -r "config.txt" ]]` is valid Bash: `&&` is an operator token even without the preceding space. Prefer spaced formatting for readability; accept either offered header.
+- `[ -f "config.txt" && -r "config.txt" ]` - the shell splits this into two commands; the first `[` lacks a closing `]`. Use `[[ -f config.txt && -r config.txt ]]` or `[ -f config.txt ] && [ -r config.txt ]`
 
 ---
 
 ### PP-15: Command Substitution Trap
+
+Choose either valid date-assignment spelling; there is one invalid assignment alternative.
 Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Individual
 
 ```
@@ -607,12 +619,12 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Individual
 ║  - Display the filename                                              ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                      ║
-║  SHUFFLED LINES (two are DISTRACTORS):                              ║
+║  SHUFFLED LINES (one valid alternative, one distractor):                              ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║     TODAY=$(date +%Y-%m-%d)                                         ║
 ║     FILENAME="backup_${TODAY}.tar"                                  ║
 ║     echo "Backup file: $FILENAME"                                   ║
-║     TODAY=`date +%Y-%m-%d`                 ← DISTRACTOR (works but deprecated) ║
+║     TODAY=`date +%Y-%m-%d`                 ← VALID ALTERNATIVE (older syntax) ║
 ║     TODAY = $(date +%Y-%m-%d)              ← DISTRACTOR (spaces!)   ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║                                                                      ║
@@ -627,12 +639,14 @@ echo "Backup file: $FILENAME"
 ```
 
 Distractor explanations:
-- `` TODAY=`date +%Y-%m-%d` `` - backticks work but are deprecated; `$()` is preferred (nestable, clearer)
-- `TODAY = $(date +%Y-%m-%d)` - spaces around `=` cause syntax error
+- `` TODAY=`date +%Y-%m-%d` `` - backticks remain supported older syntax; `$()` is preferred for clearer nesting. Either offered assignment is valid here
+- `TODAY = $(date +%Y-%m-%d)` invokes a command named TODAY instead of assigning a variable
 
 ---
 
 ### PP-16: Read Variable Trap
+
+Choose either valid delimiter-assignment header. The header using expanded values as `read` variable names is the distractor.
 Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 
 ```
@@ -645,13 +659,13 @@ Level: ⭐⭐⭐ Advanced | Time: 5 min | Mode: Pairs
 ║  BEHAVIOUR: Display "User: alice has UID 1001 and uses /bin/bash"  ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                      ║
-║  SHUFFLED LINES (two are DISTRACTORS):                              ║
+║  SHUFFLED LINES (one valid alternative, one distractor):                              ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║     while IFS=: read -r user uid shell; do                          ║
 ║         echo "User: $user has UID $uid and uses $shell"             ║
 ║     done < users.txt                                                ║
 ║     while IFS=: read -r $user $uid $shell; do   ← DISTRACTOR        ║
-║     while IFS=":" read user uid shell; do       ← DISTRACTOR        ║
+║     while IFS=":" read -r user uid shell; do    ← VALID ALTERNATIVE        ║
 ║  ────────────────────────────────────────────────────────────────   ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
@@ -666,7 +680,7 @@ done < users.txt
 
 Distractor explanations:
 - `read -r $user $uid $shell` - variables in `read` are written WITHOUT `$` prefix
-- `IFS=":"` with quotes - works in most cases but can cause issues; `IFS=:` without quotes is standard
+- `IFS=":"` and `IFS=:` assign exactly the same delimiter. Both offered `read -r` headers are valid. Omitting `-r` changes backslash handling, not the meaning of quoted `IFS`. This fixture has three colon-separated, newline-terminated fields without embedded colons.
 
 ---
 
@@ -742,7 +756,7 @@ Distractor explanations:
 | D6 | `uniq` without `sort` | Only removes consecutive | 80% |
 | D7 | `cut -f` without `-d` | TAB implicit vs space | 65% |
 | D8 | `2>&1 >` vs `> 2>&1` | Redirection order | 55% |
-| D9 | `[ && ]` inside single brackets | Use `-a` or `[[ ]]` | 50% |
+| D9 | `[ && ]` inside single brackets | Use separate tests joined by `&&`, or `[[ ]]` | 50% |
 | D10 | `pipe \| while` | Subshell problem | 65% |
 
 ---
@@ -761,3 +775,5 @@ Distractor explanations:
 
 *Parsons Problems generated for ASE Bucharest - CSIE*  
 *Seminar 02: Operators, Redirection, Filters, Loops*
+
+Historical percentage frequencies in the distractor table are retained author annotations without a supplied cohort, denominator or measurement protocol; they are not validated empirical rates.

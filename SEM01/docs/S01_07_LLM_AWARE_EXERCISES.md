@@ -132,27 +132,23 @@ COMPLETE CORRECTED SCRIPT:
 ```bash
 #!/bin/bash
 # CORRECTED backup script
-
+set -euo pipefail
 SOURCE="$HOME/Documents"
 DEST="$HOME/Backup"
-DATE=$(date +%Y%m%d)
-
-# Check that source exists
-if [ ! -d "$SOURCE" ]; then
-    echo "Error: Source directory does not exist: $SOURCE" >&2
+[[ -d "$SOURCE" ]] || { printf 'Missing source: %s\n' "$SOURCE" >&2; exit 1; }
+mkdir -p -- "$DEST"
+RUN_DIR=$(mktemp -d "$DEST/backup_$(date +%Y%m%d)_XXXXXX")
+if ! cp -a -- "$SOURCE/." "$RUN_DIR/"; then
+    printf 'Backup failed; partial files retained for inspection: %s\n' "$RUN_DIR" >&2
     exit 1
 fi
+printf 'Backup complete: %s\n' "$RUN_DIR"
+# Review old generated backup directories; never select DEST itself.
+# -mtime +7 means at least 8 complete 24-hour periods old.
+find "$DEST" -mindepth 1 -maxdepth 1 -type d -name 'backup_*' -mtime +7 -print
+# Optional, interactive removal after reviewing the selection:
+# find "$DEST" -mindepth 1 -maxdepth 1 -type d -name 'backup_*' -mtime +7 -exec rm -ri -- {} \;
 
-# Create backup directory (with -p for safety)
-mkdir -p "$DEST/$DATE"
-
-# Copy files (with quotes for spaces)
-cp -r "$SOURCE" "$DEST/$DATE/"
-
-# Delete old backups (directories only, with confirmation)
-find "$DEST" -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \;
-
-echo "Backup complete: $DEST/$DATE"
 ```
 
 ---

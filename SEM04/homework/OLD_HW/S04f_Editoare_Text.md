@@ -1,5 +1,7 @@
 # S04_TC05 - Terminal Text Editors
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory Material - Seminar 4 (MODIFIED - includes nano and vim)
 
@@ -33,16 +35,24 @@ At the end of this laboratory, the student will be able to:
 ---
 
 
+## Part I: Nano
+
+Use the [Nano module in the main material](../../docs/S04_02_MAIN_MATERIAL.md#module-5-nano---simple-text-editor)
+for the complete walkthrough. In Nano 7.x, `Ctrl+S` saves and `Ctrl+T` opens the
+execute-command menu; the visible help/footer is authoritative for the installed
+version and configuration. Neither nano nor vim is guaranteed in a minimal image.
+Check `command -v nano` / `command -v vim` before the lab.
+
 ## Part II: The VI/VIM Editor
 
 ### 2. Introduction to VI/VIM
 
-**VI** (Visual Editor) is the standard Unix editor, available on any system.
+**VI** (Visual Editor) is a traditional Unix editor. Minimal/container images may omit it.
 **VIM** (VI IMproved) is the enhanced version with additional features.
 
 ### 2.1 Why VI/VIM?
 
-- Available on ANY Unix/Linux system (including minimal servers)
+- Common on Unix/Linux installations; verify availability in the actual lab image
 - Very fast for text editing
 - Works in terminal (SSH, servers)
 - Extremely configurable and extensible
@@ -50,26 +60,14 @@ At the end of this laboratory, the student will be able to:
 
 ### 2.2 Operating Modes
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   ┌──────────────┐                    ┌──────────────┐     │
-│   │ NORMAL MODE  │◄──── ESC ──────────│ INSERT MODE  │     │
-│   │  (commands)  │────► i, a, o, I, A │  (editing)   │     │
-│   └──────┬───────┘                    └──────────────┘     │
-│          │                                                  │
-│          │ :                                                │
-│          ▼                                                  │
-│   ┌──────────────┐                    ┌──────────────┐     │
-│   │ COMMAND MODE │                    │ VISUAL MODE  │     │
-│   │ (ex commands)│◄──── ESC ──────────│ (selection)  │     │
-│   └──────────────┘                    └──────────────┘     │
-│                                             ▲              │
-│                                             │ v, V, Ctrl+v │
-│                                             │              │
-│   NORMAL MODE ──────────────────────────────┘              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    Normal --> Insert: i / a / o
+    Insert --> Normal: Esc
+    Normal --> Visual: v / V / Ctrl+v
+    Visual --> Normal: Esc
+    Normal --> CommandLine: colon
+    CommandLine --> Normal: Enter or Esc
 ```
 
 **Normal Mode** - the default mode, for commands and navigation
@@ -79,7 +77,7 @@ At the end of this laboratory, the student will be able to:
 
 ### 2.3 VIM Survival Commands
 
-```bash
+```text
 # ENTRY
 vim file.txt        # open file
 i                   # enter Insert mode
@@ -97,7 +95,7 @@ ESC                 # always returns to Normal mode
 
 ### 2.4 Navigation in VIM (Normal Mode)
 
-```bash
+```text
 # Basic movements
 h j k l           # left, down, up, right
 
@@ -119,7 +117,7 @@ G                 # end of file
 
 ### 2.5 Editing in VIM
 
-```bash
+```text
 # Insert text
 i                 # insert before cursor
 a                 # append after cursor
@@ -148,7 +146,7 @@ Ctrl+r            # redo
 
 ### 2.6 Search and Replace in VIM
 
-```bash
+```text
 # Search
 /pattern          # search forward
 ?pattern          # search backward
@@ -162,7 +160,10 @@ N                 # previous match
 :%s/old/new/gc    # with confirmation
 ```
 
-### 2.7 VIM Configuration (~/.vimrc)
+### 2.7 VIM Configuration in an Owned Fixture
+
+Save the example as `vimrc` inside a fresh exercise directory, then use
+`vim -u ./vimrc ./sample.txt`. Do not replace your personal `~/.vimrc` by default.
 
 ```vim
 " Line numbers
@@ -216,10 +217,10 @@ set wildmenu
 | Aspect | nano | vim |
 |--------|------|-----|
 | Learning curve | Easy | Steep |
-| Availability | Most systems | All Unix systems |
+| Availability | Verify installed command | Verify installed command |
 | Initial productivity | High | Low |
 | Expert productivity | Medium | Very high |
-| Extensibility | Limited | Unlimited |
+| Extensibility | Configuration/shortcuts | Configuration/plugins |
 | Operating modes | One | Multiple |
 | Shortcuts | Ctrl+X | Complex combinations |
 
@@ -241,7 +242,7 @@ set wildmenu
 5. Save and exit with `:wq`
 
 ### Exercise 3: Comparison
-Edit the same configuration file (e.g.: `.bashrc`) once with nano and once with vim. Compare the experience.
+Make two copies of a small synthetic configuration inside an owned exercise directory. Edit one with nano and one with vim, then compare the resulting files and the interaction. Do not edit your live `.bashrc` for this exercise.
 
 ---
 
@@ -288,14 +289,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

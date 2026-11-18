@@ -15,7 +15,6 @@ import sys
 import subprocess
 import json
 import re
-import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -77,6 +76,7 @@ class TestCase:
         self.description = description
         self.passed = False
         self.feedback = ""
+        self.pending_manual_review = False
     
     def run(self, student_dir: Path) -> bool:
         raise NotImplementedError
@@ -179,6 +179,9 @@ class BashExecutionTest(TestCase):
                 cwd=student_dir
             )
             
+            if result.returncode != 0:
+                self.feedback = f"Script exited with status {result.returncode}: {result.stderr[:200]}"
+                return False
             output = result.stdout.strip()
             
             if self.expected_output:
@@ -255,48 +258,33 @@ class BashrcConfigTest(TestCase):
 
 
 class GlobbingTest(TestCase):
-    """Verifies understanding of glob patterns."""
-    
+    """Locate submitted globbing evidence; its free-form explanation needs review.
+
+    The assignment does not prescribe a machine-readable output protocol. Running
+    a grader-owned pattern demonstrates Bash, not the student's work, and must
+    never earn the student marks. No submission path is created or deleted here.
+    """
+
     def __init__(self, name: str, points: int, description: str,
-                 setup_files: List[str], pattern: str, expected_matches: List[str]):
+                 setup_files: List[str], pattern: str, expected_matches: List[str],
+                 script_path: str = 'project/tests/test_globbing.sh'):
         super().__init__(name, points, description)
         self.setup_files = setup_files
         self.pattern = pattern
         self.expected_matches = expected_matches
-    
+        self.script_path = script_path
+
     def run(self, student_dir: Path) -> bool:
-        test_dir = student_dir / 'glob_test_temp'
-        test_dir.mkdir(exist_ok=True)
-        
-        try:
-            # Create test files
-            for f in self.setup_files:
-                (test_dir / f).touch()
-            
-            # Run glob expansion
-            result = subprocess.run(
-                f'cd "{test_dir}" && ls {self.pattern} 2>/dev/null | sort',
-                shell=True,
-                capture_output=True,
-                text=True
-            )
-            
-            actual_matches = sorted([f.strip() for f in result.stdout.strip().split('\n') if f.strip()])
-            expected_sorted = sorted(self.expected_matches)
-            
-            if actual_matches == expected_sorted:
-                self.passed = True
-                self.feedback = f"Pattern '{self.pattern}' produces correct result"
-            else:
-                self.feedback = f"Expected: {expected_sorted}, got: {actual_matches}"
-                
-        except Exception as e:
-            self.feedback = f"Glob test error: {str(e)}"
-        
-        finally:
-            shutil.rmtree(test_dir, ignore_errors=True)
-        
-        return self.passed
+        self.passed = False
+        script = student_dir / self.script_path
+        if not script.is_file():
+            self.feedback = f"Submitted globbing script missing: {self.script_path}"
+            return False
+        self.pending_manual_review = True
+        self.feedback = (f"Review {self.script_path} for {self.pattern!r}; "
+                         "free-form demonstration has no approved automatic output contract. "
+                         "No automatic marks awarded; this is pending review, not a failed demonstration.")
+        return False
 
 
 class CodeUnderstandingTest(TestCase):
@@ -405,6 +393,14 @@ def get_homework_tests(config: Optional[Dict] = None) -> List[TestCase]:
         aliases = ['ll', 'cls']
         function = 'mkcd'
     
+    required_files = files if config else [
+        'project/src/main.sh', 'project/src/variables.sh',
+        'project/src/system_info.sh', 'project/docs/README.md',
+        'project/tests/test_globbing.sh']
+    if len(required_files) < 5:
+        raise ValueError('Variant config requires main, variables, information, README and globbing paths')
+    main_path, variables_path, info_path, readme_path, glob_path = required_files[:5]
+    patterns = config.get('globbing', {}).get('patterns', ['*.txt', 'file?.txt']) if config else ['*.txt', 'file?.txt', '*[0-9]*', '.[!.]*']
     return [
         # Exercise 1: Project Structure (20 points)
         DirectoryStructureTest(
@@ -417,13 +413,13 @@ def get_homework_tests(config: Optional[Dict] = None) -> List[TestCase]:
             "E1.2: README.md",
             5,
             "Verify README file exists",
-            f'{root}/docs/README.md' if config else 'project/docs/README.md'
+            readme_path
         ),
         FileExistsTest(
             "E1.3: Main script",
             5,
             "Verify main script exists",
-            files[0] if config else 'project/src/main.sh'
+            main_path
         ),
         
         # Exercise 2: Variables Script (25 points)
@@ -431,13 +427,13 @@ def get_homework_tests(config: Optional[Dict] = None) -> List[TestCase]:
             "E2.1: variables.sh syntax",
             10,
             "Verify variables script syntax",
-            'project/src/variables.sh'
+            variables_path
         ),
         BashExecutionTest(
             "E2.2: variables.sh execution",
             15,
             "Verify script execution and output",
-            'project/src/variables.sh',
+            variables_path,
             expected_pattern=r'(USER|HOME|SHELL|PATH)'
         ),
         
@@ -461,36 +457,25 @@ def get_homework_tests(config: Optional[Dict] = None) -> List[TestCase]:
             required_exports=['PATH']
         ),
         
-        # Exercise 4: Globbing (20 points)
+        # Exercise 4: free-form demonstration; all assigned patterns need review.
         GlobbingTest(
-            "E4.1: Pattern *.txt",
-            10,
-            "Verify understanding of *.txt pattern",
-            ['file1.txt', 'file2.txt', 'doc.pdf', 'notes.txt'],
-            '*.txt',
-            ['file1.txt', 'file2.txt', 'notes.txt']
+            "E4: Submitted globbing demonstration", 20,
+            "Review the student's script and its explanation of every assigned pattern",
+            [], ', '.join(patterns), [], script_path=glob_path
         ),
-        GlobbingTest(
-            "E4.2: Pattern file?.txt",
-            10,
-            "Verify understanding of ? pattern",
-            ['file1.txt', 'file2.txt', 'file10.txt', 'fileA.txt'],
-            'file?.txt',
-            ['file1.txt', 'file2.txt', 'fileA.txt']
-        ),
-        
+
         # Exercise 5: Integrated Script (10 points)
         BashSyntaxTest(
             "E5.1: System info script",
             5,
             "Verify info script syntax",
-            'project/src/system_info.sh'
+            info_path
         ),
         BashExecutionTest(
             "E5.2: System info execution",
             5,
             "Verify system information display",
-            'project/src/system_info.sh',
+            info_path,
             expected_pattern=r'(Linux|Ubuntu|user|home)'
         ),
         
@@ -499,7 +484,7 @@ def get_homework_tests(config: Optional[Dict] = None) -> List[TestCase]:
             "ORAL: Generated questions",
             0,  # Points awarded manually
             "Questions for oral verification",
-            'project/src/variables.sh'
+            variables_path
         ),
     ]
 
@@ -512,7 +497,7 @@ class Grader:
     """Orchestrates running all tests and generating report."""
     
     def __init__(self, student_dir: Path, config: Optional[Dict] = None):
-        self.student_dir = student_dir
+        self.student_dir = student_dir.resolve()
         self.config = config
         self.tests = get_homework_tests(config)
         self.results: Dict[str, dict] = {}
@@ -558,7 +543,8 @@ class Grader:
                 'passed': test.passed,
                 'points': test.points if test.passed else 0,
                 'max_points': test.points,
-                'feedback': test.feedback
+                'feedback': test.feedback,
+                'pending_manual_review': test.pending_manual_review
             }
             print()
     
@@ -576,26 +562,12 @@ class Grader:
         print(f"  Tests passed: {passed_tests}/{total_tests}")
         print(f"  Automatic score: {Colours.BOLD}{self.earned_points}/{self.total_points}{Colours.NC} ({percentage:.1f}%)\n")
         
-        # Grade
-        if percentage >= 90:
-            grade, colour = "A", Colours.GREEN
-            message = "Excellent! You have understood the material very well."
-        elif percentage >= 80:
-            grade, colour = "B", Colours.GREEN
-            message = "Very good! A few minor aspects to review."
-        elif percentage >= 70:
-            grade, colour = "C", Colours.YELLOW
-            message = "Good. Review the sections where you lost points."
-        elif percentage >= 60:
-            grade, colour = "D", Colours.YELLOW
-            message = "Sufficient. I recommend repeating the exercises."
-        else:
-            grade, colour = "F", Colours.RED
-            message = "Insufficient. Please revisit the material."
-        
-        print(f"  Preliminary grade: {colour}{Colours.BOLD}{grade}{Colours.NC}")
-        print(f"  {message}\n")
-        
+        if any(t.pending_manual_review for t in self.tests):
+            print("  INCOMPLETE: globbing evidence requires manual review; automatic subtotal is not a final grade.")
+
+        print("  Assessment status: PENDING_POLICY / MANUAL_REVIEW_REQUIRED")
+        print("  The automatic subtotal does not establish a final grade or task eligibility.\n")
+
         # Questions for oral verification
         if self.oral_questions:
             print(f"{Colours.CYAN}{'-' * 70}{Colours.NC}")
@@ -624,6 +596,9 @@ class Grader:
             'percentage': self.earned_points / self.total_points * 100 if self.total_points > 0 else 0,
             'tests': self.results,
             'oral_questions': self.oral_questions,
+            'assessment_complete': False,
+            'assessment_status': 'PENDING_POLICY',
+            'pending_manual_points': sum(t.points for t in self.tests if t.pending_manual_review),
         }
         
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -637,36 +612,27 @@ class Grader:
 # =============================================================================
 
 def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <student_directory> [--json output.json] [--config config.json]")
-        print(f"\nExample: {sys.argv[0]} ~/homework/PopescuIon")
-        sys.exit(1)
-    
-    student_dir = Path(sys.argv[1]).resolve()
-    
-    if not student_dir.exists():
-        log_error(f"Directory {student_dir} does not exist!")
-        sys.exit(1)
-    
-    # Load config if provided (for randomised variants)
+    import argparse
+    parser = argparse.ArgumentParser(description='Seminar 1 diagnostic checker; assessment policy remains pending')
+    parser.add_argument('student_directory', type=Path)
+    parser.add_argument('--json', dest='json_output', type=Path, help='Export the diagnostic record')
+    parser.add_argument('--config', type=Path, help='Assignment generator JSON configuration')
+    args = parser.parse_args()
+    student_dir = args.student_directory.resolve()
+    if not student_dir.is_dir():
+        parser.error(f'Not a submission directory: {student_dir}')
     config = None
-    if '--config' in sys.argv:
-        config_idx = sys.argv.index('--config')
-        if config_idx + 1 < len(sys.argv):
-            config_path = Path(sys.argv[config_idx + 1])
-            if config_path.exists():
-                config = json.loads(config_path.read_text())
-                log_info(f"Loaded variant config: seed={config.get('seed', 'unknown')}")
-    
+    if args.config:
+        try:
+            config = json.loads(args.config.read_text(encoding='utf-8'))
+        except (OSError, ValueError) as exc:
+            parser.error(f'Cannot read configuration: {exc}')
     grader = Grader(student_dir, config)
     grader.run_all_tests()
     grader.print_summary()
-    
-    # Export JSON if requested
-    if '--json' in sys.argv:
-        json_index = sys.argv.index('--json')
-        if json_index + 1 < len(sys.argv):
-            grader.export_json(Path(sys.argv[json_index + 1]))
+    if args.json_output:
+        grader.export_json(args.json_output)
+
 
 
 if __name__ == '__main__':

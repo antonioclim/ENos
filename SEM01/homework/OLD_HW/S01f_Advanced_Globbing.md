@@ -135,7 +135,7 @@ touch log.{txt,bak,old}
 |--------|-----------|--------------|
 | Matching | Existing files | String generation |
 | When | After parsing | Before glob |
-| Result | Only files found | All combinations |
+| Result | Matching pathnames; unmatched-pattern behaviour depends on nullglob/failglob | All generated combinations |
 
 ---
 
@@ -174,7 +174,7 @@ ls @(data|info)_*.txt     # starts with "data_" or "info_"
 ```bash
 # * does NOT match files starting with .
 ls *              # does not include .bashrc, .profile etc.
-ls .*             # ONLY hidden files
+ls -d -- .[!.]* ..?*  # hidden entry names, including double-dot prefixes; see nullglob below
 ls .* *           # all (hidden + normal)
 
 # With dotglob enabled
@@ -190,7 +190,11 @@ ls *.xyz          # if none exist, looks for literal "*.xyz"
 
 # nullglob: expands to nothing if no match
 shopt -s nullglob
-ls *.xyz          # returns nothing (no error)
+ls *.xyz          # no operands remain, so ls lists the CURRENT DIRECTORY
+# To inspect matches without that ls fallback:
+matched=( *.xyz )
+printf 'Matches: %s\n' "${#matched[@]}"
+if ((${#matched[@]})); then printf '%s\n' "${matched[@]}"; fi
 
 # failglob: error if no match
 shopt -s failglob
@@ -235,8 +239,9 @@ touch backup_{2023,2024}_{jan,feb,mar}.tar.gz
 # List only .txt files
 ls *.txt
 
-# List files with a single character before .txt
+# List names with five characters before .txt (file1.txt … file5.txt here)
 ls ?????.txt
+# Exactly one character before .txt would use ?.txt; this fixture has none.
 
 # List files data_a.csv, data_b.csv, data_c.csv
 ls data_[a-c].csv
@@ -322,7 +327,7 @@ done
    > `*` matches zero or more characters, `?` exactly one character.
 
 2. **How do you list all files that are NOT .txt?**
-   > With extglob: `ls !(*.txt)` or `ls *.[!t][!x][!t]` (imprecise).
+   > With `extglob` enabled before parsing the command: `ls -d -- !(*.txt)` for nonhidden entries in this fixture. `*.[!t][!x][!t]` is not its complement and must not be used as an equivalent.
 
 3. **What does `echo {1..5..2}` do?**
    > Displays: `1 3 5` (from 1 to 5, step 2).
@@ -387,14 +392,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

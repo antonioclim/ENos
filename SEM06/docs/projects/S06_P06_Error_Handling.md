@@ -24,7 +24,9 @@ In the Unix environment, the exit code represents the primary channel for commun
 | 126 | Command not executable | Missing permissions |
 | 127 | Command not found | Command not found |
 | 128+N | Termination by signal N | 130=SIGINT, 137=SIGKILL, 143=SIGTERM |
-| 255 | Exit code out of range | Error specifying code |
+| 255 | Valid status; meaning is application-defined | `exit 255` and `exit -1` yield 255 in Bash |
+
+Codes 1/2 and 64–78 in this table are conventions, not universal meanings for every programme. Bash uses an 8-bit status: `exit 255` → 255, `exit 256` → 0 and `exit -1` → 255. Its command-lookup and signal status conventions are separate from the project-specific codes below.
 
 ### Defining Custom Exit Codes
 
@@ -141,8 +143,9 @@ echo "Step 2"   # Never executes
 
 **Exceptions to errexit**:
 - Commands in conditions (`if cmd; then`)
-- Commands with `||` or `&&`
-- Commands in subshells `$(...)` (version dependent)
+- Non-final commands in `&&`/`||` lists; the final command is not exempt merely because a list contains these operators
+- Command substitutions normally clear errexit in Bash; POSIX mode or `inherit_errexit` (Bash 4.4+) changes this. Parenthesised subshells inherit `-e`
+- ERR trap inheritance is separate: `set -E` enables errtrace
 - Commands in functions called from conditional contexts
 
 ```bash
@@ -201,12 +204,12 @@ echo $?  # 0 - code of last command
 # With pipefail
 set -o pipefail
 false | true
-echo $?  # 1 - code of first command that fails
+echo $?  # 1 - rightmost nonzero command status
 
 # Practical example
 cat /nonexistent/file 2>/dev/null | grep "pattern"
-# Without pipefail: $? = exit code of grep (can be 0 or 1)
-# With pipefail: $? = 1 (cat failed)
+# Here grep has no input and returns 1; both pipeline modes return 1.
+# To observe rightmost-status selection, compare (exit 3) | (exit 7).
 ```
 
 ### The Recommended Combination
@@ -228,7 +231,8 @@ set -o pipefail  # Propagate errors in pipeline
 # set -euo pipefail
 
 # For scripts requiring POSIX compatibility:
-# Avoid pipefail (not POSIX) and use other mechanisms
+# Check the target shell/version: POSIX.1-2024 specifies pipefail, but many
+# deployed /bin/sh implementations predate or do not implement that revision.
 ```
 
 ---
@@ -259,186 +263,76 @@ trap 'commands' SIGNALS
 ### Pattern: Cleanup on Exit
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-
-#-------------------------------------------------------------------------------
-# Variables for cleanup
-#-------------------------------------------------------------------------------
-declare -g TEMP_DIR=""
-declare -g LOCK_FILE=""
+declare -g TEMP_DIR='' LOCK_FD=''
 declare -ga CLEANUP_FILES=()
-
-#-------------------------------------------------------------------------------
-# Cleanup handler
-#-------------------------------------------------------------------------------
 cleanup() {
-    local exit_code=$?
-    
-    # Disable trap to avoid recursion
-    trap - EXIT ERR INT TERM
-    
-    echo "[CLEANUP] Starting cleanup (exit code: $exit_code)..."
-    
-    # Cleanup temporary files
-    for file in "${CLEANUP_FILES[@]}"; do
-        if [[ -e "$file" ]]; then
-            rm -f "$file" && echo "[CLEANUP] Removed: $file"
-        fi
-    done
-    
-    # Cleanup temporary directory
-    if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
-        rm -rf "$TEMP_DIR" && echo "[CLEANUP] Removed temp dir: $TEMP_DIR"
-    fi
-    
-    # Release lock
-    if [[ -n "$LOCK_FILE" && -f "$LOCK_FILE" ]]; then
-        rm -f "$LOCK_FILE" && echo "[CLEANUP] Released lock: $LOCK_FILE"
-    fi
-    
-    echo "[CLEANUP] Cleanup completed"
-    exit "$exit_code"
+    local rc=$? file
+    trap - EXIT
+    for file in "${CLEANUP_FILES[@]}"; do rm -f -- "$file" || true; done
+    if [[ -n $TEMP_DIR ]]; then rm -rf -- "$TEMP_DIR" || true; fi
+    if [[ -n $LOCK_FD ]]; then exec {LOCK_FD}>&-; fi
+    exit "$rc"
 }
-
-# Register handler
-trap cleanup EXIT ERR INT TERM
-
-#-------------------------------------------------------------------------------
-# Helper functions for resource management
-#-------------------------------------------------------------------------------
-register_temp_file() {
-    local file="$1"
-    CLEANUP_FILES+=("$file")
-}
-
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+register_temp_file() { CLEANUP_FILES+=("$1"); }
 create_temp_dir() {
-    TEMP_DIR=$(mktemp -d)
-    echo "$TEMP_DIR"
+    local -n output=$1
+    TEMP_DIR=$(mktemp -d) || return 1
+    output=$TEMP_DIR # Allocation/registration stays in the parent shell.
 }
-
 acquire_lock() {
-    local lock_file="$1"
-    
-    if [[ -f "$lock_file" ]]; then
-        local pid
-        pid=$(<"$lock_file")
-        if kill -0 "$pid" 2>/dev/null; then
-            echo "Already running (PID: $pid)" >&2
-            return 1
-        fi
-        echo "Removing stale lock file"
-        rm -f "$lock_file"
-    fi
-    
-    echo $$ > "$lock_file"
-    LOCK_FILE="$lock_file"
-    return 0
+    local path=$1
+    exec {LOCK_FD}>>"$path" || return 1
+    if flock -n "$LOCK_FD"; then return 0; fi
+    exec {LOCK_FD}>&-; LOCK_FD=''; return 1
 }
-
-#-------------------------------------------------------------------------------
-# Main
-#-------------------------------------------------------------------------------
 main() {
-    # Resources that will be cleaned up automatically
+    : "${LOCK_DIR:?Set an existing owned writable lock directory}"
     local tmp_dir
-    tmp_dir=$(create_temp_dir)
-    
-    local tmp_file="${tmp_dir}/data.tmp"
-    register_temp_file "$tmp_file"
-    
-    acquire_lock "/var/run/myapp.lock" || exit 1
-    
-    # Simulate work
-    echo "Working in $tmp_dir..."
-    echo "data" > "$tmp_file"
-    
-    # Intentional error for demonstration
-    # false
-    
-    echo "Success!"
+    create_temp_dir tmp_dir || return 1
+    register_temp_file "$tmp_dir/data.tmp"
+    acquire_lock "$LOCK_DIR/myapp.lock" || return 1
+    printf 'Working in %s\n' "$tmp_dir"
+    printf 'data\n' > "$tmp_dir/data.tmp" || return 1
+    # Optional bounded fixture pause; no background daemon is started.
+    if [[ ${PAUSE_AFTER_ALLOC:-0} == 1 ]]; then sleep 1; fi
+    [[ ${FAIL_AFTER_ALLOC:-0} != 1 ]] || return 7
+    printf 'Success!\n'
 }
-
 main "$@"
+# Lock pathname persists; closing the owned descriptor releases the lock.
 ```
 
 ### Pattern: Error Handler with Stack Trace
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-#-------------------------------------------------------------------------------
-# Error Handler with diagnostic information
-#-------------------------------------------------------------------------------
+#!/usr/bin/env bash
+set -Eeuo pipefail
 error_handler() {
-    local exit_code=$?
-    local line_no="${1:-}"
-    local bash_lineno="${2:-}"
-    local last_command="${3:-}"
-    local func_stack="${4:-}"
-    
-    echo ""
-    echo "═══════════════════════════════════════════════════════════════"
-    echo "  ERROR OCCURRED"
-    echo "═══════════════════════════════════════════════════════════════"
-    echo "  Exit Code:    $exit_code"
-    echo "  Line Number:  $line_no"
-    echo "  Command:      $last_command"
-    echo ""
-    
-    # Stack trace
-    if [[ -n "$func_stack" ]]; then
-        echo "  Stack Trace:"
-        echo "  ------------"
-        local i=0
-        local frames
-        IFS=' ' read -ra frames <<< "$func_stack"
-        for func in "${frames[@]}"; do
-            local lineno="${BASH_LINENO[$i]:-?}"
-            echo "    [$i] $func (line $lineno)"
-            ((i++))
-        done
-    fi
-    
-    echo ""
-    echo "═══════════════════════════════════════════════════════════════"
+    local rc=$1 line=$2 command=$3 function_text=$4 line_text=$5 i
+    local -a frames=() lines=()
+    trap - ERR # one report, including nested frames, then propagate failure
+    IFS=' ' read -r -a frames <<< "$function_text"
+    IFS=' ' read -r -a lines <<< "$line_text"
+    printf 'ERROR OCCURRED\nExit Code: %s\nLine Number: %s\nCommand: %s\nStack Trace:\n' "$rc" "$line" "$command" >&2
+    for ((i=0;i<${#frames[@]};i++)); do
+        printf '  [%s] %s (caller line %s)\n' "$i" "${frames[i]}" "${lines[i]:-?}" >&2
+    done
+    exit "$rc"
 }
-
-# Trap ERR with extended information
-trap 'error_handler "${LINENO}" "${BASH_LINENO[*]}" "$BASH_COMMAND" "${FUNCNAME[*]}"' ERR
-
-#-------------------------------------------------------------------------------
-# Test functions
-#-------------------------------------------------------------------------------
-level3() {
-    echo "In level3..."
-    false  # Error here
-}
-
-level2() {
-    echo "In level2..."
-    level3
-}
-
-level1() {
-    echo "In level1..."
-    level2
-}
-
-#-------------------------------------------------------------------------------
-# Main
-#-------------------------------------------------------------------------------
-main() {
-    echo "Starting..."
-    level1
-    echo "Finished"  # Never reaches here
-}
-
+trap 'error_handler "$?" "$LINENO" "$BASH_COMMAND" "${FUNCNAME[*]}" "${BASH_LINENO[*]}"' ERR
+level3() { printf 'In level3...\n'; false; }
+level2() { printf 'In level2...\n'; level3; }
+level1() { printf 'In level1...\n'; level2; }
+main() { printf 'Starting...\n'; level1; printf 'Finished\n'; }
 main "$@"
 ```
 
-Example output:
+Illustrative output shape (line numbers depend on the extracted script; the corrected handler reports the actual frames once):
 ```
 Starting...
 In level1...
@@ -471,93 +365,33 @@ In level3...
 Bash doesn't have native try-catch, but we can simulate the behaviour:
 
 ```bash
-#!/bin/bash
-
-#-------------------------------------------------------------------------------
-# Try-catch implementation
-#-------------------------------------------------------------------------------
-
-# Global variables for exceptions
-declare -g EXCEPTION=""
-declare -g EXCEPTION_CODE=0
-
-# "throw" - raise exception
-throw() {
-    EXCEPTION="$1"
-    EXCEPTION_CODE="${2:-1}"
-    return "$EXCEPTION_CODE"
-}
-
-# "try" - execute block with error capture
+#!/usr/bin/env bash
+# Explicit result capture, not language-level exception unwinding.
+declare -g EXCEPTION='' EXCEPTION_CODE=0
+throw() { EXCEPTION=$1; EXCEPTION_CODE=${2:-1}; return "$EXCEPTION_CODE"; }
 try() {
-    local -a commands=("$@")
-    
-    EXCEPTION=""
-    EXCEPTION_CODE=0
-    
-    # Temporary errexit disable
-    local old_errexit
-    old_errexit=$(set +o | grep errexit)
-    set +e
-    
-    # Execute commands
-    "${commands[@]}"
-    EXCEPTION_CODE=$?
-    
-    # Restore errexit
-    eval "$old_errexit"
-    
-    return 0  # try always returns 0
+    EXCEPTION=''; EXCEPTION_CODE=0
+    # No shell option is changed. Because this is a conditional call, the
+    # operation must explicitly return from each failure branch.
+    if "$@"; then EXCEPTION_CODE=0; else EXCEPTION_CODE=$?; fi
+    return 0
 }
-
-# "catch" - check if exception occurred
-catch() {
-    local pattern="${1:-.*}"
-    
-    if [[ $EXCEPTION_CODE -ne 0 ]]; then
-        if [[ "$EXCEPTION" =~ $pattern ]]; then
-            return 0  # Exception caught
-        fi
-    fi
-    return 1  # No exception caught
-}
-
-#-------------------------------------------------------------------------------
-# Usage example
-#-------------------------------------------------------------------------------
+catch() { ((EXCEPTION_CODE != 0)) && [[ $EXCEPTION =~ ${1:-.*} ]]; }
 risky_operation() {
-    local success_probability=$((RANDOM % 10))
-    
-    if [[ $success_probability -lt 3 ]]; then
-        throw "NetworkError: Connection failed" 60
-    elif [[ $success_probability -lt 5 ]]; then
-        throw "IOError: File not accessible" 40
-    fi
-    
-    echo "Operation successful"
+    case ${1:-network} in
+        network) throw 'NetworkError: Connection failed' 60; return $? ;;
+        io) throw 'IOError: File not accessible' 40; return $? ;;
+        success) printf 'Operation successful\n' ;;
+        *) throw 'ArgumentError: unknown fixture' 2; return $? ;;
+    esac
 }
-
 main() {
-    try risky_operation
-    
-    if catch "NetworkError"; then
-        echo "Caught network error: $EXCEPTION"
-        echo "Retrying..."
-        try risky_operation
-    fi
-    
-    if catch "IOError"; then
-        echo "Caught IO error: $EXCEPTION"
-        echo "Using fallback..."
-    fi
-    
-    if catch; then
-        echo "Caught unexpected error: $EXCEPTION (code: $EXCEPTION_CODE)"
-    fi
-    
-    echo "Continuing execution..."
+    try risky_operation network
+    if catch NetworkError; then printf 'Caught network error: %s\n' "$EXCEPTION"; fi
+    try risky_operation success
+    if catch; then return "$EXCEPTION_CODE"; fi
+    printf 'Continuing execution...\n'
 }
-
 main "$@"
 ```
 
@@ -717,7 +551,7 @@ add_error() {
     error_entry+=" $message"
     
     ERRORS+=("$error_entry")
-    ((ERROR_COUNT++))
+    ERROR_COUNT=$((ERROR_COUNT + 1))
 }
 
 has_errors() {
@@ -738,7 +572,7 @@ print_errors() {
         local i=1
         for error in "${ERRORS[@]}"; do
             echo " $i. $error"
-            ((i++))
+            i=$((i + 1))
         done
         echo "══════════════════════════════════════════════════════"
     fi
@@ -761,7 +595,7 @@ validate_config() {
     # Read and validate parameters
     local line_num=0
     while IFS='=' read -r key value || [[ -n "$key" ]]; do
-        ((line_num++))
+        line_num=$((line_num + 1))
         
         # Skip comments and empty lines
         [[ "$key" =~ ^[[:space:]]*# ]] && continue
@@ -1016,7 +850,7 @@ init_logging() {
     if [[ -n "$LOG_FILE" ]]; then
         local log_dir
         log_dir=$(dirname "$LOG_FILE")
-        mkdir -p "$log_dir"
+        mkdir -p "$log_dir" || return 1
     fi
     
     log_debug "Logging initialised (level: $LOG_LEVEL, file: ${LOG_FILE:-<none>})"
@@ -1025,8 +859,8 @@ init_logging() {
 #-------------------------------------------------------------------------------
 # Export for sourcing
 #-------------------------------------------------------------------------------
-export -f log log_trace log_debug log_info log_warn log_error log_fatal
-export -f log_context log_operation_start log_operation_end log_var
+# Child Bash processes must source this module themselves. Exporting selected
+# functions does not export their helper dependencies or associative arrays.
 export LOG_LEVEL LOG_FILE
 ```
 
@@ -1037,7 +871,7 @@ export LOG_LEVEL LOG_FILE
 source "$(dirname "$0")/lib/logging.sh"
 
 # Configuration
-init_logging "DEBUG" "/var/log/myapp/app.log"
+init_logging "DEBUG" "${LOG_DESTINATION:?Set a log path in an owned directory}"
 
 # Usage
 main() {
@@ -1053,7 +887,7 @@ main() {
     local duration=$(( (SECONDS - start_time) * 1000 ))
     log_operation_end "Database connection" "success" "$duration"
     
-    if [[ some_condition ]]; then
+    if [[ ${DEMO_WARNING:-0} == 1 ]]; then
         log_warn "Unusual condition detected"
     fi
     
@@ -1143,3 +977,7 @@ Implement a graceful shutdown mechanism:
 6. **Fail early** (fail fast) when problems are detected
 7. **Provide context** in error messages
 8. **Test error paths** not just the happy path
+
+### Technical reference for the corrected examples
+
+Shell-option exceptions and pipeline status follow the [GNU Bash set documentation](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html); command-substitution inheritance is described in [Command Execution Environment](https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html).

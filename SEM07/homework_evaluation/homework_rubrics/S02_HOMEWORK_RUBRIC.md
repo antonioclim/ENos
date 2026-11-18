@@ -107,7 +107,7 @@ tr 'a-z' 'A-Z' <<< "hello"
 
 ### Expected Commands
 ```bash
-cat data | sort | uniq -c | sort -rn | head -10
+sort data | uniq -c | sort -rn | sed -n '1,10p'
 ls -la | tee listing.txt | wc -l
 echo "${PIPESTATUS[@]}"
 diff <(ls dir1) <(ls dir2)
@@ -140,7 +140,7 @@ set -o pipefail
 ### Expected Pipeline
 ```bash
 # Top 10 IPs from log file
-cat access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -10
+cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | sed -n '1,10p'
 ```
 
 ### Common Deductions
@@ -188,7 +188,7 @@ done < file.txt
 
 count=0
 while [ $count -lt 10 ]; do
-    ((count++))
+    count=$((count + 1))
     [ $count -eq 5 ] && continue
     echo $count
 done

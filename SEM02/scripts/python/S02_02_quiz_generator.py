@@ -140,7 +140,7 @@ class QuestionBank:
 # 
 
 def create_question_bank() -> QuestionBank:
-    """Create the question bank for Seminar 3-4."""
+    """Create the question bank for Seminar 2."""
     bank = QuestionBank()
     
     # 
@@ -342,7 +342,7 @@ def create_question_bank() -> QuestionBank:
         id="RD004",
         category="redirection",
         difficulty="hard",
-        question_text="What is the correct order to send BOTH (stdout and stderr) to a file?",
+        question_text="Which command first redirects stdout to file.txt and then duplicates that descriptor for stderr?",
         code_block=None,
         options=[
             "cmd > file.txt 2>&1",
@@ -858,9 +858,12 @@ class QuizGenerator:
         return int(hashlib.md5(data.encode()).hexdigest()[:8], 16)
     
     def generate_quiz(self, student_name: str, student_group: str,
-                      question_count: int = 15) -> Quiz:
+                      question_count: int = 15, seed: Optional[int] = None) -> Quiz:
         """Generate a personalised quiz for a student."""
-        seed = self._generate_seed(student_name, student_group)
+        if not 1 <= question_count <= len(self.bank.questions):
+            raise ValueError(f'question_count must be between 1 and {len(self.bank.questions)}')
+        if seed is None:
+            seed = self._generate_seed(student_name, student_group)
         
         # Select questions in balanced fashion
         selected_questions = self.bank.get_balanced_selection(question_count, seed)
@@ -894,13 +897,13 @@ class QuizGenerator:
             generated_at=datetime.now().isoformat(),
             questions=quiz_questions,
             seed=seed,
-            total_points=100,
+            total_points=sum(q['points'] for q in quiz_questions),
             time_limit_minutes=30
         )
     
     def _calculate_points(self, difficulty: str, total_questions: int) -> int:
-        """Calculate points per question based on difficulty."""
-        base = 100 // total_questions
+        """Legacy formative weights; the exported total is the actual sum, not an asserted 100-point assessment policy."""
+        base = max(1, 100 // total_questions)
         multipliers = {'easy': 0.8, 'medium': 1.0, 'hard': 1.3}
         return round(base * multipliers.get(difficulty, 1.0))
 
@@ -916,7 +919,7 @@ class QuizExporter:
         """Export the quiz in text format."""
         lines = []
         lines.append("=" * 70)
-        lines.append(f"  QUIZ: Seminar 3-4 - Operators, Redirection, Filters, Loops")
+        lines.append(f"  QUIZ: Seminar 2 - Operators, Redirection, Filters, Loops")
         lines.append("=" * 70)
         lines.append(f"  Student: {quiz.student_name}")
         lines.append(f"  Group: {quiz.student_group}")
@@ -1216,7 +1219,7 @@ class QuizExporter:
         """Export the quiz in Markdown format (for PDF conversion)."""
         lines = []
         lines.append("---")
-        lines.append("title: Quiz Seminar 3-4")
+        lines.append("title: Quiz Seminar 2")
         lines.append(f"student: {quiz.student_name}")
         lines.append(f"group: {quiz.student_group}")
         lines.append(f"date: {quiz.generated_at[:10]}")
@@ -1279,7 +1282,7 @@ def print_banner():
     banner = """
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                               ║
-║   📝  QUIZ GENERATOR - Seminar 3-4                                            ║
+║   📝  QUIZ GENERATOR - Seminar 2                                            ║
 ║       Operators | Redirection | Filters | Loops                               ║
 ║                                                                               ║
 ║       Bucharest UES - CSIE | Operating Systems                                ║
@@ -1303,7 +1306,7 @@ def read_students_file(filepath: str) -> List[Tuple[str, str]]:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Personalised quiz generator for Seminar 3-4',
+        description='Personalised quiz generator for Seminar 2',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Usage examples:
@@ -1384,6 +1387,9 @@ Usage examples:
         print(f"\n{Colours.YELLOW}⚠️ Specify --student and --grupa OR --students{Colours.ENDC}")
         return 1
     
+    if not 1 <= args.count <= len(bank.questions):
+        parser.error(f'--count must be between 1 and {len(bank.questions)}')
+
     # Create output directory
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1392,7 +1398,7 @@ Usage examples:
     print(f"{Colours.BOLD}🔄 Generating quizzes...{Colours.ENDC}\n")
     
     for name, group in students:
-        quiz = generator.generate_quiz(name, group, args.count)
+        quiz = generator.generate_quiz(name, group, args.count, seed=args.seed)
         
         # Clean name for filename
         safe_name = re.sub(r'[^\w\-]', '_', name)

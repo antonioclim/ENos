@@ -43,9 +43,9 @@ PASS=0
 FAIL=0
 WARN=0
 
-pass() { echo -e "${GREEN}✓ PASS:${NC} $1"; ((PASS++)); }
-fail() { echo -e "${RED}✗ FAIL:${NC} $1"; ((FAIL++)); }
-warn() { echo -e "${YELLOW}⚠ WARN:${NC} $1"; ((WARN++)); }
+pass() { echo -e "${GREEN}✓ PASS:${NC} $1"; PASS=$((PASS+1)); }
+fail() { echo -e "${RED}✗ FAIL:${NC} $1"; FAIL=$((FAIL+1)); }
+warn() { echo -e "${YELLOW}⚠ WARN:${NC} $1"; WARN=$((WARN+1)); }
 
 usage() {
     cat << EOF
@@ -82,19 +82,28 @@ check_scripts() {
     echo "═══ Bash Scripts Validation ═══"
     
     local scripts
-    scripts=$(find "$1" -name "*.sh" -type f 2>/dev/null)
+    local plan script
+    plan=$(mktemp) || return 1
+    if ! find "$1" -name '*.sh' -type f -print0 > "$plan"; then
+        rm -f -- "$plan"; fail "Cannot enumerate scripts"; return 0
+    fi
+    scripts=$(wc -c < "$plan")
     
-    if [[ -z "$scripts" ]]; then
-        warn "No .sh scripts found"
-        return
+    if [[ $scripts -eq 0 ]]; then
+        fail "No Bash sources found"
+        rm -f -- "$plan"
+        return 0
     fi
     
-    while IFS= read -r script; do
+    if ! command -v shellcheck >/dev/null 2>&1; then warn 'ShellCheck NOT_RUN (not installed)'; fi
+    while IFS= read -r -d '' script; do
         local name
         name=$(basename "$script")
         
         # Check shebang
-        if head -1 "$script" | grep -q '^#!/.*bash'; then
+        local first_line
+        IFS= read -r first_line < "$script" || true
+        if [[ $first_line =~ ^\#\!(/bin/bash|/usr/bin/bash|/usr/bin/env[[:space:]]+bash)$ ]]; then
             pass "$name: correct shebang"
         else
             fail "$name: missing or incorrect shebang"
@@ -112,10 +121,12 @@ check_scripts() {
             if shellcheck -x "$script" &>/dev/null; then
                 pass "$name: ShellCheck OK"
             else
-                warn "$name: ShellCheck warnings"
+                fail "$name: ShellCheck reported issues"
             fi
         fi
-    done <<< "$scripts"
+    done < "$plan"
+    rm -f -- "$plan"
+    return 0
 }
 
 check_readme() {
@@ -123,17 +134,17 @@ check_readme() {
     echo "═══ README.md Validation ═══"
     
     local readme="$1/README.md"
-    [[ ! -f "$readme" ]] && return
+    [[ -f "$readme" ]] || return 0
     
     local lines
     lines=$(wc -l < "$readme")
     
     if [[ $lines -gt 50 ]]; then
-        pass "README sufficiently detailed ($lines lines)"
+        pass "README length heuristic ($lines lines; content quality not established)"
     elif [[ $lines -gt 20 ]]; then
         warn "README is short ($lines lines)"
     else
-        fail "README too short ($lines lines)"
+        warn "README is short ($lines lines); inspect whether required content is present"
     fi
     
     # Check for common sections
@@ -160,16 +171,15 @@ check_permissions() {
     echo ""
     echo "═══ Permissions Validation ═══"
     
-    local main_script
-    main_script=$(find "$1/src" -maxdepth 1 -name "*.sh" -type f 2>/dev/null | head -1)
-    
-    if [[ -n "$main_script" ]]; then
-        if [[ -x "$main_script" ]]; then
-            pass "Main script is executable"
-        else
-            warn "Main script is not executable — run: chmod +x $main_script"
-        fi
-    fi
+    local script first_line found=0
+    [[ -d "$1/src" ]] || return 0
+    while IFS= read -r -d '' script; do
+        found=$((found+1))
+        if [[ -x "$script" ]]; then pass "Executable: $script"
+        else warn "Not executable: $script (invoke with bash or explicitly set the intended entry-point mode)"; fi
+    done < <(find "$1/src" -maxdepth 1 -name '*.sh' -type f -print0)
+    if ((found==0)); then warn 'No src/*.sh entry point; check the project-specific layout'; fi
+    return 0
 }
 
 print_summary() {
@@ -183,7 +193,7 @@ print_summary() {
     echo "═══════════════════════════════════════"
     
     if [[ $FAIL -eq 0 ]]; then
-        echo -e "${GREEN}Project valid for submission!${NC}"
+        echo -e "${GREEN}Structural checks completed without failures; functional/assessment acceptance is not established.${NC}"
         return 0
     else
         echo -e "${RED}Project has issues that need to be resolved.${NC}"
@@ -192,6 +202,8 @@ print_summary() {
 }
 
 # Main
+[[ ${1:-} != --help && ${1:-} != -h ]] || { usage; exit 0; }
+[[ $# -eq 1 ]] || { usage >&2; exit 2; }
 [[ $# -lt 1 ]] && { usage; exit 1; }
 [[ ! -d "$1" ]] && { echo "Error: '$1' is not a directory"; exit 1; }
 

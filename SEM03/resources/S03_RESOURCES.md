@@ -5,6 +5,8 @@ Advanced Utilities • Professional Scripts • Unix Permissions • Automation
 
 ---
 
+The source list is educational guidance, not a live availability or deployment certification. The unavailable historical Healthchecks article has been replaced by a clearly labelled primary alternative. The Linux Experiment channel destination is verified; other platform catalogues and pricing have not been comprehensively rechecked.
+
 ## Contents
 
 1. [Official Documentation](#1-official-documentation)
@@ -98,9 +100,9 @@ man 8 cron        # Cron daemon
 | Resource | Level | Description |
 |----------|-------|-------------|
 | [Crontab Guru](https://crontab.guru/) | Tool | Online editor/validator |
-| [Cron Expression Generator](https://www.freeformatter.com/cron-expression-generator-quartz.html) | Tool | Generator |
+| [Quartz Cron Expression Generator](https://www.freeformatter.com/cron-expression-generator-quartz.html) | Tool | Quartz dialect; do not paste its fields into a five-field Unix user crontab |
 | [Systemd Timers vs Cron](https://wiki.archlinux.org/title/Systemd/Timers) | Advanced | Modern alternative |
-| [Cron Best Practices](https://blog.healthchecks.io/2022/01/cron-job-best-practices/) | Intermediate | Production |
+| [Healthchecks monitoring documentation](https://healthchecks.io/docs/) | Intermediate | Alternative primary resource for monitoring scheduled jobs; not a recovered copy of the unavailable 2022 article |
 
 ---
 
@@ -157,7 +159,9 @@ man 8 cron        # Cron daemon
 | OnlineGDB | https://www.onlinegdb.com/online_bash_shell | Online debug |
 | Paiza.io | https://paiza.io/en/projects/new?language=bash | Multi-language |
 
-### 4.3 Virtual Laboratories
+### 4.3 Historical Virtual-Laboratory Suggestions
+
+The following entries are retained as historical suggestions, with current access and availability unverified. They are not dependencies of this seminar.
 
 | Resource | Type | Description |
 |----------|------|-------------|
@@ -171,201 +175,105 @@ man 8 cron        # Cron daemon
 
 ### 5.1 find Cheat Sheet
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║                    FIND QUICK REFERENCE                          ║
-╠══════════════════════════════════════════════════════════════════╣
-║ SEARCH BY NAME                                                   ║
-║   find /path -name "*.txt"        Case sensitive                 ║
-║   find /path -iname "*.txt"       Case insensitive               ║
-║                                                                  ║
-║ SEARCH BY TYPE                                                   ║
-║   -type f    Regular file       -type d    Directory            ║
-║   -type l    Symbolic link      -type b    Block device         ║
-║                                                                  ║
-║ SEARCH BY SIZE                                                   ║
-║   -size +10M     Larger than 10MB                               ║
-║   -size -100k    Smaller than 100KB                             ║
-║   -size 50c      Exactly 50 bytes                               ║
-║                                                                  ║
-║ SEARCH BY TIME (days)                                            ║
-║   -mtime -7      Modified in last 7 days                        ║
-║   -mtime +30     Modified more than 30 days ago                 ║
-║   -mmin -60      Modified in last 60 minutes                    ║
-║                                                                  ║
-║ LOGICAL OPERATORS                                                ║
-║   -and / -a      AND (implicit)                                 ║
-║   -or  / -o      OR                                             ║
-║   -not / !       NOT                                            ║
-║   \( \)          Grouping                                       ║
-║                                                                  ║
-║ ACTIONS                                                          ║
-║   -print         Display (default)                              ║
-║   -print0        Null-separated (for xargs -0)                  ║
-║   -exec cmd {} \;   Execute for each                            ║
-║   -exec cmd {} +    Execute batched                             ║
-║   -delete        Delete (⚠️ test first!)                        ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+| Predicate/action | Meaning in GNU find |
+|---|---|
+| `-name '*.txt'` / `-iname '*.txt'` | Case-sensitive / insensitive basename matching; quote the pattern |
+| `-type f`, `d`, `l`, `b` | Regular file, directory, symlink, block device |
+| `-size +10M` | More than ten rounded-up 1 MiB units: strictly more than 10 MiB |
+| `-size -100k` | Fewer than 100 rounded-up 1 KiB units: at most 99 KiB |
+| `-size 50c` | Exactly 50 bytes |
+| `-mtime -7` | Fewer than seven complete 24-hour periods old |
+| `-mtime +30` | More than thirty complete 24-hour periods: at least 31 days old |
+| `-mmin -60` | Fewer than sixty complete minutes old |
+| `-a`, `-o`, `!`, escaped parentheses | AND (also implicit), OR, NOT and grouping; AND binds more tightly than OR |
+| `-print`, `-print0` | Newline / NUL output; `-print` is the usual implicit action |
+| `-exec command {} \;`, `-exec command {} +` | One invocation per match / batched arguments |
+| `-delete` | Delete matching entries; preview the exact predicate and restrict it to the owned exercise tree first |
 
 ### 5.2 xargs Cheat Sheet
 
+`xargs` batches arguments subject to its command-size limit. Default parsing treats whitespace and quotes specially; it is unsuitable for arbitrary filenames. `-n 1` limits arguments per invocation, `-I {}` supplies a replacement token and `-P 4` permits up to four concurrent child commands; actual parallel work also requires multiple batches.
+
+```bash
+# Run inside the owned fixture directory created in section 11.
+find . -type f -name '*.txt' -print0 | xargs -0 -r grep -- 'pattern'
+find . -type f -name '*.log' -print0 | xargs -0 -r printf 'Selected: %s\n'
+# After reviewing the selection, delete only those owned fixture files:
+find . -type f -name '*.log' -print0 | xargs -0 -r rm --
 ```
-╔══════════════════════════════════════════════════════════════════╗
-║                    XARGS QUICK REFERENCE                         ║
-╠══════════════════════════════════════════════════════════════════╣
-║ BASIC USAGE                                                      ║
-║   cmd | xargs               Execute with all args                ║
-║   cmd | xargs -n 1          One arg per execution               ║
-║   cmd | xargs -I {} cmd {}  Custom placeholder                  ║
-║                                                                  ║
-║ HANDLING SPECIAL CHARACTERS                                      ║
-║   find . -print0 | xargs -0    Null-separated (spaces safe)     ║
-║                                                                  ║
-║ PARALLEL EXECUTION                                               ║
-║   xargs -P 4                Execute 4 processes in parallel      ║
-║                                                                  ║
-║ COMMON PATTERNS                                                  ║
-║   find . -name "*.log" | xargs rm                               ║
-║   find . -name "*.txt" -print0 | xargs -0 grep "pattern"        ║
-║   cat files.txt | xargs -I {} cp {} backup/                     ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+
+GNU `-r` avoids an invocation for an empty list. For portable per-file actions, consider `find ... -exec ... {} +`. A newline-delimited `files.txt` is only safe when its filename restrictions are explicit; use a NUL list for general filenames. A copy destination must exist before a batched `cp --target-directory=... --` invocation.
 
 ### 5.3 Permissions Cheat Sheet
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║                 PERMISSIONS QUICK REFERENCE                      ║
-╠══════════════════════════════════════════════════════════════════╣
-║ PERMISSION BITS                                                  ║
-║                                                                  ║
-║   Symbolic:  r w x   r w x   r w x                              ║
-║              │ │ │   │ │ │   │ │ │                              ║
-║              └─┴─┴─owner─┴─group─┴─others                        ║
-║                                                                  ║
-║   Octal:    4 2 1   4 2 1   4 2 1                               ║
-║             │ │ │   │ │ │   │ │ │                               ║
-║             r w x   r w x   r w x                               ║
-║                                                                  ║
-║ COMMON PERMISSIONS                                               ║
-║   755 rwxr-xr-x   Executables, directories                      ║
-║   644 rw-r--r--   Regular files                                 ║
-║   600 rw-------   Private files                                 ║
-║   700 rwx------   Private directories/scripts                   ║
-║   666 rw-rw-rw-   ⚠️ Avoid! Everyone can write                  ║
-║   777 rwxrwxrwx   ⚠️ NEVER! Security nightmare                  ║
-║                                                                  ║
-║ SPECIAL PERMISSIONS                                              ║
-║   SUID (4xxx)   Execute as owner       chmod u+s / chmod 4755   ║
-║   SGID (2xxx)   Inherit group          chmod g+s / chmod 2755   ║
-║   Sticky (1xxx) Only owner deletes     chmod +t  / chmod 1777   ║
-║                                                                  ║
-║ x ON DIRECTORY = ACCESS (cd), NOT EXECUTE!                       ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+| Bits/mode | Meaning and limit |
+|---|---|
+| `r=4`, `w=2`, `x=1`, three owner/group/other triples | Access permissions; directory `x` is search/traversal |
+| `755` / `644` | Common directory/executable / regular-data modes; choose according to actual access needs |
+| `600` / `700` | Owner-only data / directory or executable |
+| `666` / `777` | Broad write access; do not use as a generic error fix. Shared-directory requirements may use sticky `1777` with explicit ownership rules |
+| SUID (`4xxx`) | Executable-file effective owner semantics, subject to OS/mount restrictions; not a promise that shell scripts gain privileges |
+| SGID (`2xxx`) | Executable-file effective group; on a directory, group inheritance subject to filesystem rules |
+| Sticky (`1xxx`) | In a writable directory, unlink/rename generally requires ownership of the entry or directory, or suitable privilege; it does not prevent reading/modifying file content |
+
+Parent-directory search permission, ACLs, mount options and process identity also affect access. `chmod u+s`, `chmod g+s` and `chmod +t` set the corresponding special bit; numeric modes `4755`, `2755` and `1777` are examples, not deployment defaults.
 
 ### 5.4 umask Calculator
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║                    UMASK CALCULATOR                              ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║   Default permissions:                                           ║
-║     Files:       666 (rw-rw-rw-)                                ║
-║     Directories: 777 (rwxrwxrwx)                                ║
-║                                                                  ║
-║   umask REMOVES bits from default!                               ║
-║                                                                  ║
-║   ┌─────────────────────────────────────────────────────────┐   ║
-║   │ umask │ Files (666-umask) │ Directories (777-umask)    │   ║
-║   ├─────────────────────────────────────────────────────────┤   ║
-║   │  000  │  666 (rw-rw-rw-)  │  777 (rwxrwxrwx)          │   ║
-║   │  002  │  664 (rw-rw-r--)  │  775 (rwxrwxr-x)          │   ║
-║   │  022  │  644 (rw-r--r--)  │  755 (rwxr-xr-x) ← typical │   ║
-║   │  027  │  640 (rw-r-----)  │  750 (rwxr-x---)          │   ║
-║   │  077  │  600 (rw-------)  │  700 (rwx------) ← secure │   ║
-║   └─────────────────────────────────────────────────────────┘   ║
-║                                                                  ║
-║   Formula: Final = Default - umask (per digit)                   ║
-║   ⚠️ umask does NOT ADD bits, only REMOVES!                     ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+For ordinary creation without a default ACL, use a **bitwise** mask: `actual = requested & (~umask & 0777)`. A request of `0666` for a regular file or `0777` for a directory is common; the caller can request fewer bits. Subtraction is not the rule.
+
+| umask | Requested `0666` | Requested `0777` |
+|---|---|---|
+| `000` | `666` | `777` |
+| `002` | `664` | `775` |
+| `022` | `644` | `755` |
+| `027` | `640` | `750` |
+| `077` | `600` | `700` |
+| `111` | `666` | `666` |
+
+The last row is a counterexample to decimal/octal subtraction. A default ACL changes the creation rules; consult [`umask(2)`](https://man7.org/linux/man-pages/man2/umask.2.html) for that case. Existing files are not changed by a later `umask` call.
 
 ### 5.5 Cron Format Reference
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║                    CRON FORMAT REFERENCE                         ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║   ┌───────────── minute (0-59)                                  ║
-║   │ ┌───────────── hour (0-23)                                  ║
-║   │ │ ┌───────────── day of month (1-31)                        ║
-║   │ │ │ ┌───────────── month (1-12 or JAN-DEC)                  ║
-║   │ │ │ │ ┌───────────── day of week (0-7, SUN=0 or 7)          ║
-║   │ │ │ │ │                                                     ║
-║   * * * * * command                                             ║
-║                                                                  ║
-║ SPECIAL CHARACTERS                                               ║
-║   *       Every value           */n     Every n                 ║
-║   n-m     Range n to m          n,m     List n and m            ║
-║                                                                  ║
-║ COMMON EXAMPLES                                                  ║
-║   0 * * * *        Every hour at :00                            ║
-║   */15 * * * *     Every 15 minutes                             ║
-║   0 3 * * *        Daily at 3:00 AM                             ║
-║   0 3 * * 0        Sundays at 3:00 AM                           ║
-║   0 0 1 * *        First of each month at midnight              ║
-║   30 4 1,15 * *    1st and 15th at 4:30 AM                      ║
-║                                                                  ║
-║ SHORTCUTS (if supported)                                         ║
-║   @reboot          At startup                                   ║
-║   @yearly          0 0 1 1 *                                    ║
-║   @monthly         0 0 1 * *                                    ║
-║   @weekly          0 0 * * 0                                    ║
-║   @daily           0 0 * * *                                    ║
-║   @hourly          0 * * * *                                    ║
-║                                                                  ║
-║ ⚠️ DOM + DOW: EITHER matches (OR logic, not AND!)               ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+A Unix **user crontab** has `minute hour day-of-month month day-of-week command`. Typical field ranges are `0–59`, `0–23`, `1–31`, `1–12` and `0–7` (Sunday 0 or 7). System crontabs have an additional username field. Named months/weekdays and shortcuts depend on the implementation.
+
+| Schedule | Meaning |
+|---|---|
+| `0 * * * *` | Every hour at minute 0 |
+| `*/15 * * * *` | Minutes 0, 15, 30 and 45 |
+| `0 3 * * *` | Daily at 03:00 |
+| `0 3 * * 0` | Sundays at 03:00 |
+| `0 0 1 * *` | First of every month at midnight |
+| `30 4 1,15 * *` | First and fifteenth at 04:30 |
+
+`*` selects all values, `n-m` a range, `n,m` a list and a step applies **within its field**, not as an elapsed-time interval. In the Debian/Vixie-style rule, when both day-of-month and day-of-week are restricted, matching either is sufficient; this is not an unconditional OR rule for wildcard fields. Time zone and DST handling are implementation-dependent. `%` has special command-field semantics unless escaped.
+
+Where supported: `@reboot` means daemon startup, `@yearly` is `0 0 1 1 *`, `@monthly` is `0 0 1 * *`, `@weekly` is `0 0 * * 0`, `@daily` is `0 0 * * *` and `@hourly` is `0 * * * *`. Consult `man 5 crontab` on the target machine.
 
 ### 5.6 getopts Reference
 
+```bash
+# Complete parsing example; save as a separate script and run with Bash.
+usage() { printf 'Usage: %s [-h] [-v] [-f FILE] [-n NUMBER] [--] ARG...\n' "$0"; }
+VERBOSE=0; FILE=''; NUM=''; NUM_GIVEN=0
+while getopts ':hvf:n:' opt; do
+    case "$opt" in
+        h) usage; exit 0 ;;
+        v) VERBOSE=1 ;;
+        f) FILE=$OPTARG ;;
+        n) NUM=$OPTARG; NUM_GIVEN=1 ;;
+        :) printf 'Option -%s needs an argument\n' "$OPTARG" >&2; exit 2 ;;
+        \?) printf 'Unknown option: -%s\n' "$OPTARG" >&2; exit 2 ;;
+    esac
+done
+shift "$((OPTIND-1))"
+if (( NUM_GIVEN )) && [[ ! "$NUM" =~ ^[0-9]+$ ]]; then
+    printf 'NUMBER must contain only decimal digits\n' >&2; exit 2
+fi
+printf 'Parsed %s positional argument(s)\n' "$#"
 ```
-╔══════════════════════════════════════════════════════════════════╗
-║                   GETOPTS QUICK REFERENCE                        ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║ BASIC TEMPLATE                                                   ║
-║   while getopts "hvf:n:" opt; do                                ║
-║       case $opt in                                              ║
-║           h) usage; exit 0 ;;                                   ║
-║           v) VERBOSE=1 ;;                                       ║
-║           f) FILE="$OPTARG" ;;                                  ║
-║           n) NUM="$OPTARG" ;;                                   ║
-║           ?) usage; exit 1 ;;                                   ║
-║       esac                                                      ║
-║   done                                                          ║
-║   shift $((OPTIND-1))                                           ║
-║                                                                  ║
-║ OPTSTRING FORMAT                                                 ║
-║   "abc"     -a, -b, -c without arguments                        ║
-║   "a:b:c"   -a ARG, -b ARG, -c ARG required                     ║
-║   "a:bc"    -a ARG required, -b -c optional                     ║
-║   ":abc"    Silent errors (leading :)                           ║
-║                                                                  ║
-║ SPECIAL VARIABLES                                                ║
-║   $OPTARG   Value of current option's argument                  ║
-║   $OPTIND   Index of next argument to process                   ║
-║   $opt      Current option letter                               ║
-║                                                                  ║
-║ ⚠️ getopts ONLY handles short options (-a, -b)                  ║
-║    For --long options, use manual parsing with case             ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+
+`abc` defines three flags; `a:b:c` makes `-a` and `-b` require arguments, while `-c` is a flag. `a:bc` requires an argument only for `-a`. Options themselves are optional unless application logic requires them; this is different from an optional option argument. A leading `:` enables silent error reporting through `:`/`?` and `OPTARG`. `OPTIND` identifies the next argument; reset it to 1 before a separate parsing pass. Bash `getopts` handles short options; parse long options explicitly if required.
 
 ### 5.7 Downloadable Resources
 
@@ -386,7 +294,7 @@ man 8 cron        # Cron daemon
 |---------|-------|------|
 | Learn Linux TV | Server administration | https://www.youtube.com/@LearnLinuxTV |
 | NetworkChuck | Linux basics, fun style | https://www.youtube.com/@NetworkChuck |
-| The Linux Experiment | Desktop Linux | https://www.youtube.com/@TheLinuxExperiment |
+| The Linux Experiment | Desktop Linux | https://www.youtube.com/channel/UC5UAwBUum7CPN5buc-_N1Fw |
 | tutoriaLinux | System admin | https://www.youtube.com/@tutoriaLinux |
 | DistroTube | Command line power | https://www.youtube.com/@DistroTube |
 
@@ -464,7 +372,7 @@ man 8 cron        # Cron daemon
 
 | Article | Source | Focus |
 |---------|--------|-------|
-| "Cron Job Monitoring" | healthchecks.io | Monitoring |
+| Healthchecks documentation | https://healthchecks.io/docs/ | Primary alternative for scheduled-job monitoring |
 | "Systemd Timers vs Cron" | Arch Wiki | Modern alternatives |
 | "Avoiding Cron Pitfalls" | Various | Common problems |
 | "Lock Files in Shell Scripts" | Linux Journal | Race condition prevention |
@@ -511,7 +419,7 @@ man 8 cron        # Cron daemon
 |----------|-----|-------------|
 | CIS Benchmarks | https://www.cisecurity.org/cis-benchmarks | Industry standard |
 | OWASP | https://owasp.org/ | Web/application security |
-| NSA/CISA Linux Hardening | DISA STIGs | Governmental |
+| Government hardening publications | Select a named publication and issuing body | NSA/CISA and DISA STIGs are distinct sources; no exact publication is identified here |
 | Lynis | https://cisofy.com/lynis/ | Audit tool |
 
 ### 10.2 Vulnerabilities and CVE
@@ -537,57 +445,56 @@ man 8 cron        # Cron daemon
 
 ### 11.1 find Challenges
 
+Use a disposable directory owned by the learner. These exercises do not require changes to `/var/log`, `/var/www`, shared `/tmp` contents or system cron. Review selected paths before each modifying action.
+
 ```bash
-# 1. Find all SUID files on the system
-find / -perm -4000 -type f 2>/dev/null
-
-# 2. Find world-writable files
-find / -perm -002 -type f 2>/dev/null
-
-# 3. Find files without valid owner
-find / -nouser -o -nogroup 2>/dev/null
-
-# 4. Find files modified in the last 24h
-find /home -mtime -1 -type f
-
-# 5. Find and compress logs older than 30 days
-find /var/log -name "*.log" -mtime +30 -exec gzip {} \;
+LAB_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/enos-resource-lab.XXXXXX")
+mkdir -p -- "$LAB_ROOT/logs" "$LAB_ROOT/web/assets" "$LAB_ROOT/dropbox"
+printf 'demo log\n' > "$LAB_ROOT/logs/old sample.log"
+printf 'page\n' > "$LAB_ROOT/web/index.html"
+printf 'text\n' > "$LAB_ROOT/web/assets/file with spaces.txt"
+# Set only this fixture's modification time, then inspect it.
+touch -d '32 days ago' -- "$LAB_ROOT/logs/old sample.log"
+find "$LAB_ROOT" -type f -perm -4000 -print
+find "$LAB_ROOT" -type f -perm -002 -print
+find "$LAB_ROOT" \( -nouser -o -nogroup \) -print
+find "$LAB_ROOT" -type f -mtime -1 -print
+find "$LAB_ROOT/logs" -type f -name '*.log' -mtime +30 -print
+find "$LAB_ROOT/logs" -type f -name '*.log' -mtime +30 -exec gzip -- {} +
+printf 'Retained exercise directory: %s\n' "$LAB_ROOT"
 ```
+
+An empty result is valid: the owned fixture does not fabricate privileged files or orphan owners. Whole-system searches are a separate read-only administrative exercise with an authorised scope and explicit treatment of permission errors.
 
 ### 11.2 Permissions Challenges
 
+Continue in the same fixture shell. The group example uses the learner's current group; institutional shared-group policy is a separate choice.
+
 ```bash
-# 1. Fix permissions for a web project
-find /var/www -type d -exec chmod 755 {} \;
-find /var/www -type f -exec chmod 644 {} \;
-
-# 2. Configure shared directory for group
-mkdir /shared
-chgrp developers /shared
-chmod 2775 /shared
-
-# 3. Create "drop box" directory (write-only)
-mkdir /dropbox
-chmod 733 /dropbox
-
-# 4. Quick security audit
-find . -perm -777 -ls 2>/dev/null
+find "$LAB_ROOT/web" -type d -exec chmod 755 -- {} +
+find "$LAB_ROOT/web" -type f -exec chmod 644 -- {} +
+mkdir -- "$LAB_ROOT/shared"
+chgrp -- "$(id -gn)" "$LAB_ROOT/shared"
+chmod 2775 -- "$LAB_ROOT/shared"
+chmod 1733 -- "$LAB_ROOT/dropbox"
+find "$LAB_ROOT" -perm -777 -ls
 ```
+
+The historical `chmod 733` "write-only drop box" description was incomplete. Directory write+search permits creating entries and accessing known names; sticky `1733` restricts unlink/rename by other users but does **not** ensure confidentiality or prohibit modifying a writable known file. File ownership/modes, ACLs and a controlled ingestion design determine those properties.
 
 ### 11.3 Cron Challenges
 
-```
-# 1. Daily backup at 2:30 AM
-30 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1
+These are **templates to inspect**, not installed jobs. Replace `/home/student/enos-cron-lab` with a fixed absolute owned directory, create/review the referenced scripts and logs first, then choose scheduling explicitly. Do not insert an unexpanded shell variable into a crontab expecting it to inherit this interactive shell.
 
-# 2. Weekly cleanup Sunday at 3 AM
-0 3 * * 0 find /tmp -mtime +7 -delete
-
-# 3. Monthly report on first day at 6 AM
-0 6 1 * * /usr/local/bin/monthly_report.sh
-
-# 4. Disk check every 6 hours
-0 */6 * * * df -h > /var/log/disk_usage.log
+```cron
+# Daily reviewed backup script at 02:30
+30 2 * * * /home/student/enos-cron-lab/backup.sh >> /home/student/enos-cron-lab/backup.log 2>&1
+# Sunday 03:00: list old regular files in the owned cache; no shared-/tmp deletion
+0 3 * * 0 /usr/bin/find /home/student/enos-cron-lab/cache -type f -mtime +7 -print
+# Monthly reviewed report
+0 6 1 * * /home/student/enos-cron-lab/monthly_report.sh
+# Every six wall-clock hours, append timestamp-free disk report to an owned log
+0 */6 * * * /usr/bin/df -h >> /home/student/enos-cron-lab/disk_usage.log 2>&1
 ```
 
 ### 11.4 Mini-Projects
@@ -729,6 +636,6 @@ For quick reference, all important URLs:
 
 Document generated for: Seminar 03 OS, Bucharest UES - CSIE  
 Version: 1.0  
-Last updated: January 2025
+Historical collection: January 2025; corrected candidate: 17 November 2026
 
 *💡 Suggestion: Save this page in bookmarks for quick access during study!*

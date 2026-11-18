@@ -1,0 +1,72 @@
+' Recovered from the baseline PNG's embedded PlantUML, then translated and corrected.
+@startuml kernel_architectures
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Kernel Architectures
+
+skinparam rectangle {
+    roundCorner 5
+}
+
+rectangle "**MONOLITHIC KERNEL**\n(Linux, FreeBSD)" as mono {
+    rectangle "User Space" as mono_user #E3F2FD {
+        rectangle "Applications" as mono_apps #FFFFFF
+    }
+    
+    rectangle "Kernel Space" as mono_kernel #FFCCBC {
+        rectangle "Scheduler" as mono_sched #FFE0B2
+        rectangle "Memory Mgr" as mono_mm #FFE0B2
+        rectangle "File System" as mono_fs #FFE0B2
+        rectangle "Drivers" as mono_drv #FFE0B2
+        rectangle "Network" as mono_net #FFE0B2
+    }
+    
+    note bottom of mono_kernel
+    **Core services in kernel space**
+    ✓ Direct calls between kernel services
+    ✗ A kernel fault can crash the system
+    end note
+}
+
+rectangle "**MICROKERNEL**\n(Minix, QNX, seL4)" as micro {
+    rectangle "User Space" as micro_user #E3F2FD {
+        rectangle "Applications" as micro_apps #FFFFFF
+        rectangle "FS Server" as micro_fs #C8E6C9
+        rectangle "Net Server" as micro_net #C8E6C9
+        rectangle "Drivers" as micro_drv #C8E6C9
+    }
+    
+    rectangle "Kernel Space" as micro_kernel #FFCCBC {
+        rectangle "IPC" as micro_ipc #FFE0B2
+        rectangle "Basic\nScheduler" as micro_sched #FFE0B2
+    }
+    
+    note bottom of micro_kernel
+    **Minimal services in kernel**
+    ✓ User-space server fault containment
+    ✗ IPC overhead depends on implementation
+    end note
+}
+
+rectangle "**HYBRID KERNEL**\n(Windows NT, macOS)" as hybrid {
+    rectangle "User Space" as hybrid_user #E3F2FD {
+        rectangle "Applications" as hybrid_apps #FFFFFF
+        rectangle "Subsystems" as hybrid_sub #C8E6C9
+    }
+    
+    rectangle "Kernel Space" as hybrid_kernel #FFCCBC {
+        rectangle "Core Services" as hybrid_core #FFE0B2
+        rectangle "Drivers" as hybrid_drv #FFE0B2
+        rectangle "FS, Net" as hybrid_fs #FFE0B2
+    }
+    
+    note bottom of hybrid_kernel
+    **Mixed design**
+    ✓ Flexible design
+    ✓ Performance depends on workload
+    end note
+}
+
+mono -[hidden]down- micro
+micro -[hidden]down- hybrid
+
+@enduml

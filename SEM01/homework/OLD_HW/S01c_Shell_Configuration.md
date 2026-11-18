@@ -91,25 +91,7 @@ export PYTHONPATH="/home/student/lib/python"
 
 ### 3.1 Loading Order
 
-```
-LOGIN SHELL (ssh, login):
-┌─────────────────┐
-│  /etc/profile   │ ← Global for all users
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│  ~/.bash_profile│ ← Personal (or ~/.bash_login or ~/.profile)
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│  ~/.bashrc      │ ← Usually sourced from .bash_profile
-└─────────────────┘
-
-NON-LOGIN SHELL (new terminal):
-┌─────────────────┐
-│  ~/.bashrc      │ ← Only this file
-└─────────────────┘
-```
+Bash login startup reads `/etc/profile`, then **the first readable** personal file in this order: `~/.bash_profile`, `~/.bash_login`, `~/.profile`. The selected file may explicitly source `~/.bashrc`; this is not an unconditional next step. Interactive non-login Bash reads `~/.bashrc`. For ordinary non-interactive Bash, `BASH_ENV` names an optional startup file. SSH and terminal launch settings can select different modes.
 
 ### 3.2 ~/.bashrc
 
@@ -299,7 +281,9 @@ echo ${NAME}    # equivalent, but clearer
 
 # Concatenation (${} required)
 echo "${NAME}_backup"    # Ana_backup
-echo "$NAME_backup"      # error - looks for NAME_backup variable
+unset NAME_backup
+echo "$NAME_backup"      # empty, not a syntax error; reads the distinct NAME_backup variable
+# With set -u, expansion of an unset variable is an error instead.
 ```
 
 ### 6.2 Default Values
@@ -308,7 +292,7 @@ echo "$NAME_backup"      # error - looks for NAME_backup variable
 # ${VAR:-default} - use default if VAR does not exist or is empty
 echo ${UNDEFINED:-"default value"}
 
-# ${VAR:=default} - set VAR to default if it does not exist
+# ${VAR:=default} - set VAR to default if unset OR empty
 echo ${DIRECTORY:="/tmp"}
 echo $DIRECTORY    # /tmp
 
@@ -370,7 +354,7 @@ echo "Path: $PATH"
 # 2. Create an environment variable
 export PROJECT="OS_Lab"
 
-# 3. Verify in subshell
+# 3. Verify in a newly invoked Bash interpreter
 bash -c 'echo "Project: $PROJECT"'
 
 # 4. Add directory to PATH
@@ -381,14 +365,15 @@ export PATH="$PATH:$HOME/scripts"
 
 ```bash
 # 1. Back up .bashrc
-cp ~/.bashrc ~/.bashrc.backup
+BASHRC_BACKUP=$(mktemp "$HOME/.bashrc.backup.XXXXXX") || exit 1
+cp -- "$HOME/.bashrc" "$BASHRC_BACKUP" || exit 1
 
 # 2. Add aliases
 echo "alias ll='ls -la'" >> ~/.bashrc
 echo "alias cls='clear'" >> ~/.bashrc
 
-# 3. Apply changes
-source ~/.bashrc
+# 3. Check syntax, inspect the changes, then apply in this interactive shell
+bash -n "$HOME/.bashrc" && source "$HOME/.bashrc"
 
 # 4. Test
 ll
@@ -415,10 +400,10 @@ PS1=$OLD_PS1
 ## 8. Review Questions
 
 1. **What is the difference between a local and an environment variable?**
-   > A local variable exists only in the current shell. An environment variable (export) is inherited by subprocesses.
+   > An unexported shell variable is retained by a parenthesised subshell but is not passed to a newly invoked interpreter. Exported variables enter the child process environment. `local` has a separate function-scope meaning in Bash.
 
 2. **Which file is executed when opening a new terminal?**
-   > `~/.bashrc` for non-login shells (graphical terminals).
+   > An interactive non-login Bash reads `~/.bashrc`. A login Bash uses `/etc/profile`, then the first readable `~/.bash_profile`, `~/.bash_login` or `~/.profile`; that file may source `~/.bashrc`. Non-interactive Bash has a separate `BASH_ENV` rule. Terminal configuration determines which shell mode is started.
 
 3. **How do you permanently add a directory to PATH?**
    > Add `export PATH="$PATH:/directory"` to `~/.bashrc`.
@@ -452,7 +437,7 @@ $HOME     # home directory
 $USER     # username
 $PATH     # executable paths
 $PWD      # current directory
-$SHELL    # current shell
+$SHELL    # login-shell environment value, not necessarily current interpreter
 
 # ALIAS
 alias name='command'
@@ -485,14 +470,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

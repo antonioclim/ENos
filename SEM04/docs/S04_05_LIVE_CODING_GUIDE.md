@@ -3,7 +3,7 @@
 
 > Operating Systems | Bucharest University of Economic Studies - CSIE  
 > Seminar 4 | Live Coding Sessions  
-> Sessions: 5 | Total time: ~50 minutes
+> Sessions: 5 | Total time: 60 minutes (10+15+15+15+5); select a shorter route explicitly when needed
 
 ---
 
@@ -11,7 +11,7 @@
 
 ### Why Live Coding?
 
-Live coding is one of the most effective methods for teaching programming:
+This guide uses live coding to make the reasoning process observable:
 
 1. Models the thinking process - students see HOW an expert thinks
 2. Normalises mistakes - shows that even experts make errors
@@ -35,7 +35,6 @@ Live coding is one of the most effective methods for teaching programming:
 │                                                                         │
 │  5. VISIBILITY - Large font (16pt+), clean terminal                    │
 
-> 💡 I have had students who learnt Bash in two weeks starting from zero — so it is possible, with consistent practice.
 
 │                                                                         │
 │  6. PROGRESSIVE - From simple to complex, never the reverse            │
@@ -43,11 +42,24 @@ Live coding is one of the most effective methods for teaching programming:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+> 💡 I have had students who learnt Bash in two weeks starting from zero — so it is possible, with consistent practice.
+
+
+Retained personal experience statements are anecdotes, not measured learning
+rates. Examples use GNU tools and `LC_ALL=C` for ASCII regex expectations. The
+CSV fixture has unquoted fields, one header and numeric salary values. Keep the
+intentional WRONG examples for discussion; they are not corrected reference code.
+
 ### Pre-Session Preparation
 
 ```bash
-# Verify that sample data exists
-ls ~/demo_sem4/data/
+# Start at the repository root; generate a fresh, owned lab dataset.
+SEM04_DIR=$(cd SEM04 && pwd) || exit 1
+LIVE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-livecoding.XXXXXX") || exit 1
+export SEM04_DIR LIVE_DIR
+ENOS_SEM04_DATA_DIR="$LIVE_DIR/data" ENOS_SEM04_RESOURCE_DIR="$LIVE_DIR/generated" \
+    bash "$SEM04_DIR/scripts/bash/S04_01_setup_seminar.sh" || exit 1
+ls -- "$LIVE_DIR/data/"
 
 # Clear the terminal
 clear
@@ -65,7 +77,7 @@ export PS1='$ '
 ## Setup
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$LIVE_DIR/data" || exit 1
 cat test.txt   # Show contents
 ```
 
@@ -104,8 +116,6 @@ grep '192.168.1.1' test.txt
 ```bash
 echo "192X168Y1Z1" >> test.txt
 grep '192.168.1.1' test.txt
-
-*(`grep` is probably the command I use most frequently. Simple, fast, efficient.)*
 
 ```
 
@@ -146,7 +156,7 @@ echo -e "The end\nendless\nMy friend" > endings.txt
 grep 'end$' endings.txt
 ```
 
-[SAY]: "Only 'The end' - the only one that ENDS with 'end'."
+[SAY]: "Both The end and My friend end with the substring end. A word boundary would express a different requirement."
 
 ### Useful Combination
 
@@ -178,7 +188,7 @@ grep '[A-Z]' test.txt          # Lines with uppercase
 grep '[^0-9]' test.txt    # WRONG!
 ```
 
-[SURPRISE]: "It found ALL lines! Why?"
+[SURPRISE]: "It selects every line containing at least one non-digit; an all-digit line and an empty line are counterexamples."
 
 [EXPLANATION]: "[^0-9] means 'a character that IS NOT a digit'. Almost all lines have at least one non-digit."
 
@@ -226,7 +236,7 @@ grep 'ab\+c' quant.txt
 ## Setup
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$LIVE_DIR/data" || exit 1
 head access.log    # Show structure
 ```
 
@@ -238,9 +248,11 @@ head access.log    # Show structure
 grep 'get' access.log | head -3
 grep -i 'get' access.log | head -3
 
-*Personal note: `grep` is probably the command I use most frequently. Simple, fast, efficient.*
 
 ```
+
+*Personal note: `grep` is probably the command I use most frequently. Simple, fast, efficient.*
+
 
 [EXPLANATION]: "-i ignores the difference between uppercase and lowercase"
 
@@ -257,8 +269,9 @@ grep -v '^#' config.txt
 ### -n: Line Numbers
 
 ```bash
-grep -n 'ERROR\|error' access.log 2>/dev/null || \
-grep -n '403' access.log
+grep -n 'ERROR\|error' access.log
+rc=$?
+case $rc in 0) : ;; 1) grep -n '" 403 ' access.log ;; *) exit "$rc" ;; esac
 ```
 
 [UTILITY]: "Essential for debugging - you know exactly where the problem is!"
@@ -303,14 +316,14 @@ grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort | uniq -c | sort -rn | 
 
 ## Segment 2.2: Useful Patterns (5 min)
 
-### Emails
+### Email-shaped Substrings (not RFC Validation)
 
 ```bash
 cat emails.txt
 grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' emails.txt
 ```
 
-### IP Addresses
+### IPv4-shaped Substrings (not Octet Validation)
 
 ```bash
 grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort -u
@@ -351,7 +364,7 @@ grep -B 2 -A 2 '403' access.log | head -15
 ## Setup
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$LIVE_DIR/data" || exit 1
 cat config.txt
 ```
 
@@ -397,12 +410,13 @@ cat config.txt   # Confirm it is unchanged
 ### Safe Demo
 
 ```bash
-cp config.txt config_test.txt
+[[ ! -e config_test.txt && ! -e config_test.txt.bak ]] || { echo "Use a fresh exercise directory" >&2; exit 1; }
+cp -- config.txt config_test.txt || exit 1
 
 # DANGEROUS (without backup)
 # sed -i 's/localhost/127.0.0.1/' config_test.txt
 
-# SAFE (with backup)
+# One backup in a fresh directory; an existing .bak would otherwise be overwritten
 sed -i.bak 's/localhost/127.0.0.1/' config_test.txt
 ls config_test.*
 cat config_test.bak   # Original preserved!
@@ -456,7 +470,7 @@ sed '/port/s/=/ = /' config.txt
 ### & = The Entire Match
 
 ```bash
-echo "port=8080" | sed 's/[0-9]\+/[&]/'
+echo "port=8080" | sed 's/[0-9]*/[&]/'  # Deliberately wrong: permits an empty match
 ```
 
 [PREDICTION]: "What will it display?"
@@ -487,7 +501,7 @@ echo "John Smith" | sed 's/\([A-Za-z]*\) \([A-Za-z]*\)/\2, \1/'
 ## Setup
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$LIVE_DIR/data" || exit 1
 cat employees.csv
 ```
 
@@ -520,12 +534,14 @@ echo "John Smith 30" | awk '{ print $1 }'   # John
 
 ```bash
 # WITHOUT comma = concatenation
-awk -F',' '{ print $2 $3 }' employees.csv | head -3
-# JohnSmithIT
+awk -F',' 'NR>1 { print $2 $3 }' employees.csv | head -2
+# John SmithIT
+# Maria GarciaHR
 
 # WITH comma = space (OFS)
-awk -F',' '{ print $2, $3 }' employees.csv | head -3
+awk -F',' 'NR>1 { print $2, $3 }' employees.csv | head -2
 # John Smith IT
+# Maria Garcia HR
 ```
 
 ---
@@ -545,7 +561,7 @@ awk -F',' 'NR > 1 { print $2 }' employees.csv
 awk -F',' '$3 == "IT"' employees.csv
 
 # Salary > 5500
-awk -F',' '$4 > 5500' employees.csv
+awk -F',' 'NR>1 && $4 ~ /^[0-9]+$/ && $4 > 5500' employees.csv
 ```
 
 ### Calculations
@@ -555,7 +571,7 @@ awk -F',' '$4 > 5500' employees.csv
 awk -F',' 'NR > 1 { sum += $4 } END { print "Total:", sum }' employees.csv
 
 # Average
-awk -F',' 'NR > 1 { sum += $4; count++ } END { print "Average:", sum/count }' employees.csv
+awk -F',' 'NR > 1 { sum += $4; count++ } END { if(count) print "Average:", sum/count; else print "Average: undefined (0 records)" }' employees.csv
 ```
 
 ---
@@ -601,7 +617,7 @@ awk '{ print FILENAME, NR, FNR }' f1.txt f2.txt
 ## Quick Demo
 
 ```bash
-nano /tmp/demo_script.sh
+nano "$LIVE_DIR/demo_script.sh"
 ```
 
 [ON SCREEN]: Show the footer with commands
@@ -651,13 +667,13 @@ echo "Hello from nano!"
 ## Pre-Seminar Checklist
 
 ```
-□ Sample data created in ~/demo_sem4/data/
+□ Sample data created in the owned LIVE_DIR/data/ fixture
 □ Terminal with large font (16pt+)
 □ Short PS1 for visibility
 □ Demo scripts tested
 □ Notes with deliberate errors at hand
 □ Cheat sheet prepared for sharing
-□ Browser with regex101.com open
+□ Actual target GNU tools checked; an online tester is an optional dialect-specific aid
 ```
 
 ---
@@ -679,7 +695,7 @@ SESSION 2: GREP (15 min)
 
 SESSION 3: SED (15 min)
 ├── s/old/new/g = global
-├── -i.bak = safe in-place
+├── -i.bak = one backup (check name collision first)
 ├── /pattern/d = delete
 └── & and \1 = backreferences
 
@@ -698,3 +714,8 @@ SESSION 5: Nano (5 min)
 ---
 
 *Live Coding Guide for Operating Systems Seminar 4 | ASE Bucharest - CSIE*
+
+
+## Retained Author Notes
+
+*(`grep` is probably the command I use most frequently. Simple, fast, efficient.)*

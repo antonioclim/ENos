@@ -39,6 +39,7 @@ from struct import pack
 import argparse
 import signal
 import sys
+import time
 import json
 from collections import defaultdict
 
@@ -90,7 +91,9 @@ BPF_HASH(bytes_recv, u32, u64);
 
 // Entry into tcp_v4_connect
 int trace_connect_entry(struct pt_regs *ctx, struct sock *sk) {
-    u32 tid = bpf_get_current_pid_tgid();
+    u64 pid_tgid = bpf_get_current_pid_tgid();
+    u32 tid = (u32)pid_tgid;
+    u32 pid = pid_tgid >> 32;
     
     // PID filter (replaced at runtime)
     FILTER_PID
@@ -121,7 +124,7 @@ int trace_connect_return(struct pt_regs *ctx) {
     currsock.delete(&tid);
     
     // Extract connection information
-    u16 sport = 0;
+    u16 sport = sk->__sk_common.skc_num; // host byte order
     u16 dport = sk->__sk_common.skc_dport;
     u32 saddr = sk->__sk_common.skc_rcv_saddr;
     u32 daddr = sk->__sk_common.skc_daddr;
@@ -399,13 +402,13 @@ class NetworkMonitor:
         # Open perf buffer
         self.bpf["events"].open_perf_buffer(self.print_event)
         
-        elapsed = 0
+        deadline = time.monotonic() + duration if duration is not None else None
         try:
             while self.running:
-                self.bpf.perf_buffer_poll(timeout=1000)  # 1 second
-                elapsed += 1
-                if duration and elapsed >= duration:
+                if deadline is not None and time.monotonic() >= deadline:
                     break
+                timeout = 1000 if deadline is None else max(1, min(1000, int((deadline-time.monotonic())*1000)))
+                self.bpf.perf_buffer_poll(timeout=timeout)
         except KeyboardInterrupt:
             pass
         
@@ -465,7 +468,7 @@ class NetworkMonitor:
 def main():
     """Main entry point."""
     
-    # Comandă line arguments
+    # Command line arguments
     parser = argparse.ArgumentParser(
         description="Network connection monitoring with eBPF/BCC",
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -277,8 +277,8 @@ file script.sh        # Bourne-Again shell script...
 file image.jpg        # JPEG image data...
 
 # Size
-du -h file.txt        # file size
-du -sh directory/     # total directory size
+du -h file.txt        # allocated disk usage
+du -sh directory/     # total allocated disk usage
 du -ah directory/     # all files in directory
 
 # Disk space
@@ -287,7 +287,7 @@ df -h /home           # space on specified partition
 
 # Statistics
 stat file.txt         # complete information
-wc file.txt           # lines, words, characters
+wc file.txt           # lines, words, bytes
 wc -l file.txt        # lines only
 wc -w file.txt        # words only
 wc -c file.txt        # bytes only
@@ -319,7 +319,7 @@ find . -size 100c                 # exactly 100 bytes
 
 # Search by time
 find . -mtime -7                  # modified in last 7 days
-find . -mtime +30                 # modified more than 30 days ago
+find . -mtime +30                 # at least 31 completed 24-hour periods old
 find . -mmin -60                  # modified in last hour
 
 # Combinations
@@ -405,8 +405,10 @@ find ~ -name "*.txt" -type f
 # Find large files (>100MB)
 find /var -size +100M 2>/dev/null
 
-# Find files modified today
-find . -mtime 0 -type f
+# Find regular files modified less than 24 hours ago
+find . -type f -mtime 0
+# GNU find: strictly after local midnight (calendar boundary)
+find . -type f -newermt "today"
 ```
 
 ### Exercise 4: Information
@@ -418,7 +420,7 @@ echo "Line 2" >> test.txt
 echo "Line 3" >> test.txt
 
 # Analyse
-wc test.txt           # lines, words, characters
+wc test.txt           # lines, words, bytes
 stat test.txt         # complete information
 file test.txt         # file type
 ls -lh test.txt       # human-readable size
@@ -482,8 +484,8 @@ less file               # paginated
 ls -la                  # detailed listing
 file name               # file type
 stat name               # statistics
-wc file                 # lines/words/chars
-du -sh dir/             # directory size
+wc file                 # lines/words/bytes
+du -sh dir/             # allocated directory disk usage
 
 # SEARCHING
 find . -name "*.txt"    # by name
@@ -505,15 +507,25 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 
 *By Revolvix for OPERATING SYSTEMS class | restricted licence 2017-2030*
+
+### Measurement contract
+
+`wc` without options reports newline, word and byte counts. In a UTF-8 locale, `printf 'é\n' | wc -c` reports 3 bytes and `printf 'é\n' | wc -m` reports 2 characters. `wc -L` measures display width, which is a different quantity. `du` normally reports allocated disk usage; `stat -c %s file` (GNU) or `du --apparent-size -B1 file` reports logical length/apparent size. Sparse files demonstrate why these values can differ. GNU `find -mtime n` rounds age down to completed 24-hour periods, not calendar dates.

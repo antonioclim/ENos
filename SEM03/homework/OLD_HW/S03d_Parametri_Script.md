@@ -1,5 +1,7 @@
 # S03_TC03 - Parameters in Bash Scripts
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (Redistributed)
 
@@ -92,7 +94,9 @@ echo "After shift 2: $@"
 # optstring: option letters
 # : after letter = option requires argument
 
-while getopts "hvo:" opt; do
+VERBOSE=false
+OUTPUT=""
+while getopts ":hvo:" opt; do
     case $opt in
         h)
             echo "Help: ./script.sh [-h] [-v] [-o file]"
@@ -234,6 +238,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -o|--output)
+            [[ $# -ge 2 && -n $2 ]] || { echo "Missing nonempty option value" >&2; exit 1; }
             OUTPUT="$2"
             shift 2
             ;;
@@ -328,7 +333,7 @@ fi
 
 ## Cheat Sheet
 
-```bash
+```text
 # POSITIONAL PARAMETERS
 $0        # script name
 $1-$9     # parameters 1-9
@@ -342,7 +347,7 @@ shift     # remove $1
 shift N   # remove first N
 
 # GETOPTS
-getopts "ab:c:" opt    # a,c without arg, b with arg
+getopts "ab:c:" opt    # a is a flag; b and c require arguments
 $OPTARG               # argument value
 $OPTIND               # current index
 shift $((OPTIND-1))   # skip over options
@@ -370,14 +375,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

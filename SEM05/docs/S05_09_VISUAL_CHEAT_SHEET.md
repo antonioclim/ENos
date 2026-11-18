@@ -6,23 +6,27 @@
 
 ---
 
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
+
+
 ## STRICT MODE (Memorise: "euo pipefail IFS")
 
 ```bash
 #!/bin/bash
 
-*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
 set -euo pipefail
 IFS=$'\n\t'
 ```
 
+*(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
+
 | Option | What it does | Without it |
 |--------|--------------|------------|
 | `-e` | Exit on error | Continues after errors |
 | `-u` | Error on undefined var | Undefined var = "" |
-| `-o pipefail` | Pipe returns first error | Returns last |
-| `IFS=...` | Safe separator | Space separates |
+| `-o pipefail` | Rightmost non-zero pipeline status; all zero gives zero | Returns last |
+| `IFS=...` | Changes splitting; quoting is still required | Space separates |
 
 ### Trap: -e does NOT work in:
 ```
@@ -93,7 +97,7 @@ ${!arr[@]}             # All indices
 ```
 
 ### Iteration
-```bash
+```text
 # CORRECT - with quotes!
 for item in "${arr[@]}"; do
     echo "$item"
@@ -157,18 +161,18 @@ TEMP_FILE=""
 
 cleanup() {
     local exit_code=$?
-    [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+    if [[ -n ${TEMP_FILE:-} ]]; then rm -f -- "$TEMP_FILE"; fi
     exit $exit_code
 }
 
-trap cleanup EXIT           # On any exit
+trap cleanup EXIT           # Shell exit; not SIGKILL or machine failure
 trap 'echo "Ctrl+C"' INT   # On Ctrl+C
 ```
 
 ### Common Signals
 ```
-EXIT    On script exit (any mode)
-ERR     On error (with set -e)
+EXIT    On shell exit; not SIGKILL or abrupt machine failure
+ERR     Eligible failure; independent of set -e; set -E controls inheritance
 INT     Ctrl+C
 TERM    kill (default)
 DEBUG   Before each command
@@ -225,13 +229,14 @@ trap 'echo "Line $LINENO: $BASH_COMMAND"' DEBUG
 
 ```bash
 
-*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 ${VAR:-default}     # Returns default if VAR unset/empty
 ${VAR:=default}     # Sets VAR to default if unset/empty
 ${VAR:?error msg}   # Error if VAR unset/empty
 ${VAR:+alternate}   # Returns alternate if VAR IS set
 ```
+
+*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 ### Pattern for Arguments
 ```bash
@@ -271,7 +276,8 @@ ${PIPESTATUS[@]} # Exit codes from pipe
 ```bash
 DEBUG="${DEBUG:-false}"
 debug() {
-    [[ "$DEBUG" == "true" ]] && echo "[DEBUG] $*" >&2
+    if [[ "$DEBUG" == "true" ]]; then printf '[DEBUG] %s\n' "$*" >&2; fi
+    return 0
 }
 ```
 
@@ -313,8 +319,8 @@ main "$@"
 | `hash[key]=v` | `declare -A hash; hash[key]=v` |
 | `var in func` | `local var in func` |
 | `return "string"` | `echo "string"` |
-| `cd $dir; rm *` | `set -e; cd "$dir"; rm *` |
-| `$(ls *.txt)` | `*.txt` or `find` |
+| `cd $dir; rm *` | Establish owned fixture; `cd -- "$owned" || exit 1`; remove only owned entries |
+| `$(ls *.txt)` | Quoted globs or a checked NUL-delimited `find` stream |
 
 ---
 

@@ -220,8 +220,9 @@ parse_args() {
                 version
                 exit 0
                 ;;
+            -vv) VERBOSE=2; LOG_LEVEL=DEBUG; shift;;
             -v|--verbose)
-                ((VERBOSE++))
+                VERBOSE=$((VERBOSE + 1))
                 [[ $VERBOSE -ge 2 ]] && LOG_LEVEL=DEBUG
                 shift
                 ;;
@@ -323,7 +324,8 @@ process() {
     log_debug "Output: ${OUTPUT:-stdout}"
     
     if $DRY_RUN; then
-        log_warn "DRY RUN MODE - no real changes being made"
+        log_warn "DRY RUN MODE - processing output will not be written"
+        return 0
     fi
     
     # Create temporary file for processing
@@ -344,10 +346,9 @@ process() {
     if ! $DRY_RUN; then
         # Real processing
         # Example: copy content with modifications
-        while IFS= read -r line; do
-            # Process each line
-            echo "$line" >> "$temp_file"
-        done < "$INPUT_FILE"
+        # This baseline example preserves exact input bytes, including a final
+        # unterminated line and text such as -n. Put intentional transforms here.
+        cat -- "$INPUT_FILE" > "$temp_file"
         
         # Write result
         if [[ -n "$OUTPUT" ]]; then

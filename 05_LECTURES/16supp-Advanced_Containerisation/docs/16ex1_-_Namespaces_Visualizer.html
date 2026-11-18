@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linux Namespaces Visualizer | Lecture 16 - Containerisation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Linux Namespaces Visualiser | Lecture 16 - Containerisation</title>
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #0c0c14;
@@ -241,7 +241,84 @@
             background: #4b5563;
             border-radius: 3px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
@@ -253,8 +330,8 @@
                         <i class="fab fa-docker text-2xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">Linux Namespaces Visualizer</h1>
-                        <p class="text-sm text-gray-400">Lecture 16 • Mecanismul de Izolare for Containere</p>
+                        <h1 class="text-xl font-bold">Linux Namespaces Visualiser</h1>
+                        <p class="text-sm text-gray-400">Lecture 16 • Namespace Views for Containers</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -267,7 +344,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Configured namespace scenario</h2><p>These controls change a conceptual view and transcript; they create no native namespaces. USER on explicitly assumes UID 0 is mapped to host UID 100000; ordinary docker run alone does not establish that mapping. MNT on assumes a separately prepared root filesystem as well as mount isolation. TIME models a monotonic/boottime offset, not a private wall clock. All off views share their corresponding host namespace. Privilege and security also depend on capabilities, mounts, devices, seccomp and the shared kernel.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Overview -->
@@ -277,11 +354,11 @@
                     <i class="fas fa-shield-alt text-blue-400 text-xl"></i>
                 </div>
                 <div class="flex-1">
-                    <h2 class="font-bold text-lg mb-2">Ce sunt Namespaces?</h2>
+                    <h2 class="font-bold text-lg mb-2">What are Namespaces?</h2>
                     <p class="text-gray-400 text-sm mb-4">
-                        Namespaces izoleaza vizibilitatea resurselor sistemului. Un proces intr-un namespace vede 
-                        only resursele din acel namespace, nu and from host or alte containere. Sunt fundamentul 
-                        containerizarii in Linux.
+                        Namespaces scope views of particular operating-system resources. A process sees 
+                        resources visible through that namespace rather than every host/container view. They provide part of 
+                        container isolation in Linux.
                     </p>
                     <div class="flex flex-wrap gap-2">
                         <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-semibold">PID</span>
@@ -310,7 +387,7 @@
                         <p class="text-xs text-gray-500">Process IDs</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza spatiul de PID-uri. Container vede propriul PID 1.</p>
+                <p class="text-xs text-gray-400">Scopes process IDs; this configured container has its own visible PID 1.</p>
             </div>
             
             <!-- NET Namespace -->
@@ -324,7 +401,7 @@
                         <p class="text-xs text-gray-500">Network Stack</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza interfete de retea, IP-uri, routing tables.</p>
+                <p class="text-xs text-gray-400">Scopes network interfaces, addresses, routes and related network state.</p>
             </div>
             
             <!-- MNT Namespace -->
@@ -338,7 +415,7 @@
                         <p class="text-xs text-gray-500">Filesystem</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza mount points. Container vede alt filesystem.</p>
+                <p class="text-xs text-gray-400">Scopes mount visibility; a separate root filesystem also requires explicit setup.</p>
             </div>
             
             <!-- UTS Namespace -->
@@ -352,7 +429,7 @@
                         <p class="text-xs text-gray-500">Hostname</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza hostname and domain name.</p>
+                <p class="text-xs text-gray-400">Scopes hostname and NIS domain name.</p>
             </div>
             
             <!-- IPC Namespace -->
@@ -366,7 +443,7 @@
                         <p class="text-xs text-gray-500">IPC Objects</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza shared memory, semaphores, message queues.</p>
+                <p class="text-xs text-gray-400">Scopes System V IPC and POSIX message queues, not every IPC mechanism.</p>
             </div>
             
             <!-- USER Namespace -->
@@ -380,7 +457,7 @@
                         <p class="text-xs text-gray-500">User/Group IDs</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Mapeaza UID/GID. Root in container ≠ root pe host!</p>
+                <p class="text-xs text-gray-400">Provides configured UID/GID mappings; this example maps container UID 0 to host UID 100000.</p>
             </div>
             
             <!-- CGROUP Namespace -->
@@ -394,7 +471,7 @@
                         <p class="text-xs text-gray-500">Control Groups</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Izoleaza vizualizarea cgroup hierarchy.</p>
+                <p class="text-xs text-gray-400">Scopes the visible cgroup hierarchy root.</p>
             </div>
             
             <!-- TIME Namespace -->
@@ -408,7 +485,7 @@
                         <p class="text-xs text-gray-500">System Clock</p>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400">Container may avea propriul clock (Linux 5.6+).</p>
+                <p class="text-xs text-gray-400">Supports configured monotonic/boottime offsets (Linux 5.6+), not a private wall clock.</p>
             </div>
         </div>
 
@@ -419,7 +496,7 @@
                 <div class="glass-panel rounded-2xl p-6">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                         <i class="fas fa-eye text-blue-400"></i>
-                        Vizualizare Izolare
+                        Isolation View
                         <span id="currentNsLabel" class="ml-auto px-3 py-1 bg-gray-700 rounded-full text-xs text-gray-400">Select a namespace</span>
                     </h3>
                     
@@ -435,7 +512,7 @@
                             <div class="host-box rounded-xl p-4 min-h-[300px]" id="hostView">
                                 <!-- Content based on selected namespace -->
                                 <div id="hostPID" class="namespace-view">
-                                    <p class="text-xs text-gray-500 mb-3">Procese vizibile pe Host:</p>
+                                    <p class="text-xs text-gray-500 mb-3">Processes Visible on the Host:</p>
                                     <div class="space-y-2">
                                         <div class="process-item host">
                                             <span class="mono text-blue-400">PID 1</span>
@@ -452,7 +529,7 @@
                                         <div class="process-item host" id="hostContainerProcess">
                                             <span class="mono text-blue-400">PID 500</span>
                                             <span class="text-gray-300">container-app</span>
-                                            <span class="text-xs text-emerald-400 ml-auto">← vede ca PID 1 in container</span>
+                                            <span class="text-xs text-emerald-400 ml-auto">← seen as PID 1 in this container</span>
                                         </div>
                                         <div class="process-item host">
                                             <span class="mono text-blue-400">PID 501</span>
@@ -590,7 +667,7 @@
                             </div>
                             <div class="container-box rounded-xl p-4 min-h-[300px]" id="containerView">
                                 <div id="containerPID" class="namespace-view">
-                                    <p class="text-xs text-gray-500 mb-3">Procese vizibile in Container:</p>
+                                    <p class="text-xs text-gray-500 mb-3">Processes Visible in the Container:</p>
                                     <div class="space-y-2">
                                         <div class="process-item container">
                                             <span class="mono text-emerald-400">PID 1</span>
@@ -654,7 +731,7 @@
                                             <p class="text-xs text-gray-500">hostname</p>
                                             <p class="text-lg font-mono text-emerald-400">container-abc123</p>
                                         </div>
-                                        <p class="text-xs text-gray-500 italic">Container are propriul hostname!</p>
+                                        <p class="text-xs text-gray-500 italic">This UTS namespace has a separately configured hostname.</p>
                                     </div>
                                 </div>
                                 
@@ -669,9 +746,9 @@
                                         <div class="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mt-3">
                                             <p class="text-xs text-amber-400 font-semibold">
                                                 <i class="fas fa-shield-alt mr-1"></i>
-                                                SECURITY: Root in container = UID 100000 pe host!
+                                                Configured mapping: container UID 0 corresponds to host UID 100000.
                                             </p>
-                                            <p class="text-xs text-gray-400 mt-1">Chiar if un atacator devine root in container, pe host e only un user neprivilegiat.</p>
+                                            <p class="text-xs text-gray-400 mt-1">This mapping limits the host identity represented by container UID 0; capabilities, mounts and other security controls still matter.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -690,7 +767,7 @@
                                             <span class="text-xs text-red-400 ml-auto">CANNOT SEE!</span>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-3 italic">Container nu may accesa IPC objects from host.</p>
+                                    <p class="text-xs text-gray-500 mt-3 italic">An isolated IPC namespace has a separate view of the covered IPC objects; this does not cover every form of IPC.</p>
                                 </div>
                                 
                                 <div id="containerCGROUP" class="namespace-view hidden">
@@ -701,7 +778,7 @@
                                         <div class="text-gray-300 ml-4">├── memory/</div>
                                         <div class="text-gray-500 ml-4 line-through">└── docker/ (CANNOT SEE!)</div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-3 italic">Container vede only propria sa cgroup.</p>
+                                    <p class="text-xs text-gray-500 mt-3 italic">The cgroup namespace presents paths relative to its configured root.</p>
                                 </div>
                                 
                                 <div id="containerTIME" class="namespace-view hidden">
@@ -709,7 +786,7 @@
                                     <div class="p-4 bg-emerald-500/10 rounded-lg text-center">
                                         <p class="text-xs text-gray-500 mb-1">CLOCK_BOOTTIME (virtualized)</p>
                                         <p class="text-3xl font-mono text-emerald-400" id="containerClock">00:00:00</p>
-                                        <p class="text-xs text-gray-500 mt-2">Container may avea alt timp!</p>
+                                        <p class="text-xs text-gray-500 mt-2">The supported monotonic/boottime offset may differ from the host view.</p>
                                     </div>
                                 </div>
                             </div>
@@ -726,7 +803,7 @@
                         <i class="fas fa-sliders-h text-purple-400"></i>
                         Namespace Toggles
                     </h3>
-                    <p class="text-xs text-gray-500 mb-4">Activeaza/dezactiveaza izolarea for fiecare namespace:</p>
+                    <p class="text-xs text-gray-500 mb-4">Enable or disable the illustrated namespace isolation:</p>
                     
                     <div class="space-y-3" id="toggleContainer">
                         <!-- Toggles generated by JS -->
@@ -735,7 +812,7 @@
                     <div class="mt-4 p-3 bg-gray-800/50 rounded-lg">
                         <p class="text-xs text-gray-400">
                             <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-                            Dezactivarea unui namespace inseamna ca container-ul il partajeaza cu host-ul (ex: <code class="bg-gray-700 px-1 rounded">--net=host</code>).
+                            Disabling an isolated view here means sharing the host namespace (ex: <code class="bg-gray-700 px-1 rounded">--net=host</code>).
                         </p>
                     </div>
                 </div>
@@ -776,6 +853,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             currentNamespace: 'pid',
@@ -802,7 +915,7 @@
             ipc: { name: 'IPC', desc: 'IPC objects isolation' },
             user: { name: 'USER', desc: 'User/Group ID mapping' },
             cgroup: { name: 'CGROUP', desc: 'Cgroup hierarchy isolation' },
-            time: { name: 'TIME', desc: 'System clock isolation' }
+            time: { name: 'TIME', desc: 'Supported monotonic/boottime offsets' }
         };
 
         // DOM Elements
@@ -826,7 +939,9 @@
         };
 
         // Initialize toggles
-        function initToggles() {
+        const namespaceViewTemplates={};
+function namespaceView(ns) { return document.getElementById('container'+ns.toUpperCase()); }
+function initToggles() {
             const container = elements.toggleContainer;
             container.innerHTML = '';
             
@@ -882,105 +997,64 @@
             elements.currentNsLabel.innerHTML = `<span style="color: ${state.namespaces[ns].color}">${info.name}</span> - ${info.desc}`;
             elements.currentNsLabel.className = 'ml-auto px-3 py-1 rounded-full text-xs';
             elements.currentNsLabel.style.background = `${state.namespaces[ns].color}20`;
+            updateVisualization();
         }
 
         function updateVisualization() {
-            const ns = state.currentNamespace;
-            const isEnabled = state.namespaces[ns].enabled;
-            
-            elements.containerIsolated.classList.toggle('hidden', !isEnabled);
-            elements.containerBox.classList.toggle('isolated', !isEnabled);
-            
-            if (!isEnabled) {
-                elements.containerIsolated.innerHTML = '<i class="fas fa-lock-open mr-1"></i>Shared with Host';
-                elements.containerIsolated.className = 'ml-auto px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs';
-            } else {
-                elements.containerIsolated.innerHTML = '<i class="fas fa-lock mr-1"></i>Isolated';
-                elements.containerIsolated.className = 'ml-auto px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-xs';
-            }
-        }
+    for(const [ns,config] of Object.entries(state.namespaces)){
+        const view=namespaceView(ns),host=document.getElementById('host'+ns.toUpperCase());if(!view||!host)continue;
+        if(namespaceViewTemplates[ns]===undefined)namespaceViewTemplates[ns]=view.innerHTML;
+        view.innerHTML=config.enabled?namespaceViewTemplates[ns]:host.innerHTML.replace(/\bid="[^"]*"/g,'');
+    }
+    const enabled=state.namespaces[state.currentNamespace].enabled;
+    elements.containerIsolated.classList.remove('hidden');elements.containerBox.classList.toggle('isolated',enabled);
+    elements.containerIsolated.textContent=enabled?'Separate configured namespace view':'Shared host namespace view';
+    elements.containerIsolated.className='ml-auto px-2 py-0.5 rounded text-xs '+(enabled?'text-emerald-400':'text-red-400');
+}
 
         // Terminal commands
         const terminalCommands = {
             ps: `USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 root         1  0.0  0.1   4536  3412 ?        Ss   10:00   0:00 /app/main
 root         2  0.0  0.0   2396  1532 ?        S    10:00   0:00 /app/worker
-<span class="text-gray-500">// Container vede only propriile procese (PID 1, 2)
-// NU vede systemd, sshd, dockerd from host!</span>`,
+<span class="text-gray-500">// The isolated PID view shows the model container processes (PID 1 and 2).
+// Does not see host systemd, sshd or dockerd in this PID namespace.</span>`,
             hostname: `container-abc123
-<span class="text-gray-500">// Container are propriul hostname
-// Host-ul are: myserver.local</span>`,
+<span class="text-gray-500">// This UTS view has its own hostname
+// The host has: myserver.local</span>`,
             ifconfig: `eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
         inet 172.17.0.2  netmask 255.255.0.0  broadcast 172.17.255.255
         
 lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
         inet 127.0.0.1  netmask 255.0.0.0
 
-<span class="text-gray-500">// Container vede only eth0 virtual and lo propriu
-// NU vede eth0 (192.168.1.100) from host!</span>`,
+<span class="text-gray-500">// This network namespace shows its own virtual eth0 and loopback interfaces.
+// Does not see the host eth0 (192.168.1.100) in this network namespace.</span>`,
             whoami: `root
-<span class="text-gray-500">// Sunt root IN CONTAINER (UID 0)
-// Dar pe HOST sunt UID 100000 (neprivilegiat!)
-// Izolare prin USER namespace</span>`
+<span class="text-gray-500">// Container-visible UID is 0
+// The configured host mapping gives UID 100000; this is an illustrative user-namespace mapping.
+// Configured USER-namespace mapping</span>`
         };
 
         function runCommand(cmd) {
-            const output = elements.terminalOutput;
-            const cmdText = cmd === 'ps' ? 'ps aux' : cmd === 'ifconfig' ? 'ip addr' : cmd;
-            
-            output.innerHTML += `<div class="text-white mt-2">root@container-abc123:/# ${cmdText}</div>`;
-            output.innerHTML += `<div class="text-gray-300 whitespace-pre">${terminalCommands[cmd]}</div>`;
-            output.innerHTML += `<div class="text-gray-500 mt-2">root@container-abc123:/# <span class="typing-cursor"></span></div>`;
-            
-            output.scrollTop = output.scrollHeight;
-        }
+    const mapping={ps:'pid',hostname:'uts',ifconfig:'net',whoami:'user'},ns=mapping[cmd],enabled=state.namespaces[ns].enabled;
+    const shared={ps:'Schematic host PID view: systemd (1), sshd, dockerd and the container processes are visible.',hostname:'myserver.local',ifconfig:'Schematic shared host network: host interfaces, addresses and routes.',whoami:'root (host UID 0 in this declared privileged shared-user-namespace scenario)'};
+    const cmdText=cmd==='ps'?'ps aux':cmd==='ifconfig'?'ip addr':cmd;
+    elements.terminalOutput.innerHTML+=`<div>Conceptual command: ${cmdText}</div><div class="whitespace-pre">${enabled?terminalCommands[cmd]:enosEscape(shared[cmd])}</div>`;
+}
 
         // Create container animation
         async function createContainer() {
-            if (state.containerCreated) return;
-            
-            elements.btnCreateContainer.disabled = true;
-            elements.btnCreateContainer.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-            
-            const output = elements.terminalOutput;
-            output.innerHTML = '';
-            
-            const steps = [
-                { text: '$ docker run -it ubuntu /bin/bash', delay: 500 },
-                { text: 'Creating PID namespace...', delay: 300, color: 'text-amber-400' },
-                { text: 'Creating NET namespace...', delay: 300, color: 'text-emerald-400' },
-                { text: 'Creating MNT namespace...', delay: 300, color: 'text-purple-400' },
-                { text: 'Creating UTS namespace...', delay: 300, color: 'text-pink-400' },
-                { text: 'Creating IPC namespace...', delay: 300, color: 'text-cyan-400' },
-                { text: 'Creating USER namespace...', delay: 300, color: 'text-red-400' },
-                { text: 'Creating CGROUP namespace...', delay: 300, color: 'text-lime-400' },
-                { text: 'Setting up overlay filesystem...', delay: 400, color: 'text-gray-400' },
-                { text: 'Configuring network (veth pair)...', delay: 400, color: 'text-gray-400' },
-                { text: 'Container started!', delay: 500, color: 'text-green-400' }
-            ];
-            
-            for (const step of steps) {
-                const div = document.createElement('div');
-                div.className = step.color || 'text-white';
-                div.textContent = step.text;
-                output.appendChild(div);
-                output.scrollTop = output.scrollHeight;
-                await sleep(step.delay);
-            }
-            
-            output.innerHTML += `<div class="text-gray-500 mt-2">root@container-abc123:/# <span class="typing-cursor"></span></div>`;
-            
-            state.containerCreated = true;
-            state.containerUptime = 0;
-            
-            elements.containerIsolated.classList.remove('hidden');
-            elements.containerBox.classList.add('container-animate');
-            
-            elements.btnCreateContainer.disabled = false;
-            elements.btnCreateContainer.innerHTML = '<i class="fas fa-cube"></i> Container Running';
-        }
+    if(state.containerCreated||elements.btnCreateContainer.disabled)return;
+    elements.btnCreateContainer.disabled=true;elements.terminalOutput.textContent='Conceptual configuration; no native container is created.\n';
+    const choices=Object.entries(state.namespaces).map(([ns,c])=>[ns,c.enabled]);
+    for(const [ns,enabled] of choices){const row=document.createElement('div');row.textContent=ns.toUpperCase()+': '+(enabled?'separate configured namespace':'share host namespace');elements.terminalOutput.appendChild(row);await sleep(150);}
+    state.containerCreated=true;state.containerUptime=0;updateVisualization();
+    elements.btnCreateContainer.disabled=false;elements.btnCreateContainer.textContent='Model running';
+}
 
         function reset() {
+            enosTimers.cancel();
             state.containerCreated = false;
             state.containerUptime = 0;
             
@@ -997,6 +1071,7 @@ lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
             elements.containerIsolated.classList.add('hidden');
             
             elements.btnCreateContainer.innerHTML = '<i class="fas fa-cube"></i> Create Container';
+            elements.btnCreateContainer.disabled=false;setInterval(updateClocks,1000);
         }
 
         function sleep(ms) {
@@ -1018,10 +1093,11 @@ lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
             };
             
             if (elements.hostClock) {
-                elements.hostClock.textContent = formatTime(state.hostUptime);
+                document.getElementById('hostClock').textContent = formatTime(state.hostUptime);
             }
-            if (elements.containerClock) {
-                elements.containerClock.textContent = formatTime(state.containerUptime);
+            if(!state.namespaces.time.enabled){const shared=document.getElementById('containerTIME');if(shared)shared.innerHTML=document.getElementById('hostTIME').innerHTML.replace(/\bid="[^"]*"/g,'');}
+            if (document.getElementById('containerClock')) {
+                document.getElementById('containerClock').textContent = formatTime(state.namespaces.time.enabled?state.containerUptime:state.hostUptime);
             }
         }
 
@@ -1041,6 +1117,27 @@ lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
         initToggles();
         selectNamespace('pid');
         setInterval(updateClocks, 1000);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

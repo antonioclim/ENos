@@ -1,5 +1,5 @@
 @startuml modele_multithreading
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Multithreading Models
 
 skinparam rectangle {
@@ -29,7 +29,8 @@ rectangle "**Many-to-One (N:1)**" as n1 #FFCDD2 {
     note bottom
     ✓ Fast switch (user space)
     ✓ Portable
-    ✗ One syscall blocks **all**
+    ✗ An unwrapped blocking kernel call blocks the sole kernel thread
+    Nonblocking I/O and Pth-aware wrappers can avoid that block
     ✗ No real parallelism
     //Ex: GNU Pth//
     end note
@@ -57,7 +58,8 @@ rectangle "**One-to-One (1:1)**" as o1 #C8E6C9 {
     
     note bottom
     ✓ **Real parallelism** on multi-core
-    ✓ One blocked thread does not affect others
+    ✓ Other runnable kernel threads can continue
+    (unless they depend on a shared lock/resource)
     ✗ Thread creation overhead
     //Ex: Linux NPTL, Windows, macOS//
     end note

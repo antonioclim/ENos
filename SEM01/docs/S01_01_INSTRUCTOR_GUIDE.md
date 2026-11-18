@@ -1,7 +1,7 @@
 # Instructor Guide: Seminar 1-2
 ## Operating Systems | Shell Basics & Configuration
 
-Total duration: 100 minutes (2 × 50 min + break)  
+This timetable contains **100 minutes of contact activities plus a 10-minute break: 110 elapsed minutes**. Other routes use 100 elapsed minutes; the author must select the scheduled duration before delivery. No activity has been silently removed.  
 Seminar type: Language as Vehicle (Bash for OS concepts)  
 Level: Beginner (assuming minimal terminal experience)
 
@@ -31,9 +31,10 @@ which figlet lolcat cmatrix cowsay dialog tree pv >/dev/null 2>&1 && \
 bash --version | head -1
 
 # Prepare a clean working directory
-rm -rf ~/demo_seminar
-mkdir -p ~/demo_seminar
-cd ~/demo_seminar
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-demo.XXXXXX") || exit 1
+# Keep this variable: cleanup may remove only this newly created directory.
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 ```
 
 ### Required Materials
@@ -62,7 +63,7 @@ alias grep='grep --color=auto'
 Purpose: Capture attention, establish interactive tone
 
 ```bash
-# Run EXACTLY these commands (tested)
+# Optional hook; check installed programs and terminal support before delivery
 clear
 figlet -f slant "BASH" | lolcat
 sleep 2
@@ -199,6 +200,8 @@ ls -la
 #### Segment 5: Creation and manipulation (3 min)
 
 ```bash
+# Return from the read-only navigation tour before creating anything.
+cd -- "${DEMO_DIR:?Run the owned-workspace preparation first}" || exit 1
 mkdir project
 cd project
 touch file.txt
@@ -366,7 +369,7 @@ Pick one pair and ask:
 
 For pairs who finish early (don't let them sit idle):
 
-1. **One-liner Challenge:** "Can you do the same task in a single pipeline?"
+1. **One-liner Challenge:** "Can you express the dependent steps as a command list using `&&`? A pipeline connects streams and is not needed for directory creation."
 2. **Error Handling:** "What if the directory already exists? Add a check."
 3. **Peer Teaching:** "Explain your solution to a pair still working — without giving the answer"
 
@@ -392,10 +395,10 @@ Protocol: Vote → 2min Discussion → Revote → Explanation
 Correct answer: B) Hello $NAME
 
 Explanation:
-```bash
 
 *(Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.)*
 
+```bash
 # Single quotes = LITERAL (expands nothing)
 echo 'Hello $NAME'    # Output: Hello $NAME
 
@@ -438,14 +441,16 @@ while true; do fortune | cowsay -f $(ls /usr/share/cowsay/cows | shuf -n1) | lol
 
 ```bash
 # ANNOUNCE: "Let's create variables"
+unset MESSAGE
 MESSAGE="Hello from bash"
-echo $MESSAGE
+echo "$MESSAGE"
 
-# PREDICT: "What happens if I open a new terminal?"
+# PREDICT: "What does a newly invoked Bash interpreter receive?"
 bash -c 'echo $MESSAGE'
 # Output: (nothing)
 
-# EXPLAIN: The variable is LOCAL, not inherited
+# EXPLAIN: This unexported variable is absent in the new interpreter.
+# A parenthesised subshell ( echo "$MESSAGE" ) retains shell state instead.
 ```
 
 #### Segment 2: Export (4 min)
@@ -464,7 +469,7 @@ bash -c 'echo $MESSAGE'
 echo "Home: $HOME"
 echo "User: $USER"  
 echo "Path: $PATH"
-echo "Shell: $SHELL"
+echo "Login-shell environment value: $SHELL"
 
 # PREDICT: "What will $? display after a successful command?"
 ls
@@ -481,23 +486,30 @@ echo $?
 
 ```bash
 
-*Personal note: Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.*
 
 # ANNOUNCE: "Let's see the configuration file"
-cat ~/.bashrc | head -30
+head -n 30 "$HOME/.bashrc"
+BASHRC_BACKUP=$(mktemp "$HOME/.bashrc.backup.XXXXXX") || exit 1
+cp -- "$HOME/.bashrc" "$BASHRC_BACKUP" || exit 1
 
 # ANNOUNCE: "Let's add an alias"
 echo "alias ll='ls -la'" >> ~/.bashrc
 
-# PREDICT: "Does it work immediately?"
-ll
-# Output: command not found
+# PREDICT: "Has this definition been loaded in the current shell?"
+# Precondition for the demonstration: no prior ll alias or function.
+unalias ll 2>/dev/null || :
+unset -f ll 2>/dev/null || :
+type ll
+# A new definition written to a file is not automatically executed.
 
 # EXPLAIN: It needs to be reloaded!
-source ~/.bashrc
+bash -n "$HOME/.bashrc" && source "$HOME/.bashrc"
 ll
 # Now it works!
 ```
+
+*Personal note: Bash has ugly syntax, I admit. But it runs everywhere and that matters enormously in practice.*
+
 
 **⚠️ DELIBERATE ERROR** (minute 18):
 
@@ -522,6 +534,7 @@ Display:
 ```
 What is the final output?
 
+unset VAR1
 VAR1="local"
 export VAR2="exported"
 bash -c 'echo "$VAR1 $VAR2"'
@@ -535,8 +548,8 @@ D) local
 Correct answer: C)
 
 Explanation:
-- `$VAR1` is not exported → in subshell it's empty → produces space
-- `$VAR2` is exported → visible in subshell → "exported"
+- `$VAR1` is not exported → in the newly invoked interpreter it is empty → produces space
+- `$VAR2` is exported → visible in the newly invoked interpreter → "exported"
 - Result: " exported" (space + exported)
 - Test first with simple data
 
@@ -574,7 +587,8 @@ TASKS:
 Solution (for instructor):
 ```bash
 # 1. Backup
-cp ~/.bashrc ~/.bashrc.backup
+BASHRC_BACKUP=$(mktemp "$HOME/.bashrc.backup.XXXXXX") || exit 1
+cp -- "$HOME/.bashrc" "$BASHRC_BACKUP" || exit 1
 
 # 2. Aliases
 mkdir -p ~/projects
@@ -592,8 +606,8 @@ echo "Welcome back, $USER! Today is $(date +%A)"
 PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 EOF
 
-# 5. Activation
-source ~/.bashrc
+# 5. Inspect the added lines and check syntax before activation
+bash -n "$HOME/.bashrc" && source "$HOME/.bashrc"
 ```
 
 ---
@@ -658,7 +672,7 @@ Write on paper or in notes - it's for YOU, not for a grade.
 | figlet/lolcat not installed | `sudo apt install figlet lolcat -y` |
 | Terminal too small | Ctrl+Shift++ for zoom |
 | Student stuck in vim | Press `Esc`, then type `:q!` and Enter |
-| .bashrc corrupted | `cp ~/.bashrc.backup ~/.bashrc` |
+| .bashrc corrupted | Restore the unique backup created for this attempt: `cp -- "$BASHRC_BACKUP" "$HOME/.bashrc"`, after checking the source path |
 | Permission denied | Work in `~`, not in `/` |
 
 ---

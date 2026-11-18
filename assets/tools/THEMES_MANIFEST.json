@@ -1,0 +1,18 @@
+{
+  "themes": [
+    {
+      "source": "assets/vendor/reveal.js/4.5.0/theme/night.css",
+      "source_sha256": "997c5a88d2a95769251d9b6f8623548857d88f392b1963cc680474b49a7f9e43",
+      "transform": "Replace exactly two Google Fonts imports with local combined font CSS; all other theme bytes retained.",
+      "output": "assets/css/reveal-night-4.5.0.css",
+      "output_sha256": "f33041a949dd9245ddbc6d2742b690a2361bbbcbf8c7a1e69e884feabb3a3f2f"
+    },
+    {
+      "source": "assets/vendor/reveal.js/4.6.1/theme/night.css",
+      "source_sha256": "997c5a88d2a95769251d9b6f8623548857d88f392b1963cc680474b49a7f9e43",
+      "transform": "Replace exactly two Google Fonts imports with local combined font CSS; all other theme bytes retained.",
+      "output": "assets/css/reveal-night-4.6.1.css",
+      "output_sha256": "f33041a949dd9245ddbc6d2742b690a2361bbbcbf8c7a1e69e884feabb3a3f2f"
+    }
+  ]
+}

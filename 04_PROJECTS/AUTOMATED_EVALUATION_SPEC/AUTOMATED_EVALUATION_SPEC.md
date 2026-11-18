@@ -1,5 +1,49 @@
 # Automatic Evaluation System Specifications - OS Projects
 
+## Status and executable boundary (Phase 5 correction)
+
+These are **author proposals**, not an adopted grading system or a measured
+automation result. Original points, percentages, time estimates and competing
+grade/penalty proposals are retained as planning history. `total_points` now
+equals the sum of the displayed case points; it is not an automatic rescaling to
+100. No final grade, bonus, deduction, disclosure or publication policy is selected.
+
+The implemented [local reference](../helpers/evaluation_reference.py) validates
+the finite structured predicates printed below and emits JSON once. Unknown
+operators, malformed values and duplicate JSON/YAML keys are errors. `all`, `any`
+and `not` are explicit; string lists do not have an implicit OR meaning. A `pending`
+predicate is a concrete unresolved adapter/author requirement: it reports NOT_RUN,
+never PASS, and prevents a purported complete percentage. Existing project CLI
+alternatives remain proposed interfaces until the author resolves their contract.
+
+Each explicitly authorised trusted local case uses a fresh owned project copy and
+`FIXTURE_ROOT`; inherited setup runs again before every case. Setup and cleanup
+share one shell; only explicitly exported variables reach the command child.
+Background fixtures must retain their parent, export their PID and be killed and
+waited for. The runner also terminates its own process group on timeout. Permission
+oracles require a non-root fixture user. No shared `/tmp` paths, host crontab,
+services, HOME directory or unrelated IPC objects are part of the local contract.
+
+This helper is **not a sandbox for untrusted submissions**. It supplies a wall-time
+and output bound for trusted fixtures, not CPU/RAM/PID/disk/network containment.
+`requires_platform` cases are reported NOT_RUN. A production isolation backend,
+archive intake, student execution, notifications and institutional acceptance are
+not implemented or executed by this repair. Use the regression tests for the
+implemented boundary, not the proposal's planning percentages as evidence.
+
+```bash
+# Validation does not execute setup or project commands; YAML requires PyYAML.
+python3 04_PROJECTS/helpers/evaluation_reference.py validate owned-suite.yaml
+# This opt-in is only for a trusted, owned fixture, never an untrusted submission.
+python3 04_PROJECTS/helpers/evaluation_reference.py run owned-suite.yaml --run-owned --project owned-fixture
+python3 -m unittest discover -s 04_PROJECTS/tests -p test_evaluation_spec.py -v
+```
+
+The local reference uses all-or-nothing points per asserted case only to demonstrate
+arithmetic. Partial credit and institutional consequences remain explicit author
+choices. See [the assessment/evidence contract](../ASSESSMENT_AND_EVIDENCE_CONTRACT.md).
+
+
 ## Document Version 1.0 | January 2025
 
 ---
@@ -10,7 +54,7 @@
 2. [Evaluation Components](#2-evaluation-components)
 3. [Automated Tests per Category](#3-automated-tests-per-category)
 4. [Detailed Specifications per Project](#4-detailed-specifications-per-project)
-5. [Criteria NOT EVALUABLE Automatically](#5-criteria-not-evaluable-automatically)
+5. [Criteria Requiring Additional or Human Evidence](#5-criteria-requiring-additional-or-human-evidence)
 6. [Technical Implementation](#6-technical-implementation)
 7. [Scoring and Reporting](#7-scoring-and-reporting)
 
@@ -100,55 +144,111 @@
 ```yaml
 common_tests:
   structural:
-    - name: "has_readme"
-      check: "test -f README.md"
-      points: 1
-      
-    - name: "has_main_script"
-      check: "find src -name '*.sh' -type f | head -1"
-      points: 2
-      
-    - name: "has_makefile"
-      check: "test -f Makefile"
-      points: 1
-      
-    - name: "proper_structure"
-      check: "test -d src && test -d tests"
-      points: 2
-
+  - name: has_readme
+    check: test -f README.md
+    points: 1
+    category: structural
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+  - name: has_main_script
+    check: python3 "$EVALUATION_REFERENCE" inspect has-shell --root .
+    points: 2
+    category: structural
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    reference_operation: true
+  - name: has_makefile
+    check: test -f Makefile
+    points: 1
+    category: structural
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+  - name: proper_structure
+    check: test -d src && test -d tests
+    points: 2
+    category: structural
+    expect:
+      exit_code:
+        op: eq
+        value: 0
   static_analysis:
-    - name: "shellcheck_clean"
-      check: "shellcheck -S error src/**/*.sh"
-      points: 5
-      partial: true  # Partial points for warnings
-      
-    - name: "no_syntax_errors"
-      check: "bash -n src/**/*.sh"
-      points: 3
-      
-    - name: "shebang_present"
-      check: "head -1 src/*.sh | grep -q '^#!/bin/bash'"
-      points: 1
-      
-    - name: "set_options"
-      check: "grep -l 'set -.*e' src/*.sh"
-      points: 2
-
+  - name: shellcheck_clean
+    check: python3 "$EVALUATION_REFERENCE" inspect shellcheck --root .
+    points: 5
+    category: static_analysis
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    historical_partial: true
+    requires_tools:
+    - shellcheck
+    reference_operation: true
+  - name: no_syntax_errors
+    check: python3 "$EVALUATION_REFERENCE" inspect syntax --root .
+    points: 3
+    category: static_analysis
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    reference_operation: true
+  - name: shebang_present
+    check: python3 "$EVALUATION_REFERENCE" inspect shebang --root .
+    points: 1
+    category: static_analysis
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    reference_operation: true
+  - name: set_options
+    check: grep -l 'set -.*e' src/*.sh
+    points: 2
+    category: static_analysis
+    expect:
+      pending: Presence of set flags is not evidence of correct error handling; select an explicit behaviour rubric before awarding these proposed points.
   basic_execution:
-    - name: "runs_without_args"
-      check: "./script.sh"
-      expect: "exit_code != 0 AND shows_help"
-      points: 2
-      
-    - name: "help_flag"
-      check: "./script.sh --help"
-      expect: "exit_code == 0 AND output_contains('usage')"
-      points: 2
-      
-    - name: "version_flag"
-      check: "./script.sh --version"
-      expect: "exit_code == 0"
-      points: 1
+  - name: runs_without_args
+    check: ./script.sh
+    expect:
+      all:
+      - exit_code:
+          op: ne
+          value: 0
+      - text:
+          stream: combined
+          op: regex
+          value: (?i)usage|help
+    points: 2
+    category: basic_execution
+  - name: help_flag
+    check: ./script.sh --help
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - text:
+          stream: stdout
+          op: contains
+          value: usage
+    points: 2
+    category: basic_execution
+  - name: version_flag
+    check: ./script.sh --version
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    points: 1
+    category: basic_execution
 ```
 
 ---
@@ -162,53 +262,119 @@ common_tests:
 ```yaml
 e01_tests:
   functional:
-    - name: "basic_scan"
-      setup: "mkdir -p /tmp/test/{a,b,c}; dd if=/dev/zero of=/tmp/test/a/big bs=1M count=10"
-      check: "./fsaudit.sh /tmp/test"
-      expect:
-        - "output_contains('/tmp/test/a/big')"
-        - "output_contains('10')"  # MB
-      points: 5
-      
-    - name: "extension_stats"
-      setup: "touch /tmp/test/{a.txt,b.txt,c.log,d.log,e.log}"
-      check: "./fsaudit.sh /tmp/test --stats"
-      expect:
-        - "output_contains('.txt') AND output_contains('2')"
-        - "output_contains('.log') AND output_contains('3')"
-      points: 5
-      
-    - name: "permission_audit"
-      setup: "chmod 777 /tmp/test/a/big"
-      check: "./fsaudit.sh /tmp/test --permissions"
-      expect: "output_contains('777') OR output_contains('world-writable')"
-      points: 5
-      
-    - name: "csv_export"
-      check: "./fsaudit.sh /tmp/test --format csv -o /tmp/out.csv"
-      expect:
-        - "exit_code == 0"
-        - "file_exists('/tmp/out.csv')"
-        - "file_is_valid_csv('/tmp/out.csv')"
-      points: 3
-      
-    - name: "json_export"
-      check: "./fsaudit.sh /tmp/test --format json -o /tmp/out.json"
-      expect:
-        - "file_is_valid_json('/tmp/out.json')"
-      points: 3
-
+  - name: basic_scan
+    setup: mkdir -p "${FIXTURE_ROOT}"/test/{a,b,c}; dd if=/dev/zero of="${FIXTURE_ROOT}"/test/a/big bs=1M count=10
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/test
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: contains
+          value: ${FIXTURE_ROOT}/test/a/big
+      - text:
+          stream: stdout
+          op: contains
+          value: '10'
+    points: 5
+    category: functional
+  - name: extension_stats
+    setup: touch "${FIXTURE_ROOT}"/test/{a.txt,b.txt,c.log,d.log,e.log}
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/test --stats
+    expect:
+      all:
+      - all:
+        - text:
+            stream: stdout
+            op: contains
+            value: .txt
+        - text:
+            stream: stdout
+            op: contains
+            value: '2'
+      - all:
+        - text:
+            stream: stdout
+            op: contains
+            value: .log
+        - text:
+            stream: stdout
+            op: contains
+            value: '3'
+    points: 5
+    category: functional
+  - name: permission_audit
+    setup: chmod 777 "${FIXTURE_ROOT}"/test/a/big
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/test --permissions
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: '777'
+      - text:
+          stream: stdout
+          op: contains
+          value: world-writable
+    points: 5
+    category: functional
+  - name: csv_export
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/test --format csv -o "${FIXTURE_ROOT}"/out.csv
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - path:
+          kind: file
+          path: ${FIXTURE_ROOT}/out.csv
+      - csv_valid:
+          path: ${FIXTURE_ROOT}/out.csv
+          min_rows: 1
+          min_columns: 2
+    points: 3
+    category: functional
+  - name: json_export
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/test --format json -o "${FIXTURE_ROOT}"/out.json
+    expect:
+      json_valid:
+        path: ${FIXTURE_ROOT}/out.json
+    points: 3
+    category: functional
   error_handling:
-    - name: "nonexistent_dir"
-      check: "./fsaudit.sh /nonexistent"
-      expect: "exit_code != 0 AND stderr_contains('error')"
-      points: 2
-      
-    - name: "no_read_permission"
-      setup: "mkdir /tmp/noaccess; chmod 000 /tmp/noaccess"
-      check: "./fsaudit.sh /tmp/noaccess"
-      expect: "exit_code != 0 OR stderr_contains('permission')"
-      points: 2
+  - name: nonexistent_dir
+    check: ./fsaudit.sh ${FIXTURE_ROOT}/missing
+    expect:
+      all:
+      - exit_code:
+          op: ne
+          value: 0
+      - text:
+          stream: stderr
+          op: contains
+          value: error
+    points: 2
+    category: error_handling
+  - name: no_read_permission
+    setup: mkdir "${FIXTURE_ROOT}"/noaccess; chmod 000 "${FIXTURE_ROOT}"/noaccess
+    check: ./fsaudit.sh "${FIXTURE_ROOT}"/noaccess
+    expect:
+      any:
+      - exit_code:
+          op: ne
+          value: 0
+      - text:
+          stream: stderr
+          op: contains
+          value: permission
+    points: 2
+    category: error_handling
+    requires_non_root: true
+  setup:
+    commands:
+    - |-
+      mkdir -p "${FIXTURE_ROOT}"/test/{a,b,c}
+      dd if=/dev/zero of="${FIXTURE_ROOT}"/test/a/big bs=1M count=10 status=none
+      touch "${FIXTURE_ROOT}"/test/{a.txt,b.txt,c.log,d.log,e.log}
 ```
 
 #### E02: Log Analyzer
@@ -216,45 +382,96 @@ e01_tests:
 ```yaml
 e02_tests:
   functional:
-    - name: "parse_syslog"
-      setup: |
-        cat > /tmp/test.log << 'EOF'
-        Jan 20 10:15:30 host sshd[1234]: Failed password for root
-        Jan 20 10:15:31 host sshd[1234]: Accepted password for user
-        Jan 20 10:15:32 host kernel: Out of memory
-        EOF
-      check: "./loganalyzer.sh /tmp/test.log"
-      expect:
-        - "output_contains('sshd') OR output_contains('kernel')"
-      points: 5
-      
-    - name: "filter_by_level"
-      setup: |
-        cat > /tmp/test.log << 'EOF'
-        Jan 20 10:00:00 host app: [ERROR] Database connection failed
-        Jan 20 10:00:01 host app: [INFO] Starting service
-        Jan 20 10:00:02 host app: [WARN] High memory usage
-        Jan 20 10:00:03 host app: [ERROR] Timeout
-        EOF
-      check: "./loganalyzer.sh /tmp/test.log --level ERROR"
-      expect:
-        - "output_contains('Database') AND output_contains('Timeout')"
-        - "NOT output_contains('Starting')"
-      points: 5
-      
-    - name: "time_filter"
-      check: "./loganalyzer.sh /tmp/test.log --since '10:00:01' --until '10:00:02'"
-      expect:
-        - "output_contains('INFO') OR output_contains('WARN')"
-        - "NOT output_contains('ERROR')"
-      points: 5
-      
-    - name: "statistics"
-      check: "./loganalyzer.sh /tmp/test.log --stats"
-      expect:
-        - "output_matches_regex('ERROR.*2')"
-        - "output_matches_regex('INFO.*1')"
-      points: 5
+  - name: parse_syslog
+    setup: |
+      cat > "${FIXTURE_ROOT}"/test.log << 'EOF'
+      Jan 20 10:15:30 host sshd[1234]: Failed password for root
+      Jan 20 10:15:31 host sshd[1234]: Accepted password for user
+      Jan 20 10:15:32 host kernel: Out of memory
+      EOF
+    check: ./loganalyzer.sh "${FIXTURE_ROOT}"/test.log
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: sshd
+      - text:
+          stream: stdout
+          op: contains
+          value: kernel
+    points: 5
+    category: functional
+  - name: filter_by_level
+    setup: |
+      cat > "${FIXTURE_ROOT}"/test.log << 'EOF'
+      Jan 20 10:00:00 host app: [ERROR] Database connection failed
+      Jan 20 10:00:01 host app: [INFO] Starting service
+      Jan 20 10:00:02 host app: [WARN] High memory usage
+      Jan 20 10:00:03 host app: [ERROR] Timeout
+      EOF
+    check: ./loganalyzer.sh "${FIXTURE_ROOT}"/test.log --level ERROR
+    expect:
+      all:
+      - all:
+        - text:
+            stream: stdout
+            op: contains
+            value: Database
+        - text:
+            stream: stdout
+            op: contains
+            value: Timeout
+      - not:
+          text:
+            stream: stdout
+            op: contains
+            value: Starting
+    points: 5
+    category: functional
+  - name: time_filter
+    check: ./loganalyzer.sh "${FIXTURE_ROOT}"/test.log --since '10:00:01' --until '10:00:02'
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: INFO
+        - text:
+            stream: stdout
+            op: contains
+            value: WARN
+      - not:
+          text:
+            stream: stdout
+            op: contains
+            value: ERROR
+    points: 5
+    category: functional
+  - name: statistics
+    check: ./loganalyzer.sh "${FIXTURE_ROOT}"/test.log --stats
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: regex
+          value: ERROR.*2
+      - text:
+          stream: stdout
+          op: regex
+          value: INFO.*1
+    points: 5
+    category: functional
+  setup:
+    commands:
+    - |-
+      cat > "${FIXTURE_ROOT}"/test.log <<'EOF'
+      Jan 20 10:00:00 host app: [ERROR] Database connection failed
+      Jan 20 10:00:01 host app: [INFO] Starting service
+      Jan 20 10:00:02 host app: [WARN] High memory usage
+      Jan 20 10:00:03 host app: [ERROR] Timeout
+      EOF
 ```
 
 #### E03: Bulk File Organizer
@@ -262,52 +479,109 @@ e02_tests:
 ```yaml
 e03_tests:
   functional:
-    - name: "organize_by_extension"
-      setup: |
-        mkdir -p /tmp/source
-        touch /tmp/source/{a,b}.txt /tmp/source/{c,d}.jpg /tmp/source/{e}.pdf
-      check: "./organizer.sh /tmp/source /tmp/dest --by extension"
-      expect:
-        - "dir_exists('/tmp/dest/txt')"
-        - "file_count('/tmp/dest/txt') == 2"
-        - "dir_exists('/tmp/dest/jpg')"
-      points: 5
-      
-    - name: "organize_by_date"
-      setup: |
-        touch -d "2024-01-15" /tmp/source/old.txt
-        touch -d "2025-01-20" /tmp/source/new.txt
-      check: "./organizer.sh /tmp/source /tmp/dest --by date"
-      expect:
-        - "dir_exists('/tmp/dest/2024') OR dir_exists('/tmp/dest/2024-01')"
-        - "dir_exists('/tmp/dest/2025') OR dir_exists('/tmp/dest/2025-01')"
-      points: 5
-      
-    - name: "dry_run"
-      check: "./organizer.sh /tmp/source /tmp/dest --by extension --dry-run"
-      expect:
-        - "output_contains('would move') OR output_contains('DRY')"
-        - "file_exists('/tmp/source/a.txt')"  # File not actually moved
-      points: 5
-      
-    - name: "undo"
-      setup: "./organizer.sh /tmp/source /tmp/dest --by extension"
-      check: "./organizer.sh --undo"
-      expect:
-        - "file_exists('/tmp/source/a.txt')"
-        - "NOT dir_exists('/tmp/dest/txt') OR dir_empty('/tmp/dest/txt')"
-      points: 5
-      
-    - name: "conflict_handling"
-      setup: |
-        echo "v1" > /tmp/source/test.txt
-        mkdir -p /tmp/dest/txt
-        echo "v2" > /tmp/dest/txt/test.txt
-      check: "./organizer.sh /tmp/source /tmp/dest --by extension"
-      expect:
-        - "exit_code == 0"
-        - "file_exists('/tmp/dest/txt/test.txt') OR file_exists('/tmp/dest/txt/test_1.txt')"
-      points: 5
+  - name: organize_by_extension
+    setup: |
+      mkdir -p "${FIXTURE_ROOT}"/source
+      touch "${FIXTURE_ROOT}"/source/{a,b}.txt "${FIXTURE_ROOT}"/source/{c,d}.jpg "${FIXTURE_ROOT}"/source/e.pdf
+    check: ./organizer.sh "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest --by extension
+    expect:
+      all:
+      - path:
+          kind: directory
+          path: ${FIXTURE_ROOT}/dest/txt
+      - file_count:
+          path: ${FIXTURE_ROOT}/dest/txt
+          op: eq
+          value: 2
+      - path:
+          kind: directory
+          path: ${FIXTURE_ROOT}/dest/jpg
+    points: 5
+    category: functional
+  - name: organize_by_date
+    setup: |
+      touch -d "2024-01-15" "${FIXTURE_ROOT}"/source/old.txt
+      touch -d "2025-01-20" "${FIXTURE_ROOT}"/source/new.txt
+    check: ./organizer.sh "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest --by date
+    expect:
+      all:
+      - any:
+        - path:
+            kind: directory
+            path: ${FIXTURE_ROOT}/dest/2024
+        - path:
+            kind: directory
+            path: ${FIXTURE_ROOT}/dest/2024-01
+      - any:
+        - path:
+            kind: directory
+            path: ${FIXTURE_ROOT}/dest/2025
+        - path:
+            kind: directory
+            path: ${FIXTURE_ROOT}/dest/2025-01
+    points: 5
+    category: functional
+  - name: dry_run
+    check: ./organizer.sh "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest --by extension --dry-run
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: would move
+        - text:
+            stream: stdout
+            op: contains
+            value: DRY
+      - path:
+          kind: file
+          path: ${FIXTURE_ROOT}/source/a.txt
+    points: 5
+    category: functional
+  - name: undo
+    setup: ./organizer.sh "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest --by extension
+    check: ./organizer.sh --undo
+    expect:
+      all:
+      - path:
+          kind: file
+          path: ${FIXTURE_ROOT}/source/a.txt
+      - any:
+        - not:
+            path:
+              kind: directory
+              path: ${FIXTURE_ROOT}/dest/txt
+        - path:
+            kind: empty_directory
+            path: ${FIXTURE_ROOT}/dest/txt
+    points: 5
+    category: functional
+  - name: conflict_handling
+    setup: |
+      echo "v1" > "${FIXTURE_ROOT}"/source/test.txt
+      mkdir -p "${FIXTURE_ROOT}"/dest/txt
+      echo "v2" > "${FIXTURE_ROOT}"/dest/txt/test.txt
+    check: ./organizer.sh "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest --by extension
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - any:
+        - path:
+            kind: file
+            path: ${FIXTURE_ROOT}/dest/txt/test.txt
+        - path:
+            kind: file
+            path: ${FIXTURE_ROOT}/dest/txt/test_1.txt
+    points: 5
+    category: functional
+  setup:
+    commands:
+    - |-
+      mkdir -p "${FIXTURE_ROOT}"/source "${FIXTURE_ROOT}"/dest
+      touch "${FIXTURE_ROOT}"/source/{a,b}.txt "${FIXTURE_ROOT}"/source/{c,d}.jpg "${FIXTURE_ROOT}"/source/e.pdf
 ```
 
 #### E04: System Health Reporter
@@ -315,39 +589,87 @@ e03_tests:
 ```yaml
 e04_tests:
   functional:
-    - name: "cpu_report"
-      check: "./health.sh --cpu"
-      expect:
-        - "output_matches_regex('[0-9]+\\.?[0-9]*%')"
-      points: 3
-      
-    - name: "memory_report"
-      check: "./health.sh --memory"
-      expect:
-        - "output_contains('MB') OR output_contains('GB')"
-        - "output_matches_regex('[0-9]+')"
-      points: 3
-      
-    - name: "disk_report"
-      check: "./health.sh --disk"
-      expect:
-        - "output_contains('/') OR output_contains('root')"
-        - "output_matches_regex('[0-9]+%')"
-      points: 3
-      
-    - name: "full_report"
-      check: "./health.sh --all"
-      expect:
-        - "output_contains('CPU') OR output_contains('cpu')"
-        - "output_contains('Memory') OR output_contains('RAM')"
-        - "output_contains('Disk')"
-      points: 5
-      
-    - name: "alert_colors"
-      check: "./health.sh --all"
-      expect:
-        - "output_contains_ansi_codes()"
-      points: 3
+  - name: cpu_report
+    check: ./health.sh --cpu
+    expect:
+      text:
+        stream: stdout
+        op: regex
+        value: '[0-9]+\.?[0-9]*%'
+    points: 3
+    category: functional
+  - name: memory_report
+    check: ./health.sh --memory
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: MB
+        - text:
+            stream: stdout
+            op: contains
+            value: GB
+      - text:
+          stream: stdout
+          op: regex
+          value: '[0-9]+'
+    points: 3
+    category: functional
+  - name: disk_report
+    check: ./health.sh --disk
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: /
+        - text:
+            stream: stdout
+            op: contains
+            value: root
+      - text:
+          stream: stdout
+          op: regex
+          value: '[0-9]+%'
+    points: 3
+    category: functional
+  - name: full_report
+    check: ./health.sh --all
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: CPU
+        - text:
+            stream: stdout
+            op: contains
+            value: cpu
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: Memory
+        - text:
+            stream: stdout
+            op: contains
+            value: RAM
+      - text:
+          stream: stdout
+          op: contains
+          value: Disk
+    points: 5
+    category: functional
+  - name: alert_colors
+    check: ./health.sh --all
+    expect:
+      ansi: true
+    points: 3
+    category: functional
 ```
 
 #### E05: Config File Manager
@@ -355,36 +677,70 @@ e04_tests:
 ```yaml
 e05_tests:
   functional:
-    - name: "backup_config"
-      setup: "echo 'test=123' > /tmp/test.conf"
-      check: "./configmgr.sh backup /tmp/test.conf"
-      expect:
-        - "exit_code == 0"
-        - "backup_file_exists('/tmp/test.conf')"
-      points: 5
-      
-    - name: "list_versions"
-      setup: |
-        ./configmgr.sh backup /tmp/test.conf
-        echo 'test=456' > /tmp/test.conf
-        ./configmgr.sh backup /tmp/test.conf
-      check: "./configmgr.sh list /tmp/test.conf"
-      expect:
-        - "output_line_count() >= 2"
-      points: 3
-      
-    - name: "restore_version"
-      check: "./configmgr.sh restore /tmp/test.conf --version 1"
-      expect:
-        - "file_contains('/tmp/test.conf', 'test=123')"
-      points: 5
-      
-    - name: "diff_versions"
-      check: "./configmgr.sh diff /tmp/test.conf --v1 1 --v2 2"
-      expect:
-        - "output_contains('123') AND output_contains('456')"
-        - "output_contains('-') OR output_contains('+')"
-      points: 5
+  - name: backup_config
+    setup: echo 'test=123' > "${FIXTURE_ROOT}"/test.conf
+    check: ./configmgr.sh backup "${FIXTURE_ROOT}"/test.conf
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: backup_file_exists(''${FIXTURE_ROOT}/test.conf'')'
+    points: 5
+    category: functional
+    requires_platform: owned configuration/version storage adapter; the prototype must not write a host HOME directory
+  - name: list_versions
+    setup: |
+      ./configmgr.sh backup "${FIXTURE_ROOT}"/test.conf
+      echo 'test=456' > "${FIXTURE_ROOT}"/test.conf
+      ./configmgr.sh backup "${FIXTURE_ROOT}"/test.conf
+    check: ./configmgr.sh list "${FIXTURE_ROOT}"/test.conf
+    expect:
+      lines:
+        stream: stdout
+        op: ge
+        value: 2
+    points: 3
+    category: functional
+    requires_platform: owned configuration/version storage adapter; the prototype must not write a host HOME directory
+  - name: restore_version
+    check: ./configmgr.sh restore "${FIXTURE_ROOT}"/test.conf --version 1
+    expect:
+      file_text:
+        path: ${FIXTURE_ROOT}/test.conf
+        op: contains
+        value: test=123
+    points: 5
+    category: functional
+    requires_platform: owned configuration/version storage adapter; the prototype must not write a host HOME directory
+  - name: diff_versions
+    check: ./configmgr.sh diff "${FIXTURE_ROOT}"/test.conf --v1 1 --v2 2
+    expect:
+      all:
+      - all:
+        - text:
+            stream: stdout
+            op: contains
+            value: '123'
+        - text:
+            stream: stdout
+            op: contains
+            value: '456'
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: '-'
+        - text:
+            stream: stdout
+            op: contains
+            value: +
+    points: 5
+    category: functional
+    requires_platform: owned configuration/version storage adapter; the prototype must not write a host HOME directory
+  setup:
+    commands:
+    - printf 'test=123\n' > "${FIXTURE_ROOT}"/test.conf
 ```
 
 ### 3.2 MEDIUM Projects (M01-M15)
@@ -392,203 +748,389 @@ e05_tests:
 #### M01: Incremental Backup System
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
+# After full backup
 m01_tests:
   functional:
-    - name: "full_backup"
-      setup: |
-        mkdir -p /tmp/source/{a,b}
-        echo "file1" > /tmp/source/a/f1.txt
-        echo "file2" > /tmp/source/b/f2.txt
-      check: "./backup.sh full -s /tmp/source -d /tmp/backup -n test"
-      expect:
-        - "exit_code == 0"
-        - "backup_archive_exists('/tmp/backup')"
-        - "archive_contains('a/f1.txt')"
-      points: 10
-      timeout: 60
-      
-    - name: "incremental_backup"
-      setup: |
-        # After full backup
-        echo "modified" > /tmp/source/a/f1.txt
-        echo "new" > /tmp/source/new.txt
-      check: "./backup.sh incremental -s /tmp/source -d /tmp/backup -n test"
-      expect:
-        - "exit_code == 0"
-        - "incremental_archive_smaller_than_full()"
-        - "archive_contains('new.txt')"
-      points: 15
-      
-    - name: "compression_gzip"
-      check: "./backup.sh full -s /tmp/source -d /tmp/backup --compress gzip"
-      expect:
-        - "file_exists_with_extension('.tar.gz')"
-      points: 3
-      
-    - name: "compression_xz"
-      check: "./backup.sh full -s /tmp/source -d /tmp/backup --compress xz"
-      expect:
-        - "file_exists_with_extension('.tar.xz')"
-      points: 3
-      
-    - name: "restore_full"
-      check: "./backup.sh restore BACKUP_ID -o /tmp/restored"
-      expect:
-        - "files_identical('/tmp/source', '/tmp/restored')"
-      points: 10
-      
-    - name: "restore_selective"
-      check: "./backup.sh restore BACKUP_ID -f a/f1.txt -o /tmp/restored"
-      expect:
-        - "file_exists('/tmp/restored/a/f1.txt')"
-        - "NOT file_exists('/tmp/restored/b/f2.txt')"
-      points: 5
-      
-    - name: "rotation"
-      setup: "create_multiple_backups(10)"
-      check: "./backup.sh prune --keep-daily 3"
-      expect:
-        - "backup_count() <= 3"
-      points: 10
-      
-    - name: "integrity_verify"
-      check: "./backup.sh verify BACKUP_ID"
-      expect:
-        - "exit_code == 0"
-        - "output_contains('verified') OR output_contains('OK')"
-      points: 5
-      
-    - name: "schedule_cron"
-      check: "./backup.sh schedule on --cron '0 3 * * *'"
-      expect:
-        - "crontab_contains('backup')"
-      points: 5
-
+  - name: full_backup
+    setup: |
+      mkdir -p "${FIXTURE_ROOT}"/source/{a,b}
+      echo "file1" > "${FIXTURE_ROOT}"/source/a/f1.txt
+      echo "file2" > "${FIXTURE_ROOT}"/source/b/f2.txt
+    check: ./backup.sh full -s "${FIXTURE_ROOT}"/source -d "${FIXTURE_ROOT}"/backup -n test
+    expect:
+      all:
+      - all:
+        - exit_code:
+            op: eq
+            value: 0
+        - pending: 'Supply a versioned project/platform adapter and exact oracle for: backup_archive_exists(''${FIXTURE_ROOT}/backup'')'
+        - pending: 'Supply a versioned project/platform adapter and exact oracle for: archive_contains(''a/f1.txt'')'
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 10
+    timeout: 60
+    category: functional
+  - name: incremental_backup
+    setup: |
+      # After full backup
+      echo "modified" > "${FIXTURE_ROOT}"/source/a/f1.txt
+      echo "new" > "${FIXTURE_ROOT}"/source/new.txt
+    check: ./backup.sh incremental -s "${FIXTURE_ROOT}"/source -d "${FIXTURE_ROOT}"/backup -n test
+    expect:
+      all:
+      - all:
+        - exit_code:
+            op: eq
+            value: 0
+        - pending: 'Supply a versioned project/platform adapter and exact oracle for: incremental_archive_smaller_than_full()'
+        - pending: 'Supply a versioned project/platform adapter and exact oracle for: archive_contains(''new.txt'')'
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 15
+    category: functional
+    notes: A size comparison is fixture-specific and cannot replace exact reconstructed-content/deletion checks.
+  - name: compression_gzip
+    check: ./backup.sh full -s "${FIXTURE_ROOT}"/source -d "${FIXTURE_ROOT}"/backup --compress gzip
+    expect:
+      all:
+      - glob:
+          pattern: ${FIXTURE_ROOT}/**/*.tar.gz
+          kind: file
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 3
+    category: functional
+  - name: compression_xz
+    check: ./backup.sh full -s "${FIXTURE_ROOT}"/source -d "${FIXTURE_ROOT}"/backup --compress xz
+    expect:
+      all:
+      - glob:
+          pattern: ${FIXTURE_ROOT}/**/*.tar.xz
+          kind: file
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 3
+    category: functional
+  - name: restore_full
+    check: ./backup.sh restore "${BACKUP_ID:?fixture adapter must export the exact returned ID}" -o "${FIXTURE_ROOT}"/restored
+    expect:
+      all:
+      - files_equal:
+        - ${FIXTURE_ROOT}/source
+        - ${FIXTURE_ROOT}/restored
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 10
+    category: functional
+  - name: restore_selective
+    check: ./backup.sh restore "${BACKUP_ID:?fixture adapter must export the exact returned ID}" -f a/f1.txt -o "${FIXTURE_ROOT}"/restored
+    expect:
+      all:
+      - all:
+        - path:
+            kind: file
+            path: ${FIXTURE_ROOT}/restored/a/f1.txt
+        - not:
+            path:
+              kind: file
+              path: ${FIXTURE_ROOT}/restored/b/f2.txt
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 5
+    category: functional
+  - name: rotation
+    setup: create_multiple_backups 10
+    check: ./backup.sh prune --keep-daily 3
+    expect:
+      all:
+      - pending: 'Define an explicit measured field and versioned adapter for: backup_count() <= 3'
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 10
+    category: functional
+    notes: Retain selected restore points plus every required ancestor; three daily points do not imply at most three archive directories.
+  - name: integrity_verify
+    check: ./backup.sh verify BACKUP_ID
+    expect:
+      all:
+      - all:
+        - exit_code:
+            op: eq
+            value: 0
+        - any:
+          - text:
+              stream: stdout
+              op: contains
+              value: verified
+          - text:
+              stream: stdout
+              op: contains
+              value: OK
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 5
+    category: functional
+  - name: schedule_cron
+    check: ./backup.sh schedule on --cron '0 3 * * *'
+    expect:
+      all:
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: crontab_contains(''backup'')'
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 5
+    category: functional
   error_handling:
-    - name: "source_not_exists"
-      check: "./backup.sh full -s /nonexistent -d /tmp/backup"
-      expect: "exit_code != 0"
-      points: 2
-      
-    - name: "corrupted_archive"
-      setup: "truncate -s 100 /tmp/backup/archive.tar.gz"
-      check: "./backup.sh verify BACKUP_ID"
-      expect: "exit_code != 0 AND output_contains('corrupt')"
-      points: 3
+  - name: source_not_exists
+    check: ./backup.sh full -s ${FIXTURE_ROOT}/missing -d "${FIXTURE_ROOT}"/backup
+    expect:
+      all:
+      - exit_code:
+          op: ne
+          value: 0
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 2
+    category: error_handling
+  - name: corrupted_archive
+    setup: truncate -s 100 "${FIXTURE_ROOT}"/backup/archive.tar.gz
+    check: ./backup.sh verify BACKUP_ID
+    expect:
+      all:
+      - all:
+        - exit_code:
+            op: ne
+            value: 0
+        - text:
+            stream: stdout
+            op: contains
+            value: corrupt
+      - pending: M01 canonical CLI, archive-ID/manifest/root and retention-selection contract is not adopted; an adapter must define the exact producer receipt and dependency-preserving expected state.
+    points: 3
+    category: error_handling
 ```
 
 #### M02: Process Lifecycle Monitor
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
+# Process that consumes memory
+# CPU-intensive process
 m02_tests:
   functional:
-    - name: "monitor_by_pid"
-      setup: "sleep 300 &; PID=$!"
-      check: "./procmon.sh status $PID"
-      expect:
-        - "output_contains('sleep')"
-        - "output_contains('CPU') OR output_contains('%')"
-      points: 5
-      cleanup: "kill $PID"
-      
-    - name: "monitor_by_name"
-      setup: "sleep 300 &"
-      check: "./procmon.sh status sleep"
-      expect:
-        - "output_contains('sleep')"
-      points: 5
-      
-    - name: "process_tree"
-      setup: "bash -c 'sleep 300 &' &"
-      check: "./procmon.sh tree $$"
-      expect:
-        - "output_contains('bash')"
-        - "output_contains('sleep')"
-        - "output_contains('├') OR output_contains('└')"
-      points: 10
-      
-    - name: "resource_tracking"
-      setup: |
-        # Process that consumes memory
-        python3 -c 'x=[0]*10000000; import time; time.sleep(60)' &
-        PID=$!
-      check: "./procmon.sh status $PID"
-      expect:
-        - "output_matches_regex('[0-9]+ MB') OR output_matches_regex('[0-9]+MB')"
-        - "memory_value() > 10"  # Should show >10MB
-      points: 10
-      
-    - name: "event_detection_exit"
-      setup: |
-        (sleep 2; exit 0) &
-        PID=$!
-      check: "./procmon.sh watch $PID --duration 5"
-      expect:
-        - "output_contains('exit') OR output_contains('terminated')"
-      points: 10
-      timeout: 10
-      
-    - name: "cpu_alert"
-      setup: |
-        # CPU-intensive process
-        yes > /dev/null &
-        PID=$!
-      check: "./procmon.sh watch $PID --cpu-alert 50 --duration 3"
-      expect:
-        - "output_contains('alert') OR output_contains('threshold')"
-      points: 5
-      cleanup: "kill $PID"
+  - name: monitor_by_pid
+    setup: |-
+      sleep 300 &
+       PID=$!
+      export SETUP_PID=$!
+      export PID=${PID:-$SETUP_PID}
+    check: ./procmon.sh status $PID
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: contains
+          value: sleep
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: CPU
+        - text:
+            stream: stdout
+            op: contains
+            value: '%'
+    points: 5
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+    category: functional
+  - name: monitor_by_name
+    setup: |-
+      sleep 300 &
+      export SETUP_PID=$!
+      export PID=${PID:-$SETUP_PID}
+    check: ./procmon.sh status sleep
+    expect:
+      text:
+        stream: stdout
+        op: contains
+        value: sleep
+    points: 5
+    category: functional
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+  - name: process_tree
+    setup: |-
+      bash -c 'sleep 300 & child=$!; trap '"'"'kill "$child" 2>/dev/null; wait "$child" 2>/dev/null'"'"' EXIT; wait "$child"' &
+      export SETUP_PID=$!
+    check: ./procmon.sh tree "${SETUP_PID:?owned setup process required}"
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: contains
+          value: bash
+      - text:
+          stream: stdout
+          op: contains
+          value: sleep
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: ├
+        - text:
+            stream: stdout
+            op: contains
+            value: └
+    points: 10
+    category: functional
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+  - name: resource_tracking
+    setup: |-
+      # Process that consumes memory
+      python3 -c 'x=[0]*10000000; import time; time.sleep(60)' &
+      PID=$!
+
+      export SETUP_PID=$!
+      export PID=${PID:-$SETUP_PID}
+    check: ./procmon.sh status $PID
+    expect:
+      all:
+      - any:
+        - text:
+            stream: stdout
+            op: regex
+            value: '[0-9]+ MB'
+        - text:
+            stream: stdout
+            op: regex
+            value: '[0-9]+MB'
+      - pending: 'Define an explicit measured field and versioned adapter for: memory_value() > 10'
+    points: 10
+    category: functional
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+  - name: event_detection_exit
+    setup: |-
+      (sleep 2; exit 0) &
+      PID=$!
+
+      export SETUP_PID=$!
+      export PID=${PID:-$SETUP_PID}
+    check: ./procmon.sh watch $PID --duration 1
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: exit
+      - text:
+          stream: stdout
+          op: contains
+          value: terminated
+    points: 10
+    timeout: 75
+    category: functional
+    notes: The assignment duration option is in minutes. This proposed one-minute check has a 75-second outer bound; it is not a five-second test.
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+  - name: cpu_alert
+    setup: |-
+      # CPU-intensive process
+      yes > /dev/null &
+      PID=$!
+
+      export SETUP_PID=$!
+      export PID=${PID:-$SETUP_PID}
+    check: ./procmon.sh watch $PID --cpu-alert 50 --duration 1
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: alert
+      - text:
+          stream: stdout
+          op: contains
+          value: threshold
+    points: 5
+    cleanup: if [[ -n ${SETUP_PID:-} ]]; then kill "$SETUP_PID" 2>/dev/null || true; wait "$SETUP_PID" 2>/dev/null || true; fi
+    category: functional
+    timeout: 75
+    notes: The assignment duration option is in minutes. This proposed one-minute check has a 75-second outer bound; it is not a five-second test.
 ```
 
 #### M03: Service Health Watchdog
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
+# Note: Requires mock services or Docker
+# Assume ssh/cron runs in container
 m03_tests:
-  # Note: Requires mock services or Docker
   functional:
-    - name: "check_running_service"
-      # Assume ssh/cron runs in container
-      check: "./watchdog.sh status cron"
-      expect:
-        - "output_contains('running') OR output_contains('active')"
-      points: 5
-      
-    - name: "check_stopped_service"
-      setup: "systemctl stop cron 2>/dev/null || service cron stop"
-      check: "./watchdog.sh status cron"
-      expect:
-        - "output_contains('stopped') OR output_contains('inactive')"
-      points: 5
-      cleanup: "systemctl start cron 2>/dev/null || service cron start"
-      
-    - name: "check_tcp_port"
-      setup: "nc -l 8888 &"
-      check: "./watchdog.sh check-port 8888"
-      expect:
-        - "exit_code == 0"
-        - "output_contains('open') OR output_contains('OK')"
-      points: 5
-      
-    - name: "daemon_mode"
-      check: "./watchdog.sh daemon start"
-      expect:
-        - "pid_file_exists()"
-        - "process_running('watchdog')"
-      points: 10
-      cleanup: "./watchdog.sh daemon stop"
-      
-    - name: "config_file_parsing"
-      setup: |
-        cat > /tmp/watchdog.yaml << 'EOF'
-        services:
-          - name: test
-            type: process
-            check: "pgrep bash"
-        EOF
-      check: "./watchdog.sh -c /tmp/watchdog.yaml status"
-      expect:
-        - "exit_code == 0"
-      points: 5
+  - name: check_running_service
+    check: ./watchdog.sh status cron
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: running
+      - text:
+          stream: stdout
+          op: contains
+          value: active
+    points: 5
+    category: functional
+  - name: check_stopped_service
+    setup: systemctl stop cron 2>/dev/null || service cron stop
+    check: ./watchdog.sh status cron
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: stopped
+      - text:
+          stream: stdout
+          op: contains
+          value: inactive
+    points: 5
+    cleanup: systemctl start cron 2>/dev/null || service cron start
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: check_tcp_port
+    setup: nc -l 8888 &
+    check: ./watchdog.sh check-port 8888
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: open
+        - text:
+            stream: stdout
+            op: contains
+            value: OK
+    points: 5
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: daemon_mode
+    check: ./watchdog.sh daemon start
+    expect:
+      all:
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: pid_file_exists()'
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: process_running(''watchdog'')'
+    points: 10
+    cleanup: ./watchdog.sh daemon stop
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: config_file_parsing
+    setup: |
+      cat > "${FIXTURE_ROOT}"/watchdog.yaml << 'EOF'
+      services:
+        - name: test
+          type: process
+          check: "pgrep bash"
+      EOF
+    check: ./watchdog.sh -c "${FIXTURE_ROOT}"/watchdog.yaml status
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    points: 5
+    category: functional
 ```
 
 #### M04: Network Security Scanner
@@ -596,109 +1138,204 @@ m03_tests:
 ```yaml
 m04_tests:
   functional:
-    - name: "ping_sweep"
-      check: "./netscan.sh discover 127.0.0.1/32"
-      expect:
-        - "output_contains('127.0.0.1')"
-        - "output_contains('up') OR output_contains('alive')"
-      points: 5
-      
-    - name: "port_scan_single"
-      setup: "nc -l 9999 &"
-      check: "./netscan.sh scan 127.0.0.1 -p 9999"
-      expect:
-        - "output_contains('9999')"
-        - "output_contains('open')"
-      points: 5
-      
-    - name: "port_scan_range"
-      setup: "nc -l 8001 & nc -l 8002 &"
-      check: "./netscan.sh scan 127.0.0.1 -p 8000-8010"
-      expect:
-        - "output_contains('8001') AND output_contains('8002')"
-        - "output_contains('open')"
-      points: 10
-      
-    - name: "parallel_scan"
-      check: "./netscan.sh scan 127.0.0.1 -p 1-1000 -j 10"
-      expect:
-        - "execution_time() < 30"  # Parallel = fast
-      points: 5
-      timeout: 60
-      
-    - name: "json_output"
-      check: "./netscan.sh scan 127.0.0.1 -p 22,80 --format json"
-      expect:
-        - "output_is_valid_json()"
-        - "json_has_key('host') OR json_has_key('ports')"
-      points: 5
-      
-    - name: "html_report"
-      check: "./netscan.sh scan 127.0.0.1 -p 1-100 --format html -o /tmp/report.html"
-      expect:
-        - "file_exists('/tmp/report.html')"
-        - "file_contains_html_tags('/tmp/report.html')"
-      points: 5
+  - name: ping_sweep
+    check: ./netscan.sh discover 127.0.0.1/32
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: contains
+          value: 127.0.0.1
+      - any:
+        - text:
+            stream: stdout
+            op: contains
+            value: up
+        - text:
+            stream: stdout
+            op: contains
+            value: alive
+    points: 5
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: port_scan_single
+    setup: nc -l 9999 &
+    check: ./netscan.sh scan 127.0.0.1 -p 9999
+    expect:
+      all:
+      - text:
+          stream: stdout
+          op: contains
+          value: '9999'
+      - text:
+          stream: stdout
+          op: contains
+          value: open
+    points: 5
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: port_scan_range
+    setup: nc -l 8001 & nc -l 8002 &
+    check: ./netscan.sh scan 127.0.0.1 -p 8000-8010
+    expect:
+      all:
+      - all:
+        - text:
+            stream: stdout
+            op: contains
+            value: '8001'
+        - text:
+            stream: stdout
+            op: contains
+            value: '8002'
+      - text:
+          stream: stdout
+          op: contains
+          value: open
+    points: 10
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: parallel_scan
+    check: ./netscan.sh scan 127.0.0.1 -p 1-1000 -j 10
+    expect:
+      duration:
+        op: lt
+        value: 30
+    points: 5
+    timeout: 60
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: json_output
+    check: ./netscan.sh scan 127.0.0.1 -p 22,80 --format json
+    expect:
+      all:
+      - json_valid:
+          stream: stdout
+      - any:
+        - json_valid:
+            stream: stdout
+            required_keys:
+            - host
+        - json_valid:
+            stream: stdout
+            required_keys:
+            - ports
+    points: 5
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  - name: html_report
+    check: ./netscan.sh scan 127.0.0.1 -p 1-100 --format html -o "${FIXTURE_ROOT}"/report.html
+    expect:
+      all:
+      - path:
+          kind: file
+          path: ${FIXTURE_ROOT}/report.html
+      - file_text:
+          path: ${FIXTURE_ROOT}/report.html
+          op: regex
+          value: <[A-Za-z][^>]*>
+    points: 5
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
 ```
 
 #### M05: Deployment Pipeline
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
+# Create mock app with health endpoint
+#!/bin/bash
 m05_tests:
   functional:
-    - name: "detect_node_project"
-      setup: |
-        mkdir -p /tmp/project
-        echo '{"name":"test","scripts":{"build":"echo built"}}' > /tmp/project/package.json
-      check: "./deploy.sh build /tmp/project"
-      expect:
-        - "output_contains('node') OR output_contains('npm')"
-      points: 5
-      
-    - name: "detect_python_project"
-      setup: |
-        mkdir -p /tmp/project
-        echo 'flask==2.0' > /tmp/project/requirements.txt
-      check: "./deploy.sh build /tmp/project"
-      expect:
-        - "output_contains('python') OR output_contains('pip')"
-      points: 5
-      
-    - name: "deploy_atomic"
-      setup: "mkdir -p /tmp/deploy/releases"
-      check: "./deploy.sh deploy /tmp/project -e dev"
-      expect:
-        - "symlink_exists('/tmp/deploy/current')"
-        - "symlink_target_contains('releases')"
-      points: 10
-      
-    - name: "rollback"
-      setup: |
-        ./deploy.sh deploy /tmp/project -e dev
-        ./deploy.sh deploy /tmp/project -e dev  # Second release
-      check: "./deploy.sh rollback -e dev"
-      expect:
-        - "exit_code == 0"
-        - "symlink_changed('/tmp/deploy/current')"
-      points: 10
-      
-    - name: "health_check"
-      setup: |
-        # Create mock app with health endpoint
-        cat > /tmp/project/app.sh << 'EOF'
-        #!/bin/bash
-        while true; do echo -e "HTTP/1.1 200 OK\n\nOK" | nc -l 8080 -q 1; done
-        EOF
-        chmod +x /tmp/project/app.sh
-      check: "./deploy.sh deploy /tmp/project -e dev --health-check http://localhost:8080"
-      expect:
-        - "output_contains('healthy') OR output_contains('OK')"
-      points: 10
+  - name: detect_node_project
+    setup: |
+      mkdir -p "${FIXTURE_ROOT}"/project
+      echo '{"name":"test","scripts":{"build":"echo built"}}' > "${FIXTURE_ROOT}"/project/package.json
+    check: ./deploy.sh build "${FIXTURE_ROOT}"/project
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: node
+      - text:
+          stream: stdout
+          op: contains
+          value: npm
+    points: 5
+    category: functional
+  - name: detect_python_project
+    setup: |
+      mkdir -p "${FIXTURE_ROOT}"/project
+      echo 'flask==2.0' > "${FIXTURE_ROOT}"/project/requirements.txt
+    check: ./deploy.sh build "${FIXTURE_ROOT}"/project
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: python
+      - text:
+          stream: stdout
+          op: contains
+          value: pip
+    points: 5
+    category: functional
+  - name: deploy_atomic
+    setup: mkdir -p "${FIXTURE_ROOT}"/deploy/releases
+    check: ./deploy.sh deploy "${FIXTURE_ROOT}"/project -e dev
+    expect:
+      all:
+      - path:
+          kind: symlink
+          path: ${FIXTURE_ROOT}/deploy/current
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: symlink_target_contains(''releases'')'
+    points: 10
+    category: functional
+  - name: rollback
+    setup: |
+      ./deploy.sh deploy "${FIXTURE_ROOT}"/project -e dev
+      ./deploy.sh deploy "${FIXTURE_ROOT}"/project -e dev  # Second release
+    check: ./deploy.sh rollback -e dev
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - pending: 'Supply a versioned project/platform adapter and exact oracle for: symlink_changed(''${FIXTURE_ROOT}/deploy/current'')'
+    points: 10
+    category: functional
+  - name: health_check
+    setup: |
+      # Create mock app with health endpoint
+      cat > "${FIXTURE_ROOT}"/project/app.sh << 'EOF'
+      #!/bin/bash
+      while true; do echo -e "HTTP/1.1 200 OK\n\nOK" | nc -l 8080 -q 1; done
+      EOF
+      chmod +x "${FIXTURE_ROOT}"/project/app.sh
+    check: ./deploy.sh deploy "${FIXTURE_ROOT}"/project -e dev --health-check http://localhost:8080
+    expect:
+      any:
+      - text:
+          stream: stdout
+          op: contains
+          value: healthy
+      - text:
+          stream: stdout
+          op: contains
+          value: OK
+    points: 10
+    category: functional
+    requires_platform: isolated disposable service/network/scheduler environment with an owned adapter; not supported by the local reference
+  setup:
+    commands:
+    - mkdir -p "${FIXTURE_ROOT}"/project "${FIXTURE_ROOT}"/deploy/releases
 ```
 
 #### M06-M15 (Similar Pattern)
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
 # Template for the rest of MEDIUM projects
 # Each follows the same pattern:
 # 1. Setup environment
@@ -707,67 +1344,57 @@ m05_tests:
 # 4. Test error handling
 # 5. Test output formats
 # 6. Performance/timeout tests
-
 m06_resource_historian:
-  - collect_cpu_metrics
-  - collect_memory_metrics
-  - store_in_sqlite
-  - ascii_graph_generation
-  - report_generation
-
+- collect_cpu_metrics
+- collect_memory_metrics
+- store_in_sqlite
+- ascii_graph_generation
+- report_generation
 m07_security_audit:
-  - user_audit_empty_passwords
-  - file_audit_suid
-  - service_audit_ssh
-  - report_with_severity
-
+- user_audit_empty_passwords
+- file_audit_suid
+- service_audit_ssh
+- report_with_severity
 m08_disk_manager:
-  - space_analysis
-  - cleanup_temp_files
-  - duplicate_detection
-  - threshold_alerts
-
+- space_analysis
+- cleanup_temp_files
+- duplicate_detection
+- threshold_alerts
 m09_task_scheduler:
-  - add_cron_task
-  - add_systemd_timer
-  - list_tasks
-  - execution_logging
-
+- add_cron_task
+- add_systemd_timer
+- list_tasks
+- execution_logging
 m10_process_tree:
-  - build_tree
-  - detect_zombies
-  - aggregate_resources
-  - export_dot
-
+- build_tree
+- detect_zombies
+- aggregate_resources
+- export_dot
 m11_memory_forensics:
-  - system_memory_overview
-  - process_memory_maps
-  - leak_detection_snapshot
-  - comparison_report
-
+- system_memory_overview
+- process_memory_maps
+- leak_detection_snapshot
+- comparison_report
 m12_file_integrity:
-  - create_baseline
-  - detect_modifications
-  - inotify_watch
-  - generate_report
-
+- create_baseline
+- detect_modifications
+- inotify_watch
+- generate_report
 m13_log_aggregator:
-  - multi_source_collection
-  - syslog_parsing
-  - journald_reading
-  - pattern_alerting
-
+- multi_source_collection
+- syslog_parsing
+- journald_reading
+- pattern_alerting
 m14_config_manager:
-  - environment_inheritance
-  - template_rendering
-  - secret_encryption
-  - environment_diff
-
+- environment_inheritance
+- template_rendering
+- secret_encryption
+- environment_diff
 m15_parallel_engine:
-  - parallel_execution
-  - job_queue_management
-  - progress_reporting
-  - error_retry
+- parallel_execution
+- job_queue_management
+- progress_reporting
+- error_retry
 ```
 
 ### 3.3 ADVANCED Projects (A01-A03)
@@ -775,128 +1402,301 @@ m15_parallel_engine:
 ```yaml
 a01_job_scheduler:
   build:
-    - name: "compile_c_library"
-      check: "make -C src/c"
-      expect:
-        - "file_exists('build/libjobqueue.so')"
-      points: 10
-      
-    - name: "compile_cli_tool"
-      check: "make"
-      expect:
-        - "file_exists('bin/jobctl')"
-      points: 5
-      
+  - name: compile_c_library
+    check: make -C src/c
+    expect:
+      path:
+        kind: file
+        path: build/libjobqueue.so
+    points: 10
+    category: build
+  - name: compile_cli_tool
+    check: make
+    expect:
+      path:
+        kind: file
+        path: bin/jobctl
+    points: 5
+    category: build
   functional:
-    - name: "init_queue"
-      check: "./bin/jobctl init"
-      expect:
-        - "shm_exists('/dev/shm/jobscheduler')"
-      points: 5
-      
-    - name: "submit_job"
-      check: "./bin/jobctl submit 'echo test'"
-      expect:
-        - "output_matches_regex('Job.*#[0-9]+')"
-      points: 5
-      
-    - name: "priority_ordering"
-      setup: |
-        ./bin/jobctl submit -p 10 'sleep 1'
-        ./bin/jobctl submit -p 1 'echo high'
-      check: "./bin/jobctl list"
-      expect:
-        - "high_priority_first()"
-      points: 10
-      
-    - name: "shared_memory_integrity"
-      check: "run_concurrent_submits(100)"
-      expect:
-        - "no_corruption()"
-        - "job_count() == 100"
-      points: 15
-      
+  - name: init_queue
+    check: ./bin/jobctl init
+    expect:
+      pending: 'Supply a versioned project/platform adapter and exact oracle for: shm_exists(''/dev/shm/jobscheduler'')'
+    points: 5
+    category: functional
+    requires_platform: owned named POSIX IPC instance and completed versioned A01 CLI; never shared global /dev/shm paths
+    setup: |
+      export JOBQUEUE_INSTANCE=${FIXTURE_ROOT##*/}
+    cleanup: ./bin/jobctl destroy
+  - name: submit_job
+    check: ./bin/jobctl submit 'echo test'
+    expect:
+      text:
+        stream: stdout
+        op: regex
+        value: Job.*#[0-9]+
+    points: 5
+    category: functional
+    requires_platform: owned named POSIX IPC instance and completed versioned A01 CLI; never shared global /dev/shm paths
+    setup: |
+      export JOBQUEUE_INSTANCE=${FIXTURE_ROOT##*/}
+      ./bin/jobctl init
+    cleanup: ./bin/jobctl destroy
+  - name: priority_ordering
+    setup: |
+      export JOBQUEUE_INSTANCE=${FIXTURE_ROOT##*/}
+      ./bin/jobctl init
+      ./bin/jobctl submit -p 10 'sleep 1'
+      ./bin/jobctl submit -p 1 'echo high'
+    check: ./bin/jobctl list
+    expect:
+      pending: 'Supply a versioned project/platform adapter and exact oracle for: high_priority_first()'
+    points: 10
+    category: functional
+    requires_platform: owned named POSIX IPC instance and completed versioned A01 CLI; never shared global /dev/shm paths
+    cleanup: ./bin/jobctl destroy
+  - name: shared_memory_integrity
+    check: |-
+      pids=()
+      for i in $(seq 1 100); do ./bin/jobctl submit "concurrent_$i" > "submit_$i.log" 2>&1 & pids+=("$!"); done
+      failed=0
+      for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
+      (( failed == 0 )) || exit 1
+      ./bin/jobctl list
+    expect:
+      all:
+      - exit_code:
+          op: eq
+          value: 0
+      - unique_matches:
+          pattern: concurrent_[0-9]+\b
+          values:
+          - concurrent_1
+          - concurrent_2
+          - concurrent_3
+          - concurrent_4
+          - concurrent_5
+          - concurrent_6
+          - concurrent_7
+          - concurrent_8
+          - concurrent_9
+          - concurrent_10
+          - concurrent_11
+          - concurrent_12
+          - concurrent_13
+          - concurrent_14
+          - concurrent_15
+          - concurrent_16
+          - concurrent_17
+          - concurrent_18
+          - concurrent_19
+          - concurrent_20
+          - concurrent_21
+          - concurrent_22
+          - concurrent_23
+          - concurrent_24
+          - concurrent_25
+          - concurrent_26
+          - concurrent_27
+          - concurrent_28
+          - concurrent_29
+          - concurrent_30
+          - concurrent_31
+          - concurrent_32
+          - concurrent_33
+          - concurrent_34
+          - concurrent_35
+          - concurrent_36
+          - concurrent_37
+          - concurrent_38
+          - concurrent_39
+          - concurrent_40
+          - concurrent_41
+          - concurrent_42
+          - concurrent_43
+          - concurrent_44
+          - concurrent_45
+          - concurrent_46
+          - concurrent_47
+          - concurrent_48
+          - concurrent_49
+          - concurrent_50
+          - concurrent_51
+          - concurrent_52
+          - concurrent_53
+          - concurrent_54
+          - concurrent_55
+          - concurrent_56
+          - concurrent_57
+          - concurrent_58
+          - concurrent_59
+          - concurrent_60
+          - concurrent_61
+          - concurrent_62
+          - concurrent_63
+          - concurrent_64
+          - concurrent_65
+          - concurrent_66
+          - concurrent_67
+          - concurrent_68
+          - concurrent_69
+          - concurrent_70
+          - concurrent_71
+          - concurrent_72
+          - concurrent_73
+          - concurrent_74
+          - concurrent_75
+          - concurrent_76
+          - concurrent_77
+          - concurrent_78
+          - concurrent_79
+          - concurrent_80
+          - concurrent_81
+          - concurrent_82
+          - concurrent_83
+          - concurrent_84
+          - concurrent_85
+          - concurrent_86
+          - concurrent_87
+          - concurrent_88
+          - concurrent_89
+          - concurrent_90
+          - concurrent_91
+          - concurrent_92
+          - concurrent_93
+          - concurrent_94
+          - concurrent_95
+          - concurrent_96
+          - concurrent_97
+          - concurrent_98
+          - concurrent_99
+          - concurrent_100
+    points: 15
+    category: functional
+    requires_platform: owned named POSIX IPC instance and completed versioned A01 CLI; never shared global /dev/shm paths
+    setup: |
+      export JOBQUEUE_INSTANCE=${FIXTURE_ROOT##*/}
+      ./bin/jobctl init
+    cleanup: ./bin/jobctl destroy
   memory:
-    - name: "no_memory_leaks"
-      check: "valgrind --leak-check=full ./bin/jobctl submit 'test'"
-      expect:
-        - "output_contains('no leaks')"
-      points: 10
-
+  - name: no_memory_leaks
+    check: valgrind --error-exitcode=97 --leak-check=full ./bin/jobctl submit 'test'
+    expect:
+      exit_code:
+        op: eq
+        value: 0
+    points: 10
+    category: memory
+    requires_platform: owned named POSIX IPC instance and completed versioned A01 CLI; never shared global /dev/shm paths
+    setup: |
+      export JOBQUEUE_INSTANCE=${FIXTURE_ROOT##*/}
+      ./bin/jobctl init
+    cleanup: ./bin/jobctl destroy
+    notes: A clean bounded Valgrind run is evidence for this execution only; missing tools, ptrace restrictions or lifecycle failures are unavailable, not a pass.
 a02_shell_extension:
   build:
-    - name: "compile_library"
-      check: "make"
-      expect:
-        - "file_exists('build/libshellext.so')"
-      points: 10
-      
+  - name: compile_library
+    check: make
+    expect:
+      path:
+        kind: file
+        path: build/libshellext.so
+    points: 10
+    category: build
   functional:
-    - name: "syntax_highlighting"
-      check: |
-        echo 'if [ -f test ]; then echo "found"; fi' | ./highlight
-      expect:
-        - "output_contains_ansi('if')"  # Keyword coloured
-        - "output_contains_ansi('echo')" # Builtin coloured
-      points: 15
-      
-    - name: "completion_trie"
-      setup: "load_commands_into_trie()"
-      check: "./complete 'gre'"
-      expect:
-        - "output_contains('grep')"
-      points: 15
-      
-    - name: "lexer_correctness"
-      check: "./tokenize 'echo $VAR | grep \"test\"'"
-      expect:
-        - "tokens_include('BUILTIN', 'VARIABLE', 'OPERATOR', 'STRING')"
-      points: 10
-
+  - name: syntax_highlighting
+    check: |
+      echo 'if [ -f test ]; then echo "found"; fi' | ./highlight
+    expect:
+      all:
+      - ansi:
+        - if
+      - ansi:
+        - echo
+    points: 15
+    category: functional
+  - name: completion_trie
+    setup: ./load_commands
+    check: ./complete 'gre'
+    expect:
+      text:
+        stream: stdout
+        op: contains
+        value: grep
+    points: 15
+    category: functional
+  - name: lexer_correctness
+    check: ./tokenize 'echo $VAR | grep "test"'
+    expect:
+      pending: 'Supply a versioned project/platform adapter and exact oracle for: tokens_include(''BUILTIN'', ''VARIABLE'', ''OPERATOR'', ''STRING'')'
+    points: 10
+    category: functional
 a03_file_sync:
   build:
-    - name: "compile"
-      check: "make"
-      expect:
-        - "file_exists('build/libsyncutil.so')"
-        - "file_exists('bin/synctool')"
-      points: 10
-      
+  - name: compile
+    check: make
+    expect:
+      all:
+      - path:
+          kind: file
+          path: build/libsyncutil.so
+      - path:
+          kind: file
+          path: bin/synctool
+    points: 10
+    category: build
   functional:
-    - name: "hash_file"
-      setup: "dd if=/dev/urandom of=/tmp/test bs=1M count=10"
-      check: "./bin/synctool hash /tmp/test"
-      expect:
-        - "output_matches_regex('[a-f0-9]{64}')"  # SHA256
-      points: 5
-      
-    - name: "generate_signature"
-      check: "./bin/synctool signature /tmp/test"
-      expect:
-        - "file_exists('/tmp/test.sig')"
-      points: 10
-      
-    - name: "delta_generation"
-      setup: |
-        cp /tmp/test /tmp/test_modified
-        echo "change" >> /tmp/test_modified
-      check: "./bin/synctool delta /tmp/test /tmp/test_modified"
-      expect:
-        - "delta_size() < file_size('/tmp/test_modified')"
-      points: 15
-      
-    - name: "delta_application"
-      check: "./bin/synctool apply /tmp/test /tmp/delta -o /tmp/result"
-      expect:
-        - "files_identical('/tmp/test_modified', '/tmp/result')"
-      points: 15
+  - name: hash_file
+    setup: |-
+      mkdir -p "${FIXTURE_ROOT}"/a03_test/source
+      printf abc > "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
+    check: ./bin/synctool hash "${FIXTURE_ROOT}"/a03_test/source/known-vector.txt
+    expect:
+      pending: Author must select MD5 (16 bytes/32 hex) or SHA-256 (32 bytes/64 hex) and CLI framing; then compare the exact abc known vector, not only length, repetition or inequality.
+    points: 5
+    category: functional
+    historical_command: ./bin/synctool hash /tmp/test
+    notes: 'Known vectors for abc: MD5 900150983cd24fb0d6963f7d28e17f72; SHA-256 ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad.'
+  - name: generate_signature
+    check: ./bin/synctool signature "${FIXTURE_ROOT}"/test
+    expect:
+      path:
+        kind: file
+        path: ${FIXTURE_ROOT}/test.sig
+    points: 10
+    category: functional
+  - name: delta_generation
+    setup: |
+      cp "${FIXTURE_ROOT}"/test "${FIXTURE_ROOT}"/test_modified
+      echo "change" >> "${FIXTURE_ROOT}"/test_modified
+    check: ./bin/synctool delta "${FIXTURE_ROOT}"/test "${FIXTURE_ROOT}"/test_modified
+    expect:
+      pending: 'Supply explicit paths/units for the measured comparison: delta_size() < file_size(''${FIXTURE_ROOT}/test_modified'')'
+    points: 15
+    category: functional
+  - name: delta_application
+    check: ./bin/synctool apply "${FIXTURE_ROOT}"/test "${FIXTURE_ROOT}"/delta -o "${FIXTURE_ROOT}"/result
+    expect:
+      files_equal:
+      - ${FIXTURE_ROOT}/test_modified
+      - ${FIXTURE_ROOT}/result
+    points: 15
+    category: functional
+  setup:
+    commands:
+    - |-
+      mkdir -p "${FIXTURE_ROOT}"/a03_test/source
+      printf abc > "${FIXTURE_ROOT}"/test
+      cp "${FIXTURE_ROOT}"/test "${FIXTURE_ROOT}"/test_modified
+      printf "change\n" >> "${FIXTURE_ROOT}"/test_modified
 ```
 
 ---
 
 ## 4. Detailed Specifications per Project
 
-### 4.1 Complete Testing Matrix
+### 4.1 Historical Planning Matrix (not measured test inventory)
 
 | Project | Total Tests | Auto (%) | Manual (%) | Est. Time |
 |---------|-------------|----------|------------|-----------|
@@ -926,7 +1726,7 @@ a03_file_sync:
 
 ---
 
-## 5. Criteria NOT EVALUABLE Automatically
+## 5. Criteria Requiring Additional or Human Evidence
 
 ### 5.1 Complete List
 
@@ -946,7 +1746,7 @@ a03_file_sync:
 ### 5.2 Automatic Evaluation Percentage per Criterion
 
 ```
-FULLY AUTOMATIC (100%):
+FINITE AUTOMATIC CHECKS (coverage estimate, not proof):
 ├── File structure (exists/does not exist)
 ├── Correct syntax (bash -n, ShellCheck)
 ├── Correct exit codes
@@ -975,7 +1775,7 @@ FINAL SCORE = (Auto × 0.85) + (Manual × 0.15)
 
 Where:
 - Auto = Score from automated tests (0-100)
-- Manual = Human evaluation for:
+- Manual = 100 × sum of the following marks / 30 (normalisation required):
   • Documentation (0-10 points)
   • Overall code quality (0-10 points)  
   • Creativity/Extra features (0-10 points)
@@ -1015,7 +1815,7 @@ evaluator/
         └── report.json.j2
 ```
 
-### 6.2 Docker Sandbox
+### 6.2 Proposed Docker Image (not an implemented sandbox)
 
 ```dockerfile
 FROM ubuntu:24.04
@@ -1026,7 +1826,7 @@ RUN apt-get update && apt-get install -y \
     findutils \
     grep \
     sed \
-    awk \
+    gawk \
     shellcheck \
     sqlite3 \
     inotify-tools \
@@ -1036,10 +1836,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     make \
     valgrind \
-    python3 \
+    python3 python3-yaml gzip bzip2 xz-utils libssl-dev libreadline-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Resource limits
+# Planning configuration only; ENV does not enforce any resource limit
 ENV TIMEOUT=60
 ENV MAX_MEMORY=512M
 ENV MAX_DISK=1G
@@ -1053,138 +1853,46 @@ COPY --chown=student:student entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
 ```
 
-### 6.3 Test Runner Core
+### 6.3 Implemented local runner and finite predicates
 
-```bash
-#!/bin/bash
-# test_runner.sh
+The executable implementation is [evaluation_reference.py](../helpers/evaluation_reference.py).
+It supplies `validate_predicate`, `evaluate`, `run_case`, `summarise` and an explicit
+`hybrid_percentage` arithmetic function. It never evaluates predicate text as a
+shell program or Python expression. Command text belongs only to a trusted fixture
+and is separate from its predicate data. Reports include `id`, `category`, `status`,
+`exit_code`, `duration`, `points`, `max_points`, separate stdout/stderr and a null
+`grade`. Missing tools or lifecycle failures are ERROR/NOT_RUN, not a clean result.
 
-run_test() {
-    local test_name="$1"
-    local test_command="$2"
-    local expected="$3"
-    local timeout="${4:-60}"
-    local points="${5:-1}"
-    
-    local start_time result exit_code output
-    start_time=$(date +%s.%N)
-    
-    # Execute in sandbox with timeout
-    output=$(timeout "$timeout" bash -c "$test_command" 2>&1)
-    exit_code=$?
-    
-    local end_time duration
-    end_time=$(date +%s.%N)
-    duration=$(echo "$end_time - $start_time" | bc)
-    
-    # Evaluate expected
-    local passed=false
-    if evaluate_expectation "$output" "$exit_code" "$expected"; then
-        passed=true
-    fi
-    
-    # Output result
-    cat << EOF
-{
-  "test": "$test_name",
-  "passed": $passed,
-  "exit_code": $exit_code,
-  "duration": $duration,
-  "points": $([ "$passed" = "true" ] && echo "$points" || echo "0"),
-  "max_points": $points,
-  "output_preview": "$(echo "$output" | head -5 | jq -Rs .)"
-}
-EOF
-}
-
-evaluate_expectation() {
-    local output="$1"
-    local exit_code="$2"
-    local expectation="$3"
-    
-    # Parse expectation (simplified)
-    case "$expectation" in
-        "exit_code == 0")
-            [ "$exit_code" -eq 0 ]
-            ;;
-        "exit_code != 0")
-            [ "$exit_code" -ne 0 ]
-            ;;
-        output_contains*)
-            local pattern="${expectation#*\'}"
-            pattern="${pattern%\'*}"
-            echo "$output" | grep -q "$pattern"
-            ;;
-        file_exists*)
-            local file="${expectation#*\'}"
-            file="${file%\'*}"
-            [ -f "$file" ]
-            ;;
-        *)
-            # Complex evaluation with eval
-            eval "$expectation"
-            ;;
-    esac
-}
+```yaml
+owned_reference:
+  tests:
+    functional_core:
+      - id: literal_json
+        name: Literal output and separate stderr
+        argv: [python3, -c, "import sys; print('quoted \"value\"'); print('diagnostic', file=sys.stderr)"]
+        expect:
+          all:
+            - exit_code: {op: eq, value: 0}
+            - text: {stream: stdout, op: contains, value: 'quoted "value"'}
+            - text: {stream: stderr, op: equals, value: "diagnostic\n"}
+        points: 5
+        timeout: 2
 ```
 
-### 6.4 Scoring Engine
+### 6.4 Arithmetic and incomplete evidence
 
-```python
-#!/usr/bin/env python3
-# scoring.py
+For complete results, raw percentage is `100 * sum(points) / sum(max_points)`.
+Explicit category weights must be numeric, cover every category and sum to 100;
+otherwise the scorer rejects the configuration. A missing category cannot silently
+become zero. A NOT_RUN/ERROR case keeps its planned denominator and makes the final
+percentage unavailable. No missing case is silently removed to increase a score.
 
-import yaml
-import json
-from typing import Dict, List
-
-def calculate_score(test_results: List[Dict], project_config: Dict) -> Dict:
-    """Calculates the final score for a project."""
-    
-    total_points = 0
-    max_points = 0
-    category_scores = {}
-    
-    for result in test_results:
-        category = result.get('category', 'general')
-        points = result['points']
-        max_pts = result['max_points']
-        
-        total_points += points
-        max_points += max_pts
-        
-        if category not in category_scores:
-            category_scores[category] = {'earned': 0, 'max': 0}
-        category_scores[category]['earned'] += points
-        category_scores[category]['max'] += max_pts
-    
-    # Apply weights from config
-    weighted_score = 0
-    for category, weight in project_config.get('weights', {}).items():
-        if category in category_scores:
-            cat = category_scores[category]
-            if cat['max'] > 0:
-                weighted_score += (cat['earned'] / cat['max']) * weight
-    
-    return {
-        'total_points': total_points,
-        'max_points': max_points,
-        'percentage': (total_points / max_points * 100) if max_points > 0 else 0,
-        'weighted_score': weighted_score,
-        'category_breakdown': category_scores,
-        'grade': calculate_grade(weighted_score)
-    }
-
-def calculate_grade(score: float) -> str:
-    """Converts score to grade."""
-    if score >= 90: return 'A (10)'
-    if score >= 80: return 'B (9)'
-    if score >= 70: return 'C (8)'
-    if score >= 60: return 'D (7)'
-    if score >= 50: return 'E (6)'
-    if score >= 40: return 'F (5)'
-    return 'F (4)'
-```
+The historical 85/15 illustration becomes mathematically coherent only after
+normalising the three manual marks: `manual_percentage = 100 * sum(marks) / 30`.
+Then `illustrative_total = 0.85 * auto_percentage + 0.15 * manual_percentage`.
+Maximum input is 100; the earlier unnormalised formula reached only 89.5.
+The weights and conversion to a grade remain author decisions. `hybrid_percentage`
+requires the weight explicitly and `summarise` returns `grade: null`.
 
 ---
 
@@ -1193,75 +1901,83 @@ def calculate_grade(score: float) -> str:
 ### 7.1 Scoring Model
 
 ```yaml
+# Retained historical inline notes; the Phase 5 status above governs evidence/policy.
+# Points per category
+# Penalties
+# Bonuses
 scoring_model:
-  # Points per category
-  structural: 10%
-  static_analysis: 10%
-  functional_core: 40%
-  functional_optional: 15%
-  error_handling: 10%
-  performance: 5%
-  documentation: 5%
-  code_quality: 5%
-  
-  # Penalties
-  penalties:
+  policy_status: proposal_not_adopted
+  weights:
+    structural: 10
+    static_analysis: 10
+    functional_core: 40
+    functional_optional: 15
+    error_handling: 10
+    performance: 5
+    documentation: 5
+    code_quality: 5
+  historical_penalty_proposal:
     shellcheck_errors: -5% per error (max -20%)
     timeout_exceeded: -50% for that test
     crash: -100% for that test
     hardcoded_paths: -2% per occurrence
-    
-  # Bonuses
-  bonuses:
+  historical_bonus_proposal:
     all_tests_pass: +5%
     exceptional_error_handling: +5%
     kubernetes_extension: +10%
+  application: No penalties, bonuses or grades are applied by the local reference.
 ```
 
 ### 7.2 Report Format
 
 ```json
 {
-  "evaluation_id": "eval_20250128_123456",
-  "student_id": "student123",
-  "project": "M01_Incremental_Backup_System",
-  "timestamp": "2025-01-28T12:34:56Z",
-  
+  "schema_version": 1,
+  "example_only": true,
   "summary": {
-    "total_score": 85.5,
-    "grade": "B (9)",
-    "tests_passed": 18,
-    "tests_failed": 2,
-    "tests_total": 20
+    "earned_known": 81,
+    "max_planned": 100,
+    "percentage": 81.0,
+    "weighted_percentage": null,
+    "complete": true,
+    "grade": null,
+    "policy_status": "proposal_only_no_institutional_grade"
   },
-  
   "categories": {
-    "structural": {"score": 100, "max": 100, "details": ["..."]},
-    "functional": {"score": 82, "max": 100, "details": ["..."]},
-    "error_handling": {"score": 75, "max": 100, "details": ["..."]}
-  },
-  
-  "failed_tests": [
-    {
-      "name": "restore_selective",
-      "reason": "File not found in restored location",
-      "expected": "file_exists('/tmp/restored/a/f1.txt')",
-      "actual": "File does not exist"
+    "structural": {
+      "earned": 10,
+      "max": 10
+    },
+    "static_analysis": {
+      "earned": 8,
+      "max": 10
+    },
+    "functional_core": {
+      "earned": 33,
+      "max": 40
+    },
+    "functional_optional": {
+      "earned": 9,
+      "max": 15
+    },
+    "error_handling": {
+      "earned": 7,
+      "max": 10
+    },
+    "performance": {
+      "earned": 5,
+      "max": 5
+    },
+    "documentation": {
+      "earned": 4,
+      "max": 5
+    },
+    "code_quality": {
+      "earned": 5,
+      "max": 5
     }
-  ],
-  
-  "recommendations": [
-    "Implement selective restore from archives",
-    "Add validation for restore path"
-  ],
-  
-  "execution_time": "8m 34s",
-  "shellcheck_warnings": 3,
-  "code_metrics": {
-    "total_loc": 456,
-    "functions": 23,
-    "comment_ratio": 0.12
-  }
+  },
+  "provenance": "Illustrative arithmetic only; the earlier 85.5 total did not equal the displayed 81 category points."
 }
 ```
 
@@ -1273,13 +1989,13 @@ scoring_model:
 ║                    M01: Incremental Backup System                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-TOTAL SCORE: 85.5 / 100  [████████████████████░░░░] 
+ILLUSTRATIVE RAW TOTAL: 81 / 100  [████████████████████░░░░] 
 
 DETAILS PER CATEGORY
 ═══════════════════════════════════════════════════════════════════════════════
   Structural      [██████████] 100%   (10/10 pts)
   Static Analysis [████████░░]  80%   (8/10 pts)
-  Functional Core [████████░░]  82%   (33/40 pts)
+  Functional Core [████████░░]  82.5% (33/40 pts)
   Optional        [██████░░░░]  60%   (9/15 pts)
   Error Handling  [███████░░░]  70%   (7/10 pts)
   Performance     [██████████] 100%   (5/5 pts)
@@ -1302,7 +2018,7 @@ RECOMMENDATIONS
   2. Verify rotation logic for monthly backups
   3. Reduce ShellCheck warnings (3 found)
 
-FINAL GRADE: 9 (B)
+FINAL GRADE: PENDING AUTHOR POLICY
 ```
 
 ---
@@ -1325,3 +2041,38 @@ FINAL GRADE: 9 (B)
 ---
 
 *Document generated for the Operating Systems course | ASE-CSIE | 2024-2025*
+
+
+## Open policy comparison and recommendation
+
+The main proposal's grade thresholds (90→10, 80→9, 70→8, 60→7,
+50→6, 40→5) conflict with the summary proposal (95→10, 90→9,
+80→8, 70→7, 60→6, 50→5). Both are retained as historical alternatives;
+neither is applied by the reference. Main-document penalties of −5% per ShellCheck
+error capped at −20% also conflict with summary −2% capped at −15%; bonuses differ
+between +5/+5 and +3/+2. The author must select one versioned policy, including
+rounding, caps, optional work and missing-platform treatment. The recommendation
+is one explicit machine-readable policy with boundary fixtures, after author
+approval. Until then reports contain observations and raw illustrative arithmetic,
+not a final grade. The historical 85/15 proposal is also not adopted implicitly.
+
+Automation percentages, test counts and durations in the planning tables have no
+measured denominator in this transfer. They are estimates, not achieved coverage,
+validated throughput or proof of universal correctness. Rare faults, races,
+recovery and parser edge cases can have bounded automated tests; each needs a
+declared oracle and evidence scope. Human judgement and platform acceptance remain
+separate. No student notification, external comparison service or publication is
+authorised by a proposed architecture diagram.
+
+### Technical references for the implemented boundary
+
+- [Python 3.12 subprocess documentation](https://docs.python.org/3.12/library/subprocess.html): literal argv, separate streams, process creation and POSIX session handling.
+- [Docker resource constraints](https://docs.docker.com/engine/containers/resource_constraints/): CPU/memory controls are runtime configuration, not ENV declarations. No Docker containment was exercised by this local repair.
+
+The current runner reports whole-case wall time (setup, command and cleanup), not
+a standalone program benchmark. Its sampled output cap can have a small overshoot;
+it is not a disk quota. A production backend must separately verify memory, CPU,
+PID, filesystem, disk, network and privilege containment with owned negative
+controls before any untrusted submission is considered. The Dockerfile remains a
+proposed image recipe; the submission entrypoint and isolation launcher are not
+implemented by the local helper.

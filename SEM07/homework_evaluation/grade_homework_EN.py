@@ -10,12 +10,15 @@ Grades homework submissions based on rubrics and generates reports.
 import argparse
 import csv
 import json
+import hashlib
+import math
 import os
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from verification_engine import parse_header_and_events, seminar_label
 
 try:
     from rich.console import Console
@@ -59,9 +62,9 @@ class HomeworkSubmission:
     timestamp: datetime
     deadline: Optional[datetime] = None
     signature_valid: bool = False
-    score: float = 0.0
+    score: Optional[float] = None
     late_days: int = 0
-    final_score: float = 0.0
+    final_score: Optional[float] = None
     comments: list = field(default_factory=list)
 
 
@@ -74,60 +77,30 @@ class StudentRecord:
     submissions: list = field(default_factory=list)
     total_submitted: int = 0
     total_valid: int = 0
-    average_score: float = 0.0
-    meets_threshold: bool = False
+    average_score: Optional[float] = None
+    meets_threshold: Optional[bool] = None
     elimination_reason: str = ""
 
 
 class HomeworkGrader:
     """Main grading engine."""
     
-    def __init__(self, rubrics_dir: str, deadlines_file: Optional[str] = None):
+    def __init__(self, rubrics_dir: str, deadlines_file: Optional[str] = None, manual_scores=None):
+        self.manual_scores = manual_scores or {}
         self.rubrics_dir = Path(rubrics_dir)
         self.rubrics = self._load_rubrics()
         self.deadlines = self._load_deadlines(deadlines_file) if deadlines_file else {}
         self.console = Console() if RICH_AVAILABLE else None
         
     def _load_rubrics(self) -> dict:
-        """Load grading rubrics from markdown files."""
+        """Load the supplied human rubrics as evidence, without inventing weights."""
         rubrics = {}
-        
         for sem in SEMINARS:
-            rubric_file = self.rubrics_dir / f"{sem}_HOMEWORK_RUBRIC.md"
-            if rubric_file.exists():
-                rubrics[sem] = self._parse_rubric(rubric_file)
-            else:
-                # Default rubric
-                rubrics[sem] = {
-                    'max_score': 10.0,
-                    'criteria': {
-                        'completion': 4.0,
-                        'correctness': 4.0,
-                        'style': 2.0,
-                    }
-                }
-        
+            rubric_file = self.rubrics_dir / f"S{sem[3:]}_HOMEWORK_RUBRIC.md"
+            if rubric_file.is_file():
+                rubrics[sem] = {'path': str(rubric_file), 'text': rubric_file.read_text(encoding='utf-8')}
         return rubrics
-    
-    def _parse_rubric(self, rubric_file: Path) -> dict:
-        """Parse rubric markdown file."""
-        # Simplified parser - in production, use proper markdown parsing
-        rubric = {'max_score': 10.0, 'criteria': {}}
-        
-        with open(rubric_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        # Extract criteria from markdown tables
-        # This is a simplified implementation
-        if 'completion' in content.lower():
-            rubric['criteria']['completion'] = 4.0
-        if 'correctness' in content.lower():
-            rubric['criteria']['correctness'] = 4.0
-        if 'style' in content.lower():
-            rubric['criteria']['style'] = 2.0
-            
-        return rubric
-    
+
     def _load_deadlines(self, deadlines_file: str) -> dict:
         """Load deadline information from CSV."""
         deadlines = {}
@@ -141,109 +114,62 @@ class HomeworkGrader:
         return deadlines
     
     def grade_submission(self, submission: HomeworkSubmission) -> HomeworkSubmission:
-        """Grade a single submission."""
-        
-        # Check signature validity
+        """Join explicit verification and a human-reviewed final score.
+
+        No command/byte-count heuristic is an assessment. A missing score or
+        rubric remains pending; timestamp and participation policy stay open.
+        """
         if not submission.signature_valid:
-            submission.score = 0.0
-            submission.final_score = 0.0
-            submission.comments.append("Invalid or missing signature")
+            submission.comments.append("PENDING_VERIFICATION: no complete verified identity/signature record")
             return submission
-        
-        # Get rubric for this seminar
-        rubric = self.rubrics.get(submission.seminar, self.rubrics['SEM01'])
-        
-        # Analyse submission (simplified - in production, run actual tests)
-        score = self._analyse_submission(submission, rubric)
+        if submission.seminar not in self.rubrics:
+            submission.comments.append("PENDING_REVIEW: corresponding human rubric is missing")
+            return submission
+        score = self._analyse_submission(submission, self.rubrics[submission.seminar])
+        if score is None:
+            submission.comments.append("PENDING_REVIEW: supply an explicit human-reviewed final_score")
+            return submission
         submission.score = score
-        
-        # Apply late penalty
-        if submission.late_days > 0:
-            if submission.late_days > MAX_LATE_DAYS:
-                submission.final_score = 0.0
-                submission.comments.append(f"Submitted {submission.late_days} days late (max {MAX_LATE_DAYS})")
-            else:
-                penalty = LATE_PENALTIES.get(submission.late_days, 0.60)
-                submission.final_score = score * (1 - penalty)
-                submission.comments.append(f"Late penalty: -{penalty*100:.0f}%")
-        else:
-            submission.final_score = score
-            
+        submission.final_score = score
+        submission.comments.append("Manual final_score; no automatic lateness deduction or eligibility decision")
         return submission
-    
-    def _analyse_submission(self, submission: HomeworkSubmission, rubric: dict) -> float:
-        """Analyse submission content and compute score."""
-        
-        # In production, this would:
-        # 1. Parse the .cast file
-        # 2. Extract commands executed
-        # 3. Verify expected outputs
-        # 4. Check for required elements
-        
-        # Simplified scoring based on file existence and size
-        file_path = Path(submission.file_path)
-        
-        if not file_path.exists():
-            return 0.0
-            
-        file_size = file_path.stat().st_size
-        
-        # Basic heuristics (replace with actual analysis)
-        if file_size < 100:
-            return 2.0  # Minimal content
-        elif file_size < 1000:
-            return 5.0  # Partial completion
-        elif file_size < 5000:
-            return 7.0  # Good completion
-        else:
-            return 9.0  # Comprehensive
-    
+
+    def _analyse_submission(self, submission: HomeworkSubmission, rubric: dict) -> Optional[float]:
+        """Return a supplied final score. The rubric remains the human assessor's evidence."""
+        return self.manual_scores.get(Path(submission.file_path).resolve())
+
     def calculate_late_days(self, submission_time: datetime, deadline: datetime) -> int:
         """Calculate number of days late."""
         if submission_time <= deadline:
             return 0
             
         delta = submission_time - deadline
-        return delta.days + (1 if delta.seconds > 0 else 0)
+        return math.ceil(delta.total_seconds() / 86400)
     
     def aggregate_student_grades(self, submissions: list) -> dict:
-        """Aggregate grades by student."""
+        """Aggregate distinct assignments; a resubmission needs an explicit decision."""
+        seen = set()
         students = {}
-        
         for sub in submissions:
-            if sub.student_id not in students:
-                students[sub.student_id] = StudentRecord(
-                    student_id=sub.student_id,
-                    student_name=sub.student_name,
-                    student_group=sub.student_group,
-                )
-            
-            record = students[sub.student_id]
+            assignment = (sub.student_id, sub.seminar, sub.homework_id)
+            if assignment in seen:
+                raise ValueError(f"Duplicate assignment requires explicit resubmission selection: {assignment}")
+            seen.add(assignment)
+            record = students.setdefault(sub.student_id, StudentRecord(
+                student_id=sub.student_id, student_name=sub.student_name, student_group=sub.student_group))
+            if (record.student_name, record.student_group) != (sub.student_name, sub.student_group):
+                raise ValueError(f"Conflicting identity for student_id {sub.student_id}")
             record.submissions.append(sub)
             record.total_submitted += 1
-            
-            if sub.signature_valid and sub.final_score > 0:
+            if sub.signature_valid and sub.final_score is not None:
                 record.total_valid += 1
-        
-        # Calculate averages and check threshold
-        for student_id, record in students.items():
-            if record.total_valid > 0:
-                valid_scores = [s.final_score for s in record.submissions 
-                               if s.signature_valid and s.final_score > 0]
-                record.average_score = sum(valid_scores) / len(valid_scores)
-            
-            # Check 80% threshold
-            if record.total_valid >= MINIMUM_THRESHOLD:
-                record.meets_threshold = True
-            else:
-                record.meets_threshold = False
-                record.elimination_reason = (
-                    f"Only {record.total_valid}/{TOTAL_HOMEWORKS} valid submissions "
-                    f"(minimum: {MINIMUM_THRESHOLD})"
-                )
-        
+        for record in students.values():
+            scores = [sub.final_score for sub in record.submissions if sub.final_score is not None]
+            record.average_score = sum(scores) / len(scores) if scores else None
+            record.meets_threshold = None
+            record.elimination_reason = 'PENDING_POLICY: eligibility, authoritative time and resubmission rules need author approval'
         return students
-    
+
     def generate_report(self, students: dict, output_path: str):
         """Generate grading report."""
         
@@ -253,20 +179,20 @@ class HomeworkGrader:
             writer = csv.writer(f)
             writer.writerow([
                 'Student ID', 'Student Name', 'Group',
-                'Submitted', 'Valid', 'Average Score',
+                'Distinct Submissions', 'Reviewed and Verified', 'Manual Final Score Average',
                 'Meets Threshold', 'Status', 'Comments'
             ])
             
             for student_id, record in sorted(students.items()):
-                status = "PASS" if record.meets_threshold else "ELIMINATION"
+                status = "PENDING_POLICY"
                 writer.writerow([
                     record.student_id,
                     record.student_name,
                     record.student_group,
                     record.total_submitted,
                     record.total_valid,
-                    f"{record.average_score:.2f}",
-                    "Yes" if record.meets_threshold else "No",
+                    f"{record.average_score:.2f}" if record.average_score is not None else "PENDING_REVIEW",
+                    "Undecided",
                     status,
                     record.elimination_reason,
                 ])
@@ -290,14 +216,14 @@ class HomeworkGrader:
         table.add_column("Status", justify="center")
         
         for student_id, record in sorted(students.items()):
-            status_style = "green" if record.meets_threshold else "red"
-            status_text = "✓ PASS" if record.meets_threshold else "✗ ELIM"
+            status_style = "yellow"
+            status_text = "PENDING_POLICY"
             
             table.add_row(
                 record.student_name,
                 record.student_group,
                 f"{record.total_valid}/{record.total_submitted}",
-                f"{record.average_score:.2f}",
+                f"{record.average_score:.2f}" if record.average_score is not None else "PENDING_REVIEW",
                 f"[{status_style}]{status_text}[/{status_style}]"
             )
         
@@ -309,8 +235,7 @@ class HomeworkGrader:
         
         self.console.print(f"\n[bold]Summary:[/bold]")
         self.console.print(f"  Total students: {total}")
-        self.console.print(f"  [green]Passing:[/green] {passing}")
-        self.console.print(f"  [red]Eliminated:[/red] {total - passing}")
+        self.console.print(f"  Pending author policy: {total}")
     
     def _print_text_report(self, students: dict):
         """Print plain text report."""
@@ -319,10 +244,10 @@ class HomeworkGrader:
         print("=" * 70)
         
         for student_id, record in sorted(students.items()):
-            status = "PASS" if record.meets_threshold else "ELIMINATION"
+            status = "PENDING_POLICY"
             print(f"\n{record.student_name} ({record.student_group})")
             print(f"  Submissions: {record.total_valid}/{record.total_submitted}")
-            print(f"  Average: {record.average_score:.2f}")
+            print(f"  Average: {record.average_score if record.average_score is not None else 'PENDING_REVIEW'}")
             print(f"  Status: {status}")
             if record.elimination_reason:
                 print(f"  Reason: {record.elimination_reason}")
@@ -334,8 +259,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -s /submissions/ -r ./rubrics/ -o grades.csv
-  %(prog)s -s /submissions/ -r ./rubrics/ -d deadlines.csv -o grades.csv
+  %(prog)s -s ./submissions --verification ./verification/verification_results.csv -o grades.csv
+  %(prog)s -s ./submissions --verification ./verification/verification_results.csv --scores reviewed_scores.csv -d deadlines.csv -o grades.csv
         """
     )
     
@@ -347,7 +272,7 @@ Examples:
     parser.add_argument(
         '-r', '--rubrics',
         default='./homework_rubrics',
-        help='Directory containing rubric files'
+        help='Compatibility argument only; rubric files are read by the human reviewer, not scored by this tool'
     )
     parser.add_argument(
         '-d', '--deadlines',
@@ -364,6 +289,10 @@ Examples:
         help='Verbose output'
     )
     
+    parser.add_argument('--verification', required=True, type=Path,
+                        help='Explicit verification_results.csv from the SEM07 verifier')
+    parser.add_argument('--scores', type=Path,
+                        help='Human-reviewed CSV: file,final_score; final scores are not penalised again')
     args = parser.parse_args()
     
     # Validate inputs
@@ -371,44 +300,76 @@ Examples:
         print(f"Error: Submissions directory not found: {args.submissions}")
         sys.exit(1)
     
-    # Initialise grader
-    grader = HomeworkGrader(args.rubrics, args.deadlines)
-    
-    # Process submissions
-    submissions = []
-    submissions_dir = Path(args.submissions)
-    
-    for cast_file in submissions_dir.rglob("*.cast"):
-        # Parse submission metadata
-        try:
-            with open(cast_file, 'r', encoding='utf-8') as f:
-                header = json.loads(f.readline())
-                
-            submission = HomeworkSubmission(
-                student_id=header.get('student_id', 'UNKNOWN'),
-                student_name=header.get('student_name', 'UNKNOWN'),
-                student_group=header.get('student_group', 'UNKNOWN'),
-                seminar=header.get('seminar', 'SEM01'),
-                homework_id=header.get('homework_id', ''),
-                file_path=str(cast_file),
-                timestamp=datetime.fromtimestamp(header.get('timestamp', 0)),
-                signature_valid=True,  # Assume pre-verified
-            )
-            
-            # Grade submission
-            graded = grader.grade_submission(submission)
-            submissions.append(graded)
-            
-            if args.verbose:
-                print(f"Graded: {cast_file.name} -> {graded.final_score:.2f}")
-                
-        except (json.JSONDecodeError, KeyError) as e:
-            print(f"Warning: Could not parse {cast_file}: {e}")
-    
-    # Aggregate and report
-    students = grader.aggregate_student_grades(submissions)
-    grader.generate_report(students, args.output)
+    submissions_dir = Path(args.submissions).resolve()
+    try:
+        with args.verification.open(newline='', encoding='utf-8') as handle:
+            verified = {}
+            for row in csv.DictReader(handle):
+                key = row['File']
+                if key in verified:
+                    raise ValueError(f'Duplicate verification row: {key}')
+                verified[key] = row
+        scores = {}
+        if args.scores:
+            with args.scores.open(newline='', encoding='utf-8') as handle:
+                for row in csv.DictReader(handle):
+                    target = (submissions_dir / row['file']).resolve()
+                    if not target.is_relative_to(submissions_dir) or target in scores:
+                        raise ValueError('Score path escapes the source directory or is duplicated')
+                    score = float(row['final_score'])
+                    if not math.isfinite(score) or not 0 <= score <= 10:
+                        raise ValueError('final_score must be finite and between 0 and 10')
+                    scores[target] = score
+        grader = HomeworkGrader(args.rubrics, args.deadlines, scores)
+        submissions, rejected = [], []
+        for cast_file in sorted(submissions_dir.rglob('*.cast')):
+            if cast_file.is_symlink() or not cast_file.is_file():
+                continue
+            key = cast_file.relative_to(submissions_dir).as_posix()
+            try:
+                data = cast_file.read_bytes()
+                header, _ = parse_header_and_events(data)
+                required = ('student_id', 'student_name', 'student_group', 'homework_id')
+                if any(not isinstance(header.get(k), str) or not header[k].strip()
+                       or header[k].upper() == 'UNKNOWN' for k in required):
+                    raise ValueError('MISSING_METADATA: complete explicit identity and assignment are required')
+                seminar = seminar_label(header.get('seminar'))
+                if seminar not in SEMINARS:
+                    raise ValueError('Unknown seminar')
+                row = verified.get(key, {})
+                matches = (row.get('Signature_Status') == 'VALID' and row.get('Metadata_Status') == 'COMPLETE'
+                           and row.get('Source_SHA256') == hashlib.sha256(data).hexdigest()
+                           and (row.get('Student'), row.get('Group'), row.get('Seminar')) ==
+                           (header['student_name'], header['student_group'], seminar))
+                stamp = header.get('timestamp')
+                if type(stamp) is not int or stamp < 0:
+                    raise ValueError('Missing or invalid timestamp')
+                submission = HomeworkSubmission(
+                    student_id=header['student_id'], student_name=header['student_name'],
+                    student_group=header['student_group'], seminar=seminar,
+                    homework_id=header['homework_id'], file_path=str(cast_file),
+                    timestamp=datetime.fromtimestamp(stamp, tz=timezone.utc), signature_valid=matches)
+                deadline = grader.deadlines.get(f"{submission.seminar}_{submission.homework_id}")
+                if deadline:
+                    if deadline.tzinfo is None:
+                        raise ValueError('Deadline must include a timezone; client timestamp authority remains undecided')
+                    submission.deadline = deadline
+                    submission.late_days = grader.calculate_late_days(submission.timestamp, deadline)
+                submissions.append(grader.grade_submission(submission))
+            except (OSError, ValueError, TypeError, KeyError, IndexError, OverflowError) as exc:
+                rejected.append({'file': key, 'reason': str(exc)})
+        students = grader.aggregate_student_grades(submissions)
+        grader.generate_report(students, args.output)
+        detail = {'status': 'PRELIMINARY_REVIEW_ONLY', 'rejected': rejected,
+                  'submissions': [{'file': s.file_path, 'verified': s.signature_valid,
+                                   'manual_final_score': s.final_score, 'late_days_from_client_time': s.late_days,
+                                   'comments': s.comments} for s in submissions]}
+        Path(args.output).with_suffix('.review.json').write_text(json.dumps(detail, indent=2)+'\n')
+        return 2 if rejected or any(s.final_score is None for s in submissions) else 0
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f'Cannot produce a grading report: {exc}', file=sys.stderr)
+        return 1
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

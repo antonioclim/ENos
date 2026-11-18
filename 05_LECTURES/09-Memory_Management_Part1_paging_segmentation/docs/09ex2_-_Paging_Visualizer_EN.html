@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paging Visualiser | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -76,7 +76,84 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -88,7 +165,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Paging Visualiser</h1>
-                    <p class="text-xs text-stone-500">Translatere Adrese Logice → Fizice</p>
+                    <p class="text-xs text-stone-500">Logical-to-Physical Address Translation</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
@@ -105,31 +182,31 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <i class="fas fa-exchange-alt text-indigo-500"></i>
-                        Translatere Address
+                        Address Translation
                     </h2>
                     
                     <!-- Address Input -->
                     <div class="mb-6 p-4 bg-stone-50 rounded-lg">
                         <div class="flex flex-wrap items-center gap-4">
                             <div>
-                                <label class="text-xs text-stone-500 block mb-1">Address Logica (decimala)</label>
+                                <label class="text-xs text-stone-500 block mb-1">Logical Address (decimal)</label>
                                 <input type="number" id="logicalAddress" value="1234" min="0" class="w-32 p-2 border border-stone-300 rounded mono text-sm">
                             </div>
                             <button onclick="translateAddress()" class="btn-action px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-medium">
                                 <i class="fas fa-arrow-right mr-1"></i> Translate
                             </button>
                             <div id="physicalAddressResult" class="text-lg font-bold text-green-600 mono hidden">
-                                → Fizica: <span id="physicalValue">0</span>
+                                → Physical: <span id="physicalValue">0</span>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Binary Breakdown -->
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-stone-700 mb-3">Descompunere Binara</h3>
+                        <h3 class="text-sm font-semibold text-stone-700 mb-3">Binary Breakdown</h3>
                         <div class="flex flex-wrap gap-8">
                             <div>
-                                <div class="text-xs text-stone-500 mb-2">Address Logica</div>
+                                <div class="text-xs text-stone-500 mb-2">Logical Address</div>
                                 <div id="logicalBinary" class="flex">
                                     <!-- Binary bits will be rendered here -->
                                 </div>
@@ -140,7 +217,7 @@
                             </div>
                             <div class="flex items-center text-2xl text-stone-400">→</div>
                             <div>
-                                <div class="text-xs text-stone-500 mb-2">Address Fizica</div>
+                                <div class="text-xs text-stone-500 mb-2">Physical Address</div>
                                 <div id="physicalBinary" class="flex">
                                     <!-- Binary bits will be rendered here -->
                                 </div>
@@ -154,7 +231,7 @@
                     
                     <!-- Translation Steps -->
                     <div id="translationSteps" class="p-4 bg-blue-50 rounded-lg text-sm space-y-2">
-                        <div class="text-blue-800">Introduceti o address logica and apasati "Translate"</div>
+                        <div class="text-blue-800">Enter a logical address and press "Translate"</div>
                     </div>
                 </div>
 
@@ -164,7 +241,7 @@
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-file text-blue-500"></i>
-                            Memorie Logica (Pagini)
+                            Logical Memory (Pages)
                         </h3>
                         <div id="logicalMemory" class="grid grid-cols-4 gap-1">
                             <!-- Pages will be rendered here -->
@@ -175,7 +252,7 @@
                     <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                         <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                             <i class="fas fa-memory text-green-500"></i>
-                            Physical Memory (Frame-uri)
+                            Physical Memory (Frames)
                         </h3>
                         <div id="physicalMemory" class="grid grid-cols-4 gap-1">
                             <!-- Frames will be rendered here -->
@@ -237,7 +314,7 @@
                         </table>
                     </div>
                     <button onclick="clearTLB()" class="mt-2 text-xs text-red-600 hover:text-red-800">
-                        <i class="fas fa-trash mr-1"></i> Goleste TLB
+                        <i class="fas fa-trash mr-1"></i> Clear TLB
                     </button>
                 </div>
             </div>
@@ -251,28 +328,28 @@
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Dimensiune Page (bytes)</label>
+                            <label class="text-xs text-stone-500 block mb-1">Page Size (bytes)</label>
                             <select id="pageSize" class="w-full p-2 border border-stone-300 rounded text-sm" onchange="updateConfig()">
-                                <option value="256">256 B (8 biti offset)</option>
-                                <option value="512">512 B (9 biti offset)</option>
-                                <option value="1024" selected>1 KB (10 biti offset)</option>
-                                <option value="4096">4 KB (12 biti offset)</option>
+                                <option value="256">256 B (8 offset bits)</option>
+                                <option value="512">512 B (9 offset bits)</option>
+                                <option value="1024" selected>1 KB (10 offset bits)</option>
+                                <option value="4096">4 KB (12 offset bits)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Pagini</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Pages</label>
                             <input type="number" id="numPages" value="16" min="4" max="64" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Number Frame-uri</label>
+                            <label class="text-xs text-stone-500 block mb-1">Number of Frames</label>
                             <input type="number" id="numFrames" value="8" min="4" max="32" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">Dimensiune TLB</label>
+                            <label class="text-xs text-stone-500 block mb-1">TLB Capacity</label>
                             <input type="number" id="tlbSize" value="4" min="2" max="16" class="w-full p-2 border border-stone-300 rounded text-sm mono" onchange="updateConfig()">
                         </div>
                         <button onclick="initializeSystem()" class="w-full p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded text-sm transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i> Reinitializeaza
+                            <i class="fas fa-sync-alt mr-1"></i> Reinitialise
                         </button>
                     </div>
                 </div>
@@ -280,17 +357,17 @@
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Actions Rapide
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>Quick Actions
                     </h3>
                     <div class="space-y-2">
                         <button onclick="randomTranslation()" class="btn-action w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm">
-                            <i class="fas fa-random mr-1"></i> Translatere Aleatorie
+                            <i class="fas fa-random mr-1"></i> Random Translation
                         </button>
                         <button onclick="simulatePageFault()" class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Simuleaza Page Fault
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Simulate a Page Fault
                         </button>
                         <button onclick="runAccesssSequence()" class="btn-action w-full p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded text-sm">
-                            <i class="fas fa-play mr-1"></i> Secventa de Accessuri
+                            <i class="fas fa-play mr-1"></i> Access Sequence
                         </button>
                     </div>
                 </div>
@@ -298,15 +375,15 @@
                 <!-- Statistics -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-chart-bar text-green-500 mr-2"></i>Statistici
+                        <i class="fas fa-chart-bar text-green-500 mr-2"></i>Statistics
                     </h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
-                            <span>Pagini in memorie:</span>
+                            <span>Resident pages:</span>
                             <span id="pagesInMemory" class="font-bold mono">0</span>
                         </div>
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
-                            <span>Frame-uri libere:</span>
+                            <span>Free frames:</span>
                             <span id="freeFrames" class="font-bold mono">0</span>
                         </div>
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
@@ -314,7 +391,7 @@
                             <span id="pageFaults" class="font-bold mono text-red-600">0</span>
                         </div>
                         <div class="flex justify-between p-2 bg-stone-50 rounded">
-                            <span>Accessuri totale:</span>
+                            <span>Total accesses:</span>
                             <span id="totalAccessses" class="font-bold mono">0</span>
                         </div>
                     </div>
@@ -323,11 +400,11 @@
                 <!-- Address Calculation Info -->
                 <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl shadow-sm border border-indigo-200 p-4">
                     <h3 class="text-sm font-semibold text-indigo-800 mb-3">
-                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formule
+                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>Formulae
                     </h3>
                     <div class="space-y-2 text-xs text-indigo-700 mono">
                         <div class="p-2 bg-white/50 rounded">
-                            page_num = addr / page_size
+                            page_num = floor(addr / page_size)
                         </div>
                         <div class="p-2 bg-white/50 rounded">
                             offset = addr % page_size
@@ -348,16 +425,16 @@
                     </h3>
                     <div class="space-y-2 text-xs text-stone-600">
                         <div class="p-2 bg-blue-50 rounded-lg">
-                            <strong>Page:</strong> Bloc de dimensiune fixa in memoria logica
+                            <strong>Page:</strong> A fixed-size block in logical memory
                         </div>
                         <div class="p-2 bg-green-50 rounded-lg">
-                            <strong>Frame:</strong> Bloc corespunzator in memoria fizica
+                            <strong>Frame:</strong> A corresponding fixed-size block in physical memory
                         </div>
                         <div class="p-2 bg-amber-50 rounded-lg">
-                            <strong>TLB:</strong> Cache for traduceri recente (foarte rapid)
+                            <strong>TLB:</strong> A cache of address translations; lookup cost is architecture-dependent
                         </div>
                         <div class="p-2 bg-red-50 rounded-lg">
-                            <strong>Page Fault:</strong> Pagina nu este in memorie, must incarcata
+                            <strong>Page Fault:</strong> The page is not resident and must be loaded
                         </div>
                     </div>
                 </div>
@@ -373,6 +450,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let pageSize = 1024;
         let numPages = 16;
@@ -392,6 +505,7 @@
 
         // ==================== Initialization ====================
         function initializeSystem() {
+            enosTimers.cancel();
             pageSize = parseInt(document.getElementById('pageSize').value);
             numPages = parseInt(document.getElementById('numPages').value);
             numFrames = parseInt(document.getElementById('numFrames').value);
@@ -445,16 +559,16 @@
 
         // ==================== Address Translation ====================
         function translateAddress() {
-            const logicalAddr = parseInt(document.getElementById('logicalAddress').value);
+            const logicalAddr=enosInteger(document.getElementById('logicalAddress').value,0,numPages*pageSize-1,'Logical address');if(logicalAddr===null)return;
             
             if (isNaN(logicalAddr) || logicalAddr < 0) {
-                alert('Address invalida!');
+                alert('Invalid address.');
                 return;
             }
             
             const maxAddr = numPages * pageSize - 1;
             if (logicalAddr > maxAddr) {
-                alert(`Adresa ${logicalAddr} depaseste spatiul de adresare (max: ${maxAddr})`);
+                alert(`Adresa ${logicalAddr} exceeds the model address space (maximum: ${maxAddr})`);
                 return;
             }
             
@@ -627,15 +741,15 @@
         function renderTranslationSteps(logical, pageNum, offset, frameNum, physical, tlbHit, pageFault) {
             const steps = document.getElementById('translationSteps');
             steps.innerHTML = `
-                <div class="font-semibold text-blue-800 mb-2">steps Translatere for adresa ${logical}:</div>
+                <div class="font-semibold text-blue-800 mb-2">Translation steps for address ${logical}:</div>
                 <ol class="list-decimal list-inside space-y-1 text-blue-700">
-                    <li>Extrage numarul paginii: ${logical} / ${pageSize} = <strong>${pageNum}</strong></li>
-                    <li>Extrage offset-ul: ${logical} % ${pageSize} = <strong>${offset}</strong></li>
+                    <li>Extract the page number: ${logical} / ${pageSize} = <strong>${pageNum}</strong></li>
+                    <li>Extract the offset: ${logical} % ${pageSize} = <strong>${offset}</strong></li>
                     <li>Check TLB: ${tlbHit ? '<span class="text-green-600 font-bold">HIT!</span>' : '<span class="text-amber-600">MISS</span>'}</li>
-                    ${!tlbHit ? `<li>Consulta tabela de pagini for pagina ${pageNum}</li>` : ''}
-                    ${pageFault ? '<li class="text-red-600 font-bold">⚠️ PAGE FAULT! Pagina incarcata in frame-ul ' + frameNum + '</li>' : ''}
+                    ${!tlbHit ? `<li>Consult the page-table entry for page ${pageNum}</li>` : ''}
+                    ${pageFault ? '<li class="text-red-600 font-bold">⚠️ PAGE FAULT: page loaded into frame ' + frameNum + '</li>' : ''}
                     <li>Frame-ul corespunzator: <strong>${frameNum}</strong></li>
-                    <li>Calculeaza adresa fizica: ${frameNum} × ${pageSize} + ${offset} = <strong class="text-green-700">${physical}</strong></li>
+                    <li>Calculate the physical address: ${frameNum} × ${pageSize} + ${offset} = <strong class="text-green-700">${physical}</strong></li>
                 </ol>
             `;
         }
@@ -779,7 +893,7 @@
             // Find an invalid page
             const invalidPages = pageTable.filter(e => !e.valid);
             if (invalidPages.length === 0) {
-                alert('Toate paginile sunt deja in memorie!');
+                alert('All pages are already resident.');
                 return;
             }
             const page = invalidPages[Math.floor(Math.random() * invalidPages.length)];
@@ -802,6 +916,27 @@
 
         // ==================== Initialize ====================
         document.addEventListener('DOMContentLoaded', initializeSystem);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

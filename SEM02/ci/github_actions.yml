@@ -73,7 +73,7 @@ jobs:
       - name: Python linting (ruff)
         run: |
           echo "Running ruff..."
-          ruff check SEM02/scripts/python/ SEM02/formative/ || true
+          ruff check --config SEM02/ci/ruff.toml SEM02/scripts/python/ SEM02/formative/
         continue-on-error: true
       
       - name: Validate YAML
@@ -90,7 +90,7 @@ jobs:
         run: |
           cd SEM02
           if [ -f "tests/test_autograder.py" ]; then
-            python -m pytest tests/ -v --tb=short || true
+            python -m pytest --import-mode=importlib tests/ -v --tb=short
           else
             echo "No unit tests found"
           fi

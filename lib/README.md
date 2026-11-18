@@ -15,7 +15,7 @@ The `lib/` directory contains shared Python modules that provide consistent func
 1. **Consistency** — All seminars use identical logging format and randomisation algorithms
 2. **Maintainability** — Bug fixes propagate automatically to all seminars
 3. **Testing** — Shared code is tested once, used everywhere
-4. **British English** — Centralised enforcement of spelling conventions
+4. **British English** — A documentation convention; the library does not enforce language
 
 ---
 
@@ -41,6 +41,7 @@ Provides consistent, structured logging with colour support for terminal output.
 **Usage:**
 
 ```python
+import logging
 import sys
 from pathlib import Path
 
@@ -92,7 +93,7 @@ logger.critical("Database connection failed!")
 
 Generates deterministic, student-specific test parameters for anti-plagiarism purposes.
 
-**Key Principle:** Same student + same assignment = same parameters. Different students = different parameters. This ensures each student has unique test cases whilst maintaining reproducibility for grading.
+**Reproducibility:** the same explicit seed reproduces the generated parameters. For identity-derived seeds, retain all inputs, including the week if weekly variation is enabled. Different identities are not a proof of unique tasks or authorship; collisions or overlapping generated values are possible.
 
 **Classes:**
 
@@ -104,7 +105,7 @@ Generates deterministic, student-specific test parameters for anti-plagiarism pu
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
-| `generate_student_seed` | `(student_id, assignment, include_week=True) → int` | Create reproducible seed from student identity |
+| `generate_student_seed` | `(student_id, assignment, include_week=True, *, week=None) → int` | Create reproducible seed from student identity |
 | `randomise_test_parameters` | `(seed) → TestParameters` | Generate full parameter set from seed |
 
 **TestParameters Fields:**
@@ -202,7 +203,7 @@ pytest -v --cov=. --cov-report=term-missing test_*.py
 # test_randomisation_utils.py::TestGenerateStudentSeed::test_same_student_same_seed PASSED
 # test_randomisation_utils.py::TestGenerateStudentSeed::test_different_students_different_seeds PASSED
 # ...
-# Coverage: 85%+
+# This is example output, not a measured coverage report.
 ```
 
 ---
@@ -252,3 +253,7 @@ logger = setup_logging(__name__)
 ---
 
 *Part of ENos Educational Kit | Operating Systems | ASE Bucharest — CSIE*
+
+## Formative bank contract
+
+`quiz_contract.py` validates the SEM05 list-based and SEM06 letter-keyed YAML data structures after their runners load YAML. It checks IDs, prompts, answer keys, positive finite weights and declared counts/Bloom distributions. Its JSON exporter retains the source question fields, answer identity and source SHA-256. This is local formative data, not an institutional LMS importer or grading policy. See the two seminar formative guides and `scripts/build_formative_exports.py --check`.

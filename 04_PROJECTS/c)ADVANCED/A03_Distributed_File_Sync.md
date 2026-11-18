@@ -13,7 +13,7 @@ File synchronisation system between multiple machines (similar to rsync/Dropbox)
 ## Why C?
 
 The C component provides:
-- **Fast hashing** (MD5/SHA for large files)
+- **Fast hashing** (SHA-256 for large files)
 - **Rolling hash** for rsync-style delta sync
 - **Binary diff** for efficient transfer
 - **inotify wrapper** for change detection
@@ -100,6 +100,7 @@ A03_Distributed_File_Sync/
 │       ├── syncutil.h           # Public header
 │       ├── hash.c               # Fast hashing
 │       ├── rolling_hash.c       # Rolling checksum
+│       ├── signature.c          # Block signatures
 │       ├── diff.c               # Binary diff
 │       ├── inotify_helper.c     # inotify wrapper
 │       └── synctool.c           # CLI utility
@@ -119,6 +120,40 @@ A03_Distributed_File_Sync/
 
 ## C Component - Implementation
 
+The corrected local components are also supplied in [reference/a03](../reference/a03/).
+They implement hashing, an Adler-32-style rolling checksum, block signatures and
+in-memory delta generation/application. They do not provide the omitted CLI,
+network serialisers, watcher or conflict policy. The checksum uses Adler's initial
+sum of one and modulo 65521; it is not a claim of binary compatibility with rsync's
+rolling checksum. The in-memory delta representation can grow with input size;
+allocation failures are reported and streaming bounded storage is further work.
+
+**Adopted D6 digest contract:** file and block digests use SHA-256 with an
+exact 32-byte C representation. A student-supplied `synctool hash PATH` command
+must emit exactly 64 lower-case hexadecimal characters followed by one newline
+on success, use standard error for diagnostics and return a non-zero status
+without a success digest on failure. Serialised digest records must identify
+`version: 2` and `algorithm: sha256` explicitly, reject duplicate fields and
+malformed values and carry a digest of exactly 64 lower-case hexadecimal
+characters. Records using a legacy version or the historical MD5 algorithm are
+rejected; migration recomputes SHA-256 from the original bytes rather than
+reinterpreting a 16-byte digest.
+
+The local reference and its known-answer tests implement the digest change.
+The CLI, digest-record parser, network serialisers, watcher and conflict policy
+remain student implementation tasks. Their assessment adapters remain
+`PENDING_CLI_ADAPTER` or `PENDING_TRANSPORT_ADAPTER` until supplied and validated.
+This algorithm decision does not adopt examination points or an institutional
+grading policy. A checksum does not authenticate a peer or establish authorship.
+
+Delta application rejects source/destination identity and validates all
+instructions before creating a same-directory owned stage. It publishes with a
+rename only after successful reads, writes, flush and file fsync. Use a trusted,
+quiescent parent directory: this example does not implement hostile path-race
+isolation or directory-fsync crash durability. Source stat comparisons detect
+ordinary concurrent changes but are not a filesystem snapshot. The network layer
+must verify the expected result digest and base version before accepting a patch.
+
 ### Main Header (syncutil.h)
 
 ```c
@@ -129,10 +164,13 @@ A03_Distributed_File_Sync/
 #include <stddef.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include <time.h>
 
 /* Block size for rolling hash */
 #define BLOCK_SIZE 4096
-#define HASH_SIZE 16  /* MD5 */
+#define HASH_SIZE 32  /* SHA-256 */
+#define DIGEST_RECORD_VERSION 2
+#define DIGEST_ALGORITHM "sha256"
 
 /* File hash structure */
 typedef struct {
@@ -144,8 +182,9 @@ typedef struct {
 /* Block signature for delta sync */
 typedef struct {
     uint32_t weak_hash;           /* Rolling (Adler-32 style) */
-    unsigned char strong_hash[HASH_SIZE]; /* MD5 */
+    unsigned char strong_hash[HASH_SIZE]; /* SHA-256 */
     off_t offset;
+    size_t length;               /* Short final block length is explicit. */
 } BlockSignature;
 
 /* Signature table for a file */
@@ -183,11 +222,11 @@ typedef struct {
 
 /* ===== Hashing Functions ===== */
 
-/* Compute MD5 hash of file */
+/* Compute SHA-256 hash of file */
 int hash_file(const char *path, FileChecksum *checksum);
 
-/* Compute MD5 of data block */
-void hash_block(const unsigned char *data, size_t len, 
+/* Compute SHA-256 of data block */
+int hash_block(const unsigned char *data, size_t len, 
                 unsigned char *hash);
 
 /* Compare two checksums */
@@ -204,11 +243,12 @@ typedef struct {
     size_t window_pos;
 } RollingHash;
 
-void rolling_hash_init(RollingHash *rh, size_t window_size);
-void rolling_hash_update(RollingHash *rh, unsigned char old_byte, 
+int rolling_hash_init(RollingHash *rh, size_t window_size);
+int rolling_hash_update(RollingHash *rh, unsigned char old_byte, 
                          unsigned char new_byte);
 uint32_t rolling_hash_digest(const RollingHash *rh);
 void rolling_hash_free(RollingHash *rh);
+void rolling_hash_reset(RollingHash *rh);
 
 /* ===== Signature Generation ===== */
 
@@ -259,48 +299,53 @@ void watcher_destroy(InotifyWatcher *w);
 #include "syncutil.h"
 #include <stdio.h>
 #include <string.h>
-#include <openssl/md5.h>
+#include <openssl/evp.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
-int hash_file(const char *path, FileChecksum *checksum) {
-    FILE *f = fopen(path, "rb");
-    if (!f) return -1;
-    
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    
-    unsigned char buffer[BLOCK_SIZE];
-    size_t bytes_read;
-    size_t total_size = 0;
-    
-    while ((bytes_read = fread(buffer, 1, BLOCK_SIZE, f)) > 0) {
-        MD5_Update(&ctx, buffer, bytes_read);
-        total_size += bytes_read;
-    }
-    
-    MD5_Final(checksum->hash, &ctx);
-    checksum->file_size = total_size;
-    
-    /* Get mtime */
-    struct stat st;
-    if (fstat(fileno(f), &st) == 0) {
-        checksum->mtime = st.st_mtime;
-    }
-    
-    fclose(f);
+/* Version 2 uses SHA-256 for file and block digests. A digest does not
+ * authenticate a peer or establish authorship. */
+int hash_block(const unsigned char *data, size_t len, unsigned char *hash) {
+    unsigned int written = 0;
+    unsigned char result[HASH_SIZE];
+    if ((!data && len) || !hash) { errno = EINVAL; return -1; }
+    if (EVP_Digest(data, len, result, &written, EVP_sha256(), NULL) != 1 || written != HASH_SIZE) return -1;
+    memcpy(hash, result, HASH_SIZE); /* Publish only a complete digest. */
     return 0;
 }
 
-void hash_block(const unsigned char *data, size_t len, 
-                unsigned char *hash) {
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, data, len);
-    MD5_Final(hash, &ctx);
+int hash_file(const char *path, FileChecksum *checksum) {
+    if (!path || !checksum) { errno = EINVAL; return -1; }
+    FILE *f = fopen(path, "rb");
+    if (!f) return -1;
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    struct stat before, after;
+    FileChecksum result = {0};
+    int rc = -1;
+    if (!ctx || fstat(fileno(f), &before) < 0 || !S_ISREG(before.st_mode) || EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) != 1) goto done;
+    unsigned char buffer[BLOCK_SIZE];
+    size_t count;
+    while ((count = fread(buffer, 1, sizeof buffer, f)) > 0) {
+        if (count > SIZE_MAX-result.file_size || EVP_DigestUpdate(ctx, buffer, count) != 1) goto done;
+        result.file_size += count;
+    }
+    if (ferror(f) || fstat(fileno(f), &after) < 0 || before.st_size != after.st_size ||
+        before.st_mtim.tv_sec != after.st_mtim.tv_sec || before.st_mtim.tv_nsec != after.st_mtim.tv_nsec ||
+        before.st_ctim.tv_sec != after.st_ctim.tv_sec || before.st_ctim.tv_nsec != after.st_ctim.tv_nsec) goto done;
+    unsigned int written = 0;
+    if (EVP_DigestFinal_ex(ctx, result.hash, &written) != 1 || written != HASH_SIZE) goto done;
+    result.mtime = after.st_mtime;
+    rc = 0;
+done:
+    EVP_MD_CTX_free(ctx);
+    if (fclose(f) != 0) rc = -1;
+    if (rc == 0) *checksum = result; /* No partial result is published on error. */
+    return rc;
 }
 
 bool checksums_equal(const FileChecksum *a, const FileChecksum *b) {
-    return memcmp(a->hash, b->hash, HASH_SIZE) == 0;
+    return a && b && a->file_size == b->file_size && memcmp(a->hash, b->hash, HASH_SIZE) == 0;
 }
 ```
 
@@ -310,42 +355,45 @@ bool checksums_equal(const FileChecksum *a, const FileChecksum *b) {
 #include "syncutil.h"
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
-#define MOD_ADLER 65521
+#define MOD_ADLER UINT32_C(65521)
 
-void rolling_hash_init(RollingHash *rh, size_t window_size) {
-    rh->a = 1;
-    rh->b = 0;
-    rh->count = 0;
-    rh->window_size = window_size;
-    rh->window = calloc(window_size, 1);
-    rh->window_pos = 0;
+/* Initialise a zeroed/freed object; reset an existing object to reuse its window. */
+int rolling_hash_init(RollingHash *rh, size_t window_size) {
+    if (!rh || !window_size) { errno = EINVAL; return -1; }
+    unsigned char *window = calloc(window_size, 1);
+    if (!window) return -1;
+    *rh = (RollingHash){.a=1, .window_size=window_size, .window=window};
+    return 0;
 }
 
-void rolling_hash_update(RollingHash *rh, unsigned char old_byte, 
-                         unsigned char new_byte) {
-    /* Remove old byte contribution, add new byte */
-    rh->a = (rh->a - old_byte + new_byte) % MOD_ADLER;
-    rh->b = (rh->b - (rh->window_size * old_byte) + rh->a - 1) % MOD_ADLER;
-    
-    /* Handle negative modulo */
-    if ((int32_t)rh->a < 0) rh->a += MOD_ADLER;
-    if ((int32_t)rh->b < 0) rh->b += MOD_ADLER;
-    
-    /* Update window */
+void rolling_hash_reset(RollingHash *rh) {
+    if (!rh) return;
+    rh->a=1; rh->b=0; rh->count=0; rh->window_pos=0;
+}
+
+int rolling_hash_update(RollingHash *rh, unsigned char old_byte, unsigned char new_byte) {
+    if (!rh || !rh->window || !rh->window_size) { errno=EINVAL; return -1; }
+    if (rh->count < rh->window_size) {
+        if (old_byte != 0) { errno=EINVAL; return -1; }
+        rh->a = (rh->a + new_byte) % MOD_ADLER;
+        rh->b = (rh->b + rh->a) % MOD_ADLER;
+        rh->count++;
+    } else {
+        if (old_byte != rh->window[rh->window_pos]) { errno=EINVAL; return -1; }
+        rh->a = (rh->a + MOD_ADLER - old_byte + new_byte) % MOD_ADLER;
+        uint32_t weight = (uint32_t)(((uint64_t)(rh->window_size % MOD_ADLER) * old_byte) % MOD_ADLER);
+        rh->b = (rh->b + MOD_ADLER - weight + rh->a + MOD_ADLER - 1) % MOD_ADLER;
+    }
     rh->window[rh->window_pos] = new_byte;
     rh->window_pos = (rh->window_pos + 1) % rh->window_size;
-    
-    if (rh->count < rh->window_size) rh->count++;
+    return 0;
 }
 
-uint32_t rolling_hash_digest(const RollingHash *rh) {
-    return (rh->b << 16) | rh->a;
-}
-
+uint32_t rolling_hash_digest(const RollingHash *rh) { return rh ? (rh->b << 16) | rh->a : 0; }
 void rolling_hash_free(RollingHash *rh) {
-    free(rh->window);
-    rh->window = NULL;
+    if (rh) { free(rh->window); *rh=(RollingHash){0}; }
 }
 ```
 
@@ -356,54 +404,49 @@ void rolling_hash_free(RollingHash *rh) {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
 SignatureTable *signature_generate(const char *path, size_t block_size) {
-    FILE *f = fopen(path, "rb");
+    if (!path || !block_size) { errno=EINVAL; return NULL; }
+    FILE *f=fopen(path,"rb");
     if (!f) return NULL;
-    
-    /* Get file size */
-    fseek(f, 0, SEEK_END);
-    size_t file_size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    
-    size_t block_count = (file_size + block_size - 1) / block_size;
-    
-    SignatureTable *sig = malloc(sizeof(SignatureTable));
-    sig->block_count = block_count;
-    sig->block_size = block_size;
-    sig->blocks = malloc(block_count * sizeof(BlockSignature));
-    
-    unsigned char *buffer = malloc(block_size);
-    RollingHash rh;
-    
-    for (size_t i = 0; i < block_count; i++) {
-        size_t bytes_read = fread(buffer, 1, block_size, f);
-        
-        /* Calculate weak hash (rolling) */
-        rolling_hash_init(&rh, bytes_read);
-        for (size_t j = 0; j < bytes_read; j++) {
-            rolling_hash_update(&rh, 0, buffer[j]);
-        }
-        sig->blocks[i].weak_hash = rolling_hash_digest(&rh);
-        rolling_hash_free(&rh);
-        
-        /* Calculate strong hash (MD5) */
-        hash_block(buffer, bytes_read, sig->blocks[i].strong_hash);
-        
-        sig->blocks[i].offset = i * block_size;
+    struct stat before,after;
+    SignatureTable *sig=NULL;
+    unsigned char *buffer=NULL;
+    RollingHash rh={0};
+    if (fstat(fileno(f),&before)<0 || !S_ISREG(before.st_mode) || before.st_size<0 || (uintmax_t)before.st_size>SIZE_MAX) goto fail;
+    size_t length=(size_t)before.st_size, count=length/block_size+(length%block_size!=0);
+    if (count>SIZE_MAX/sizeof(BlockSignature)) goto fail;
+    sig=calloc(1,sizeof *sig);
+    if (!sig) goto fail;
+    sig->block_count=count; sig->block_size=block_size;
+    if (count) {
+        sig->blocks=calloc(count,sizeof *sig->blocks); buffer=malloc(block_size);
+        if (!sig->blocks || !buffer || rolling_hash_init(&rh,block_size)<0) goto fail;
     }
-    
-    free(buffer);
-    fclose(f);
+    for (size_t i=0;i<count;++i) {
+        size_t need=length-i*block_size;
+        if (need>block_size) need=block_size;
+        if (fread(buffer,1,need,f)!=need) goto fail;
+        rolling_hash_reset(&rh);
+        for (size_t j=0;j<need;++j) if (rolling_hash_update(&rh,0,buffer[j])<0) goto fail;
+        sig->blocks[i].weak_hash=rolling_hash_digest(&rh);
+        if (hash_block(buffer,need,sig->blocks[i].strong_hash)<0) goto fail;
+        sig->blocks[i].offset=(off_t)(i*block_size); sig->blocks[i].length=need;
+    }
+    if (fgetc(f)!=EOF || ferror(f) || fstat(fileno(f),&after)<0 || before.st_size!=after.st_size ||
+        before.st_mtim.tv_sec!=after.st_mtim.tv_sec || before.st_mtim.tv_nsec!=after.st_mtim.tv_nsec ||
+        before.st_ctim.tv_sec!=after.st_ctim.tv_sec || before.st_ctim.tv_nsec!=after.st_ctim.tv_nsec) goto fail;
+    rolling_hash_free(&rh); free(buffer);
+    if (fclose(f)!=0) { signature_free(sig); return NULL; }
     return sig;
+fail:
+    rolling_hash_free(&rh); free(buffer); signature_free(sig); fclose(f); return NULL;
 }
 
-void signature_free(SignatureTable *sig) {
-    if (sig) {
-        free(sig->blocks);
-        free(sig);
-    }
-}
+void signature_free(SignatureTable *sig) { if (sig) { free(sig->blocks); free(sig); } }
 ```
 
 ### Delta Generation (diff.c)
@@ -413,213 +456,184 @@ void signature_free(SignatureTable *sig) {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
 #define HASH_TABLE_SIZE 65536
 
-/* Hash table for quick weak hash lookup */
-typedef struct {
+typedef struct HashEntry {
     uint32_t weak_hash;
     size_t block_index;
     struct HashEntry *next;
 } HashEntry;
 
-static size_t hash_index(uint32_t weak_hash) {
-    return weak_hash % HASH_TABLE_SIZE;
+static int append_instruction(Delta *delta, size_t *capacity, DeltaInstruction value) {
+    if (delta->instruction_count==*capacity) {
+        size_t next=*capacity ? *capacity*2 : 128;
+        if (next<*capacity || next>SIZE_MAX/sizeof *delta->instructions) return -1;
+        DeltaInstruction *grown=realloc(delta->instructions,next*sizeof *grown);
+        if (!grown) return -1;
+        delta->instructions=grown; *capacity=next;
+    }
+    delta->instructions[delta->instruction_count++]=value;
+    return 0;
 }
 
-Delta *delta_generate(const SignatureTable *old_sig, const char *new_path) {
-    if (!old_sig || !new_path) return NULL;
-    
-    FILE *f = fopen(new_path, "rb");
+static int append_literal(Delta *delta,size_t *capacity,const unsigned char *data,size_t length) {
+    if (!length) return 0;
+    unsigned char *copy=malloc(length);
+    if (!copy) return -1;
+    memcpy(copy,data,length);
+    DeltaInstruction value={.type=DELTA_DATA,.u.data={copy,length}};
+    if (append_instruction(delta,capacity,value)<0) { free(copy); return -1; }
+    return 0;
+}
+
+Delta *delta_generate(const SignatureTable *old_sig,const char *new_path) {
+    if (!old_sig || !new_path || !old_sig->block_size || (old_sig->block_count && !old_sig->blocks)) { errno=EINVAL; return NULL; }
+    FILE *f=fopen(new_path,"rb");
     if (!f) return NULL;
-    
-    /* Build hash table from old signatures */
-    HashEntry **hash_table = calloc(HASH_TABLE_SIZE, sizeof(HashEntry *));
-    
-    for (size_t i = 0; i < old_sig->block_count; i++) {
-        size_t idx = hash_index(old_sig->blocks[i].weak_hash);
-        HashEntry *entry = malloc(sizeof(HashEntry));
-        entry->weak_hash = old_sig->blocks[i].weak_hash;
-        entry->block_index = i;
-        entry->next = hash_table[idx];
-        hash_table[idx] = entry;
+    struct stat before,after;
+    HashEntry **table=NULL;
+    Delta *delta=NULL;
+    RollingHash rh={0};
+    unsigned char *pending=NULL;
+    size_t pending_len=0,pending_capacity=0,instruction_capacity=0;
+    int ok=0;
+    if (fstat(fileno(f),&before)<0 || !S_ISREG(before.st_mode)) goto done;
+    table=calloc(HASH_TABLE_SIZE,sizeof *table); delta=calloc(1,sizeof *delta);
+    if (!table || !delta || rolling_hash_init(&rh,old_sig->block_size)<0) goto done;
+    for (size_t i=0;i<old_sig->block_count;++i) {
+        const BlockSignature *block=&old_sig->blocks[i];
+        if (block->offset<0 || !block->length || block->length>old_sig->block_size) goto done;
+        if (block->length!=old_sig->block_size) continue; /* Short final blocks become literals. */
+        size_t idx=block->weak_hash%HASH_TABLE_SIZE;
+        HashEntry *entry=malloc(sizeof *entry);
+        if (!entry) goto done;
+        *entry=(HashEntry){block->weak_hash,i,table[idx]}; table[idx]=entry;
     }
-    
-    /* Initialize delta */
-    Delta *delta = malloc(sizeof(Delta));
-    delta->instruction_count = 0;
-    size_t capacity = 128;
-    delta->instructions = malloc(capacity * sizeof(DeltaInstruction));
-    
-    /* Scan new file */
-    size_t block_size = old_sig->block_size;
-    unsigned char *buffer = malloc(block_size);
-    unsigned char *pending_data = malloc(1024 * 1024); /* 1MB buffer */
-    size_t pending_len = 0;
-    
-    RollingHash rh;
-    rolling_hash_init(&rh, block_size);
-    
     int c;
-    size_t pos = 0;
-    size_t window_filled = 0;
-    
-    while ((c = fgetc(f)) != EOF) {
-        unsigned char byte = (unsigned char)c;
-        
-        unsigned char old_byte = 0;
-        if (window_filled >= block_size) {
-            old_byte = pending_data[pending_len - block_size];
+    while ((c=fgetc(f))!=EOF) {
+        if (pending_len==pending_capacity) {
+            size_t next=pending_capacity ? pending_capacity*2 : 4096;
+            if (next<=pending_capacity) goto done;
+            unsigned char *grown=realloc(pending,next);
+            if (!grown) goto done;
+            pending=grown; pending_capacity=next;
         }
-        
-        rolling_hash_update(&rh, old_byte, byte);
-        pending_data[pending_len++] = byte;
-        window_filled++;
-        
-        if (window_filled >= block_size) {
-            uint32_t weak = rolling_hash_digest(&rh);
-            size_t idx = hash_index(weak);
-            
-            /* Check hash table */
-            HashEntry *entry = hash_table[idx];
-            while (entry) {
-                if (entry->weak_hash == weak) {
-                    /* Verify with strong hash */
-                    unsigned char strong[HASH_SIZE];
-                    hash_block(pending_data + pending_len - block_size, 
-                              block_size, strong);
-                    
-                    if (memcmp(strong, 
-                              old_sig->blocks[entry->block_index].strong_hash,
-                              HASH_SIZE) == 0) {
-                        /* Match found! */
-                        
-                        /* Emit pending data (minus the matched block) */
-                        size_t data_len = pending_len - block_size;
-                        if (data_len > 0) {
-                            if (delta->instruction_count >= capacity) {
-                                capacity *= 2;
-                                delta->instructions = realloc(
-                                    delta->instructions,
-                                    capacity * sizeof(DeltaInstruction));
-                            }
-                            
-                            DeltaInstruction *inst = 
-                                &delta->instructions[delta->instruction_count++];
-                            inst->type = DELTA_DATA;
-                            inst->u.data.data = malloc(data_len);
-                            memcpy(inst->u.data.data, pending_data, data_len);
-                            inst->u.data.length = data_len;
-                        }
-                        
-                        /* Emit copy instruction */
-                        if (delta->instruction_count >= capacity) {
-                            capacity *= 2;
-                            delta->instructions = realloc(
-                                delta->instructions,
-                                capacity * sizeof(DeltaInstruction));
-                        }
-                        
-                        DeltaInstruction *inst = 
-                            &delta->instructions[delta->instruction_count++];
-                        inst->type = DELTA_COPY;
-                        inst->u.copy.offset = 
-                            old_sig->blocks[entry->block_index].offset;
-                        inst->u.copy.length = block_size;
-                        
-                        /* Reset */
-                        pending_len = 0;
-                        window_filled = 0;
-                        rolling_hash_init(&rh, block_size);
-                        
-                        break;
-                    }
-                }
-                entry = entry->next;
-            }
-        }
-        
-        pos++;
-    }
-    
-    /* Emit remaining pending data */
-    if (pending_len > 0) {
-        if (delta->instruction_count >= capacity) {
-            capacity *= 2;
-            delta->instructions = realloc(
-                delta->instructions,
-                capacity * sizeof(DeltaInstruction));
-        }
-        
-        DeltaInstruction *inst = 
-            &delta->instructions[delta->instruction_count++];
-        inst->type = DELTA_DATA;
-        inst->u.data.data = malloc(pending_len);
-        memcpy(inst->u.data.data, pending_data, pending_len);
-        inst->u.data.length = pending_len;
-    }
-    
-    /* Cleanup */
-    free(buffer);
-    free(pending_data);
-    rolling_hash_free(&rh);
-    
-    for (size_t i = 0; i < HASH_TABLE_SIZE; i++) {
-        HashEntry *entry = hash_table[i];
-        while (entry) {
-            HashEntry *next = entry->next;
-            free(entry);
-            entry = next;
+        unsigned char old=rh.count<rh.window_size ? 0 : rh.window[rh.window_pos];
+        if (rolling_hash_update(&rh,old,(unsigned char)c)<0) goto done;
+        pending[pending_len++]=(unsigned char)c;
+        if (rh.count<rh.window_size) continue;
+        uint32_t weak=rolling_hash_digest(&rh);
+        for (HashEntry *entry=table[weak%HASH_TABLE_SIZE];entry;entry=entry->next) {
+            if (entry->weak_hash!=weak) continue;
+            unsigned char strong[HASH_SIZE];
+            if (hash_block(pending+pending_len-old_sig->block_size,old_sig->block_size,strong)<0) goto done;
+            const BlockSignature *block=&old_sig->blocks[entry->block_index];
+            if (memcmp(strong,block->strong_hash,HASH_SIZE)!=0) continue;
+            if (append_literal(delta,&instruction_capacity,pending,pending_len-old_sig->block_size)<0) goto done;
+            DeltaInstruction copy={.type=DELTA_COPY,.u.copy={block->offset,old_sig->block_size}};
+            if (append_instruction(delta,&instruction_capacity,copy)<0) goto done;
+            pending_len=0;
+            rolling_hash_reset(&rh); /* Retain ownership; no repeated allocation/leak. */
+            break;
         }
     }
-    free(hash_table);
-    
-    fclose(f);
+    if (ferror(f) || fstat(fileno(f),&after)<0 || before.st_size!=after.st_size ||
+        before.st_mtim.tv_sec!=after.st_mtim.tv_sec || before.st_mtim.tv_nsec!=after.st_mtim.tv_nsec ||
+        before.st_ctim.tv_sec!=after.st_ctim.tv_sec || before.st_ctim.tv_nsec!=after.st_ctim.tv_nsec ||
+        append_literal(delta,&instruction_capacity,pending,pending_len)<0) goto done;
+    ok=1;
+done:
+    free(pending); rolling_hash_free(&rh);
+    if (table) {
+        for (size_t i=0;i<HASH_TABLE_SIZE;++i) {
+            HashEntry *entry=table[i];
+            while (entry) { HashEntry *next=entry->next; free(entry); entry=next; }
+        }
+        free(table);
+    }
+    if (fclose(f)!=0) ok=0;
+    if (!ok) { delta_free(delta); return NULL; }
     return delta;
 }
 
-int delta_apply(const char *old_path, const Delta *delta, 
-                const char *new_path) {
-    FILE *old_f = fopen(old_path, "rb");
-    FILE *new_f = fopen(new_path, "wb");
-    
-    if (!old_f || !new_f) {
-        if (old_f) fclose(old_f);
-        if (new_f) fclose(new_f);
-        return -1;
+int delta_apply(const char *old_path,const Delta *delta,const char *new_path) {
+    if (!old_path || !new_path || !delta || (delta->instruction_count && !delta->instructions)) { errno=EINVAL; return -1; }
+    FILE *old_f=fopen(old_path,"rb"),*out=NULL;
+    if (!old_f) return -1;
+    struct stat old_st,target_st,after;
+    char *stage=NULL;
+    int fd=-1,rc=-1;
+    if (fstat(fileno(old_f),&old_st)<0 || !S_ISREG(old_st.st_mode)) goto done;
+    if (lstat(new_path,&target_st)==0) {
+        if (!S_ISREG(target_st.st_mode) || (old_st.st_dev==target_st.st_dev && old_st.st_ino==target_st.st_ino)) { errno=EINVAL; goto done; }
+    } else if (errno!=ENOENT) goto done;
+    size_t total=0;
+    /* Validate every instruction before creating an output candidate. */
+    for (size_t i=0;i<delta->instruction_count;++i) {
+        const DeltaInstruction *v=&delta->instructions[i];
+        size_t length;
+        if (v->type==DELTA_COPY) {
+            if (v->u.copy.offset<0 || v->u.copy.offset>old_st.st_size || (uintmax_t)v->u.copy.length>(uintmax_t)(old_st.st_size-v->u.copy.offset)) { errno=EINVAL; goto done; }
+            length=v->u.copy.length;
+        } else if (v->type==DELTA_DATA) {
+            if (v->u.data.length && !v->u.data.data) { errno=EINVAL; goto done; }
+            length=v->u.data.length;
+        } else { errno=EINVAL; goto done; }
+        if (length>SIZE_MAX-total) { errno=EOVERFLOW; goto done; }
+        total+=length;
     }
-    
-    for (size_t i = 0; i < delta->instruction_count; i++) {
-        const DeltaInstruction *inst = &delta->instructions[i];
-        
-        if (inst->type == DELTA_COPY) {
-            /* Copy block from old file */
-            unsigned char *buffer = malloc(inst->u.copy.length);
-            fseek(old_f, inst->u.copy.offset, SEEK_SET);
-            fread(buffer, 1, inst->u.copy.length, old_f);
-            fwrite(buffer, 1, inst->u.copy.length, new_f);
-            free(buffer);
+    size_t path_len=strlen(new_path);
+    if (path_len>SIZE_MAX-32) goto done;
+    stage=malloc(path_len+32);
+    if (!stage) goto done;
+    snprintf(stage,path_len+32,"%s.partial.XXXXXX",new_path);
+    fd=mkstemp(stage);
+    if (fd<0) goto done;
+    out=fdopen(fd,"wb");
+    if (!out) goto done;
+    fd=-1;
+    unsigned char buffer[8192];
+    for (size_t i=0;i<delta->instruction_count;++i) {
+        const DeltaInstruction *v=&delta->instructions[i];
+        if (v->type==DELTA_DATA) {
+            if (v->u.data.length && fwrite(v->u.data.data,1,v->u.data.length,out)!=v->u.data.length) goto done;
         } else {
-            /* Write new data */
-            fwrite(inst->u.data.data, 1, inst->u.data.length, new_f);
+            if (fseeko(old_f,v->u.copy.offset,SEEK_SET)<0) goto done;
+            size_t remaining=v->u.copy.length;
+            while (remaining) {
+                size_t part=remaining<sizeof buffer ? remaining : sizeof buffer;
+                if (fread(buffer,1,part,old_f)!=part || fwrite(buffer,1,part,out)!=part) goto done;
+                remaining-=part;
+            }
         }
     }
-    
-    fclose(old_f);
-    fclose(new_f);
-    return 0;
+    if (ferror(old_f) || ferror(out) || fflush(out)!=0 || fsync(fileno(out))<0 ||
+        fstat(fileno(old_f),&after)<0 || old_st.st_size!=after.st_size ||
+        old_st.st_mtim.tv_sec!=after.st_mtim.tv_sec || old_st.st_mtim.tv_nsec!=after.st_mtim.tv_nsec ||
+        old_st.st_ctim.tv_sec!=after.st_ctim.tv_sec || old_st.st_ctim.tv_nsec!=after.st_ctim.tv_nsec) goto done;
+    if (fclose(out)!=0) { out=NULL; goto done; }
+    out=NULL;
+    if (fclose(old_f)!=0) { old_f=NULL; goto done; }
+    old_f=NULL;
+    if (rename(stage,new_path)<0) goto done;
+    rc=0;
+done:
+    if (old_f && fclose(old_f)!=0) rc=-1;
+    if (out && fclose(out)!=0) rc=-1;
+    if (fd>=0) close(fd);
+    if (stage) { if (rc!=0) unlink(stage); free(stage); }
+    return rc;
 }
 
 void delta_free(Delta *delta) {
     if (!delta) return;
-    
-    for (size_t i = 0; i < delta->instruction_count; i++) {
-        if (delta->instructions[i].type == DELTA_DATA) {
-            free(delta->instructions[i].u.data.data);
-        }
-    }
-    free(delta->instructions);
-    free(delta);
+    for (size_t i=0;i<delta->instruction_count;++i)
+        if (delta->instructions[i].type==DELTA_DATA) free(delta->instructions[i].u.data.data);
+    free(delta->instructions); free(delta);
 }
 ```
 
@@ -629,7 +643,7 @@ void delta_free(Delta *delta) {
 
 ```makefile
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -fPIC
+CFLAGS = -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -O2 -fPIC
 LDFLAGS = -lcrypto -lpthread
 
 SRC_DIR = src/c
@@ -637,7 +651,7 @@ BUILD_DIR = build
 BIN_DIR = bin
 
 LIB_SOURCES = $(SRC_DIR)/hash.c $(SRC_DIR)/rolling_hash.c \
-              $(SRC_DIR)/diff.c $(SRC_DIR)/inotify_helper.c
+              $(SRC_DIR)/signature.c $(SRC_DIR)/diff.c $(SRC_DIR)/inotify_helper.c
 LIB_TARGET = $(BUILD_DIR)/libsyncutil.so
 CLI_TARGET = $(BIN_DIR)/synctool
 
@@ -673,6 +687,22 @@ clean:
 ---
 
 ## Sync Protocol (Simplified Protocol)
+
+The messages below describe operations, not a parseable wire format. A completed
+student protocol must define a versioned length-delimited frame (bounded length,
+message type, request ID and payload) and reject truncated/unknown frames. Encode
+paths as relative components beneath an agreed sync root; reject absolute paths,
+`..`, NUL and symlink escapes. Binary signatures/deltas need a specified byte
+order, widths, algorithm ID, block length and length checks; never transmit raw C
+structs or split binary payloads on spaces/newlines. Include the base file version
+and expected result digest, and acknowledge only a validated committed result.
+
+Recovery must associate a transfer ID with an owned partial file and publish once;
+repeated messages must not repeat destructive actions. A changed base is a conflict,
+not permission to overwrite. The three listed conflict strategies remain choices
+to specify and test explicitly; “newest” requires a declared clock/version model.
+Serialisation, transport, authentication and recovery state are student work; this
+schematic does not claim interoperable or secure network execution.
 
 ```
 1. HELLO - Handshake between nodes
@@ -721,7 +751,8 @@ clean:
 
 - rsync algorithm paper (Andrew Tridgell)
 - `man inotify` - Linux file monitoring
-- OpenSSL documentation (hashing)
+- National Institute of Standards and Technology. (2015). *Secure Hash Standard (SHS)* (FIPS PUB 180-4). https://doi.org/10.6028/NIST.FIPS.180-4
+- [OpenSSL digest documentation](https://docs.openssl.org/master/man3/EVP_DigestInit/)
 - Seminar 2-3 - IPC, network basics
 
 ---

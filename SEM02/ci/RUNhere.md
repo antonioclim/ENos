@@ -1,110 +1,50 @@
-# 📁 CI Configuration — SEM02
+# CI template — Seminar 2
 
-> **Location:** `SEM02/ci/`  
-> **Purpose:** GitHub Actions workflow for automated quality checks
+## Files and activation
 
-## Contents
+`github_actions.yml` is a **template stored under `SEM02/ci/`**. Its presence
+here does not activate GitHub Actions. Activation requires a separately authorised
+change under `.github/workflows/` and the repository's actual settings. A failed
+check blocks merging only when the repository makes that check required; this
+file cannot establish branch-protection policy.
 
-| File | Purpose |
-|------|---------|
-| `github_actions.yml` | CI pipeline definition for this seminar |
+`ruff.toml` is the standalone Ruff configuration. `linting.toml` retains historical
+mixed-tool/pyproject-style reference material and must not be passed to Ruff's
+`--config` option. The standalone file uses Ruff keys at the top level and omits
+the unsupported `W503` selector. Do not apply global stylistic autofixes to
+intentional teaching examples.
 
-## What It Does
+## Actual checks
 
-This workflow runs automatically on every push/PR and performs:
+The supplied template has one `lint-and-test` job. Syntax and YAML/JSON parsing steps fail on errors. ShellCheck, Ruff and the unit-test step retain explicit `continue-on-error: true`; these are informative in this template. The structure step currently reports missing paths as warnings. There is no link checker, AI detector, coverage threshold or separate summary job in this file.
 
-| Check | Tool | Failure Behaviour |
-|-------|------|-------------------|
-| Bash lint | shellcheck | Blocks merge |
-| Python lint | ruff | Blocks merge |
-| YAML validation | PyYAML | Blocks merge |
-| Unit tests | pytest | Blocks merge |
-| Coverage check | pytest-cov | Warns if < threshold |
-| Structure validation | Custom | Blocks merge |
-| Link checking | lychee | Warns only |
-| AI pattern scan | Custom | Warns only |
+A passed syntax check is not a functional test. A low coverage value, when a
+separate coverage run is used, should prompt examination of untested behaviour;
+it is not justification to lower an acceptance threshold automatically. Lint
+warnings alone do not establish that an intentional WRONG/TODO activity is a defect.
 
-## How to Use
+## Local commands
 
-### For Repository Setup
+From `SEM02/`, with the required tools already available in the selected
+virtual environment:
 
-Copy to GitHub Actions location:
 ```bash
-cp github_actions.yml ../../.github/workflows/sem02_ci.yml
-```
-
-### For Local Testing
-
-Run individual checks locally:
-```bash
-# Lint Bash scripts
-shellcheck scripts/bash/*.sh scripts/demo/*.sh
-
-# Lint Python
-pip install ruff && ruff check scripts/python/
-
-# Validate YAML
+ruff check --config ci/ruff.toml scripts/python/ formative/
 python3 -c "import yaml; yaml.safe_load(open('formative/quiz.yaml'))"
-
-# Run tests
-pip install pytest pytest-cov && pytest tests/ -v
+python3 -c "import json; json.load(open('formative/quiz_lms.json'))"
+python3 -m pytest --import-mode=importlib tests/ -v
 ```
 
-## Configuration
+For a bounded Ruff configuration check, an empty Python file should exit 0;
+a temporary file containing `print(undefined_fixture_name)` should report F821
+and exit 1. This detects a configuration-loader failure separately from an ordinary
+lint finding. The current phase could parse the standalone TOML but had no local
+Ruff executable, so native Ruff acceptance remains unverified. No package was
+installed and no remote CI workflow was run.
 
-### Coverage Threshold
+The project `quiz_lms.json` is a canonical-bank derivative, not a proved native
+Moodle/Canvas import package. Inspect the quiz runner's actual `--help` and its
+local tests for supported functions.
 
-Edit the `COVERAGE_THRESHOLD` environment variable:
-```yaml
-env:
-  COVERAGE_THRESHOLD: 75  # Minimum coverage percentage
-```
-
-### Excluding Files
-
-Add patterns to ignore in linting:
-```yaml
-- name: Run shellcheck
-  run: find scripts/ -name "*.sh" ! -name "excluded.sh" -exec shellcheck {} \;
-```
-
-## Workflow Jobs
-
-```
-┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│  lint-bash  │   │ lint-python │   │validate-yaml│
-└──────┬──────┘   └──────┬──────┘   └──────┬──────┘
-       │                 │                 │
-       └────────────────┼─────────────────┘
-                        ▼
-                 ┌─────────────┐
-                 │    test     │
-                 └──────┬──────┘
-                        │
-       ┌────────────────┼────────────────┐
-       ▼                ▼                ▼
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│ ai-check    │  │ link-check  │  │  structure  │
-└─────────────┘  └─────────────┘  └─────────────┘
-                        │
-                        ▼
-                 ┌─────────────┐
-                 │   summary   │
-                 └─────────────┘
-```
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Workflow not triggering | Check branch names in `on:` section |
-| shellcheck errors | Run locally first, fix warnings |
-| Coverage too low | Add more tests or lower threshold |
-| Link check timeouts | External links may be slow, check manually |
-
----
-
-*Mirrors: parent `Makefile` targets*  
-*See also: [`../Makefile`](../Makefile) for local automation*
-
-*Last updated: January 2026*
+See [the local Makefile](../Makefile) and [tests](../tests/). The local `lint-python`
+target propagates Ruff's status and reports an unavailable tool explicitly.

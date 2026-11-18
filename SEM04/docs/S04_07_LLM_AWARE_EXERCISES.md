@@ -8,6 +8,22 @@
 
 ---
 
+## Evidence and Working Scope
+
+The outputs labelled simulated are constructed debugging exercises, not measured
+samples from a named model. Retained experience statements and numerical claims
+such as “3–4 times fewer errors” have no accompanying cohort dataset/protocol in
+this repository; they must not be treated as established effect sizes. Diagnose
+the observable code, not presumed author/model intent. Test on the actual GNU
+regex dialect and declared locale, not only an online PCRE/JavaScript tester.
+Create all exercise fixtures in one fresh owned directory and retain it while
+working. Simple `-F,` examples assume no quoted commas/newlines.
+
+```bash
+LLM_LAB=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-llm.XXXXXX") || exit 1
+cd -- "$LLM_LAB" || exit 1
+```
+
 ## Why LLM-Aware Exercises?
 
 ### The Current Context
@@ -113,7 +129,7 @@ OMITTED (false negatives):
 
 CORRECTLY ACCEPTED:
 - `simple@test.io`
-- `123@numbers.com` (partially - depends on interpretation)
+- `123@numbers.com` — a numeric-only local part is allowed; the example provides no invalid accepted address
 
 Major problems with the AI regex:
 - Does not accept `.` in the local part
@@ -138,6 +154,10 @@ Rewrite the regex to correctly accept more email formats:
 grep -E "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" test_emails.txt
 ```
 
+This broad pattern is still a teaching subset, not full email validation: it can
+accept consecutive dots or invalid domain labels. State the required grammar
+before deciding whether a match is valid.
+
 Explanation of improvements:
 - `[a-zA-Z0-9._%+-]+` - accepts dots, `_`, percent, plus, minus in local part
 - `[a-zA-Z0-9.-]+` - accepts dots and minuses in domain (for subdomains)
@@ -151,7 +171,8 @@ Why did the LLM make mistakes?
 <details>
 <summary>💡 Analysis</summary>
 
-LLMs tend to generate "simple" solutions that work for base cases but do not cover edge cases. The reasons:
+For this simulated output, the prompt and test contract were incomplete. Possible
+explanations are hypotheses; no generation trace demonstrates model intent:
 1. The prompt did not specify detailed requirements
 2. The LLM preferred simplicity
 3. It did not test on diverse data
@@ -203,11 +224,12 @@ What problems do you observe?
 <details>
 <summary>📝 Identified Problems</summary>
 
-1. Comments are processed - lines with # generate invalid output
-2. Empty lines - generate lines with only `,`
+1. Comments without `=` are printed unchanged, so they remain invalid JSON text
+2. Empty lines are printed unchanged; they do not acquire commas
 3. Last line - has an extra comma (invalid JSON)
 4. Missing JSON structure - does not have `{` and `}`
-5. Numeric/boolean values - are treated as strings
+5. String values are valid JSON; whether types should be inferred is a separate contract
+6. Quotes, backslashes and control characters are not escaped; greedy splitting uses the last `=`
 </details>
 
 ### L2.2: Correct the Solution (7 min)
@@ -225,29 +247,38 @@ Create a complete solution that:
 <details>
 <summary>✅ Correct Solution</summary>
 
-```bash
-echo "{"
-sed '/^#/d; /^$/d' test_config.txt | \
-sed 's/\(.*\)=\(.*\)/  "\1": "\2",/' | \
-sed '$ s/,$//'
-echo "}"
-```
-
-Or more elegant with awk:
+A sed illustration can format the exact simple fixture, but adding commas and
+braces is insufficient for arbitrary values. Use a serializer for the completed
+model below. Its explicit contract is **all values remain strings**, keys split
+at the first `=`, comments/blank lines skipped and duplicate/empty keys rejected.
+It buffers the mapping before emitting JSON, so a later invalid record cannot
+leave a successful-looking partial object.
 
 ```bash
-awk -F'=' '
-BEGIN { print "{" }
-/^#/ || /^$/ { next }
-{ 
-    if (NR > 1 && prev) print prev ","
-    prev = sprintf("  \"%s\": \"%s\"", $1, $2)
-}
-END { 
-    if (prev) print prev
-    print "}"
-}' test_config.txt
+python3 - test_config.txt <<'PYJSON'
+import json
+import sys
+from pathlib import Path
+
+records = {}
+for number, raw in enumerate(Path(sys.argv[1]).read_text(encoding="utf-8").splitlines(), 1):
+    if not raw.strip() or raw.lstrip().startswith("#"):
+        continue
+    if "=" not in raw:
+        raise SystemExit(f"Line {number}: expected key=value")
+    key, value = raw.split("=", 1)
+    key = key.strip()
+    if not key or key in records:
+        raise SystemExit(f"Line {number}: empty/duplicate key")
+    records[key] = value
+print(json.dumps(records, ensure_ascii=False, indent=2))
+PYJSON
 ```
+
+This does not claim to parse general INI syntax, sections, multiline records or
+interpolation. If an exercise specifically requires sed/AWK, constrain its input
+grammar and implement equivalent escaping/validation rather than silently
+changing the accepted data.
 </details>
 
 ### L2.3: Prompt Engineering (2 min)
@@ -264,7 +295,9 @@ Generate a sed or awk command that transforms a configuration file
 2. Ignore empty lines
 3. The output must be valid JSON (no comma after the last pair)
 4. Structure: { "key1": "value1", "key2": "value2" }
-5. Use only standard Unix utilities (sed, awk, etc.)
+5. Preserve values as strings and split only at the first equals sign
+6. Escape JSON with a serializer, reject duplicate keys and test parsed round-trip
+7. Declare the parser/runtime dependency instead of assuming sed can encode every value
 
 Example input:
 # comment
@@ -344,7 +377,7 @@ Your list:
 3. Product with most sales
 4. Sales per day
 5. Average revenue per transaction
-6. Most profitable product
+6. Product with highest revenue (profit cannot be inferred without cost data)
 </details>
 
 ### L3.3: Complete Solution (7 min)
@@ -363,6 +396,9 @@ Create a complete sales report:
 awk -F',' '
 NR == 1 { next }  # Skip header
 {
+    if (NF!=4 || $3 !~ /^[0-9]+$/ || $4 !~ /^[0-9]+([.][0-9]+)?$/) {
+        printf "Invalid sales record at line %d\n", NR > "/dev/stderr"; bad=1; next
+    }
     qty += $3
     revenue += $3 * $4
     product_qty[$2] += $3
@@ -371,13 +407,15 @@ NR == 1 { next }  # Skip header
     count++
 }
 END {
+    if (bad) exit 2
     print "=== SALES REPORT ==="
     print ""
     print "Overall Statistics:"
     printf "  Total Transactions: %d\n", count
     printf "  Total Quantity: %d units\n", qty
     printf "  Total Revenue: $%.2f\n", revenue
-    printf "  Avg per Transaction: $%.2f\n", revenue/count
+    if (count) printf "  Avg per Transaction: $%.2f\n", revenue/count
+    else print "  Avg per Transaction: undefined (0 transactions)"
     print ""
     print "By Product:"
     for (p in product_qty)
@@ -426,10 +464,10 @@ Errors found:
 
 1. `UUOC` - Useless Use of Cat (`cat | grep` → `grep file`)
 2. `unique` - Does not exist! The correct command is `uniq`
-3. `grep 404` - May match IPs that contain 404
+3. `grep 404` may match a URL, byte count or other unrelated field; select status field 9 in the declared fixture
 4. `sort -n` - Sorts ascending, but we want descending for "top"
 5. `head` - OK, but without a number it takes 10 (OK for "top 10")
-6. Wrong order - `uniq` must be AFTER `sort`
+6. The ordering before the misspelled `unique` is already correct: `sort` is before it. Fix the command name, not an invented order defect.
 </details>
 
 ### L4.2: Correct the Pipeline (3 min)
@@ -443,13 +481,13 @@ Errors found:
 <summary>✅ Correct Solution</summary>
 
 ```bash
-grep ' 404 ' access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head -10
+awk '$9 == 404 {print $1}' access.log | sort | uniq -c | sort -rn | head -10
 ```
 
 Or:
 
 ```bash
-awk '/ 404 / {print $1}' access.log | sort | uniq -c | sort -rn | head -10
+awk '$9 == 404 {print $1}' access.log | sort | uniq -c | sort -rn | head -10
 ```
 </details>
 
@@ -512,11 +550,11 @@ grep -oE '(href|src)="https?://[^"]*"' file.html | grep -oE 'https?://[^"]*'
 | Output | Works? | Problems | Score |
 |--------|--------|----------|-------|
 | A | Partially | Does not extract, only displays lines; catches text with "http" too | 2/10 |
-| B | Yes | May include unwanted characters; does not filter by context | 6/10 |
-| C | Yes | Good, but excludes URLs from JavaScript, inline CSS | 8/10 |
+| B | Limited subset | May include unwanted characters; does not filter by context | Historical illustrative score 6/10 |
+| C | Limited subset | Only lowercase double-quoted attributes, no spacing around =; not an HTML parser | Historical illustrative score 8/10 |
 </details>
 
-### L5.2: Perfect Prompt (3 min)
+### L5.2: Specify a Testable Input Contract (3 min)
 
 Write the ideal prompt for this task:
 
@@ -528,7 +566,9 @@ Write the ideal prompt for this task:
 <summary>💡 Exemplary Prompt</summary>
 
 ```
-Create a bash one-liner using grep or sed to extract all valid URLs from an HTML file.
+Create a teaching extractor for the exact simplified HTML fixture below.
+For arbitrary HTML, use a parser and define which attributes/text contexts count;
+do not promise every valid URL from a regex-only pipeline.
 
 Technical requirements:
 1. Match http:// and https:// protocols
@@ -596,7 +636,7 @@ EOF
 
 ### L6.1: Complete Code Review (5 min)
 
-Find ALL problems (minimum 5):
+Separate actual defects, contract ambiguities and optional style improvements; do not invent a minimum number of bugs:
 
 1. 
 2. 
@@ -611,10 +651,10 @@ Find ALL problems (minimum 5):
 1. UUOC - `cat file | grep` inefficient
 2. Wrong logic - the ifs are not else-if, Alice appears 3 times!
 3. Header processing - `grep -v "^Name"` works, but is fragile
-4. NR in END - NR includes all lines, not just those processed
+4. Here `grep` has already removed the header: AWK NR counts only the remaining input records. The actual issue is division by zero when none remain
 5. No validation - what if Grade is not a number?
-6. Shebang - OK, but missing `set -euo pipefail`
-7. Not portable - assumes GNU awk
+6. Missing `set -euo pipefail` is not intrinsically a defect; explicitly handling upstream command failures is the requirement
+7. This AWK syntax is portable; it does not require GNU awk. `-F,` is not a complete CSV parser
 </details>
 
 ### L6.2: Rewrite Correctly (10 min)
@@ -635,6 +675,9 @@ set -euo pipefail
 awk -F',' '
 NR == 1 { next }  # Skip header
 {
+    if (NF!=3 || $3 !~ /^[0-9]+([.][0-9]+)?$/ || $3<0 || $3>100) {
+        printf "Invalid grade row %d\n", NR > "/dev/stderr"; bad=1; next
+    }
     name = $1
     grade = $3
     sum += grade
@@ -645,9 +688,11 @@ NR == 1 { next }  # Skip header
     else if (grade > 50) status = "Pass"
     else status = "Fail"
     
-    printf "%s (ID: %s) - %d - %s\n", name, $2, grade, status
+    rows[++n] = sprintf("%s (ID: %s) - %.2f - %s", name, $2, grade, status)
 }
 END {
+    if (bad) exit 2
+    for (i=1;i<=n;i++) print rows[i]
     if (count > 0)
         printf "\nAverage Grade: %.2f\n", sum/count
     else
@@ -658,7 +703,11 @@ END {
 
 ---
 
-## LLM-Aware Evaluation Rubric
+## Retained LLM-Aware Evaluation Proposal
+
+The bands in the synthetic grade-processor exercise teach conditional branching;
+they are not the seminar assessment policy. The following weights also await the
+author decision in [assessment status](../homework/ASSESSMENT_STATUS.md).
 
 | Criterion | Points | Description |
 |-----------|--------|-------------|

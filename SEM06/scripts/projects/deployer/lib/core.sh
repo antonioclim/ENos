@@ -81,9 +81,9 @@ DEPLOY_SERVICES_FAILED=0
 DEPLOY_HOOKS_RUN=0
 
 # Cleanup tracking
-declare -a CLEANUP_COMMANDS=()
-declare -a TEMP_FILES=()
-declare -a DEPLOYED_SERVICES=()
+declare -ga CLEANUP_COMMANDS=()
+declare -ga TEMP_FILES=()
+declare -ga DEPLOYED_SERVICES=()
 
 # ==============================================================================
 # LOGGING SYSTEM
@@ -168,7 +168,7 @@ _log() {
     if [[ $level -ge $LOG_LEVEL_ERROR ]]; then
         echo -e "$term_line" >&2
     else
-        echo -e "$term_line"
+        echo -e "$term_line" >&2
     fi
     
     # Output to file
@@ -278,7 +278,7 @@ run_with_retry() {
             sleep "$delay"
         fi
         
-        ((attempt++))
+        attempt=$((attempt + 1))
     done
     
     log_error "Command failed after $max_retries attempts: ${cmd[*]}"
@@ -390,48 +390,28 @@ is_valid_url() {
 # Args: $1 = lock file path
 # Return: 0 if lock acquired, 1 otherwise
 acquire_lock() {
-    local lock_file=${1:-$LOCK_FILE}
-    
-    if [[ -z "$lock_file" ]]; then
-        log_warn "No lock file specified, skipping lock"
-        return 0
+    local lock_file="${1:-$LOCK_FILE}" wait_seconds="${2:-0}"
+    command -v flock >/dev/null || { log_error "flock is required"; return 1; }
+    mkdir -p -- "$(dirname "$lock_file")" || return 1
+    exec {DEPLOYER_LOCK_FD}>"$lock_file" || return 1
+    if ! flock -w "$wait_seconds" "$DEPLOYER_LOCK_FD"; then
+        exec {DEPLOYER_LOCK_FD}>&-
+        unset DEPLOYER_LOCK_FD
+        return 1
     fi
-    
-    # Create directory if it doesn't exist
-    local lock_dir
-    lock_dir=$(dirname "$lock_file")
-    mkdir -p "$lock_dir" 2>/dev/null || true
-    
-    # Check existing lock
-    if [[ -f "$lock_file" ]]; then
-        local old_pid
-        old_pid=$(cat "$lock_file" 2>/dev/null || echo "")
-        
-        if [[ -n "$old_pid" ]] && kill -0 "$old_pid" 2>/dev/null; then
-            log_error "Another deployment is running (PID: $old_pid)"
-            return 1
-        else
-            log_warn "Removing stale lock file"
-            rm -f "$lock_file"
-        fi
-    fi
-    
-    # Create lock
-    echo $$ > "$lock_file"
-    LOCK_FILE="$lock_file"
-    LOCK_ACQUIRED=true
-    
-    log_debug "Lock acquired: $lock_file (PID: $$)"
+    printf '%s\n' "$$" >&"$DEPLOYER_LOCK_FD"
     return 0
 }
 
 # Release lock file
 release_lock() {
-    if [[ "$LOCK_ACQUIRED" == "true" && -n "$LOCK_FILE" ]]; then
-        rm -f "$LOCK_FILE"
-        LOCK_ACQUIRED=false
-        log_debug "Lock released: $LOCK_FILE"
+    if [[ -n "${DEPLOYER_LOCK_FD:-}" ]]; then
+        flock -u "$DEPLOYER_LOCK_FD" || return 1
+        exec {DEPLOYER_LOCK_FD}>&-
+        unset DEPLOYER_LOCK_FD
     fi
+    # Keep the inode: unlinking would permit another independent lock.
+    return 0
 }
 
 # ==============================================================================
@@ -454,22 +434,24 @@ register_temp_file() {
 # Args: $1 = prefix (optional)
 # Return: path to file
 make_temp_file() {
-    local prefix=${1:-"deployer"}
-    local temp_file
-    temp_file=$(mktemp "/tmp/${prefix}.XXXXXX")
-    register_temp_file "$temp_file"
-    echo "$temp_file"
+    local prefix="${1:-deployer}"
+    [[ -n "${DEPLOYER_TEMP_ROOT:-}" && -d "$DEPLOYER_TEMP_ROOT" ]] || {
+        log_error "Call initialise_temp_workspace in the parent shell first"; return 1;
+    }
+    [[ "$prefix" =~ ^[A-Za-z0-9_.-]+$ ]] || return 1
+    mktemp "$DEPLOYER_TEMP_ROOT/$prefix.XXXXXX"
 }
 
 # Create tracked temporary directory
 # Args: $1 = prefix (optional)
 # Return: path to directory
 make_temp_dir() {
-    local prefix=${1:-"deployer"}
-    local temp_dir
-    temp_dir=$(mktemp -d "/tmp/${prefix}.XXXXXX")
-    register_temp_file "$temp_dir"
-    echo "$temp_dir"
+    local prefix="${1:-deployer}"
+    [[ -n "${DEPLOYER_TEMP_ROOT:-}" && -d "$DEPLOYER_TEMP_ROOT" ]] || {
+        log_error "Call initialise_temp_workspace in the parent shell first"; return 1;
+    }
+    [[ "$prefix" =~ ^[A-Za-z0-9_.-]+$ ]] || return 1
+    mktemp -d "$DEPLOYER_TEMP_ROOT/$prefix.XXXXXX"
 }
 
 # Cleanup on exit
@@ -513,7 +495,7 @@ generate_deployment_id() {
     local timestamp
     timestamp=$(date '+%Y%m%d%H%M%S')
     local random_suffix
-    random_suffix=$(head -c 4 /dev/urandom | xxd -p 2>/dev/null || echo "$$")
+    random_suffix=$(od -An -N8 -tx1 /dev/urandom | tr -d " \n") || return 1
     echo "deploy_${timestamp}_${random_suffix}"
 }
 
@@ -544,6 +526,7 @@ HOOKS_DIR=${HOOKS_DIR:-""}
 # Run hook if it exists
 # Args: $1 = hook name, $2... = arguments for hook
 run_hook() {
+    [[ "${DRY_RUN:-false}" != true ]] || { log_info "[DRY RUN] Skip hook: $1"; return 0; }
     local hook_name=$1
     shift
     local hook_args=("$@")
@@ -563,12 +546,12 @@ run_hook() {
     
     # Check if executable
     if [[ ! -x "$hook_file" ]]; then
-        log_warn "Hook not executable: $hook_name"
-        return 0
+        log_error "Hook not executable: $hook_name"
+        return 1
     fi
     
     log_info "Running hook: $hook_name"
-    ((DEPLOY_HOOKS_RUN++))
+    DEPLOY_HOOKS_RUN=$((DEPLOY_HOOKS_RUN + 1))
     
     # Export context variables
     export DEPLOYMENT_ID
@@ -762,7 +745,7 @@ register_deployed_service() {
     local path=${3:-""}
     
     DEPLOYED_SERVICES+=("$service:$version:$path")
-    ((DEPLOY_SERVICES_SUCCESS++))
+    DEPLOY_SERVICES_SUCCESS=$((DEPLOY_SERVICES_SUCCESS + 1))
 }
 
 # Get list of deployed services
@@ -813,3 +796,10 @@ export -f acquire_lock release_lock
 export -f run_hook
 export -f format_bytes format_duration
 export -f is_docker is_root has_systemd
+
+# Call directly in the parent shell, never through command substitution.
+initialise_temp_workspace() {
+    [[ -n "${DEPLOYER_TEMP_ROOT:-}" ]] && return 0
+    DEPLOYER_TEMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/deployer.XXXXXX") || return 1
+    TEMP_FILES+=("$DEPLOYER_TEMP_ROOT")
+}

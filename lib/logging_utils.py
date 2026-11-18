@@ -8,6 +8,7 @@ Supports both console output (with colours) and file logging.
 Author: ing. dr. Antonio Clim, ASE-CSIE
 """
 
+import copy
 import logging
 import sys
 from pathlib import Path
@@ -32,6 +33,7 @@ class ColouredFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Format log record with colour coding if terminal supports it."""
         if sys.stdout.isatty():
+            record = copy.copy(record)
             colour = self.COLOURS.get(record.levelno, self.RESET)
             record.levelname = f"{colour}{record.levelname}{self.RESET}"
         return super().format(record)
@@ -63,12 +65,18 @@ def setup_logging(
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Avoid duplicate handlers on repeated calls
-    if logger.handlers:
-        return logger
+    # Reconfigure only handlers owned by this helper. Open the new file first:
+    # a failed reconfiguration must not silently destroy a working logger.
+    file_handler = logging.FileHandler(log_file, encoding='utf-8') if log_file else None
+    for handler in list(logger.handlers):
+        if getattr(handler, '_enos_handler', False):
+            logger.removeHandler(handler)
+            handler.close()
+    logger.propagate = False
     
     # Console handler with colours
     console_handler = logging.StreamHandler(sys.stdout)
+    console_handler._enos_handler = True
     console_handler.setLevel(level)
     
     if use_colours and sys.stdout.isatty():
@@ -86,8 +94,8 @@ def setup_logging(
     logger.addHandler(console_handler)
     
     # Optional file handler (no colours)
-    if log_file:
-        file_handler = logging.FileHandler(log_file)
+    if file_handler is not None:
+        file_handler._enos_handler = True
         file_handler.setLevel(level)
         file_formatter = logging.Formatter(
             '[%(asctime)s] [%(levelname)s] %(name)s: %(message)s',
@@ -101,4 +109,5 @@ def setup_logging(
 
 def get_logger(name: str) -> logging.Logger:
     """Get or create a logger with default ENos configuration."""
-    return setup_logging(name)
+    logger = logging.getLogger(name)
+    return logger if logger.handlers else setup_logging(name)

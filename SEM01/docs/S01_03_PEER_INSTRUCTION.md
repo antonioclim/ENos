@@ -26,7 +26,7 @@ For each question in this document, follow this protocol:
 
 - **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote improvement:** Record the observed change; no fixed improvement is guaranteed. The percentages above are facilitation targets, not validated effects for this cohort.
 
 ### Question Notation
 
@@ -83,7 +83,7 @@ Correct answer: B
 
 After discussion, demonstrate:
 ```bash
-echo $SHELL          # Shows which shell you use
+echo "$SHELL"        # Preferred/login-shell value; not current-process identification
 ps -p $$             # Shows the shell process
 cat /etc/shells      # List of available shells
 ```
@@ -94,7 +94,7 @@ cat /etc/shells      # List of available shells
 Level: Fundamental | Duration: 3 min | Target: ~60% correct
 
 ```
-Which of the following is an ABSOLUTE PATH?
+Before any shell expansion, which literal string begins with / and is an ABSOLUTE PATH?
 
 A) ../Documents
 B) ~/Downloads
@@ -107,10 +107,10 @@ Correct answer: C
 | Distractor | Targeted misconception |
 |------------|------------------------|
 | A | `..` is relative to current directory |
-| B | `~` seems absolute but it's shell expansion (becomes absolute but isn't "pure") |
+| B | `~` is shell syntax; expanding it normally produces an absolute home-directory path |
 | D | `./` is explicitly relative |
 
-Note: B can be debatable - accept and explain that ~ expands to absolute path but technically it's a shortcut.
+The stem explicitly asks about the literal text before expansion. After tilde expansion, B normally denotes an absolute path too.
 
 ---
 
@@ -205,10 +205,11 @@ Explanation: `\$` in double quotes = literal `$` character, not expansion.
 Level: Intermediate | Duration: 4 min | Target: ~40% correct
 
 ```
-What happens when you run?
+In a Bash session with no command, function or alias named VAR, what diagnostic
+does the first line produce? (The following echo is a separate command.)
 
 VAR = "value"
-echo $VAR
+echo "$VAR"
 
 A) Displays "value"
 B) Displays "" (empty string)
@@ -231,10 +232,11 @@ echo $VAR
 
 ---
 
-### PI-07: Local vs Export
+### PI-07: Unexported vs Exported
 Level: Advanced | Duration: 5 min | Target: ~35% correct
 
 ```
+unset LOCAL EXPORTED
 LOCAL="local"
 export EXPORTED="exported"
 bash -c 'echo "[$LOCAL] [$EXPORTED]"'
@@ -251,12 +253,13 @@ Correct answer: B
 
 | Distractor | Targeted misconception |
 |------------|------------------------|
-| A | Believes all variables are visible in subshell |
+| A | Believes all variables are sent to a newly executed interpreter |
 | C | Inverse confusion about export |
-| D | Believes subshell inherits nothing |
+| D | Believes a new interpreter receives no exported environment |
 
 Demonstration:
 ```bash
+unset LOCAL EXPORTED
 LOCAL="local"
 export EXPORTED="exported"
 bash -c 'echo "LOCAL=$LOCAL, EXPORTED=$EXPORTED"'
@@ -269,9 +272,12 @@ bash -c 'echo "LOCAL=$LOCAL, EXPORTED=$EXPORTED"'
 Level: Intermediate | Duration: 4 min | Target: ~55% correct
 
 ```
-ls /nonexistent 2>/dev/null
+Assume GNU ls, /nonexistent is absent and /home is readable/searchable.
+The commands are run without errexit so that both exit statuses are printed.
+
+command ls /nonexistent 2>/dev/null
 echo $?
-ls /home 2>/dev/null
+command ls /home 2>/dev/null
 echo $?
 
 What do the two echo commands display (in order)?
@@ -282,7 +288,7 @@ C) 2, 0
 D) 0, 1
 ```
 
-Correct answer: C (or B, depends on system - accept both)
+Correct answer: C under the explicitly stated GNU ls and filesystem assumptions.
 
 Explanation:
 - First command: nonexistent directory → non-zero exit code (2 for ls)
@@ -321,25 +327,25 @@ Explanation: `?` matches EXACTLY ONE character, not more.
 Level: Intermediate | Duration: 4 min | Target: ~45% correct
 
 ```
-You have these files: file.txt, .hidden, .bashrc, data.csv
-
-What does: ls *
+Only these four regular files exist: file.txt, .hidden, .bashrc, data.csv.
+Bash dotglob is disabled and GLOBIGNORE is unset. Ignore display order.
+Which set of names does: ls -d -- * list?
 
 A) file.txt, .hidden, .bashrc, data.csv
 B) file.txt, data.csv
 C) file.txt, .hidden, data.csv
-D) All files that don't start with a dot
+D) Only names containing exactly one dot
 ```
 
-Correct answer: B (and D is conceptually correct)
+Correct answer: B
 
 Explanation: Glob `*` does NOT include files starting with `.` (hidden)!
 
 ```bash
 # You need to be explicit:
-ls .*           # Only hidden
-ls * .*         # All
-ls -a           # All (simpler)
+( shopt -s nullglob; hidden=(.[!.]* ..?*); ((${#hidden[@]} == 0)) || printf '%s\n' "${hidden[@]}" )
+# The two patterns also cover ..double and do not traverse a hidden directory.
+ls -A           # All entries except . and ..
 ```
 
 ---
@@ -382,7 +388,8 @@ rm -rf project       # Forced, no confirmation (VERY DANGEROUS!)
 Level: Intermediate | Duration: 4 min | Target: ~40% correct
 
 ```
-You add to ~/.bashrc:
+In an interactive Bash where ll is neither an alias, function nor executable,
+you edit the file ~/.bashrc to add (without executing the line):
 alias ll='ls -la'
 
 Then you immediately run in the SAME terminal:
@@ -398,7 +405,7 @@ D) Opens editor to configure the alias
 
 Correct answer: B
 
-Explanation: `.bashrc` is only loaded when opening a new shell!
+Explanation: editing a file does not execute it in the running shell. Interactive non-login Bash reads `.bashrc` on startup; a login profile may source it explicitly.
 
 ```bash
 # Solutions:
@@ -413,21 +420,22 @@ source ~/.bashrc    # Reload in current shell
 Level: Advanced | Duration: 5 min | Target: ~35% correct
 
 ```
-PATH="/custom/bin"
-echo $PATH
-ls
+Assume /custom/bin contains no ls executable, there is no alias/function ls,
+and command hashing is cleared. Run in a disposable subshell:
 
-What happens with the ls command?
+( PATH="/custom/bin"; hash -r; command ls )
+
+What is the observable result?
 
 A) Lists current directory normally
 B) Error: ls: command not found
-C) Searches for ls in /custom/bin
+C) Prints the directory /custom/bin without running ls
 D) Uses ls from cached location
 ```
 
 Correct answer: B
 
-Explanation: We REPLACED the entire PATH! `ls` can no longer be found.
+Explanation: PATH was replaced and its sole directory has no ls executable. Bash cannot resolve the command under these assumptions. The subshell keeps the parent PATH unchanged.
 
 ```bash
 # WRONG - replaces everything:
@@ -505,7 +513,7 @@ FILES=`ls`          # Backticks - harder to read
 | PI-04 | After quoting | echo, variables |
 | PI-05 | After escape | Backslash |
 | PI-06 | After variables | Assignment |
-| PI-07 | After export | Subshell |
+| PI-07 | After export | New interpreter versus parenthesised subshell |
 | PI-08 | After errors | Debugging |
 | PI-09 | After globbing | Wildcards |
 | PI-10 | After ls -a | Hidden files |

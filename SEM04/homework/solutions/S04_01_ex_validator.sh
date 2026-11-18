@@ -1,155 +1,50 @@
-#!/bin/bash
-# ============================================================================
+#!/usr/bin/env bash
 # ex1_validator.sh - Model Solution
-# Data validation and extraction (email, IP, phone)
-# 
-# Author: [Instructor]
-# Version: 1.0
-# ============================================================================
+# Author: [Instructor] | Version: 1.1 (corrected teaching contract)
+# Input: the personalised generator's Contact:, Server IP: and Phone: records.
+# Email validation is an explicitly limited lexical grammar, not RFC completeness.
 set -euo pipefail
-
-# Colours for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-# ============================================================================
-# Argument verification
-# ============================================================================
-if [[ $# -lt 1 ]]; then
-    echo -e "${RED}Usage: $0 <file>${NC}"
-    echo "Example: $0 contacts.txt"
-    exit 1
+export LC_ALL=C
+if [[ ${1-} == --help && $# == 1 ]]; then
+    echo "Usage: $0 CONTACTS_FILE"; exit 0
 fi
-
-INPUT_FILE="$1"
-
-if [[ ! -f "$INPUT_FILE" ]]; then
-    echo -e "${RED}Error: File '$INPUT_FILE' does not exist!${NC}"
-    exit 1
-fi
-
-# ============================================================================
-# Function: Email Validation
-# Pattern accepts: user@domain.tld
-# ============================================================================
-validate_emails() {
-    echo -e "${BLUE}=== EMAIL VALIDATION ===${NC}"
-    echo ""
-    
-    # Pattern for email extraction (permissive)
-    local extract_pattern='[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-    
-    # Strict pattern for validation
-    local valid_pattern='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    
-    # Extract all emails
-    local all_emails
-    all_emails=$(grep -oE "$extract_pattern" "$INPUT_FILE" | sort -u)
-    
-    local total=0
-    local valid_count=0
-    local invalid_count=0
-    local valid_list=""
-    local invalid_list=""
-    
-    while IFS= read -r email; do
-        [[ -z "$email" ]] && continue
-        ((total++))
-        
-        # Additional validation: does not start/end with dot, no consecutive dots
-        if [[ "$email" =~ $valid_pattern ]] && \
-           [[ ! "$email" =~ ^\\. ]] && \
-           [[ ! "$email" =~ \\.@ ]] && \
-           [[ ! "$email" =~ \\.\\. ]]; then
-            ((valid_count++))
-            valid_list+="  - $email"$'\n'
-        else
-            ((invalid_count++))
-            invalid_list+="  - $email"$'\n'
-        fi
-    done <<< "$all_emails"
-    
-    echo -e "Total found: ${YELLOW}$total${NC}"
-    echo -e "${GREEN}✅ Valid: $valid_count${NC}"
-    if [[ -n "$valid_list" ]]; then
-        echo -e "$valid_list"
-    fi
-    
-    if [[ $invalid_count -gt 0 ]]; then
-        echo -e "${RED}❌ Invalid: $invalid_count${NC}"
-        echo -e "$invalid_list"
-    fi
-    
-    echo ""
-}
-
-# ============================================================================
-# Function: IP Extraction
-# Strict validation: each octet 0-255
-# ============================================================================
-extract_ips() {
-    echo -e "${BLUE}=== UNIQUE IP ADDRESSES ===${NC}"
-    echo ""
-    
-    # Permissive pattern for extraction
-    local extract_pattern='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
-    
-    # Extract and validate
-    grep -oE "$extract_pattern" "$INPUT_FILE" 2>/dev/null | while read -r ip; do
-        # Strict validation: each octet between 0-255
-        IFS='.' read -ra octets <<< "$ip"
-        local valid=true
-        for octet in "${octets[@]}"; do
-            if [[ $octet -lt 0 || $octet -gt 255 ]]; then
-                valid=false
-                break
-            fi
-        done
-        if $valid; then
-            echo "$ip"
-        fi
-    done | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n -u
-    
-    echo ""
-}
-
-# ============================================================================
-# Function: RO Phone Number Extraction
-# Accepted formats: 07XX-XXX-XXX, 07XX.XXX.XXX, 07XX XXX XXX, 07XXXXXXXX
-# ============================================================================
-extract_phones() {
-    echo -e "${BLUE}=== RO PHONE NUMBERS ===${NC}"
-    echo ""
-    
-    # Pattern for Romanian mobile phones
-    # Accepts: 07XX-XXX-XXX, 07XX.XXX.XXX, 07XX XXX XXX, 07XXXXXXXX
-    # And variants with +40
-    local patterns=(
-        '\+40[-. ]?7[0-9]{2}[-. ]?[0-9]{3}[-. ]?[0-9]{3}'
-        '07[2-9][0-9][-. ]?[0-9]{3}[-. ]?[0-9]{3}'
-    )
-    
-    for pattern in "${patterns[@]}"; do
-        grep -oE "$pattern" "$INPUT_FILE" 2>/dev/null
-    done | sort -u
-    
-    echo ""
-}
-
-# ============================================================================
-# Main
-# ============================================================================
-echo ""
-echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║         DATA VALIDATOR - $INPUT_FILE${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-
-validate_emails
-extract_ips
-extract_phones
-
-echo -e "${GREEN}✅ Validation complete!${NC}"
+[[ $# == 1 && -f $1 && -r $1 ]] || { echo "Usage: $0 READABLE_CONTACTS_FILE" >&2; exit 2; }
+INPUT_FILE=$1
+declare -a valid_emails=() invalid_emails=() ips=() phones=()
+invalid_rows=0
+email_pattern='^[A-Za-z0-9._%+-]+@[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$'
+while IFS= read -r line || [[ -n $line ]]; do
+    line=${line%$'\r'}
+    case $line in
+        ''|'#'*) continue ;;
+        'Contact: '*)
+            email=${line#'Contact: '}
+            if [[ $email =~ $email_pattern && $email != .* && $email != *'.@'* && $email != *'..'* ]]; then
+                valid_emails+=("$email")
+            else invalid_emails+=("$email"); fi ;;
+        'Server IP: '*)
+            ip=${line#'Server IP: '}; valid=true
+            if [[ $ip =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]]; then
+                IFS=. read -r -a octets <<< "$ip"
+                for octet in "${octets[@]}"; do ((10#$octet <= 255)) || valid=false; done
+            else valid=false; fi
+            if "$valid"; then ips+=("$ip"); else printf 'Invalid IP candidate: %s\n' "$ip" >&2; invalid_rows=$((invalid_rows+1)); fi ;;
+        'Phone: '*)
+            phone=${line#'Phone: '}
+            if [[ $phone =~ ^07[0-9]{8}$ || $phone =~ ^07[0-9]{2}-[0-9]{3}-[0-9]{3}$ || $phone =~ ^07[0-9]{2}\.[0-9]{3}\.[0-9]{3}$ || $phone =~ ^07[0-9]{2}\ [0-9]{3}\ [0-9]{3}$ ]]; then
+                phones+=("$phone")
+            else printf 'Invalid phone candidate: %s\n' "$phone" >&2; invalid_rows=$((invalid_rows+1)); fi ;;
+        *) printf 'Unrecognised record: %s\n' "$line" >&2; invalid_rows=$((invalid_rows+1)) ;;
+    esac
+done < "$INPUT_FILE"
+printf '=== EMAIL VALIDATION (limited grammar; record counts) ===\n'
+printf 'Total found: %d\nValid: %d\n' "$((${#valid_emails[@]}+${#invalid_emails[@]}))" "${#valid_emails[@]}"
+((${#valid_emails[@]} == 0)) || printf '  - %s\n' "${valid_emails[@]}"
+printf 'Invalid: %d\n' "${#invalid_emails[@]}"
+((${#invalid_emails[@]} == 0)) || printf '  - %s\n' "${invalid_emails[@]}"
+printf '\n=== UNIQUE IP ADDRESSES ===\n'
+if ((${#ips[@]})); then printf '%s\n' "${ips[@]}" | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n -u; fi
+printf '\n=== RO PHONE NUMBER SHAPES ===\n'
+if ((${#phones[@]})); then printf '%s\n' "${phones[@]}" | sort -u; fi
+if ((invalid_rows)); then printf 'Incomplete: %d invalid/unrecognised non-email records\n' "$invalid_rows" >&2; exit 2; fi
+printf '\nValidation complete; allocation/deliverability/authorship not established.\n'

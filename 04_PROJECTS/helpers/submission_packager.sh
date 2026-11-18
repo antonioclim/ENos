@@ -48,7 +48,8 @@ Output:
 EOF
 }
 
-[[ $# -lt 3 ]] && { usage; exit 1; }
+[[ ${1:-} != --help && ${1:-} != -h ]] || { usage; exit 0; }
+[[ $# -ne 3 ]] && { usage >&2; exit 2; }
 
 PROJECT_DIR="$1"
 STUDENT_NAME="$2"
@@ -56,6 +57,8 @@ PROJECT_ID="$3"
 
 [[ ! -d "$PROJECT_DIR" ]] && { echo "Error: '$PROJECT_DIR' does not exist"; exit 1; }
 
+[[ "$STUDENT_NAME" =~ ^[A-Za-z0-9_-]+$ && "$PROJECT_ID" =~ ^(E0[1-5]|M(0[1-9]|1[0-5])|A0[1-3])$ ]] || { echo "Invalid student name or project ID" >&2; exit 1; }
+PROJECT_DIR=$(realpath -- "$PROJECT_DIR")
 DATE=$(date +%Y%m%d)
 ARCHIVE_NAME="${STUDENT_NAME}_${PROJECT_ID}_${DATE}.tar.gz"
 
@@ -69,6 +72,10 @@ echo "ID:       $PROJECT_ID"
 echo "Output:   $ARCHIVE_NAME"
 echo ""
 
+# Stage outside the source tree and publish only a complete archive.
+[[ ! -e "$ARCHIVE_NAME" ]] || { echo "Output already exists: $ARCHIVE_NAME" >&2; exit 1; }
+STAGE=$(mktemp -d "${TMPDIR:-/tmp}/enos-package.XXXXXX")
+trap 'rm -rf -- "$STAGE"' EXIT
 # Create archive excluding unnecessary files
 echo "Packaging..."
 tar --exclude='__pycache__' \
@@ -80,10 +87,23 @@ tar --exclude='__pycache__' \
     --exclude='*.tmp' \
     --exclude='.vscode' \
     --exclude='.idea' \
-    -czvf "$ARCHIVE_NAME" \
+    -czvf "$STAGE/archive.tar.gz" \
     -C "$(dirname "$PROJECT_DIR")" \
     "$(basename "$PROJECT_DIR")"
 
+tar -tzf "$STAGE/archive.tar.gz" > "$STAGE/members.txt"
+python3 - "$STAGE/archive.tar.gz" "$ARCHIVE_NAME" <<'PUBLISH'
+import os, shutil, sys, tempfile
+from pathlib import Path
+source, target = map(Path, sys.argv[1:])
+fd, temporary = tempfile.mkstemp(prefix='.enos-package-', dir=target.parent)
+os.close(fd)
+try:
+    shutil.copyfile(source, temporary)
+    os.link(temporary, target)  # exclusive publication; existing target is preserved
+finally:
+    os.unlink(temporary)
+PUBLISH
 # Check size
 SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
 echo ""
@@ -94,5 +114,5 @@ echo "════════════════════════�
 # Check contents
 echo ""
 echo "Archive contents:"
-tar -tzvf "$ARCHIVE_NAME" | head -20
-echo "... ($(tar -tzf "$ARCHIVE_NAME" | wc -l) files total)"
+sed -n '1,20p' "$STAGE/members.txt"
+echo "... ($(wc -l < "$STAGE/members.txt") files total)"

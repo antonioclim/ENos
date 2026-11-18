@@ -85,8 +85,8 @@
 │ • FreeBSD          │ • QNX              │ • macOS (XNU)      │
 │ • Traditional UNIX │ • seL4, L4         │ • BeOS             │
 ├────────────────────┼────────────────────┼────────────────────┤
-│ ✓ Fast (no IPC)    │ ✓ Fault isolation  │ ✓ Balanced         │
-│ ✗ One bug = crash  │ ✗ IPC overhead     │ ✓ Flexible         │
+│ Kernel service calls    │ ✓ Fault isolation  │ ✓ Balanced         │
+│ Faults may propagate  │ ✗ IPC overhead     │ ✓ Flexible         │
 └────────────────────┴────────────────────┴────────────────────┘
 ```
 
@@ -114,10 +114,10 @@ Open source                          Cloud-native      Heterogeneous
 
 ---
 
-## System Layers (Memory Representation)
+## System Layers (Abstraction, Not Address Layout)
 
 ```
-HIGH ADDRESS
+APPLICATION ABSTRACTIONS
 ┌─────────────────────────────────────────────────────────────┐
 │                    USER APPLICATIONS                         │
 │           Browser, Editor, Spotify, VS Code                  │
@@ -134,7 +134,7 @@ HIGH ADDRESS
 │                      HARDWARE                                │
 │            CPU, RAM, Disk, Network, GPU                      │
 └─────────────────────────────────────────────────────────────┘
-LOW ADDRESS
+HARDWARE INTERFACES
 ```
 
 ---

@@ -1,5 +1,7 @@
 # S03_TC01 - Find and Locate
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (SPLIT from TC2e - Redistributed)
 
@@ -110,8 +112,9 @@ find /var/log -type f -name "*.log" -size +10M
 # Files modified in the last 24h
 find ~ -type f -mtime 0
 
-# Delete old temporary files
-find /tmp -type f -name "*.tmp" -mtime +7 -delete
+# Preview owned temporary files at least eight complete days old
+find ./owned_temp -type f -name "*.tmp" -mtime +7 -print
+# Apply only after inspecting this disposable fixture: use -delete instead of -print.
 ```
 
 ### Exercise 2: Find and process
@@ -122,8 +125,12 @@ find . -name "*.sh" ! -perm /111
 # Empty directories for cleanup
 find . -type d -empty -print
 
-# Duplicate files by size
-find . -type f -printf '%s %p\n' | sort -n | uniq -D -w 10
+# Equal-size candidate groups (not proof of duplicate content).
+# GNU sort/uniq -z preserve filename bytes, including spaces and newlines.
+find . -type f -printf '%020s %p\0' | LC_ALL=C sort -z |
+    uniq -z -D -w 20
+# %020s is find's zero-padded byte-size field, not a filename prefix.
+# Compare content separately before calling candidates duplicates or deleting anything.
 ```
 
 ---
@@ -143,7 +150,7 @@ find . -type l            # symlinks
 
 # SIZE SEARCH
 find . -size +10M         # > 10MB
-find . -size -1k          # < 1KB
+find . -size -1024c       # 0–1023 bytes; -size -1k matches only empty files
 find . -empty             # empty
 
 # TIME SEARCH
@@ -171,14 +178,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

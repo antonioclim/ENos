@@ -1,18 +1,33 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
-title Socket API Flow
-state "Server" {
-  [*] --> socket
-  socket --> bind
-  bind --> listen
-  listen --> accept
-  accept --> read_write
-  read_write --> close
+title Socket API Flow — One Connection, Successful Calls
+state "Server" as server {
+  state "socket()" as ss
+  state "bind()" as sb
+  state "listen()" as sl
+  state "accept() -> connected fd" as sa
+  state "read()/write() on connected fd" as sr
+  state "close(connected fd)" as sc
+  [*] --> ss
+  ss --> sb
+  sb --> sl
+  sl --> sa
+  sa --> sr
+  sr --> sc
+  sc --> [*]
 }
-state "Client" {
-  [*] --> socket2
-  socket2 --> connect
-  connect --> read_write2
-  read_write2 --> close2
+state "Client" as client {
+  state "socket()" as cs
+  state "connect()" as cc
+  state "read()/write()" as cr
+  state "close()" as cx
+  [*] --> cs
+  cs --> cc
+  cc --> cr
+  cr --> cx
+  cx --> [*]
 }
+note bottom of server
+The listening fd remains open for further accept() calls.
+Production code must handle errors, EOF and partial I/O.
+end note
 @enduml

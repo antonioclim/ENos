@@ -25,7 +25,7 @@ questions:
       - "A type of processor"
       - "Software that creates and manages virtual machines, providing hardware abstraction"
       - "A network protocol"
-      - "A type of memorie"
+      - "A type of memory"
     correct: 1
     explanation: "Hypervisor = layer that allows running multiple OSes on the same physical hardware."
 
@@ -59,16 +59,16 @@ questions:
     text: "How do Intel VT-x/AMD-V help with virtualisation?"
     options:
       - "They increase CPU speed"
-      - "They add a new ring (ring -1) for the hypervisor, enabling efficient traps"
+      - "They provide hardware virtualisation modes and configurable exits between guest and hypervisor"
       - "They encrypt data"
-      - "They manage memorie"
+      - "They manage memory"
     correct: 1
-    explanation: "Hardware virtualisation: hypervisor in VMX root mode, guest in VMX non-root. Efficient VM exits."
+    explanation: "Intel VMX distinguishes root and non-root operation while keeping privilege rings 0–3 within those modes; ring -1 is an informal analogy. AMD SVM has its own host/guest mechanism. Exit cost remains workload-dependent."
 
   - id: q05
     bloom: understand
     difficulty: medium
-    text: "What is a shadow tabel de pagini and why is it necessary?"
+    text: "What is the role of a shadow page table when second-level hardware paging is unavailable?"
     options:
       - "A backup copy"
       - "The hypervisor maintains guest-virtual → host-physical translation for performance"
@@ -82,12 +82,12 @@ questions:
     difficulty: medium
     text: "What advantage does EPT/NPT (Extended Page Tables) offer?"
     options:
-      - "More memorie"
-      - "Hardware manages guest→host address translation, eliminating shadow PT"
+      - "More memory"
+      - "Hardware supports guest-physical to host-physical translation, reducing the need to maintain combined shadow translations"
       - "Improved security"
       - "It offers no advantages"
     correct: 1
-    explanation: "EPT/NPT: hardware MMU performs two translations (guest VA→guest PA→host PA), without software overhead."
+    explanation: "EPT/NPT supports two-dimensional translation: guest VA→guest PA and guest PA→host PA. The hypervisor still maintains mappings and handles faults and invalidation; translation walks and exits retain costs."
 
   - id: q07
     bloom: understand
@@ -99,7 +99,7 @@ questions:
       - "Containers have no isolation"
       - "VMs are older"
     correct: 1
-    explanation: "Container: isolated procese (namespaces, cgroups), without full OS overhead."
+    explanation: "Container: isolated processes (namespaces, cgroups), without full OS overhead."
 
   - id: q08
     bloom: understand
@@ -111,7 +111,7 @@ questions:
       - "Shadow page tables"
       - "Type 2 hypervisor"
     correct: 1
-    explanation: "Namespaces: isolate PID, network, mount, etc. Cgroups: limit CPU, memorie, I/O."
+    explanation: "Namespaces: isolate PID, network, mount, etc. Cgroups: limit CPU, memory, I/O."
 
   - id: q09
     bloom: analyse
@@ -119,11 +119,11 @@ questions:
     text: "When is full virtualisation preferred over containers?"
     options:
       - "Always"
-      - "When you need to run different OSes or require maximum isolation (security boundaries)"
+      - "When you need supported guest kernels or a boundary that separates guest kernels from the host"
       - "When you want maximum performance"
       - "Never"
     correct: 1
-    explanation: "VM: kernel-level isolation, different OSes. Container: same kernel, weaker but efficient isolation."
+    explanation: "VMs separate guest kernels through a hypervisor; ordinary containers share the host kernel. Security depends on implementation, configuration and threat model; neither provides an absolute isolation guarantee."
 
   - id: q10
     bloom: analyse
@@ -135,12 +135,12 @@ questions:
       - "Network consumption"
       - "Disk space"
     correct: 1
-    explanation: "Without VT-x: trap on each privileged instruction, hypervisor emulates. With VT-x: fast exit."
+    explanation: "Software virtualisation may combine trap-and-emulate with binary translation for sensitive instructions. Hardware support makes interception configurable but does not eliminate VM-exit cost."
 
   - id: q11
     bloom: analyse
     difficulty: hard
-    text: "Why is live migration (moving a VM without downtime) possible?"
+    text: "How can pre-copy live migration reduce, rather than eliminate, VM downtime?"
     options:
       - "It is not possible"
       - "Memory is copied incrementally while the VM runs, then a short freeze for final state"
@@ -155,8 +155,8 @@ questions:
     text: "You have a server with 64GB RAM and want to run 100 isolated instances of the same application. What do you choose?"
     options:
       - "100 full VMs"
-      - "Containers: share kernel and libraries, overhead ~MB per instance vs ~GB per VM"
-      - "100 procese without isolation"
+      - "Consider containers sharing the kernel, then verify the per-instance workload memory and required isolation"
+      - "100 processes without isolation"
       - "It is not possible"
     correct: 1
-    explanation: "Container: ~10-50MB overhead vs VM ~1GB. 100 containers in 64GB possible; 100 VMs - impossible."
+    explanation: "The original ~10–50 MB container and ~1 GB VM values are illustrative inputs with unverified provenance. Total memory must include workload working sets, shared pages and host overhead. 64 GB alone does not establish whether either 100-instance design fits."

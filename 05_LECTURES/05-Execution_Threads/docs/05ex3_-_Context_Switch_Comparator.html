@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>05ex3 - Context Switch Comparator | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --process-color: #ef4444;
@@ -215,7 +215,84 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2); }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -231,7 +308,7 @@
                             <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-400 to-green-400 bg-clip-text text-transparent">
                                 Context Switch Comparator
                             </h1>
-                            <p class="text-slate-400 text-sm">course 05 - Cost Comparativ: Process Switch vs Thread Switch</p>
+                            <p class="text-slate-400 text-sm">Course 05 — Comparative Cost: Process Switch vs User-level Switch</p>
                         </div>
                     </div>
                 </div>
@@ -245,7 +322,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Sequential walkthroughs and fixed instructional costs</h2><p>The two animations are sequential walkthroughs, so their visual finish order is not a race. The 1400 versus 280 cycle inputs have no established empirical provenance and do not support a typical speed claim. The process path assumes an untagged address-space switch; the user-level cooperative path remains on the same kernel thread, uses integer-only work and makes no floating-point-state change. Its zero FPU/kernel-stack entries apply only to those assumptions. Native kernel-scheduled threads need their own CPU/FPU context and kernel execution state. PCID/ASID can avoid a full TLB flush, and cache effects depend on working sets.</p></section>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto">
@@ -253,10 +330,10 @@
         <section class="glass-card rounded-2xl p-5 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
-                    <i class="fas fa-flag-checkered text-amber-400"></i> Cursa Context Switch
+                    <i class="fas fa-flag-checkered text-amber-400"></i> Context-Switch Walkthroughs
                 </h2>
                 <button id="btn-race" class="btn-race px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-lg font-semibold text-white flex items-center gap-2">
-                    <i class="fas fa-play"></i> Start Race!
+                    <i class="fas fa-play"></i> Start walkthroughs
                 </button>
             </div>
             
@@ -326,7 +403,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-medium text-sm">Registre CPU (all)</span>
+                                    <span class="font-medium text-sm">CPU Registers (all)</span>
                                     <span class="mono text-xs text-red-400">+100</span>
                                 </div>
                                 <div class="progress-bar mt-1">
@@ -416,7 +493,7 @@
                                     </span>
                                     <span class="mono text-xs text-red-400 font-bold">+500</span>
                                 </div>
-                                <p class="text-xs text-red-400/70 mt-1">Dramatic overhead - invalidare completa!</p>
+                                <p class="text-xs text-red-400/70 mt-1">Full invalidation in this declared untagged model</p>
                                 <div class="progress-bar mt-1">
                                     <div class="progress-bar-fill bg-red-500" style="width: 0%"></div>
                                 </div>
@@ -431,7 +508,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-medium text-sm">Cache Penalty (partial invalidat)</span>
+                                    <span class="font-medium text-sm">Cache Miss Cost (workload-dependent)</span>
                                     <span class="mono text-xs text-red-400">+300</span>
                                 </div>
                                 <div class="progress-bar mt-1">
@@ -479,7 +556,7 @@
                 <div class="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-500/30">
                     <p class="text-xs text-red-300">
                         <i class="fas fa-exclamation-triangle mr-1"></i>
-                        <strong>Total tipic: 1,000 - 10,000 cicluri CPU</strong> (~1-10 μs pe procesoare moderne)
+                        <strong>Illustrative total: 1,000 - 10,000 CPU cycles</strong> (no time conversion without an explicit CPU frequency)
                     </p>
                 </div>
             </section>
@@ -505,7 +582,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-medium text-sm">Registre CPU</span>
+                                    <span class="font-medium text-sm">CPU Registers</span>
                                     <span class="mono text-xs text-green-400">+100</span>
                                 </div>
                                 <div class="progress-bar mt-1">
@@ -578,7 +655,7 @@
                                     </span>
                                     <span class="mono text-xs text-blue-400">SKIP!</span>
                                 </div>
-                                <p class="text-xs text-blue-400/70 mt-1">Same spatiu of adrese!</p>
+                                <p class="text-xs text-blue-400/70 mt-1">The same address space is retained.</p>
                             </div>
                         </div>
                     </div>
@@ -595,7 +672,7 @@
                                     </span>
                                     <span class="mono text-xs text-blue-400">SKIP!</span>
                                 </div>
-                                <p class="text-xs text-blue-400/70 mt-1">Nu e nevoie of flush!</p>
+                                <p class="text-xs text-blue-400/70 mt-1">No address-space switch is required here.</p>
                             </div>
                         </div>
                     </div>
@@ -610,7 +687,7 @@
                                     <span class="font-medium text-sm">Cache (minimal penalty)</span>
                                     <span class="mono text-xs text-green-400">+50</span>
                                 </div>
-                                <p class="text-xs text-green-400/70 mt-1">Ramane valid in mare parte!</p>
+                                <p class="text-xs text-green-400/70 mt-1">Cache effects depend on the working sets and CPU.</p>
                                 <div class="progress-bar mt-1">
                                     <div class="progress-bar-fill bg-green-500" style="width: 0%"></div>
                                 </div>
@@ -622,7 +699,7 @@
                 <div class="mt-4 p-3 rounded-lg bg-green-900/20 border border-green-500/30">
                     <p class="text-xs text-green-300">
                         <i class="fas fa-check-circle mr-1"></i>
-                        <strong>Total tipic: 100 - 1,000 cicluri CPU</strong> (~100ns - 1μs) - 10x-100x more rapid!
+                        <strong>Illustrative total: 100 - 1,000 CPU cycles</strong> (no time conversion without a CPU frequency) - 5.0x for these fixed inputs only.
                     </p>
                 </div>
             </section>
@@ -631,7 +708,7 @@
         <!-- Chart Comparison -->
         <section class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-chart-bar text-purple-400"></i> Comparison Vizuala - Costuri per Operatie
+                <i class="fas fa-chart-bar text-purple-400"></i> Visual Comparison - Cost per Operation
             </h3>
             
             <div class="h-80">
@@ -648,11 +725,11 @@
                     </div>
                     <div>
                         <h4 class="font-semibold text-slate-200">Process Switch Time</h4>
-                        <p class="text-xs text-slate-400">Timp tipic pe sistem modern</p>
+                        <p class="text-xs text-slate-400">Illustrative timing range; no benchmark provenance</p>
                     </div>
                 </div>
                 <div class="text-3xl font-bold text-red-400 mono">1-10 μs</div>
-                <div class="text-xs text-slate-500 mt-1">~3,000-30,000 cicluri @ 3GHz</div>
+                <div class="text-xs text-slate-500 mt-1">~3,000-30,000 cycles at the assumed 3 GHz frequency</div>
             </div>
             
             <div class="metric-card glass-card rounded-xl p-5">
@@ -661,12 +738,12 @@
                         <i class="fas fa-bolt text-green-400"></i>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-slate-200">Thread Switch Time</h4>
-                        <p class="text-xs text-slate-400">Timp tipic pe sistem modern</p>
+                        <h4 class="font-semibold text-slate-200">User-level Switch Time</h4>
+                        <p class="text-xs text-slate-400">Illustrative timing range; no benchmark provenance</p>
                     </div>
                 </div>
                 <div class="text-3xl font-bold text-green-400 mono">100ns - 1μs</div>
-                <div class="text-xs text-slate-500 mt-1">~300-3,000 cicluri @ 3GHz</div>
+                <div class="text-xs text-slate-500 mt-1">~300-3,000 cycles at the assumed 3 GHz frequency</div>
             </div>
             
             <div class="metric-card glass-card rounded-xl p-5">
@@ -675,62 +752,62 @@
                         <i class="fas fa-percentage text-amber-400"></i>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-slate-200">Raport Tipic</h4>
+                        <h4 class="font-semibold text-slate-200">Illustrative Ratio</h4>
                         <p class="text-xs text-slate-400">Process vs Thread switch</p>
                     </div>
                 </div>
-                <div class="text-3xl font-bold text-amber-400 mono">10x - 100x</div>
-                <div class="text-xs text-slate-500 mt-1">Thread switch e semnificativ more rapid</div>
+                <div class="text-3xl font-bold text-amber-400 mono">5.0x in this example</div>
+                <div class="text-xs text-slate-500 mt-1">This ratio applies only to the declared fixed inputs.</div>
             </div>
         </section>
 
         <!-- Why Section -->
         <section class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-question-circle text-blue-400"></i> De Ce Este Thread Switch Mai Fast?
+                <i class="fas fa-question-circle text-blue-400"></i> Why Can a User-level Switch Cost Less?
             </h3>
             
             <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                    <h4 class="font-semibold text-red-400 mb-3">Process Switch - De ce e lent?</h4>
+                    <h4 class="font-semibold text-red-400 mb-3">Process Switch — Sources of Cost</h4>
                     <ul class="space-y-2 text-sm">
                         <li class="flex items-start gap-2">
                             <i class="fas fa-times text-red-400 mt-1"></i>
-                            <span><strong>TLB Flush mandatory</strong> - schimbarea spatiului of adrese invalideaza all intrarile TLB</span>
+                            <span><strong>TLB handling is architecture-dependent</strong>: this example charges a flush on an untagged model. PCID/ASID-tagged translations can survive an address-space switch.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-times text-red-400 mt-1"></i>
-                            <span><strong>Cache cold</strong> - datele noului process probabil not are in cache</span>
+                            <span><strong>Cache cold</strong> — the new task’s working set may not be cached</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-times text-red-400 mt-1"></i>
-                            <span><strong>Page Table Base Register</strong> - must schimbat for noul spatiu of adrese</span>
+                            <span><strong>Page Table Base Register</strong> — changes when switching address spaces in this model</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-times text-red-400 mt-1"></i>
-                            <span><strong>Kernel structures</strong> - PCB-ul intreg must swap-uit</span>
+                            <span><strong>Kernel structures</strong>: save/restore the relevant execution state; the whole PCB is not swapped.</span>
                         </li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="font-semibold text-green-400 mb-3">Thread Switch - De ce e rapid?</h4>
+                    <h4 class="font-semibold text-green-400 mb-3">User-level Switch — Potential Savings</h4>
                     <ul class="space-y-2 text-sm">
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-green-400 mt-1"></i>
-                            <span><strong>Same spatiu of adrese</strong> - not e nevoie of TLB flush</span>
+                            <span><strong>Same address space</strong> — no address-space change in this model</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-green-400 mt-1"></i>
-                            <span><strong>Cache warm</strong> - datele partajate are probabil deja in cache</span>
+                            <span><strong>Cache warm</strong> — shared data may already be cached; locality must be measured</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-green-400 mt-1"></i>
-                            <span><strong>only registre + stack</strong> - minimal of saved/restaurat</span>
+                            <span><strong>Declared cooperative model</strong>: switch within one kernel thread, preserving ABI-required registers and stack. Native OS threads also have independent CPU/FPU and kernel execution state.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-green-400 mt-1"></i>
-                            <span><strong>TCB mic</strong> - Thread Control Block e mult more mic than PCB</span>
+                            <span><strong>Runtime TCB</strong> — runtime bookkeeping differs from a kernel task record; size is implementation-dependent</span>
                         </li>
                     </ul>
                 </div>
@@ -740,7 +817,7 @@
         <!-- Reset Button -->
         <div class="text-center mb-6">
             <button id="btn-reset" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-medium flex items-center gap-2 mx-auto transition-all">
-                <i class="fas fa-redo"></i> Reset Animatia
+                <i class="fas fa-redo"></i> Reset Animation
             </button>
         </div>
     </main>
@@ -756,6 +833,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             processTotal: 0,
@@ -793,7 +915,7 @@
                         borderWidth: 1
                     },
                     {
-                        label: 'Thread Switch',
+                        label: 'User-level Switch',
                         data: [100, 50, 50, 30, 0, 0, 50, 0, 0],
                         backgroundColor: 'rgba(34, 197, 94, 0.7)',
                         borderColor: 'rgba(34, 197, 94, 1)',
@@ -809,7 +931,7 @@
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Cicluri CPU',
+                            text: 'CPU Cycles',
                             color: '#94a3b8'
                         },
                         grid: {
@@ -841,9 +963,8 @@
         // Animation Functions
         async function animateSteps() {
             if (state.isAnimating) return;
-            state.isAnimating = true;
-            
             resetSteps();
+            state.isAnimating = true;
             
             const processSteps = processStepsContainer.querySelectorAll('.step-item:not(.skipped)');
             const threadSteps = threadStepsContainer.querySelectorAll('.step-item:not(.skipped)');
@@ -934,26 +1055,12 @@
         }
 
         function showRaceResult() {
-            const ratio = (state.processTotal / state.threadTotal).toFixed(1);
-            
-            raceResult.classList.remove('hidden');
-            raceResult.innerHTML = `
-                <div class="text-center">
-                    <span class="winner-badge inline-block px-4 py-2 bg-green-500 rounded-lg text-white font-bold text-lg mb-2">
-                        <i class="fas fa-trophy mr-2"></i> Thread Switch Wins!
-                    </span>
-                    <p class="text-slate-300">
-                        Process switch a durat <span class="text-red-400 font-bold">${state.processTotal}</span> cycles, 
-                        Thread switch only <span class="text-green-400 font-bold">${state.threadTotal}</span> cycles.
-                    </p>
-                    <p class="text-amber-400 font-semibold mt-1">
-                        Raport: ${ratio}x more lent for Process Switch!
-                    </p>
-                </div>
-            `;
-        }
+    raceResult.classList.remove('hidden');
+    raceResult.textContent=`Fixed-input totals: process ${state.processTotal} cycles; cooperative user-level switch ${state.threadTotal} cycles. Arithmetic ratio ${(state.processTotal/state.threadTotal).toFixed(1)}. Animation duration is not an OS measurement.`;
+}
 
         function resetSteps() {
+            enosTimers.cancel(); state.isAnimating = false;
             // Reset process steps
             processStepsContainer.querySelectorAll('.step-item').forEach(step => {
                 if (!step.classList.contains('skipped')) {
@@ -1009,6 +1116,27 @@
         // Event Listeners
         document.getElementById('btn-race').addEventListener('click', animateSteps);
         document.getElementById('btn-reset').addEventListener('click', resetSteps);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

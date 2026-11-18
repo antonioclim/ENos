@@ -1,3 +1,27 @@
+# Lecture 08 — Deadlock (Coffman)
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C08_01_COURSE_PLAN.md)
+- [Course Plan (retained filename)](docs/C08_01_PLAN_CURS.md)
+- [Concept Map](docs/C08_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C08_03_DISCUSSION_QUESTIONS.md)
+- [Discussion Questions (retained filename)](docs/C08_03_INTREBARI_DISCUTIE.md)
+- [Study Guide (retained filename)](docs/C08_04_GHID_STUDIU.md)
+- [Study Guide](docs/C08_04_STUDY_GUIDE.md)
+- [08ex1 - RAG Visualizer EN](docs/08ex1_-_RAG_Visualizer_EN.html)
+- [08ex2 - Bankers Algorithm EN](docs/08ex2_-_Bankers_Algorithm_EN.html)
+- [08ex3 - Deadlock Detection Recovery EN](docs/08ex3_-_Deadlock_Detection_Recovery_EN.html)
+- [Formative question bank](docs/C08_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 08
 

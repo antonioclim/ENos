@@ -6,714 +6,632 @@
 #
 # USAGE:
 #   python3 quiz_runner.py quiz.yaml           # Interactive mode
-#   python3 quiz_runner.py quiz.yaml --random  # Random order
-#   python3 quiz_runner.py quiz.yaml --export  # Export JSON for LMS
+#   python3 quiz_runner.py quiz.yaml --shuffle # Random order
+#   python3 quiz_runner.py quiz.yaml --export-bank bank.json # Local JSON data, not an LMS format
 # ═══════════════════════════════════════════════════════════════════════════════
 
 metadata:
   seminar: 5
-  title: "Advanced Bash Scripting"
-  subtitle: "Functions, Arrays, Reliability, Error Handling"
-  version: "1.1.0"
-  author: "ing. dr. Antonio Clim"
-  institution: "ASE Bucharest - CSIE"
-  date: "2025-01"
+  title: Advanced Bash Scripting
+  subtitle: Functions, Arrays, Reliability, Error Handling
+  version: 1.1.0
+  author: ing. dr. Antonio Clim
+  institution: ASE Bucharest - CSIE
+  date: 2025-01
   duration_minutes: 25
   question_count: 18
-  total_points: 100
+  total_points: 102
   passing_threshold: 60
-  
   bloom_distribution:
-    remember: 2
     understand: 8
+    remember: 2
     apply: 5
     analyse: 2
     evaluate: 1
-
   topics:
-    - name: "Functions"
-      questions: ["q01", "q02", "q03"]
-    - name: "Arrays"
-      questions: ["q04", "q05", "q06", "q07"]
-    - name: "Reliability"
-      questions: ["q08", "q09", "q10", "q11", "q12"]
-    - name: "Trap and Error Handling"
-      questions: ["q13", "q14"]
-    - name: "Consolidation"
-      questions: ["q15", "q16", "q17", "q18"]
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 1: FUNCTIONS
-# ═══════════════════════════════════════════════════════════════════════════════
-
+  - name: Functions
+    questions:
+    - q01
+    - q02
+    - q03
+  - name: Arrays
+    questions:
+    - q04
+    - q05
+    - q06
+    - q07
+  - name: Reliability
+    questions:
+    - q08
+    - q09
+    - q10
+    - q11
+    - q12
+  - name: Trap and Error Handling
+    questions:
+    - q13
+    - q14
+  - name: Consolidation
+    questions:
+    - q15
+    - q16
+    - q17
+    - q18
+  source_review: 2026-11-17; unpublished Phase 5 candidate
+  assessment_scope: Formative self-assessment only; question weights and local feedback thresholds do
+    not adopt a course grading policy.
 questions:
+- id: q01
+  topic: Functions
+  title: Variables in Functions
+  bloom: understand
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 80% believe variables
+    are local by default'
+  code: |
+    #!/bin/bash
+    count=10
 
-  - id: q01
-    topic: "Functions"
-    title: "Variables in Functions"
-    bloom: understand
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "80% believe variables are local by default"
-    
-    code: |
-      #!/bin/bash
-      count=10
-      
-      increment() {
-          count=$((count + 1))
-          echo "In function: $count"
-      }
-      
-      increment
-      echo "After function: $count"
-    
-    question: "What does the last line display?"
-    
-    options:
-      - text: "After function: 10"
-        explanation: "Believes variables are local by default"
-      - text: "After function: 11"
-        explanation: "CORRECT - variables in functions are GLOBAL by default"
-      - text: "After function: (empty)"
-        explanation: "Confuses with undefined behaviour"
-      - text: "Error - count is not defined in main"
-        explanation: "Does not understand that variables are global"
-    
-    correct_answer: 1
-    
-    explanation: |
-      In Bash, variables in functions are GLOBAL by default.
-      This is the opposite of Python/Java/C behaviour.
-      
-      Yes, it's bonkers. No, I don't know why Ken Thompson thought 
-      this was a good idea. But here we are, decades later, still 
-      getting bitten by it.
-      
-      For local variables, use: local count=$((count + 1))
-    
-    followup: "How do we make the variable stay local?"
-    followup_answer: "local count=$((count + 1))"
+    increment() {
+        count=$((count + 1))
+        echo "In function: $count"
+    }
 
-  - id: q02
-    topic: "Functions"
-    title: "Return vs Echo"
-    bloom: understand
-    points: 6
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "75% believe return works like other languages"
-    
-    code: |
-      #!/bin/bash
-      
-      get_value() {
-          return 42
-      }
-      
-      result=$(get_value)
-      echo "Result: '$result'"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Result: '42'"
-        explanation: "Confuses return with echo/print from other languages"
-      - text: "Result: '' (empty string)"
-        explanation: "CORRECT - return sets exit code, $() captures stdout"
-      - text: "Result: '0'"
-        explanation: "Confuses with default exit code"
-      - text: "Syntax error"
-        explanation: "Syntax is valid"
-    
-    correct_answer: 1
-    
-    explanation: |
-      `return` in Bash only sets exit code (0-255), it does not return values.
-      $() captures stdout, not the exit code.
-      To "return" values, use echo inside the function.
+    increment
+    echo "After function: $count"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does the last line display?
+  options:
+  - text: 'After function: 10'
+    explanation: Believes variables are local by default
+  - text: 'After function: 11'
+    explanation: CORRECT — in this script count is global; no enclosing local binding exists
+  - text: 'After function: (empty)'
+    explanation: Confuses with undefined behaviour
+  - text: Error - count is not defined in main
+    explanation: Does not understand that variables are global
+  correct_answer: 1
+  explanation: 'In this fresh script, assigning count in the function updates the global count, so the
+    last line is After function: 11. Bash uses dynamic scope: an assignment may instead find a caller''s
+    local variable. Use local for state intended to be local. No claim about the historical designer of
+    this behaviour is needed.'
+  followup: How do we make the variable stay local?
+  followup_answer: local count=$((count + 1))
+- id: q02
+  topic: Functions
+  title: Return vs Echo
+  bloom: understand
+  points: 6
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 75% believe return
+    works like other languages'
+  code: |
+    #!/bin/bash
 
-  - id: q03
-    topic: "Functions"
-    title: "Function Arguments vs Script Arguments"
-    bloom: understand
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "65% confuse $1 in function with $1 in script"
-    
-    code: |
-      #!/bin/bash
-      # Script: test.sh, run with: ./test.sh SCRIPT_ARG
-      
-      show_arg() {
-          echo "Function sees: $1"
-      }
-      
-      echo "Script sees: $1"
-      show_arg "FUNC_ARG"
-    
-    question: "Run with ./test.sh SCRIPT_ARG, what does the second line display?"
-    
-    options:
-      - text: "Function sees: SCRIPT_ARG"
-        explanation: "Confuses argument scope"
-      - text: "Function sees: FUNC_ARG"
-        explanation: "CORRECT - $1 in function is the function argument"
-      - text: "Function sees: (empty)"
-        explanation: "Function receives explicit argument"
-      - text: "Function sees: $1"
-        explanation: "Variables are expanded"
-    
-    correct_answer: 1
-    
-    explanation: |
-      $1 in function refers to the function argument, not the script argument.
-      Functions have their own set of positional arguments.
+    get_value() {
+        return 42
+    }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 2: ARRAYS
-# ═══════════════════════════════════════════════════════════════════════════════
+    result=$(get_value)
+    echo "Result: '$result'"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: 'Result: ''42'''
+    explanation: Confuses return with echo/print from other languages
+  - text: 'Result: '''' (empty string)'
+    explanation: CORRECT - return sets exit code, $() captures stdout
+  - text: 'Result: ''0'''
+    explanation: Confuses with default exit code
+  - text: Syntax error
+    explanation: Syntax is valid
+  correct_answer: 1
+  explanation: |
+    `return` in Bash only sets exit code (0-255), it does not return values.
+    $() captures stdout, not the exit code.
+    To "return" values, use echo inside the function.
+- id: q03
+  topic: Functions
+  title: Function Arguments vs Script Arguments
+  bloom: understand
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 65% confuse $1 in
+    function with $1 in script'
+  code: |
+    #!/bin/bash
+    # Script: test.sh, run with: ./test.sh SCRIPT_ARG
 
-  - id: q04
-    topic: "Arrays"
-    title: "Array Indexing"
-    bloom: remember
-    points: 4
-    difficulty: easy
-    time_seconds: 45
-    targeted_misconception: "55% believe arrays start at 1"
-    
-    code: |
-      #!/bin/bash
-      arr=("first" "second" "third")
-      echo "${arr[1]}"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "first"
-        explanation: "Believes indexing starts at 1"
-      - text: "second"
-        explanation: "CORRECT - arrays in Bash start at 0"
-      - text: "third"
-        explanation: "Indexing confusion"
-      - text: "Error - index 1 does not exist"
-        explanation: "Index 1 exists (second element)"
-    
-    correct_answer: 1
-    
-    explanation: |
-      Arrays in Bash start at index 0.
-      arr[0]="first", arr[1]="second", arr[2]="third"
+    show_arg() {
+        echo "Function sees: $1"
+    }
 
-  - id: q05
-    topic: "Arrays"
-    title: "declare -A"
-    bloom: understand
-    points: 6
-    difficulty: hard
-    time_seconds: 90
-    targeted_misconception: "70% believe declare -A is optional for hash"
-    
-    code: |
-      #!/bin/bash
-      # Without declare -A
-      config[host]="localhost"
-      config[port]="8080"
-      echo "Keys: ${!config[@]}"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Keys: host port"
-        explanation: "That would be with declare -A"
-      - text: "Keys: 0"
-        explanation: "CORRECT - without declare -A, 'host' and 'port' become 0"
-      - text: "Keys: 0 0"
-        explanation: "Only one key remains (overwritten)"
-      - text: "Error - config is not declared"
-        explanation: "Indexed arrays are created implicitly"
-    
-    correct_answer: 1
-    
-    explanation: |
-      Without declare -A, Bash treats config as INDEXED array.
-      'host' and 'port' are evaluated as variables (undefined = 0).
-      Both assignments write to config[0], last one overwrites first.
+    echo "Script sees: $1"
+    show_arg "FUNC_ARG"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. Run with ./test.sh SCRIPT_ARG, what does the second line display?
+  options:
+  - text: 'Function sees: SCRIPT_ARG'
+    explanation: Confuses argument scope
+  - text: 'Function sees: FUNC_ARG'
+    explanation: CORRECT - $1 in function is the function argument
+  - text: 'Function sees: (empty)'
+    explanation: Function receives explicit argument
+  - text: 'Function sees: $1'
+    explanation: Variables are expanded
+  correct_answer: 1
+  explanation: |
+    $1 in function refers to the function argument, not the script argument.
+    Functions have their own set of positional arguments.
+- id: q04
+  topic: Arrays
+  title: Array Indexing
+  bloom: remember
+  points: 4
+  difficulty: easy
+  time_seconds: 45
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 55% believe arrays
+    start at 1'
+  code: |
+    #!/bin/bash
+    arr=("first" "second" "third")
+    echo "${arr[1]}"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: first
+    explanation: Believes indexing starts at 1
+  - text: second
+    explanation: CORRECT - arrays in Bash start at 0
+  - text: third
+    explanation: Indexing confusion
+  - text: Error - index 1 does not exist
+    explanation: Index 1 exists (second element)
+  correct_answer: 1
+  explanation: |
+    Arrays in Bash start at index 0.
+    arr[0]="first", arr[1]="second", arr[2]="third"
+- id: q05
+  topic: Arrays
+  title: declare -A
+  bloom: understand
+  points: 6
+  difficulty: hard
+  time_seconds: 90
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 70% believe declare
+    -A is optional for hash'
+  code: |
+    #!/bin/bash
+    # Without declare -A
+    config[host]="localhost"
+    config[port]="8080"
+    echo "Keys: ${!config[@]}"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display? Assume config, host and port are initially unset
+    and nounset is off.
+  options:
+  - text: 'Keys: host port'
+    explanation: That would be with declare -A
+  - text: 'Keys: 0'
+    explanation: CORRECT - without declare -A, 'host' and 'port' become 0
+  - text: 'Keys: 0 0'
+    explanation: Only one key remains (overwritten)
+  - text: Error - config is not declared
+    explanation: Indexed arrays are created implicitly
+  correct_answer: 1
+  explanation: |
+    Without declare -A, Bash treats config as INDEXED array.
+    'host' and 'port' are evaluated as variables (undefined = 0).
+    Both assignments write to config[0], last one overwrites first.
+- id: q06
+  topic: Arrays
+  title: Iteration with Quotes
+  bloom: apply
+  points: 6
+  difficulty: medium
+  time_seconds: 75
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 65% forget quotes
+    when iterating'
+  code: |
+    #!/bin/bash
+    files=("file one.txt" "file two.txt")
 
-  - id: q06
-    topic: "Arrays"
-    title: "Iteration with Quotes"
-    bloom: apply
-    points: 6
-    difficulty: medium
-    time_seconds: 75
-    targeted_misconception: "65% forget quotes when iterating"
-    
-    code: |
-      #!/bin/bash
-      files=("file one.txt" "file two.txt")
-      
-      count=0
-      for f in ${files[@]}; do
-          ((count++))
-      done
-      echo "Iterations: $count"
-    
-    question: "How many iterations does the loop have?"
-    
-    options:
-      - text: "2"
-        explanation: "That would be WITH quotes"
-      - text: "4"
-        explanation: "CORRECT - word splitting separates each element"
-      - text: "1"
-        explanation: "Does not understand array iteration"
-      - text: "Error"
-        explanation: "Code is syntactically valid"
-    
-    correct_answer: 1
-    
-    explanation: |
-      Without quotes, Bash applies word splitting.
-      "file one.txt" becomes 2 words: "file" and "one.txt"
-      "file two.txt" becomes 2 words: "file" and "two.txt"
-      Total: 4 iterations. Use "${files[@]}" with quotes!
+    count=0
+    for f in ${files[@]}; do
+        ((count++))
+    done
+    echo "Iterations: $count"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. How many iterations does the loop have?
+  options:
+  - text: '2'
+    explanation: That would be WITH quotes
+  - text: '4'
+    explanation: CORRECT - word splitting separates each element
+  - text: '1'
+    explanation: Does not understand array iteration
+  - text: Error
+    explanation: Code is syntactically valid
+  correct_answer: 1
+  explanation: |
+    Without quotes, Bash applies word splitting.
+    "file one.txt" becomes 2 words: "file" and "one.txt"
+    "file two.txt" becomes 2 words: "file" and "two.txt"
+    Total: 4 iterations. Use "${files[@]}" with quotes!
+- id: q07
+  topic: Arrays
+  title: Deleting Element from Array
+  bloom: understand
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 60% believe unset
+    re-indexes the array'
+  code: |
+    #!/bin/bash
+    arr=("a" "b" "c" "d" "e")
+    unset 'arr[2]'
+    echo "Indices: ${!arr[@]}"
+    echo "Length: ${#arr[@]}"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: 'Indices: 0 1 2 3 and Length: 4'
+    explanation: Believes unset re-indexes
+  - text: 'Indices: 0 1 3 4 and Length: 4'
+    explanation: CORRECT - unset creates a sparse array
+  - text: 'Indices: 0 1 2 3 4 and Length: 5'
+    explanation: Element was deleted
+  - text: Error
+    explanation: Syntax is valid
+  correct_answer: 1
+  explanation: |
+    unset arr[2] deletes the element but does NOT re-index.
+    The array becomes "sparse" (with gap at index 2).
+    Remaining indices: 0, 1, 3, 4. Length is 4 elements.
+- id: q08
+  topic: Reliability
+  title: set -u Behaviour
+  bloom: understand
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 55% don''t know
+    how to handle optional variables with set -u'
+  code: |
+    #!/bin/bash
+    set -euo pipefail
 
-  - id: q07
-    topic: "Arrays"
-    title: "Deleting Element from Array"
-    bloom: understand
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "60% believe unset re-indexes the array"
-    
-    code: |
-      #!/bin/bash
-      arr=("a" "b" "c" "d" "e")
-      unset arr[2]
-      echo "Indices: ${!arr[@]}"
-      echo "Length: ${#arr[@]}"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Indices: 0 1 2 3 and Length: 4"
-        explanation: "Believes unset re-indexes"
-      - text: "Indices: 0 1 3 4 and Length: 4"
-        explanation: "CORRECT - unset creates a sparse array"
-      - text: "Indices: 0 1 2 3 4 and Length: 5"
-        explanation: "Element was deleted"
-      - text: "Error"
-        explanation: "Syntax is valid"
-    
-    correct_answer: 1
-    
-    explanation: |
-      unset arr[2] deletes the element but does NOT re-index.
-      The array becomes "sparse" (with gap at index 2).
-      Remaining indices: 0, 1, 3, 4. Length is 4 elements.
+    x="${UNDEFINED_VAR}"
+    echo "Continues..."
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What happens? UNDEFINED_VAR is not present in the environment.
+  options:
+  - text: Displays Continues... with x=""
+    explanation: Would happen without set -u
+  - text: 'Error: unbound variable'
+    explanation: CORRECT - set -u makes undefined variables an error
+  - text: Displays Continues... with x="UNDEFINED_VAR"
+    explanation: Confuses variable expansion
+  - text: Depends on Bash version
+    explanation: Behaviour is consistent
+  correct_answer: 1
+  explanation: |
+    set -u (nounset) makes undefined variables cause error.
+    UNDEFINED_VAR does not exist → script stops.
+    Use ${UNDEFINED_VAR:-default} for optional variables.
+- id: q09
+  topic: Reliability
+  title: set -e in if
+  bloom: understand
+  points: 6
+  difficulty: hard
+  time_seconds: 75
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 75% believe set
+    -e stops script on any error'
+  code: |
+    #!/bin/bash
+    set -e
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 3: RELIABILITY (set -euo pipefail)
-# ═══════════════════════════════════════════════════════════════════════════════
+    if false; then
+        echo "In if"
+    fi
+    echo "After if"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What happens?
+  options:
+  - text: Script stops at false
+    explanation: set -e does not work in if context
+  - text: Displays After if
+    explanation: CORRECT - set -e has exceptions for conditionals
+  - text: Displays In if then After if
+    explanation: false means the condition is false
+  - text: Syntax error
+    explanation: Syntax is valid
+  correct_answer: 1
+  explanation: The tested false command is exempt from errexit because it is the if condition. Exceptions
+    also include while/until tests, non-final commands in &&/|| lists, non-final pipeline commands (subject
+    to pipefail) and negation. A function called in such a tested context can have errexit ignored throughout
+    its body; do not infer a universal stop-on-error rule.
+- id: q10
+  topic: Reliability
+  title: set -e with ||
+  bloom: apply
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 65% don''t understand
+    || disables set -e'
+  code: |
+    #!/bin/bash
+    set -e
 
-  - id: q08
-    topic: "Reliability"
-    title: "set -u Behaviour"
-    bloom: understand
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "55% don't know how to handle optional variables with set -u"
-    
-    code: |
-      #!/bin/bash
-      set -euo pipefail
-      
-      x="${UNDEFINED_VAR}"
-      echo "Continues..."
-    
-    question: "What happens?"
-    
-    options:
-      - text: "Displays Continues... with x=\"\""
-        explanation: "Would happen without set -u"
-      - text: "Error: unbound variable"
-        explanation: "CORRECT - set -u makes undefined variables an error"
-      - text: "Displays Continues... with x=\"UNDEFINED_VAR\""
-        explanation: "Confuses variable expansion"
-      - text: "Depends on Bash version"
-        explanation: "Behaviour is consistent"
-    
-    correct_answer: 1
-    
-    explanation: |
-      set -u (nounset) makes undefined variables cause error.
-      UNDEFINED_VAR does not exist → script stops.
-      Use ${UNDEFINED_VAR:-default} for optional variables.
+    false || echo "Recovered"
+    echo "Continues"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: Script stops at false
+    explanation: '|| disables set -e for the left command'
+  - text: Recovered then Continues
+    explanation: CORRECT - || catches the error
+  - text: Only Recovered
+    explanation: Script continues after ||
+  - text: Only Continues
+    explanation: Recovered is displayed because false fails
+  correct_answer: 1
+  explanation: The non-final false command in the OR list is tested, so errexit does not exit there. The
+    following echo succeeds and the script continues. A failure in the final command of an AND/OR list
+    is not covered by this exemption.
+- id: q11
+  topic: Reliability
+  title: pipefail Behaviour
+  bloom: apply
+  points: 6
+  difficulty: medium
+  time_seconds: 75
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 60% don''t understand
+    pipefail'
+  code: |
+    #!/bin/bash
+    set -o pipefail
+    (exit 2) | (exit 7) | true
+    printf "Exit: %s\n" "$?"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: 'Exit: 0'
+    explanation: That would be WITHOUT pipefail
+  - text: 'Exit: 7'
+    explanation: CORRECT — rightmost non-zero status in pipeline order, not the first failure or completion
+      time
+  - text: 'Exit: 2'
+    explanation: The leftmost failure is not the pipefail selection rule
+  - text: Nothing - script stops
+    explanation: without set -e, script continues
+  correct_answer: 1
+  explanation: 'With pipefail, the pipeline status is the rightmost non-zero component status: 7. Without
+    it, the last true command would give 0. errexit is not enabled here.'
+- id: q12
+  topic: Reliability
+  title: set -e + pipefail
+  bloom: apply
+  points: 6
+  difficulty: hard
+  time_seconds: 75
+  targeted_misconception: Combination set -e + pipefail
+  code: |
+    #!/bin/bash
+    set -eo pipefail
 
-  - id: q09
-    topic: "Reliability"
-    title: "set -e in if"
-    bloom: understand
-    points: 6
-    difficulty: hard
-    time_seconds: 75
-    targeted_misconception: "75% believe set -e stops script on any error"
-    
-    code: |
-      #!/bin/bash
-      set -e
-      
-      if false; then
-          echo "In if"
-      fi
-      echo "After if"
-    
-    question: "What happens?"
-    
-    options:
-      - text: "Script stops at false"
-        explanation: "set -e does not work in if context"
-      - text: "Displays After if"
-        explanation: "CORRECT - set -e has exceptions for conditionals"
-      - text: "Displays In if then After if"
-        explanation: "false means the condition is false"
-      - text: "Syntax error"
-        explanation: "Syntax is valid"
-    
-    correct_answer: 1
-    
-    explanation: |
-      set -e does NOT stop the script when:
-      - Command is in if/while/until condition
-      - Command is left side of || or &&
-      - Command is negated with !
+    cat /nonexistent | grep "pattern"
+    echo "After pipe"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What happens? The path /nonexistent is absent.
+  options:
+  - text: Displays error from cat, then After pipe
+    explanation: set -e stops the script
+  - text: Reports the cat error, then exits after the failed pipeline; After pipe is not printed
+    explanation: CORRECT — the completed pipeline has non-zero status in an unguarded context
+  - text: Displays After pipe (grep saves it)
+    explanation: grep receives no matching data and returns 1; it does not make this pipeline successful.
+  - text: Depends on existence of pattern file
+    explanation: pattern is a search expression, not a filename in this command.
+  correct_answer: 1
+  explanation: cat reports its error to stderr. With no matching input, grep returns 1; that is the rightmost
+    non-zero pipeline status. The unguarded pipeline then triggers errexit. This is not an immediate exit
+    at the first command that fails.
+- id: q13
+  topic: Trap and Error Handling
+  title: Trap EXIT
+  bloom: apply
+  points: 6
+  difficulty: medium
+  time_seconds: 75
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 55% believe trap
+    EXIT does not execute on errors'
+  code: |
+    #!/bin/bash
+    set -e
 
-  - id: q10
-    topic: "Reliability"
-    title: "set -e with ||"
-    bloom: apply
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "65% don't understand || disables set -e"
-    
-    code: |
-      #!/bin/bash
-      set -e
-      
-      false || echo "Recovered"
-      echo "Continues"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Script stops at false"
-        explanation: "|| disables set -e for the left command"
-      - text: "Recovered then Continues"
-        explanation: "CORRECT - || catches the error"
-      - text: "Only Recovered"
-        explanation: "Script continues after ||"
-      - text: "Only Continues"
-        explanation: "Recovered is displayed because false fails"
-    
-    correct_answer: 1
-    
-    explanation: |
-      When using ||, set -e is disabled for the left command.
-      false fails → "Recovered" is displayed.
-      Script continues normally after ||.
+    cleanup() {
+        echo "Cleanup executed"
+    }
+    trap cleanup EXIT
 
-  - id: q11
-    topic: "Reliability"
-    title: "pipefail Behaviour"
-    bloom: apply
-    points: 6
-    difficulty: medium
-    time_seconds: 75
-    targeted_misconception: "60% don't understand pipefail"
-    
-    code: |
-      #!/bin/bash
-      set -o pipefail
-      
-      false | true | true
-      echo "Exit: $?"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Exit: 0"
-        explanation: "That would be WITHOUT pipefail"
-      - text: "Exit: 1"
-        explanation: "CORRECT - pipefail returns first error from pipe"
-      - text: "Exit: 2"
-        explanation: "Only first non-zero exit code matters"
-      - text: "Nothing - script stops"
-        explanation: "without set -e, script continues"
-    
-    correct_answer: 1
-    
-    explanation: |
-      With pipefail, pipeline returns exit code of first failing command.
-      Without pipefail, it would return 0 (from last true).
+    echo "Start"
+    false
+    echo "End"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. What does it display?
+  options:
+  - text: Start then Cleanup executed
+    explanation: CORRECT — this shell exits on the unguarded false command and then executes its EXIT
+      trap.
+  - text: Start, End, Cleanup executed
+    explanation: set -e stops at false, End is not displayed
+  - text: Only Start
+    explanation: trap EXIT still executes
+  - text: Cleanup executed then Start
+    explanation: trap executes at EXIT, not at start
+  correct_answer: 0
+  explanation: The script prints Start, then exits at false under errexit and runs cleanup through EXIT.
+    EXIT is a shell event, not an OS signal. No cleanup is guaranteed after SIGKILL or a crash. An INT
+    handler that merely returns may let execution continue; registering both INT and EXIT can call cleanup
+    twice unless the handler/cleanup is designed accordingly.
+- id: q14
+  topic: Trap and Error Handling
+  title: Trap and Subshell
+  bloom: understand
+  points: 6
+  difficulty: hard
+  time_seconds: 90
+  targeted_misconception: 'Historical unverified estimate; no cohort/source supplied: 45% believe trap
+    is inherited in subshell'
+  code: |
+    #!/bin/bash
 
-  - id: q12
-    topic: "Reliability"
-    title: "set -e + pipefail"
-    bloom: apply
-    points: 6
-    difficulty: hard
-    time_seconds: 75
-    targeted_misconception: "Combination set -e + pipefail"
-    
-    code: |
-      #!/bin/bash
-      set -eo pipefail
-      
-      cat /nonexistent | grep "pattern"
-      echo "After pipe"
-    
-    question: "What happens?"
-    
-    options:
-      - text: "Displays error from cat, then After pipe"
-        explanation: "set -e stops the script"
-      - text: "Script stops at cat error"
-        explanation: "CORRECT - set -e + pipefail = errors in pipe stop script"
-      - text: "Displays After pipe (grep saves it)"
-        explanation: "pipefail propagates error from cat"
-      - text: "Depends on existence of pattern file"
-        explanation: "cat error appears first"
-    
-    correct_answer: 1
-    
-    explanation: |
-      set -e + pipefail = errors in pipe stop the script.
-      cat /nonexistent fails, pipefail propagates error, set -e stops.
+    cleanup() { echo "Cleanup"; }
+    trap cleanup EXIT
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 4: TRAP AND ERROR HANDLING
-# ═══════════════════════════════════════════════════════════════════════════════
+    (
+        echo "In subshell"
+        exit 1
+    )
 
-  - id: q13
-    topic: "Trap and Error Handling"
-    title: "Trap EXIT"
-    bloom: apply
-    points: 6
-    difficulty: medium
-    time_seconds: 75
-    targeted_misconception: "55% believe trap EXIT does not execute on errors"
-    
-    code: |
-      #!/bin/bash
-      set -e
-      
-      cleanup() {
-          echo "Cleanup executed"
-      }
-      trap cleanup EXIT
-      
-      echo "Start"
-      false
-      echo "End"
-    
-    question: "What does it display?"
-    
-    options:
-      - text: "Start then Cleanup executed"
-        explanation: "CORRECT - trap EXIT executes ALWAYS"
-      - text: "Start, End, Cleanup executed"
-        explanation: "set -e stops at false, End is not displayed"
-      - text: "Only Start"
-        explanation: "trap EXIT still executes"
-      - text: "Cleanup executed then Start"
-        explanation: "trap executes at EXIT, not at start"
-    
-    correct_answer: 0
-    
-    explanation: |
-      trap cleanup EXIT executes ALWAYS on exit:
-      - On normal exit
-      - On errors (set -e)
-      - On Ctrl+C (if you also have trap INT)
+    echo "After subshell: $?"
+  question: Assume a fresh non-interactive Bash 5.x shell, ordinary IFS, no inherited shell options or
+    traps, and the stated inputs. How many Cleanup appear?
+  options:
+  - text: '0'
+    explanation: Trap from main script still executes
+  - text: '1'
+    explanation: CORRECT for this parenthesised subshell and the stated fresh-shell settings.
+  - text: '2'
+    explanation: Trap is not inherited
+  - text: Depends on Bash version
+    explanation: Behaviour is consistent
+  correct_answer: 1
+  explanation: 'In this exact parenthesised-subshell example, the parent EXIT action is not run by the
+    child. It runs once when the parent finishes. Do not generalise to all trap inheritance: ERR, DEBUG
+    and RETURN have separate settings and contexts, including errtrace/functrace.'
+- id: q15
+  topic: Consolidation
+  title: Professional Template
+  bloom: remember
+  points: 5
+  difficulty: medium
+  time_seconds: 60
+  targeted_misconception: Order of sections in scripts
+  question: Which option matches the explicit template convention taught here, including selected shell
+    options before ordinary work? This is a local teaching convention, not the only valid Bash programme
+    structure.
+  options:
+  - text: Shebang → Main → Functions → Trap → Constants
+    explanation: Main should be at the end
+  - text: Shebang → Constants → Functions → Trap → Main
+    explanation: Missing set -euo pipefail
+  - text: Shebang → set -euo pipefail → Constants → Functions → Trap → Parse Args → Main
+    explanation: CORRECT — this is the stated template convention; other structures may be valid under
+      different requirements.
+  - text: Main → Functions → Shebang → Trap
+    explanation: Shebang must be first line
+  correct_answer: 2
+  explanation: The convention is shebang, explicitly chosen shell options, constants, functions, trap
+    setup, argument parsing and main. A trap action must be available when invoked, not necessarily at
+    registration time. Strict-mode options require deliberate treatment of their exceptions.
+- id: q16
+  topic: Consolidation
+  title: Identify Bugs
+  bloom: analyse
+  points: 8
+  difficulty: hard
+  time_seconds: 120
+  targeted_misconception: Common wrong patterns
+  code: |
+    #!/bin/bash
+    set -euo pipefail
 
-  - id: q14
-    topic: "Trap and Error Handling"
-    title: "Trap and Subshell"
-    bloom: understand
-    points: 6
-    difficulty: hard
-    time_seconds: 90
-    targeted_misconception: "45% believe trap is inherited in subshell"
-    
-    code: |
-      #!/bin/bash
-      
-      cleanup() { echo "Cleanup"; }
-      trap cleanup EXIT
-      
-      (
-          echo "In subshell"
-          exit 1
-      )
-      
-      echo "After subshell: $?"
-    
-    question: "How many Cleanup appear?"
-    
-    options:
-      - text: "0"
-        explanation: "Trap from main script still executes"
-      - text: "1"
-        explanation: "CORRECT - trap is NOT inherited in subshell"
-      - text: "2"
-        explanation: "Trap is not inherited"
-      - text: "Depends on Bash version"
-        explanation: "Behaviour is consistent"
-    
-    correct_answer: 1
-    
-    explanation: |
-      Traps are NOT inherited in subshells.
-      Cleanup appears only once, when main script terminates.
+    declare -a files
+    files=$(find . -name "*.txt")
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 5: CONSOLIDATION
-# ═══════════════════════════════════════════════════════════════════════════════
-
-  - id: q15
-    topic: "Consolidation"
-    title: "Professional Template"
-    bloom: remember
-    points: 5
-    difficulty: medium
-    time_seconds: 60
-    targeted_misconception: "Order of sections in scripts"
-    
-    question: "What is the correct order of sections in a professional script?"
-    
-    options:
-      - text: "Shebang → Main → Functions → Trap → Constants"
-        explanation: "Main should be at the end"
-      - text: "Shebang → Constants → Functions → Trap → Main"
-        explanation: "Missing set -euo pipefail"
-      - text: "Shebang → set -euo pipefail → Constants → Functions → Trap → Parse Args → Main"
-        explanation: "CORRECT - standard professional structure"
-      - text: "Main → Functions → Shebang → Trap"
-        explanation: "Shebang must be first line"
-    
-    correct_answer: 2
-    
-    explanation: |
-      Professional structure: Shebang → strict mode → constants → 
-      functions → cleanup → trap → argument parsing → main → execute main
-
-  - id: q16
-    topic: "Consolidation"
-    title: "Identify Bugs"
-    bloom: analyse
-    points: 8
-    difficulty: hard
-    time_seconds: 120
-    targeted_misconception: "Common wrong patterns"
-    
-    code: |
-      #!/bin/bash
-      set -euo pipefail
-      
-      declare -a files
-      files=$(find . -name "*.txt")
-      
-      for f in ${files[@]}; do
-          process "$f"
-      done
-    
-    question: "How many bugs does this code have?"
-    
-    options:
-      - text: "1"
-        explanation: "There are more problems"
-      - text: "2"
-        explanation: "There is one more"
-      - text: "3"
-        explanation: "CORRECT - wrong assignment, missing quotes, redundant declare"
-      - text: "4 or more"
-        explanation: "There are exactly 3 main ones"
-    
-    correct_answer: 2
-    
-    explanation: |
-      Bug 1: files=$(...) - should be mapfile -t files < <(find...)
-      Bug 2: ${files[@]} without quotes - should be "${files[@]}"
-      Bug 3: declare -a redundant for indexed arrays
-
-  - id: q17
-    topic: "Consolidation"
-    title: "Best Practice - True/False"
-    bloom: evaluate
-    points: 6
-    difficulty: medium
-    time_seconds: 75
-    targeted_misconception: "set -e exceptions"
-    
-    question: "Which statement is FALSE about Bash best practices?"
-    
-    options:
-      - text: "local should be used for all variables in functions"
-        explanation: "TRUE - prevents side effects"
-      - text: "declare -A is mandatory for associative arrays"
-        explanation: "TRUE - otherwise treated as indexed"
-      - text: "set -e stops script on absolutely any error"
-        explanation: "FALSE - has multiple exceptions (if, ||, &&, !, etc.)"
-      - text: "\"${arr[@]}\" with quotes is necessary for correct iteration"
-        explanation: "TRUE - prevents word splitting"
-    
-    correct_answer: 2
-    
-    explanation: |
-      set -e has exceptions: commands in if/while, after || or &&,
-      commands negated with !, functions in test context.
-
-  - id: q18
-    topic: "Consolidation"
-    title: "Debug Pattern"
-    bloom: analyse
-    points: 6
-    difficulty: medium
-    time_seconds: 75
-    targeted_misconception: "Conditional debug pattern"
-    
-    code: |
-      #!/bin/bash
-      DEBUG="${DEBUG:-false}"
-      
-      process() {
-          local file="$1"
-          $DEBUG && echo "[DEBUG] Processing: $file" >&2
-          # ... processing
-      }
-    
-    question: "What does $DEBUG && echo ... do?"
-    
-    options:
-      - text: "Always displays debug message"
-        explanation: "Depends on DEBUG value"
-      - text: "Displays message only if DEBUG=\"true\""
-        explanation: "CORRECT - $DEBUG is executed as command"
-      - text: "Displays message if DEBUG is any non-empty value"
-        explanation: "false as string is not a valid command"
-      - text: "Syntax error"
-        explanation: "Syntax is valid"
-    
-    correct_answer: 1
-    
-    explanation: |
-      $DEBUG is executed as COMMAND.
-      DEBUG="true" → command "true" succeeds → echo executes
-      DEBUG="false" → command "false" fails → echo does not execute
+    for f in ${files[@]}; do
+        process "$f"
+    done
+  question: Assume process is defined, find succeeds, and .txt filenames may contain spaces or newlines.
+    Which concrete problem follows from this code?
+  options:
+  - text: declare -a is a syntax error
+    explanation: It is a valid declaration of an indexed array.
+  - text: The scalar assignment automatically creates one array element per pathname
+    explanation: Command substitution supplies one scalar value, not a NUL-delimited pathname array.
+  - text: The collected text is stored in one array element and unquoted expansion can split/glob filenames
+    explanation: CORRECT — the representation and expansion fail to preserve arbitrary pathname boundaries.
+  - text: Changing only declare -a to declare -A solves pathname handling
+    explanation: Changing array type does not repair parsing or quoting.
+  correct_answer: 2
+  explanation: Optional declare -a is valid and is not a third bug. Command substitution also strips trailing
+    newlines; newline-delimited collection cannot represent every pathname. Use a checked NUL-delimited
+    producer and read/mapfile -d "" with quoted "${files[@]}", or find -exec ... {} +. Producer failure
+    must be checked explicitly when process substitution is used.
+- id: q17
+  topic: Consolidation
+  title: Best Practice - True/False
+  bloom: evaluate
+  points: 6
+  difficulty: medium
+  time_seconds: 75
+  targeted_misconception: set -e exceptions
+  question: Which statement is FALSE about Bash best practices?
+  options:
+  - text: Use local for variables intended to be function-local and document intentional shared state
+    explanation: TRUE — scope follows the intended contract, not a universal ban on shared state.
+  - text: Use declare -A when initially declaring an associative array
+    explanation: TRUE — an otherwise implicit array is indexed.
+  - text: set -e stops script on absolutely any error
+    explanation: FALSE - has multiple exceptions (if, ||, &&, !, etc.)
+  - text: Quoted "${arr[@]}" preserves each element, including whitespace, during array iteration
+    explanation: TRUE — quoting avoids field splitting and pathname expansion of elements.
+  correct_answer: 2
+  explanation: The false statement is the universal errexit claim. Its documented exceptions include tests,
+    non-final commands in &&/|| lists, pipeline contexts and negation. A function called as a test can
+    also run with errexit ignored.
+- id: q18
+  topic: Consolidation
+  title: Debug Pattern
+  bloom: analyse
+  points: 6
+  difficulty: medium
+  time_seconds: 75
+  targeted_misconception: Conditional debug pattern
+  code: |
+    #!/bin/bash
+    DEBUG="${DEBUG:-false}"
+    process() {
+        local file="$1"
+        if [[ "$DEBUG" == true ]]; then
+            printf "[DEBUG] Processing: %s\n" "$file" >&2
+        fi
+        # ... processing
+        return 0
+    }
+    process "example.txt"
+  question: For the displayed data-comparison implementation, when is the debug line written? DEBUG may
+    be any string supplied to this fresh Bash process.
+  options:
+  - text: Always
+    explanation: The comparison controls the output.
+  - text: Only when DEBUG is exactly the string true
+    explanation: CORRECT — [[ ... ]] compares data and does not execute its value.
+  - text: 'For every non-empty DEBUG value, including :'
+    explanation: Neither non-emptiness nor a successful command name is the comparison rule.
+  - text: Never, because false is not a valid command
+    explanation: false is a valid command; this implementation does not execute DEBUG at all.
+  correct_answer: 1
+  explanation: 'The implementation treats DEBUG as data. The historical $DEBUG && ... form executes its
+    expanded value as a command; both true and : succeed, so the old true-only answer was invalid. The
+    explicit comparison avoids that ambiguity and does not run a command named by DEBUG.'

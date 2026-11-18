@@ -56,7 +56,7 @@ Develop a tool that analyses and reports on the state of a file system. The scri
 
 ## Interface
 
-```bash
+```text
 # Basic usage
 ./fs_auditor.sh /path/to/analyze
 
@@ -81,6 +81,8 @@ Examples:
 ---
 
 ## Output Examples
+
+These are synthetic illustrations, not measured runs or acceptance evidence.
 
 ### Text Output (default)
 
@@ -181,7 +183,10 @@ E01_File_System_Auditor/
 
 ```bash
 # Directory sizes
-du -sh */ 2>/dev/null | sort -rh | head -10
+# GNU tools: immediate children, including hidden directories. Sizes include descendants.
+find . -mindepth 1 -maxdepth 1 -type d -print0 |
+    du -sh --files0-from=- --null | sort -zrh | head -z -n 10 |
+    while IFS= read -r -d '' entry; do printf '%q\n' "$entry"; done
 
 # Large files
 find . -type f -size +100M -exec ls -lh {} \;
@@ -191,7 +196,20 @@ find . -type f -size +100M -exec ls -lh {} \;
 
 ```bash
 # Count per extension
-find . -type f | sed 's/.*\.//' | sort | uniq -c | sort -rn
+declare -A extension_count=()
+while IFS= read -r -d '' file; do
+    name=${file##*/}
+    # A single leading dot does not make a filename extension.
+    case "$name" in
+        .*.*|?*.*) extension=${name##*.} ;;
+        *) extension='(no ext)' ;;
+    esac
+    [[ -n "$extension" ]] || extension='(no ext)'
+    extension_count["$extension"]=$((${extension_count["$extension"]:-0} + 1))
+done < <(find . -type f -print0)
+for extension in "${!extension_count[@]}"; do
+    printf '%d %q\n' "${extension_count[$extension]}" "$extension"
+done | sort -nr
 ```
 
 ### Permission checking

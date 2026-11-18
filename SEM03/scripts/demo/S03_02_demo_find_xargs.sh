@@ -29,7 +29,8 @@ set -e  # Exit on error
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-DEMO_DIR="$HOME/find_demo_lab"
+DEMO_DIR="$(mktemp -d "${TMPDIR:-/tmp}/enos-find.XXXXXXXX")"
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
 INTERACTIVE=false
 RUN_SECTION=""
 RUN_ALL=false
@@ -408,7 +409,7 @@ section_3_type_size() {
     
     run_demo "find . -type f -size +1M" "Files larger than 1MB"
     
-    run_demo "find . -type f -size +100k -size -1M" "Between 100KB and 1MB"
+    run_demo "find . -type f -size +102400c -size -1048576c" "Between 100KB and 1MB"
     
     # Display with size
     run_demo "find . -type f -size +100k -exec ls -lh {} \\;" "With displayed sizes"
@@ -602,7 +603,7 @@ section_6_actions() {
     echo "  3. Delete:  find . -name '*.tmp' -delete"
     
     # Safe demo: create and delete temporary files
-    touch "$DEMO_DIR/temp/deleteme_{1..3}.test"
+    touch "$DEMO_DIR/temp"/deleteme_{1..3}.test
     
     run_demo "find ./temp -name '*.test' -print" "STEP 1: Verify what will be deleted"
     
@@ -904,12 +905,8 @@ parse_args() {
 main() {
     parse_args "$@"
     
-    # Check if demo environment exists
-    if [[ ! -d "$DEMO_DIR" ]] && [[ "$RUN_SECTION" != "1" ]] && [[ -z "$RUN_SECTION" ]]; then
-        echo -e "${YELLOW}Initial setup needed. Running section 1...${NC}"
-        section_1_intro
-    fi
-    
+    setup_demo_environment
+
     # Run specific section or all
     if [[ -n "$RUN_SECTION" ]]; then
         case "$RUN_SECTION" in

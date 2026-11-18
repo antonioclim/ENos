@@ -1,3 +1,23 @@
+# Lecture 17supp — Kernel Level OS Programming
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C17_01_COURSE_PLAN.md)
+- [Concept Map](docs/C17_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C17_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C17_04_STUDY_GUIDE.md)
+- [17ex1 - Kernel Module Lifecycle](docs/17ex1_-_Kernel_Module_Lifecycle.html)
+- [17ex2 - Character Device Flow](docs/17ex2_-_Character_Device_Flow.html)
+- [Formative question bank](docs/C17_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 # Demo Scripts — Course 17 Supplementary: eBPF and Kernel Level Programming
 
 > Operating Systems | ASE Bucharest - CSIE | 2025-2026  
@@ -133,7 +153,7 @@ The script demonstrates the complete eBPF cycle:
 | **kprobe** | `netmonitor.py` (tcp_connect, tcp_accept) | On kernel function entry |
 | **kretprobe** | Return values | On kernel function exit |
 | **tracepoint** | `system_monitor.bt` (syscalls) | Predefined kernel events |
-| **uprobe** | Utilizatorspace functions | On binary function entry |
+| **uprobe** | User-space functions | On binary function entry |
 | **USDT** | Application probes | Explicit code markers |
 
 ### BPF Maps
@@ -171,7 +191,7 @@ Functions:
 
 ---
 
-## Exemplu Output
+## Illustrative output
 
 ### netmonitor.py
 
@@ -248,7 +268,7 @@ sudo apt install bpfcc-tools python3-bpfcc libbpfcc-dev
 # bpftrace
 sudo apt install bpftrace
 
-# Kernel headers (for BTF)
+# Headers matching the running kernel (some BCC compilation paths)
 sudo apt install linux-headers-$(uname -r)
 
 # Optional: for advanced eBPF development
@@ -264,11 +284,11 @@ uname -r
 
 # Check BTF availability
 ls -la /sys/kernel/btf/vmlinux
-# Must exist for BCC/bpftrace
+# Runtime BTF availability; requirements depend on tool/version/probe type
 
 # Check bpf() syscall availability
-cat /proc/kallsyms | grep -w bpf
-# Should show __x64_sys_bpf or similar
+grep -E '(__[[:alnum:]_]*sys_bpf|__do_sys_bpf|sys_bpf)$' /proc/kallsyms
+# May show __x64_sys_bpf or another architecture-specific symbol; restricted kallsyms is not proof that BPF is absent
 
 # Quick bpftrace test
 sudo bpftrace -e 'BEGIN { printf("eBPF works!\n"); exit(); }'
@@ -284,7 +304,7 @@ sudo python3 -c "from bcc import BPF; print('BCC works!')"
 | Problem | Cause | Solution |
 |---------|-------|----------|
 | "BPF not supported" | Kernel without CONFIG_BPF | Recompile kernel or use standard distribution |
-| "BTF not found" | Missing headers | `sudo apt install linux-headers-$(uname -r)` |
+| "BTF not found" | Running kernel does not expose suitable BTF | Use a supported kernel built with `CONFIG_DEBUG_INFO_BTF` and check `/sys/kernel/btf/vmlinux`; installing headers alone does not create runtime BTF |
 | "Permission denied" | Missing capabilities | Run with `sudo` or add `CAP_BPF` |
 | "Failed to load BPF program" | Verifier error | Check eBPF code (limits, invalid accesses) |
 | "bcc module not found" | Wrong Python path | `sudo apt install python3-bpfcc` |

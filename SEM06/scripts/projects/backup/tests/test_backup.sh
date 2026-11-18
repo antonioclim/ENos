@@ -36,12 +36,12 @@ VERBOSE=false
 TEST_FILTER=""
 
 # Colours
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[0;33m'
-readonly BLUE='\033[0;34m'
-readonly CYAN='\033[0;36m'
-readonly NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
 # =============================================================================
 # TEST FUNCTIONS
@@ -80,6 +80,7 @@ setup_test_environment() {
     
     # Create temporary directories
     TEST_TMP_DIR=$(mktemp -d)
+    export TMPDIR="$TEST_TMP_DIR"
     TEST_SOURCE_DIR="${TEST_TMP_DIR}/source"
     TEST_DEST_DIR="${TEST_TMP_DIR}/dest"
     TEST_LOG_DIR="${TEST_TMP_DIR}/logs"
@@ -276,7 +277,7 @@ run_test() {
         return 0
     fi
     
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     
     echo -ne "  Testing: ${test_name}... "
     
@@ -293,10 +294,10 @@ run_test() {
     
     if [[ $exit_code -eq 0 ]]; then
         echo -e "${GREEN}PASSED${NC}"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
     else
         echo -e "${RED}FAILED${NC}"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         if [[ -n "${output:-}" ]]; then
             echo "$output" | sed 's/^/    /'
         fi
@@ -307,8 +308,8 @@ skip_test() {
     local test_name="$1"
     local reason="${2:-}"
     
-    ((TESTS_RUN++))
-    ((TESTS_SKIPPED++))
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
     
     echo -e "  Testing: ${test_name}... ${YELLOW}SKIPPED${NC} ${reason:+($reason)}"
 }
@@ -321,32 +322,32 @@ test_logging_debug() {
     local output
     output=$(log_debug "Test debug message" 2>&1)
     # Debug should be in log when LOG_LEVEL=DEBUG
-    assert_true "[[ -f '$LOG_FILE' ]] || [[ -n '$output' ]]" "Log should work"
+    assert_true "[[ -f '$LOG_FILE' ]] || [[ -n '$output' ]]" "Log should work" || return 1
 }
 
 test_logging_info() {
     local output
     output=$(log_info "Test info message" 2>&1)
-    assert_contains "$output" "INFO" "Should contain INFO level"
+    assert_contains "$output" "INFO" "Should contain INFO level" || return 1
 }
 
 test_logging_warn() {
     local output
     output=$(log_warn "Test warning" 2>&1)
-    assert_contains "$output" "WARN" "Should contain WARN level"
+    assert_contains "$output" "WARN" "Should contain WARN level" || return 1
 }
 
 test_logging_error() {
     local output
     output=$(log_error "Test error" 2>&1)
-    assert_contains "$output" "ERROR" "Should contain ERROR level"
+    assert_contains "$output" "ERROR" "Should contain ERROR level" || return 1
 }
 
 test_generate_backup_name() {
     local name
     name=$(generate_backup_name "daily")
-    assert_not_empty "$name" "Backup name should not be empty"
-    assert_contains "$name" "daily" "Should contain backup type"
+    assert_not_empty "$name" "Backup name should not be empty" || return 1
+    assert_contains "$name" "daily" "Should contain backup type" || return 1
 }
 
 test_verify_archive_valid() {
@@ -354,11 +355,11 @@ test_verify_archive_valid() {
     local test_archive="${TEST_TMP_DIR}/test_valid.tar.gz"
     tar -czf "$test_archive" -C "$TEST_SOURCE_DIR" . 2>/dev/null
     
-    assert_file_exists "$test_archive" "Archive should be created"
+    assert_file_exists "$test_archive" "Archive should be created" || return 1
     
     local result
     result=$(verify_archive "$test_archive" && echo "valid" || echo "invalid")
-    assert_equals "valid" "$result" "Archive should be valid"
+    assert_equals "valid" "$result" "Archive should be valid" || return 1
 }
 
 test_verify_archive_invalid() {
@@ -368,7 +369,7 @@ test_verify_archive_invalid() {
     
     local result
     result=$(verify_archive "$test_archive" 2>/dev/null && echo "valid" || echo "invalid")
-    assert_equals "invalid" "$result" "Invalid archive should fail verification"
+    assert_equals "invalid" "$result" "Invalid archive should fail verification" || return 1
 }
 
 # =============================================================================
@@ -378,29 +379,29 @@ test_verify_archive_invalid() {
 test_get_archive_extension_gzip() {
     COMPRESSION="gzip"
     local ext
-    ext=$(get_archive_extension)
-    assert_equals ".tar.gz" "$ext" "gzip extension should be .tar.gz"
+    ext=$(get_archive_extension "$COMPRESSION")
+    assert_equals ".tar.gz" "$ext" "gzip extension should be .tar.gz" || return 1
 }
 
 test_get_archive_extension_bzip2() {
     COMPRESSION="bzip2"
     local ext
-    ext=$(get_archive_extension)
-    assert_equals ".tar.bz2" "$ext" "bzip2 extension should be .tar.bz2"
+    ext=$(get_archive_extension "$COMPRESSION")
+    assert_equals ".tar.bz2" "$ext" "bzip2 extension should be .tar.bz2" || return 1
 }
 
 test_get_archive_extension_xz() {
     COMPRESSION="xz"
     local ext
-    ext=$(get_archive_extension)
-    assert_equals ".tar.xz" "$ext" "xz extension should be .tar.xz"
+    ext=$(get_archive_extension "$COMPRESSION")
+    assert_equals ".tar.xz" "$ext" "xz extension should be .tar.xz" || return 1
 }
 
 test_get_archive_extension_none() {
     COMPRESSION="none"
     local ext
-    ext=$(get_archive_extension)
-    assert_equals ".tar" "$ext" "no compression extension should be .tar"
+    ext=$(get_archive_extension "$COMPRESSION")
+    assert_equals ".tar" "$ext" "no compression extension should be .tar" || return 1
 }
 
 test_create_archive_gzip() {
@@ -409,10 +410,10 @@ test_create_archive_gzip() {
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
     echo "" > "$exclude_file"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
-    assert_file_exists "$archive" "Archive should be created"
-    assert_file_size_greater "$archive" 100 "Archive should have content"
+    assert_file_exists "$archive" "Archive should be created" || return 1
+    assert_file_size_greater "$archive" 100 "Archive should have content" || return 1
 }
 
 test_create_archive_bzip2() {
@@ -426,9 +427,9 @@ test_create_archive_bzip2() {
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
     echo "" > "$exclude_file"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
-    assert_file_exists "$archive" "Archive should be created"
+    assert_file_exists "$archive" "Archive should be created" || return 1
 }
 
 test_extract_archive() {
@@ -439,15 +440,15 @@ test_extract_archive() {
     echo "" > "$exclude_file"
     
     # Create archive
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     # Extract
     mkdir -p "$extract_dir"
-    extract_archive "$archive" "$extract_dir"
+    extract_archive "$archive" "$extract_dir" || return 1
     
     # Verify extraction
-    assert_dir_exists "$extract_dir" "Extract directory should exist"
-    assert_true "[[ -n \"\$(ls -A '$extract_dir')\" ]]" "Extracted content should not be empty"
+    assert_dir_exists "$extract_dir" "Extract directory should exist" || return 1
+    assert_true "[[ -n \"\$(ls -A '$extract_dir')\" ]]" "Extracted content should not be empty" || return 1
 }
 
 test_list_archive_contents() {
@@ -456,43 +457,43 @@ test_list_archive_contents() {
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
     echo "" > "$exclude_file"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     local contents
     contents=$(list_archive_contents "$archive")
     
-    assert_not_empty "$contents" "Contents should not be empty"
-    assert_contains "$contents" "file1.txt" "Should contain file1.txt"
+    assert_not_empty "$contents" "Contents should not be empty" || return 1
+    assert_contains "$contents" "file1.txt" "Should contain file1.txt" || return 1
 }
 
 test_get_file_size() {
     local size
     size=$(get_file_size "${TEST_SOURCE_DIR}/file1.txt")
     
-    assert_not_empty "$size" "Size should not be empty"
+    assert_not_empty "$size" "Size should not be empty" || return 1
 }
 
 test_count_files() {
     local count
     count=$(count_files "$TEST_SOURCE_DIR")
     
-    assert_true "[[ $count -gt 0 ]]" "Should count files"
+    assert_true "[[ $count -gt 0 ]]" "Should count files" || return 1
 }
 
 test_calculate_checksum_md5() {
     local checksum
     checksum=$(calculate_checksum "${TEST_SOURCE_DIR}/file1.txt" "md5")
     
-    assert_not_empty "$checksum" "MD5 checksum should not be empty"
-    assert_true "[[ ${#checksum} -eq 32 ]]" "MD5 should be 32 characters"
+    assert_not_empty "$checksum" "MD5 checksum should not be empty" || return 1
+    assert_true "[[ ${#checksum} -eq 32 ]]" "MD5 should be 32 characters" || return 1
 }
 
 test_calculate_checksum_sha256() {
     local checksum
     checksum=$(calculate_checksum "${TEST_SOURCE_DIR}/file1.txt" "sha256")
     
-    assert_not_empty "$checksum" "SHA256 checksum should not be empty"
-    assert_true "[[ ${#checksum} -eq 64 ]]" "SHA256 should be 64 characters"
+    assert_not_empty "$checksum" "SHA256 checksum should not be empty" || return 1
+    assert_true "[[ ${#checksum} -eq 64 ]]" "SHA256 should be 64 characters" || return 1
 }
 
 test_save_and_verify_checksum() {
@@ -502,16 +503,16 @@ test_save_and_verify_checksum() {
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
     echo "" > "$exclude_file"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     # Save checksum
-    save_checksum "$archive" "$checksum_file"
-    assert_file_exists "$checksum_file" "Checksum file should exist"
+    save_checksum "$archive" sha256 || return 1
+    assert_file_exists "$checksum_file" "Checksum file should exist" || return 1
     
     # Verify checksum
     local result
-    result=$(verify_checksum "$archive" "$checksum_file" && echo "valid" || echo "invalid")
-    assert_equals "valid" "$result" "Checksum should be valid"
+    result=$(verify_checksum "$archive" sha256 && echo "valid" || echo "invalid")
+    assert_equals "valid" "$result" "Checksum should be valid" || return 1
 }
 
 test_checksum_detects_corruption() {
@@ -521,45 +522,45 @@ test_checksum_detects_corruption() {
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
     echo "" > "$exclude_file"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
-    save_checksum "$archive" "$checksum_file"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
+    save_checksum "$archive" sha256 || return 1
     
     # Corrupt the archive
     echo "corruption" >> "$archive"
     
     # Verify that it detects corruption
     local result
-    result=$(verify_checksum "$archive" "$checksum_file" 2>/dev/null && echo "valid" || echo "invalid")
-    assert_equals "invalid" "$result" "Should detect corruption"
+    result=$(verify_checksum "$archive" sha256 2>/dev/null && echo "valid" || echo "invalid")
+    assert_equals "invalid" "$result" "Should detect corruption" || return 1
 }
 
 test_is_excluded() {
     EXCLUDE_PATTERNS=("*.tmp" "*.cache" "node_modules/*")
     
-    assert_true "is_excluded 'test.tmp'" "*.tmp should be excluded"
-    assert_true "is_excluded 'data.cache'" "*.cache should be excluded"
-    assert_false "is_excluded 'file.txt'" ".txt should not be excluded"
+    assert_true "is_excluded 'test.tmp' '*.tmp' '*.cache'" "*.tmp should be excluded" || return 1
+    assert_true "is_excluded 'data.cache' '*.tmp' '*.cache'" "*.cache should be excluded" || return 1
+    assert_false "is_excluded 'file.txt' '*.tmp' '*.cache'" ".txt should not be excluded" || return 1
 }
 
 test_create_exclude_file() {
     EXCLUDE_PATTERNS=("*.tmp" "*.cache" "*.log")
     
     local exclude_file="${TEST_TMP_DIR}/exclude_test.txt"
-    create_exclude_file "$exclude_file"
+    exclude_file=$(create_exclude_file "${EXCLUDE_PATTERNS[@]}")
     
-    assert_file_exists "$exclude_file" "Exclude file should exist"
+    assert_file_exists "$exclude_file" "Exclude file should exist" || return 1
     
     local content
     content=$(cat "$exclude_file")
-    assert_contains "$content" "*.tmp" "Should contain *.tmp"
-    assert_contains "$content" "*.cache" "Should contain *.cache"
+    assert_contains "$content" "*.tmp" "Should contain *.tmp" || return 1
+    assert_contains "$content" "*.cache" "Should contain *.cache" || return 1
 }
 
 test_estimate_backup_size() {
     local estimate
     estimate=$(estimate_backup_size "$TEST_SOURCE_DIR")
     
-    assert_not_empty "$estimate" "Estimate should not be empty"
+    assert_not_empty "$estimate" "Estimate should not be empty" || return 1
 }
 
 # =============================================================================
@@ -570,9 +571,9 @@ test_get_backup_type_for_today() {
     local type
     type=$(get_backup_type_for_today)
     
-    assert_not_empty "$type" "Backup type should not be empty"
+    assert_not_empty "$type" "Backup type should not be empty" || return 1
     assert_true "[[ '$type' == 'daily' || '$type' == 'weekly' || '$type' == 'monthly' ]]" \
-        "Type should be daily, weekly, or monthly"
+        "Type should be daily, weekly, or monthly" || return 1
 }
 
 test_get_retention_for_type_daily() {
@@ -580,7 +581,7 @@ test_get_retention_for_type_daily() {
     local retention
     retention=$(get_retention_for_type "daily")
     
-    assert_equals "7" "$retention" "Daily retention should be 7"
+    assert_equals "7" "$retention" "Daily retention should be 7" || return 1
 }
 
 test_get_retention_for_type_weekly() {
@@ -588,7 +589,7 @@ test_get_retention_for_type_weekly() {
     local retention
     retention=$(get_retention_for_type "weekly")
     
-    assert_equals "4" "$retention" "Weekly retention should be 4"
+    assert_equals "4" "$retention" "Weekly retention should be 4" || return 1
 }
 
 test_get_retention_for_type_monthly() {
@@ -596,7 +597,7 @@ test_get_retention_for_type_monthly() {
     local retention
     retention=$(get_retention_for_type "monthly")
     
-    assert_equals "12" "$retention" "Monthly retention should be 12"
+    assert_equals "12" "$retention" "Monthly retention should be 12" || return 1
 }
 
 test_get_backup_name_for_type() {
@@ -605,10 +606,10 @@ test_get_backup_name_for_type() {
     local name
     name=$(get_backup_name_for_type "daily")
     
-    assert_not_empty "$name" "Backup name should not be empty"
-    assert_contains "$name" "test_backup" "Should contain prefix"
-    assert_contains "$name" "daily" "Should contain type"
-    assert_contains "$name" ".tar" "Should have tar extension"
+    assert_not_empty "$name" "Backup name should not be empty" || return 1
+    assert_contains "$name" "test_backup" "Should contain prefix" || return 1
+    assert_contains "$name" "daily" "Should contain type" || return 1
+    assert_contains "$name" ".tar" "Should have tar extension" || return 1
 }
 
 # =============================================================================
@@ -623,7 +624,7 @@ test_rotate_backups() {
     
     for i in {1..5}; do
         local archive="${TEST_DEST_DIR}/test_backup_daily_202501${i}_120000.tar.gz"
-        create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+        create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file"
         sleep 0.1
     done
     
@@ -632,13 +633,13 @@ test_rotate_backups() {
     count_before=$(find "$TEST_DEST_DIR" -name "test_backup_daily*.tar.gz" | wc -l)
     
     # Apply rotation (keep 3)
-    rotate_backups "$TEST_DEST_DIR" 3 "test_backup_daily"
+    rotate_backups "$TEST_DEST_DIR" 3 "test_backup_daily*.tar*"
     
     # Count after
     local count_after
     count_after=$(find "$TEST_DEST_DIR" -name "test_backup_daily*.tar.gz" | wc -l)
     
-    assert_true "[[ $count_after -le 3 ]]" "Should have at most 3 backups after rotation"
+    assert_true "[[ $count_after -le 3 ]]" "Should have at most 3 backups after rotation" || return 1
 }
 
 test_get_sorted_backups() {
@@ -650,13 +651,13 @@ test_get_sorted_backups() {
     local times=("20250101_100000" "20250102_100000" "20250103_100000")
     for t in "${times[@]}"; do
         local archive="${TEST_DEST_DIR}/sort_test_daily_${t}.tar.gz"
-        create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+        create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file"
     done
     
     local sorted
-    sorted=$(get_sorted_backups "$TEST_DEST_DIR" "sort_test_daily")
+    sorted=$(get_sorted_backups "$TEST_DEST_DIR" "sort_test_daily*.tar*")
     
-    assert_not_empty "$sorted" "Sorted list should not be empty"
+    assert_not_empty "$sorted" "Sorted list should not be empty" || return 1
 }
 
 # =============================================================================
@@ -670,42 +671,42 @@ test_full_backup_cycle() {
     SAVE_CHECKSUM=true
     
     local exclude_file="${TEST_TMP_DIR}/exclude.txt"
-    create_exclude_file "$exclude_file"
+    exclude_file=$(create_exclude_file "${EXCLUDE_PATTERNS[@]}")
     
     # 1. Create backup
     local backup_name
     backup_name=$(get_backup_name_for_type "daily")
     local archive="${TEST_DEST_DIR}/${backup_name}"
     
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
-    assert_file_exists "$archive" "Backup should be created"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
+    assert_file_exists "$archive" "Backup should be created" || return 1
     
     # 2. Verify archive
     local valid
     valid=$(verify_backup_integrity "$archive" && echo "yes" || echo "no")
-    assert_equals "yes" "$valid" "Backup should be valid"
+    assert_equals "yes" "$valid" "Backup should be valid" || return 1
     
     # 3. Save and verify checksum
     local checksum_file="${archive}.sha256"
-    save_checksum "$archive" "$checksum_file"
+    save_checksum "$archive" sha256 || return 1
     
     local checksum_valid
-    checksum_valid=$(verify_checksum "$archive" "$checksum_file" && echo "yes" || echo "no")
-    assert_equals "yes" "$checksum_valid" "Checksum should be valid"
+    checksum_valid=$(verify_checksum "$archive" sha256 && echo "yes" || echo "no")
+    assert_equals "yes" "$checksum_valid" "Checksum should be valid" || return 1
     
     # 4. Extract and verify
     local restore_dir="${TEST_TMP_DIR}/restored"
     mkdir -p "$restore_dir"
-    extract_archive "$archive" "$restore_dir"
+    extract_archive "$archive" "$restore_dir" || return 1
     
-    assert_file_exists "${restore_dir}/file1.txt" "Restored file should exist"
+    assert_file_exists "${restore_dir}/source/file1.txt" "Restored file should exist" || return 1
     
     local original_content
     original_content=$(cat "${TEST_SOURCE_DIR}/file1.txt")
     local restored_content
-    restored_content=$(cat "${restore_dir}/file1.txt")
+    restored_content=$(cat "${restore_dir}/source/file1.txt")
     
-    assert_equals "$original_content" "$restored_content" "Content should match"
+    assert_equals "$original_content" "$restored_content" "Content should match" || return 1
 }
 
 test_backup_excludes_patterns() {
@@ -713,18 +714,18 @@ test_backup_excludes_patterns() {
     EXCLUDE_PATTERNS=("*.tmp" "*.cache")
     
     local exclude_file="${TEST_TMP_DIR}/exclude_patterns.txt"
-    create_exclude_file "$exclude_file"
+    exclude_file=$(create_exclude_file "${EXCLUDE_PATTERNS[@]}")
     
     local archive="${TEST_TMP_DIR}/exclude_test.tar.gz"
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     # List contents
     local contents
     contents=$(list_archive_contents "$archive")
     
-    assert_false "[[ '$contents' == *'.tmp'* ]]" "Should not contain .tmp files"
-    assert_false "[[ '$contents' == *'.cache'* ]]" "Should not contain .cache files"
-    assert_true "[[ '$contents' == *'.txt'* ]]" "Should contain .txt files"
+    assert_false "[[ '$contents' == *'.tmp'* ]]" "Should not contain .tmp files" || return 1
+    assert_false "[[ '$contents' == *'.cache'* ]]" "Should not contain .cache files" || return 1
+    assert_true "[[ '$contents' == *'.txt'* ]]" "Should contain .txt files" || return 1
 }
 
 test_backup_with_spaces_in_names() {
@@ -734,13 +735,13 @@ test_backup_with_spaces_in_names() {
     echo "" > "$exclude_file"
     
     local archive="${TEST_TMP_DIR}/spaces_test.tar.gz"
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     # Verify that file with spaces is included
     local contents
     contents=$(list_archive_contents "$archive")
     
-    assert_contains "$contents" "file with spaces" "Should handle files with spaces"
+    assert_contains "$contents" "file with spaces" "Should handle files with spaces" || return 1
 }
 
 test_nested_directories() {
@@ -750,14 +751,14 @@ test_nested_directories() {
     echo "" > "$exclude_file"
     
     local archive="${TEST_TMP_DIR}/nested_test.tar.gz"
-    create_archive "$archive" "$exclude_file" "$TEST_SOURCE_DIR"
+    create_archive "$TEST_SOURCE_DIR" "$archive" "$COMPRESSION" "$exclude_file" || return 1
     
     local contents
     contents=$(list_archive_contents "$archive")
     
-    assert_contains "$contents" "subdir1" "Should contain subdir1"
-    assert_contains "$contents" "subdir2" "Should contain subdir2"
-    assert_contains "$contents" "nested" "Should contain nested directories"
+    assert_contains "$contents" "subdir1" "Should contain subdir1" || return 1
+    assert_contains "$contents" "subdir2" "Should contain subdir2" || return 1
+    assert_contains "$contents" "nested" "Should contain nested directories" || return 1
 }
 
 # =============================================================================

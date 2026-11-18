@@ -52,10 +52,11 @@ class TestDeployerCore:
     
     def test_has_health_check_function(self, deployer_path: Path) -> None:
         """Deployer must have health check function."""
-        core = deployer_path / "lib" / "core.sh"
-        content = core.read_text()
-        assert "health_check" in content or "check_health" in content or \
-               "verify" in content.lower(), "Missing health check functionality"
+        result = subprocess.run(
+            ["bash", "-c", 'source "$1/lib/core.sh"; source "$1/lib/utils.sh"; health_check_command true; ! health_check_command false',
+             "bash", str(deployer_path)], capture_output=True, text=True, timeout=5)
+        assert result.returncode == 0, result.stderr
+
 
 
 class TestMonitorCore:

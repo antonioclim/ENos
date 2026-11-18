@@ -172,7 +172,7 @@ generate_find_scenarios() {
                 scenarios+=("Find files modified in the last $days days")
                 ;;
             "permission_filter")
-                local perm=$(random_range 600 777)
+                local perm="$(random_range 0 7)$(random_range 0 7)$(random_range 0 7)"
                 scenarios+=("Find files with permissions exactly $perm")
                 ;;
             "combined_search")
@@ -636,8 +636,10 @@ touch "$TEST_DIR/docs/my document.txt"
 touch "$TEST_DIR/docs/file with spaces.md"
 
 # Set various permissions for tests
-chmod 777 "$TEST_DIR/temp/insecure.txt" 2>/dev/null || touch "$TEST_DIR/temp/insecure.txt"
-chmod 600 "$TEST_DIR/config/secrets.cfg" 2>/dev/null || touch "$TEST_DIR/config/secrets.cfg"
+touch "$TEST_DIR/temp/insecure.txt"
+chmod 777 "$TEST_DIR/temp/insecure.txt"
+touch "$TEST_DIR/config/secrets.cfg"
+chmod 600 "$TEST_DIR/config/secrets.cfg"
 chmod 755 "$TEST_DIR/src/core/main.c"
 
 # Create empty directory for -empty tests
@@ -691,7 +693,7 @@ process_students_file() {
         # Validation
         if [[ -z "$name" || -z "$grupa" ]]; then
             log_warning "Invalid line ignored: $name,$grupa,$email"
-            ((errors++))
+            errors=$((errors + 1))
             continue
         fi
         
@@ -707,7 +709,7 @@ process_students_file() {
             fi
         fi
         
-        ((count++))
+        count=$((count + 1))
     done < "$file"
     
     echo ""

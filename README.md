@@ -2,20 +2,19 @@
 
 <div align="center">
 
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│  🐧 LINUX    Ubuntu 24.04+    │  📋 BASH 5.0+   │  🐍 PYTHON 3.12+  │  📦 GIT 2.40+        │
-├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│  LICENCE           RESTRICTIVE │  UNITS               14+4  │  EST. HOURS          60+       │
-│  VERSION               5.3.1   │  SEMINARS               7  │  PROJECTS             23       │
-│  STATUS               ACTIVE   │  HTML INTERACTIVE      71  │  SCRIPTS            180+       │
-│  LANGUAGE            ENGLISH   │  PNG DIAGRAMS          27  │  TEST COVERAGE       >80%      │
-└──────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+| Item | Current status |
+| --- | --- |
+| Repository | antonioclim/ENos |
+| Preserved baseline | v5.5.0 · d8fdd0507fe26e6bc1438a692da14afc2112464c |
+| Source version | v6.0.0 · [release notes](RELEASE_NOTES_v6.0.0.md) |
+| Materials | 14 core lectures, 4 supplementary lectures, 7 seminars, 23 projects |
+| Inventory | See the generated repository inventory below |
+| Verification | Bounded local regressions; no claim of complete host/browser acceptance |
+| Licence | MIT original code; CC BY 4.0 original prose/figures; retained exceptions and third-party terms |
 
 [![GitHub](https://img.shields.io/badge/GitHub-ENos-blue?logo=github)](https://github.com/antonioclim/ENos)
 [![Romanian Version](https://img.shields.io/badge/🇷🇴_ROso-Romanian-red)](https://github.com/antonioclim/ROso)
-[![License](https://img.shields.io/badge/Licence-Restrictive-orange)](#licence)
+[Licence status](#licence)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04+-E95420?logo=ubuntu)](https://ubuntu.com/)
 
 **by ing. dr. Antonio Clim** | Bucharest University of Economic Studies — CSIE  
@@ -30,7 +29,7 @@ Year I, Semester 2 | 2017–2030
 <details open>
 <summary><strong>Click to expand/collapse</strong></summary>
 
-- [What's New in v5.3](#-whats-new-in-v53)
+- [v6.0.0 release scope](#-v600-release-scope)
 - [Quick Navigation](#-quick-navigation)
 - [Kit Overview](#-kit-overview)
 - [Repository Structure](#-repository-structure)
@@ -49,16 +48,21 @@ Year I, Semester 2 | 2017–2030
 
 ---
 
-## 🆕 What's New in v5.3
+## 🆕 v6.0.0 Release Scope
 
-| Feature | Description | Status |
-|:-------:|-------------|:------:|
-| 🖨️ | **Print stylesheets** for HTML presentations (offline handouts) | ✅ NEW |
-| 🔗 | **Link checking** in CI pipeline (automated validation) | ✅ NEW |
-| 🧪 | **Expanded test suite** for shared utilities (>80% coverage) | ✅ NEW |
-| 📚 | **lib/ documentation** with comprehensive usage examples | ✅ NEW |
-| 🤖 | **AI fingerprint scanner** for detecting AI-generated submissions | ✅ Enhanced |
-| 📊 | **Randomisation utilities** for student-specific test parameters | ✅ Enhanced |
+ENos v6.0.0 consolidates the audited v5.5.0 baseline, the verified review snapshot at `d7aead32517115f2ca5e2f425f692b3f569d33a5` and the D1–D7 teaching profile adopted on 18 November 2026. The author has authorised its integration and stable publication. The [release page](https://github.com/antonioclim/ENos/releases/tag/v6.0.0) records the publication state and release commit. [AUTHOR_DECISIONS.md](AUTHOR_DECISIONS.md) records the adopted scope and deferred institutional decisions. [VERIFICATION.md](VERIFICATION.md) separates executed checks from historical evidence and target-environment acceptance.
+
+| Area | v6.0.0 behaviour |
+| --- | --- |
+| HTML and teaching models | Corrected source logic with bounded regressions; native browser acceptance remains separate |
+| Recording | Adopted local practice with explicit `--offline`; institutional submission remains deferred |
+| Evaluation | Descriptive component reports; `PENDING_POLICY` and a null final grade by default; supplied-policy calculations are unverified scenarios |
+| Question banks | Existing public banks are formative learning resources; no confidential examination bank or summative blueprint is implied |
+| Review heuristics | Style/similarity observations for human review; no authorship probability or automatic sanction |
+| A03 digests | Coordinated SHA-256 reference and assessment contract; omitted CLI/network implementation remains student work |
+| M14 exercise | Synthetic local values, redacted previews and explicit private output with bounded cleanup; real-secret use and authenticated storage remain deferred |
+| Common utilities | Reconfigurable logging, replayable random seeds, scoped resource/link checks and print maintenance |
+| Derived material | Source-linked exports and generated assets are checked against their manifests; counts are not coverage percentages |
 
 ---
 
@@ -100,45 +104,26 @@ flowchart LR
 
 ## 📊 Kit Overview
 
-### At a Glance
+### Reproducible inventory
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        ENos EDUCATIONAL KIT v5.3.1                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐      │
-│  │   14 + 4    │   │      7      │   │     23      │   │    180+     │      │
-│  │  LECTURES   │   │  SEMINARS   │   │  PROJECTS   │   │   SCRIPTS   │      │
-│  │ (Core+Supp) │   │ (Complete)  │   │ (3 Levels)  │   │(Bash+Python)│      │
-│  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘      │
-│                                                                             │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐      │
-│  │     71      │   │     27      │   │     26      │   │     28      │      │
-│  │    HTML     │   │     PNG     │   │     SVG     │   │    YAML     │      │
-│  │(Interactive)│   │ (Diagrams)  │   │ (Graphics)  │   │  (Quizzes)  │      │
-│  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘      │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<!-- inventory:start -->
+| File category | Count |
+| --- | ---: |
+| Selected physical repository files | 1560 |
+| Markdown | 461 |
+| HTML files, including exports and vendored support pages | 72 |
+| Python source files, including tests | 113 |
+| Shell files | 133 |
+| Generated lecture PNG diagrams | 39 |
+| SVG files | 26 |
+| All YAML files | 34 |
+| Formative YAML quiz files | 7 |
+| PlantUML files, including shared style | 40 |
 
-### Comprehensive Statistics
+Generated by `scripts/inventory.py`; [file hashes and scope](REPOSITORY_INVENTORY.json).
+<!-- inventory:end -->
 
-| Category | Quantity | Location | Details |
-|:---------|:--------:|:---------|:--------|
-| **Theoretical Lectures** | 14 | `05_LECTURES/01-14` | Core OS concepts |
-| **Supplementary Lectures** | 4 | `05_LECTURES/15-18supp` | Network, Containers, Kernel, NPU |
-| **Practical Seminars** | 7 | `SEM01-SEM07/` | Including evaluation week |
-| **Semester Projects** | 23 | `04_PROJECTS/` | 5 Easy + 15 Medium + 3 Advanced |
-| **Markdown Documentation** | 362 | Throughout | Guides, materials, references |
-| **HTML Presentations** | 71 | Various `/docs/` folders | Interactive simulators |
-| **PNG Diagrams** | 27 | `00_SUPPLEMENTARY/diagrams_png/` | Concept visualisations |
-| **SVG Diagrams** | 26 | `SEM*/docs/images/` | Vector graphics |
-| **Python Scripts** | 65 | `*/scripts/python/` | Autograders, generators, tools |
-| **Bash Scripts** | 118 | `*/scripts/bash/`, `*/scripts/demo/` | Demos, utilities, validators |
-| **YAML Quiz Files** | 28 | `*/formative/` | Question banks |
-| **Test Files** | 25+ | `*/tests/` | pytest and shell tests |
-| **Estimated Hours** | 60+ | — | For complete coverage |
+File counts describe the selected repository files, not test coverage or native acceptance. All YAML files are counted separately from formative question banks. The earlier “60+ hours” is an unvalidated teaching estimate, not a measured completion time.
 
 ---
 
@@ -149,10 +134,10 @@ flowchart LR
 ```
 ENos/
 ├── 📄 README.md                    # This comprehensive guide
-├── 📄 README_ADDITIONS.md          # Recent changes and additions
+├── 📄 README_ADDITIONS.md          # Historical draft pointer; not current instructions
 ├── 📄 NAVIGATION.md                # Quick navigation index
-├── 📄 LICENCE.md                   # Detailed licence terms
-├── 📄 LICENSE                      # Short licence reference
+├── 📄 LICENCE.md                   # Component licensing and retained notices
+├── 📄 LICENSE                      # MIT terms for eligible original code
 ├── 📄 pyproject.toml               # Python project configuration
 │
 ├── 📂 00_SUPPLEMENTARY/            # Exam prep, diagrams, references
@@ -190,7 +175,7 @@ ENos/
 ├── 📄 Exam_Exercises_Part3.md      # Practice problems (90KB)
 ├── 📂 diagrams_common/
 │   └── skin.puml                   # PlantUML theme
-├── 📂 diagrams_png/                # 27 concept diagrams
+├── 📂 diagrams_png/                # Generated diagrams; see manifest.json
 │   ├── coffman_conditions.png
 │   ├── critical_section.png
 │   ├── dining_philosophers.png
@@ -221,7 +206,7 @@ ENos/
 └── 📄 validate.sh                  # Validation script
 ```
 
-**Purpose:** Comprehensive exam preparation with 270+ pages of exercises covering all course topics.
+**Purpose:** Exam preparation in three Markdown volumes; pagination depends on the renderer. The earlier 270+ page estimate was not derived from this checkout.
 
 </details>
 
@@ -514,7 +499,7 @@ SEM07/
     └── run_auto_eval_EN.sh
 ```
 
-**Purpose:** Complete evaluation infrastructure including automated grading, plagiarism detection, oral defence protocols, and grade calculation.
+**Purpose:** Evaluation tools and draft assessment documents. Automated observations do not establish misconduct or an approved institutional grade; unresolved policy is explicit.
 
 </details>
 
@@ -563,7 +548,7 @@ flowchart TD
     C -->|Win 10/11 Build 19041+| E[✨ WSL2 Recommended]
     C -->|Older| D
     D --> F[VirtualBox + Ubuntu 24.04]
-    E --> G[Native Linux Experience]
+    E --> G[Linux environment under WSL2]
     
     style E fill:#90EE90
     style G fill:#90EE90
@@ -572,7 +557,7 @@ flowchart TD
 | Option | For whom | Advantages | Disadvantages |
 |:-------|:---------|:-----------|:--------------|
 | **WSL2** ⭐ | Windows 10/11 | Fast, integrated, no reboot | Requires updated Windows |
-| **VirtualBox** | Any OS | Complete isolation, snapshots | Slower, more resources |
+| **VirtualBox** | Supported host/guest architecture | Separate guest kernel, snapshots | Capacity and compatibility depend on configuration |
 | **Dual boot** | Advanced users | Native performance | Risk, must reboot |
 
 ### Step 1: Installing WSL2 (Recommended)
@@ -596,7 +581,8 @@ wsl --install -d Ubuntu-24.04
 ```bash
 # BASH (Ubuntu)
 # Update system
-sudo apt update && sudo apt upgrade -y
+sudo apt update
+sudo apt upgrade
 
 # Install required packages
 sudo apt install -y git vim nano tree htop ncdu shellcheck \
@@ -604,15 +590,15 @@ sudo apt install -y git vim nano tree htop ncdu shellcheck \
     openssh-server curl wget figlet lolcat cowsay fortune pv dialog jq bc
 
 # Verify installation
-./01_INIT_SETUP/verify_installation.sh
+bash 01_INIT_SETUP/verify_installation.sh
 ```
 
 ### Standard Lab Credentials
 
 | System | Username | Password |
 |:-------|:---------|:---------|
-| Ubuntu/WSL | `stud` | `stud` |
-| Portainer | `stud` | `studstudstud` |
+| Your local Ubuntu/WSL instance | A valid local username | Choose a unique password |
+| Portainer, if separately required | Account configured by the operator | No shared default is prescribed here |
 | URL | — | `http://localhost:9000` |
 
 ---
@@ -870,6 +856,8 @@ mindmap
 
 ### Project Timeline
 
+The following is the baseline teaching schedule proposal. Actual dates, eligibility and penalties require the course-specific approved contract.
+
 ```
 Week 8         Week 10        Week 12        Week 14        Exam Session
   │              │              │              │                 │
@@ -883,6 +871,8 @@ Week 8         Week 10        Week 12        Week 14        Exam Session
 ```
 
 ### Evaluation Criteria
+
+**Historical proposed weights — not an adopted grading contract.** These values conflict with other baseline rubrics. Retained for the author decision; tools must not infer approval from this table.
 
 | Component | Weight |
 |:----------|:------:|
@@ -903,7 +893,7 @@ Week 8         Week 10        Week 12        Week 14        Exam Session
 Provides consistent, coloured logging across all Python scripts.
 
 ```python
-from logging_utils import setup_logging
+from lib.logging_utils import setup_logging
 
 logger = setup_logging(__name__)
 logger.info("Processing started")
@@ -926,11 +916,12 @@ logger.error("File not found")
 Generates deterministic, student-specific test parameters for anti-plagiarism.
 
 ```python
-from randomisation_utils import generate_student_seed, randomise_test_parameters
+from lib.randomisation_utils import generate_student_seed, randomise_test_parameters
 
-seed = generate_student_seed("student@ase.ro", "SEM03_HW")
+seed = generate_student_seed("student@ase.ro", "SEM03_HW", include_week=False)
 params = randomise_test_parameters(seed)
-# Same student + assignment = same parameters (reproducible)
+# Same normalised identity + assignment + explicit seed inputs reproduce parameters.
+# If weekly variation is enabled, record the week or returned seed for reassessment.
 ```
 
 **Generated Parameters:**
@@ -957,7 +948,8 @@ Validates documentation links across the entire kit.
 # Check all links including external URLs (slow)
 ./scripts/check_links.sh --external
 
-# Requirements: lychee (cargo install lychee)
+# Requires Python and markdown-it-py in the active virtual environment.
+# The default run performs no network requests.
 ```
 
 #### add_print_styles.sh
@@ -976,49 +968,24 @@ Injects print stylesheets into HTML presentations for offline handouts.
 
 ## Part VI: Anti-Plagiarism Infrastructure
 
-### Multi-Layer Detection System
+### Review support and evidence limits
 
-```mermaid
-flowchart TD
-    subgraph Layer1["🔍 Layer 1: Automated"]
-        A[Internal Detector] --> B[Similarity Check]
-        A --> C[AI Pattern Scan]
-    end
-    
-    subgraph Layer2["🔬 Layer 2: External Tools"]
-        D[MOSS] --> E[Structural Analysis]
-        F[JPlag] --> G[Token Comparison]
-    end
-    
-    subgraph Layer3["👤 Layer 3: Human"]
-        H[Oral Verification] --> I[Understanding Confirmation]
-    end
-    
-    Layer1 --> Layer2 --> Layer3
-```
+Similarity and style tools produce observations that require contextual human review. They cannot establish authorship or misconduct. Repeated scaffolding, shared tasks, legitimate assistance and common coding conventions can create matches.
 
-### Tools Overview
+| Tool | Purpose | Boundary |
+| --- | --- | --- |
+| Internal similarity checks | Locate comparable passages between submissions | No automatic plagiarism conclusion or grade penalty |
+| Style-pattern scanner | Show matched phrases/formatting features with explanations | No validated AI-generation probability |
+| JPlag / MOSS integration examples | Compare code under their documented setup | No service submission is authorised by running a local review plan; external transfer needs a separate decision |
+| Oral review | Gather evidence of understanding | Questions, selection rules and grade effect remain course-specific |
 
-| Tool | Command | Purpose |
-|:-----|:--------|:--------|
-| Internal Detector | `make plagiarism-check` | Fast similarity + AI patterns |
-| MOSS | `make moss-check` | Stanford structural comparison |
-| JPlag | `make jplag-check` | Offline detailed analysis |
-| Oral Verification | Manual | Understanding confirmation |
-
-### AI Fingerprint Scanner
-
-Located in `SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py`:
+The historic filename is retained for compatibility:
 
 ```bash
-python3 S01_06_ai_fingerprint_scanner.py submission.sh
+python3 SEM01/scripts/python/S01_06_ai_fingerprint_scanner.py --help
 ```
 
-**Detects patterns indicating AI generation:**
-- Overly consistent comment style
-- Unusual vocabulary patterns
-- Suspicious formatting uniformity
-- Common AI-generated phrases
+It reports style features such as comments, vocabulary and formatting. Those features have multiple possible causes; these tools do not turn them into a sanction.
 
 ---
 
@@ -1026,15 +993,15 @@ python3 S01_06_ai_fingerprint_scanner.py submission.sh
 
 ### GitHub Actions Workflow
 
-Each seminar includes a CI configuration (`ci/github_actions.yml`) with:
+Seminar `ci/github_actions.yml` files are templates. GitHub only activates workflows in its configured workflow location; no active root workflow or successful remote run is established by these templates. Local checks are documented separately. Typical template jobs include:
 
 | Job | Purpose | Tool |
 |:----|:--------|:-----|
 | `lint-bash` | Shell script linting | ShellCheck |
 | `lint-python` | Python code linting | Ruff |
 | `validate-yaml` | Quiz/config validation | yamllint |
-| `ai-check` | AI fingerprint detection | Custom scanner |
-| `link-check` | Documentation links | lychee |
+| `ai-check` | Style observations for review | Custom scanner |
+| `link-check` | Parsed local links and anchors | Python checker |
 | `test` | Unit tests with coverage | pytest |
 | `structure-check` | Directory validation | Custom |
 
@@ -1045,16 +1012,16 @@ cd SEM01
 make test        # Run tests
 make lint        # Run linters
 make ai-check    # Check for AI patterns
-make all         # Run everything
+make all         # Inspect dependencies and side effects before using this broader target
 ```
 
-### Test Coverage Requirements
+### Historical Coverage Targets (Unverified)
 
 | Component | Target Coverage |
 |:----------|:---------------:|
-| lib/ | >80% |
-| Autograders | >75% |
-| Quiz generators | >70% |
+| lib/ | >80% (historical target, not measured here) |
+| Autograders | >75% (historical target) |
+| Quiz generators | >70% (historical target) |
 
 ---
 
@@ -1121,8 +1088,8 @@ mindmap
 
 | System | Username | Password |
 |:-------|:---------|:---------|
-| Ubuntu/WSL | `stud` | `stud` |
-| Portainer | `stud` | `studstudstud` |
+| Your local Ubuntu/WSL instance | A valid local username | Choose a unique password |
+| Portainer, if separately required | Account configured by the operator | No shared default is prescribed here |
 | Portainer URL | — | `http://localhost:9000` |
 
 ### Annex B: Emergency Commands
@@ -1236,25 +1203,13 @@ secrets.*
 
 ### Annex E: Kit Statistics Summary
 
-| Category | Quantity | Details |
-|:---------|:--------:|:--------|
-| Theoretical Lectures | 14 | Chapters 01–14 |
-| Supplementary Lectures | 4 | Chapters 15–18 |
-| Practical Seminars | 7 | SEM01–SEM07 |
-| Semester Projects | 23 | 5 EASY + 15 MEDIUM + 3 ADVANCED |
-| Markdown Files | 362 | Documentation and guides |
-| HTML Presentations | 71 | Interactive slides |
-| PNG Diagrams | 27 | In `00_SUPPLEMENTARY/` |
-| SVG Diagrams | 26 | Vector graphics |
-| Python Scripts | 65 | Autograders, tools, tests |
-| Bash Scripts | 118 | Demos, utilities, validators |
-| YAML Quiz Files | 28 | Question banks |
-| Test Files | 25+ | pytest and shell tests |
-| Estimated Hours | 60+ | For complete coverage |
+Use the [generated inventory](REPOSITORY_INVENTORY.json) and the table near the beginning of this README. This avoids maintaining a second contradictory set of counts.
 
 ### Annex F: Changelog (Recent)
 
-#### Version 5.3.1 (January 2026)
+#### Historical Version 5.3.1 Notes (January 2026)
+
+The following baseline changelog claims are retained as history. They are not new verification evidence; in particular the all-HTML print, active CI and >80% coverage claims were not established in that baseline.
 
 **New Features:**
 - ✅ Added print stylesheets to all HTML presentations
@@ -1282,24 +1237,18 @@ secrets.*
 
 ### Summary
 
-| Permission | Status |
-|:-----------|:------:|
-| ✅ Personal study | Allowed |
-| ✅ Code execution for learning | Allowed |
-| ✅ Local modification for experimentation | Allowed |
-| ✅ Academic citation with attribution | Allowed |
-| ❌ Redistribution | **Prohibited** |
-| ❌ Derivative works for public use | **Prohibited** |
-| ❌ Commercial use | **Prohibited** |
+The author-approved scope is **MIT for identified original software and code examples**, and **CC BY 4.0 for identified original teaching prose and figures**, within the rights the author can grant. [LICENCE.md](LICENCE.md) explains the scope and [LICENCE_SCOPE.json](LICENCE_SCOPE.json) records component assignments and retained exceptions. Mixed HTML and Markdown distinguish their prose/figures from software examples and embedded code.
+
+Existing attribution and third-party terms are retained. In particular, the existing CC BY-SA 4.0 package notice and SO ASE-CSIE Team attribution in `SEM02` are preserved; `SEM02/**` is excluded from the new grant pending a more precise rights boundary. Vendored and derived assets retain their applicable upstream terms. This revision does not claim to retract permissions previously granted.
 
 ### Attribution
 
-When citing these materials in academic works:
+To cite v6.0.0, use the following reference. When using another revision, identify its exact version, commit or source archive:
 
 ```
-Clim, A. (2026). ENos — Educational Kit for Operating Systems (v5.3.1).
+Clim, A. (2026). ENos — Educational Kit for Operating Systems (Version 6.0.0) [Computer software].
 Bucharest University of Economic Studies — CSIE.
-https://github.com/antonioclim/ENos
+https://github.com/antonioclim/ENos/releases/tag/v6.0.0
 ```
 
 ### BibTeX
@@ -1309,9 +1258,9 @@ https://github.com/antonioclim/ENos
   author       = {Clim, Antonio},
   title        = {{ENos}: Operating Systems — Complete Educational Kit},
   year         = {2026},
-  version      = {5.3.1},
+  version      = {6.0.0},
   institution  = {Bucharest University of Economic Studies},
-  howpublished = {\url{https://github.com/antonioclim/ENos}},
+  howpublished = {\url{https://github.com/antonioclim/ENos/releases/tag/v6.0.0}},
   note         = {English language version. Romanian version: ROso}
 }
 ```
@@ -1322,9 +1271,9 @@ See [LICENCE.md](./LICENCE.md) for complete terms.
 
 <div align="center">
 
-**Kit updated:** January 2026  
-**Version:** 5.3.1  
-**Tested on:** Ubuntu 24.04 LTS, WSL2 with Ubuntu 22.04/24.04  
+**Release source updated:** 18 November 2026\
+**Version:** 6.0.0 (adopted D1–D7 profile; preserved baseline v5.5.0)\
+**Target environments:** Ubuntu 24.04 LTS and the documented WSL2/VirtualBox routes. Full acceptance on those hosts remains to be recorded  
 **Feedback:** [GitHub Issues](https://github.com/antonioclim/ENos/issues)
 
 ---

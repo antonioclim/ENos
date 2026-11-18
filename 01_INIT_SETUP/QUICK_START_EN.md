@@ -1,5 +1,9 @@
 # Quick Start — 5 Minute Verification
 
+> **Phase 5 source correction:** Keep the academic identifier (for example `AP_1001_A`) in your student records. The machine hostname is a separate DNS-compatible label: map that example to `ap-1001-a` by lowercasing and replacing underscores with hyphens. This is a technical mapping, not an authentication or grading rule. Usernames must also satisfy the installer: start with a lower-case letter, use a suitable unique local username and keep the full student identity separately.
+
+Use a unique local password that you can retain securely. Never configure the shared historical example password `stud` on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.
+
 > Use this checklist to verify your installation is complete.  
 > If any check fails, return to the full guide for that step.
 
@@ -17,7 +21,7 @@
 - Open VirtualBox → select your VM → click Start
 - Connect via SSH: `ssh yourname@VM_IP_ADDRESS`
 
-✅ **Pass:** You see a command prompt like `popescu@AP_1001_A:~$`
+✅ **Pass:** You see a command prompt like `popescu@ap-1001-a:~$`
 
 ---
 
@@ -29,14 +33,14 @@ Copy and paste these commands in Ubuntu:
 # Check Ubuntu version (should show 24.04)
 lsb_release -d
 
-# Check your hostname (should be INITIAL_GROUP_SERIES format)
+# Check your hostname (should be initials-group-series format)
 hostname
 
 # Check your username (should be your surname)
 whoami
 
 # Check internet connectivity
-ping -c 2 google.com
+ping -c 2 google.com  # optional ICMP diagnostic; failure alone does not prove no internet
 ```
 
 ✅ **Pass:** All commands work and show correct values
@@ -46,18 +50,18 @@ ping -c 2 google.com
 ### Step 3: Run the full verification script
 
 ```bash
-bash ~/verify_installation.sh
+bash 01_INIT_SETUP/verify_installation.sh  # run from the repository root
 ```
 
-Or download it first if you do not have it:
+The verifier is included in this checkout. If you deliberately need the historical v5.5.0 copy, the pinned source is:
 
 ```bash
 # If verify_installation.sh is not in your home directory
-curl -O https://raw.githubusercontent.com/YOUR_REPO/verify_installation.sh
-bash verify_installation.sh
+curl --fail --location --output verify_installation-v5.5.0.sh https://raw.githubusercontent.com/antonioclim/ENos/d8fdd0507fe26e6bc1438a692da14afc2112464c/01_INIT_SETUP/verify_installation.sh
+bash verify_installation-v5.5.0.sh  # historical diagnostic, not this corrected candidate
 ```
 
-✅ **Pass:** All items show `[OK]` in green
+✅ **Pass:** The summary reports its checks and limits. Optional warnings do not establish missing capabilities, and local checks are not full host acceptance.
 
 ---
 
@@ -83,7 +87,7 @@ ssh yourname@IP_ADDRESS
 | What | Command | Expected result |
 |------|---------|-----------------|
 | Ubuntu version | `lsb_release -d` | Ubuntu 24.04.x LTS |
-| Hostname | `hostname` | AP_1001_A (your format) |
+| Hostname | `hostname` | ap-1001-a (your format) |
 | Username | `whoami` | popescu (your surname) |
 | IP address | `hostname -I` | 172.x.x.x or 192.168.x.x |
 | Start SSH | `sudo systemctl start ssh` | No output = success |

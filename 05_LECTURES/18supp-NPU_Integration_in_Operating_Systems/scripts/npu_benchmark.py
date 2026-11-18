@@ -196,7 +196,7 @@ def run_onnx_benchmarks(model_path: str, iterations: int) -> list[dict]:
             print("  Testing DirectML...")
             results.append(benchmark_onnxruntime(model_path, 'DmlExecutionProvider', iterations))
 
-    except ImportEroare:
+    except ImportError:
         print("  ONNX Runtime not installed")
 
     return results
@@ -217,7 +217,7 @@ def run_openvino_benchmarks(model_path: str, iterations: int) -> list[dict]:
             print(f"  Testing {device}...")
             results.append(benchmark_openvino(model_path, device, iterations))
 
-    except ImportEroare:
+    except ImportError:
         print("  OpenVINO not installed (pip install openvino)")
 
     return results

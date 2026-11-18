@@ -1,4 +1,4 @@
-# Spectacular Demos - Seminar 3-4
+# Spectacular Demos - Seminar 02
 ## Operating Systems | Operators, Redirection, Filters, Loops
 
 **Version**: 1.0 | **Purpose**: Wow-factor for engagement and concept memorisation  
@@ -23,7 +23,6 @@ sudo apt update && sudo apt install -y \
 
 ```bash
 
-*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
 
 # Check script (can be run in setup_seminar.sh)
 check_tool() {
@@ -40,9 +39,12 @@ for tool in figlet toilet lolcat cowsay pv dialog htop tree bc; do
 done
 ```
 
+*Personal note: Many prefer `zsh`, but I stick with Bash because it's the standard on servers. Consistency beats comfort.*
+
+
 ### Fallback for Missing Tools
 
-All demos include fallback for situations when tools are not installed. The code checks availability and provides text-based alternatives.
+Banner demos include plain-text fallbacks. Other tools remain explicit prerequisites: H1 uses bc, I1 requires dialog and monitoring uses Linux/procps/iproute2 commands. Run the availability checks for the selected demo; no complete fallback is claimed. Historical numerical anecdotes are retained without empirical validation.
 
 ---
 
@@ -54,13 +56,13 @@ All demos include fallback for situations when tools are not installed. The code
 ```bash
 #!/bin/bash
 # demo_h1_pipeline_power.sh - Spectacular hook with pipeline power
+command -v bc >/dev/null || { printf 'bc is required for H1\n' >&2; exit 1; }
 
 clear
 echo -e "\n\033[1;36m"
 if command -v figlet &>/dev/null; then
     figlet -c "PIPES" | lolcat 2>/dev/null || figlet -c "PIPES"
 
-> 💡 Experience shows that debugging is 80% reading carefully and 20% writing new code.
 
 else
     echo "╔═══════════════════════════════════════════╗"
@@ -92,13 +94,15 @@ echo -e "\033[1;36mCommand: find | sort | head | while read\033[0m"
 sleep 2
 ```
 
+> 💡 Experience shows that debugging is 80% reading carefully and 20% writing new code.
+
+
 ### DEMO H2: Epic Countdown
 **Moment**: Alternative to H1 | **Wow Factor**: ⭐⭐⭐⭐⭐
 
-```bash
-
 *(Bash has ugly syntax, I admit. But it runs everywhere, and that matters enormously in practice.)*
 
+```bash
 #!/bin/bash
 # demo_h2_countdown.sh - Spectacular visual countdown
 
@@ -150,14 +154,14 @@ count=0
 while [[ $count -lt 10 ]]; do
     load=$(cat /proc/loadavg | cut -d' ' -f1)
     mem=$(free -h | awk '/^Mem/{print $3"/"$2}')
-    procs=$(ps aux 2>/dev/null | wc -l)
+    procs=$(ps -e -o pid= | wc -l)
     disk=$(df -h / | awk 'NR==2{print $5}')
     
     printf "\r\033[K💓 Load: \033[1;33m%-5s\033[0m | Mem: \033[1;32m%-12s\033[0m | Procs: \033[1;35m%-4d\033[0m | Disk: \033[1;31m%s\033[0m" \
         "$load" "$mem" "$procs" "$disk"
     
     sleep 1
-    ((count++))
+    count=$((count + 1))
 done
 echo -e "\n\n\033[1;36m>>> This is the power of LOOPS and PIPELINES!\033[0m"
 ```
@@ -172,6 +176,9 @@ echo -e "\n\n\033[1;36m>>> This is the power of LOOPS and PIPELINES!\033[0m"
 ```bash
 #!/bin/bash
 # demo_c1_conditionals.sh - Visualising && and || operators
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-demo.XXXXXX") || exit 1
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 demo_section() {
     echo ""
@@ -318,11 +325,14 @@ echo -e "\033[1;36m>>> Observe: STDOUT and STDERR are SEPARATE channels!\033[0m"
 ```bash
 #!/bin/bash
 # demo_f1_uniq_trap.sh - The famous uniq trap
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-demo.XXXXXX") || exit 1
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 echo -e "\033[1;36m═══ DEMO: THE uniq TRAP ═══\033[0m\n"
 
 # Create test data
-cat > /tmp/colours.txt << 'EOF'
+cat > "$DEMO_DIR/colours.txt" << 'EOF'
 red
 green
 red
@@ -334,7 +344,7 @@ blue
 EOF
 
 echo -e "\033[1;33mOriginal data:\033[0m"
-cat -n /tmp/colours.txt
+cat -n "$DEMO_DIR/colours.txt"
 echo ""
 
 sleep 1
@@ -342,7 +352,7 @@ sleep 1
 echo -e "\033[1;31m>>> WRONG: uniq WITHOUT sort\033[0m"
 echo "Command: cat colours.txt | uniq"
 echo "Result:"
-cat /tmp/colours.txt | uniq | while read line; do
+cat "$DEMO_DIR/colours.txt" | uniq | while read line; do
     echo -e "  \033[1;31m$line\033[0m"
 done
 echo ""
@@ -355,7 +365,7 @@ echo ""
 echo -e "\033[1;32m>>> CORRECT: sort | uniq\033[0m"
 echo "Command: cat colours.txt | sort | uniq"
 echo "Result:"
-cat /tmp/colours.txt | sort | uniq | while read line; do
+cat "$DEMO_DIR/colours.txt" | sort | uniq | while read line; do
     echo -e "  \033[1;32m$line\033[0m"
 done
 
@@ -364,11 +374,11 @@ sleep 1
 echo ""
 echo -e "\033[1;36m>>> BONUS: sort | uniq -c for frequencies\033[0m"
 echo "Result:"
-cat /tmp/colours.txt | sort | uniq -c | sort -rn | while read count colour; do
+cat "$DEMO_DIR/colours.txt" | sort | uniq -c | sort -rn | while read count colour; do
     printf "  \033[1;35m%2d×\033[0m %s\n" "$count" "$colour"
 done
 
-rm -f /tmp/colours.txt
+rm -f "$DEMO_DIR/colours.txt"
 
 echo ""
 echo -e "\033[1;33m═══════════════════════════════════════════════════════\033[0m"
@@ -396,32 +406,32 @@ sleep 1
 
 echo ""
 echo -e "\033[1;33m[Step 2] | awk '{print \$1}' - extract only username:\033[0m"
-ps aux | awk '{print $1}' | head -5
+ps -e -o user= | head -5
 sleep 1
 
 echo ""
 echo -e "\033[1;33m[Step 3] | sort - alphabetical sorting:\033[0m"
-ps aux | awk '{print $1}' | sort | head -5
+ps -e -o user= | sort | head -5
 sleep 1
 
 echo ""
 echo -e "\033[1;33m[Step 4] | uniq -c - count occurrences:\033[0m"
-ps aux | awk '{print $1}' | sort | uniq -c | head -5
+ps -e -o user= | sort | uniq -c | head -5
 sleep 1
 
 echo ""
 echo -e "\033[1;33m[Step 5] | sort -rn - descending sort:\033[0m"
-ps aux | awk '{print $1}' | sort | uniq -c | sort -rn | head -5
+ps -e -o user= | sort | uniq -c | sort -rn | head -5
 sleep 1
 
 echo ""
 echo -e "\033[1;33m[Step 6] | head -5 - only first 5:\033[0m"
-ps aux | awk '{print $1}' | sort | uniq -c | sort -rn | head -5
+ps -e -o user= | sort | uniq -c | sort -rn | head -5
 
 echo ""
 echo -e "\033[1;32m═══════════════════════════════════════════════════════\033[0m"
 echo -e "\033[1;32mFINAL PIPELINE:\033[0m"
-echo -e "\033[1;36mps aux | awk '{print \$1}' | sort | uniq -c | sort -rn | head -5\033[0m"
+echo -e "\033[1;36mps -e -o user= | sort | uniq -c | sort -rn | head -5\033[0m"
 echo -e "\033[1;32m═══════════════════════════════════════════════════════\033[0m"
 ```
 
@@ -487,11 +497,14 @@ echo -e "\033[1;33m════════════════════�
 ```bash
 #!/bin/bash
 # demo_b2_subshell_trap.sh - Subshell problem with pipe
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s02-demo.XXXXXX") || exit 1
+trap 'rm -rf -- "$DEMO_DIR"' EXIT
+cd -- "$DEMO_DIR" || exit 1
 
 echo -e "\033[1;36m═══ DEMO: THE SUBSHELL PROBLEM WITH PIPE ═══\033[0m\n"
 
 # Create test file
-echo -e "line1\nline2\nline3" > /tmp/test_lines.txt
+echo -e "line1\nline2\nline3" > "$DEMO_DIR/test_lines.txt"
 
 echo -e "\033[1;31m>>> THE PROBLEM: Variable does NOT update\033[0m"
 echo ""
@@ -499,9 +512,9 @@ echo ""
 count=0
 echo "BEFORE: count=$count"
 echo ""
-echo 'Command: cat file | while read line; do ((count++)); done'
-cat /tmp/test_lines.txt | while read line; do
-    ((count++))
+echo 'Command: cat file | while read line; do count=$((count + 1)); done'
+cat "$DEMO_DIR/test_lines.txt" | while read line; do
+    count=$((count + 1))
     echo "  In loop: count=$count (line: $line)"
 done
 echo ""
@@ -518,17 +531,17 @@ echo ""
 count=0
 echo "BEFORE: count=$count"
 echo ""
-echo 'Command: while read line; do ((count++)); done < file'
+echo 'Command: while read line; do count=$((count + 1)); done < file'
 while read line; do
-    ((count++))
+    count=$((count + 1))
     echo "  In loop: count=$count (line: $line)"
-done < /tmp/test_lines.txt
+done < "$DEMO_DIR/test_lines.txt"
 echo ""
 echo "AFTER: count=$count"
 echo ""
 echo -e "\033[1;32m✓ count is 3! Redirect does NOT create subshell!\033[0m"
 
-rm -f /tmp/test_lines.txt
+rm -f "$DEMO_DIR/test_lines.txt"
 
 echo ""
 echo -e "\033[1;33m═══════════════════════════════════════════════════════\033[0m"
@@ -559,7 +572,7 @@ while true; do
         2 "💾 Memory Info" \
         3 "💿 Disk Info" \
         4 "🔄 Active processes (top 10)" \
-        5 "🌐 Network connections" \
+        5 "🌐 Listening TCP/UDP sockets" \
         6 "👤 Logged in users" \
         7 "📈 Load Average" \
         8 "🕐 System Uptime" \
@@ -572,7 +585,7 @@ while true; do
         2) dialog --title "💾 Memory" --msgbox "$(free -h)" 12 50 ;;
         3) dialog --title "💿 Disks" --msgbox "$(df -h | head -10)" 15 70 ;;
         4) dialog --title "🔄 Top Processes" --msgbox "$(ps aux --sort=-%mem | head -11)" 18 100 ;;
-        5) dialog --title "🌐 Connections" --msgbox "$(ss -tuln | head -15)" 20 80 ;;
+        5) dialog --title "🌐 Listening sockets" --msgbox "$(ss -tuln | head -15)" 20 80 ;;
         6) dialog --title "👤 Users" --msgbox "$(who)" 12 50 ;;
         7) dialog --title "📈 Load" --msgbox "$(cat /proc/loadavg)" 8 50 ;;
         8) dialog --title "🕐 Uptime" --msgbox "$(uptime -p)" 8 50 ;;
@@ -596,7 +609,7 @@ echo -e "\033[1;32m✓ System Explorer closed. Goodbye!\033[0m"
 | C1 | && and \|\| | 2 min | ⭐⭐⭐ | After operator theory |
 | C2 | Background jobs | 2 min | ⭐⭐⭐⭐ | After explaining & |
 | R1 | File descriptors | 2 min | ⭐⭐⭐ | Start of redirection |
-| R2 | Progress bar pv | 2 min | ⭐⭐⭐⭐⭐ | Redirect wow moment |
+| R2 (planned) | Progress bar pv; no R2 script supplied in this file | Not scheduled | — | Author may add a separate demo |
 | F1 | The uniq trap | 2 min | ⭐⭐⭐⭐ | CRITICAL - after uniq |
 | F2 | Pipeline build | 3 min | ⭐⭐⭐⭐ | Incremental demo |
 | B1 | Brace trap | 2 min | ⭐⭐⭐⭐ | CRITICAL - after for |
@@ -605,5 +618,5 @@ echo -e "\033[1;32m✓ System Explorer closed. Goodbye!\033[0m"
 
 ---
 
-*Document generated for Seminar 3-4 OS | ASE Bucharest - CSIE*  
+*Document generated for Seminar 02 OS | ASE Bucharest - CSIE*  
 *Spectacular demos for engagement and critical concept memorisation*

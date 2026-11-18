@@ -1,4 +1,6 @@
 # Seminar 3 Assignment: System Administrator Toolkit
+
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
 ## Operating Systems | Bucharest UES - CSIE
 
 **Version**: 1.0 | **Deadline**: [To be completed by instructor]  
@@ -9,16 +11,16 @@
 
 ## Table of Contents
 
-1. [Objectives and Competencies](#-objectives-and-competencies)
-2. [Submission Instructions](#-submission-instructions)
-3. [Part 1: Find Master](#part-1-find-master-20-percent)
-4. [Part 2: Professional Script](#part-2-professional-script-30-percent)
-5. [Part 3: Permission Manager](#part-3-permission-manager-25-percent)
-6. [Part 4: Cron Jobs](#part-4-cron-jobs-15-percent)
-7. [Part 5: Integration Challenge](#part-5-integration-challenge-10-percent)
-8. [Bonuses](#-bonuses-up-to-20-percent-extra)
-9. [Evaluation Criteria](#-evaluation-criteria)
-10. [Permitted Resources](#-permitted-resources)
+1. [Objectives and Competencies](#objectives-and-competencies)
+2. [Submission Instructions](#submission-instructions)
+3. [Part 1: Find Master](#part-1-find-master-20)
+4. [Part 2: Professional Script](#part-2-professional-script-30)
+5. [Part 3: Permission Manager](#part-3-permission-manager-25)
+6. [Part 4: Cron Jobs](#part-4-cron-jobs-15)
+7. [Part 5: Integration Challenge](#part-5-integration-challenge-10)
+8. [Bonuses](#bonuses-up-to-20-extra)
+9. [Evaluation Criteria](#evaluation-criteria)
+10. [Permitted Resources](#permitted-resources)
 
 ---
 
@@ -110,7 +112,7 @@ You're going to use ChatGPT or similar tools. I know it. You know it. Let's be a
 
 ### Mandatory Development Log
 
-Every script must include a development log in the header. No log = automatic -10%.
+Every script must include a development log in the header. The historical -10% deduction is **unapplied pending the canonical policy**; a log is self-declared process evidence, not proof of authorship.
 
 ```bash
 #!/bin/bash
@@ -122,13 +124,13 @@ Every script must include a development log in the header. No log = automatic -1
 # DEVELOPMENT LOG:
 # 2025-01-28 14:30 - Started with getopts template from lecture
 # 2025-01-28 15:45 - Stuck on OPTARG, asked ChatGPT for clarification
-# 2025-01-28 16:00 - Realised I needed quotes around $OPTARG
+# 2025-01-28 16:00 - Quoted "$OPTARG" when passing it as a command argument
 # 2025-01-29 09:00 - Added verbose mode, tested with sample files
 # 2025-01-29 10:30 - Fixed bug where -n 0 was accepted (should error)
 # ═══════════════════════════════════════════════════════════════
 ```
 
-This isn't about catching you—it's about proving you actually worked through the problems.
+A development log supports a technical conversation. It does not independently establish who produced the code or whether the log is complete.
 
 ### Live Verification Questions
 
@@ -297,10 +299,10 @@ task9() {
 }
 
 # Task 10: Find and archive all .md files in docs.tar.gz
-# Hint: find ... -print0 | xargs -0 tar ...
+# Hint: feed a complete NUL file list to one GNU tar invocation with --null -T -
 task10() {
-    echo "=== Task 10: Archive .md with find + xargs ==="
-    # COMPLETE THE FIND + XARGS + TAR COMMAND
+    echo "=== Task 10: Archive .md with find + one tar invocation ==="
+    # COMPLETE THE FIND + TAR COMMAND (do not recreate the same archive in xargs batches)
 }
 
 # Run all tasks
@@ -370,7 +372,9 @@ EXAMPLES:
 
 ### Requirements
 
-> ⚠️ **Serious warning**: SUID on Bash scripts is a VERY bad idea from a security standpoint. In this exercise we use it to understand the concept, but in production — NEVER. I've seen servers compromised because of this. Technical Mandatory Requirements
+### Technical Requirements
+
+Linux ignores SUID on interpreter scripts. Inspect mode bits to understand the concept; do not claim that chmod u+s makes a Bash script execute as root. The original security anecdote is historical author commentary, not a demonstrated exploit in this kit.
 
 1. **Argument parsing** with `getopts` for short options
 2. **Support for long options** (manual, not external getopt)
@@ -380,6 +384,12 @@ EXAMPLES:
 6. **Logging** with configurable level (verbose/normal/quiet)
 
 ### Script Skeleton
+
+The marked processing functions are student work. They are not complete executable
+solutions; complete their bodies and explicit error handling before running a mode.
+The supplied parser/control shell must handle paths with spaces and never announce
+completion after a failed processing function. No test evidence for unfinished
+student implementations is implied.
 
 ```bash
 #!/bin/bash
@@ -391,6 +401,7 @@ EXAMPLES:
 #
 
 set -o nounset  # Error for undefined variables
+set -o pipefail  # Preserve upstream failures in the supplied control shell
 
 #
 # CONSTANTS AND DEFAULTS
@@ -418,7 +429,8 @@ readonly E_FILE=2
 
 # Display message if verbose is enabled
 log_verbose() {
-    [[ $VERBOSE -eq 1 ]] && echo "[INFO] $*" >&2
+    if [[ $VERBOSE -eq 1 ]]; then echo "[INFO] $*" >&2; fi
+    return 0
 }
 
 # Display error and exit
@@ -429,7 +441,8 @@ die() {
 
 # Display warning
 warn() {
-    [[ $QUIET -eq 0 ]] && echo "[WARN] $*" >&2
+    if [[ $QUIET -eq 0 ]]; then echo "[WARN] $*" >&2; fi
+    return 0
 }
 
 # Display usage
@@ -516,11 +529,11 @@ parse_args() {
             --help)      args+=("-h") ;;
             --verbose)   args+=("-v") ;;
             --quiet)     args+=("-q") ;;
-            --output)    args+=("-o" "$2"); shift ;;
-            --mode)      args+=("-m" "$2"); shift ;;
-            --pattern)   args+=("-p" "$2"); shift ;;
+            --output) [[ $# -ge 2 && -n $2 ]] || { echo "Missing --output operand" >&2; exit "$E_USAGE"; }; args+=("-o" "$2"); shift ;;
+            --mode) [[ $# -ge 2 && -n $2 ]] || { echo "Missing --mode operand" >&2; exit "$E_USAGE"; }; args+=("-m" "$2"); shift ;;
+            --pattern) [[ $# -ge 2 && -n $2 ]] || { echo "Missing --pattern operand" >&2; exit "$E_USAGE"; }; args+=("-p" "$2"); shift ;;
             --recursive) args+=("-r") ;;
-            --extension) args+=("-e" "$2"); shift ;;
+            --extension) [[ $# -ge 2 && -n $2 ]] || { echo "Missing --extension operand" >&2; exit "$E_USAGE"; }; args+=("-e" "$2"); shift ;;
             --)          args+=("--"); shift; break ;;
             *)           args+=("$1") ;;
         esac
@@ -597,24 +610,38 @@ main() {
     log_verbose "Mode: $MODE"
     log_verbose "Files: ${FILES[*]}"
     
-    # Prepare output
-    local output_cmd="cat"
-    [[ -n "$OUTPUT" ]] && output_cmd="tee $OUTPUT"
-    
-    # Process files
-    {
-        for file in "${FILES[@]}"; do
-            if [[ -d "$file" && $RECURSIVE -eq 1 ]]; then
-                # Recursive processing
-                while IFS= read -r -d '' f; do
-                    process_file "$f"
-                done < <(find "$file" -type f ${EXTENSION:+-name "*$EXTENSION"} -print0)
-            else
-                process_file "$file"
-            fi
-        done
-    } | $output_cmd
-    
+    # Stage output in an owned temporary directory. This wrapper must not report
+    # completion if a student processing function or a discovery/read operation fails.
+    local stage status=0 file f
+    stage=$(mktemp -d "${TMPDIR:-/tmp}/enos-fileprocessor.XXXXXX") || exit "$E_FILE"
+    trap 'rm -rf -- "$stage"' RETURN
+    for file in "${FILES[@]}"; do
+        if [[ -d $file && $RECURSIVE -eq 1 ]]; then
+            local find_args=("$file" -type f)
+            [[ -z $EXTENSION ]] || find_args+=(-name "*$EXTENSION")
+            if ! find "${find_args[@]}" -print0 > "$stage/files0"; then status=$E_FILE; break; fi
+            while IFS= read -r -d '' f; do
+                process_file "$f" >> "$stage/result" || { status=$E_FILE; break; }
+            done < "$stage/files0"
+        else
+            process_file "$file" >> "$stage/result" || status=$E_FILE
+        fi
+        ((status == 0)) || break
+    done
+    if ((status)); then
+        rm -rf -- "$stage"; trap - RETURN
+        echo 'Processing failed; no completed result published' >&2
+        exit "$status"
+    fi
+    [[ -f $stage/result ]] || : > "$stage/result"
+    if [[ -n $OUTPUT ]]; then
+        (set -C; cat -- "$stage/result" > "$OUTPUT") || status=$E_FILE
+    else
+        cat -- "$stage/result" || status=$E_FILE
+    fi
+    rm -rf -- "$stage"; trap - RETURN
+    ((status == 0)) || exit "$status"
+
     log_verbose "Processing complete."
     exit $E_SUCCESS
 }
@@ -660,12 +687,12 @@ OPTIONS:
     -F, --force-fix     Correct without confirmation (DANGEROUS!)
     -r, --report FILE   Save report to FILE
     -s, --standard STD  Verification standard:
-                        strict   - only owner can write (644/755)
-                        normal   - group can read (644/755) [default]
-                        relaxed  - world readable (644/755)
+                        strict/normal/relaxed - historical unresolved policy names;
+                        do not silently map all three to identical modes.
+                        Until a policy is supplied, inventory and suggest only.
 
 PROBLEMS DETECTED:
-    ⚠️  World-writable files (permissions xx7 or xx6 with w)
+    ⚠️  World-writable files (other-write bit set: final octal digit 2, 3, 6 or 7)
     ⚠️  SUID/SGID on scripts (security risk)
     ⚠️  Executable files that shouldn't be
     ⚠️  Directories without x for owner
@@ -766,12 +793,12 @@ fix_permission() {
     echo "  Suggested: $suggested_perm"
     
     if [[ $FORCE_FIX -eq 1 ]]; then
-        chmod "$suggested_perm" "$file"
+        chmod -- "$suggested_perm" "$file" || return 1
         echo "  ✓ Automatically corrected"
     elif [[ $FIX -eq 1 ]]; then
         read -p "  Apply correction? [y/N] " response
         if [[ "$response" =~ ^[Yy] ]]; then
-            chmod "$suggested_perm" "$file"
+            chmod -- "$suggested_perm" "$file" || return 1
             echo "  ✓ Corrected"
         else
             echo "  ✗ Ignored"
@@ -832,7 +859,7 @@ main "$@"
 
 | Criterion | Points | Description |
 |-----------|--------|-------------|
-| Detect world-writable | 4% | Correctly identifies xx7/xx6 files |
+| Detect world-writable | 4% | Tests the other-write bit (including 602, 603, 606 and 607) |
 | Detect SUID/SGID | 4% | Identifies special bits on scripts |
 | Detect 777 | 3% | Flags as critical |
 | Formatted report | 4% | Includes statistics, problems, commands |
@@ -963,7 +990,7 @@ Select option [0-5]:
 
 ### Requirements
 
-> ⚠️ **Serious warning**: SUID on Bash scripts is a VERY bad idea from a security standpoint. In this exercise we use it to understand the concept, but in production — NEVER. I've seen servers compromised because of this.
+> Linux ignores SUID on Bash scripts. This exercise does not require privileged execution; use owned fixtures and describe platform restrictions.
 
 - Interactive menu with `select` or `case`
 - Each option calls functions from previous scripts or reimplements them
@@ -1003,38 +1030,21 @@ Add support for:
 In short: Options with `=`: `--output=file.txt`; Combined options: `-vro output.txt`; Automatic completion (script for bash completion).
 
 
-### Bonus B3: Robust Lock File (5%)
+### Bonus B3: Atomic Locking (historical 5%, pending policy)
 
-Implement in `backup_script.sh`:
-- Lock file with PID
-- Timeout for lock
-- Automatic cleanup on signals (trap)
-- Zombie process verification
+Implement an atomic lock in a private owned state directory, with a documented
+wait/timeout policy and cleanup that releases only the lock held by this process.
+`kill -0` alone cannot distinguish a stale PID from a reused PID or grant permission
+to remove another invocation's lock. Use a descriptor lock (`flock`) or an atomic
+lock-directory protocol and explain filesystem assumptions.
 
 ```bash
-# Example robust lock verification
-LOCKFILE="/var/run/backup.lock"
-LOCK_TIMEOUT=3600  # 1 hour
-
-if [[ -f "$LOCKFILE" ]]; then
-    pid=$(cat "$LOCKFILE")
-    if kill -0 "$pid" 2>/dev/null; then
-        # Process still active - check timeout
-        # COMPLETE
-    else
-        # Dead process - cleanup lock
-        rm -f "$LOCKFILE"
-    fi
-fi
+# Skeleton only: choose an existing private WORK_DIR and implement the task body.
+: "${WORK_DIR:?Set an owned state directory}"
+exec 9>"$WORK_DIR/backup.lock" || exit 1
+flock -n 9 || { echo 'Another process holds the lock' >&2; exit 2; }
+# COMPLETE: backup with checked statuses; do not unlink this live lock file.
 ```
-
-### Bonus B4: Test Suite (5%)
-
-Create `test_fileprocessor.sh` with automated tests:
-- Minimum 10 tests
-- Verify all modes
-- Verify error handling
-- Pass/fail output for each test
 
 ---
 
@@ -1078,8 +1088,8 @@ Create `test_fileprocessor.sh` with automated tests:
 ## 🔐 VERIFICATION CHALLENGES (Mandatory - 15% of final grade)
 
 > **Why this section exists**: We want to ensure you UNDERSTAND what you submit
-> not just that you can produce working code. These challenges cannot be solved 
-> by simply using ChatGPT or copying from colleagues.
+> not just that you can produce working code. These are discussion prompts, not a validated method for proving authorship.
+> Their weights, eligibility conditions and privacy requirements remain pending policy.
 
 ### Challenge V1: Screenshot with Timestamp (5%)
 
@@ -1110,7 +1120,7 @@ Create `test_fileprocessor.sh` with automated tests:
    - How did you fix it?
 
 2. **Two things you learnt** that were not obvious from the seminar materials
-   - Example: "I discovered that xargs -I {} does not work with -P for parallel execution"
+   - Example: "I discovered that xargs -I {} can be combined with -P, but concurrent output may interleave"
 
 **Format**:
 ```markdown

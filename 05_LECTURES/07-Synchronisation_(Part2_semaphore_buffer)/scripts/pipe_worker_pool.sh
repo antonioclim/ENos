@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -28,13 +28,15 @@ while getopts ":p:n:h" opt; do
   esac
 done
 
+[[ "$P" =~ ^[1-9][0-9]*$ && "$N" =~ ^[0-9]+$ ]] || { echo "Parallelism must be positive and tasks nonnegative." >&2; exit 2; }
+
 echo "=== Worker pool (xargs -P) ==="
 echo "[INFO] tasks=$N, parallelism=$P"
 echo
 
 # Producer: generates numbers 1..N
 seq 1 "$N" \
-  | xargs -n 1 -P "$P" bash -c 'echo "[worker $$] processing item=$1"; sleep 0.1' _
+  | xargs -r -n 1 -P "$P" bash -c 'echo "[worker $$] processing item=$1"; sleep 0.1' _
 
 echo
 echo "Didactic observation:"

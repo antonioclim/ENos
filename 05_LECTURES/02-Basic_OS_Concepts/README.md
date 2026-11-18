@@ -1,3 +1,23 @@
+# Lecture 02 — Basic OS Concepts
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C02_01_COURSE_PLAN.md)
+- [Concept Map](docs/C02_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C02_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C02_04_STUDY_GUIDE.md)
+- [02ex1 - Interrupt Flow](docs/02ex1_-_Interrupt_Flow.html)
+- [02ex2 - Polling vs Interrupts](docs/02ex2_-_Polling_vs_Interrupts.html)
+- [Formative question bank](docs/C02_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 /* FIȘIER TRADUS ȘI VERIFICAT ÎN LIMBA ROMÂNĂ */
 
 # Demonstration Scripts – Week 02

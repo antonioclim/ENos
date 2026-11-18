@@ -1,5 +1,8 @@
 # S05_TC04 - Trap and Error Handling
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory material - Seminar 5 (SPLIT from TC6b)
 
@@ -104,7 +107,7 @@ trap cleanup EXIT
 TEMP_FILE=$(mktemp)
 # ...
 
-if [[ "$DEBUG" == true ]]; then
+if [[ "${DEBUG:-false}" == true ]]; then
     KEEP_TEMP=true
     echo "Temp file kept: $TEMP_FILE"
 fi
@@ -157,7 +160,7 @@ error_handler() {
     
     local i=0
     while caller $i; do
-        ((i++))
+        i=$((i+1))
     done | while read line func file; do
         echo "  $file:$line in $func()" >&2
     done
@@ -230,8 +233,8 @@ cleanup() {
     echo "Cleanup..."
 }
 
-trap 'cleanup; exit 130' INT   # 128 + 2 (SIGINT)
-trap 'cleanup; exit 143' TERM  # 128 + 15 (SIGTERM)
+trap 'exit 130' INT   # 128 + 2 (SIGINT)
+trap 'exit 143' TERM  # 128 + 15 (SIGTERM)
 trap cleanup EXIT
 
 # Script...
@@ -261,11 +264,9 @@ cleanup() {
         [[ -f "$f" ]] && rm -f "$f"
     done
     
-    # Remove lock file
-    [[ -f "$LOCK_FILE" ]] && rm -f "$LOCK_FILE"
+    # Never unlink a persistent flock pathname; closing the owned descriptor releases it.
     
-    # Remove PID file
-    [[ -f "$PID_FILE" ]] && rm -f "$PID_FILE"
+    # Remove a PID file only after proving this invocation created/owns that record.
     
     exit $exit_code
 }
@@ -285,20 +286,22 @@ on_interrupt() {
 # Setup traps
 trap cleanup EXIT
 trap 'on_error $LINENO "$BASH_COMMAND" $?' ERR
-trap on_interrupt INT TERM
+trap on_interrupt INT
+trap 'exit 143' TERM
 
 # Helper for temp files
 create_temp() {
-    local f
-    f=$(mktemp)
-    TEMP_FILES+=("$f")
-    echo "$f"
+    local output_name="$1" created_path
+    [[ $output_name =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || return 2
+    created_path=$(mktemp) || return 1
+    TEMP_FILES+=("$created_path")
+    printf -v "$output_name" '%s' "$created_path"
 }
 
 # Main script
 main() {
     local temp1
-    temp1=$(create_temp)
+    create_temp temp1 || return 1
     
     echo "Working..."
     # ...
@@ -313,30 +316,21 @@ main "$@"
 #!/bin/bash
 set -euo pipefail
 
-LOCK_FILE="/var/run/myscript.lock"
-
+LOCK_DIR="${LOCK_DIR:?Set a private writable directory shared by all contenders}"
+[[ -d $LOCK_DIR && ! -L $LOCK_DIR && $(stat -c %u "$LOCK_DIR") == "$EUID" ]] || exit 2
+LOCK_FILE="$LOCK_DIR/myscript.lock"
+LOCK_FD=''
 acquire_lock() {
-    if [[ -f "$LOCK_FILE" ]]; then
-        local pid
-        pid=$(cat "$LOCK_FILE")
-        if kill -0 "$pid" 2>/dev/null; then
-            echo "Error: Script already running (PID $pid)" >&2
-            exit 1
-        fi
-        echo "Warning: Stale lock file, removing..."
-        rm -f "$LOCK_FILE"
-    fi
-    
-    echo $$ > "$LOCK_FILE"
+    exec {LOCK_FD}>>"$LOCK_FILE" || return 1
+    flock -n "$LOCK_FD" || { echo 'Another instance holds the lock' >&2; return 1; }
 }
-
 release_lock() {
-    rm -f "$LOCK_FILE"
+    if [[ -n $LOCK_FD ]]; then exec {LOCK_FD}>&-; LOCK_FD=''; fi
+    return 0
 }
-
 trap release_lock EXIT
-
-acquire_lock
+acquire_lock || exit 1
+# The lock pathname persists. Unlinking it can permit locking different inodes.
 
 # Script...
 echo "Running with PID $$"
@@ -389,7 +383,7 @@ set -euo pipefail
 
 DEBUG="${DEBUG:-false}"
 
-if [[ "$DEBUG" == true ]]; then
+if [[ "${DEBUG:-false}" == true ]]; then
     # Display each command before execution
     trap 'echo "+ $BASH_COMMAND" >&2' DEBUG
 fi

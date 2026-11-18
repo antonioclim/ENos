@@ -1,111 +1,78 @@
-# 📁 Formative Assessment — SEM05
+# Formative assessment — SEM05
 
-> **Location:** `SEM05/formative/`  
-> **Purpose:** Self-assessment quiz system for seminar concepts
+## Canonical files and scope
 
-## Contents
+`quiz.yaml` is the canonical 18-question bank. It contains 102 authored points; the metadata totals and Bloom distribution are derived from its current records. Question IDs, weights and existing Bloom labels are preserved. Review of the response alternatives does not validate classroom-effectiveness percentages: historical estimates retain an explicit unverified-provenance label.
 
-| File | Purpose |
-|------|---------|
-| `quiz.yaml` | Question bank (12+ questions, Bloom-distributed) |
-| `quiz_runner.py` | Interactive CLI quiz runner |
-| `quiz_lms.json` | LMS-compatible export (Moodle/Canvas) |
+`quiz_runner.py` provides local practice. `quiz_lms.json` retains its historical filename but contains **ENos local data**, with the YAML SHA-256 and every original question record. It is **not Moodle XML, Canvas QTI or a verified institutional import format**. No LMS connection or import acceptance is claimed. Public files cannot be made confidential by labelling them instructor-only; the publication choice remains open in [AUTHOR_DECISIONS.md](../../AUTHOR_DECISIONS.md).
 
-## Quick Start
+## Quick start
+
+Use the complete repository checkout and a Python environment with PyYAML. Rich is optional for SEM05. From the repository root, change to `SEM05/formative`, then run the selected command:
 
 ```bash
-# Run interactive quiz
-python3 quiz_runner.py
-
-# Run with specific number of questions
-python3 quiz_runner.py --questions 10
-
-# Shuffle question order
-python3 quiz_runner.py --shuffle
-
-# Show answers immediately after each question
-python3 quiz_runner.py --show-answers
+python3 quiz_runner.py quiz.yaml --no-rich
+python3 quiz_runner.py quiz.yaml --category Functions --limit 3 --no-rich
+python3 quiz_runner.py quiz.yaml --shuffle --no-rich
+python3 quiz_runner.py quiz.yaml --no-rich --export-results results.json
+python3 quiz_runner.py quiz.yaml --validate
+python3 quiz_runner.py quiz.yaml --export-bank bank.json
 ```
 
-## quiz_runner.py Options
+No `--questions`, `--timed`, `--file`, `--show-answers`, `--export moodle` or `--export canvas` workflow is implemented. The actual help is `python3 quiz_runner.py --help`.
 
-```bash
-python3 quiz_runner.py [options]
+## Options
 
-Options:
-  --questions N     Number of questions to ask (default: all)
-  --shuffle         Randomize question order
-  --show-answers    Show correct answer after each question
-  --timed SEC       Time limit per question in seconds
-  --file PATH       Use alternative quiz file
-  --validate        Validate quiz.yaml structure without running
-  --export FORMAT   Export to format: json, csv, moodle
-```
+| Argument | Behaviour |
+|---|---|
+| Positional `quiz_file` | Required YAML bank path |
+| `--shuffle` | Shuffle question order; options are not shuffled |
+| `--category NAME` | Match the exact topic name, case-insensitively, e.g. `Functions` |
+| `--limit N` | Positive maximum number of selected questions |
+| `--no-rich` | Plain text output |
+| `--export-results FILE` | JSON session results after completion |
+| `--validate` | Validate source schema, answer keys and declared counts/weights without answering |
+| `--export-bank FILE` | Local normalised bank data, without running a quiz |
+| `--export-lms FILE` | Historical alias of `--export-bank`; it is not an LMS import converter |
 
-## Quiz Format (quiz.yaml)
+## Scoring contract
+
+The CLI percentage is **correct answers / selected questions × 100**, preserving the existing count-based practice behaviour. It also exports earned/max question points separately. Those weights sum to 102 in the complete authored bank; the former 100 metadata value was inconsistent. No question weight was changed to force a total of 100. All 18 correct answers yield 100%; selecting a topic/limit uses that selected question count. A blank/interrupted session is not a completed assessment and does not produce a final session export.
+
+Both tools render feedback only at the documented time. Embedded Bash snippets are question text; the quiz does not execute them. Code-output questions assume the stated shell, options and inputs. Intentional wrong examples remain questions, with corrected answer explanations.
+
+## Editing the bank
+
+Use stable unique IDs, valid answer keys and finite positive points. The following is an illustrative minimal bank, not a replacement for the canonical data:
 
 ```yaml
 metadata:
   seminar: 5
-  subject: "Functions & Arrays"
-  version: "2.0"
-  creation_date: "2026-01-XX"
-  number_of_questions: 12
-  estimated_time_minutes: 15
-  bloom_distribution:
-    remember: 3      # Knowledge recall
-    understand: 5    # Comprehension  
-    apply: 2         # Practical usage
-    analyse: 2       # Problem solving
-
+  title: Example formative bank
 questions:
-  - id: q01
+  - id: example01
+    question: Which exit status conventionally means success?
+    topic: Functions
     bloom: remember
-    difficulty: easy
-    text: "Question text here?"
+    points: 5
     options:
-      - "Option A"
-      - "Option B"  
-      - "Option C"
-      - "Option D"
-    correct: 1       # 0-indexed (Option B is correct)
-    explanation: "Explanation of why B is correct"
+      - text: Zero
+        explanation: Success status
+      - text: One
+        explanation: Non-zero status
+    correct_answer: 0
+    explanation: Zero conventionally denotes success.
 ```
 
-## Adding Questions
+If `question_count`, `total_points` or `bloom_distribution` is present, it must agree with the records. The real banks declare all three. Schema validation is separate from human review of scientific content and answer uniqueness.
 
-1. Edit `quiz.yaml`
-2. Follow Bloom taxonomy distribution guidelines
-3. Validate: `python3 quiz_runner.py --validate`
-4. Test: `python3 quiz_runner.py --questions 5`
-
-## LMS Integration
-
-### Export for Moodle
+After an authorised edit, recalculate the descriptive metadata from the records, run `--validate`, then regenerate `quiz_lms.json` with `--export-bank quiz_lms.json`. From the repository root, both derived exports can be rebuilt with:
 
 ```bash
-python3 quiz_runner.py --export moodle > quiz_moodle.xml
+python3 scripts/build_formative_exports.py
+python3 scripts/build_formative_exports.py --check
 ```
 
-### Export for Canvas
+The builder and CLI use the same local export contract and retain the source question fields. The export preserves option identity and answer feedback; it does not enforce historical LMS template settings or select a publication/assessment policy. See [the teaching materials](../docs/) and [local tests](../tests/).
 
-Use the pre-generated `quiz_lms.json` or:
-```bash
-python3 quiz_runner.py --export canvas > quiz_canvas.qti
-```
-
-## Bloom's Taxonomy Reference
-
-| Level | Cognitive Process | Question Types |
-|-------|-------------------|----------------|
-| Remember | Recall facts | Definitions, lists, terminology |
-| Understand | Explain meaning | Comparisons, descriptions |
-| Apply | Use knowledge | Code completion, command usage |
-| Analyse | Break down | Debugging, output prediction |
-
----
-
-*See also: [`../docs/`](../docs/) for study materials*  
-*See also: [`../tests/`](../tests/) for automated testing*
-
-*Last updated: January 2026*
+*Corrected source candidate: 17 November 2026. Native CLI/fixture checks are recorded in the Phase 5 evidence; no interactive terminal usability or LMS acceptance is inferred.*

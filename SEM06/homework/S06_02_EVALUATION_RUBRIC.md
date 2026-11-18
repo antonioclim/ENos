@@ -2,6 +2,8 @@
 
 > **Instructor document** | Seminar 6 + Final Presentation (SEM07)
 
+> **Assessment status — author decision pending:** this file preserves the original requirements and point tables as proposals. They conflict with other SEM06/SEM07 documents and do not define an adopted grading policy. Read [the decision table](../docs/TEACHING_CONTRACT.md#author-decisions) before assigning grades, collecting machine identifiers or activating external integrations. Technical examples and TODO exercises can be practised locally meanwhile.
+
 ---
 
 ## Scoring System Legend
@@ -82,7 +84,7 @@ Seminar 06 is an **integrating seminar** where students work on one of the 3 CAP
 
 | Criterion | Pts | Excellent | Satisfactory | Insufficient |
 |-----------|-----|-----------|--------------|--------------|
-| Modification detection | 7 | find -newer or rsync | Partial | Full backup |
+| Modification detection | 7 | Ordered chain restoring modifications, deletion and rename | Partial | Full backup |
 | Snapshot management | 7 | Version tracking | Works | Manual |
 | Compression | 6 | tar.gz with configurable level | Fixed tar.gz | Uncompressed |
 
@@ -133,7 +135,7 @@ Seminar 06 is an **integrating seminar** where students work on one of the 3 CAP
 |-----------|-----|-----------|--------------|--------------|
 | Pre/post hooks | 7 | Custom script execution | One of two | Missing |
 | Environment config | 7 | .env or export | Partial | Hardcoded |
-| Atomic deploy | 6 | Symlink switch | Works | In-place |
+| Atomic deploy | 6 | Staged same-filesystem symlink replacement with explicit limits | Works | In-place |
 
 #### 3.3 Rollback (20%)
 
@@ -147,7 +149,7 @@ Seminar 06 is an **integrating seminar** where students work on one of the 3 CAP
 
 | Requirement | Pts | Description |
 |-------------|-----|-------------|
-| Zero-downtime | +10 | Blue-green deployment |
+| Zero-downtime | +10 | Proposed operational requirement; blue-green alone does not establish availability |
 | Container support | +10 | Docker build/deploy |
 | Slack notifications | +10 | Webhook on deploy |
 | Multi-environment | +10 | Dev/staging/prod |

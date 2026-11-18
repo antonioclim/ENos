@@ -1,6 +1,6 @@
 # Dockerfile for Project Evaluation Sandbox
 # Operating Systems | ASE Bucharest - CSIE
-# Provides isolated environment for running student code safely
+# Template dependencies; runtime isolation is supplied and validated separately.
 
 FROM ubuntu:24.04
 
@@ -61,8 +61,7 @@ RUN useradd -m -s /bin/bash evaluator \
     && mkdir -p /project /results \
     && chown -R evaluator:evaluator /project /results
 
-# Set resource limits
-# Note: These are defaults, can be overridden at runtime
+# Informational defaults only; ENV does not enforce resource limits.
 ENV TIMEOUT=60
 ENV MAX_MEMORY="512m"
 ENV MAX_PIDS=100
@@ -84,7 +83,8 @@ CMD ["bash"]
 
 # Usage:
 # Build:
-#   docker build -t os-eval-sandbox .
+#   docker build -f Docker/Dockerfile -t os-eval-sandbox .
+# Run from SEM07/project_evaluation, the parent build context.
 #
 # Run evaluation:
 #   docker run --rm \
@@ -95,7 +95,7 @@ CMD ["bash"]
 #       -v /path/to/project:/project:ro \
 #       -v /path/to/results:/results \
 #       os-eval-sandbox \
-#       /usr/local/bin/run_auto_eval_EN.sh /project -o /results
+#       /usr/local/bin/run_auto_eval_EN.sh --execute-local /project -o /results
 #
 # Interactive debugging:
 #   docker run --rm -it \

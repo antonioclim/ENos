@@ -32,6 +32,8 @@ By the end of this laboratory, the student will be able to:
 ---
 
 
+Input contract: delimiter-based CSV examples accept simple unquoted fields with no embedded delimiter, quote or newline and one record per line. For general CSV use a CSV parser. Expected lexical order uses `LC_ALL=C`; measurements of the current host are illustrative and change between samples.
+
 ## 2. The while Loop
 
 Executes as long as the condition is **true**.
@@ -156,8 +158,12 @@ done
 for file in *.jpeg; do
     [ -f "$file" ] || continue
     newname="${file%.jpeg}.jpg"
-    mv "$file" "$newname"
-    echo "Renamed: $file -> $newname"
+    [[ ! -e "$newname" && ! -L "$newname" ]] || { echo "Destination exists: $newname" >&2; exit 1; }
+    if mv -- "$file" "$newname"; then
+        printf 'Renamed: %s -> %s\n' "$file" "$newname"
+    else
+        echo "Rename failed: $file" >&2; exit 1
+    fi
 done
 ```
 
@@ -308,14 +314,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

@@ -149,7 +149,7 @@ Why it matters: Students coming from shell scripting automatically apply globbin
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-Correct answer: 3
+Correct answer: 2
 
 Explanation:
 
@@ -161,9 +161,9 @@ Explanation:
 # ac (missing the character between a and c)
 # aXc (. = X)
 # a1c (. = 1)
-# abbc (pattern found in middle: a[b]bc contains "abc")
+# abbc does not contain a three-character substring a?c.
 
-# SURPRISE: abbc matches because grep searches for SUBSTRING
+# grep searches for a contiguous substring; it does not skip a second b.
 # If we wanted exactly 3 characters: grep '^a.c$'
 ```
 
@@ -236,7 +236,7 @@ grep -v '[0-9]' file.txt
 │  ├───┤                                                                  │
 │  │ 3 │ + requires at least 2 characters, not 1                              │
 │  ├───┤                                                                  │
-│  │ 4 │ File does not contain the text "ab+c"                               │
+│  │ 4 │ grep only compares the first character of each line                               │
 │  └───┘                                                                  │
 │                                                                         │
 │  Difficulty: ⭐⭐⭐ | Misconception: M1.3 (BRE vs ERE)                │
@@ -345,7 +345,7 @@ echo '<div>Hello</div><div>World</div>' | grep -oE '<div>[^<]*</div>'
 │     concatenate                                                         │
 │     bobcat                                                              │
 │                                                                         │
-│  You want to find ONLY the line with the exact word "cat".                   │
+│  Select TWO commands that also match "the cat sat" as a word.                   │
 │  What command do you use?                                                  │
 │                                                                         │
 │  ┌───┐                                                                  │
@@ -365,7 +365,7 @@ echo '<div>Hello</div><div>World</div>' | grep -oE '<div>[^<]*</div>'
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-Correct answer: 3 și 4 (both work, and are equivalent)
+Correct answers: 3 and 4 for the added whole-word requirement. On the original four-line fixture, option 2 also returns cat.
 
 Explanation:
 
@@ -826,7 +826,7 @@ echo "cat cat cat cat" | sed 's/cat/dog/2g'
 │  ├───┤                                                                  │
 │  │ 3 │ sed 's/\/usr\/local/\/opt/' file.txt                            │
 │  ├───┤                                                                  │
-│  │ 4 │ Options .* are both correct                            │
+│  │ 4 │ Options 2 and 3 are both correct                            │
 │  └───┘                                                                  │
 │                                                                         │
 │  Difficulty: ⭐⭐ | Misconception: M3.4 (fixed delimiter)               │
@@ -1187,7 +1187,7 @@ awk 'NR==FNR { ... }' file1.txt file2.txt
 │     John,5000                                                           │
 │     Maria,6000                                                          │
 │                                                                         │
-│  You want the sum of salaries (without header). Which is CORRECT?                   │
+│  Which choice explicitly excludes the header before summing?                   │
 │                                                                         │
 │  ┌───┐                                                                  │
 │  │ 1 │ awk -F',' '{sum+=$2} END{print sum}'                            │
@@ -1196,7 +1196,7 @@ awk 'NR==FNR { ... }' file1.txt file2.txt
 │  ├───┤                                                                  │
 │  │ 3 │ awk -F',' 'NR!=1 {sum+=$2} END{print sum}'                      │
 │  ├───┤                                                                  │
-│  │ 4 │ Options .* are correct                                   │
+│  │ 4 │ Options 2 and 3 both explicitly skip the header                                   │
 │  └───┘                                                                  │
 │                                                                         │
 │  Difficulty: ⭐⭐ | Concept: Skipping header                          │
@@ -1209,11 +1209,11 @@ Correct answer: 4
 Explanation:
 
 ```bash
-# 1. WRONG - includes the header
+# 1. Produces the same numeric sum on this fixture, but includes the header
 awk -F',' '{sum+=$2} END{print sum}' employees.csv
 # $2 on line 1 = "Salary" (text), awk converts to 0
-# But adds 0, so the result is correct... ACCIDENTALLY!
-# On real data, may cause warnings or errors.
+# Adding the converted zero gives 11000 on this fixture.
+# This does not implement the requested explicit header exclusion.
 
 # 2. CORRECT - NR>1 skips the first line
 awk -F',' 'NR>1 {sum+=$2} END{print sum}' employees.csv
@@ -1302,7 +1302,7 @@ awk '{count[$1]++} END{for(k in count) print k, count[k]}' data.txt
 │  ┌───┐                                                                  │
 │  │ 1 │ Test......42                                                     │
 │  ├───┤                                                                  │
-│  │ 2 │ Test.........42                                                  │
+│  │ 2 │ Test..........42                                                  │
 │  ├───┤                                                                  │
 │  │ 3 │ ......Test...42                                                  │
 │  ├───┤                                                                  │
@@ -1314,7 +1314,7 @@ awk '{count[$1]++} END{for(k in count) print k, count[k]}' data.txt
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-Correct answer: 1
+Correct answer: 2
 
 Explanation:
 
@@ -1326,16 +1326,16 @@ Explanation:
 # "Test" has 4 characters, %-10s adds 6 spaces after
 # 42 has 2 characters, %5d adds 3 spaces before
 
-# Result: "Test " + " 42" = "Test 42"
-# (6 spații după Test, 3 înainte de 42)
+# Result: "Test" + 6 padding spaces + 1 format-literal space + 3 padding spaces + "42"
+# Ten spaces occur between Test and 42.
 
 # Vizualizare:
-# T e s t . . . . . . . . 4 2
+# T e s t . . . . . . . . . . 4 2
 # |___10 chars_____| |_5_|
 
 # Output real:
 awk 'BEGIN{printf "%-10s %5d\n", "Test", 42}'
-# Test 42
+# Test          42
 ```
 
 ---

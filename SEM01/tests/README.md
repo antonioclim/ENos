@@ -4,30 +4,21 @@
 
 ---
 
-## Test Summary
+## Shipped tests and launch routes
 
-| Test | Description | Status |
-|------|-------------|--------|
-| `test_01_shell_basics.sh` | Fundamental commands (ls, cd, pwd) | 🔜 TODO |
-| `test_02_quoting.sh` | Single/double quotes, escape | 🔜 TODO |
-| `test_03_variables.sh` | Shell and environment variables | 🔜 TODO |
-| `test_04_globbing.sh` | Wildcards (*, ?, [], {}) | 🔜 TODO |
-| `run_all_tests.sh` | Runner for all tests | 🔜 TODO |
-
----
-
-## Usage
+The distributed Python suites are `test_quiz.py` and `test_ai_fingerprint.py`.
+From the repository root, run:
 
 ```bash
-# Run all tests
-./run_all_tests.sh
-
-# Run individual test
-./test_01_shell_basics.sh
-
-# Check syntax
-bash -n test_*.sh
+python3 -m pytest --import-mode=importlib SEM01/tests
+# Equivalent wrapper (requires pytest and the project Python dependencies):
+bash SEM01/tests/run_all_tests.sh
 ```
+
+`test_01_shell_basics.sh`, `test_02_quoting.sh`, `test_03_variables.sh` and
+`test_04_globbing.sh` remain proposed TODO files. They are not shipped and are not
+reported as successful tests by the wrapper. The example below is a template for
+future Bash tests, not an additional installed suite.
 
 ---
 
@@ -38,19 +29,20 @@ bash -n test_*.sh
 # test_XX_description.sh
 set -euo pipefail
 
-pass() { echo "✅ PASS: $1"; ((PASSED++)); }
-fail() { echo "❌ FAIL: $1"; ((FAILED++)); }
+pass() { echo "✅ PASS: $1"; PASSED=$((PASSED+1)); return 0; }
+fail() { echo "❌ FAIL: $1"; FAILED=$((FAILED+1)); return 0; }
 
 PASSED=0 FAILED=0
 
 test_example() {
     local result
     result=$(echo "test")
-    [[ "$result" == "test" ]] && pass "Echo works" || fail "Echo failed"
+    if [[ "$result" == "test" ]]; then pass "Echo works"; else fail "Echo failed"; fi
 }
 
 test_example
 echo "═══ Result: $PASSED passed, $FAILED failed ═══"
+(( FAILED == 0 ))
 ```
 
 ---

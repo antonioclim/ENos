@@ -1,33 +1,23 @@
-# 📁 Test Suite — Monitor Project
+# Tests — Monitor runtime project
 
-> **Location:** `SEM06/scripts/projects/monitor/tests/`  
-> **Purpose:** Automated tests for monitoring functionality
-
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `test_monitor.sh` | Main test suite |
-
----
-
-## Running Tests
+From the repository root:
 
 ```bash
-./tests/test_monitor.sh
-# or
-make test
+bash SEM06/scripts/projects/monitor/tests/test_monitor.sh
 ```
 
----
+The supported aggregate target is `make -C SEM06 test`; no project-local Makefile
+is supplied. Run scripts through Bash so a checkout's executable-bit presentation
+does not determine whether the tests can start.
 
-## Test Coverage
+The Bash harness accepts `--verbose` and an optional group name `core`, `utils`,
+`config` or `integration`. It checks logging/validation/locks, CPU and memory
+sampling, disk/process/system collectors, literal configuration and CLI formats.
+Read-only host metric checks are distinct from synthetic deterministic fixtures.
+The tests do not install or activate a daemon.
 
-- Threshold configuration
-- Resource measurement
-- Alert generation
-- Logging functionality
+`SEM06/tests/test_runtime_semantics.py` supplies a synthetic first-alert JSON probe.
+Missing readings are unavailable evidence; they must not be interpreted as healthy
+zeroes. A collector test does not validate delivery to email/Slack or a systemd host.
 
----
-
-*Last updated: January 2026*
+See [the project guide](../README.md) and [library modules](../lib/).

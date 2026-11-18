@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env bash
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 #
 # firewall_basic.sh - Basic firewall configuration with iptables
 # Operating Systems | ASE Bucharest - CSIE | 2025-2026

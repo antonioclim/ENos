@@ -1,111 +1,42 @@
-# 📁 Formative Assessment — SEM01
+# Formative quiz — Seminar 1
 
-> **Location:** `SEM01/formative/`  
-> **Purpose:** Self-assessment quiz system for seminar concepts
-
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `quiz.yaml` | Question bank (12+ questions, Bloom-distributed) |
-| `quiz_runner.py` | Interactive CLI quiz runner |
-| `quiz_lms.json` | LMS-compatible export (Moodle/Canvas) |
-
-## Quick Start
+Run from this directory:
 
 ```bash
-# Run interactive quiz
-python3 quiz_runner.py
-
-# Run with specific number of questions
-python3 quiz_runner.py --questions 10
-
-# Shuffle question order
-python3 quiz_runner.py --shuffle
-
-# Show answers immediately after each question
-python3 quiz_runner.py --show-answers
+python3 quiz_runner.py quiz.yaml
+python3 quiz_runner.py quiz.yaml --shuffle --limit 5 --no-color
 ```
 
-## quiz_runner.py Options
+## Actual command-line interface
 
-```bash
-python3 quiz_runner.py [options]
+```text
+usage: quiz_runner.py [-h] [--shuffle] [--limit LIMIT] [--no-color]
+                      [quiz_file]
 
-Options:
-  --questions N     Number of questions to ask (default: all)
-  --shuffle         Randomize question order
-  --show-answers    Show correct answer after each question
-  --timed SEC       Time limit per question in seconds
-  --file PATH       Use alternative quiz file
-  --validate        Validate quiz.yaml structure without running
-  --export FORMAT   Export to format: json, csv, moodle
+Run YAML quizzes in the terminal.
+
+positional arguments:
+  quiz_file      Path to the quiz file (default: quiz.yaml)
+
+options:
+  -h, --help     show this help message and exit
+  --shuffle      Shuffle the questions
+  --limit LIMIT  Limit the number of questions
+  --no-color     Disable colours
 ```
 
-## Quiz Format (quiz.yaml)
+## Question bank and evidence
 
-```yaml
-metadata:
-  seminar: 1
-  subject: "Shell Fundamentals"
-  version: "2.0"
-  creation_date: "2026-01-XX"
-  number_of_questions: 12
-  estimated_time_minutes: 15
-  bloom_distribution:
-    remember: 3      # Knowledge recall
-    understand: 5    # Comprehension  
-    apply: 2         # Practical usage
-    analyse: 2       # Problem solving
+`quiz.yaml` is the question source. Letter keys A–D with labelled option strings; type open uses its manual rubric. Open responses are excluded from the automatic MCQ denominator and retained for manual review. Feedback is formative and does not settle the [open assessment contract](../homework/ASSESSMENT_STATUS.md).
 
-questions:
-  - id: q01
-    bloom: remember
-    difficulty: easy
-    text: "Question text here?"
-    options:
-      - "Option A"
-      - "Option B"  
-      - "Option C"
-      - "Option D"
-    correct: 1       # 0-indexed (Option B is correct)
-    explanation: "Explanation of why B is correct"
-```
+Edit the source bank, check each keyed answer against its stated assumptions and regenerate the project JSON view. Run the seminar tests after changes. The runner does not implement a Moodle/Canvas export command or the previously documented --validate, --timed and --show-answers flags.
 
-## Adding Questions
+`quiz_lms.json` preserves a JSON view of the questions. It is not a validated Moodle/Canvas import package; an import test is a separate step. Keep open-response rubrics and answer keys in the appropriate instructor flow once the publication policy is decided.
 
-1. Edit `quiz.yaml`
-2. Follow Bloom taxonomy distribution guidelines
-3. Validate: `python3 quiz_runner.py --validate`
-4. Test: `python3 quiz_runner.py --questions 5`
+See [study materials](../docs/) and [tests](../tests/).
 
-## LMS Integration
+## Canonical bank and derived JSON contract
 
-### Export for Moodle
+`quiz.yaml` is the canonical question bank. `quiz_lms.json` is a project JSON view, not an imported or validated Moodle/Canvas package. It retains all 14 items: 13 multiple-choice questions with one keyed answer and one open response with its original rubric, example solution and `manual_review_required: true`. The open response has no automatic answer key or awarded score. The estimated 20 minutes describe planning, not an enforced deadline. Pass thresholds, attempt limits and institutional weighting remain `PENDING_POLICY`; no settings are inferred from a legacy JSON export.
 
-```bash
-python3 quiz_runner.py --export moodle > quiz_moodle.xml
-```
-
-### Export for Canvas
-
-Use the pre-generated `quiz_lms.json` or:
-```bash
-python3 quiz_runner.py --export canvas > quiz_canvas.qti
-```
-
-## Bloom's Taxonomy Reference
-
-| Level | Cognitive Process | Question Types |
-|-------|-------------------|----------------|
-| Remember | Recall facts | Definitions, lists, terminology |
-| Understand | Explain meaning | Comparisons, descriptions |
-| Apply | Use knowledge | Code completion, command usage |
-| Analyse | Break down | Debugging, output prediction |
-
----
-
-*See also: [`../docs/`](../docs/) for study materials*  
-*See also: [`../tests/`](../tests/) for automated testing*
-
-*Last updated: January 2026*
+`source_sync.sha256` identifies the exact YAML bytes. The consistency tests compare IDs, types, text, options, keys, feedback, Bloom/learning-outcome annotations and the manual rubric against the canonical bank. Regenerate the JSON whenever the YAML changes and validate the resulting provider-specific adapter separately before any LMS import.

@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WSL2 Ubuntu 24.04 Installation Guide - Operating Systems</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #E95420;
@@ -624,9 +621,99 @@
             background: var(--success);
             color: white;
         }
-    </style>
+    
+button.accordion-header, button.collapsible-header {width:100%;border:0;text-align:left;font:inherit;color:inherit;}
+button.progress-step {border:0;background:transparent;font:inherit;color:inherit;}
+:focus-visible {outline:3px solid #245db4;outline-offset:3px;}
+@media print {
+  .tab-content, .os-content, .accordion-content, .collapsible-content {display:block!important;max-height:none!important;overflow:visible!important;opacity:1!important;}
+  .tabs-nav,.os-selector,.copy-btn,.nav-buttons,.mark-done,.progress-container,.progress-tracker,.scroll-top {display:none!important;}
+  body,.card,.code-block,pre {background:#fff!important;color:#111!important;box-shadow:none!important;}
+  pre,code {white-space:pre-wrap!important;overflow-wrap:anywhere!important;}
+  h1,h2,h3,h4 {break-after:avoid;}
+  .tab-content,.card {break-inside:auto;}
+}
+
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
+<aside class="card" aria-label="Setup corrections"><h2>Architecture, identity and access</h2><p>Keep the academic identifier (for example AP_1001_A) in your student records. The machine hostname is a separate DNS-compatible label: map that example to ap-1001-a by lowercasing and replacing underscores with hyphens. This is a technical mapping, not an authentication or grading rule. Usernames must also satisfy the installer: start with a lower-case letter, use a suitable unique local username and keep the full student identity separately.</p><p>Use a unique local password that you can retain securely. Never configure the shared historical example password stud on a network-accessible guest. Bridged mode exposes the guest to the surrounding network: use only an authorised lab network and scope SSH access to the intended host. A first SSH connection requires checking the guest fingerprint through the VM console.</p><p>The manual MSI route below selects x64 or ARM64 explicitly. Preserve existing wsl.conf sections when applying network/boot settings. <a href="https://learn.microsoft.com/en-us/windows/wsl/install-manual">Microsoft manual-install guidance</a>.</p></aside>
     <header class="header">
         <h1>WSL2 Ubuntu 24.04 Installation Guide</h1>
 <p><strong>Lab observation:</strong> in practice, most WSL2 problems come from two places: (1) virtualisation features disabled in BIOS/UEFI or in Windows, and (2) a "skipped" reboot after installation. Quickly check with `wsl --status` and `wsl --list --verbose` before reinventing the wheel.</p>
@@ -1090,7 +1177,10 @@
                                 <span>🔵 POWERSHELL (Administrator)</span>
                                 <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
                             </div>
-                            <pre>Invoke-WebRequest -Uri https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi -OutFile wsl_update_x64.msi -UseBasicParsing</pre>
+                            <pre>$EnosArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
+if ($EnosArch -notin @(&#x27;x64&#x27;, &#x27;arm64&#x27;)) { throw &#x27;Unsupported host architecture for this WSL2 package route&#x27; }
+$EnosPackage = &quot;wsl_update_$EnosArch.msi&quot;
+Invoke-WebRequest -Uri &quot;https://wslstorestorage.blob.core.windows.net/wslblob/$EnosPackage&quot; -OutFile $EnosPackage -UseBasicParsing</pre>
                         </div>
                         <p style="color: var(--gray);">Wait for it to download (1-2 minutes).</p>
                     </div>
@@ -1105,7 +1195,7 @@
                                 <span>🔵 POWERSHELL (Administrator)</span>
                                 <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
                             </div>
-                            <pre>msiexec /i wsl_update_x64.msi /quiet</pre>
+                            <pre>msiexec /i $EnosPackage</pre>
                         </div>
                     </div>
                 </div>
@@ -1236,8 +1326,8 @@
                     </div>
                 </div>
 
-                <p><strong>WHAT TO TYPE:</strong> <code>stud</code></p>
-                <p>Then you will see "Retype new password:" - type <code>stud</code> again and press Enter.</p>
+                <p><strong>WHAT TO TYPE:</strong> <em>your unique local password</em></p>
+                <p>Then you will see "Retype new password:" - type <em>your unique local password</em> again and press Enter.</p>
             </div>
 
             <div class="card" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(0, 255, 136, 0.1));">
@@ -1293,7 +1383,7 @@
                     </div>
                 </div>
 
-                <p style="margin-top: 1rem;">If it asks for password, type <code>stud</code> and press Enter.</p>
+                <p style="margin-top: 1rem;">If it asks for password, type <em>your unique local password</em> and press Enter.</p>
             </div>
 
             <div class="card">
@@ -1326,7 +1416,7 @@
 
             <div class="card">
                 <h3>Hostname format</h3>
-                <p>Format: <code>INITIAL_GROUP_SERIES</code></p>
+                <p>Format: <code>initials-group-series</code></p>
                 <p>Where:</p>
                 <ul style="margin-left: 1.5rem;">
                     <li><strong>INITIAL</strong> = First letter of first name + First letter of surname</li>
@@ -1342,9 +1432,9 @@
                             <th>Series</th>
                             <th>Hostname</th>
                         </tr>
-                        <tr><td>Ana Popescu</td><td>1001</td><td>A</td><td><code>AP_1001_A</code></td></tr>
-                        <tr><td>Ion Marin Ionescu</td><td>2034</td><td>B</td><td><code>IMI_2034_B</code></td></tr>
-                        <tr><td>Maria Stan</td><td>1502</td><td>C</td><td><code>MS_1502_C</code></td></tr>
+                        <tr><td>Ana Popescu</td><td>1001</td><td>A</td><td><code>ap-1001-a</code></td></tr>
+                        <tr><td>Ion Marin Ionescu</td><td>2034</td><td>B</td><td><code>imi-2034-b</code></td></tr>
+                        <tr><td>Maria Stan</td><td>1502</td><td>C</td><td><code>ms-1502-c</code></td></tr>
                     </table>
                 </div>
             </div>
@@ -1366,7 +1456,7 @@
                 <div class="alert alert-danger">
                     <span class="alert-icon">⚠️</span>
                     <div>
-                        <strong>REPLACE</strong> the text <code>INITIAL_GROUP_SERIES</code> with YOUR hostname before copying the command!
+                        <strong>REPLACE</strong> the text <code>initials-group-series</code> with YOUR hostname before copying the command!
                     </div>
                 </div>
 
@@ -1374,12 +1464,12 @@
 
                 <div class="code-block bash">
                     <div class="code-header">
-                        <span>⬛ BASH - Example for AP_1001_A</span>
+                        <span>⬛ BASH - Example for ap-1001-a</span>
                         <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
                     </div>
                     <pre>sudo tee /etc/wsl.conf &lt;&lt; 'EOF'
 [network]
-hostname = AP_1001_A
+hostname = ap-1001-a
 generateHosts = false
 
 [boot]
@@ -1387,20 +1477,20 @@ systemd = true
 EOF</pre>
                 </div>
 
-                <p style="margin-top: 1rem;">If it asks for password, type <code>stud</code> and press Enter.</p>
+                <p style="margin-top: 1rem;">If it asks for password, type <em>your unique local password</em> and press Enter.</p>
             </div>
 
             <div class="card">
                 <h3>Add hostname to hosts file</h3>
                 
-                <p>Again, <strong>REPLACE</strong> <code>INITIAL_GROUP_SERIES</code> with your hostname:</p>
+                <p>Again, <strong>REPLACE</strong> <code>initials-group-series</code> with your hostname:</p>
 
                 <div class="code-block bash">
                     <div class="code-header">
-                        <span>⬛ BASH - Example for AP_1001_A</span>
+                        <span>⬛ BASH - Example for ap-1001-a</span>
                         <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
                     </div>
-                    <pre>echo "127.0.0.1    AP_1001_A" | sudo tee -a /etc/hosts</pre>
+                    <pre>echo "127.0.0.1    ap-1001-a" | sudo tee -a /etc/hosts</pre>
                 </div>
             </div>
 
@@ -1449,7 +1539,7 @@ EOF</pre>
                             </div>
                             <pre>hostname</pre>
                         </div>
-                        <p>You should see your hostname (e.g.: <code>AP_1001_A</code>).</p>
+                        <p>You should see your hostname (e.g.: <code>ap-1001-a</code>).</p>
                     </div>
                 </div>
             </div>
@@ -1713,7 +1803,7 @@ EOF</pre>
                     <li>Make sure Ubuntu is running (the black window should be open)</li>
                     <li>In PuTTY, double-click on the saved session "Ubuntu-WSL2-SO"</li>
                     <li>At the first connection, you will see a security message - click <strong>Accept</strong> or <strong>Yes</strong></li>
-                    <li>Type the password: <code>stud</code> (you will not see it as you type)</li>
+                    <li>Type the password: <em>your unique local password</em> (you will not see it as you type)</li>
                     <li>Press <strong>Enter</strong></li>
                 </ol>
 
@@ -1765,7 +1855,7 @@ EOF</pre>
                             <li><strong>Host name:</strong> Ubuntu's IP address</li>
                             <li><strong>Port number:</strong> <code>22</code></li>
                             <li><strong>User name:</strong> your name (e.g.: <code>popescu</code>)</li>
-                            <li><strong>Password:</strong> <code>stud</code></li>
+                            <li><strong>Password:</strong> <em>your unique local password</em></li>
                         </ul>
                     </li>
                     <li>Click <strong>Save</strong></li>
@@ -1809,21 +1899,21 @@ EOF</pre>
             </div>
             <div class="card">
                 <h3>Check your current default shell</h3>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo $SHELL</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>echo $SHELL</pre></div>
                 <p>You should see: <code>/bin/bash</code></p>
                 <p>Also check what is actually running:</p>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo $0</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>echo $0</pre></div>
                 <p>You should see: <code>-bash</code> or <code>bash</code></p>
             </div>
             <div class="card">
                 <h3>Change to Bash if needed</h3>
                 <p>If <code>$SHELL</code> showed something other than <code>/bin/bash</code>:</p>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>chsh -s /bin/bash</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>chsh -s /bin/bash</pre></div>
                 <div class="warning-box"><strong>⚠️ After changing:</strong> Close Ubuntu, run <code>wsl --shutdown</code> in PowerShell, then reopen Ubuntu. Verify again.</div>
             </div>
             <div class="card">
                 <h3>Quick verification</h3>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>echo "Shell: $SHELL | Running: $0 | Bash version: $BASH_VERSION"</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>echo "Shell: $SHELL | Running: $0 | Bash version: $BASH_VERSION"</pre></div>
                 <p>Expected: <code>/bin/bash</code> for Shell, <code>bash</code> for Running, version like <code>5.2.x</code></p>
             </div>
             <button class="mark-done" onclick="markDone(this, 'tab11')">✓ Bash is my default shell</button>
@@ -1838,7 +1928,7 @@ EOF</pre>
             </div>
             <div class="card">
                 <h3>Preparation</h3>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>sudo service ssh start
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>sudo service ssh start
 echo "Created in Ubuntu on $(date)" > ~/test/transfer_test_from_ubuntu.txt
 hostname -I</pre></div>
             </div>
@@ -1848,7 +1938,7 @@ hostname -I</pre></div>
                     <li>On Desktop, create <code>transfer_test_from_windows.txt</code> with: <code>Hello from Windows!</code></li>
                     <li>In WinSCP: Left panel → Desktop, Right panel → <code>~/test/</code></li>
                     <li>Drag file from left to right</li>
-                    <li>Verify: <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>cat ~/test/transfer_test_from_windows.txt</pre></div></li>
+                    <li>Verify: <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>cat ~/test/transfer_test_from_windows.txt</pre></div></li>
                 </ol>
             </div>
             <div class="card">
@@ -1860,13 +1950,13 @@ hostname -I</pre></div>
             </div>
             <div class="card">
                 <h3>Verify with checksums (optional)</h3>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>sha256sum ~/test/transfer_test_from_windows.txt</pre></div>
-                <div class="cmd-block powershell"><div class="cmd-header">POWERSHELL (Windows)</div><pre>Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorithm SHA256</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>sha256sum ~/test/transfer_test_from_windows.txt</pre></div>
+                <div class="code-block powershell"><div class="code-header"><span>POWERSHELL (Windows)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>Get-FileHash "$env:USERPROFILE\Desktop\transfer_test_from_windows.txt" -Algorithm SHA256</pre></div>
                 <p>If both match → perfect transfer!</p>
             </div>
             <div class="card">
                 <h3>Cleanup</h3>
-                <div class="cmd-block bash"><div class="cmd-header">BASH (Ubuntu)</div><pre>rm ~/test/transfer_test_from_windows.txt ~/test/transfer_test_from_ubuntu.txt</pre></div>
+                <div class="code-block bash"><div class="code-header"><span>BASH (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></div><pre>rm ~/test/transfer_test_from_windows.txt ~/test/transfer_test_from_ubuntu.txt</pre></div>
             </div>
             <button class="mark-done" onclick="markDone(this, 'tab12')">✓ Bidirectional transfer works</button>
             <div class="nav-buttons"><button class="nav-btn prev" onclick="prevTab()">← Back</button><button class="nav-btn next" onclick="nextTab()">Continue →</button></div>
@@ -1961,7 +2051,7 @@ hostname -I</pre></div>
                 
                 <p>If everything is OK, you should see:</p>
                 <ul style="margin-left: 1.5rem;">
-                    <li>✅ Your hostname (e.g.: <code>AP_1001_A</code>)</li>
+                    <li>✅ Your hostname (e.g.: <code>ap-1001-a</code>)</li>
                     <li>✅ Your username (e.g.: <code>popescu</code>)</li>
                     <li>✅ Ubuntu 24.04</li>
                     <li>✅ IP</li>
@@ -1993,10 +2083,10 @@ hostname -I</pre></div>
 
             <div class="accordion">
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ "WSL 2 requires an update to its kernel component"</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Solution:</strong> Open PowerShell as Administrator and run:</p>
@@ -2013,10 +2103,10 @@ hostname -I</pre></div>
                 </div>
 
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ Virtualisation is not enabled (Error: 0x80370102)</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Solution:</strong></p>
@@ -2032,10 +2122,10 @@ hostname -I</pre></div>
                 </div>
 
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ Cannot paste commands in Ubuntu</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Solution:</strong> In the Ubuntu window, use:</p>
@@ -2048,10 +2138,10 @@ hostname -I</pre></div>
                 </div>
 
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ I forgot the password</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Solution:</strong> Open PowerShell and run:</p>
@@ -2076,10 +2166,10 @@ hostname -I</pre></div>
                 </div>
 
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ SSH does not start</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Solution:</strong> Run in Ubuntu:</p>
@@ -2103,10 +2193,10 @@ hostname -I</pre></div>
                 </div>
 
                 <div class="accordion-item">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
                         <span>❌ Cannot connect with PuTTY</span>
                         <span class="arrow">▼</span>
-                    </div>
+                    </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <p><strong>Check:</strong></p>
@@ -2177,18 +2267,18 @@ hostname -I</pre></div>
                 
                 <h3 style="margin-top: 1rem;">Final checklist</h3>
                 <ul class="checklist" id="finalChecklist">
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> WSL2 installed and updated</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Ubuntu 24.04 LTS installed</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Account created with surname</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Password set (stud)</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Hostname configured (INITIAL_GROUP_SERIES)</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> System updated</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Software packages installed</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> SSH working</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> PuTTY installed and configured</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> WinSCP installed and configured</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Folders created</li>
-                    <li onclick="toggleCheck(this)"><input type="checkbox"> Verification showed everything OK</li>
+                    <li><label><input type="checkbox"> WSL2 installed and updated</label></li>
+                    <li><label><input type="checkbox"> Ubuntu 24.04 LTS installed</label></li>
+                    <li><label><input type="checkbox"> Account created with surname</label></li>
+                    <li><label><input type="checkbox"> Unique local password set</label></li>
+                    <li><label><input type="checkbox"> Hostname configured (initials-group-series)</label></li>
+                    <li><label><input type="checkbox"> System updated</label></li>
+                    <li><label><input type="checkbox"> Software packages installed</label></li>
+                    <li><label><input type="checkbox"> SSH working</label></li>
+                    <li><label><input type="checkbox"> PuTTY installed and configured</label></li>
+                    <li><label><input type="checkbox"> WinSCP installed and configured</label></li>
+                    <li><label><input type="checkbox"> Folders created</label></li>
+                    <li><label><input type="checkbox"> Verification showed everything OK</label></li>
                 </ul>
             </div>
 
@@ -2207,143 +2297,135 @@ hostname -I</pre></div>
     </footer>
 
     <script>
-        // Tab functionality
-        let currentTab = 'intro';
-        const tabs = ['intro', 'tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6', 'tab7', 'tab8', 'tab9', 'tab10', 'tab11', 'tab12', 'tab13', 'tab14'];
-        const completedTabs = new Set();
 
-        function showTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabId).classList.add('active');
-            
-            // Activate button
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-            
-            currentTab = tabId;
-            updateProgress();
-            
-            // Scroll to top of content
-            window.scrollTo({ top: 200, behavior: 'smooth' });
-        }
+function safeRead(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+function safeWrite(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* Session remains usable. */ } }
+async function copyCode(btn) {
+    const block = btn.closest('.code-block, .cmd-block, pre');
+    const source = block && (block.querySelector('code') || block.querySelector('pre') || block);
+    if (!source) return;
+    const text = source.textContent.replace(/📋 Copy|✓ Copied!|✅ Copied!/g, '').trim();
+    try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✓ Copied!';
+    } catch (_) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('aria-label', 'Command text — press Control+C or Command+C to copy');
+        area.style.width = '100%';
+        block.appendChild(area); area.focus(); area.select();
+        btn.textContent = 'Select text and copy';
+        area.addEventListener('blur', () => area.remove(), {once:true});
+    }
+    setTimeout(() => { btn.textContent = '📋 Copy'; }, 2500);
+}
+function toggleAccordion(header) {
+    const open = header.parentElement.classList.toggle('open');
+    header.setAttribute('aria-expanded', String(open));
+}
+function toggleCollapsible(header) {
+    const open = header.parentElement.classList.toggle('active');
+    header.setAttribute('aria-expanded', String(open));
+}
+function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
+document.querySelectorAll('.accordion-header, .collapsible-header').forEach((button, i) => {
+    button.setAttribute('aria-expanded', String(button.parentElement.classList.contains('open') || button.parentElement.classList.contains('active')));
+    const panel = button.nextElementSibling;
+    if (panel) { panel.id = panel.id || 'disclosure-panel-' + i; button.setAttribute('aria-controls', panel.id); }
+});
+document.querySelectorAll('.checklist input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', () => input.closest('li').classList.toggle('checked', input.checked));
+});
+const scrollButton = document.getElementById('scrollTop');
+if (scrollButton) {
+    scrollButton.setAttribute('aria-label', 'Scroll to the top');
+    window.addEventListener('scroll', () => scrollButton.classList.toggle('visible', window.scrollY > 500));
+}
 
-        function nextTab() {
-            const currentIndex = tabs.indexOf(currentTab);
-            if (currentIndex < tabs.length - 1) {
-                showTab(tabs[currentIndex + 1]);
-            }
-        }
+const guideKey = 'wsl2';
+const tabButtons = Array.from(document.querySelectorAll('.tab-btn[data-tab]'));
+const tabs = tabButtons.map(btn => btn.dataset.tab).filter(id => document.getElementById(id));
+const stageButtons = Array.from(document.querySelectorAll('.mark-done'));
+const stages = stageButtons.map(btn => btn.closest('.tab-content').id);
+const completedTabs = new Set();
+let currentTab = tabs[0];
+let currentOS = 'windows';
+function setOS(os) {
+    if (!['windows','macos','linux'].includes(os)) os = 'windows';
+    currentOS = os;
+    document.querySelectorAll('.os-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.os === os);
+        btn.setAttribute('aria-pressed', String(btn.dataset.os === os));
+    });
+    document.querySelectorAll('.os-content').forEach(panel => panel.classList.toggle('active', panel.classList.contains(os)));
+    safeWrite(guideKey + '-os', os);
+}
+function updateProgress() {
+    const count = stages.filter(id => completedTabs.has(id)).length;
+    const percent = stages.length ? 100 * count / stages.length : 0;
+    const fill = document.getElementById('progressFill');
+    if (fill) { fill.style.width = percent + '%'; fill.setAttribute('role','progressbar');
+        fill.setAttribute('aria-label','Stages explicitly marked complete');
+        fill.setAttribute('aria-valuemin','0'); fill.setAttribute('aria-valuemax',String(stages.length));
+        fill.setAttribute('aria-valuenow',String(count)); }
+    const text = document.getElementById('progressText');
+    if (text) text.textContent = Math.round(percent) + '% (' + count + '/' + stages.length + ' stages)';
+}
+function showTab(id, focus = false) {
+    if (!tabs.includes(id)) return false;
+    document.querySelectorAll('.tab-content').forEach(panel => panel.classList.toggle('active', panel.id === id));
+    tabButtons.forEach(btn => {
+        const selected = btn.dataset.tab === id;
+        btn.classList.toggle('active', selected); btn.setAttribute('aria-selected',String(selected));
+        btn.tabIndex = selected ? 0 : -1;
+        if (selected && focus) btn.focus();
+    });
+    currentTab = id;
+    document.querySelectorAll('.nav-btn.prev').forEach(btn => { btn.disabled = tabs.indexOf(id) === 0; });
+    document.querySelectorAll('.nav-btn.next:not(.complete)').forEach(btn => { btn.disabled = tabs.indexOf(id) === tabs.length - 1; });
+    window.scrollTo({top:200, behavior:'smooth'});
+    return true;
+}
+function nextTab() { const i=tabs.indexOf(currentTab); if(i>=0 && i+1<tabs.length) showTab(tabs[i+1],true); }
+function prevTab() { const i=tabs.indexOf(currentTab); if(i>0) showTab(tabs[i-1],true); }
+function saveProgress() { safeWrite(guideKey + '-progress', JSON.stringify(Array.from(completedTabs))); }
+function markDone(button, id) {
+    if (!stages.includes(id)) return;
+    completedTabs.add(id); button.classList.add('done'); button.textContent='✓ Completed!';
+    const tab = tabButtons.find(btn => btn.dataset.tab === id);
+    if (tab) tab.classList.add('completed');
+    updateProgress(); saveProgress();
+}
+const nav = document.getElementById('tabsNav');
+if (nav) { nav.setAttribute('role','tablist'); nav.setAttribute('aria-label','Guide stages'); }
+tabButtons.forEach((button, index) => {
+    button.id = button.id || 'stage-tab-' + index;
+    button.setAttribute('role','tab'); button.setAttribute('aria-controls',button.dataset.tab);
+    const panel = document.getElementById(button.dataset.tab);
+    if (panel) { panel.setAttribute('role','tabpanel'); panel.setAttribute('aria-labelledby',button.id); }
+    button.addEventListener('click',() => showTab(button.dataset.tab));
+    button.addEventListener('keydown',event => {
+        let target = index;
+        if(event.key==='ArrowRight') target=(index+1)%tabs.length;
+        else if(event.key==='ArrowLeft') target=(index+tabs.length-1)%tabs.length;
+        else if(event.key==='Home') target=0;
+        else if(event.key==='End') target=tabs.length-1;
+        else return;
+        event.preventDefault(); showTab(tabs[target],true);
+    });
+});
+try {
+    const restored=JSON.parse(safeRead(guideKey+'-progress') || '[]');
+    if(Array.isArray(restored)) restored.filter(id=>typeof id==='string' && stages.includes(id)).forEach(id=>completedTabs.add(id));
+} catch (_) { /* Ignore malformed saved state. */ }
+stageButtons.forEach(button => {
+    const id=button.closest('.tab-content').id;
+    if(completedTabs.has(id)) { button.classList.add('done');button.textContent='✓ Completed!';
+        const tab=tabButtons.find(btn=>btn.dataset.tab===id);if(tab)tab.classList.add('completed'); }
+});
+setOS(safeRead(guideKey+'-os') || 'windows'); updateProgress(); showTab(currentTab);
 
-        function prevTab() {
-            const currentIndex = tabs.indexOf(currentTab);
-            if (currentIndex > 0) {
-                showTab(tabs[currentIndex - 1]);
-            }
-        }
-
-        // Tab button clicks
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                showTab(btn.dataset.tab);
-            });
-        });
-
-        // Copy code functionality
-        function copyCode(btn) {
-            const pre = btn.closest('.code-block').querySelector('pre');
-            const text = pre.textContent;
-            
-            navigator.clipboard.writeText(text).then(() => {
-                btn.textContent = '✓ Copied!';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.textContent = '📋 Copy';
-                    btn.classList.remove('copied');
-                }, 2000);
-            });
-        }
-
-        // Mark as done
-        function markDone(btn, tabId) {
-            btn.classList.add('done');
-            btn.textContent = '✓ Completed!';
-            completedTabs.add(tabId);
-            
-            // Mark tab button as completed
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('completed');
-            
-            updateProgress();
-        }
-
-        // Update progress
-        function updateProgress() {
-            const progress = (completedTabs.size / (tabs.length - 1)) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressText').textContent = Math.round(progress) + '%';
-        }
-
-        // Accordion
-        function toggleAccordion(header) {
-            const item = header.parentElement;
-            item.classList.toggle('open');
-        }
-
-        // Checklist
-        function toggleCheck(li) {
-            li.classList.toggle('checked');
-            const checkbox = li.querySelector('input');
-            checkbox.checked = !checkbox.checked;
-        }
-
-        // Scroll to top
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Show/hide scroll button
-        window.addEventListener('scroll', () => {
-            const scrollBtn = document.getElementById('scrollTop');
-            if (window.scrollY > 500) {
-                scrollBtn.classList.add('visible');
-            } else {
-                scrollBtn.classList.remove('visible');
-            }
-        });
-
-        // Load saved progress from localStorage
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('wsl2-progress');
-            if (saved) {
-                const savedTabs = JSON.parse(saved);
-                savedTabs.forEach(tabId => {
-                    completedTabs.add(tabId);
-                    const btn = document.querySelector(`[data-tab="${tabId}"]`);
-                    if (btn) btn.classList.add('completed');
-                });
-                updateProgress();
-            }
-        });
-
-        // Save progress
-        function saveProgress() {
-            localStorage.setItem('wsl2-progress', JSON.stringify([...completedTabs]));
-        }
-
-        // Save on tab complete
-        const originalMarkDone = markDone;
-        markDone = function(btn, tabId) {
-            originalMarkDone(btn, tabId);
-            saveProgress();
-        };
-    </script>
+</script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 # INSTRUCTIONS:
 # 1. Complete functions marked with TODO
 # 2. Do not modify function signatures
-# 3. Run tests with: ./test_hw02.sh
+# 3. Historical test_hw0N.sh files were not supplied. Use an owned fixture and document assertions.
 #
 # Author: [Your name]
 # Group: [Your group]
@@ -87,7 +87,7 @@ create_backup() {
     # 2. Create dest_dir if it doesn't exist
     # 3. Generate filename: backup_YYYYMMDD_HHMMSS.tar.{gz|bz2|xz}
     # 4. Select tar option for compression (z, j, J)
-    # 5. If type=incremental, use --newer-mtime with last backup date
+    # 5. If incremental, preserve a full base + GNU tar snapshot/parent chain, including deletions
     # 6. Execute tar to create archive
     # 7. Verify archive was created
     # 8. Display size and return path
@@ -184,6 +184,12 @@ verify_checksum() {
 
 # === MAIN ===
 main() {
+    # TODO guard: remove only after implementing and testing this exercise.
+    if [[ ${1:-} != -h && ${1:-} != --help && ${1:-} != -v && ${1:-} != --version ]]; then
+        printf 'NOT_IMPLEMENTED: archived starter; no operation performed\n' >&2
+        return 3
+    fi
+    [[ ${1:-} != -h && ${1:-} != --help ]] || usage
     [[ $# -lt 1 ]] && usage
     
     local command="$1"

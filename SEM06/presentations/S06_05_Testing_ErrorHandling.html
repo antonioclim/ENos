@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Testing & Error Handling | CAPSTONE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.5.0/reset.css">
+    <link rel="stylesheet" href="../../assets/vendor/reveal.js/4.5.0/reveal.css">
+    <link rel="stylesheet" href="../../assets/css/reveal-night-4.5.0.css">
+    <link rel="stylesheet" href="../../assets/vendor/highlight.js/11.7.0/monokai.css">
     <style>
         :root { --r-main-font-size: 36px; --r-code-font: 'JetBrains Mono', monospace; }
         .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
@@ -62,7 +62,87 @@
             .fragment { opacity: 1 !important; visibility: visible !important; }
             @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
         }
-    </style>
+    @media screen and (max-width: 700px) {
+ .two-column,.two-columns,.three-columns,.cols { flex-direction: column; }
+ pre,code { overflow-wrap: anywhere; } table { display: block; overflow-x: auto; }
+}
+</style>
+<link rel="stylesheet" data-enos-presentation-fallback href="../../assets/css/presentation_fallback.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="reveal">
@@ -71,7 +151,7 @@
             <section>
                 <h1>Testing & Error Handling</h1>
                 <h2>Quality Assurance for Bash Scripts</h2>
-                <p class="hl-green">CAPSTONE - Module Avansate</p>
+                <p class="hl-green">CAPSTONE - Advanced Modules</p>
             </section>
 
             <!-- Part 1: Testing -->
@@ -82,49 +162,49 @@
 
             <!-- Test Pyramid -->
             <section>
-                <h2>Piramida de Testare</h2>
+                <h2>Testing Pyramid</h2>
                 <div class="diagram">
 <pre style="margin:0; font-size:0.6em;">
                     ╱╲
                    ╱  ╲
-                  ╱ <span class="hl-orange">E2E</span> ╲          ← Puține, lente, fragile
+                  ╱ <span class="hl-orange">E2E</span> ╲          ← Fewer, slower, broad dependencies
                  ╱──────╲
                 ╱        ╲
-               ╱<span class="hl-yellow">Integration</span>╲      ← Moderate, testează interacțiuni
+               ╱<span class="hl-yellow">Integration</span>╲      ← Moderate count; test interactions
               ╱────────────╲
              ╱              ╲
-            ╱   <span class="hl-green">Unit Tests</span>   ╲    ← Multe, rapide, izolate
+            ╱   <span class="hl-green">Unit Tests</span>   ╲    ← Many, fast, isolated
            ╱────────────────────╲
            
-   Viteză:     Lent ←───────────→ Rapid
-   Număr:      Puține ←─────────→ Multe
-   Cost:       Mare ←───────────→ Mic
+   Speed:     Slow ←───────────→ Fast
+   Count:      Few ←─────────→ Many
+   Cost:       High ←───────────→ Low
 </pre>
                 </div>
             </section>
 
             <!-- Test Framework Architecture -->
             <section>
-                <h2>Framework Architecture</h2>
+                <h2>Framework Architecture</h2><p class="xs">Design target. Runnable teaching helpers are in SEM06/scripts/examples/. The maintained application suites are under SEM06/tests/ and each project tests/ directory.</p>
                 <div class="diagram">
 <pre style="margin:0; font-size:0.55em;">
 testing/
-├── <span class="hl-green">test_runner.sh</span>      # Executor principal teste
-├── <span class="hl-yellow">test_helpers.sh</span>     # Assertions și utilități
+├── <span class="hl-green">test_runner.sh</span>      # Main test runner
+├── <span class="hl-yellow">test_helpers.sh</span>     # Assertions and utilities
 ├── <span class="hl-orange">tests/</span>
 │   ├── unit/              # Unit tests
 │   │   ├── test_monitor_core.sh
 │   │   ├── test_backup_utils.sh
 │   │   └── test_deployer_health.sh
-│   ├── integration/       # Teste integrare
+│   ├── integration/       # Integration tests
 │   │   ├── test_full_backup.sh
 │   │   └── test_deploy_pipeline.sh
-│   ├── fixtures/          # Date de test
+│   ├── fixtures/          # Test data
 │   │   ├── sample_config.conf
 │   │   └── mock_proc_stat
-│   └── mocks/             # Funcții mock
+│   └── mocks/             # Mock functions
 │       └── mock_commands.sh
-└── <span class="hl-blue">reports/</span>              # Rapoarte generate
+└── <span class="hl-blue">reports/</span>              # Generated reports
     ├── results.tap
     └── coverage.html
 </pre>
@@ -133,246 +213,152 @@ testing/
 
             <!-- Basic Assertions -->
             <section>
-                <h2>Assertions de Bază</h2>
-                <pre><code class="language-bash"># test_helpers.sh - Core assertions
-
-assert_equals() {
-    local expected="$1"
-    local actual="$2"
-    local message="${3:-Values should be equal}"
-    
-    if [[ "$expected" == "$actual" ]]; then
-        log_test_pass "$message"
-        ((TESTS_PASSED++))
+                <h2>Basic Assertions</h2>
+                <pre><code class="language-bash">ASSERTIONS_PASSED=0
+ASSERTIONS_FAILED=0
+assert_result() {
+    local truth=$1 message=$2
+    if [[ $truth == 0 ]]; then
+        ASSERTIONS_PASSED=$((ASSERTIONS_PASSED + 1))
+        printf '  PASS: %s\n' "$message"
         return 0
-    else
-        log_test_fail "$message"
-        log_test_fail "  Expected: '$expected'"
-        log_test_fail "  Actual:   '$actual'"
-        ((TESTS_FAILED++))
-        return 1
     fi
+    ASSERTIONS_FAILED=$((ASSERTIONS_FAILED + 1))
+    printf '  FAIL: %s\n' "$message" &gt;&amp;2
+    return 1
 }
-
+assert_equals() {
+    if [[ $1 == "$2" ]]; then assert_result 0 "${3:-Equal values}";
+    else assert_result 1 "${3:-Expected [$1], got [$2]}"; fi
+}
 assert_contains() {
-    local haystack="$1"
-    local needle="$2"
-    local message="${3:-String should contain substring}"
-    
-    if [[ "$haystack" == *"$needle"* ]]; then
-        log_test_pass "$message"
-        ((TESTS_PASSED++))
-    else
-        log_test_fail "$message"
-        log_test_fail "  String: '$haystack'"
-        log_test_fail "  Missing: '$needle'"
-        ((TESTS_FAILED++))
-    fi
+    if [[ $1 == *"$2"* ]]; then assert_result 0 "${3:-Substring present}";
+    else assert_result 1 "${3:-Missing substring [$2]}"; fi
 }
-
-assert_success() {
-    local status="$1"
-    local message="${2:-Command should succeed}"
-    
-    [[ "$status" -eq 0 ]] && log_test_pass "$message" || log_test_fail "$message"
-}</code></pre>
+assert_success() { assert_equals 0 "$1" "${2:-Command succeeded}"; }</code></pre>
             </section>
 
             <!-- File Assertions -->
             <section>
-                <h2>Assertions pentru Fișiere</h2>
+                <h2>File Assertions</h2>
                 <pre><code class="language-bash">assert_file_exists() {
-    local file="$1"
-    local message="${2:-File should exist: $file}"
-    
-    [[ -f "$file" ]] && log_test_pass "$message" || log_test_fail "$message"
+    if [[ -f $1 ]]; then assert_result 0 "${2:-File exists}";
+    else assert_result 1 "${2:-Missing file [$1]}"; fi
 }
-
 assert_file_contains() {
-    local file="$1"
-    local pattern="$2"
-    local message="${3:-File should contain pattern}"
-    
-    if grep -q "$pattern" "$file" 2>/dev/null; then
-        log_test_pass "$message"
-    else
-        log_test_fail "$message"
-        log_test_fail "  File: $file"
-        log_test_fail "  Pattern: $pattern"
-    fi
+    if grep -Fq -- "$2" "$1"; then assert_result 0 "${3:-File contains text}";
+    else assert_result 1 "${3:-File lacks text or cannot be read}"; fi
 }
-
 assert_file_permissions() {
-    local file="$1"
-    local expected_perms="$2"  # ex: "755", "644"
-    local actual_perms=$(stat -c "%a" "$file")
-    
-    assert_equals "$expected_perms" "$actual_perms" \
-        "File $file should have permissions $expected_perms"
+    local actual
+    if actual=$(stat -c %a -- "$1"); then assert_equals "$2" "$actual";
+    else assert_result 1 "Cannot stat [$1]"; fi
 }
-
 assert_directory_not_empty() {
-    local dir="$1"
-    local count=$(ls -A "$dir" 2>/dev/null | wc -l)
-    
-    [[ "$count" -gt 0 ]] && log_test_pass "Directory not empty" \
-                        || log_test_fail "Directory is empty: $dir"
+    local output
+    if [[ -d $1 ]] &amp;&amp; output=$(find "$1" -mindepth 1 -maxdepth 1 -printf x -quit) &amp;&amp; [[ $output == x ]]; then
+        assert_result 0 'Directory is nonempty'
+    else assert_result 1 'Directory is empty or unavailable'; fi
 }</code></pre>
             </section>
 
             <!-- Numeric Assertions -->
             <section>
-                <h2>Assertions Numerice</h2>
-                <pre><code class="language-bash">assert_greater_than() {
-    local actual="$1"
-    local threshold="$2"
-    local message="${3:-Value should be greater than $threshold}"
-    
-    if (( actual > threshold )); then
-        log_test_pass "$message"
-    else
-        log_test_fail "$message (actual: $actual)"
-    fi
+                <h2>Numeric Assertions</h2>
+                <pre><code class="language-bash">assert_number() {
+    local operation=$1 value=$2 lower=$3 upper=${4:-0}
+    if python3 - "$operation" "$value" "$lower" "$upper" &lt;&lt;'PY'
+import math, sys
+try:
+    value, lower, upper = map(float, sys.argv[2:])
+    valid = all(map(math.isfinite, (value, lower, upper)))
+    result = {'gt': value &gt; lower, 'lt': value &lt; lower,
+              'range': lower &lt;= value &lt;= upper}[sys.argv[1]]
+    raise SystemExit(0 if valid and result else 1)
+except (ValueError, KeyError):
+    raise SystemExit(1)
+PY
+    then assert_result 0 "Numeric $operation assertion"
+    else assert_result 1 "Numeric $operation assertion ($value)"; fi
 }
-
-assert_less_than() {
-    local actual="$1"
-    local threshold="$2"
-    local message="${3:-Value should be less than $threshold}"
-    
-    (( actual < threshold )) && log_test_pass "$message" \
-                             || log_test_fail "$message (actual: $actual)"
-}
-
-assert_in_range() {
-    local value="$1"
-    local min="$2"
-    local max="$3"
-    local message="${4:-Value should be in range [$min, $max]}"
-    
-    if (( value >= min && value <= max )); then
-        log_test_pass "$message"
-    else
-        log_test_fail "$message (actual: $value)"
-    fi
-}
-
-# Example utilizare
-test_cpu_range() {
-    local cpu=$(get_cpu_usage)
-    assert_in_range "$cpu" 0 100 "CPU usage should be 0-100%"
-}</code></pre>
+assert_greater_than() { assert_number gt "$1" "$2"; }
+assert_less_than() { assert_number lt "$1" "$2"; }
+assert_in_range() { assert_number range "$1" "$2" "$3"; }
+# Decimal, finite values are accepted. NaN/infinity and malformed values fail.
+assert_in_range 23.5 0 100</code></pre>
             </section>
 
             <!-- Mocking -->
             <section>
                 <h2>Mocking Commands</h2>
-                <pre><code class="language-bash"># Sistemul de mock - înlocuire temporară comenzi
-
-mock_command() {
-    local cmd="$1"
-    local output="$2"
-    local exit_code="${3:-0}"
-    
-    # Creare funcție cu același nume (override)
-    eval "$cmd() { echo '$output'; return $exit_code; }"
-    
-    # Track pentru cleanup
-    MOCKED_COMMANDS+=("$cmd")
-}
-
-unmock_command() {
-    local cmd="$1"
-    unset -f "$cmd"
-}
-
-cleanup_mocks() {
-    for cmd in "${MOCKED_COMMANDS[@]}"; do
-        unmock_command "$cmd"
-    done
-    MOCKED_COMMANDS=()
-}
-
-# Example: Mock pentru test CPU
-test_high_cpu_alert() {
-    # Mock cat să returneze CPU 95%
-    mock_command "cat" "cpu 9500 0 500 0 0 0 0 0"
-    
-    local result=$(check_cpu_alert 80)
-    
-    assert_equals "CRITICAL" "$result" "Should trigger critical alert"
-    
-    cleanup_mocks
-}
-
-# Mock pentru curl (API calls)
-mock_curl() {
-    local response="$1"
-    local status="${2:-200}"
-    
-    curl() {
-        echo "$response"
-        return 0
-    }
-}</code></pre>
+                <pre><code class="language-bash"># Scope the mock to a child shell; the caller's functions/PATH remain intact.
+# From repository root, in a disposable test:
+(
+    fixture=$(mktemp -d) || exit 1
+    trap 'rm -rf -- "$fixture"' EXIT
+    helper="$PWD/SEM06/scripts/examples/mock_curl.py"
+    printf '#!/bin/bash\nexec python3 %q "$@"\n' "$helper" &gt; "$fixture/curl"
+    chmod u+x "$fixture/curl"
+    PATH="$fixture:$PATH"
+    unset -f curl 2&gt;/dev/null || :  # only in this child, not the caller
+    export MOCK_CURL_EXPECTED_ARGV_JSON='["--fail", "https://fixture.invalid/health"]'
+    export MOCK_CURL_BODY='{"status":"unavailable"}'
+    export MOCK_CURL_HTTP_STATUS=503 MOCK_CURL_EXIT=0
+    if curl --fail https://fixture.invalid/health; then rc=0; else rc=$?; fi
+    [[ $rc == 22 ]]  # --fail maps HTTP &gt;=400 to curl status22, not shell status503
+)
+# The Python fixture rejects unexpected argv; response data is never evaluated.
+# It implements only its documented option subset, not the whole curl interface.</code></pre>
             </section>
 
             <!-- Test Runner -->
             <section>
                 <h2>Test Runner</h2>
-                <pre><code class="language-bash">#!/bin/bash
-# test_runner.sh
-
-run_tests() {
-    local test_dir="${1:-tests}"
-    local pattern="${2:-test_*.sh}"
-    
-    TESTS_TOTAL=0
-    TESTS_PASSED=0
-    TESTS_FAILED=0
-    
-    echo "═══════════════════════════════════════"
-    echo "  Running tests from: $test_dir"
-    echo "═══════════════════════════════════════"
-    
-    # Găsire și rulare teste
-    while IFS= read -r test_file; do
-        echo -e "\n▶ $test_file"
-        
-        # Source test file
-        source "$test_file"
-        
-        # Găsire funcții test_*
-        local test_functions=$(declare -F | grep "test_" | awk '{print $3}')
-        
-        for test_fn in $test_functions; do
-            ((TESTS_TOTAL++))
-            
-            # Setup
-            setup 2>/dev/null
-            
-            # Run test
-            if $test_fn; then
-                echo "  ✓ $test_fn"
-            else
-                echo "  ✗ $test_fn"
-            fi
-            
-            # Teardown
-            teardown 2>/dev/null
-        done
-    done < <(find "$test_dir" -name "$pattern" -type f)
-    
-    # Summary
-    print_summary
+                <pre><code class="language-bash">#!/usr/bin/env bash
+# Each file is sourced in a fresh Bash process. Trusted test code only.
+set -uo pipefail
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &amp;&amp; pwd) || exit 2
+run_file() {
+    source "$SCRIPT_DIR/test_helpers.sh" || return 2
+    source "$1" || return 2
+    local -a functions=()
+    local line name fn before status total=0 passed=0 failed=0
+    while IFS= read -r line; do
+        name=${line##* }
+        [[ $name == test_* ]] &amp;&amp; functions+=("$name")
+    done &lt; &lt;(declare -F)
+    ((${#functions[@]} &gt; 0)) || { echo 'NOT_RUN: no test_ functions' &gt;&amp;2; return 2; }
+    for fn in "${functions[@]}"; do
+        total=$((total + 1)); before=$ASSERTIONS_FAILED; status=0
+        if declare -F setup &gt;/dev/null; then setup || status=1; fi
+        if ((status == 0)); then "$fn" || status=1; fi
+        if declare -F teardown &gt;/dev/null; then teardown || status=1; fi
+        if ((status == 0 &amp;&amp; ASSERTIONS_FAILED == before)); then
+            passed=$((passed + 1))
+        else failed=$((failed + 1)); fi
+    done
+    printf 'Tests: %s total, %s passed, %s failed; assertions: %s passed, %s failed\n' \
+        "$total" "$passed" "$failed" "$ASSERTIONS_PASSED" "$ASSERTIONS_FAILED"
+    ((failed == 0))
 }
-
-print_summary() {
-    echo -e "\n═══════════════════════════════════════"
-    echo "  Results: $TESTS_PASSED/$TESTS_TOTAL passed"
-    [[ $TESTS_FAILED -gt 0 ]] && echo "  Failed: $TESTS_FAILED"
-    echo "═══════════════════════════════════════"
-}</code></pre>
+main() {
+    if [[ ${1:-} == --file ]]; then
+        [[ $# == 2 &amp;&amp; -r $2 ]] || return 2
+        run_file "$2"; return $?
+    fi
+    [[ $# -le 1 &amp;&amp; -d ${1:-tests} ]] || return 2
+    local directory=${1:-tests} plan file rc=0 count=0
+    plan=$(mktemp) || return 2
+    trap 'rm -f -- "$plan"' RETURN
+    find "$directory" -type f -name 'test_*.sh' -print0 &gt; "$plan" || return 2
+    while IFS= read -r -d '' file; do
+        count=$((count + 1))
+        bash "${BASH_SOURCE[0]}" --file "$file" || rc=1
+    done &lt; "$plan"
+    ((count &gt; 0)) || { echo 'NOT_RUN: no test files' &gt;&amp;2; return 2; }
+    return "$rc"
+}
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then main "$@"; fi</code></pre>
             </section>
 
             <!-- Part 2: Error Handling -->
@@ -383,8 +369,8 @@ print_summary() {
 
             <!-- Exit Codes -->
             <section>
-                <h2>Exit Codes Standard</h2>
-                <pre><code class="language-bash"># Definire exit codes consistente
+                <h2>Example Project Exit Codes</h2>
+                <pre><code class="language-bash"># Define consistent project-specific exit codes
 readonly EXIT_SUCCESS=0
 readonly EXIT_FAILURE=1
 readonly EXIT_INVALID_ARG=2
@@ -396,7 +382,7 @@ readonly EXIT_NETWORK_ERROR=7
 readonly EXIT_TIMEOUT=8
 readonly EXIT_ALREADY_RUNNING=9
 
-# Mapping pentru mesaje
+# Message mapping
 declare -A EXIT_MESSAGES=(
     [0]="Success"
     [1]="General failure"
@@ -414,7 +400,7 @@ exit_with_code() {
     local code="$1"
     local message="${EXIT_MESSAGES[$code]:-Unknown error}"
     
-    [[ $code -ne 0 ]] && log_error "$message (code: $code)"
+    [[ $code -ne 0 ]] &amp;&amp; log_error "$message (code: $code)"
     exit "$code"
 }</code></pre>
             </section>
@@ -422,82 +408,43 @@ exit_with_code() {
             <!-- Strict Mode -->
             <section>
                 <h2>Strict Mode (set options)</h2>
-                <pre><code class="language-bash">#!/bin/bash
-# ALWAYS start scripts with these options
-
-set -euo pipefail
-
-# Ce fac aceste opțiuni:
-
-# -e (errexit): Exit imediat la orice eroare
-set -e
-false           # Script se oprește aici
-echo "Nu ajung"  # Nu se execută
-
-# -u (nounset): Eroare la variabile nedefinite
-set -u
-echo "$UNDEFINED_VAR"  # Error: unbound variable
-
-# -o pipefail: Pipe returnează eroarea primei comenzi failed
-set -o pipefail
-false | true | true    # Exit code = 1 (de la false)
-# Fără pipefail, ar returna 0 (de la ultima true)
-
-# Alte opțiuni utile:
-set -E  # ERR trap moștenit de funcții
-set -T  # DEBUG trap moștenit de funcții
-
-# Combinat:
-set -eEuo pipefail
-
-# IFS strict (opțional dar recomandat)
-IFS=$'\n\t'</code></pre>
+                <pre><code class="language-bash"># Independent child-shell probes: an expected error must not abort later examples.
+if bash -ec 'false; echo unreachable'; then rc=0; else rc=$?; fi
+printf 'Eligible errexit failure: %s\n' "$rc"  # 1
+if bash -uc 'unset missing; printf "%s" "$missing"'; then rc=0; else rc=$?; fi
+printf 'Nounset failure: %s\n' "$rc"  # nonzero
+bash -c 'set -o pipefail; (exit 3) | (exit 7); printf "%s\n" "$?"'  # 7
+# pipefail = rightmost nonzero status, not first failure in time.
+# -e exceptions: tests, non-final &amp;&amp;/|| commands, negated pipelines, tested functions.
+# ( ... ) inherits errexit; $( ... ) normally clears it unless inherit_errexit is set.
+# ERR may run without -e. set -E inherits ERR into functions/subshell environments.
+# set -T inherits DEBUG/RETURN; EXIT is not an operating-system signal.
+# Changing IFS globally is not a substitute for quoting or a defined input grammar.</code></pre>
             </section>
 
             <!-- Trap Handlers -->
             <section>
                 <h2>Trap Handlers</h2>
-                <pre><code class="language-bash"># Trap - execută cod la semnale/evenimente
-
-# Cleanup la EXIT (mereu rulează)
+                <pre><code class="language-bash">TEMP_DIR=''
 cleanup() {
-    local exit_code=$?
-    
-    # Cleanup temporare
-    rm -rf "$TEMP_DIR" 2>/dev/null
-    
-    # Close file descriptors
-    exec 3>&- 2>/dev/null
-    
-    # Release locks
-    rm -f "$LOCK_FILE" 2>/dev/null
-    
-    log_debug "Cleanup completed (exit: $exit_code)"
-    exit "$exit_code"
+    local rc=$?
+    if [[ -n $TEMP_DIR ]]; then rm -rf -- "$TEMP_DIR" || :; fi
+    # flock is released by closing its owned descriptor/process exit.
+    # Never unlink a shared lock pathname while another process can hold its inode.
+    exit "$rc"
 }
 trap cleanup EXIT
-
-# Error handler cu stack trace
+trap 'exit 130' INT
+trap 'exit 143' TERM
+TEMP_DIR=$(mktemp -d) || exit 1
 error_handler() {
-    local line="$1"
-    local command="$2"
-    local code="$3"
-    
-    log_error "Error at line $line: $command (exit: $code)"
-    
-    # Print stack trace
-    log_error "Stack trace:"
-    local i=0
-    while caller $i; do
-        ((i++))
-    done | while read line func file; do
-        log_error "  $file:$line in $func()"
-    done
+    local line=$1 code=$2 i=0
+    printf 'Failure at line %s: status %s\n' "$line" "$code" &gt;&amp;2
+    while caller "$i"; do i=$((i + 1)); done
+    return 0
 }
-trap 'error_handler $LINENO "$BASH_COMMAND" $?' ERR
-
-# Handle Ctrl+C gracefully
-trap 'log_warn "Interrupted by user"; exit 130' INT TERM</code></pre>
+trap 'error_handler "$LINENO" "$?"' ERR
+# Keep command contents/credentials out of logs. SIGKILL/power loss bypass traps.</code></pre>
             </section>
 
             <!-- Logging Framework -->
@@ -526,17 +473,19 @@ log() {
     # Check if should log
     local level_num=${LOG_LEVELS[$level]:-2}
     local current_num=${LOG_LEVELS[$LOG_LEVEL]:-2}
-    [[ $level_num -lt $current_num ]] && return
+    [[ $level_num -lt $current_num ]] &amp;&amp; return 0
     
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local color="${LOG_COLORS[$level]}"
     
     # Format: [TIMESTAMP] [LEVEL] message
-    printf "${color}[%s] [%-5s]${NC} %s\n" "$timestamp" "$level" "$message"
+    printf '%b[%s] [%-5s]%b %s\n' "$color" "$timestamp" "$level" "$NC" "$message" &gt;&amp;2 || return 1
     
     # Also write to log file if defined
-    [[ -n "${LOG_FILE:-}" ]] && \
-        printf "[%s] [%-5s] %s\n" "$timestamp" "$level" "$message" >> "$LOG_FILE"
+    if [[ -n "${LOG_FILE:-}" ]]; then
+        printf '[%s] [%-5s] %s\n' "$timestamp" "$level" "$message" &gt;&gt; "$LOG_FILE" || return 1
+    fi
+    return 0
 }
 
 # Convenience functions
@@ -550,8 +499,8 @@ log_fatal() { log "FATAL" "$@"; exit 1; }</code></pre>
 
             <!-- Input Validation -->
             <section>
-                <h2>Validare Input</h2>
-                <pre><code class="language-bash"># Funcții de validare
+                <h2>Input Validation</h2>
+                <pre><code class="language-bash"># Validation functions
 
 validate_not_empty() {
     local value="$1"
@@ -595,7 +544,7 @@ validate_in_list() {
     
     local valid=false
     for item in "${allowed[@]}"; do
-        [[ "$value" == "$item" ]] && valid=true && break
+        [[ "$value" == "$item" ]] &amp;&amp; valid=true &amp;&amp; break
     done
     
     if [[ "$valid" == "false" ]]; then
@@ -611,102 +560,68 @@ validate_in_list "$FORMAT" "format" text json csv prometheus</code></pre>
             <!-- Retry Pattern -->
             <section>
                 <h2>Retry Pattern</h2>
-                <pre><code class="language-bash">retry() {
-    local max_attempts="${1:-3}"
-    local delay="${2:-5}"
-    local backoff="${3:-2}"  # Multiplier pentru exponential backoff
-    shift 3
-    local command=("$@")
-    
-    local attempt=1
-    local current_delay=$delay
-    
-    while ((attempt <= max_attempts)); do
-        log_debug "Attempt $attempt/$max_attempts: ${command[*]}"
-        
-        if "${command[@]}"; then
-            log_debug "Command succeeded on attempt $attempt"
-            return 0
+                <pre><code class="language-bash">#!/usr/bin/env bash
+# External argv command only; total timeout also includes retry delays.
+retry() {
+    [[ $# -ge 4 ]] || return 2
+    local attempts=$1 delay=$2 backoff=$3 attempt=1 rc=1; shift 3
+    [[ $attempts =~ ^[1-9][0-9]?$|^100$ &amp;&amp; $delay =~ ^[0-9]{1,4}$ &amp;&amp; $backoff =~ ^[1-9]$|^10$ ]] || return 2
+    delay=$((10#$delay)); ((delay &lt;= 3600)) || return 2
+    while ((attempt &lt;= attempts)); do
+        if "$@"; then return 0; else rc=$?; fi
+        if ((attempt &lt; attempts)); then
+            sleep "$delay" || return 1
+            delay=$((delay * backoff)); ((delay &lt;= 3600)) || delay=3600
         fi
-        
-        if ((attempt < max_attempts)); then
-            log_warn "Attempt $attempt failed, retrying in ${current_delay}s..."
-            sleep "$current_delay"
-            current_delay=$((current_delay * backoff))
-        fi
-        
-        ((attempt++))
+        attempt=$((attempt + 1))
     done
-    
-    log_error "Command failed after $max_attempts attempts: ${command[*]}"
-    return 1
+    return "$rc"
 }
-
-# Usage
-retry 3 5 2 curl -sf "http://api.example.com/health"
-
-# Cu timeout
 retry_with_timeout() {
-    local timeout="$1"
-    shift
-    timeout "$timeout" retry "$@"
-}</code></pre>
+    [[ $# -ge 5 &amp;&amp; $1 =~ ^[1-9][0-9]*([.][0-9]+)?$ ]] || return 2
+    local duration=$1 source_path; shift
+    source_path=$(realpath -- "${BASH_SOURCE[0]}") || return 2
+    timeout --signal=TERM --kill-after=2 "$duration" bash -c \
+        'source "$1"; shift; retry "$@"' _ "$source_path" "$@"
+}
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then retry "$@"; fi
+
+# Examples use external commands. Bare caller-local functions are unsupported:
+# retry_with_timeout 3 2 0 1 /bin/true     # 0
+# retry_with_timeout 3 2 0 1 /bin/false    # 1, preserved final status
+# retry_with_timeout 1 2 0 1 sleep 10      # 124 (GNU timeout)
+# A retried command itself returning124 has the same status; retain attempt logs.</code></pre>
             </section>
 
             <!-- Best Template -->
             <section>
-                <h2>Template Script Robust</h2>
+                <h2>Robust Script Template</h2>
                 <pre><code class="language-bash">#!/bin/bash
-#
-# Script: myapp.sh
-# Description: Production-ready script template
-#
-
+# Teaching scaffold; implement each TODO before claiming completion.
 set -euo pipefail
-
-# Constants
-readonly SCRIPT_NAME=$(basename "$0")
-readonly SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-readonly TEMP_DIR=$(mktemp -d)
-
-# Cleanup
-cleanup() {
-    rm -rf "$TEMP_DIR"
-}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &amp;&amp; pwd) || exit 1
+TEMP_DIR=''
+cleanup() { local rc=$?; [[ -z $TEMP_DIR ]] || rm -rf -- "$TEMP_DIR" || :; exit "$rc"; }
 trap cleanup EXIT
-trap 'log_error "Error at line $LINENO"; exit 1' ERR
-
-# Source libraries
-source "$SCRIPT_DIR/lib/logging.sh"
-source "$SCRIPT_DIR/lib/validation.sh"
-
-# Main function
+trap 'exit 130' INT
+trap 'exit 143' TERM
 main() {
-    # Parse arguments
-    parse_args "$@"
-    
-    # Validate
-    validate_environment
-    
-    # Execute
-    log_info "Starting $SCRIPT_NAME"
-    do_work
-    log_info "Completed successfully"
+    # TODO: parse all arguments, validate and handle --help/--dry-run before writes.
+    TEMP_DIR=$(mktemp -d) || return 1
+    # TODO: perform and verify the requested operation.
+    printf 'Scaffold has no implementation yet\n' &gt;&amp;2
+    return 3
 }
-
-# Entry point
-if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-    main "$@"
-fi</code></pre>
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then main "$@"; fi</code></pre>
             </section>
 
             <!-- Summary Table -->
             <section>
-                <h2>Rezumat</h2>
+                <h2>Summary</h2>
                 <table>
                     <tr>
                         <th>Aspect</th>
-                        <th>Tehnici</th>
+                        <th>Techniques</th>
                         <th>Tools</th>
                     </tr>
                     <tr>
@@ -739,24 +654,26 @@ fi</code></pre>
 
             <!-- Q&A -->
             <section>
-                <h1>Întrebări?</h1>
-                <p class="hl-green">Practică: Scrieți teste pentru Monitor!</p>
+                <h1>Questions?</h1>
+                <p class="hl-green">Practice: write semantic tests for Monitor.</p>
                 <div class="box" style="margin-top: 2em;">
-                    <p class="sm">./test_runner.sh tests/unit/ | Raportare TAP/JUnit</p>
+                    <p class="sm">bash SEM06/scripts/examples/test_runner.sh OWNED_TEST_DIRECTORY | TAP/JUnit output is an extension, not implemented by this teaching runner</p>
                 </div>
             </section>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.5.0/reveal.js"></script>
+    <script src="../../assets/vendor/reveal.js/4.5.0/plugin/highlight/highlight.js"></script>
     <script>
         Reveal.initialize({
             hash: true,
             slideNumber: 'c/t',
             transition: 'slide',
-            plugins: [ RevealHighlight ]
+            keyboardCondition: event => !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(event.target.tagName) && !event.target.isContentEditable,
+        plugins: [ RevealHighlight ]
         });
     </script>
+<script src="../../assets/js/presentation_fallback.js"></script>
 </body>
 </html>

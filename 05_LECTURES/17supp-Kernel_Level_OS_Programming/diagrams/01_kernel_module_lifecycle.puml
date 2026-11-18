@@ -1,8 +1,13 @@
 @startuml
-title Kernel Module Lifecycle
-[*] --> Compiled : make
+title Kernel Module Lifecycle — Simplified Success and Failure Paths
+[*] --> Building
+Building --> Compiled : make succeeds
+Building --> Failed : build fails
+Failed --> [*]
 Compiled --> Loading : insmod
-Loading --> Loaded : success
-Loaded --> Unloading : rmmod
+Loading --> Loaded : permitted, dependencies and init succeed
+Loading --> Failed : load rejected / init fails
+Loaded --> Unloading : rmmod permitted; module not busy
+Loaded --> Loaded : unload rejected / references remain
 Unloading --> [*]
 @enduml

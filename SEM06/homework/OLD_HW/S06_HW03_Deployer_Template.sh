@@ -5,7 +5,7 @@
 # INSTRUCTIONS:
 # 1. Complete functions marked with TODO
 # 2. Do not modify function signatures
-# 3. Run tests with: ./test_hw03.sh
+# 3. Historical test_hw0N.sh files were not supplied. Use an owned fixture and document assertions.
 #
 # Author: [Your name]
 # Group: [Your group]
@@ -280,6 +280,12 @@ run_hook() {
 
 # === MAIN ===
 main() {
+    # TODO guard: remove only after implementing and testing this exercise.
+    if [[ ${1:-} != -h && ${1:-} != --help && ${1:-} != -v && ${1:-} != --version ]]; then
+        printf 'NOT_IMPLEMENTED: archived starter; no operation performed\n' >&2
+        return 3
+    fi
+    [[ ${1:-} != -h && ${1:-} != --help ]] || usage
     [[ $# -ge 1 ]] || usage 1
 
     local command="$1"

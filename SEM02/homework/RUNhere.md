@@ -1,82 +1,23 @@
-# 📁 Homework — Assignment Materials
+# Homework materials — Seminar 2
 
-> **Location:** `SEM02/homework/`  
-> **Purpose:** Homework specification, submission scripts, and evaluation criteria
+The [public task](S02_01_HOMEWORK.md), [rubric](S02_03_EVALUATION_RUBRIC.md) and [assessment status](ASSESSMENT_STATUS.md) must be read together. Their conflicting grading rules remain an author decision.
 
-## Contents
+## Create a local starter package
 
-| File | Purpose |
-|------|---------|
-| `S02_01_HOMEWORK.md` | Assignment specification |
-| `S02_02_create_homework.sh` | Homework generator script |
-| `S02_03_EVALUATION_RUBRIC.md` | Grading criteria |
-| `S02_04_ORAL_VERIFICATION_LOG.md` | Interview checklist |
-| `solutions/` | Reference solutions (instructors) |
-| `OLD_HW/` | Archived previous assignments |
-
----
-
-## S02_02_create_homework.sh
-
-**Purpose:** Generates personalized homework assignments for students.
-
-### Usage
+Run from this directory:
 
 ```bash
-./S02_02_create_homework.sh [options]
-
-Options:
-  --student-id ID    Generate for specific student
-  --batch FILE       Generate from student list CSV
-  --seed N           Random seed for reproducibility
-  --output DIR       Output directory
-  --template FILE    Custom assignment template
+bash S02_02_create_homework.sh "Student Name" 1051 --output /path/to/new-packages
+bash S02_02_create_homework.sh --interactive
+bash S02_02_create_homework.sh --help
 ```
 
-### Examples
+The supported generator interface is positional name/group, --interactive, --output DIR and --help. It does not implement --student-id, --batch, --seed or --template.
 
-```bash
-# Generate for single student
-./S02_02_create_homework.sh --student-id ABC123
+The package contains five exercise starters under exercises/, a README and check_homework.sh. The self-check checks structure, syntax, remaining placeholders and executable bits; it does not award points, establish functional correctness or convert untouched templates into a completed assignment. Keep TODOs until you implement the required work.
 
-# Batch generation
-./S02_02_create_homework.sh --batch students.csv --output assignments/
+## Work and submission evidence
 
-# Reproducible generation
-./S02_02_create_homework.sh --batch students.csv --seed 42
-```
+Complete the tasks and keep the requested explanation of your results. Run the local preflight in the generated package. The repository recorder and submission checker are documented in [the central guides](../../03_GUIDES/); use their actual interfaces. Recordings, hashes and logs support contextual review but do not prove authorship or uninterrupted capture.
 
-### How Personalisation Works
-
-The script generates unique:
-- File names and paths
-- Data values (numbers, strings)
-- Expected outputs
-
-This prevents direct copying between students.
-
----
-
-## Submission Guidelines
-
-1. Complete all exercises in `S02_01_HOMEWORK.md`
-2. Validate: Use `../../03_GUIDES/check_my_submission.sh`
-3. Record: Use `../../02_INIT_HOMEWORKS/record_homework_EN.sh`
-4. Submit via designated platform
-
----
-
-## Grading
-
-See `S02_03_EVALUATION_RUBRIC.md` for:
-- Points breakdown per exercise
-- Style requirements
-- Documentation expectations
-- Partial credit criteria
-
----
-
-*See also: [`../docs/`](../docs/) for study materials*  
-*See also: [`../../03_GUIDES/`](../../03_GUIDES/) for submission guide*
-
-*Last updated: January 2026*
+Reference solutions under solutions/ and archived material under OLD_HW/ have distinct teaching roles. Access and publication policy for instructor material remains to be decided by the author.

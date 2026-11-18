@@ -1,207 +1,40 @@
-# 📁 Project Templates — Starter Scaffolding
+# Project scaffold and templates
 
-> **Location:** `04_PROJECTS/templates/`  
-> **Purpose:** Generate standardised project structure for student assignments  
-> **Target audience:** Students starting new projects
-
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `project_structure.sh` | Generates complete project skeleton |
-| `README_template.md` | Template for project documentation |
-| `Makefile_template` | Standard Makefile with required targets |
-
-## Quick Start
+`project_structure.sh` creates a new generic Bash project in the current directory. It does not choose a project implementation, overwrite an existing directory or initialise/publish a repository.
 
 ```bash
-# Make script executable
-chmod +x project_structure.sh
-
-# Create new project from template
-./project_structure.sh my_backup_project --type backup
-
-# List available project types
-./project_structure.sh --list-types
+bash project_structure.sh --help
+# From an owned parent directory, using the absolute generator path:
+bash /path/to/ENos/04_PROJECTS/templates/project_structure.sh my_backup_project M01
 ```
 
----
+Arguments are a simple project name and optional valid catalogue ID (`E01–E05`, `M01–M15`, `A01–A03`). There are no `--type`, `--list-types`, `--output`, `--author`, `--force` or `--readme-template` options. Select a parent directory with `cd`; edit the generated README intentionally after creation.
 
-## project_structure.sh
+## Generated content
 
-**Purpose:** Generates a complete, standards-compliant project directory with all required files.
-
-### Usage
+The scaffold contains `src/main.sh`, `src/lib/utils.sh`, `etc/config.conf`, `tests/test_main.sh`, README, Makefile, INSTALL/USAGE documents, `.gitignore` and a basic example. The standalone README template is available for manual adaptation. TODOs are preserved: help/version succeed, but unimplemented project work returns3 with NOT_IMPLEMENTED. The scaffold tests verify this honest boundary, not completed M01 functionality.
 
 ```bash
-./project_structure.sh <project_name> [options]
-
-Arguments:
-  project_name      Name for your project directory
-
-Options:
-  --type TYPE       Project template type (see --list-types)
-  --output DIR      Parent directory for project (default: current)
-  --author NAME     Your name for documentation
-  --list-types      Show available project types
-  --force           Overwrite existing directory
+cd my_backup_project
+make syntax test
+bash src/main.sh --help
+bash src/main.sh --version
 ```
 
-### Available Project Types
+`make all` additionally requires actual ShellCheck; absent lint is NOT_RUN/non-zero. The template checks each Bash source separately and aggregates failing tests. `make clean` deletes no unspecified files. Define exact generated targets when implementing the project. A missing tests/source set cannot pass.
+
+## Disposable installation check
+
+The template installs a launcher **and the required runtime source/library/resource layout**. Override both paths to test an owned destination without writing to the account's normal installation.
 
 ```bash
-$ ./project_structure.sh --list-types
-
-Available project types:
-  monitor    - System/process monitoring project
-  backup     - Backup automation project
-  deployer   - Deployment automation project
-  analyzer   - Log/data analysis project
-  scheduler  - Task scheduling project
-  custom     - Minimal template (build your own)
+stage=$(mktemp -d)
+trap 'rm -rf -- "$stage"' EXIT
+make install INSTALL_DIR="$stage/bin" RUNTIME_DIR="$stage/runtime"
+"$stage/bin/my_backup_project" --help
+"$stage/bin/my_backup_project" --version
 ```
 
-### Generated Structure
+`make uninstall` removes only the launcher and leaves the runtime for inspection. Packaging and publishing remain distinct operations. Licence selection remains an author decision; no competing root licence is silently copied into generated projects.
 
-```
-my_project/
-├── README.md              # Pre-filled documentation template
-├── Makefile               # Standard targets: all, test, clean, install
-├── .gitignore             # Common ignore patterns
-├── src/
-│   ├── main.sh            # Entry point with argument parsing
-│   └── lib/
-│       ├── config.sh      # Configuration management
-│       ├── utils.sh       # Utility functions
-│       └── logging.sh     # Logging helpers
-├── tests/
-│   ├── test_main.sh       # Test skeleton
-│   └── test_helpers.sh    # Test utilities
-├── docs/
-│   ├── DESIGN.md          # Design document template
-│   └── CHANGELOG.md       # Version history template
-└── examples/
-    └── example_config.conf # Sample configuration
-```
-
-### Example Usage
-
-```bash
-# Create a backup project
-./project_structure.sh my_backup_system --type backup --author "John Doe"
-
-# Create in specific directory
-./project_structure.sh scheduler_v2 --type scheduler --output ~/projects/
-
-# Minimal custom project
-./project_structure.sh experiment --type custom
-```
-
-### Output
-
-```
-═══════════════════════════════════════════════════════════════
- PROJECT GENERATOR v2.0
-═══════════════════════════════════════════════════════════════
-
-Creating project: my_backup_system
-Type: backup
-Location: /home/student/my_backup_system/
-
-[1/8] Creating directory structure ... Done
-[2/8] Generating README.md ........... Done
-[3/8] Generating Makefile ............ Done
-[4/8] Creating main.sh ............... Done
-[5/8] Creating library files ......... Done (3 files)
-[6/8] Creating test skeletons ........ Done (2 files)
-[7/8] Creating documentation ......... Done
-[8/8] Setting permissions ............ Done
-
-═══════════════════════════════════════════════════════════════
- SUCCESS: Project created at /home/student/my_backup_system/
-═══════════════════════════════════════════════════════════════
-
-Next steps:
-  1. cd my_backup_system
-  2. Edit README.md with your project details
-  3. Implement src/main.sh
-  4. Run: make test
-```
-
----
-
-## Template Files
-
-### README_template.md
-
-Pre-filled project documentation including:
-- Project title and description placeholders
-- Installation instructions
-- Usage examples with placeholder commands
-- Configuration section
-- Testing instructions
-- Grading criteria checklist
-
-### Makefile_template
-
-Standard Makefile with required targets:
-
-```makefile
-# Required targets (do not rename)
-all:        # Build/prepare project
-test:       # Run all tests
-clean:      # Remove build artifacts
-install:    # Install to system (optional)
-
-# Optional targets
-lint:       # Run shellcheck
-docs:       # Generate documentation
-package:    # Create submission archive
-```
-
----
-
-## Customisation Tips
-
-### After Generation
-
-1. **Edit README.md first** — Fill in project description and requirements
-2. **Review main.sh** — Understand the argument parsing template
-3. **Check Makefile** — Ensure targets match your build process
-4. **Update .gitignore** — Add project-specific patterns
-
-### Modifying Templates
-
-If you need to customize templates for your workflow:
-
-```bash
-# Copy template for modification
-cp README_template.md my_README_template.md
-
-# Use custom template
-./project_structure.sh my_project --readme-template my_README_template.md
-```
-
----
-
-## Integration with Helpers
-
-After creating your project, use the helper scripts:
-
-```bash
-# Validate structure
-../helpers/project_validator.sh my_project/
-
-# Run tests
-../helpers/test_runner.sh my_project/
-
-# Package for submission
-../helpers/submission_packager.sh my_project/ --student-id ABC123
-```
-
----
-
-*See also: [`../helpers/RUNhere.md`](../helpers/RUNhere.md) for validation tools*  
-*See also: [`../README.md`](../README.md) for project specifications*
-
-*Last updated: January 2026*
+See [helpers/RUNhere.md](../helpers/RUNhere.md) for implemented validation/test/package arguments and [the assessment contract](../ASSESSMENT_AND_EVIDENCE_CONTRACT.md) for policy choices.

@@ -212,7 +212,7 @@ fruits=("apple" "banana" "cherry" "date" "elderberry")
 count=1
 for fruit in "${fruits[@]}"; do
     echo "$count. $fruit"
-    ((count++))
+    count=$((count+1))
 done
 
 echo "Total: ${#fruits[@]} fruits"
@@ -566,7 +566,8 @@ set -euo pipefail
 declare -A counts
 
 for word in "$@"; do
-    ((counts[$word]++))
+    [[ -n $word ]] || { echo "Empty words are outside this exercise grammar" >&2; exit 2; }
+    counts[$word]=$((${counts[$word]:-0}+1))
 done
 
 for word in "${!counts[@]}"; do

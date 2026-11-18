@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml page_replacement_algorithms
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Page Replacement Algorithms
 
 skinparam rectangle {
@@ -16,7 +16,7 @@ rectangle "**FIFO** (First-In, First-Out)" as fifo #FFCDD2 {
     ✗ Can evict useful pages
     ✗ **Belady's Anomaly** (more frames → more faults!)
     
-    **Page Faults:** 15 (for standard ref. string)
+    **Page Faults:** 15 (for the declared trace below)
     end note
 }
 
@@ -58,7 +58,7 @@ rectangle "**CLOCK** (Second Chance)" as clock #FFF9C4 {
     ✓ Low overhead (only 1 bit per page)
     ✓ Used in practice!
     
-    **Page Faults:** ~12-13
+    **Page Faults:** 14
     end note
 }
 
@@ -66,12 +66,16 @@ fifo -[hidden]right-> opt
 lru -[hidden]right-> clock
 
 note bottom
-**Comparison for standard reference string with 3 frames:**
+**Trace: 7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1**
+3 initially empty frames. Clock hand starts at slot 0; load/use sets R=1.
+On a fault: clear R=1 entries while advancing, replace first R=0/empty slot;
+advance after insertion. Hits do not move the hand.
+**Results under this declared model:**
 | Algorithm | Page Faults | Practical? |
 | FIFO | 15 | Yes, simple |
 | **OPT** | **9** | No (theoretical) |
 | LRU | 12 | Yes, but costly |
-| **Clock** | ~12 | **Yes, recommended!** |
+| **Clock** | 14 | Practical approximation |
 end note
 
 @enduml

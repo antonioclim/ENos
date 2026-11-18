@@ -3,18 +3,20 @@
 Plagiarism Detector - Detects similarities between submissions
 Operating Systems | ASE Bucharest - CSIE
 
-Purpose: Identify submission pairs with suspicious similarity
+Purpose: Describe textual similarity and lexical style observations for human review
 Usage: python3 S01_05_plagiarism_detector.py <submissions_dir> [--threshold 0.85]
 
 Algorithm:
 1. Normalise code (remove comments, whitespace, sort lines)
 2. Calculate similarity between all pairs
-3. Detect AI-generated code patterns
+3. Record lexical style patterns without inferring authorship
 4. Report pairs above threshold
 
-Version: 2.1 - Added AI code pattern detection
+Status: descriptive diagnostic; no automatic misconduct finding or penalty
 """
 
+import argparse
+import math
 import logging
 import sys
 import re
@@ -46,7 +48,7 @@ class SimilarityResult:
 
 @dataclass
 class AIPatternResult:
-    """Result of AI pattern detection for a single file."""
+    """Legacy style-index result; ai_score is not an authorship probability."""
     filepath: Path
     student: str
     patterns_found: List[Tuple[str, int]]  # (pattern_name, line_number)
@@ -63,7 +65,8 @@ class Colours:
     BOLD = '\033[1m'
 
 
-# AI-generated code patterns commonly found in LLM outputs
+# Historical lexical patterns, also common in human-written teaching code.
+# Names remain for data/API compatibility; their presence does not establish origin.
 AI_CODE_PATTERNS: List[Tuple[str, str]] = [
     # Overly explanatory comments
     (r'#\s*This (?:script|function|code) (?:will|does|is used to)', 'explanatory_this'),
@@ -95,7 +98,7 @@ AI_CODE_PATTERNS: List[Tuple[str, str]] = [
 
 def detect_ai_patterns(content: str) -> List[Tuple[str, int]]:
     """
-    Detect patterns typical of AI-generated code.
+    Record lexical patterns in code comments and messages, without authorship inference.
     
     Args:
         content: Script content to analyse
@@ -116,14 +119,14 @@ def detect_ai_patterns(content: str) -> List[Tuple[str, int]]:
 
 def calculate_ai_score(patterns_found: List[Tuple[str, int]], total_lines: int) -> float:
     """
-    Calculate an AI likelihood score based on patterns found.
+    Calculate the historical, uncalibrated style index based on patterns found.
     
     Args:
         patterns_found: List of detected patterns
         total_lines: Total lines in the script
         
     Returns:
-        Score from 0.0 (likely human) to 1.0 (likely AI)
+        Index from 0.0 to 1.0; not a probability and not a basis for sanctions
     """
     if total_lines == 0:
         return 0.0
@@ -250,11 +253,17 @@ def calculate_hash_similarity(content1: str, content2: str) -> float:
     return 1.0 if h1 == h2 else 0.0
 
 
-def extract_student_id(filepath: Path) -> str:
+def extract_student_id(filepath: Path, submissions_root: Optional[Path] = None) -> str:
     """
     Extract student ID from file path.
     Assumes structure: submissions/StudentName/...
     """
+    if submissions_root is not None:
+        relative = filepath.resolve().relative_to(submissions_root.resolve())
+        if len(relative.parts) < 2:
+            raise ValueError("Submission structure must be ROOT/STUDENT/.../file.sh")
+        return relative.parts[0]
+    # Legacy standalone callers without an explicit root retain the old fallback.
     parts = filepath.parts
     for i, part in enumerate(parts):
         if part in ('submissions', 'homework', 'assignments'):
@@ -267,10 +276,10 @@ def extract_student_id(filepath: Path) -> str:
 
 def find_all_scripts(submissions_dir: Path, pattern: str = '*.sh') -> List[Path]:
     """Find all scripts in the submissions directory."""
-    return list(submissions_dir.rglob(pattern))
+    return sorted(p for p in submissions_dir.rglob(pattern) if p.is_file())
 
 
-def analyse_ai_patterns(scripts: List[Path]) -> List[AIPatternResult]:
+def analyse_ai_patterns(scripts: List[Path], submissions_root: Optional[Path] = None) -> List[AIPatternResult]:
     """
     Analyse all scripts for AI-generated code patterns.
     
@@ -293,7 +302,7 @@ def analyse_ai_patterns(scripts: List[Path]) -> List[AIPatternResult]:
                 
                 results.append(AIPatternResult(
                     filepath=script,
-                    student=extract_student_id(script),
+                    student=extract_student_id(script, submissions_root),
                     patterns_found=patterns,
                     ai_score=ai_score
                 ))
@@ -305,7 +314,8 @@ def analyse_ai_patterns(scripts: List[Path]) -> List[AIPatternResult]:
 
 def compare_all_pairs(
     scripts: List[Path],
-    threshold: float = 0.85
+    threshold: float = 0.85,
+    submissions_root: Optional[Path] = None
 ) -> List[SimilarityResult]:
     """
     Compare all pairs of scripts.
@@ -344,8 +354,8 @@ def compare_all_pairs(
                 continue
             
             # Skip if from same directory (same student)
-            student1 = extract_student_id(script1)
-            student2 = extract_student_id(script2)
+            student1 = extract_student_id(script1, submissions_root)
+            student2 = extract_student_id(script2, submissions_root)
             if student1 == student2:
                 continue
             
@@ -389,24 +399,26 @@ def generate_report(
     """Generate combined similarity and AI detection report."""
     lines = []
     lines.append("=" * 70)
-    lines.append("  PLAGIARISM & AI DETECTION REPORT - SEMINAR 1")
+    lines.append("  SIMILARITY AND LEXICAL STYLE OBSERVATIONS - SEMINAR 1")
     lines.append(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append("=" * 70)
     lines.append("")
     
-    # AI Detection Section
+    lines.append("Status: MANUAL_REVIEW_REQUIRED; these observations do not establish authorship or misconduct.")
+    lines.append("No final mark or penalty is calculated. No review is claimed to have taken place.")
+    # Historical style-index section
     high_ai = [r for r in ai_results if r.ai_score >= 0.5]
     medium_ai = [r for r in ai_results if 0.25 <= r.ai_score < 0.5]
     
     if high_ai or medium_ai:
         lines.append(f"{Colours.MAGENTA}{'-'*70}{Colours.NC}")
-        lines.append(f"{Colours.MAGENTA}AI-GENERATED CODE INDICATORS:{Colours.NC}")
+        lines.append(f"{Colours.MAGENTA}LEXICAL STYLE PATTERNS (UNCALIBRATED INDEX):{Colours.NC}")
         lines.append(f"{Colours.MAGENTA}{'-'*70}{Colours.NC}")
         
         if high_ai:
-            lines.append(f"\n{Colours.RED}HIGH LIKELIHOOD (score >= 0.5):{Colours.NC}")
+            lines.append(f"\n{Colours.RED}HISTORICAL INDEX >= 0.5:{Colours.NC}")
             for r in high_ai:
-                lines.append(f"  * {r.student}: {r.ai_score:.0%} AI likelihood")
+                lines.append(f"  * {r.student}: {r.ai_score:.0%} legacy style index")
                 lines.append(f"    File: {r.filepath.name}")
                 pattern_summary = {}
                 for p, _ in r.patterns_found:
@@ -414,21 +426,21 @@ def generate_report(
                 lines.append(f"    Patterns: {dict(pattern_summary)}")
         
         if medium_ai:
-            lines.append(f"\n{Colours.YELLOW}MEDIUM LIKELIHOOD (0.25 <= score < 0.5):{Colours.NC}")
+            lines.append(f"\n{Colours.YELLOW}HISTORICAL INDEX 0.25 TO < 0.5:{Colours.NC}")
             for r in medium_ai:
-                lines.append(f"  * {r.student}: {r.ai_score:.0%} AI likelihood")
+                lines.append(f"  * {r.student}: {r.ai_score:.0%} legacy style index")
                 lines.append(f"    File: {r.filepath.name}")
         
         lines.append("")
     else:
-        lines.append(f"{Colours.GREEN}[OK] No significant AI patterns detected{Colours.NC}")
+        lines.append(f"{Colours.GREEN}[OK] No lexical patterns meet the historical display thresholds{Colours.NC}")
         lines.append("")
     
     # Similarity Section
     if not similarity_results:
-        lines.append(f"{Colours.GREEN}[OK] No suspicious similarities detected!{Colours.NC}")
+        lines.append(f"{Colours.GREEN}[OK] No pairs meet the selected similarity threshold{Colours.NC}")
     else:
-        lines.append(f"{Colours.RED}[!] {len(similarity_results)} SUSPICIOUS PAIRS DETECTED{Colours.NC}")
+        lines.append(f"{Colours.RED}[!] {len(similarity_results)} PAIRS AT OR ABOVE THE SELECTED THRESHOLD{Colours.NC}")
         lines.append("")
         
         # Group by severity
@@ -438,7 +450,7 @@ def generate_report(
         
         if exact_copies:
             lines.append(f"{Colours.RED}{'-'*70}{Colours.NC}")
-            lines.append(f"{Colours.RED}EXACT COPIES (100% identical):{Colours.NC}")
+            lines.append(f"{Colours.RED}IDENTICAL AFTER NORMALISATION (not necessarily identical source):{Colours.NC}")
             lines.append(f"{Colours.RED}{'-'*70}{Colours.NC}")
             for r in exact_copies:
                 lines.append(f"  * {r.student1} <-> {r.student2}")
@@ -447,7 +459,7 @@ def generate_report(
         
         if reordered:
             lines.append(f"{Colours.YELLOW}{'-'*70}{Colours.NC}")
-            lines.append(f"{Colours.YELLOW}REORDERED (same lines, different order):{Colours.NC}")
+            lines.append(f"{Colours.YELLOW}SORTED-LINE SIMILARITY DOMINATES (may still differ):{Colours.NC}")
             lines.append(f"{Colours.YELLOW}{'-'*70}{Colours.NC}")
             for r in reordered:
                 lines.append(f"  * {r.student1} <-> {r.student2}: {r.similarity*100:.1f}%")
@@ -466,9 +478,9 @@ def generate_report(
     lines.append("=" * 70)
     lines.append("RECOMMENDATIONS:")
     lines.append("  1. Manually verify pairs marked EXACT")
-    lines.append("  2. For high AI likelihood: ask about code logic during oral")
+    lines.append("  2. Consider common templates, short answers and required syntax before interpretation")
     lines.append("  3. Request explanations for design decisions")
-    lines.append("  4. Use S01_04_ORAL_VERIFICATION_LOG.md for documentation")
+    lines.append("  4. Use S01_04_ORAL_VERIFICATION_GUIDE.md for documentation")
     lines.append("=" * 70)
     
     report = '\n'.join(lines)
@@ -477,10 +489,13 @@ def generate_report(
         # Save JSON version for further processing
         json_data = {
             'generated_at': datetime.now().isoformat(),
-            'total_suspicious_pairs': len(similarity_results),
-            'exact_copies': len([r for r in similarity_results if r.method == 'EXACT']),
-            'ai_high_likelihood': len(high_ai),
-            'ai_medium_likelihood': len(medium_ai),
+            'assessment_status': 'MANUAL_REVIEW_REQUIRED',
+            'penalty': None,
+            'interpretation': 'Descriptive observations only; no authorship probability or misconduct finding.',
+            'pairs_above_threshold': len(similarity_results),
+            'normalised_identical_pairs': len([r for r in similarity_results if r.method == 'EXACT']),
+            'legacy_style_index_ge_0_5': len(high_ai),
+            'legacy_style_index_ge_0_25_lt_0_5': len(medium_ai),
             'similarity_results': [
                 {
                     'student1': r.student1,
@@ -496,7 +511,7 @@ def generate_report(
                 {
                     'student': r.student,
                     'file': str(r.filepath),
-                    'ai_score': r.ai_score,
+                    'legacy_style_index': r.ai_score,
                     'patterns': [{'name': p[0], 'line': p[1]} for p in r.patterns_found],
                 }
                 for r in ai_results if r.ai_score >= 0.25
@@ -510,73 +525,38 @@ def generate_report(
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 S01_05_plagiarism_detector.py <submissions_dir> [--threshold 0.85]")
-        print("\nExample:")
-        print("  python3 S01_05_plagiarism_detector.py ./submissions/")
-        print("  python3 S01_05_plagiarism_detector.py ./homework/ --threshold 0.75")
-        print("\nFeatures:")
-        print("  - Detects exact copies, reordering, and structural similarity")
-        print("  - Identifies AI-generated code patterns")
-        print("  - Generates JSON report for records")
-        sys.exit(1)
-    
-    submissions_dir = Path(sys.argv[1])
-    
-    if not submissions_dir.exists():
-        logger.error(f"Directory '{submissions_dir}' does not exist!")
-        print(f"{Colours.RED}Error: Directory '{submissions_dir}' does not exist!{Colours.NC}")
-        sys.exit(1)
-    
-    # Parse threshold
-    threshold = 0.85
-    if '--threshold' in sys.argv:
-        idx = sys.argv.index('--threshold')
-        if idx + 1 < len(sys.argv):
-            threshold = float(sys.argv[idx + 1])
-    
-    logger.info(f"Scanning {submissions_dir} for similarities and AI patterns...")
-    print(f"{Colours.CYAN}Scanning {submissions_dir} for similarities and AI patterns...{Colours.NC}")
-    print(f"Similarity threshold: {threshold*100:.0f}%\n")
-    
-    # Find all scripts
+    parser = argparse.ArgumentParser(description="Describe submission similarity and lexical style for manual review; no authorship inference or automatic sanctions.")
+    parser.add_argument('submissions_dir', type=Path, help='ROOT/STUDENT/.../*.sh')
+    parser.add_argument('--threshold', type=float, default=0.85, help='Descriptive similarity display threshold, 0..1 (default: 0.85)')
+    parser.add_argument('--output', type=Path, help='Text report path; accompanying JSON uses the same stem')
+    args = parser.parse_args()
+    if not args.submissions_dir.is_dir():
+        parser.error(f"Submission directory does not exist: {args.submissions_dir}")
+    if not math.isfinite(args.threshold) or not 0 <= args.threshold <= 1:
+        parser.error('--threshold must be a finite number in [0, 1]')
+    submissions_dir = args.submissions_dir.resolve()
     scripts = find_all_scripts(submissions_dir)
-    logger.info(f"Found {len(scripts)} .sh scripts")
-    print(f"Found {len(scripts)} .sh scripts")
-    
-    if len(scripts) < 1:
-        logger.warning("No scripts found for analysis.")
-        print("No scripts found for analysis.")
-        sys.exit(0)
-    
-    # AI pattern analysis
-    logger.info("Analysing AI patterns...")
-    print("\n>>> Analysing AI patterns...")
-    ai_results = analyse_ai_patterns(scripts)
-    ai_count = len([r for r in ai_results if r.ai_score >= 0.25])
-    logger.info(f"Found {ai_count} scripts with AI indicators")
-    print(f"  Found {ai_count} scripts with AI indicators")
-    
-    # Similarity comparison (only if multiple scripts)
-    similarity_results = []
-    if len(scripts) >= 2:
-        logger.info("Comparing pairs for similarity...")
-        print("\n>>> Comparing pairs for similarity...")
-        similarity_results = compare_all_pairs(scripts, threshold)
-    
-    # Generate report
-    report_path = Path(f'plagiarism_report_{datetime.now():%Y%m%d_%H%M%S}.txt')
+    if not scripts:
+        parser.error('No .sh files found; no comparison evidence is available')
+    if args.output and args.output.suffix.lower() == '.json':
+        parser.error('--output is a text-report path; use .txt (the companion .json is generated separately)')
+    try:
+        for script in scripts:
+            extract_student_id(script, submissions_dir)
+            script.read_text(encoding='utf-8')  # fail before producing a false empty/complete report
+    except (ValueError, OSError, UnicodeError) as exc:
+        parser.error(str(exc))
+    print(f"Found {len(scripts)} scripts. Similarity display threshold: {args.threshold:.0%}")
+    ai_results = analyse_ai_patterns(scripts, submissions_dir)
+    similarity_results = compare_all_pairs(scripts, args.threshold, submissions_dir)
+    report_path = args.output or Path(f'similarity_observations_{datetime.now():%Y%m%d_%H%M%S}.txt')
     report = generate_report(similarity_results, ai_results, report_path)
+    report_path.write_text(re.sub(r'\x1b\[[0-9;]*m', '', report), encoding='utf-8')
     print(report)
-    
-    report_path.write_text(report)
-    logger.info(f"Report saved: {report_path}")
-    print(f"\n[OK] Report saved: {report_path}")
-    
-    # Exit code for CI (non-zero if issues found)
-    has_issues = bool(similarity_results) or any(r.ai_score >= 0.5 for r in ai_results)
-    sys.exit(1 if has_issues else 0)
+    print(f"Report saved: {report_path}")
+    # Successful descriptive analysis is not a CI misconduct judgement.
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

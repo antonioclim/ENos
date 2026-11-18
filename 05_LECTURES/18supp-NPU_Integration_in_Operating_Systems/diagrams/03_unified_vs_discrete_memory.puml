@@ -34,9 +34,9 @@ rectangle "DISCRETE MEMORY\n(NVIDIA Datacenter)" as discrete #FFEBEE {
 }
 
 note bottom of unified
-  ✓ Zero-copy
-  ✓ Energy efficiency
-  ✗ Limited bandwidth
+  May avoid explicit CPU/GPU copies
+  Energy depends on workload/device
+  Bandwidth depends on memory system
 end note
 
 note bottom of discrete
@@ -45,4 +45,5 @@ note bottom of discrete
   ✗ Transfer overhead
 end note
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

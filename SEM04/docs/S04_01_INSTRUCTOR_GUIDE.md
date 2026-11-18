@@ -5,7 +5,7 @@
 
 
 > Document for instructors  
-> Total duration: 100 minutes (2 × 50 min + break)  
+> Timing: 100 contact minutes + 10-minute break = 110 elapsed. A 100-minute total slot needs an explicitly reduced route.  
 > Seminar type: Text Processing - Power Tools  
 > Level: Intermediate-Advanced
 
@@ -13,14 +13,14 @@
 
 ## Table of Contents
 
-1. [Session Objectives](#-session-objectives)
-2. [Special Warnings](#️-special-warnings)
-3. [Pre-Seminar Preparation](#-pre-seminar-preparation)
-4. [First Part Timeline (50 min)](#️-detailed-timeline---first-part-50-min)
-5. [Break](#-break-10-minutes)
-6. [Second Part Timeline (50 min)](#️-detailed-timeline---second-part-50-min)
-7. [Common Troubleshooting](#-common-troubleshooting)
-8. [Additional Materials](#-additional-materials)
+1. [Session Objectives](#session-objectives)
+2. [Special Warnings](#special-warnings)
+3. [Pre-Seminar Preparation](#pre-seminar-preparation)
+4. [First Part Timeline (50 min)](#detailed-timeline---first-part-50-min)
+5. [Break](#break-10-minutes)
+6. [Second Part Timeline (50 min)](#detailed-timeline---second-part-50-min)
+7. [Common Troubleshooting](#common-troubleshooting)
+8. [Additional Materials](#additional-materials)
 
 ---
 
@@ -41,6 +41,11 @@ Upon completion of the seminar, students will be able to:
 
 ## SPECIAL WARNINGS
 
+The retained personal percentages, speed comparisons and cohort anecdotes do not
+have supporting measurements in this package. They express author experience,
+not established benchmarks or evidence of misconduct. Instructional/projection
+copies should separate these notes from commands and answer keys.
+
 ### Material Density
 
 > Pitfall: This seminar is THE MOST DENSE in the entire course!
@@ -58,22 +63,26 @@ sed: s/// d p i a               hold space, advanced addressing
 awk: $0 $1 NR NF BEGIN END      custom functions, getline, 2D arrays
 nano: save, exit, search        advanced .nanorc configuration
 
-> 💡 A student once asked me why we cannot just use the graphical interface for everything — the answer is that the terminal is 10 times faster for repetitive operations.
 
 ```
+
+> 💡 Use the terminal to express and repeat command sequences. Compare tools on a defined task before making a performance claim.
+
 
 ### Recommended Order (Priority)
 
 ```
 1. Regex fundamentals      ████████████████████ CRITICAL
 
-> 💡 Experience shows that debugging is 80% careful reading and 20% writing new code.
 
 2. grep detailed          ████████████████████ CRITICAL
 3. sed basics              ███████████████      HIGH
 4. awk basics              ███████████████      HIGH
 5. nano quick intro        █████                MEDIUM
 ```
+
+> 💡 Experience shows that debugging is 80% careful reading and 20% writing new code.
+
 
 ### Error #1 to Avoid
 
@@ -88,7 +97,7 @@ nano: save, exit, search        advanced .nanorc configuration
 ```
 □ Terminal open and visible on projector
 □ Font size increased (minimum 16pt) for visibility
-□ Sample data prepared in ~/demo_sem4/data/
+□ Sample data prepared in the current DEMO_DIR/data/
 □ Demo scripts tested
 □ Cheat sheet displayable during break
 □ regex101.com open in a tab
@@ -97,12 +106,20 @@ nano: save, exit, search        advanced .nanorc configuration
 ### Work Environment Setup
 
 ```bash
-# Create the working directory
-mkdir -p ~/demo_sem4/data
-cd ~/demo_sem4
+# Create a unique owned working directory for this exact fixture.
+DEMO_DIR=$(mktemp -d "${TMPDIR:-/tmp}/enos-s04-instructor.XXXXXX") || exit 1
+export DEMO_DIR
+mkdir -- "$DEMO_DIR/data" || exit 1
+cd -- "$DEMO_DIR" || exit 1
 ```
 
 ### Sample Data Generation (CRITICAL!)
+
+These five fixed files are the instructor fixture, distinct from the random
+setup-script dataset and committed reference fixtures. Keep that provenance when
+checking expected counts. The CSV contract is unquoted comma-separated fields
+with one header and numeric salaries. The simple log format places status in
+field 9 and bytes in field 10; IP/email regexes demonstrate lexical shapes.
 
 Run this script BEFORE the seminar:
 
@@ -110,7 +127,7 @@ Run this script BEFORE the seminar:
 #!/bin/bash
 # Generates all necessary sample files
 
-cd ~/demo_sem4/data
+cd -- "$DEMO_DIR/data" || exit 1
 
 #
 # 1. access.log - Simulated web server log
@@ -230,7 +247,9 @@ ls -la
 echo "=== Tools Verification ==="
 for cmd in grep sed awk nano; do
     printf "%-8s: " "$cmd"
-    $cmd --version 2>&1 | head -1
+    if command -v "$cmd" >/dev/null; then
+        case $cmd in awk) "$cmd" -W version 2>&1 | head -1 ;; *) "$cmd" --version 2>&1 | head -1 ;; esac
+    else printf 'NOT INSTALLED\n'; fi
 done
 ```
 
@@ -253,28 +272,26 @@ echo ""
 
 # Show the raw file (first 5 lines)
 echo "📄 Log content (first 5 lines):"
-head -5 data/access.log
+head -5 "$DEMO_DIR/data/access.log"
 echo "..."
 echo ""
 
 # Magic one-liner
 echo "🎯 Who tried to access /admin?"
-grep '/admin' data/access.log | \
+grep '/admin' "$DEMO_DIR/data/access.log" | \
     awk '{print $1}' | \
     sort | uniq -c | \
     sort -rn
 
 echo ""
-echo "✨ We found the suspicious IPs in less than 1 second!"
+echo "✨ These IPs requested /admin in the synthetic fixture; intent and elapsed time require separate evidence."
 echo "💡 This is what you can do with grep + awk + sort + uniq!"
-
-*(`awk` is surprisingly powerful for text processing. It is worth investing the time to learn it.)*
 
 ```
 
 Notes for instructor:
 - Run the command and show the result
-- Emphasise that MANUALLY it would have taken minutes
+- Explain the pipeline and inspect the exact output; do not invent elapsed-time comparisons
 - Mention that we will learn each component
 - Leave students curious about how it works
 
@@ -287,7 +304,7 @@ Transition: "To understand how it works, we need to start with the fundamentals:
 #### Segment 1: Basic Metacharacters (3 min)
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$DEMO_DIR/data" || exit 1
 
 # Show the test file
 cat test.txt
@@ -317,11 +334,11 @@ grep '^c' test.txt
 
 # PREDICTION: "What does $ do?"
 grep 't$' test.txt
-# Finds: cat, cart, cast (end with t)
+# Finds: cat, cut, cot, cart, cast and the cat sat on the mat (all end with t)
 
 # COMBINATION: Line that starts with c AND ends with t
 grep '^c.*t$' test.txt
-# Finds: cat, cart, cast
+# Finds: cat, cut, cot, cart, cast
 ```
 
 #### Segment 3: Character Classes (2 min)
@@ -430,7 +447,7 @@ grep '.*\.txt' files.list
 #### Segment 1: Essential Options (8 min)
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$DEMO_DIR/data" || exit 1
 
 # -i: case insensitive
 echo "=== Case insensitive ==="
@@ -446,7 +463,7 @@ echo ""
 echo "=== With line numbers ==="
 grep -n 'IT' employees.csv
 
-# -c: count matches (NOT characters!)
+# -c: count selected lines (not all occurrences)
 echo ""
 echo "=== How many requests with code 200? ==="
 grep -c '"[[:space:]]200[[:space:]]' access.log
@@ -491,7 +508,7 @@ grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | sort -u
 
 # Extract emails
 echo ""
-echo "=== Extract valid emails ==="
+echo "=== Extract email-shaped substrings (limited teaching grammar) ==="
 grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' emails.txt
 
 # Find lines with HTTP errors (4xx, 5xx)
@@ -524,7 +541,7 @@ Display on screen:
 ║                                                                   ║
 ║  PAIR PROGRAMMING! Switch at minute 5!                            ║
 ║                                                                   ║
-║  Using the files in ~/demo_sem4/data/, solve:                     ║
+║  Using the files in the current DEMO_DIR/data/, solve:                     ║
 ║                                                                   ║
 ║  1. Find all lines in access.log with code 200                    ║
 ║                                                                   ║
@@ -562,7 +579,7 @@ grep -vE '^(#|$)' config.txt
 grep -c ',IT,' employees.csv
 
 # 5. BONUS: Ports
-grep -oE 'port=[0-9]+' config.txt
+grep -oE 'port=[0-9]+' config.txt | cut -d= -f2
 # OR
 grep 'port' config.txt | grep -oE '[0-9]+'
 ```
@@ -667,7 +684,7 @@ Quick questions (raised hands):
 #### Segment 1: Basic Substitution (6 min)
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$DEMO_DIR/data" || exit 1
 
 # Simple substitution
 echo "=== Simple substitution ==="
@@ -725,7 +742,8 @@ sed '1i\# MODIFIED FILE' config.txt | head -3
 ```bash
 # Pitfall: In-place editing (demonstration on copy)
 echo "=== IN-PLACE EDITING ==="
-cp config.txt config_test.txt
+[[ ! -e config_test.txt && ! -e config_test.txt.bak ]] || { echo "Use a fresh owned exercise directory" >&2; exit 1; }
+cp -- config.txt config_test.txt || exit 1
 
 # Without backup (DANGEROUS!)
 # sed -i 's/localhost/127.0.0.1/' config_test.txt
@@ -754,7 +772,7 @@ echo "John Smith" | sed 's/\([A-Za-z]*\) \([A-Za-z]*\)/\2, \1/'
 #### Segment 1: Fields and print (6 min)
 
 ```bash
-cd ~/demo_sem4/data
+cd -- "$DEMO_DIR/data" || exit 1
 
 echo "=== AWK FIELDS ==="
 
@@ -799,7 +817,7 @@ awk -F',' '$3 == "IT"' employees.csv
 
 echo ""
 echo "--- Salary > 5500 ---"
-awk -F',' '$4 > 5500' employees.csv
+awk -F',' 'NR>1 && $4 ~ /^[0-9]+$/ && $4 > 5500' employees.csv
 
 # Calculations with BEGIN/END
 echo ""
@@ -810,7 +828,7 @@ awk -F',' 'NR > 1 { sum += $4 } END { print "Total:", sum }' employees.csv
 
 echo ""
 echo "--- Average salary ---"
-awk -F',' 'NR > 1 { sum += $4; count++ } END { print "Average:", sum/count }' employees.csv
+awk -F',' 'NR > 1 { sum += $4; count++ } END { if(count) print "Average:", sum/count; else print "Average: undefined (0 records)" }' employees.csv
 
 # printf formatting
 echo ""
@@ -864,7 +882,7 @@ Solutions:
 awk -F',' '$3 == "HR" { print $2 }' employees.csv
 
 # 2. Average salary
-awk -F',' 'NR > 1 { sum += $4; count++ } END { print sum/count }' employees.csv
+awk -F',' 'NR > 1 { sum += $4; count++ } END { if(count) print sum/count; else print "undefined (0 records)" }' employees.csv
 
 # 3. Highest salary
 awk -F',' 'NR>1 && $4>max {max=$4; name=$2} END{print name, max}' employees.csv
@@ -876,14 +894,14 @@ awk -F',' 'NR>1 && $4>max {max=$4; name=$2} END{print name, max}' employees.csv
 
 ```bash
 # Open nano
-nano /tmp/test_script.sh
+nano "$DEMO_DIR/test_script.sh"
 ```
 
 Demonstrate on screen (show the commands at the bottom):
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  GNU nano 7.2                    /tmp/test_script.sh               │
+│  GNU nano 7.2                    [owned path]/test_script.sh               │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  #!/bin/bash                                                        │
@@ -937,7 +955,8 @@ Key message: "Nano does not require memorisation - the commands are always visib
 Verification example:
 ```bash
 # A possible regex generated by LLM:
-regex='07[0-9]{2}[[:space:]]?[0-9]{3}[[:space:]]?[0-9]{3}'
+regex='^(07[0-9]{8}|07[0-9]{2} [0-9]{3} [0-9]{3})$'
+# Whole-line format check only, not evidence that a telephone number is allocated.
 
 # Testing
 echo "0722 123 456" | grep -E "$regex"   # Valid
@@ -962,7 +981,7 @@ echo "0622 123 456" | grep -E "$regex"   # Invalid (not 07)
 ║  3. What would you like to practise more:                         ║
 ║     □ Regex    □ GREP    □ SED    □ AWK                          ║
 ║                                                                   ║
-║  📝 Assignment: Complete S04_01_TEMA.md by next week             ║
+║  📝 Assignment: Complete S04_01_HOMEWORK.md by next week             ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
@@ -979,7 +998,7 @@ echo "0622 123 456" | grep -E "$regex"   # Invalid (not 07)
 | awk: concatenated fields | Missing comma | `print $1, $2` (with comma) |
 | awk: $0 vs $1 confusion | $0 = entire line | $1 = first field |
 | Regex too greedy | .* takes too much | Restructure pattern |
-| nano: does not save | CTRL+S is wrong | CTRL+O for Write Out |
+| nano: save shortcut | Nano 7.x supports CTRL+S (Save) and CTRL+O (Write Out) | Inspect installed help and output path; CTRL+T is Execute |
 | grep -o does not work | Incorrect pattern | Test without -o first |
 
 ---
@@ -991,12 +1010,17 @@ echo "0622 123 456" | grep -E "$regex"   # Invalid (not 07)
 - `docs/S04_08_SPECTACULAR_DEMOS.md` - Additional demos
 
 ### For Quick Reference
-- `docs/S04_09_VISUAL_CHEAT_SHEET.md` - Printable one-pager
+- `docs/S04_09_VISUAL_CHEAT_SHEET.md` - Quick reference (verify pagination in the chosen print layout)
 
 ### For Evaluation
 - `docs/S04_03_PEER_INSTRUCTION.md` - All PI questions
-- `homework/S04_01_TEMA.md` - Assignment for students
+- `homework/S04_01_HOMEWORK.md` - Assignment for students
 
 ---
 
 *Instructor guide for Seminar 4 of Operating Systems | Bucharest University of Economic Studies - CSIE*
+
+
+## Retained Author Notes
+
+*(`awk` is surprisingly powerful for text processing. It is worth investing the time to learn it.)*

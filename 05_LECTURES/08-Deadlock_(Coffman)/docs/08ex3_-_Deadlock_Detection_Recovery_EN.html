@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deadlock Detection and Recovery | Operating Systems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); }
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -86,7 +86,84 @@
         .timeline-item:last-child::before {
             display: none;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="min-h-screen text-stone-900">
     <!-- Header -->
@@ -98,7 +175,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-stone-800">Deadlock Detection and Recovery</h1>
-                    <p class="text-xs text-stone-500">Strategii de Rezolvare</p>
+                    <p class="text-xs text-stone-500">Recovery Strategies</p>
                 </div>
             </div>
             <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
@@ -128,7 +205,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-cubes text-amber-500"></i>
-                            Resurse in Sistem
+                            System Resources
                         </h2>
                         <div id="deadlockIndicator" class="hidden deadlock-indicator px-3 py-1 bg-red-500 text-white rounded-full text-sm font-bold">
                             🔒 DEADLOCK!
@@ -144,7 +221,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-cogs text-blue-500"></i>
-                            Procese
+                            Processes
                         </h2>
                         <span id="processStats" class="text-sm text-stone-500"></span>
                     </div>
@@ -157,7 +234,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-search text-purple-500"></i>
-                        Algoritm de Detectare
+                        Detection Algorithm
                     </h3>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -174,7 +251,7 @@
                         </div>
                     </div>
                     <div id="detectionLog" class="bg-stone-900 rounded-lg p-3 text-xs mono text-green-300 h-32 overflow-y-auto">
-                        <div class="text-stone-500">// Apasa "Detectare" for a rula algoritmul</div>
+                        <div class="text-stone-500">// Press "Detect Deadlock" to run the algorithm</div>
                     </div>
                 </div>
 
@@ -182,10 +259,10 @@
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-history text-green-500"></i>
-                        Istoric Recuperare
+                        Recovery History
                     </h3>
                     <div id="recoveryTimeline" class="space-y-4">
-                        <div class="text-sm text-stone-400 italic">Nu s-au efectuat actions de recuperare inca.</div>
+                        <div class="text-sm text-stone-400 italic">No recovery actions have been performed yet.</div>
                     </div>
                 </div>
             </div>
@@ -202,7 +279,7 @@
                             <i class="fas fa-exclamation-triangle mr-1"></i> Detect Deadlock
                         </button>
                         <button onclick="detectDeadlockAnimated()" class="btn-action w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-film mr-1"></i> Detectare Animata
+                            <i class="fas fa-film mr-1"></i> Animated Detection
                         </button>
                     </div>
                 </div>
@@ -210,32 +287,32 @@
                 <!-- Recovery Controls -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-first-aid text-green-500 mr-2"></i>Strategii de Recuperare
+                        <i class="fas fa-first-aid text-green-500 mr-2"></i>Recovery Strategies
                     </h3>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">1. Terminare Procese</label>
+                            <label class="text-xs text-stone-500 block mb-1">1. Process Termination</label>
                             <select id="terminationStrategy" class="w-full p-2 border border-stone-300 rounded text-sm mb-2">
-                                <option value="all">Finish toate procesele deadlocked</option>
-                                <option value="one">Finish cate unul (cost minim)</option>
-                                <option value="priority">after prioritate (low first)</option>
+                                <option value="all">Terminate all deadlocked processes</option>
+                                <option value="one">Terminate one at a time (minimum model cost)</option>
+                                <option value="priority">By priority (lowest first)</option>
                             </select>
                             <button onclick="recoverByTermination()" id="btnTerminate" disabled class="btn-action w-full p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition-colors">
-                                <i class="fas fa-skull mr-1"></i> Aplica Terminare
+                                <i class="fas fa-skull mr-1"></i> Apply Termination
                             </button>
                         </div>
                         <div>
-                            <label class="text-xs text-stone-500 block mb-1">2. Preemptare Resurse</label>
+                            <label class="text-xs text-stone-500 block mb-1">2. Resource Preemption</label>
                             <select id="preemptionStrategy" class="w-full p-2 border border-stone-300 rounded text-sm mb-2">
-                                <option value="min">Preempteaza minim necesar</option>
-                                <option value="fifo">FIFO (cel mai old request)</option>
+                                <option value="min">Preempt the minimum needed in this model</option>
+                                <option value="fifo">FIFO (oldest request)</option>
                             </select>
                             <button onclick="recoverByPreemption()" id="btnPreempt" disabled class="btn-action w-full p-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded text-sm transition-colors">
-                                <i class="fas fa-hand-paper mr-1"></i> Aplica Preemptare
+                                <i class="fas fa-hand-paper mr-1"></i> Apply Preemption
                             </button>
                         </div>
                         <button onclick="recoverAutomatic()" id="btnAutoRecover" disabled class="btn-action w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium">
-                            <i class="fas fa-magic mr-1"></i> Recuperare Automata
+                            <i class="fas fa-magic mr-1"></i> Automatic Recovery
                         </button>
                     </div>
                 </div>
@@ -243,11 +320,11 @@
                 <!-- Scenarios -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarii
+                        <i class="fas fa-flask text-purple-500 mr-2"></i>Scenarios
                     </h3>
                     <div class="space-y-2">
                         <button onclick="loadScenario('simple')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
-                            <i class="fas fa-lock text-red-500 mr-2"></i>Deadlock Simplu (2P, 2R)
+                            <i class="fas fa-lock text-red-500 mr-2"></i>Simple Deadlock (2P, 2R)
                         </button>
                         <button onclick="loadScenario('complex')" class="btn-action w-full p-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-sm text-left">
                             <i class="fas fa-lock text-red-500 mr-2"></i>Complex Deadlock (4P, 3R)
@@ -259,7 +336,7 @@
                             <i class="fas fa-check-circle text-green-500 mr-2"></i>No Deadlock
                         </button>
                         <button onclick="resetSystem()" class="w-full p-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded text-sm transition-colors">
-                            <i class="fas fa-redo mr-1"></i> Reset Complet
+                            <i class="fas fa-redo mr-1"></i> Full Reset
                         </button>
                     </div>
                 </div>
@@ -267,7 +344,7 @@
                 <!-- Costs Info -->
                 <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-200 p-4">
                     <h3 class="text-sm font-semibold text-amber-800 mb-3">
-                        <i class="fas fa-coins text-amber-500 mr-2"></i>Costuri Recuperare
+                        <i class="fas fa-coins text-amber-500 mr-2"></i>Recovery Costs
                     </h3>
                     <div class="space-y-2 text-xs text-amber-700">
                         <div class="flex justify-between p-2 bg-white/50 rounded">
@@ -275,11 +352,11 @@
                             <span class="font-bold">Cost = Priority × Resources</span>
                         </div>
                         <div class="flex justify-between p-2 bg-white/50 rounded">
-                            <span>Preemptare resursa:</span>
+                            <span>Resource preemption:</span>
                             <span class="font-bold">Cost = Rollback time</span>
                         </div>
                         <div class="flex justify-between p-2 bg-white/50 rounded">
-                            <span>Total recuperari:</span>
+                            <span>Total recoveries:</span>
                             <span id="totalCost" class="font-bold">0</span>
                         </div>
                     </div>
@@ -288,15 +365,15 @@
                 <!-- Algorithm Explanation -->
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
                     <h3 class="text-sm font-semibold text-stone-700 mb-3">
-                        <i class="fas fa-book text-blue-500 mr-2"></i>Algoritm Detectare
+                        <i class="fas fa-book text-blue-500 mr-2"></i>Detection Algorithm
                     </h3>
                     <ol class="text-xs text-stone-600 space-y-1 list-decimal list-inside">
                         <li>Work = Available</li>
                         <li>Finish[i] = (Allocation[i] == 0)</li>
                         <li>find i: Finish[i]=false and Request[i] ≤ Work</li>
                         <li>Work = Work + Allocation[i], Finish[i] = true</li>
-                        <li>Repeta pana nu mai gasesti</li>
-                        <li>Finish[i] = false → P[i] este in deadlock</li>
+                        <li>Repeat until no further process can complete</li>
+                        <li>An unfinished process holding resources belongs to the detected deadlocked set</li>
                     </ol>
                 </div>
             </div>
@@ -307,22 +384,22 @@
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <i class="fas fa-skull text-red-500"></i>
-                    Terminare Procese
+                    Process Termination
                 </h3>
                 <div class="space-y-3 text-sm text-stone-600">
                     <div class="p-3 bg-red-50 rounded-lg">
-                        <strong>Optiunea 1: Finish TOATE procesele deadlocked</strong>
+                        <strong>Option 1: Terminate all deadlocked processes</strong>
                         <ul class="list-disc list-inside mt-1 text-xs">
-                            <li>Simplu and garantat to functioneze</li>
-                            <li>Cost maxim - pierdere totala a progresului</li>
+                            <li>Releases all their model resources; real recovery also requires resource consistency</li>
+                            <li>Loses every terminated process’s unsaved progress</li>
                         </ul>
                     </div>
                     <div class="p-3 bg-amber-50 rounded-lg">
-                        <strong>Optiunea 2: Finish cate unul</strong>
+                        <strong>Option 2: Terminate one at a time</strong>
                         <ul class="list-disc list-inside mt-1 text-xs">
-                            <li>Finish un proces, re-check deadlock</li>
-                            <li>Mai complex, dar cost potential mai mic</li>
-                            <li>Criteriu: prioritate, resurse detinute, timp executie</li>
+                            <li>Terminate one process, then check for deadlock again</li>
+                            <li>More complex, but potentially less recovery cost</li>
+                            <li>Criteria: priority, held resources and execution time</li>
                         </ul>
                     </div>
                 </div>
@@ -331,20 +408,20 @@
             <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                     <i class="fas fa-hand-paper text-amber-500"></i>
-                    Preemptare Resurse
+                    Resource Preemption
                 </h3>
                 <div class="space-y-3 text-sm text-stone-600">
                     <div class="p-3 bg-blue-50 rounded-lg">
-                        <strong>Selectare Victima</strong>
-                        <p class="text-xs mt-1">Alege procesul de la care to preemptezi resursa bazat pe: cost minim, prioritate, timp de waiting.</p>
+                        <strong>Victim Selection</strong>
+                        <p class="text-xs mt-1">Choose a victim using an explicit criterion such as recovery cost, priority or waiting time.</p>
                     </div>
                     <div class="p-3 bg-purple-50 rounded-lg">
                         <strong>Rollback</strong>
-                        <p class="text-xs mt-1">Procesul victima must readus la o stare safe (checkpoint). If nu exists checkpoint → terminare.</p>
+                        <p class="text-xs mt-1">Restore the victim to a consistent checkpoint when supported; otherwise termination may be required. Some resources cannot safely be preempted.</p>
                     </div>
                     <div class="p-3 bg-green-50 rounded-lg">
                         <strong>Starvation Prevention</strong>
-                        <p class="text-xs mt-1">Include numarul de rollback-uri in cost for a preveni ca acelasi proces to fie victima mereu.</p>
+                        <p class="text-xs mt-1">Account for previous rollbacks when selecting victims so the policy does not repeatedly penalise the same process.</p>
                     </div>
                 </div>
             </div>
@@ -358,7 +435,44 @@
         </div>
     </footer>
 
-    <script>
+    <script>let enosDetection=null;
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // ==================== State ====================
         let resources = [];
         let processes = [];
@@ -420,7 +534,7 @@
                     
                 case 'complex':
                     resources = [
-                        new Resource('R1', 'R1', 2),
+                        new Resource('R1', 'R1', 1),
                         new Resource('R2', 'R2', 2),
                         new Resource('R3', 'R3', 1)
                     ];
@@ -446,28 +560,12 @@
                     break;
                     
                 case 'partial':
-                    resources = [
-                        new Resource('R1', 'R1', 2),
-                        new Resource('R2', 'R2', 2)
-                    ];
-                    processes = [
-                        new Process('P1', 'P1', 3),
-                        new Process('P2', 'P2', 2),
-                        new Process('P3', 'P3', 1)
-                    ];
-                    // P1 and P2 in deadlock, P3 can finish
-                    processes[0].allocation = { R1: 1 };
-                    processes[0].request = { R2: 1 };
-                    processes[1].allocation = { R2: 1 };
-                    processes[1].request = { R1: 1 };
-                    processes[2].allocation = { R1: 1 };
-                    processes[2].request = {};
-                    
-                    resources[0].available = 0;
-                    resources[1].available = 1;
-                    break;
-                    
-                case 'safe':
+ resources=[new Resource('R1','R1',1),new Resource('R2','R2',1),new Resource('R3','R3',1)];
+ processes=[new Process('P1','P1',3),new Process('P2','P2',2),new Process('P3','P3',1)];
+ processes[0].allocation={R1:1};processes[0].request={R2:1};
+ processes[1].allocation={R2:1};processes[1].request={R1:1};
+ processes[2].allocation={R3:1};processes[2].request={};break;
+                    case 'safe':
                     resources = [
                         new Resource('R1', 'R1', 3),
                         new Resource('R2', 'R2', 2)
@@ -486,11 +584,13 @@
                     break;
             }
             
-            renderAll();
+            resources.forEach(r=>r.available=r.total-processes.reduce((sum,p)=>sum+(p.allocation[r.id]||0),0));
+            enosDetection=null;renderAll();
             log(`Scenariu "${type}" loaded.`);
         }
 
         function resetSystem() {
+            enosTimers.cancel();
             resources = [];
             processes = [];
             deadlockedProcesses = [];
@@ -598,7 +698,7 @@
 
         function renderWorkVector() {
             const container = document.getElementById('workVector');
-            const available = resources.map(r => r.available);
+            const available = enosDetection ? enosDetection.work : resources.map(r => r.available);
             container.innerHTML = resources.map((r, i) => `
                 <div class="flex flex-col items-center">
                     <span class="text-xs text-stone-500">${r.name}</span>
@@ -609,8 +709,8 @@
 
         function renderFinishArray() {
             const container = document.getElementById('finishArray');
-            container.innerHTML = processes.map(p => {
-                const finished = p.isTerminated || !p.isDeadlocked;
+            container.innerHTML = processes.map((p,i) => {
+                const finished = enosDetection ? enosDetection.finish[i] : (p.isTerminated || Object.values(p.allocation).every(v=>v===0));
                 return `
                     <div class="flex flex-col items-center">
                         <span class="text-xs text-stone-500">${p.name}</span>
@@ -623,7 +723,7 @@
         function renderRecoveryTimeline() {
             const container = document.getElementById('recoveryTimeline');
             if (recoveryHistory.length === 0) {
-                container.innerHTML = '<div class="text-sm text-stone-400 italic">Nu s-au efectuat actions de recuperare inca.</div>';
+                container.innerHTML = '<div class="text-sm text-stone-400 italic">No recovery actions have been performed yet.</div>';
                 return;
             }
             
@@ -658,14 +758,14 @@
                 document.getElementById('btnTerminate').disabled = false;
                 document.getElementById('btnPreempt').disabled = false;
                 document.getElementById('btnAutoRecover').disabled = false;
-                showBanner('deadlock', 'DEADLOCK DETECTAT!', 
+                showBanner('deadlock', 'DEADLOCK DETECTED', 
                     `Processes in deadlock: ${deadlockedProcesses.join(', ')}`);
             } else {
                 document.getElementById('deadlockIndicator').classList.add('hidden');
                 document.getElementById('btnTerminate').disabled = true;
                 document.getElementById('btnPreempt').disabled = true;
                 document.getElementById('btnAutoRecover').disabled = true;
-                showBanner('safe', 'No Deadlock', 'Sistemul este intr-o stare safe.');
+                showBanner('safe', 'No Deadlock', 'No current deadlock was detected under the displayed outstanding requests.');
             }
         }
 
@@ -685,11 +785,11 @@
                 document.getElementById('btnTerminate').disabled = false;
                 document.getElementById('btnPreempt').disabled = false;
                 document.getElementById('btnAutoRecover').disabled = false;
-                showBanner('deadlock', 'DEADLOCK DETECTAT!', 
+                showBanner('deadlock', 'DEADLOCK DETECTED', 
                     `Processes in deadlock: ${deadlockedProcesses.join(', ')}`);
             } else {
                 document.getElementById('deadlockIndicator').classList.add('hidden');
-                showBanner('safe', 'No Deadlock', 'Sistemul este intr-o stare safe.');
+                showBanner('safe', 'No Deadlock', 'No current deadlock was detected under the displayed outstanding requests.');
             }
         }
 
@@ -734,7 +834,7 @@
                         }
                         finish[i] = true;
                         changed = true;
-                        log(`  Work devine [${work.join(', ')}]`);
+                        log(`  Work becomes [${work.join(', ')}]`);
                     }
                 }
             }
@@ -749,11 +849,12 @@
             }
             
             if (deadlocked.length === 0) {
-                log('✓ Nu exists deadlock');
+                log('✓ No deadlock detected');
             } else {
                 log(`✗ Deadlock detected: ${deadlocked.join(', ')}`);
             }
             
+            enosDetection={deadlocked,finish:[...finish],work:[...work]}; renderWorkVector();renderFinishArray();
             return { deadlocked, finish, work };
         }
 
@@ -765,7 +866,7 @@
                 return totalAlloc === 0;
             });
             
-            log('=== ALGORITM DE DETECTARE (ANIMAT) ===');
+            log('=== ANIMATED DETECTION ALGORITHM ===');
             log(`Work initial = [${work.join(', ')}]`);
             await sleep(500);
             
@@ -804,7 +905,7 @@
                         await sleep(400);
                         break;
                     } else {
-                        log(`  ✗ ${p.name} nu may finish acum`);
+                        log(`  ✗ ${p.name} cannot finish now`);
                     }
                 }
             }
@@ -818,20 +919,22 @@
             
             log('\n=== result ===');
             if (deadlocked.length === 0) {
-                log('✓ Nu exists deadlock');
+                log('✓ No deadlock detected');
             } else {
                 log(`✗ Processes in deadlock: ${deadlocked.join(', ')}`);
             }
             
+            enosDetection={deadlocked,finish:[...finish],work:[...work]}; renderWorkVector();renderFinishArray();
             return { deadlocked, finish, work };
         }
 
         // ==================== Recovery ====================
         function recoverByTermination() {
             const strategy = document.getElementById('terminationStrategy').value;
+            const originalCosts=new Map(processes.map(p=>[p.id,p.getCost()]));
             
             if (deadlockedProcesses.length === 0) {
-                showBanner('info', 'Nimic de facut', 'Nu exists procese in deadlock.');
+                showBanner('info', 'No Recovery Needed', 'No deadlocked processes remain.');
                 return;
             }
             
@@ -863,7 +966,7 @@
                 `Strategie: ${strategy}`,
                 terminated.reduce((sum, pid) => {
                     const p = processes.find(proc => proc.id === pid);
-                    return sum + (p ? p.getCost() : 0);
+                    return sum + (originalCosts.get(pid) || 0);
                 }, 0)
             );
             
@@ -884,7 +987,7 @@
 
         function recoverByPreemption() {
             if (deadlockedProcesses.length === 0) {
-                showBanner('info', 'Nimic de facut', 'Nu exists procese in deadlock.');
+                showBanner('info', 'No Recovery Needed', 'No deadlocked processes remain.');
                 return;
             }
             
@@ -892,10 +995,11 @@
             const deadlockedProcs = processes.filter(p => deadlockedProcesses.includes(p.id));
             
             // Sort by cost (lowest first)
-            deadlockedProcs.sort((a, b) => a.getCost() - b.getCost());
+            if(document.getElementById('preemptionStrategy').value!=='fifo') deadlockedProcs.sort((a,b)=>a.getCost()-b.getCost());
             
             const victim = deadlockedProcs[0];
             const preemptedResources = [];
+            const capturedCost=victim.getCost();
             
             // Preempt one resource from victim
             for (const r of resources) {
@@ -903,15 +1007,16 @@
                     const amount = victim.allocation[r.id];
                     r.available += amount;
                     victim.allocation[r.id] = 0;
+                    victim.request[r.id]=(victim.request[r.id]||0)+amount;
                     preemptedResources.push(`${r.id}:${amount}`);
                     break; // Preempt only one
                 }
             }
             
             addRecoveryAction('preempt',
-                `Preemptat de la ${victim.id}: ${preemptedResources.join(', ')}`,
-                'Procesul va trebui to re-ceara resursa',
-                victim.priority
+                `Preempted from ${victim.id}: ${preemptedResources.join(', ')}`,
+                'The process will need to request the resource again',
+                capturedCost
             );
             
             detectDeadlock();
@@ -937,13 +1042,13 @@
                 deadlockedProcs.sort((a, b) => a.getCost() - b.getCost());
                 const victim = deadlockedProcs[0];
                 
-                log(`  Victima selectata: ${victim.id} (cost=${victim.getCost()})`);
-                terminateProcess(victim);
+                log(`  Selected victim: ${victim.id} (cost=${victim.getCost()})`);
+                const capturedCost=victim.getCost();terminateProcess(victim);
                 
                 addRecoveryAction('terminate',
                     `finished automat: ${victim.id}`,
                     `Iteratia ${iterations} - cost minim`,
-                    victim.getCost()
+                    capturedCost
                 );
                 
                 // Re-check
@@ -961,10 +1066,10 @@
                 document.getElementById('btnTerminate').disabled = true;
                 document.getElementById('btnPreempt').disabled = true;
                 document.getElementById('btnAutoRecover').disabled = true;
-                showBanner('safe', 'Recuperare Completa!', 
-                    `Deadlock rezolvat in ${iterations} iteratii. Cost total: ${totalRecoveryCost}`);
+                showBanner('safe', 'Recovery Complete!', 
+                    `Deadlock resolved in ${iterations} iterations. Total model cost: ${totalRecoveryCost}`);
             } else {
-                showBanner('error', 'Recuperare Esuata', 'Nu s-a putut rezolva deadlock-ul.');
+                showBanner('error', 'Recovery Failed', 'The selected action did not resolve the deadlock.');
             }
         }
 
@@ -1025,6 +1130,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadScenario('simple');
         });
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

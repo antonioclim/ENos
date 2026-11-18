@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 Controlled CPU hog (used in scheduling demos).
 

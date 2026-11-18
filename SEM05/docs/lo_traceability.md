@@ -6,6 +6,9 @@
 
 ---
 
+> See [the teaching and assessment contract](TEACHING_CONTRACT.md). Historical frequencies, activity percentages and scoring proposals are retained for author review, not verified outcomes or adopted policy.
+
+
 ## 1. Learning Outcomes
 
 | ID | Learning Outcome | Bloom Level |
@@ -27,22 +30,24 @@
 
 | LO | Main Material | Peer Instruction | Parsons | Live Coding | Sprint Exercises | Quiz |
 |----|---------------|------------------|---------|-------------|------------------|------|
-| **LO1** | §1.1-1.2 | Q1 | P1 | LC1.2 | E1 | q01, q15 |
-| **LO2** | §1.2 | Q1, Q3 | P1 | LC1.2 | E1 | q01, q02, q03 |
-| **LO3** | §1.3 | Q2 | P2 | LC1.3 | E2 | q02 |
-| **LO4** | §2.1 | Q4, Q7 | P3, P6 | LC2.1 | E3 | q04, q07 |
-| **LO5** | §2.2 | Q5 | P4 | LC2.2 | E4 | q05, q16 |
-| **LO6** | §2.3 | Q6 | P3, P6 | LC2.3 | E5 | q06 |
-| **LO7** | §4.1-4.3 | Q8-Q12 | P5, P7, P8 | LC3.1 | E6 | q08-q12, q17, q18 |
-| **LO8** | §5.1-5.2 | Q13, Q14 | P5, P10, P11 | LC3.2 | E7 | q13, q14 |
-| **LO9** | §4.4 | Q9, Q10 | - | LC3.1 | E8 | q09, q10, q12 |
-| **LO10** | §8 | Q15 | P12 | LC4.1 | E9 | q15 |
+| **LO1** | §1.1–1.2 | Q1 | P1 | LC1.2 | Sprint 1.2 | q01, q15 |
+| **LO2** | §1.2 | Q1, Q3 | P1 | LC1.2 | Sprint 1.2 | q01, q03 |
+| **LO3** | §1.3 | Q2 | P2 | LC1.3 | Sprint 1.1–1.3 | q02 |
+| **LO4** | §2.1–2.3 | Q4, Q7 | P4, P6 | LC2.1 | Sprint 2.1 | q04, q07 |
+| **LO5** | §3.1–3.4 | Q5 | P5 | LC2.3 | Sprint 2.2 | q05, q16 |
+| **LO6** | §2.4, §3.3 | Q6 | P4, P6 | LC2.2 | Sprint 2.3 | q06 |
+| **LO7** | §4.1–4.2 | Q8–Q12 | P7, P8 | LC3.2 | Sprint 3.1, 3.3 | q08–q12, q17, q18 |
+| **LO8** | §5.1 | Q13, Q14 | P10 | LC4.1 | Sprint 4.1 | q13, q14 |
+| **LO9** | §4.3–4.4 | Q9, Q10 | P11 (ERR context) | LC3.3 | Sprint 4.2 | q09, q10, q12 |
+| **LO10** | §8 | — | P12 | LC5.1 | Sprint B1 | — (creation assessed through code) |
+
+The entries map relevant content and opportunities to practise. They do not establish measured achievement or that a single-choice question directly assesses creation.
 
 ### Legend
 
 - **Main Material**: Sections from `S05_02_MAIN_MATERIAL.md`
 - **Peer Instruction**: Questions from `S05_03_PEER_INSTRUCTION.md`
-- **Parsons**: Parsons problems (P1-P5 core, P6-P14 extended) from `S05_04_PARSONS_PROBLEMS.md`
+- **Parsons**: Canonical Parsons problems P1–P14 from `S05_04_PARSONS_PROBLEMS.md`
 - **Live Coding**: Sessions from `S05_05_LIVE_CODING_GUIDE.md`
 - **Sprint Exercises**: Exercises from `S05_06_SPRINT_EXERCISES.md`
 - **Quiz**: Questions from `formative/quiz.yaml`
@@ -53,12 +58,11 @@
 
 Each problem includes **distractors** — incorrect lines that test common misconceptions.
 
-**Core Problems (P1-P5):** Essential for all students  
-**Extended Problems (P6-P14):** Available in `S05_04_PARSONS_PROBLEMS.md`
+**Embedded traceability examples (TP1–TP5):** The examples below use a separate namespace. They are not the same numbering as canonical P1–P14 in `S05_04_PARSONS_PROBLEMS.md`.
 
 ---
 
-### P1: Function with Local Variable
+### TP1: Function with Local Variable
 
 **Objective LO1, LO2**: Demonstrate the importance of `local` for variables in functions.
 
@@ -116,7 +120,7 @@ Global: 100
 
 ---
 
-### P2: Function with Return Value via Echo
+### TP2: Function with Return Value via Echo
 
 **Objective LO3**: Using `echo` for returning values.
 
@@ -164,14 +168,14 @@ Sum: 8
 
 **Why distractors are wrong:**
 - `X1`: `return 8` sets `$?=8`, not a usable value
-- `X2`: Spaces around `=` cause syntax error
-- `X3`: Without `$()`, result becomes the literal string "add_numbers"
+- `X2`: Spaces around `=` turn the text into a command invocation rather than an assignment
+- `X3`: `result=add_numbers 5 3` assigns an environment value while trying to execute command `5`; it does not capture the function output.
 
 </details>
 
 ---
 
-### P3: Array Iteration with Quotes
+### TP3: Array Iteration with Quotes
 
 **Objective LO4, LO6**: Correct iteration through arrays with elements containing spaces.
 
@@ -227,7 +231,7 @@ Processing: data three.csv
 
 ---
 
-### P4: Associative Array with declare -A
+### TP4: Associative Array with declare -A
 
 **Objective LO5**: Correct declaration of associative arrays.
 
@@ -285,7 +289,7 @@ Debug: true
 
 ---
 
-### P5: Script with set -euo pipefail and Trap
+### TP5: Script with set -euo pipefail and Trap
 
 **Objective LO7, LO8**: Defensive scripting with error handling.
 
@@ -298,7 +302,7 @@ A) set -euo pipefail
 B) #!/bin/bash
 C) trap cleanup EXIT
 D) echo "Important data" > "$TMPFILE"
-E) cleanup() { rm -f "$TMPFILE"; echo "Cleanup done"; }
+E) TMPFILE=; cleanup() { [[ -z ${TMPFILE:-} ]] || rm -f -- "$TMPFILE"; }
 F) TMPFILE=$(mktemp)
 G) cat "$TMPFILE"
 ```
@@ -306,7 +310,7 @@ G) cat "$TMPFILE"
 #### Distractors (WRONG lines):
 
 ```
-X1) set -e -u -o pipefail       # Valid but less common style
+X1) set +e +u +o pipefail       # Disables the requested options
 X2) trap cleanup                 # Missing the signal (EXIT)
 X3) TMPFILE = $(mktemp)          # Spaces around =
 X4) cleanup { rm -f "$TMPFILE"; }  # Missing () in function definition
@@ -321,7 +325,8 @@ X4) cleanup { rm -f "$TMPFILE"; }  # Missing () in function definition
 #!/bin/bash
 set -euo pipefail
 
-cleanup() { rm -f "$TMPFILE"; echo "Cleanup done"; }
+TMPFILE=
+cleanup() { [[ -z ${TMPFILE:-} ]] || rm -f -- "$TMPFILE"; }
 trap cleanup EXIT
 
 TMPFILE=$(mktemp)
@@ -332,13 +337,12 @@ cat "$TMPFILE"
 **Output:**
 ```
 Important data
-Cleanup done
 ```
 
 **Key point**: 
 - `set -euo pipefail` activates strict mode
-- `trap cleanup EXIT` guarantees cleanup even on errors
-- The cleanup function must be defined BEFORE trap
+- `trap cleanup EXIT` handles owned-resource cleanup on shell exit, not SIGKILL or machine failure
+- The function must exist when the handler runs; defining it before registration avoids an early-exit gap.
 
 **Why distractors are wrong:**
 - `X2`: trap requires the signal (EXIT, ERR, INT, etc.)
@@ -349,24 +353,24 @@ Cleanup done
 
 ---
 
-## 4. Targeted Misconceptions Summary
+## 4. Misconceptions Targeted by the Practice Activities
 
-| Parsons | Targeted Misconception | Estimated Frequency |
-|---------|------------------------|---------------------|
-| P1 | Variables are local by default | 80% |
-| P1 | Spaces around = are permitted | 70% |
-| P2 | return returns values as in other languages | 75% |
-| P2 | $() is optional for command substitution | 60% |
-| P3 | Quotes in iteration are optional | 65% |
-| P3 | Comma is a separator in arrays | 40% |
-| P4 | declare -A is optional for hash | 70% |
-| P4 | Python/JS syntax works in Bash | 45% |
-| P5 | trap does not require specifying the signal | 45% |
-| P5 | Function definition order doesn't matter | 50% |
+| Parsons | Targeted Misconception |
+|---------|------------------------|
+| TP1 | Variables are local by default |
+| TP1 | Spaces around = are permitted |
+| TP2 | return returns values as in other languages |
+| TP2 | $() is optional for command substitution |
+| TP3 | Quotes in iteration are optional |
+| TP3 | Comma is a separator in arrays |
+| TP4 | declare -A is optional for hash |
+| TP4 | Python/JS syntax works in Bash |
+| TP5 | trap does not require specifying the signal |
+| TP5 | Function definition order doesn't matter |
 
 ---
 
-## 5. Coverage Verification
+## 5. Historical Coverage Claims — Topic Mapping Is Not Attainment
 
 ### LO Coverage per Activity Type
 
@@ -409,7 +413,7 @@ Cleanup done
 | **LO9** | R3: Identify bugs in broken_script | Correct identification of set -e limitations |
 | **LO10** | All requirements | Professional template structure followed |
 
-### Rubric Criteria Weights
+### Historical Rubric Weight Proposal — Not an Adopted Policy
 
 | Criterion | Weight | Primary LOs |
 |-----------|--------|-------------|
@@ -422,17 +426,13 @@ Cleanup done
 
 ## 7. Activity Type Distribution
 
-### Target Distribution (Brown & Wilson Principle 10)
+### Varied activity types
 
-| Activity Type | Target | Actual | Status |
-|---------------|--------|--------|--------|
-| Writing Code | 45-55% | 48% | ✓ |
-| Parsons/Reorder | 15-20% | 18% | ✓ |
-| Trace/Predict | 15-20% | 17% | ✓ |
-| Debug/Fix | 10-15% | 12% | ✓ |
-| Explain/Review | 5-10% | 5% | ✓ |
+Brown and Wilson (2018), Tip 10, supports varied learning tasks. Use writing, Parsons/reordering, trace/predict, debug/fix and explain/review activities. The unsupported historical target/actual percentages are retained in the [provenance record](../../DECISION_PROVENANCE.json); no observed local distribution is asserted here.
 
-### Time Allocation in 100-minute Seminar
+### Retained 100-minute Allocation Proposal (Includes Break)
+
+This differs from the instructor guide (110 elapsed) and the historical plan (120 elapsed). The author must choose the actual timetable.
 
 | Activity | Minutes | Percentage |
 |----------|---------|------------|
@@ -450,12 +450,20 @@ Cleanup done
 |-------|-------------------|-------------|--------|
 | Remember | 15-20% | 11% (2/18) | Slightly low |
 | Understand | 25-30% | 44% (8/18) | Above target |
-| Apply | 30-35% | 28% (5/18) | Within range |
+| Apply | 30-35% | 28% (5/18) | Below range |
 | Analyse | 10-15% | 11% (2/18) | Within range |
-| Evaluate | 3-5% | 6% (1/18) | Within range |
-| Create | 3-5% | 0% | OK (covered in homework) |
+| Evaluate | 3-5% | 6% (1/18) | Above range |
+| Create | 3-5% | 0% | Below quiz target; code creation is a separate task |
 
 ---
 
 *Document generated for Learning Outcomes traceability - Seminar 5*  
 *Version 1.1.0 - Added Assessment Alignment and Activity Distribution*
+
+## Reference for the Pedagogical Principle
+
+Brown, N. C. C., & Wilson, G. (2018). Ten quick tips for teaching programming. *PLOS Computational Biology, 14*(4), e1006023. https://doi.org/10.1371/journal.pcbi.1006023
+
+## Current formative inventory (verified source count)
+
+The canonical YAML retains 18 questions and 102 raw points. Question-count Bloom totals: Remember 2, Understand 8, Apply 5, Analyse 2, Evaluate 1, Create 0. The JSON export is the ENos local schema, not a Moodle/QTI package. These counts describe the artefact, not student attainment; they do not validate historical local percentages.

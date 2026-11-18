@@ -1,226 +1,49 @@
-# 📁 Project Evaluation — Automated Testing
+# Project diagnostics
 
-> **Location:** `SEM07/project_evaluation/`  
-> **Purpose:** Automated project testing in isolated Docker containers  
-> **Audience:** Instructors and evaluation system
-
-## Contents
-
-| File | Purpose |
-|------|---------|
-| `run_auto_eval_EN.sh` | Main evaluation orchestration script |
-| `Docker/Dockerfile` | Isolated test environment |
-| `manual_eval_checklist_EN.md` | Manual evaluation criteria |
-| `oral_defence_questions_EN.md` | Interview question bank |
-
----
-
-## Architecture
-
-```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│ Student Project │     │  Docker Build    │     │  Run Tests      │
-│   (tarball)     │ ──► │  + Copy files    │ ──► │  + Collect      │
-│                 │     │  + Install deps  │     │    results      │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                                                          │
-                                                          ▼
-                                                  ┌─────────────────┐
-                                                  │ Grade Report    │
-                                                  │ + Feedback      │
-                                                  └─────────────────┘
-```
-
----
-
-## run_auto_eval_EN.sh
-
-### Usage
+The current evaluator performs local static diagnostics by default. It does not build or run submitted projects unless execution is explicit. Diagnostic totals are not approved marks, and project-specific acceptance remains human-reviewed.
 
 ```bash
-./run_auto_eval_EN.sh <project> [options]
-
-Arguments:
-  project           Project tarball or directory
-
-Options:
-  --timeout SEC     Total evaluation timeout (default: 300)
-  --memory MB       Memory limit for container (default: 512)
-  --parallel N      Evaluate N projects simultaneously
-  --output DIR      Output directory for results
-  --keep-container  Don't remove container after eval (debugging)
-  --no-network      Disable network in container (default)
-  --verbose         Show detailed execution log
+bash run_auto_eval_EN.sh --help
+bash run_auto_eval_EN.sh --level MEDIUM --output ./diagnostics /path/to/project
 ```
 
-### Examples
+Default static-only completion returns2 (`NOT_RUN` for functional execution). `--execute-local` permits trusted project code with per-command timeouts in a temporary working copy; that copy is not a security sandbox. It is suitable for owned synthetic fixtures, not untrusted submissions.
 
 ```bash
-# Evaluate single project
-./run_auto_eval_EN.sh student123_project.tar.gz
-
-# Batch evaluation
-./run_auto_eval_EN.sh projects/ --parallel 4 --output results/
-
-# Debugging mode
-./run_auto_eval_EN.sh project.tar.gz --keep-container --verbose
+bash run_auto_eval_EN.sh --execute-local --level EASY --timeout 10 \
+    --output ./fixture_results /path/to/owned_fixture
 ```
 
----
+Supported options: `-h/--help`, `-v/--version`, `-o/--output`, `-l/--level EASY|MEDIUM|ADVANCED`, `-t/--timeout`, `--docker`, `--docker-image`, `--execute-local`, `--no-cleanup`, `--verbose`. Input is one directory, not a tarball or batch. No `--parallel`, `--memory`, `--keep-container` or archive extraction is implemented.
 
-## Docker Environment
+## Container mode
 
-### Dockerfile
-
-Built from `Docker/Dockerfile`:
-
-```dockerfile
-FROM ubuntu:24.04
-
-# Install course dependencies
-RUN apt-get update && apt-get install -y \
-    bash \
-    python3 \
-    shellcheck \
-    make \
-    ...
-
-# Security: non-root user
-RUN useradd -m -s /bin/bash evaluator
-USER evaluator
-
-# No network access during evaluation
-# (handled by run_auto_eval_EN.sh)
-```
-
-### Build Docker Image
+Supply an existing local image explicitly. There is no pull or fallback to local execution. The wrapper requests non-root UID/GID, read-only source and root filesystem, no network, no capabilities, process/memory/CPU limits and a temporary writable filesystem. A bounded wrapper covers the container command; it does not claim a disk quota for the results bind mount.
 
 ```bash
-cd Docker/
-docker build -t enos-eval:latest .
-
-# Verify
-docker run --rm enos-eval:latest bash --version
+bash run_auto_eval_EN.sh --docker --docker-image enos-eval:local \
+    --level MEDIUM --timeout 30 --output ./container_results /path/to/project
 ```
 
-### Manual Testing
+See [Docker/RUNhere.md](Docker/RUNhere.md) for the correct build context and unverified native-container limits. Building/running a container and assessing real submissions require their own authorisation and environment; neither is part of the local source tests.
 
-```bash
-# Interactive debugging
-docker run -it --rm -v $(pwd)/project:/project enos-eval:latest /bin/bash
+## Interpretation
 
-# Run make test manually
-docker run --rm -v $(pwd)/project:/project enos-eval:latest make -C /project test
-```
+Reports retain observed command outputs/statuses. Missing ShellCheck or skipped functional work is visible; no placeholder domain tests receive credit. Current diagnostics do not implement the entire 23-project specification or a criterion-level academic grade. [manual_eval_checklist_EN.md](manual_eval_checklist_EN.md) retains review criteria with pending scale choices; [oral_defence_questions_EN.md](oral_defence_questions_EN.md) maps questions to the actual23 projects. [The assessment contract](../homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md) separates authentication, evidence, scoring and policy.
 
----
+## Diagnostic completeness
 
-## Evaluation Process
+ShellCheck runs once per regular Bash file and its JSON report and exit status are
+validated. Tool failure, timeout or malformed output stops the run; it cannot
+be labelled clean. All file discovery uses filename-preserving records. Optional
+Pylint runs with an explicit empty configuration and its status/report is checked.
+This environment's final local tests used a declared synthetic ShellCheck/bc
+adapter because those executables were unavailable; native integration remains
+unverified here. The shipped CLI still checks these prerequisites explicitly.
 
-### Step 1: Validation
-
-```bash
-# Automatic checks before evaluation
-- Archive integrity
-- Required files (README, Makefile, src/)
-- No forbidden files
-- Size limits
-```
-
-### Step 2: Build
-
-```bash
-# Inside container
-cd /project
-make all
-```
-
-### Step 3: Test
-
-```bash
-# Run project test suite
-make test
-
-# Run evaluation test suite
-/eval/run_tests.sh
-```
-
-### Step 4: Collect Results
-
-```bash
-# Parse test output
-# Calculate scores
-# Generate feedback
-```
-
----
-
-## Output Format
-
-### Evaluation Report
-
-```
-═══════════════════════════════════════════════════════════════
- PROJECT EVALUATION REPORT
-═══════════════════════════════════════════════════════════════
-
-Student: student123
-Project: M02_Process_Lifecycle_Monitor
-Date: 2026-01-30 14:32:15
-
-BUILD: ✅ PASSED
-  make all completed in 2.3s
-
-TESTS: 8/10 PASSED (80%)
-  ✅ test_basic_functionality
-  ✅ test_process_detection
-  ✅ test_output_format
-  ⚠️ test_edge_cases (partial: 5/10)
-  ❌ test_performance (timeout)
-  ...
-
-STYLE: 85%
-  shellcheck: 2 warnings
-  Documentation: Complete
-
-TOTAL: 78/100
-
-═══════════════════════════════════════════════════════════════
-```
-
----
-
-## Security Considerations
-
-| Measure | Implementation |
-|---------|----------------|
-| Isolation | Docker container |
-| No network | `--network none` flag |
-| Resource limits | CPU, memory, disk quotas |
-| Timeout | Hard kill after timeout |
-| Non-root | `evaluator` user in container |
-| Read-only | Source mounted read-only |
-
----
-
-## Manual Evaluation
-
-After automated evaluation, use:
-
-- `manual_eval_checklist_EN.md` — Checklist for manual review
-- `oral_defence_questions_EN.md` — Questions for project interview
-
-```bash
-# Example checklist items
-□ Code is readable and well-organised
-□ Solution demonstrates understanding
-□ Error handling is appropriate
-□ Documentation is complete
-```
-
----
-
-*See also: [`Docker/`](Docker/) for container configuration*  
-*See also: [`../grade_aggregation/`](../grade_aggregation/) for final grades*
-
-*Last updated: January 2026*
+The old numeric caps are retained as historical proposals. They are not attainable
+maxima for every language mix and are not normalised into grades. In a static-only
+run, the functional CSV score and total remain blank, with `NOT_RUN` and
+`PENDING_EVIDENCE`; a reviewed zero is a different state. The CSV columns are
+`Component,Score,HistoricalCap,Status`. Executed diagnostics record the real return
+codes and produce a `PENDING_POLICY` heuristic total, never a final grade.

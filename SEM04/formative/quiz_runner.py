@@ -18,6 +18,7 @@ Author: Operating Systems Course
 Version: 1.1
 """
 
+import argparse
 import sys
 import random
 from pathlib import Path
@@ -388,27 +389,16 @@ def self_test() -> bool:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
-    """Main entry point for the quiz runner."""
-    if len(sys.argv) < 2:
-        print("Usage: python3 quiz_runner.py quiz.yaml [--shuffle] [--category BLOOM]")
-        print("       python3 quiz_runner.py --self-test")
-        sys.exit(1)
-    
-    if sys.argv[1] == '--self-test':
-        success = self_test()
-        sys.exit(0 if success else 1)
-    
-    filepath = sys.argv[1]
-    shuffle = '--shuffle' in sys.argv
-    
-    category: Optional[str] = None
-    if '--category' in sys.argv:
-        idx = sys.argv.index('--category')
-        if idx + 1 < len(sys.argv):
-            category = sys.argv[idx + 1]
-    
-    metadata, questions = load_quiz(filepath)
-    result = run_quiz(questions, shuffle=shuffle, category=category)
+    parser = argparse.ArgumentParser(description="Interactive formative quiz; open tasks require manual review.")
+    parser.add_argument('quiz_file', nargs='?', type=Path, default=Path(__file__).with_name('quiz.yaml'))
+    parser.add_argument('--shuffle', action='store_true', help='Shuffle questions')
+    parser.add_argument('--category', choices=['remember','understand','apply','analyse','evaluate','create'])
+    parser.add_argument('--self-test', action='store_true')
+    args = parser.parse_args()
+    if args.self_test:
+        sys.exit(0 if self_test() else 1)
+    metadata, questions = load_quiz(str(args.quiz_file))
+    result = run_quiz(questions, shuffle=args.shuffle, category=args.category)
     display_results(result)
 
 

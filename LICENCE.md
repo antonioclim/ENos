@@ -1,310 +1,50 @@
-# Restrictive Educational Licence
+# ENos component licensing
 
-**Version 5.0.0 — January 2026**
+## Author-approved scope
 
----
+Decision D1 was approved on 18 November 2026 and is retained in ENos 6.0.0. Identified original software and code examples are licensed under the [MIT licence](LICENSE). Identified original teaching prose and figures are licensed under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode.en) (CC BY 4.0). These grants apply only to material the author owns or is entitled to license.
 
-## Copyright Notice
+[LICENCE_SCOPE.json](LICENCE_SCOPE.json) assigns a component profile to each current repository file. Classification establishes the stated boundary, not independent proof of ownership or permission to relicense someone else's work.
 
-**© 2019–2030 Antonio Clim. All rights reserved.**
+## Retained attribution and earlier grants
 
-This Licence Agreement ("Licence") governs the use of educational materials contained in this repository ("Materials"), including but not limited to source code, documentation, configuration files, diagrams, exercises and any associated resources.
+The existing attribution lines are retained verbatim:
 
-The Materials are protected under Romanian law (Law No. 8/1996 on Copyright and Related Rights, as amended), European Union Directive 2001/29/EC on the harmonisation of certain aspects of copyright and related rights in the information society and applicable international treaties including the Berne Convention for the Protection of Literary and Artistic Works.
+- `Copyright (c) 2026 Revolvix` in `LICENSE`.
+- `© 2019–2030 Antonio Clim. All rights reserved.` from the previous licensing document.
+- The named contributors and upstream copyright notices in individual components.
 
----
+No identity is reassigned: this release does not assume that Revolvix is an alias for another author. Permissions for eligible original material follow the component grants above. The former restrictive educational conditions are not additional restrictions on those newly licensed components. Nothing here claims to revoke permissions already granted for an earlier version.
 
-## 1. Definitions
+## Component boundaries
 
-**"Materials"** means all content in this repository, including source code, documentation, configuration files, Docker configurations, Python scripts, exercises, solutions, diagrams and any other educational resources.
+| Component | Applicable terms |
+| --- | --- |
+| Original scripts, programs, modules, configuration/build code and original code examples | MIT; preserve the copyright and permission notice |
+| Original teaching prose and figures, including editable diagrams and rendered figures | CC BY 4.0; give appropriate credit, link the licence and identify changes |
+| Mixed Markdown/HTML teaching material | CC BY 4.0 original prose/figures; MIT original fenced/code/pre examples, scripts and styles. This split is not a choice of either licence for the whole file |
+| Public quiz prose/explanations in YAML/JSON and their exports | CC BY 4.0 original prose; MIT original code examples and operational schema/configuration code |
+| Original inputs and fixtures supplied as part of software examples | MIT for eligible original fixture content; real personal, institutional and third-party data are excluded |
+| Vendored packages, fonts, icons and copied upstream assets | Retained upstream terms and notices; no replacement grant |
+| CSS derived from fonts/themes and generated Tailwind CSS | Retained upstream component terms. Eligible original transformations may be MIT; upstream rights are not replaced |
+| Quotations, institutional material and any portion with unresolved rights | Excluded from the new D1 grants; retain its identified source and applicable terms |
 
-**"Personal Use"** means use by a single individual for their own private educational benefit, not involving any form of sharing, distribution or commercial activity.
+Specific attributions and third-party notices take precedence over an original-material profile for the portions identified. A citation alone does not establish redistribution permission. New material with unresolved ownership remains excluded until its rights and component boundaries are established.
 
-**"Educational Institution"** means any accredited school, college, university or other institution primarily engaged in teaching and education.
+## Retained SEM02 package notice
 
-**"Commercial Use"** means any use intended for or directed towards commercial advantage or monetary compensation.
+`SEM02/README.md` describes its educational package as **CC BY-SA 4.0** and attributes the original materials to **SO ASE-CSIE Team**. This notice and attribution are preserved. Conservatively, `SEM02/**` is excluded from the new D1 grant while that package boundary is unresolved. This records the extent of the retained notice; it does not independently establish the ownership of every item or a right to replace its terms. A later item-level decision may identify original components eligible for an additional grant.
 
-**"Derivative Work"** means any work based upon the Materials, including translations, adaptations, modifications, compilations or any other form in which the Materials may be transformed.
+## Python distribution
 
----
+The Python wheel contains the shared `lib` Python modules and package metadata, not the complete lecture/seminar repository. Its original Python code is MIT; its original README-derived description is CC BY 4.0. The wheel declares `MIT AND CC-BY-4.0` and includes `LICENSE` and this policy. These terms refer to distinct components, not a choice of either licence for all contents. This paragraph identifies the installed boundary without requiring the repository-wide map. Other teaching materials and vendored assets remain in the repository or teaching archive under their component terms.
 
-## 2. Grant of Limited Licence
+## Bundled teaching archive
 
-Subject to the terms and conditions of this Licence, the Authors grant you a limited, non-exclusive, non-transferable, revocable licence to:
+The lecture ZIP is a container, not a new single-licence work. Members retain the terms of their corresponding repository paths. Include this policy, `LICENSE` and `LICENCE_SCOPE.json` when rebuilding the archive. A member that cannot be matched to a reviewed source component remains excluded from the new grant pending review.
 
-### 2.1 Permitted Uses
+## Contributions and verification
 
-| Permission | Description | Conditions |
-|:----------:|-------------|------------|
-| ✓ | **Personal Study** | View, read and study the Materials for your own educational benefit |
-| ✓ | **Code Execution** | Run code examples on personal devices for learning purposes |
-| ✓ | **Local Modification** | Modify code locally for personal experimentation and learning |
-| ✓ | **Personal Notes** | Create derivative notes and annotations for personal reference only |
-| ✓ | **Academic Citation** | Quote brief excerpts in academic works with proper attribution |
+Contributions must identify their source, author, applicable terms and any third-party material. Do not submit material whose redistribution rights are unconfirmed. Preserve existing attribution and upstream notices.
 
-### 2.2 Conditions for Permitted Uses
-
-All permitted uses are subject to the following conditions:
-
-1. **No Distribution** — You may not share, distribute or make available the Materials or any portion thereof to any third party
-2. **No Publication** — You may not upload, post or publish the Materials on any website, repository, forum or other platform
-3. **No Commercial Use** — You may not use the Materials for any commercial purpose
-4. **Attribution Required** — Any academic citation must include proper attribution to the Authors
-5. **Licence Preservation** — You must retain all copyright notices and this Licence in any copies you make for personal use
-
----
-
-## 3. Prohibited Uses
-
-Without the express prior written consent of the Authors, you may NOT:
-
-### 3.1 Distribution and Sharing
-
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Upload, post, publish or share the Materials on any website, repository, cloud storage or file-sharing platform |
-| ✗ | Distribute copies of the Materials by email, messaging services or any other means |
-| ✗ | Include the Materials in any collection, compilation or anthology |
-| ✗ | Create mirrors, forks or copies of this repository |
-
-### 3.2 Teaching and Presentation
-
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Use the Materials in courses, workshops, seminars, bootcamps or any form of organised instruction |
-| ✗ | Present, demonstrate or display the Materials to any audience |
-| ✗ | Use the Materials to create teaching resources, lesson plans or curricula |
-| ✗ | Incorporate the Materials into educational programmes or training |
-
-### 3.3 Modification and Derivative Works
-
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Create and distribute derivative works based on the Materials |
-| ✗ | Translate the Materials into other languages for distribution |
-| ✗ | Adapt, modify or transform the Materials for distribution |
-| ✗ | Combine the Materials with other content for distribution |
-
-### 3.4 Commercial Activities
-
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Sell, licence or sublicence the Materials |
-| ✗ | Use the Materials in any product or service offered for sale |
-| ✗ | Use the Materials to provide paid consulting, training or support services |
-| ✗ | Use the Materials in any manner intended to generate revenue |
-
----
-
-## 4. Educational Institution Licensing
-
-### 4.1 Institutional Licence Availability
-
-Educational institutions wishing to incorporate these Materials into their curricula may apply for an institutional licence. Institutional licences may permit:
-
-- Use of Materials in classroom instruction
-- Distribution to enrolled students
-- Inclusion in institutional learning management systems
-- Creation of derivative materials for internal use
-
-### 4.2 Application Process
-
-To apply for an institutional licence:
-
-1. Open an issue in this repository with the tag `[LICENCE]`
-2. Include: institution name, contact details, intended use, number of students and duration
-3. Allow 15 working days for review
-4. Licensing terms and any applicable fees will be communicated directly
-
-### 4.3 Institutional Licence Terms
-
-Institutional licences are granted at the sole discretion of the Authors and may include:
-
-- Geographic restrictions
-- Time limitations
-- Student number caps
-- Reporting requirements
-- Attribution requirements
-- Fees (for commercial educational institutions)
-
----
-
-## 5. Attribution Requirements
-
-### 5.1 Academic Citation
-
-When citing these Materials in academic works, theses, dissertations or publications, use the following format:
-
-**Standard Citation:**
-
-```
-Clim, A., & Toma, A. (2026). Computer Networks — Complete Laboratory Kits 
-(WSL Edition, v5.0.0). Bucharest University of Economic Studies.
-https://github.com/antonioclim/netENwsl
-```
-
-**BibTeX Format:**
-
-```bibtex
-@misc{clim2026networks,
-  author       = {Clim, Antonio and Toma, Andrei},
-  title        = {{netENwsl}: Computer Networks — Complete Laboratory Kits},
-  year         = {2026},
-  version      = {5.0.0},
-  institution  = {Bucharest University of Economic Studies},
-  howpublished = {\url{https://github.com/antonioclim/netENwsl}},
-  note         = {Educational curriculum materials for computer 
-                  networks laboratory}
-}
-```
-
-### 5.2 Attribution in Derivative Works
-
-If you have obtained written permission to create derivative works, you must include:
-
-1. Clear attribution to the original Authors
-2. A statement that the work is derived from these Materials
-3. A link to the original repository
-4. This copyright notice
-
----
-
-## 6. Third-Party Components
-
-### 6.1 Open Source Dependencies
-
-The Materials incorporate or reference the following third-party components, each subject to its own licence:
-
-| Component | Licence | Use in Materials |
-|-----------|---------|------------------|
-| Python | PSF Licence | Programming language |
-| Docker | Apache 2.0 | Containerisation platform |
-| Nginx | BSD-2-Clause | Web server and proxy |
-| Portainer CE | Zlib | Container management |
-| Scapy | GPL-2.0 | Packet manipulation |
-| Flask | BSD-3-Clause | Web framework |
-| Mosquitto | EPL-2.0 | MQTT broker |
-
-### 6.2 Third-Party Licence Compliance
-
-Your use of third-party components must comply with their respective licences. This Licence does not grant any rights to third-party components beyond what their own licences permit.
-
----
-
-## 7. Intellectual Property Rights
-
-### 7.1 Ownership
-
-The Authors retain all right, title and interest in and to the Materials, including all intellectual property rights. This Licence does not transfer any ownership rights to you.
-
-### 7.2 Trademarks
-
-This Licence does not grant permission to use the trade names, trademarks, service marks or product names of the Authors or affiliated institutions, except as required for reasonable and customary use in describing the origin of the Materials.
-
-### 7.3 Patents
-
-This Licence does not grant any patent rights. If any portion of the Materials is covered by patents owned by the Authors, you must obtain separate written permission for any use that would infringe such patents.
-
----
-
-## 8. Disclaimer of Warranties
-
-**THE MATERIALS ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.**
-
-The Authors make no warranty that:
-
-- The Materials will meet your requirements
-- The Materials will be error-free or uninterrupted
-- Any errors in the Materials will be corrected
-- The Materials are suitable for any particular purpose
-
----
-
-## 9. Limitation of Liability
-
-**IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS, OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE MATERIALS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.**
-
----
-
-## 10. Termination
-
-### 10.1 Automatic Termination
-
-This Licence and the rights granted hereunder will terminate automatically upon any breach by you of the terms of this Licence. Upon termination, you must:
-
-1. Cease all use of the Materials
-2. Delete all copies in your possession or control
-3. Certify in writing, upon request, that you have complied with these requirements
-
-### 10.2 Survival
-
-The following sections shall survive termination: Copyright Notice, Intellectual Property Rights, Disclaimer of Warranties, Limitation of Liability and Governing Law.
-
----
-
-## 11. Governing Law and Jurisdiction
-
-### 11.1 Governing Law
-
-This Licence shall be governed by and construed in accordance with the laws of Romania, without regard to its conflict of law provisions.
-
-### 11.2 Jurisdiction
-
-Any dispute arising out of or in connection with this Licence shall be subject to the exclusive jurisdiction of the courts of Bucharest, Romania.
-
-### 11.3 EU Compliance
-
-This Licence is intended to comply with applicable European Union directives and regulations concerning copyright and related rights.
-
----
-
-## 12. Miscellaneous
-
-### 12.1 Entire Agreement
-
-This Licence constitutes the entire agreement between you and the Authors with respect to the Materials and supersedes all prior or contemporaneous understandings regarding such subject matter.
-
-### 12.2 Severability
-
-If any provision of this Licence is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable and the remaining provisions shall continue in full force and effect.
-
-### 12.3 Waiver
-
-No waiver of any term of this Licence shall be deemed a further or continuing waiver of such term or any other term and the Authors' failure to assert any right or provision under this Licence shall not constitute a waiver of such right or provision.
-
-### 12.4 Amendments
-
-The Authors reserve the right to modify this Licence at any time. Continued use of the Materials after any such modification constitutes acceptance of the modified Licence.
-
-### 12.5 Contact
-
-For questions about this Licence or to request permissions, please:
-
-- Open an issue with the `[LICENCE]` tag
-- Contact the Authors through the repository
-
----
-
-## 13. Acknowledgements
-
-The development of these Materials was supported by:
-
-- **Bucharest University of Economic Studies (ASE)**
-- **Faculty of Cybernetics, Statistics and Economic Informatics (CSIE)**
-
-The Authors acknowledge the contributions of students and colleagues who provided feedback and suggestions for improving the Materials.
-
----
-
-**END OF LICENCE**
-
----
-
-*This Licence was last updated in January 2026.*
-
-*Version 5.0.0*
-
----
-
-> **© 2019–2030 Antonio Clim**  
-> Computer Networks Laboratory — ASE Bucharest, CSIE
+Run `python3 scripts/check_licence_scope.py` to check file coverage, the retained SEM02 notice and pinned upstream bytes offline. After an authorised change, `python3 scripts/check_licence_scope.py --write` refreshes the path map from these reviewed component rules. Unknown formats receive an explicit unresolved profile. A passing check establishes consistency of the record and retained bytes, not a legal ownership determination.

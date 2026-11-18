@@ -5,6 +5,8 @@
 
 ---
 
+> **Evidence status:** this is a coverage map and design proposal, not a record of student achievement. Historical percentages are retained explicitly as unverified author estimates. The current formative bank has 23 questions, 140 raw points and unchanged question IDs/weights/Bloom labels.
+
 ## About This Document
 
 The traceability matrix connects:
@@ -25,7 +27,7 @@ The traceability matrix connects:
 | **LO6.2** | Implements error handling with trap and exit codes | Apply | Yes |
 | **LO6.3** | Builds logging system with levels | Apply | Yes |
 | **LO6.4** | Reads and interprets data from /proc | Understand | Yes |
-| **LO6.5** | Implements incremental backup with find -newer | Apply | Yes |
+| **LO6.5** | Implements an incremental backup chain and verifies restoration of changes/deletions | Apply | Yes |
 | **LO6.6** | Verifies data integrity with checksums | Apply | Yes |
 | **LO6.7** | Applies deployment strategies (rolling, blue-green) | Apply | Yes |
 | **LO6.8** | Implements health checks with retry and backoff | Apply | Yes |
@@ -45,13 +47,13 @@ The traceability matrix connects:
 | LO6.1 | S06_P01 | projects/*/lib/ | q04 | PI-04 | PP-04 |
 | LO6.2 | S06_P06 | */lib/core.sh | q01, q09 | PI-05 | PP-01 |
 | LO6.3 | S06_P06 | */lib/core.sh | q07 | PI-08 | PP-05 |
-| LO6.4 | S06_P02 | monitor/lib/utils.sh | q04 | PI-01 | — |
+| LO6.4 | S06_P02 | monitor/lib/utils.sh | — | PI-01 | — |
 | LO6.5 | S06_P03 | backup/lib/core.sh | q05, q10 | PI-07 | PP-02 |
 | LO6.6 | S06_P03 | backup/lib/utils.sh | q14 | — | — |
 | LO6.7 | S06_P07 | deployer/lib/core.sh | q08, q17 | PI-10 | — |
 | LO6.8 | S06_P04 | deployer/lib/utils.sh | q06, q12 | PI-09 | PP-03 |
-| LO6.9 | S06_P05 | */tests/*.sh | — | — | — |
-| LO6.10 | S06_P08 | resources/systemd/ | — | — | — |
+| LO6.9 | S06_P05 | */tests/*.sh | q21 | — | — |
+| LO6.10 | S06_P08 | resources/systemd/ | q22, q23 | — | — |
 | LO6.11 | S06_P05 | test_helpers.sh | q15 | PI-06 | — |
 | LO6.12 | S06_P07 | — | q17, q18 | — | — |
 
@@ -76,21 +78,21 @@ The traceability matrix connects:
 
 ## Bloom Distribution
 
-### Per Material
+### Historical per-material estimates — provenance/denominator unverified
 
 | Material | R | U | Ap | An | Ev | Cr |
 |----------|---|---|----|----|----|----|
 | docs/ | 10% | 30% | 35% | 15% | 5% | 5% |
-| Quiz | 25% | 25% | 30% | 10% | 10% | 0% |
+| Quiz (historical estimate) | 25% | 25% | 30% | 10% | 10% | 0% |
 | Peer Instruction | 10% | 40% | 30% | 20% | 0% | 0% |
 | Parsons | 0% | 20% | 60% | 20% | 0% | 0% |
 | Sprint | 0% | 10% | 80% | 10% | 0% | 0% |
 | LLM-Aware | 0% | 20% | 30% | 30% | 10% | 10% |
 | Assignments | 0% | 10% | 40% | 20% | 15% | 15% |
 
-### Summary (against beginner targets)
+### Historical aggregate proposal (not observed data)
 
-| Level | Target | Actual | Status |
+| Level | Proposed target | Historical estimate | Historical judgement (unverified) |
 |-------|--------|--------|--------|
 | Remember | 15-20% | 18% | ✓ OK |
 | Understand | 25-30% | 25% | ✓ OK |
@@ -99,7 +101,7 @@ The traceability matrix connects:
 | Evaluate | 3-5% | 8% | ⚠️ Slightly above (acceptable for CAPSTONE) |
 | Create | 3-5% | 2% | ✓ OK |
 
-**Note:** CAPSTONE balances higher-order thinking with foundational recall. The slightly elevated Evaluate percentage reflects the integrative nature of capstone projects—students must justify design decisions.
+**Current countable bank, by question count (not point-weighted):** Remember 5/23 (21.74%), Understand 6/23 (26.09%), Apply 8/23 (34.78%), Analyse 2/23 (8.70%), Evaluate 2/23 (8.70%), Create 0/23. Raw maximum is 140 points. No objective counting/coding method is supplied for the historical whole-module percentages; their provenance and target selection remain author decisions. Brown and Wilson do not establish these local figures.
 
 ---
 
@@ -161,36 +163,36 @@ The traceability matrix connects:
 ## Parsons Distractors — Bash-Specific
 
 ### PP-01: Trap Handler
-**Tested distractors:**
+**Design distractors (interpretation depends on context):**
 - `TEMP_FILE = $(mktemp)` — spaces in assignment ❌
 - `trap cleanup() EXIT` — wrong parentheses ❌
 - `trap 'cleanup' ON_EXIT` — invalid signal ❌
 
 ### PP-02: Incremental Backup
-**Tested distractors:**
+**Design distractors (interpretation depends on context):**
 - `find $SOURCE -newer ...` — missing quotes ❌
 - `find --newer` — invalid flag ❌
-- `tar czf $BACKUP < find` — invalid syntax ❌
+- `tar czf $BACKUP < find` — valid shell redirection syntax but reads a file named find; it does not run find
 
 ### PP-03: Health Check
-**Tested distractors:**
-- `while [ $retry < $MAX ]` — invalid comparison in `[ ]` ❌
+**Design distractors (interpretation depends on context):**
+- `while [ $retry < $MAX ]` — shell input redirection; it is not numeric comparison
 - `retry = $((retry+1))` — spaces in assignment ❌
 - `curl -sf $URL` — missing quotes ❌
 
 ### PP-04: Source Libraries
-**Tested distractors:**
-- `SCRIPT_DIR=$(dirname $0)` — doesn't resolve symlinks ❌
+**Design distractors (interpretation depends on context):**
+- `SCRIPT_DIR=$(dirname $0)` — unquoted expansion; resolving a script symlink is a separate contract
 - `source $LIB_DIR/core.sh` — missing quotes ❌
 
 ### PP-05: Logging
-**Tested distractors:**
+**Design distractors (interpretation depends on context):**
 - `local level = "$1"` — spaces in assignment ❌
 - `echo [$timestamp] [$level]` — brackets expand ❌
 
 ### PP-06: Array Iteration
-**Tested distractors:**
-- `for s in $SERVERS` — takes only first element ❌
+**Design distractors (interpretation depends on context):**
+- `for s in $SERVERS` — scalar/default-index expansion followed by splitting/globbing, not array-safe traversal
 - `for s in ${SERVERS[@]}` — spaces break ❌
 - `SERVERS = (...)` — spaces in array assignment ❌
 
@@ -220,6 +222,9 @@ The traceability matrix connects:
 | q18 | LO6.5 | LO6.12 | Evaluate |
 | q19 | LO6.2 | — | Remember |
 | q20 | LO6.5 | LO6.6 | Remember |
+| q21 | LO6.9 | — | Apply |
+| q22 | LO6.10 | — | Understand |
+| q23 | LO6.10 | — | Apply |
 
 ---
 
@@ -227,21 +232,21 @@ The traceability matrix connects:
 
 ### LOs with Adequate Coverage
 
-All primary Learning Outcomes now have adequate quiz coverage. The addition of q19 (signals) and q20 (compression) balances the Bloom distribution.
+The bank now includes q21 (assertions), q22 (cron) and q23 (systemd timers). Existence of an item establishes a coverage candidate, not adequate validity, reliability, practical skill or measured attainment. LO6.4 and the Create outcomes still need direct practical evidence.
 
 | LO | Status | Notes |
 |----|--------|-------|
-| LO6.9 | ⚠️ | Covered in assignment A4, no direct quiz |
-| LO6.10 | ⚠️ | Covered in docs and cron examples |
+| LO6.9 | Partial | q21 covers an assertion concept; A4 remains the practical proposal |
+| LO6.10 | Partial | q22/q23 plus Sprint 9; host scheduling still needs native evidence |
 | LO6.12 | ✓ | Covered via q17, q18 (Evaluate level) |
 
 ### Completed Improvements
 
 1. ✅ **Added 2 Remember questions** (q19, q20) to balance Bloom distribution
-2. ✅ **Balanced Bloom taxonomy** — Remember now at 18% (was 6%)
+2. **Historical balance claim retained for provenance:** “Remember now at 18% (was 6%)” is not the current 5/23 count and is not verified here.
 3. ✅ **Signal and compression coverage** — foundational concepts reinforced
-4. ⏳ **Cron sprint** — recommended for future iteration
-5. ⏳ **Explicit testing exercise** — covered via assignment A4
+4. **Cron sprint exists:** Sprint 9 in S06_06; implementation/activation remain separate.
+5. **Testing:** q21 and practical assignment A4; neither alone establishes attainment.
 
 ---
 

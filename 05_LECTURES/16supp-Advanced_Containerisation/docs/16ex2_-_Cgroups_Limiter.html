@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cgroups Resource Limiter | Lecture 16 - Containerisation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --bg-primary: #0a0a12;
@@ -211,7 +211,84 @@
             background: #4b5563;
             border-radius: 3px;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-gray-100">
     <!-- OOM Overlay (hidden by default) -->
@@ -219,7 +296,7 @@
         <div class="text-center">
             <i class="fas fa-skull-crossbones text-8xl mb-4"></i>
             <h2 class="text-4xl font-bold mb-2">OOM KILLER!</h2>
-            <p class="text-xl">Container terminated due to memory limit exceeded</p>
+            <p class="text-xl">Toy process terminated after crossing the configured memory ceiling</p>
             <button id="oomDismiss" class="mt-6 px-6 py-3 bg-white text-red-600 rounded-lg font-bold hover:bg-gray-100 transition">
                 Dismiss
             </button>
@@ -236,7 +313,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold">Cgroups Resource Limiter</h1>
-                        <p class="text-sm text-gray-400">Lecture 16 • Control Groups for Containere</p>
+                        <p class="text-sm text-gray-400">Lecture 16 • Control Groups for Containers</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -249,7 +326,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Limits and toy OOM policy</h2><p>The unified cgroup v2 example assumes an owned delegated hierarchy, enabled parent controllers and an attached workload. CPU quota and I/O ceilings are not reservations. The model represents one process and deliberately omits reclaim: crossing memory.max immediately ends that toy process. Real reclaim, OOM selection and memory.oom.group affect native behaviour. Start after OOM explicitly resets the process and its counters. Memory units here use 1024² bytes.</p></section>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
         <!-- Overview -->
@@ -261,8 +338,8 @@
                 <div class="flex-1">
                     <h2 class="font-bold text-lg mb-2">What are Control Groups (cgroups)?</h2>
                     <p class="text-gray-400 text-sm">
-                        Cgroups limiteaza and contorizeaza resursele (CPU, memorie, I/O) that a group of processes can use.
-                        Sunt mecanismul care prevents a container from monopolising system resources.
+                        Cgroups account for and can limit resources such as CPU, memory and I/O for groups of processes.
+                        Configured controllers constrain the covered resources; cgroups alone do not provide every isolation or security property.
                     </p>
                 </div>
             </div>
@@ -274,45 +351,7 @@
                 <i class="fas fa-sitemap text-blue-400"></i>
                 Cgroup Hierarchy
             </h3>
-            <div class="bg-gray-900/50 rounded-xl p-4 hierarchy-tree mono">
-                <div class="folder">/sys/fs/cgroup/</div>
-                <div class="ml-4">
-                    <span class="folder">├── cpu/</span>
-                    <div class="ml-4">
-                        <span class="folder">└── docker/</span>
-                        <div class="ml-4">
-                            <span class="folder">├── container1/</span>
-                            <span class="file ml-2">← cpu.max = "<span class="value" id="hierCpuLimit">50000 100000</span>"</span>
-                        </div>
-                        <div class="ml-4">
-                            <span class="folder">└── container2/</span>
-                            <span class="file ml-2">← cpu.max = "<span class="value">25000 100000</span>"</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <span class="folder">├── memory/</span>
-                    <div class="ml-4">
-                        <span class="folder">└── docker/</span>
-                        <div class="ml-4">
-                            <span class="folder">└── container1/</span>
-                            <span class="file ml-2">← memory.max = "<span class="value" id="hierMemLimit">536870912</span>" (512MB)</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <span class="folder">└── io/</span>
-                    <div class="ml-4">
-                        <span class="folder">└── docker/</span>
-                        <div class="ml-4">
-                            <span class="folder">└── container1/</span>
-                            <span class="file ml-2">← io.max = "<span class="value" id="hierIoLimit">10485760</span>" (10MB/s)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+<div class="bg-gray-900/50 rounded-xl p-4 hierarchy-tree mono"><p>/sys/fs/cgroup/owned-lab/container1/ — unified cgroup v2 hierarchy</p><p>cpu.max = <span id="hierCpuLimit">50000 100000</span></p><p>memory.max = <span id="hierMemLimit">536870912</span> bytes</p><p>io.max = <span id="hierIoLimit">8:0 rbps=max wbps=10485760</span></p><p>Device 8:0 is an illustrative major:minor identifier; select the actual authorised block device for a native lab.</p></div></div>
         <!-- Main Grid -->
         <div class="grid grid-cols-12 gap-6">
             <!-- Left: Container Panel -->
@@ -510,7 +549,7 @@
         <div class="glass-panel rounded-2xl p-5 mt-6">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                 <i class="fas fa-users text-indigo-400"></i>
-                Noisy Neighbor Prevention
+                Noisy Neighbour Limits
             </h3>
             
             <div class="grid grid-cols-2 gap-6">
@@ -522,7 +561,7 @@
                                 <i class="fas fa-cube text-blue-400"></i>
                             </div>
                             <span class="font-semibold">Container A</span>
-                            <span class="text-xs text-gray-500">(I/O Intensivee)</span>
+                            <span class="text-xs text-gray-500">(I/O Intensive)</span>
                         </div>
                         <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">Running</span>
                     </div>
@@ -559,15 +598,15 @@
                             <div id="neighborBIoFill" class="resource-fill bg-gradient-to-r from-green-500 to-emerald-500" style="width: 0%"></div>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500">Not affected by Container A!</p>
+                    <p class="text-xs text-gray-500">Illustrative neighbour workload; contention is not modelled.</p>
                 </div>
             </div>
             
             <div class="mt-4 p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
                 <p class="text-sm text-indigo-300">
                     <i class="fas fa-shield-alt mr-2"></i>
-                    <strong>Without cgroups:</strong> Container A would monopolise I/O and Container B would suffer.
-                    <strong>With cgroups:</strong> Each container has guaranteed and limited resources.
+                    <strong>Without cgroups:</strong> Container A could contend with B; the displayed model does not measure shared-device contention.
+                    <strong>With cgroups:</strong> These controls impose upper ceilings; they do not guarantee minimum resources.
                 </p>
             </div>
         </div>
@@ -579,6 +618,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             isRunning: false,
@@ -744,14 +828,14 @@
             elements.ioLimitText.textContent = state.limits.io + ' MB/s';
             
             // Update docker command
-            elements.dockerCpu.textContent = (state.limits.cpu / 100).toFixed(1);
+            elements.dockerCpu.textContent = String(state.limits.cpu / 100);
             elements.dockerMem.textContent = state.limits.memory + 'm';
             elements.dockerIo.textContent = state.limits.io + 'mb';
             
             // Update hierarchy
             elements.hierCpuLimit.textContent = (state.limits.cpu * 1000) + ' 100000';
-            elements.hierMemLimit.textContent = (state.limits.memory * 1024 * 1024).toLocaleString();
-            elements.hierIoLimit.textContent = (state.limits.io * 1024 * 1024).toLocaleString();
+            elements.hierMemLimit.textContent = String(state.limits.memory * 1024 * 1024);
+            elements.hierIoLimit.textContent = '8:0 rbps=max wbps='+(state.limits.io * 1024 * 1024);
         }
 
         // Update usage display
@@ -804,6 +888,7 @@
         let simulationInterval;
         
         function startSimulation() {
+            if(state.containerKilled)reset();
             if (state.isRunning) {
                 stopSimulation();
                 return;
@@ -871,6 +956,7 @@
 
         // Scenarios
         function runScenario(scenario) {
+            if(state.containerKilled)reset();
             state.scenario = scenario;
             state.containerKilled = false;
             
@@ -882,21 +968,21 @@
                     state.target.cpu = 100; // Tries to use 100%
                     state.target.memory = 100;
                     state.target.io = 3;
-                    elements.scenarioText.textContent = 'Container tries to use 100% CPU, dar e limitat la ' + state.limits.cpu + '% by cgroup. Observe how usage does not exceed the limit!';
+                    elements.scenarioText.textContent = 'The container requests 100% CPU but is capped at ' + state.limits.cpu + '% by cgroup. Observe how usage does not exceed the limit!';
                     break;
                 case 'memory':
                     elements.scenarioMemLeak.classList.add('active');
                     state.target.cpu = 30;
                     state.target.memory = state.limits.memory + 100; // Will trigger OOM
                     state.target.io = 3;
-                    elements.scenarioText.textContent = 'Memory leak in progress... When memory reaches ' + state.limits.memory + ' MB, OOM Killer will terminate the container!';
+                    elements.scenarioText.textContent = 'Memory growth in this one-process model: when usage crosses ' + state.limits.memory + ' MB, the toy OOM rule ends the model process; native reclaim/selection can differ.';
                     break;
                 case 'io':
                     elements.scenarioIoHeavy.classList.add('active');
                     state.target.cpu = 30;
                     state.target.memory = 150;
                     state.target.io = 50; // Tries 50 MB/s
-                    elements.scenarioText.textContent = 'Container tries 50 MB/s I/O, but is throttled to ' + state.limits.io + ' MB/s. Disk I/O is limited without affecting other containers.';
+                    elements.scenarioText.textContent = 'Container tries 50 MB/s I/O, but is throttled to ' + state.limits.io + ' MB/s. This is an I/O ceiling; contention can remain.';
                     break;
             }
             
@@ -908,6 +994,7 @@
         }
 
         function reset() {
+            enosTimers.cancel();
             stopSimulation();
             state.containerKilled = false;
             state.usage = { cpu: 0, memory: 0, io: 0 };
@@ -947,6 +1034,27 @@
         initChart();
         updateLimits();
         updateUsageDisplay();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

@@ -11,12 +11,14 @@
     "estimated_time_minutes": 25,
     "passing_grade": 60,
     "bloom_distribution": {
-      "remember": "20%",
-      "understand": "25%",
-      "apply": "35%",
-      "analyse": "15%",
-      "evaluate": "5%"
-    }
+      "remember": 4,
+      "understand": 5,
+      "apply": 5,
+      "analyse": 4,
+      "evaluate": 4
+    },
+    "total_questions": 22,
+    "total_points": 171
   },
   "quiz_settings": {
     "shuffle_questions": true,
@@ -26,10 +28,24 @@
     "grading_method": "highest",
     "show_correct_answers": "after_close",
     "review_options": {
-      "during_attempt": ["feedback"],
-      "immediately_after": ["feedback", "marks"],
-      "later_while_open": ["feedback", "marks", "correct_answers"],
-      "after_close": ["feedback", "marks", "correct_answers", "general_feedback"]
+      "during_attempt": [
+        "feedback"
+      ],
+      "immediately_after": [
+        "feedback",
+        "marks"
+      ],
+      "later_while_open": [
+        "feedback",
+        "marks",
+        "correct_answers"
+      ],
+      "after_close": [
+        "feedback",
+        "marks",
+        "correct_answers",
+        "general_feedback"
+      ]
     }
   },
   "questions": [
@@ -45,26 +61,25 @@
         {
           "text": "-type",
           "fraction": 100,
-          "feedback": "Correct! `-type f` for files, `-type d` for directories, `-type l` for symlinks."
+          "feedback": "The `-type` option specifies the type: `f` for files, `d` for directories,\n`l` for symlinks. Example: `find . -type f` finds only files."
         },
         {
           "text": "-name",
           "fraction": 0,
-          "feedback": "Incorrect. `-name` searches by filename (pattern matching), not by type."
+          "feedback": "Confuses -name (searches by name, not type)"
         },
         {
           "text": "-size",
           "fraction": 0,
-          "feedback": "Incorrect. `-size` searches by file size."
+          "feedback": "Confuses -size (searches by size)"
         },
         {
           "text": "-mtime",
           "fraction": 0,
-          "feedback": "Incorrect. `-mtime` searches by last modification date."
+          "feedback": "Confuses -mtime (searches by modification date)"
         }
       ],
-      "general_feedback": "The `-type` option specifies the type: `f` for files, `d` for directories, `l` for symlinks.",
-      "tags": ["find", "syntax", "remember"]
+      "general_feedback": "The `-type` option specifies the type: `f` for files, `d` for directories,\n`l` for symlinks. Example: `find . -type f` finds only files."
     },
     {
       "id": "q02",
@@ -78,26 +93,25 @@
         {
           "text": "Finds the file instantly",
           "fraction": 0,
-          "feedback": "Incorrect. `locate` uses a pre-indexed database, it does not search in real-time."
+          "feedback": "Believes locate performs live search like find"
         },
         {
           "text": "Does not find the file (database not updated)",
           "fraction": 100,
-          "feedback": "Correct! The database updates periodically (typically overnight). Use `sudo updatedb` or `find` for immediate searches."
+          "feedback": "`locate` uses a pre-indexed database that updates periodically\n(typically overnight via cron). New files don't appear until `sudo updatedb`.\nUse `find` for real-time searches."
         },
         {
           "text": "Error - locate does not search in home",
           "fraction": 0,
-          "feedback": "Incorrect. `locate` searches all indexed directories, including home."
+          "feedback": "Does not understand the purpose of locate"
         },
         {
           "text": "Finds all test.txt files, including the new one",
           "fraction": 0,
-          "feedback": "Incorrect. The new file has not yet been indexed in the database."
+          "feedback": "Confuses with find's behaviour"
         }
       ],
-      "general_feedback": "`locate` uses a pre-indexed database for fast searches. For new files, use `find` or run `sudo updatedb` first.",
-      "tags": ["find", "locate", "understand"]
+      "general_feedback": "`locate` uses a pre-indexed database that updates periodically\n(typically overnight via cron). New files don't appear until `sudo updatedb`.\nUse `find` for real-time searches."
     },
     {
       "id": "q03",
@@ -105,32 +119,31 @@
       "category": "find and xargs",
       "bloom_level": "apply",
       "points": 8,
-      "question_text": "You want to find all `.log` files larger than 10MB modified in the last 7 days. Which command is correct?",
+      "question_text": "You want to find all `.log` files larger than 10MB modified\nin the last 7 days. Which command is correct?",
       "question_format": "markdown",
       "answers": [
         {
           "text": "find . -name '*.log' -size +10M -mtime -7",
           "fraction": 100,
-          "feedback": "Correct! `-name '*.log'` with quotes, `-size +10M` (+ = larger), `-mtime -7` (- = within the last N days)."
+          "feedback": "Correct: `-name '*.log'` (pattern with quotes), `-size +10M` (larger than),\n`-mtime -7` (modified in the last 7 days). The + sign means \"larger than\",\nthe - sign with mtime means \"within the last N days\"."
         },
         {
           "text": "find . -name '*.log' -size 10M -mtime 7",
           "fraction": 0,
-          "feedback": "Incorrect. Missing `+` for size (exactly 10M, not larger) and `-` for mtime (exactly 7 days, not last 7)."
+          "feedback": "Missing + for size, missing - for mtime"
         },
         {
           "text": "find . -type f '*.log' -size +10M -mtime -7",
           "fraction": 0,
-          "feedback": "Incorrect. Wrong syntax: `-type f` does not take pattern directly, you need `-name '*.log'`."
+          "feedback": "Wrong syntax: -type does not take pattern directly"
         },
         {
           "text": "find . -name *.log -size +10M -mtime -7",
           "fraction": 0,
-          "feedback": "Incorrect. Missing quotes: the shell will expand `*.log` prematurely in the current directory."
+          "feedback": "Missing quotes around pattern (shell expands prematurely)"
         }
       ],
-      "general_feedback": "The `+`/`-` signs with `-size` and `-mtime` are critical: `+` = larger/older, `-` = smaller/more recent, no sign = exact.",
-      "tags": ["find", "apply", "syntax"]
+      "general_feedback": "Correct: `-name '*.log'` (pattern with quotes), `-size +10M` (larger than),\n`-mtime -7` (modified in the last 7 days). The + sign means \"larger than\",\nthe - sign with mtime means \"within the last N days\"."
     },
     {
       "id": "q04",
@@ -144,26 +157,25 @@
         {
           "text": "All .txt files and all .md files",
           "fraction": 0,
-          "feedback": "Incorrect. AND has higher precedence than OR in find."
+          "feedback": "Does not understand operator precedence"
         },
         {
           "text": "All FILES with .txt and ANYTHING (file or directory) with .md",
           "fraction": 100,
-          "feedback": "Correct! It is interpreted as: `(-type f AND -name \"*.txt\") OR (-name \"*.md\")`. For both as files, use parentheses."
+          "feedback": "AND has higher precedence than OR in find!\nIt is interpreted as: `(-type f AND -name \"*.txt\") OR (-name \"*.md\")`\nCorrect solution: `find . -type f \\( -name \"*.txt\" -o -name \"*.md\" \\)`"
         },
         {
           "text": "Syntax error",
           "fraction": 0,
-          "feedback": "Incorrect. The syntax is valid, just the result is not as expected."
+          "feedback": "Syntax is valid, does not produce error"
         },
         {
           "text": "Nothing - conditions are mutually exclusive",
           "fraction": 0,
-          "feedback": "Incorrect. OR combines conditions, it does not exclude them."
+          "feedback": "Conditions are not exclusive, OR combines them"
         }
       ],
-      "general_feedback": "Correct solution: `find . -type f \\( -name \"*.txt\" -o -name \"*.md\" \\)` - parentheses group the OR.",
-      "tags": ["find", "operators", "understand"]
+      "general_feedback": "AND has higher precedence than OR in find!\nIt is interpreted as: `(-type f AND -name \"*.txt\") OR (-name \"*.md\")`\nCorrect solution: `find . -type f \\( -name \"*.txt\" -o -name \"*.md\" \\)`"
     },
     {
       "id": "q05",
@@ -177,26 +189,25 @@
         {
           "text": "find . -name '*.txt' | xargs rm",
           "fraction": 0,
-          "feedback": "Incorrect. xargs implicitly splits on spaces: \"important document.txt\" becomes 2 separate arguments."
+          "feedback": "xargs implicitly splits on spaces - dangerous!"
         },
         {
           "text": "find . -name '*.txt' -print0 | xargs -0 rm",
-          "fraction": 50,
-          "feedback": "Correct, but not the only solution. `-print0` and `-0` use null as separator."
+          "fraction": 0,
+          "feedback": "Correct, but not the only solution"
         },
         {
           "text": "find . -name '*.txt' -exec rm {} +",
-          "fraction": 50,
-          "feedback": "Correct, but not the only solution. `-exec {} +` passes arguments directly, without space problems."
+          "fraction": 0,
+          "feedback": "Correct, but not the only solution"
         },
         {
-          "text": "Both B and C are correct",
+          "text": "Removing cat alone fixes filename splitting in the displayed code",
           "fraction": 100,
-          "feedback": "Correct! Both methods correctly handle files with spaces in their names."
+          "feedback": "Both variants are correct for files with spaces:\n- `-print0 | xargs -0` uses null as separator\n- `-exec {} +` groups arguments and passes them directly\nVariant A fails for \"important document.txt\" (becomes 2 arguments)."
         }
       ],
-      "general_feedback": "For files with special characters: use `-print0 | xargs -0` or `-exec {} +`. Never use simple `| xargs`!",
-      "tags": ["find", "xargs", "apply", "security"]
+      "general_feedback": "Both variants are correct for files with spaces:\n- `-print0 | xargs -0` uses null as separator\n- `-exec {} +` groups arguments and passes them directly\nVariant A fails for \"important document.txt\" (becomes 2 arguments)."
     },
     {
       "id": "q06",
@@ -210,26 +221,25 @@
         {
           "text": "$#",
           "fraction": 100,
-          "feedback": "Correct! `$#` returns the number of arguments (count)."
+          "feedback": "`$#` = number of arguments (count)\n`$@` = all arguments as list\n`$*` = all arguments as string\n`$0` = script name"
         },
         {
           "text": "$@",
           "fraction": 0,
-          "feedback": "Incorrect. `$@` contains all arguments as a separated list."
+          "feedback": "Confuses with the list of arguments"
         },
         {
           "text": "$*",
           "fraction": 0,
-          "feedback": "Incorrect. `$*` contains all arguments as a single string."
+          "feedback": "Confuses with the string of arguments"
         },
         {
           "text": "$0",
           "fraction": 0,
-          "feedback": "Incorrect. `$0` contains the script name."
+          "feedback": "Confuses with the script name"
         }
       ],
-      "general_feedback": "Special variables: `$#` = count, `$@` = list, `$*` = string, `$0` = script name, `$1-$9` = individual arguments.",
-      "tags": ["bash", "variables", "remember"]
+      "general_feedback": "`$#` = number of arguments (count)\n`$@` = all arguments as list\n`$*` = all arguments as string\n`$0` = script name"
     },
     {
       "id": "q07",
@@ -243,26 +253,25 @@
         {
           "text": "1 element",
           "fraction": 0,
-          "feedback": "Incorrect. There are 2 distinct arguments."
+          "feedback": "Believes everything becomes a single string"
         },
         {
           "text": "2 elements",
           "fraction": 100,
-          "feedback": "Correct! \"Hello World\" is a single argument (due to quotes), Test is the second."
+          "feedback": "With double quotes, `\"$@\"` preserves the original arguments:\n- Argument 1: \"Hello World\" (a single argument)\n- Argument 2: \"Test\"\nTotal: 2 elements. Without quotes, it would be 3 (\"Hello\", \"World\", \"Test\")."
         },
         {
           "text": "3 elements",
           "fraction": 0,
-          "feedback": "Incorrect. It would be 3 only without quotes: \"$@\" preserves the original arguments."
+          "feedback": "Confuses with behaviour without quotes"
         },
         {
           "text": "4 elements",
           "fraction": 0,
-          "feedback": "Incorrect. $0 (script name) is not included in $@."
+          "feedback": "Counts the script name as well"
         }
       ],
-      "general_feedback": "With double quotes, `\"$@\"` preserves arguments as they were passed. Without quotes, it would re-split on spaces.",
-      "tags": ["bash", "variables", "understand"]
+      "general_feedback": "With double quotes, `\"$@\"` preserves the original arguments:\n- Argument 1: \"Hello World\" (a single argument)\n- Argument 2: \"Test\"\nTotal: 2 elements. Without quotes, it would be 3 (\"Hello\", \"World\", \"Test\")."
     },
     {
       "id": "q08",
@@ -276,26 +285,25 @@
         {
           "text": "while getopts \"vf\" opt; do",
           "fraction": 0,
-          "feedback": "Incorrect. Neither `-v` nor `-f` will receive argument."
+          "feedback": "Neither v nor f receive argument"
         },
         {
           "text": "while getopts \"v:f:\" opt; do",
           "fraction": 0,
-          "feedback": "Incorrect. Both receive argument, but `-v` is just a simple flag."
+          "feedback": "Both receive argument (wrong for -v)"
         },
         {
           "text": "while getopts \"vf:\" opt; do",
           "fraction": 100,
-          "feedback": "Correct! `v` = simple flag, `f:` = option with mandatory argument (`:` after letter)."
+          "feedback": "A colon (`:`) after a letter means \"requires argument\".\n- `v` = simple flag (no argument)\n- `f:` = option with mandatory argument\nTherefore: `\"vf:\"` is correct."
         },
         {
           "text": "while getopts \":vf\" opt; do",
           "fraction": 0,
-          "feedback": "Incorrect. `:` at beginning activates silent error mode, does not solve the argument problem."
+          "feedback": ": at beginning = silent error mode, does not solve the problem"
         }
       ],
-      "general_feedback": "In getopts, `:` after letter = requires argument. `\":vf:\"` = silent mode + v flag + f with argument.",
-      "tags": ["getopts", "apply", "arguments"]
+      "general_feedback": "A colon (`:`) after a letter means \"requires argument\".\n- `v` = simple flag (no argument)\n- `f:` = option with mandatory argument\nTherefore: `\"vf:\"` is correct."
     },
     {
       "id": "q09",
@@ -309,26 +317,25 @@
         {
           "text": "rwxr-xr-x",
           "fraction": 100,
-          "feedback": "Correct! 7=rwx (4+2+1), 5=r-x (4+0+1), 5=r-x (4+0+1)."
+          "feedback": "7 = rwx (4+2+1), 5 = r-x (4+0+1), 5 = r-x (4+0+1)\nOwner: read+write+execute, Group: read+execute, Others: read+execute\nTypical for executable scripts."
         },
         {
           "text": "rwxrwxrwx",
           "fraction": 0,
-          "feedback": "Incorrect. That is 777."
+          "feedback": "777 = rwxrwxrwx"
         },
         {
           "text": "rw-r--r--",
           "fraction": 0,
-          "feedback": "Incorrect. That is 644."
+          "feedback": "644 = rw-r--r--"
         },
         {
           "text": "rwx------",
           "fraction": 0,
-          "feedback": "Incorrect. That is 700."
+          "feedback": "700 = rwx------"
         }
       ],
-      "general_feedback": "Calculation: r=4, w=2, x=1. 755 = (4+2+1)(4+0+1)(4+0+1) = rwxr-xr-x. Typical for executables.",
-      "tags": ["permissions", "octal", "remember"]
+      "general_feedback": "7 = rwx (4+2+1), 5 = r-x (4+0+1), 5 = r-x (4+0+1)\nOwner: read+write+execute, Group: read+execute, Others: read+execute\nTypical for executable scripts."
     },
     {
       "id": "q10",
@@ -342,26 +349,25 @@
         {
           "text": "rw-rw-r--",
           "fraction": 100,
-          "feedback": "Correct! `g+w` adds write for group: r-- becomes rw-."
+          "feedback": "`g+w` = add write for group\nInitially: rw- r-- r-- (owner, group, others)\nAfter: rw- rw- r-- (group receives w)"
         },
         {
           "text": "rwxrw-r--",
           "fraction": 0,
-          "feedback": "Incorrect. `g+w` adds only write to group, not x to owner."
+          "feedback": "Confuses with adding x"
         },
         {
           "text": "rw-r--rw-",
           "fraction": 0,
-          "feedback": "Incorrect. You're confusing `g` (group) with `o` (others)."
+          "feedback": "Confuses g (group) with o (others)"
         },
         {
           "text": "rw-rwxr--",
           "fraction": 0,
-          "feedback": "Incorrect. `+w` adds only write, not execute."
+          "feedback": "Adds too many permissions"
         }
       ],
-      "general_feedback": "Symbolic notation: u=user/owner, g=group, o=others, a=all. +/- adds/removes permissions.",
-      "tags": ["permissions", "chmod", "understand"]
+      "general_feedback": "`g+w` = add write for group\nInitially: rw- r-- r-- (owner, group, others)\nAfter: rw- rw- r-- (group receives w)"
     },
     {
       "id": "q11",
@@ -375,26 +381,25 @@
         {
           "text": "Missing execute permission; solution: chmod +x backup.sh",
           "fraction": 100,
-          "feedback": "Correct! For `./script.sh` you need x. Alternatively: `bash backup.sh` (does not require x)."
+          "feedback": "To run a script with `./script.sh`, you need execute permission.\n`rw-r--r--` = 644 does not include x. Solution: `chmod +x backup.sh` or `chmod 755 backup.sh`.\nAlternatively, you can run with `bash backup.sh` (does not require x)."
         },
         {
           "text": "Missing read permission; solution: chmod +r backup.sh",
           "fraction": 0,
-          "feedback": "Incorrect. Read exists (r--), the problem is missing execute."
+          "feedback": "Read is for reading content, not execution"
         },
         {
           "text": "File is owned by root; solution: sudo ./backup.sh",
           "fraction": 0,
-          "feedback": "Incorrect. Ownership is not mentioned and sudo does not solve missing x permission."
+          "feedback": "Ownership is not the problem here"
         },
         {
           "text": "Shebang is wrong; solution: check first line",
           "fraction": 0,
-          "feedback": "Incorrect. Shebang affects interpreter, not execution permissions."
+          "feedback": "Shebang affects interpreter, not permissions"
         }
       ],
-      "general_feedback": "rw-r--r-- = 644 does not include execute. Solutions: `chmod +x` or `chmod 755` or `bash script.sh`.",
-      "tags": ["permissions", "debugging", "analyse"]
+      "general_feedback": "To run a script with `./script.sh`, you need execute permission.\n`rw-r--r--` = 644 does not include x. Solution: `chmod +x backup.sh` or `chmod 755 backup.sh`.\nAlternatively, you can run with `bash backup.sh` (does not require x)."
     },
     {
       "id": "q12",
@@ -402,32 +407,31 @@
       "category": "Unix permissions",
       "bloom_level": "apply",
       "points": 8,
-      "question_text": "You want a script to run with the owner's permissions, not those of the person executing it. What do you do?",
+      "question_text": "You want an eligible compiled executable to run with the owner's permissions, not those of\nthe person executing it. What do you do?",
       "question_format": "markdown",
       "answers": [
         {
-          "text": "chmod u+s script.sh",
+          "text": "chmod u+s program",
           "fraction": 100,
-          "feedback": "Correct! SUID (Set User ID) makes the script run with the owner's UID. CAUTION: SUID on scripts is ignored on most modern systems!"
+          "feedback": "SUID (Set User ID): `chmod u+s` or `chmod 4755`\nOn a supporting filesystem without nosuid and with other execution constraints satisfied, the executable uses the owner's effective UID.\nCAUTION: SUID on scripts is ignored on most modern systems!\nIt is used for binaries like /usr/bin/passwd."
         },
         {
-          "text": "chmod g+s script.sh",
+          "text": "chmod g+s program",
           "fraction": 0,
-          "feedback": "Incorrect. SGID (g+s) runs with the group's GID, not the owner's."
+          "feedback": "SGID (g+s) = runs with group's GID"
         },
         {
-          "text": "chmod +t script.sh",
+          "text": "chmod +t program",
           "fraction": 0,
-          "feedback": "Incorrect. Sticky bit (+t) protects file deletion in public directories."
+          "feedback": "Sticky bit (+t) = protects deletion in directories"
         },
         {
-          "text": "chmod 777 script.sh",
+          "text": "chmod 777 program",
           "fraction": 0,
-          "feedback": "Incorrect. 777 grants permissions to everyone, but does not change process identity."
+          "feedback": "777 grants permissions, does not change identity"
         }
       ],
-      "general_feedback": "SUID/SGID are special permission bits. SUID on shell scripts is disabled for security reasons.",
-      "tags": ["permissions", "suid", "apply"]
+      "general_feedback": "SUID (Set User ID): `chmod u+s` or `chmod 4755`\nOn a supporting filesystem without nosuid and with other execution constraints satisfied, the executable uses the owner's effective UID.\nCAUTION: SUID on scripts is ignored on most modern systems!\nIt is used for binaries like /usr/bin/passwd."
     },
     {
       "id": "q13",
@@ -441,26 +445,25 @@
         {
           "text": "minute hour day_of_month month day_of_week command",
           "fraction": 100,
-          "feedback": "Correct! m h dom mon dow command (minute, hour, day of month, month, day of week)."
+          "feedback": "Crontab format: `m h dom mon dow command`\n- m = minute (0-59)\n- h = hour (0-23)\n- dom = day of month (1-31)\n- mon = month (1-12)\n- dow = day of week (0-7, 0 and 7 = Sunday)"
         },
         {
           "text": "hour minute day_of_month month day_of_week command",
           "fraction": 0,
-          "feedback": "Incorrect. Minute comes first, not hour."
+          "feedback": "Swaps minute and hour"
         },
         {
           "text": "minute hour month day_of_month day_of_week command",
           "fraction": 0,
-          "feedback": "Incorrect. Day_of_month comes before month."
+          "feedback": "Swaps month and day"
         },
         {
           "text": "day_of_week month day_of_month hour minute command",
           "fraction": 0,
-          "feedback": "Incorrect. The order is completely reversed."
+          "feedback": "Completely wrong order"
         }
       ],
-      "general_feedback": "Mnemonic: \"Minute Hour Day-of-month Month Day-of-week\" (from small to large in time).",
-      "tags": ["cron", "syntax", "remember"]
+      "general_feedback": "Crontab format: `m h dom mon dow command`\n- m = minute (0-59)\n- h = hour (0-23)\n- dom = day of month (1-31)\n- mon = month (1-12)\n- dow = day of week (0-7, 0 and 7 = Sunday)"
     },
     {
       "id": "q14",
@@ -474,26 +477,25 @@
         {
           "text": "Runs backup.sh every Monday at 2:30 AM",
           "fraction": 100,
-          "feedback": "Correct! 30=min, 2=hour, *=any day, *=any month, 1=Monday."
+          "feedback": "30 = minute 30, 2 = hour 2, * = any day, * = any month, 1 = Monday\nTherefore: every Monday at 02:30 in the morning."
         },
         {
           "text": "Runs backup.sh on the 2nd of each month at 00:30",
           "fraction": 0,
-          "feedback": "Incorrect. You're confusing hour position (2) with day of month."
+          "feedback": "Confuses hour position with day_of_month"
         },
         {
           "text": "Runs backup.sh every day at 2:30 AM",
           "fraction": 0,
-          "feedback": "Incorrect. Field 5 (day_of_week=1) restricts to Monday."
+          "feedback": "Ignores day_of_week field (1=Monday)"
         },
         {
           "text": "Runs backup.sh once a month, on Monday",
           "fraction": 0,
-          "feedback": "Incorrect. Runs EVERY Monday, not once a month."
+          "feedback": "Does not understand field combination"
         }
       ],
-      "general_feedback": "Field 5: 0 and 7 = Sunday, 1 = Monday, ..., 6 = Saturday.",
-      "tags": ["cron", "interpret", "understand"]
+      "general_feedback": "30 = minute 30, 2 = hour 2, * = any day, * = any month, 1 = Monday\nTherefore: every Monday at 02:30 in the morning."
     },
     {
       "id": "q15",
@@ -501,32 +503,31 @@
       "category": "CRON",
       "bloom_level": "apply",
       "points": 8,
-      "question_text": "You want to run a script every 15 minutes. Which line is correct?",
+      "question_text": "Which line uses step notation to run a script at minutes 0, 15, 30 and 45 each hour?",
       "question_format": "markdown",
       "answers": [
         {
           "text": "*/15 * * * * /path/script.sh",
           "fraction": 100,
-          "feedback": "Correct! `*/15` = step value, runs at minutes 0, 15, 30, 45."
+          "feedback": "`*/15` = every 15 minutes (0, 15, 30, 45)\n`15 * * * *` = only at minute 15 of each hour\nVariant D is functionally equivalent, but uses an explicit list rather than the requested step notation."
         },
         {
           "text": "15 * * * * /path/script.sh",
           "fraction": 0,
-          "feedback": "Incorrect. Runs only at minute 15 of each hour, not every 15 minutes."
+          "feedback": "Runs only once per hour, at minute 15"
         },
         {
           "text": "0-15 * * * * /path/script.sh",
           "fraction": 0,
-          "feedback": "Incorrect. Range 0-15 = runs at minutes 0, 1, 2, ..., 15 (16 times per hour!)."
+          "feedback": "0-15 = minutes 0-15, not interval of 15"
         },
         {
           "text": "0,15,30,45 * * * * /path/script.sh",
-          "fraction": 80,
-          "feedback": "Functionally correct, but `*/15` is more elegant and easier to read."
+          "fraction": 0,
+          "feedback": "Functionally equivalent explicit list; the question requests step notation"
         }
       ],
-      "general_feedback": "Syntax: `*/n` = step value (every n), `n-m` = range, `n,m,o` = list.",
-      "tags": ["cron", "apply", "interval"]
+      "general_feedback": "`*/15` = every 15 minutes (0, 15, 30, 45)\n`15 * * * *` = only at minute 15 of each hour\nVariant D is functionally equivalent, but uses an explicit list rather than the requested step notation."
     },
     {
       "id": "q16",
@@ -534,32 +535,31 @@
       "category": "CRON",
       "bloom_level": "analyse",
       "points": 9,
-      "question_text": "A cron job is not running. The script works manually.\nCrontab line: `0 3 * * * backup.sh`\n\nWhat is the most likely cause?",
+      "question_text": "The cron daemon is confirmed running, the crontab is installed and readable,\nand the executable script works manually. Its directory is absent from cron PATH.\nCrontab line: `0 3 * * * backup.sh`\n\nWhat is the most likely cause?",
       "question_format": "markdown",
       "answers": [
         {
           "text": "Missing absolute path to script",
           "fraction": 100,
-          "feedback": "Correct! Cron runs with minimal PATH. Use `/home/user/backup.sh` or set PATH in crontab."
+          "feedback": "Cron runs with a minimal PATH. `backup.sh` without absolute path is not found.\nSolution: use `/home/user/backup.sh` or set PATH in crontab.\nOther common causes: missing environment variables, unredirected output."
         },
         {
           "text": "Hour 3 does not exist (daylight saving)",
           "fraction": 0,
-          "feedback": "Incorrect. DST is a rare problem and not the first to check."
+          "feedback": "DST is a rare problem, not the first to check"
         },
         {
           "text": "Cron daemon is not running",
           "fraction": 0,
-          "feedback": "Incorrect. If the script runs manually from terminal, the system is working."
+          "feedback": "Manual script execution alone cannot prove the daemon is running; this is explicitly confirmed in the question"
         },
         {
           "text": "Insufficient permissions on crontab",
           "fraction": 0,
-          "feedback": "Incorrect. Permission error would be different (crontab: permission denied)."
+          "feedback": "Error would be different for permissions"
         }
       ],
-      "general_feedback": "Common cron problems: minimal PATH, missing environment variables, unredirected output. Test with `* * * * *` for debugging.",
-      "tags": ["cron", "debugging", "analyse"]
+      "general_feedback": "Cron runs with a minimal PATH. `backup.sh` without absolute path is not found.\nSolution: use `/home/user/backup.sh` or set PATH in crontab.\nOther common causes: missing environment variables, unredirected output."
     },
     {
       "id": "q17",
@@ -567,37 +567,206 @@
       "category": "General evaluation",
       "bloom_level": "evaluate",
       "points": 10,
-      "question_text": "You need to process 10,000 .log files, deleting empty lines.\nWhich approach is the most efficient?",
+      "question_text": "You need to process 10,000 regular .log files recursively, including names with spaces.\nWhich displayed approach both preserves filename boundaries and batches sed invocations?",
       "question_format": "markdown",
       "answers": [
         {
           "text": "for f in *.log; do sed -i '/^$/d' \"$f\"; done",
-          "fraction": 20,
-          "feedback": "Works, but starts 10,000 sed processes - very slow."
+          "fraction": 0,
+          "feedback": "Works, but 10,000 forks = slow"
         },
         {
           "text": "find . -name '*.log' -exec sed -i '/^$/d' {} \\;",
-          "fraction": 20,
-          "feedback": "Works, but `\\;` starts one sed per file - equally slow."
+          "fraction": 0,
+          "feedback": "\\; = one sed per file, inefficient"
         },
         {
           "text": "find . -name '*.log' -exec sed -i '/^$/d' {} +",
           "fraction": 100,
-          "feedback": "Correct! `+` groups files and minimises the number of forked processes."
+          "feedback": "Variant C with `+` groups filenames into bounded batches. It satisfies both stated\nstructural requirements; no elapsed-time benchmark is implied. In contrast:\n- A/B: starts a sed process for EACH file (10,000 processes)\n- D: problems with spaces in names (would need -print0 | xargs -0)"
         },
         {
           "text": "find . -name '*.log' | xargs sed -i '/^$/d'",
-          "fraction": 40,
-          "feedback": "Almost correct, but has problems with spaces in names. Should be `-print0 | xargs -0`."
+          "fraction": 0,
+          "feedback": "Problems with spaces, not robust"
         }
       ],
-      "general_feedback": "For batch processing: `-exec {} +` or `-print0 | xargs -0` are the most efficient and safe.",
-      "tags": ["performance", "evaluate", "best-practice"]
+      "general_feedback": "Variant C with `+` groups filenames into bounded batches. It satisfies both stated\nstructural requirements; no elapsed-time benchmark is implied. In contrast:\n- A/B: starts a sed process for EACH file (10,000 processes)\n- D: problems with spaces in names (would need -print0 | xargs -0)"
+    },
+    {
+      "id": "trap_01",
+      "type": "multichoice",
+      "category": "Trap Questions",
+      "bloom_level": "evaluate",
+      "points": 8,
+      "question_text": "A colleague shows you this \"elegant\" one-liner:\n\n  find / -name \"*.log\" -delete 2>/dev/null\n\nWhat do you tell them?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Excellent! Suppressing errors makes it cleaner",
+          "fraction": 0,
+          "feedback": "AI-style answer - validates syntax but ignores danger"
+        },
+        {
+          "text": "Dangerous: deletes ALL .log files including critical ones",
+          "fraction": 100,
+          "feedback": "It attempts deletion of matching .log entries throughout /, subject to permissions.\nA name such as /var/log/syslog does not match the .log suffix.\nThe error suppression (2>/dev/null) hides permission denied but does not\nprevent deletion of user-owned logs.\nAnswer A sounds like AI-generated feedback (focuses on style not consequences)."
+        },
+        {
+          "text": "Does not work - -delete requires -depth",
+          "fraction": 0,
+          "feedback": "GNU -delete automatically enables depth-first traversal"
+        },
+        {
+          "text": "Needs sudo to actually delete system files",
+          "fraction": 0,
+          "feedback": "Without sudo it still deletes user logs"
+        }
+      ],
+      "general_feedback": "It attempts deletion of matching .log entries throughout /, subject to permissions.\nA name such as /var/log/syslog does not match the .log suffix.\nThe error suppression (2>/dev/null) hides permission denied but does not\nprevent deletion of user-owned logs.\nAnswer A sounds like AI-generated feedback (focuses on style not consequences)."
+    },
+    {
+      "id": "trap_02",
+      "type": "multichoice",
+      "category": "Trap Questions",
+      "bloom_level": "analyse",
+      "points": 8,
+      "question_text": "Your script processes files from user input:\n\n  read -p \"Enter filename: \" filename\n  cat $filename | process_data\n\nWhat is wrong?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "Should use printf instead of read",
+          "fraction": 0,
+          "feedback": "printf is for output not input"
+        },
+        {
+          "text": "Useless use of cat - just use: process_data < $filename",
+          "fraction": 0,
+          "feedback": "Style preference not security requirement"
+        },
+        {
+          "text": "Missing quotes: cat \"$filename\"",
+          "fraction": 100,
+          "feedback": "Missing quotes is a SECURITY vulnerability plus it breaks on spaces.\nWhile \"useless use of cat\" (option B) is a style concern it is not security.\nOption D is the trap - LLMs love \"both X and Y\" to sound comprehensive.\nBut in security there is a hierarchy: quotes are CRITICAL while UUOC is cosmetic."
+        },
+        {
+          "text": "Removing cat alone fixes filename splitting in the displayed code",
+          "fraction": 0,
+          "feedback": "B is style while C is security - they are not equivalent"
+        }
+      ],
+      "general_feedback": "Missing quotes is a SECURITY vulnerability plus it breaks on spaces.\nWhile \"useless use of cat\" (option B) is a style concern it is not security.\nOption D is the trap - LLMs love \"both X and Y\" to sound comprehensive.\nBut in security there is a hierarchy: quotes are CRITICAL while UUOC is cosmetic."
+    },
+    {
+      "id": "trap_03",
+      "type": "multichoice",
+      "category": "Trap Questions",
+      "bloom_level": "analyse",
+      "points": 8,
+      "question_text": "This cron job runs at 2:30 AM but sometimes fails silently:\n\n  30 2 * * * /home/user/backup.sh\n\nWhich conclusion is justified by these facts alone?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "The script certainly uses invalid relative paths",
+          "fraction": 0,
+          "feedback": "No relative path inside the script is shown"
+        },
+        {
+          "text": "A DST transition is certainly the cause",
+          "fraction": 0,
+          "feedback": "No transition date, timezone or implementation evidence is supplied"
+        },
+        {
+          "text": "Adding redirection is guaranteed to repair the underlying failure",
+          "fraction": 0,
+          "feedback": "Capturing diagnostics does not by itself repair the cause"
+        },
+        {
+          "text": "Insufficient evidence: inspect logs, environment, paths and the relevant schedule",
+          "fraction": 100,
+          "feedback": "The prompt does not identify a cause. Cron normally sets HOME, but the job's\nenvironment and working directory differ from an interactive session.\nLogs, exit status and a controlled reproduction distinguish path, resource,\ninterpreter and scheduling hypotheses. No prevalence measurement is supplied."
+        }
+      ],
+      "general_feedback": "The prompt does not identify a cause. Cron normally sets HOME, but the job's\nenvironment and working directory differ from an interactive session.\nLogs, exit status and a controlled reproduction distinguish path, resource,\ninterpreter and scheduling hypotheses. No prevalence measurement is supplied."
+    },
+    {
+      "id": "tacit_01",
+      "type": "multichoice",
+      "category": "Tacit Knowledge",
+      "bloom_level": "evaluate",
+      "points": 10,
+      "question_text": "The executable backup script calls a tool by its bare name. The tool exists\nonly in /usr/local/bin. The job log reports \"command not found\" and the cron\njob PATH is /usr/bin:/bin; manual execution has /usr/local/bin in PATH.\nWhich demonstrated difference explains this particular failure?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "The script's shebang line",
+          "fraction": 0,
+          "feedback": "The script is confirmed executable and reached the tool invocation"
+        },
+        {
+          "text": "Whether the disk is full",
+          "fraction": 0,
+          "feedback": "The displayed failure is command discovery, not an output-space error"
+        },
+        {
+          "text": "Environment variables (PATH, HOME, etc.)",
+          "fraction": 100,
+          "feedback": "The stated PATH omits the only directory containing the required tool.\nSet the required PATH or call the tool by its verified absolute path.\nThis conclusion follows from the supplied log and location, not a claim\nthat environment errors account for a particular percentage of cron issues."
+        },
+        {
+          "text": "The cron log in /var/log/syslog",
+          "fraction": 0,
+          "feedback": "The relevant job log and PATH evidence are already provided"
+        }
+      ],
+      "general_feedback": "The stated PATH omits the only directory containing the required tool.\nSet the required PATH or call the tool by its verified absolute path.\nThis conclusion follows from the supplied log and location, not a claim\nthat environment errors account for a particular percentage of cron issues."
+    },
+    {
+      "id": "tacit_02",
+      "type": "multichoice",
+      "category": "Tacit Knowledge",
+      "bloom_level": "evaluate",
+      "points": 10,
+      "question_text": "A colleague asks: \"My script runs fine as root but fails as normal user.\nThe executable script only reads files in /opt/app/data/ (mode 755).\nAll target files are confirmed readable by that user; no ACL or security module denies access.\"\n\nWhat is the MOST LIKELY cause?",
+      "question_format": "markdown",
+      "answers": [
+        {
+          "text": "The files inside /opt/app/data/ have restrictive permissions",
+          "fraction": 0,
+          "feedback": "File readability is explicitly confirmed; directory mode alone would not prove it"
+        },
+        {
+          "text": "The script itself is not executable for normal users",
+          "fraction": 0,
+          "feedback": "Excluded by the explicit checks in the question"
+        },
+        {
+          "text": "A parent directory (/opt or /opt/app) lacks execute permission",
+          "fraction": 100,
+          "feedback": "The sneaky one: you need execute (x) permission on EVERY directory in the\npath to reach a file, not just the final directory.\n\nIf /opt has permissions 750 and the user is not in the group, they cannot\ntraverse through it even if /opt/app/data is 755.\n\nThis catches people every time. The directory you're looking at seems fine,\nbut you forgot to check the parents."
+        },
+        {
+          "text": "Absolute paths are syntactically forbidden for normal users",
+          "fraction": 0,
+          "feedback": "Excluded by the explicit checks in the question"
+        }
+      ],
+      "general_feedback": "The sneaky one: you need execute (x) permission on EVERY directory in the\npath to reach a file, not just the final directory.\n\nIf /opt has permissions 750 and the user is not in the group, they cannot\ntraverse through it even if /opt/app/data is 755.\n\nThis catches people every time. The directory you're looking at seems fine,\nbut you forgot to check the parents."
     }
   ],
   "export_info": {
     "format_version": "1.0",
-    "compatible_with": ["Moodle 4.x", "Canvas LMS", "Blackboard"],
+    "compatible_with": [
+      "Moodle 4.x",
+      "Canvas LMS",
+      "Blackboard"
+    ],
     "import_instructions": "Import as GIFT or JSON format in your LMS quiz bank."
+  },
+  "source_sync": {
+    "source": "quiz.yaml",
+    "sha256": "8a5a39224d94970712186bc569685459801257b784886bcfb702a3f09cada08a",
+    "assessment_status": "PENDING_POLICY",
+    "note": "Question content is synchronised; LMS import and conflicting assessment policy require separate validation."
   }
 }

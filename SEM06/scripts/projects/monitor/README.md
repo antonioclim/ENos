@@ -1,238 +1,90 @@
 # System Monitor
 
-**Complete system resource monitoring application in Bash**
+A modular Bash teaching application for CPU, memory, disk, swap and load observations. It supports text, JSON and CSV, configurable thresholds, a foreground continuous loop and optional email/Slack transports. A successful fixture test does not establish production readiness or successful external notification delivery.
 
-## Description
+## Architecture and dependencies
 
-System Monitor is a professional application for monitoring system resources: CPU, memory, disk, swap and load average. It supports configurable alerting, email and Slack notifications, daemon mode for continuous monitoring and multiple output formats.
+`monitor.sh` loads separate `lib/core.sh` (logging/locks), `lib/config.sh` (literal settings and CLI) and `lib/utils.sh` (metrics). `bin/sysmonitor` invokes the project through Bash; copy the complete directory if installing it, not the wrapper alone. Bash 4.4+, Python 3.10+, GNU/Linux `/proc`, awk, df, ps and flock are needed. Curl/mail are optional only when their transport is configured.
 
-## Architecture
+## Run an owned local sample
 
-```
-monitor/
-├── monitor.sh          # Main script (entry point)
-├── bin/
-│   └── sysmonitor      # Wrapper for installation
-├── lib/
-│   ├── core.sh         # Fundamental functions (logging, error handling)
-│   ├── utils.sh        # System metrics collection functions
-│   └── config.sh       # Configuration management
-├── etc/
-│   └── monitor.conf    # Default configuration
-├── var/
-│   ├── log/            # Log files
-│   └── run/            # PID files (for daemon mode)
-└── tests/
-    └── test_monitor.sh # Test suite
-```
-
-## Installation
+From the repository root:
 
 ```bash
-# Clone/copy the project
-cd /path/to/monitor
-
-# Set execution permissions
-chmod +x monitor.sh bin/sysmonitor tests/test_monitor.sh
-
-# Optional: create symlink for global access
-sudo ln -sf "$(pwd)/monitor.sh" /usr/local/bin/sysmonitor
+#!/usr/bin/env bash
+set -euo pipefail
+work=
+trap '[[ -z ${work:-} ]] || rm -rf -- "$work"' EXIT
+work=$(mktemp -d)
+if LOG_DIR="$work/log" RUN_DIR="$work/run" \
+   bash SEM06/scripts/projects/monitor/monitor.sh --config /dev/null \
+       --log-file "$work/monitor.log" --output json > "$work/sample.json"; then
+    status=0
+else
+    status=$?
+fi
+python3 -m json.tool "$work/sample.json"
+printf 'Monitor exit status: %s\n' "$status"
+[[ $status == 0 || $status == 2 ]] # 2 means alerts/unknown probes, not a healthy success
 ```
 
-## Usage
+`--help` and `--version` are read-only. No `--all`, `--cpu`, `--format=json`, `--continuous` or `--interval=60` interface exists. Use separate option/value arguments.
 
-### Single-Shot Check
+## CLI
 
-```bash
-# Quick check (immediate exit)
-./monitor.sh
+| Purpose | Supported options |
+|---|---|
+| Configuration | `-c FILE`, `--config FILE` |
+| Thresholds | `--cpu-threshold N`, `--mem-threshold N`, `--disk-threshold N` |
+| Loop | `-d`, `--daemon`, `-i N`, `--interval N` |
+| Output | `-o text`, `-o json`, `-o csv` |
+| Diagnostics | `-l FILE`, `--log-file FILE`, `--log-level LEVEL`, `-v`, `--verbose` |
+| Exclusions | `--exclude-mount PATH` (repeatable) |
+| Notification | `-e ADDRESS`, `--email ADDRESS`; webhook via literal configuration |
+| Dry run | `-n`, `--dry-run`: read metrics, suppress notifications and file/lock writes |
 
-# With JSON output
-./monitor.sh -o json
+Continuous mode remains in the foreground; a service manager supervises that PID. Interval waits and the first alert do not abort the loop accidentally. INT/TERM exits use normal trap cleanup; SIGKILL cannot clean resources. A stable flock file provides exclusion; do not delete it merely because it exists.
 
-# Verbose mode
-./monitor.sh -v
-```
+## Configuration contract
 
-### Daemon Mode
+Defaults < configuration file < explicitly exported supported environment settings < CLI. An explicit `--config` must be readable; otherwise the project-relative `etc/monitor.conf` is used when present. Values are literal KEY=VALUE data with shell-style quoting only, no expansion or execution. For example:
 
-```bash
-# Start continuous monitoring
-./monitor.sh -d
-
-# With custom interval (30 seconds)
-./monitor.sh -d -i 30
-
-# With email notifications
-./monitor.sh -d -e admin@example.com
-```
-
-### Custom Thresholds
-
-```bash
-# Set specific thresholds
-./monitor.sh --cpu-threshold 90 --mem-threshold 95 --disk-threshold 80
-
-# Or via environment variables
-THRESHOLD_CPU=90 THRESHOLD_MEM=95 ./monitor.sh
-```
-
-### Output Formats
-
-```bash
-# Text (default)
-./monitor.sh -o text
-
-# JSON (for automated parsing)
-./monitor.sh -o json
-
-# CSV (for logging/graphs)
-./monitor.sh -o csv
-```
-
-## Configuration
-
-### Configuration File
-
-Edit `etc/monitor.conf`:
-
-```bash
-# Alert thresholds (percentages)
+```ini
 THRESHOLD_CPU=80
 THRESHOLD_MEM=90
 THRESHOLD_DISK=85
 THRESHOLD_SWAP=50
-
-# Monitoring interval (seconds)
+THRESHOLD_LOAD_MULT=2
 MONITOR_INTERVAL=60
-
-# Notifications
-NOTIFY_EMAIL=admin@example.com
-NOTIFY_ON_RECOVERY=true
-
-# Logging
+OUTPUT_FORMAT=json
 LOG_LEVEL=INFO
-LOG_FILE=/var/log/sysmonitor.log
+NOTIFY_EMAIL=""
+NOTIFY_SLACK_WEBHOOK=""
+DISK_EXCLUDE_MOUNTS=("/mnt/owned backup")
 ```
 
-### Environment Variables
+Other supported settings are LOG_FILE, LOG_MAX_SIZE, LOG_ROTATE_COUNT, LOG_USE_COLORS, NOTIFY_ON_RECOVERY, DRY_RUN, VERBOSE, DAEMON_MODE, LOCK_FILE, LOG_DIR and RUN_DIR. Paths and recipient values must be explicitly reviewed for a real host. Show-config/debug output redacts configured notification secrets. `set -x` is not enabled by verbose mode.
 
-All settings can be overridden via environment variables:
+## Metric semantics
+
+- CPU sums user through steal and samples twice; guest fields are not added again. Idle+iowait is the chosen non-busy convention. Linux iowait accounting is imperfect and can decrease. Invalid, non-positive or reset deltas fail rather than become zero.
+- Memory percentage uses `(MemTotal-MemAvailable)/MemTotal`; detailed values are MiB. SwapTotal=0 is a valid zero-use case; missing swap fields are unavailable.
+- Disk percentage follows checked `LC_ALL=C df -P`. The human list percent-escapes `%` and `|` in mount labels. It does not claim a reversible encoding of every possible procps/df filename representation.
+- Load average is not a CPU percentage. Process counts use `ps -e`; process `comm` is the last field so spaces do not shift numeric columns. Observations race with process lifecycle changes.
+- JSON uses an encoder and a single cached sample. Missing metric values are null/unavailable; check errors remain visible and do not produce OK.
+
+Exit 0 means no alert in the observed checks, 1 a configuration/environment failure, 2 alerts or failed probes with health unknown and 3 a fatal setup failure. Inspect stderr and the structured status; no sample proves future health.
+
+## Integration and tests
+
+Use [the reviewed unit templates](../../../resources/README.md) for systemd/cron planning. Provisioning users, copying units, enabling timers and sending real notifications are separate host actions. This repository check does none of those operations.
 
 ```bash
-export THRESHOLD_CPU=95
-export NOTIFY_EMAIL=alerts@company.com
-export LOG_LEVEL=DEBUG
-./monitor.sh
+bash SEM06/scripts/projects/monitor/tests/test_monitor.sh
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest SEM06/tests/test_runtime_semantics.py SEM06/tests/test_teaching_examples.py -q
 ```
 
-### Command Line Options
-
-```
-Usage: monitor.sh [options]
-
-Options:
-    -c, --config FILE       Configuration file
-    --cpu-threshold N       CPU alert threshold (default: 80%)
-    --mem-threshold N       Memory alert threshold (default: 90%)
-    --disk-threshold N      Disk alert threshold (default: 85%)
-    -i, --interval N        Monitoring interval in seconds (default: 60)
-    -l, --log-file FILE     Log file
-    --log-level LEVEL       Logging level: DEBUG, INFO, WARN, ERROR
-    -e, --email ADDRESS     Email address for notifications
-    -d, --daemon            Run in daemon mode
-    -n, --dry-run           Display only, don't send notifications
-    -v, --verbose           Detailed output (enables DEBUG)
-    -o, --output FORMAT     Output format: text, json, csv
-    --exclude-mount PATH    Exclude mount point from monitoring
-    -h, --help              Display this message
-    --version               Display version
-```
-
-## System Integration
-
-### Systemd Service
-
-Create `/etc/systemd/system/sysmonitor.service`:
-
-```ini
-[Unit]
-Description=System Monitor Service
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/sysmonitor -d
-Restart=always
-RestartSec=60
-User=root
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Activation:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable sysmonitor
-sudo systemctl start sysmonitor
-```
-
-### Cron Job
-
-For periodic monitoring without daemon:
-
-```bash
-# Edit crontab
-crontab -e
-
-# Add: check every 5 minutes
-*/5 * * * * /usr/local/bin/sysmonitor >> /var/log/sysmonitor.log 2>&1
-```
-
-## Testing
-
-```bash
-# Run all tests
-./tests/test_monitor.sh
-
-# Only tests for core.sh
-./tests/test_monitor.sh core
-
-# Verbose
-./tests/test_monitor.sh -v
-```
-
-## Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| 0    | Success, all resources OK |
-| 1    | Configuration error |
-| 2    | At least one active alert |
-| 3    | Fatal error |
-
-## Code Structure
-
-### core.sh
-- Logging functions (`log`, `log_info`, `log_error`, etc.)
-- Error handling (`die`, `check_error`)
-- Validation (`require_cmd`, `require_file`, `is_integer`)
-- Lock files (`acquire_lock`, `release_lock`)
-
-### utils.sh
-- CPU metrics (`get_cpu_usage`, `get_cpu_cores`, `get_load_average`)
-- Memory metrics (`get_memory_usage`, `get_swap_usage`)
-- Disk metrics (`get_disk_usage`, `get_all_disk_info`)
-- Process information (`get_process_count`, `get_top_cpu_processes`)
-- System information (`get_hostname`, `get_uptime_seconds`)
-
-### config.sh
-- Configuration loading from file
-- Command line argument parsing
-- Configuration validation
-- Help and version
+The Bash harness runs all its tests; it has no supported core-only filter or `-v` contract. Native fixture results and a live host sample are distinct from a running systemd service, network endpoint or browser acceptance.
 
 ## Licence
 

@@ -104,7 +104,7 @@ def print_header(title: str) -> None:
 def print_question(num: int, total: int, question: Dict[str, Any]) -> None:
     """Display a formatted question."""
     bloom = question.get('bloom', 'unknown').upper()
-    category = question.get('categorie', 'general')
+    category = question.get('category', 'general')
     
     bloom_colors = {
         'REMEMBER': Colours.GREEN,
@@ -127,7 +127,7 @@ def print_question(num: int, total: int, question: Dict[str, Any]) -> None:
     print(f"{text}\n")
     
     # Options
-    options = question.get('optiuni', [])
+    options = question.get('options', [])
     for i, opt in enumerate(options):
         letter = chr(65 + i)  # A, B, C, D
         print(f"  {Colours.BOLD}{letter}){Colours.RESET} {opt}")
@@ -157,8 +157,8 @@ def get_answer(num_options: int) -> int:
 
 def show_feedback(question: Dict[str, Any], user_answer: int, correct: bool) -> None:
     """Display feedback after answering."""
-    correct_idx = question.get('corect', 0)
-    options = question.get('optiuni', [])
+    correct_idx = question.get('correct', 0)
+    options = question.get('options', [])
     
     if correct:
         print(f"{Colours.GREEN}✓ CORRECT!{Colours.RESET}")
@@ -169,7 +169,7 @@ def show_feedback(question: Dict[str, Any], user_answer: int, correct: bool) -> 
         print(f"  Correct answer: {Colours.GREEN}{correct_letter}) {correct_text}{Colours.RESET}")
     
     # Explanation
-    explicatie = question.get('explicatie', '').strip()
+    explicatie = question.get('explanation', '').strip()
     if explicatie:
         print(f"\n{Colours.CYAN}Explanation:{Colours.RESET}")
         for line in explicatie.split('\n'):
@@ -177,9 +177,9 @@ def show_feedback(question: Dict[str, Any], user_answer: int, correct: bool) -> 
     
     # Misconceptions (if incorrect)
     if not correct:
-        misconceptii = question.get('misconceptii', {})
-        if str(user_answer) in misconceptii:
-            misc = misconceptii[str(user_answer)]
+        misconceptii = question.get('misconceptions', {})
+        if user_answer in misconceptii or str(user_answer) in misconceptii:
+            misc = misconceptii.get(user_answer, misconceptii.get(str(user_answer)))
             print(f"\n{Colours.YELLOW}Why you got it wrong:{Colours.RESET} {misc}")
     
     print()
@@ -274,7 +274,7 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
         quiz_data = yaml.safe_load(f)
     
     metadata = quiz_data.get('metadata', {})
-    questions = quiz_data.get('intrebari', [])
+    questions = quiz_data.get('questions', [])
     
     if not questions:
         print(f"{Colours.RED}Error: The quiz contains no questions.{Colours.RESET}")
@@ -296,11 +296,11 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
     
     # Header
     clear_screen()
-    quiz_title = metadata.get('subiect', 'Formative Quiz')
+    quiz_title = metadata.get('subject', 'Formative Quiz')
     print_header(f"📝 {quiz_title}")
     
     print(f"Total questions: {len(questions)}")
-    print(f"Estimated time: {metadata.get('timp_estimat_minute', 20)} minutes")
+    print(f"Estimated time: {metadata.get('estimated_time_minutes', 20)} minutes")
     print(f"\nAnswer with the corresponding letter (A, B, C, D).")
     print(f"You can exit at any time with Ctrl+C.\n")
     input(f"{Colours.CYAN}Press Enter to begin...{Colours.RESET}")
@@ -310,10 +310,10 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
         clear_screen()
         print_question(i, len(questions), question)
         
-        num_options = len(question.get('optiuni', []))
+        num_options = len(question.get('options', []))
         user_answer = get_answer(num_options)
         
-        correct_idx = question.get('corect', 0)
+        correct_idx = question.get('correct', 0)
         is_correct = (user_answer == correct_idx)
         
         # Update statistics
@@ -331,7 +331,7 @@ def run_quiz(quiz_path: Path, shuffle: bool = False, limit: Optional[int] = None
             result.bloom_breakdown[bloom]['correct'] += 1
         
         # Category breakdown
-        category = question.get('categorie', 'general')
+        category = question.get('category', 'general')
         if category not in result.category_breakdown:
             result.category_breakdown[category] = {'correct': 0, 'total': 0}
         result.category_breakdown[category]['total'] += 1
@@ -392,7 +392,7 @@ Examples:
         try:
             with open(args.quiz_file, 'r', encoding='utf-8') as f:
                 data = yaml.safe_load(f)
-                quiz_title = data.get('metadata', {}).get('subiect', quiz_title)
+                quiz_title = data.get('metadata', {}).get('subject', quiz_title)
         except Exception:
             pass
         

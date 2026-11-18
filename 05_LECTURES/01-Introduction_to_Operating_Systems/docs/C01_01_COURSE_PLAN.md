@@ -22,10 +22,10 @@ By the end of this session, students will be able to:
 | Phase | Duration | Activity | Materials |
 |-------|----------|----------|-----------|
 | **Hook** | 10 min | "Why can your phone run 50 apps simultaneously?" — interactive discussion | Whiteboard |
-| **Theory I** | 20 min | OS definition, dual role (extended machine + resource manager) | README.md §1-2 |
-| **Theory II** | 20 min | OS types, kernel architectures, historical timeline | README.md §3 |
+| **Theory I** | 20 min | OS definition, dual role (extended machine + resource manager) | C01_04_STUDY_GUIDE.md and C01_02_CONCEPT_MAP.md |
+| **Theory II** | 20 min | OS types, kernel architectures, historical timeline | C01_02_CONCEPT_MAP.md: Kernel Architectures and Historical Evolution |
 | **Demo** | 25 min | Hands-on: `neofetch`, `htop`, `/proc` exploration, `strace ls` | Terminal |
-| **Practice** | 15 min | Mini-challenge: system inspection commands | README.md §Self-Assessment |
+| **Practice** | 15 min | Mini-challenge: system inspection commands | C01_05_FORMATIVE_ASSESSMENT.yaml |
 
 ---
 
@@ -43,7 +43,7 @@ By the end of this session, students will be able to:
 |----------|----------|----------|
 | Main lecture content | `README.md` | ✓ |
 | Batch simulation script | `scripts/batch_sim.py` | ✓ |
-| Interactive demos | `00-DEMOs/01ex1_*, 01ex2_*` | Optional |
+| Interactive demos | `docs/01ex1_*, docs/01ex2_*` | Optional |
 | Concept map | `docs/C01_02_CONCEPT_MAP.md` | Reference |
 | Formative quiz | `docs/C01_05_FORMATIVE_ASSESSMENT.yaml` | Post-session |
 
@@ -55,7 +55,7 @@ By the end of this session, students will be able to:
 
 1. **"The OS is just Windows/Linux"** — Clarify that the OS is the *kernel* plus system utilities; the desktop environment is separate.
 
-2. **"Microkernel is always better because it's more secure"** — Discuss the performance trade-offs; Linux's monolithic design dominates servers precisely because of speed.
+2. **"Microkernel is always better because it's more secure"** — Discuss the performance trade-offs; architecture alone does not establish security or performance; consider implementation, workload and fault boundaries.
 
 3. **"Batch processing is obsolete"** — Show modern analogies: CI/CD pipelines, Kubernetes Jobs, cloud batch computing.
 

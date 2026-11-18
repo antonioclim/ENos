@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>05ex2 - Threading Models Comparator | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
         
         :root {
             --user-color: #8b5cf6;
@@ -45,7 +45,7 @@
             box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
         }
         
-        .thread-noof {
+        .thread-node {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -192,7 +192,84 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -208,20 +285,20 @@
                             <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                                 Threading Models Comparator
                             </h1>
-                            <p class="text-slate-400 text-sm">course 05 - Threading Models: 1:1, N:1, M:N</p>
+                            <p class="text-slate-400 text-sm">Course 05 — Threading Models: 1:1, N:1, M:N</p>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-slate-400">CPU-uri:</span>
+                        <span class="text-sm text-slate-400">CPUs:</span>
                         <input type="range" id="cpu-slider" min="1" max="4" value="2" class="w-24 accent-purple-500">
                         <span id="cpu-count" class="text-purple-400 font-bold">2</span>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Model assumptions</h2><p>Each CPU runs at most one kernel thread. Ready work waits for a CPU. In this fixed-mapping example N:1 uses one kernel thread and M:N maps U1/U2 to K1, U3/U4 to K2, without migration. A genuinely blocking syscall stalls that kernel thread while any of its selected requests remains pending. User-level nonblocking I/O or runtime replacement/migration can behave differently. Each button toggles only its own pending request.</p></section>
 
     <!-- Notification Area -->
     <div id="notification-area" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div>
@@ -265,15 +342,15 @@
                     <div class="relative z-10 grid grid-cols-3 gap-2 text-center">
                         <!-- User Threads -->
                         <div class="space-y-2">
-                            <div id="u1-1-1" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u1-1-1" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U1</div>
                             </div>
-                            <div id="u2-1-1" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u2-1-1" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U2</div>
                             </div>
-                            <div id="u3-1-1" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u3-1-1" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U3</div>
                             </div>
@@ -281,15 +358,15 @@
                         
                         <!-- Kernel Threads -->
                         <div class="space-y-2">
-                            <div id="k1-1-1" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
+                            <div id="k1-1-1" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-cog text-blue-400"></i>
                                 <div class="mono mt-1">K1</div>
                             </div>
-                            <div id="k2-1-1" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
+                            <div id="k2-1-1" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-cog text-blue-400"></i>
                                 <div class="mono mt-1">K2</div>
                             </div>
-                            <div id="k3-1-1" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
+                            <div id="k3-1-1" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-cog text-blue-400"></i>
                                 <div class="mono mt-1">K3</div>
                             </div>
@@ -313,7 +390,7 @@
                 <div id="status-1-1" class="mb-4 p-3 rounded-lg bg-emerald-900/30 border border-emerald-500/30">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-check-circle text-emerald-400"></i>
-                        <span class="text-sm text-emerald-300">Paralelism real!</span>
+                        <span class="text-sm text-emerald-300">CPU Parallelism</span>
                     </div>
                 </div>
                 
@@ -326,7 +403,7 @@
                 <div class="space-y-2 text-xs">
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
-                        <span>Paralelism pe multiple CPU</span>
+                        <span>Can run on multiple CPUs</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
@@ -334,11 +411,11 @@
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Overhead mare at creation (syscall)</span>
+                        <span>Kernel task creation has implementation-dependent overhead</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Scheduling more lent</span>
+                        <span>Kernel scheduling costs depend on workload</span>
                     </div>
                 </div>
             </section>
@@ -384,15 +461,15 @@
                     <div class="relative z-10 grid grid-cols-3 gap-2 text-center">
                         <!-- User Threads (many) -->
                         <div class="space-y-2">
-                            <div id="u1-n-1" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u1-n-1" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U1</div>
                             </div>
-                            <div id="u2-n-1" class="thread-noof waiting bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u2-n-1" class="thread-node waiting bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U2</div>
                             </div>
-                            <div id="u3-n-1" class="thread-noof waiting bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
+                            <div id="u3-n-1" class="thread-node waiting bg-purple-600/40 border border-purple-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-user text-purple-400"></i>
                                 <div class="mono mt-1">U3</div>
                             </div>
@@ -400,10 +477,10 @@
                         
                         <!-- Single Kernel Thread -->
                         <div class="flex items-center justify-center">
-                            <div id="k1-n-1" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-3 text-xs">
+                            <div id="k1-n-1" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-3 text-xs">
                                 <i class="fas fa-cog text-blue-400 text-lg"></i>
                                 <div class="mono mt-1">K1</div>
-                                <div class="text-slate-500 text-[10px]">Singur!</div>
+                                <div class="text-slate-500 text-[10px]">Single kernel thread</div>
                             </div>
                         </div>
                         
@@ -416,7 +493,7 @@
                             <div class="cpu-core idle rounded-lg p-2 text-xs opacity-50">
                                 <i class="fas fa-microchip text-slate-400"></i>
                                 <div class="mono mt-1 text-slate-500">CPU2</div>
-                                <div class="text-[10px] text-slate-600">Nefolosit!</div>
+                                <div class="text-[10px] text-slate-600">Unused CPU</div>
                             </div>
                         </div>
                     </div>
@@ -426,7 +503,7 @@
                 <div id="status-n-1" class="mb-4 p-3 rounded-lg bg-amber-900/30 border border-amber-500/30">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-exclamation-triangle text-amber-400"></i>
-                        <span class="text-sm text-amber-300">Niciun paralelism real pe multiprocesoare</span>
+                        <span class="text-sm text-amber-300">No simultaneous execution on multiple CPUs in this N:1 model</span>
                     </div>
                 </div>
                 
@@ -439,19 +516,19 @@
                 <div class="space-y-2 text-xs">
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
-                        <span>Creation/switch foarte rapid (no syscall)</span>
+                        <span>User-runtime creation/switching can avoid a syscall</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
-                        <span>Portabil (not depinof of OS)</span>
+                        <span>Portability depends on the runtime and its platform support</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Un blocking call blocheaza TOT</span>
+                        <span>A blocking syscall stalls the single backing kernel thread</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Nu can folosi multiple CPU-uri</span>
+                        <span>Cannot run its user threads simultaneously on multiple CPUs</span>
                     </div>
                 </div>
             </section>
@@ -491,19 +568,19 @@
                     <div class="relative z-10 grid grid-cols-3 gap-2 text-center">
                         <!-- User Threads (M) -->
                         <div class="space-y-1">
-                            <div id="u1-m-n" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
+                            <div id="u1-m-n" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
                                 <i class="fas fa-user text-purple-400 text-xs"></i>
                                 <div class="mono text-[10px]">U1</div>
                             </div>
-                            <div id="u2-m-n" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
+                            <div id="u2-m-n" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
                                 <i class="fas fa-user text-purple-400 text-xs"></i>
                                 <div class="mono text-[10px]">U2</div>
                             </div>
-                            <div id="u3-m-n" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
+                            <div id="u3-m-n" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
                                 <i class="fas fa-user text-purple-400 text-xs"></i>
                                 <div class="mono text-[10px]">U3</div>
                             </div>
-                            <div id="u4-m-n" class="thread-noof running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
+                            <div id="u4-m-n" class="thread-node running bg-purple-600/40 border border-purple-500 rounded-lg p-1.5 text-xs">
                                 <i class="fas fa-user text-purple-400 text-xs"></i>
                                 <div class="mono text-[10px]">U4</div>
                             </div>
@@ -511,11 +588,11 @@
                         
                         <!-- Kernel Threads (N < M) -->
                         <div class="flex flex-col justify-center space-y-2">
-                            <div id="k1-m-n" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
+                            <div id="k1-m-n" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-cog text-blue-400"></i>
                                 <div class="mono mt-1">K1</div>
                             </div>
-                            <div id="k2-m-n" class="thread-noof running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
+                            <div id="k2-m-n" class="thread-node running bg-blue-600/40 border border-blue-500 rounded-lg p-2 text-xs">
                                 <i class="fas fa-cog text-blue-400"></i>
                                 <div class="mono mt-1">K2</div>
                             </div>
@@ -561,19 +638,19 @@
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
-                        <span>may folosi multiple CPU</span>
+                        <span>Can use multiple CPUs</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-emerald-400">
                         <i class="fas fa-check mt-0.5"></i>
-                        <span>Nu all se blocheaza at I/O</span>
+                        <span>One blocking operation need not block every thread</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Complex of implementat</span>
+                        <span>More implementation complexity</span>
                     </div>
                     <div class="pro-con-item flex items-start gap-2 text-red-400">
                         <i class="fas fa-times mt-0.5"></i>
-                        <span>Priority inversion posibila</span>
+                        <span>Priority inversion is possible</span>
                     </div>
                 </div>
             </section>
@@ -582,13 +659,13 @@
         <!-- Scenario Controls -->
         <section class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-flask text-amber-400"></i> Scenarii Interactive
+                <i class="fas fa-flask text-amber-400"></i> Interactive Scenarios
             </h3>
             
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-slate-800/50 rounded-xl p-4">
-                    <h4 class="font-semibold text-purple-400 mb-2 text-sm">Scenariu 1: Thread face Blocking I/O</h4>
-                    <p class="text-xs text-slate-400 mb-3">Select un thread and observa comportamentul in fiecare model.</p>
+                    <h4 class="font-semibold text-purple-400 mb-2 text-sm">Scenario 1: A Thread Performs Blocking I/O</h4>
+                    <p class="text-xs text-slate-400 mb-3">Select a thread and observe each model’s behaviour.</p>
                     <div class="flex gap-2">
                         <select id="thread-selector" class="flex-1 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm">
                             <option value="1">Thread U1</option>
@@ -602,8 +679,8 @@
                 </div>
                 
                 <div class="bg-slate-800/50 rounded-xl p-4">
-                    <h4 class="font-semibold text-blue-400 mb-2 text-sm">Scenariu 2: Variaza CPU-uri</h4>
-                    <p class="text-xs text-slate-400 mb-3">Observa how modelele beneficiaza (or nu) of more multe CPU-uri.</p>
+                    <h4 class="font-semibold text-blue-400 mb-2 text-sm">Scenario 2: Vary the CPU Count</h4>
+                    <p class="text-xs text-slate-400 mb-3">Observe how each model uses the available CPUs.</p>
                     <div class="flex items-center gap-4">
                         <input type="range" id="cpu-slider-2" min="1" max="4" value="2" class="flex-1 accent-blue-500">
                         <span id="cpu-count-2" class="text-blue-400 font-bold text-xl w-8">2</span>
@@ -612,7 +689,7 @@
                 
                 <div class="bg-slate-800/50 rounded-xl p-4">
                     <h4 class="font-semibold text-emerald-400 mb-2 text-sm">Scenario 3: Reset Simulation</h4>
-                    <p class="text-xs text-slate-400 mb-3">Reset all thread-urile at starea initiala.</p>
+                    <p class="text-xs text-slate-400 mb-3">Reset all threads to their initial state.</p>
                     <button id="btn-reset" class="btn-action w-full py-2 bg-slate-600 hover:bg-slate-500 rounded font-medium text-sm">
                         <i class="fas fa-redo mr-2"></i> Reset All
                     </button>
@@ -620,17 +697,18 @@
             </div>
         </section>
 
+<p class="text-sm text-slate-300 mb-4">Timing entries below preserve illustrative source inputs with unresolved empirical provenance. They are not measured here, are not universal thread costs and depend on implementation, workload and hardware.</p>
         <!-- Comparison Summary -->
         <section class="glass-card rounded-2xl p-5 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-balance-scale text-blue-400"></i> Rezumat Comparativ
+                <i class="fas fa-balance-scale text-blue-400"></i> Comparative Summary
             </h3>
             
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-slate-700">
-                            <th class="text-left py-3 px-4 text-slate-400">Caracteristica</th>
+                            <th class="text-left py-3 px-4 text-slate-400">Characteristic</th>
                             <th class="text-center py-3 px-4 text-blue-400">1:1 Kernel</th>
                             <th class="text-center py-3 px-4 text-purple-400">N:1 User</th>
                             <th class="text-center py-3 px-4 text-emerald-400">M:N Hybrid</th>
@@ -638,19 +716,19 @@
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         <tr>
-                            <td class="py-3 px-4 text-slate-300">Paralelism Real</td>
-                            <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i> Da</td>
-                            <td class="py-3 px-4 text-center text-red-400"><i class="fas fa-times"></i> Nu</td>
-                            <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i> Da</td>
+                            <td class="py-3 px-4 text-slate-300">CPU Parallelism</td>
+                            <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i> Yes</td>
+                            <td class="py-3 px-4 text-center text-red-400"><i class="fas fa-times"></i> No</td>
+                            <td class="py-3 px-4 text-center text-emerald-400"><i class="fas fa-check"></i> Yes</td>
                         </tr>
                         <tr>
                             <td class="py-3 px-4 text-slate-300">Blocking I/O Impact</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">only thread-ul</td>
-                            <td class="py-3 px-4 text-center text-red-400">Tot procesul!</td>
-                            <td class="py-3 px-4 text-center text-amber-400">Depinof of mapping</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">The affected thread</td>
+                            <td class="py-3 px-4 text-center text-red-400">The whole process</td>
+                            <td class="py-3 px-4 text-center text-amber-400">Depends on mapping</td>
                         </tr>
                         <tr>
-                            <td class="py-3 px-4 text-slate-300">Creation Thread</td>
+                            <td class="py-3 px-4 text-slate-300">Thread Creation</td>
                             <td class="py-3 px-4 text-center text-amber-400">~100μs (syscall)</td>
                             <td class="py-3 px-4 text-center text-emerald-400">~1μs (user)</td>
                             <td class="py-3 px-4 text-center text-amber-400">~10μs</td>
@@ -659,16 +737,16 @@
                             <td class="py-3 px-4 text-slate-300">Context Switch</td>
                             <td class="py-3 px-4 text-center text-amber-400">Kernel mode</td>
                             <td class="py-3 px-4 text-center text-emerald-400">User mode</td>
-                            <td class="py-3 px-4 text-center text-amber-400">Ambele</td>
+                            <td class="py-3 px-4 text-center text-amber-400">Both</td>
                         </tr>
                         <tr>
-                            <td class="py-3 px-4 text-slate-300">Complexitate</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">Simpla</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">Simpla</td>
-                            <td class="py-3 px-4 text-center text-red-400">Complexa</td>
+                            <td class="py-3 px-4 text-slate-300">Complexity</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">Simple</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">Simple</td>
+                            <td class="py-3 px-4 text-center text-red-400">Complex</td>
                         </tr>
                         <tr>
-                            <td class="py-3 px-4 text-slate-300">Exemplu</td>
+                            <td class="py-3 px-4 text-slate-300">Example</td>
                             <td class="py-3 px-4 text-center text-slate-400">Linux NPTL, Windows</td>
                             <td class="py-3 px-4 text-center text-slate-400">GNU Pth, Early Java</td>
                             <td class="py-3 px-4 text-center text-slate-400">Go, Solaris LWP</td>
@@ -690,6 +768,42 @@
     </footer>
 
     <script>
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             cpuCount: 2,
@@ -716,7 +830,7 @@
                 warning: 'bg-amber-600'
             };
             
-            const notification = document.createdeElement('div');
+            const notification = document.createElement('div');
             notification.className = `notification px-4 py-3 rounded-lg ${colors[type]} text-white text-sm shadow-lg`;
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'} mr-2"></i>${message}`;
             notificationArea.appendChild(notification);
@@ -729,45 +843,40 @@
         }
 
         // Update CPU count visualization
-        function updateCPUs(count) {
-            state.cpuCount = count;
-            cpuCount.textContent = count;
-            cpuCount2.textContent = count;
-            
-            // Update CPU visualizations for each model
-            ['1-1', 'n-1', 'm-n'].forEach(model => {
-                const container = document.getElementById(`cpus-${model}`);
-                if (!container) return;
-                
-                const cpus = container.querySelectorAll('.cpu-core');
-                cpus.forEach((cpu, index) => {
-                    if (index < count) {
-                        cpu.classList.remove('opacity-50');
-                        cpu.classList.add('active');
-                        cpu.classList.remove('idle');
-                    } else {
-                        cpu.classList.add('opacity-50');
-                        cpu.classList.remove('active');
-                        cpu.classList.add('idle');
-                    }
-                });
-            });
-            
-            // N:1 model - second CPU is always unused regardless
-            const n1Cpus = document.getElementById('cpus-n-1');
-            if (n1Cpus) {
-                const cpus = n1Cpus.querySelectorAll('.cpu-core');
-                cpus.forEach((cpu, index) => {
-                    if (index === 0) {
-                        cpu.classList.add('active');
-                        cpu.classList.remove('idle', 'opacity-50');
-                    } else {
-                        cpu.classList.add('idle', 'opacity-50');
-                        cpu.classList.remove('active');
-                    }
-                });
-            }
-        }
+        function renderThreadingModel(model) {
+    const groups = model === '1-1' ? [[1],[2],[3]] : model === 'n-1' ? [[1,2,3]] : [[1,2],[3,4]];
+    const blocked = state.blockedThreads[model];
+    const unavailable = groups.map(users => users.some(u => blocked.has(u)));
+    const runnable = groups.map((_,i)=>i).filter(i=>!unavailable[i]);
+    const running = new Set(runnable.slice(0,state.cpuCount));
+    state.runningKernels = state.runningKernels || {}; state.runningKernels[model] = [...running];
+    groups.forEach((users,k) => {
+        const kernel=document.getElementById(`k${k+1}-${model}`);
+        if (kernel) { kernel.classList.remove('blocked','running','waiting'); kernel.classList.add(unavailable[k]?'blocked':running.has(k)?'running':'waiting'); }
+        users.forEach((u,index)=>{
+            const el=document.getElementById(`u${u}-${model}`); if (!el) return;
+            el.classList.remove('blocked','running','waiting');
+            el.classList.add(unavailable[k]?'blocked':running.has(k)&&index===0?'running':'waiting');
+            el.setAttribute('aria-label',`User thread ${u}: ${blocked.has(u)?'pending blocking request':unavailable[k]?'kernel thread blocked':running.has(k)&&index===0?'running':'ready'}`);
+        });
+    });
+    document.querySelectorAll(`[id^="line-${model}"]`).forEach(line => {
+        const match=line.id.match(/u(\d+)/); const user=match?Number(match[1]):0;
+        const k=groups.findIndex(g=>g.includes(user));
+        line.classList.toggle('blocked',k>=0?unavailable[k]:unavailable.every(Boolean));
+        line.classList.toggle('active',k>=0?!unavailable[k]:!unavailable.every(Boolean));
+    });
+    const container=document.getElementById(`cpus-${model}`);
+    container.innerHTML=Array.from({length:state.cpuCount},(_,i)=>`<div class="cpu-core ${i<running.size?'active':'idle'}" style="padding:.5rem;border:1px solid #64748b;border-radius:.4rem">CPU ${i+1}<br>${i<running.size?'K'+([...running][i]+1):'Idle'}</div>`).join('');
+    const overlay=document.getElementById(`blocking-${model}`); if(overlay)overlay.classList.toggle('active',unavailable.every(Boolean));
+    document.getElementById(`status-${model}`).textContent=`${running.size} running kernel thread(s); ${Math.max(0,runnable.length-running.size)} ready; ${unavailable.filter(Boolean).length} blocked. Pending requests: ${[...blocked].sort().map(x=>'U'+x).join(', ')||'none'}.`;
+}
+function updateCPUs(count) {
+    count = enosInteger(count, 1, 4, 'CPU count'); if (count === null) return;
+    state.cpuCount = count; cpuSlider.value = cpuSlider2.value = String(count);
+    cpuCount.textContent = cpuCount2.textContent = count;
+    ['1-1','n-1','m-n'].forEach(renderThreadingModel);
+}
 
         // Simulate blocking I/O
         function simulateBlockingIO(model, threadNum) {
@@ -788,159 +897,14 @@
             }
         }
 
-        function blockThread(model, threadNum) {
-            const threadId = `u${threadNum}-${model}`;
-            const threadEl = document.getElementById(threadId);
-            
-            if (!threadEl) return;
-            
-            threadEl.classList.remove('running');
-            threadEl.classList.add('blocked');
-            
-            // Model-specific behavior
-            if (model === '1-1') {
-                // Only this thread and its kernel thread are blocked
-                const kernelThread = document.getElementById(`k${threadNum}-1-1`);
-                if (kernelThread) {
-                    kernelThread.classList.remove('running');
-                    kernelThread.classList.add('blocked');
-                }
-                
-                // Update connector
-                const line = document.getElementById(`line-1-1-u${threadNum}k${threadNum}`);
-                if (line) line.classList.add('blocked');
-                
-                document.getElementById('status-1-1').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-pause-circle text-amber-400"></i>
-                        <span class="text-sm text-amber-300">U${threadNum} blocat, dar celelother thread-uri continue!</span>
-                    </div>
-                `;
-                
-                showNotification(`Model 1:1: Thread U${threadNum} blocat, dar K2, K3 continue pe other CPU-uri!`, 'info');
-                
-            } else if (model === 'n-1') {
-                // ALL threads are blocked!
-                document.getElementById('blocking-n-1').classList.add('active');
-                
-                ['u1-n-1', 'u2-n-1', 'u3-n-1', 'k1-n-1'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.classList.remove('running');
-                        el.classList.add('blocked');
-                    }
-                });
-                
-                // Block all connector lines
-                document.querySelectorAll('[id^="line-n-1"]').forEach(line => {
-                    line.classList.add('blocked');
-                });
-                
-                document.getElementById('status-n-1').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-times-circle text-red-400"></i>
-                        <span class="text-sm text-red-300">TOT PROCESUL BLOCKED! Toate thread-urile waits.</span>
-                    </div>
-                `;
-                
-                showNotification(`Model N:1: DEZASTRU! Un singur blocking call blocheaza ALL thread-urile!`, 'error');
-                
-            } else if (model === 'm-n') {
-                // Only threads on the same kernel thread are affected
-                const kernelThread = threadNum <= 2 ? 'k1' : 'k2';
-                const kernelEl = document.getElementById(`${kernelThread}-m-n`);
-                
-                if (kernelEl) {
-                    kernelEl.classList.remove('running');
-                    kernelEl.classList.add('blocked');
-                }
-                
-                // Block related user threads
-                const affectedThreads = threadNum <= 2 ? [1, 2] : [3, 4];
-                affectedThreads.forEach(t => {
-                    const el = document.getElementById(`u${t}-m-n`);
-                    if (el) {
-                        el.classList.remove('running');
-                        el.classList.add('blocked');
-                    }
-                });
-                
-                const unaffectedThreads = threadNum <= 2 ? [3, 4] : [1, 2];
-                
-                document.getElementById('status-m-n').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-exclamation-triangle text-amber-400"></i>
-                        <span class="text-sm text-amber-300">U${affectedThreads.join(',')} blocked pe ${kernelThread.toUpperCase()}, dar U${unaffectedThreads.join(',')} continue!</span>
-                    </div>
-                `;
-                
-                showNotification(`Model M:N: Thread-urile pe ${kernelThread.toUpperCase()} blocked, dar celelother continue!`, 'warning');
-            }
-        }
+        function blockThread(model, threadNum) { state.blockedThreads[model].add(threadNum); renderThreadingModel(model); }
 
-        function unblockThread(model, threadNum) {
-            // Reset all for simplicity
-            resetModel(model);
-        }
+        function unblockThread(model, threadNum) { state.blockedThreads[model].delete(threadNum); renderThreadingModel(model); }
 
-        function resetModel(model) {
-            state.blockedThreads[model].clear();
-            
-            // Remove blocking overlay
-            const overlay = document.getElementById(`blocking-${model}`);
-            if (overlay) overlay.classList.remove('active');
-            
-            // Reset all threads for this model
-            document.querySelectorAll(`[id$="-${model}"]`).forEach(el => {
-                if (el.classList.contains('thread-node')) {
-                    el.classList.remove('blocked');
-                    el.classList.add('running');
-                }
-            });
-            
-            // Reset connector lines
-            document.querySelectorAll(`[id^="line-${model}"]`).forEach(line => {
-                line.classList.remove('blocked');
-                line.classList.add('active');
-            });
-            
-            // Reset status
-            if (model === '1-1') {
-                document.getElementById('status-1-1').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-emerald-400"></i>
-                        <span class="text-sm text-emerald-300">Paralelism real!</span>
-                    </div>
-                `;
-            } else if (model === 'n-1') {
-                // N:1 special handling - only U1 runs at a time
-                document.querySelectorAll('[id^="u"][id$="-n-1"]').forEach((el, index) => {
-                    if (index === 0) {
-                        el.classList.add('running');
-                        el.classList.remove('waiting');
-                    } else {
-                        el.classList.add('waiting');
-                        el.classList.remove('running');
-                    }
-                });
-                
-                document.getElementById('status-n-1').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-exclamation-triangle text-amber-400"></i>
-                        <span class="text-sm text-amber-300">Niciun paralelism real pe multiprocesoare</span>
-                    </div>
-                `;
-            } else if (model === 'm-n') {
-                document.getElementById('status-m-n').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-emerald-400"></i>
-                        <span class="text-sm text-emerald-300">Maximum flexibility!</span>
-                    </div>
-                `;
-            }
-        }
+        function resetModel(model) { state.blockedThreads[model].clear(); renderThreadingModel(model); }
 
         function resetAll() {
+            enosTimers.cancel();
             ['1-1', 'n-1', 'm-n'].forEach(model => resetModel(model));
             showNotification('Simulation reset!', 'success');
         }
@@ -971,6 +935,27 @@
 
         // Initial setup
         updateCPUs(2);
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

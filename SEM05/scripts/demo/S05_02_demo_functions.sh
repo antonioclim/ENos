@@ -8,11 +8,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Cleanup function for trap
-cleanup() {
-    rm -f /tmp/demo_func_*.tmp 2>/dev/null || true
-}
-trap cleanup EXIT
+# This demonstration creates no temporary files; no shared-path cleanup is needed.
 
 # Colours
 RED='\033[0;31m'
@@ -32,7 +28,7 @@ banner() {
 
 pause() {
     echo ""
-    read -p "Press Enter to continue..."
+    if [[ -t 0 ]]; then read -r -p "Press Enter to continue..." || true; fi
     echo ""
 }
 
@@ -101,9 +97,11 @@ demo_basics() {
     echo -e "${RED}WHAT HAPPENS WITHOUT ARGUMENTS?${NC}"
     echo 'Call: greet_name'
     echo -e "Result: ${YELLOW}"
-    greet_name || true
+    local missing_status=0
+    (greet_name) || missing_status=$?
+    echo "Child status under nounset: $missing_status"
     echo -e "${NC}"
-    echo -e "${RED}→ Missing arguments become empty strings!${NC}"
+    echo -e "${RED}→ With set -u, an unset argument aborts the child; without it, it expands to empty.${NC}"
 }
 
 # ============================================================
@@ -249,8 +247,9 @@ demo_return() {
     echo '      return 1000'
     echo '  }'
     echo ""
-    get_big_number || true
-    echo "Exit code: $?"
+    local result_status=0
+    get_big_number || result_status=$?
+    echo "Exit code: $result_status"
     echo ""
     echo -e "${RED}1000 % 256 = 232 ← return truncates to 0-255!${NC}"
     echo -e "${RED}For large values, use echo + command substitution${NC}"
@@ -317,8 +316,8 @@ demo_defensive() {
     echo '  }'
     echo ""
     echo "Call without argument:"
-    echo -e "  Result: ${YELLOW}$(unsafe_greet)${NC}"
-    echo -e "  ${RED}→ Empty string, no error!${NC}"
+    echo -e "  Result: ${YELLOW}$(set +u; unsafe_greet)${NC}"
+    echo -e "  ${RED}→ With nounset disabled in the child: empty string, no error!${NC}"
     
     echo ""
     echo "SAFE function:"
@@ -408,7 +407,7 @@ demo_recursive() {
     
     echo -e "${RED}⚠️ Trap: Recursion in Bash is SLOW!${NC}"
     echo ""
-    echo "Each recursive call creates a subshell."
+    echo "The command substitution in this implementation creates a subshell for each recursive call."
     echo "For intensive calculations, use loops or another language."
     echo ""
     echo "Timing example:"
@@ -416,7 +415,7 @@ demo_recursive() {
     time_start=$(date +%s.%N)
     result=$(factorial 10)
     time_end=$(date +%s.%N)
-    echo "$result (time: $(echo "$time_end - $time_start" | bc)s)"
+    echo "$result (time: $(echo "$time_end - $time_start" | awk '{printf "%.6f", $1 - $3}')s)"
 }
 
 # ============================================================

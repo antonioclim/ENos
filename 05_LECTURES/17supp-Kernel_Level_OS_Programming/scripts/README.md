@@ -133,7 +133,7 @@ The script demonstrates the complete eBPF cycle:
 | **kprobe** | `netmonitor.py` (tcp_connect, tcp_accept) | On kernel function entry |
 | **kretprobe** | Return values | On kernel function exit |
 | **tracepoint** | `system_monitor.bt` (syscalls) | Predefined kernel events |
-| **uprobe** | Utilizatorspace functions | On binary function entry |
+| **uprobe** | Userspace functions | On binary function entry |
 | **USDT** | Application probes | Explicit code markers |
 
 ### BPF Maps

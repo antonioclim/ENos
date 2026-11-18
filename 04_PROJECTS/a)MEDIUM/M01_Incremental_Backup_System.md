@@ -81,7 +81,7 @@ The system must efficiently manage storage space through deduplication and provi
 
 ## CLI Interface
 
-```bash
+```text
 ./backup.sh <command> [options]
 
 Commands:
@@ -134,6 +134,8 @@ Examples:
 ---
 
 ## Output Examples
+
+These are synthetic illustrations, not measured runs or acceptance evidence.
 
 ### Full Backup
 
@@ -347,6 +349,42 @@ M01_Incremental_Backup_System/
 
 ## Implementation Hints
 
+### Chain contract for the implementation hints
+
+The helpers below are scaffolding, not a completed backup application. The mtime
+list is an observation of changed regular files, not a complete incremental format:
+it cannot by itself represent deletion, rename, metadata changes or a consistent
+snapshot of a changing source. Use one root-relative member namespace (`.`).
+
+For a GNU tar implementation, create the full base and every delta with
+`--listed-incremental=SNAPSHOT`. Copy the current snapshot to an owned staged file,
+create and verify the archive, write its checksum and a manifest containing the
+parent ID, source root, compression, snapshot version and archive name, then
+publish the archive and advance the snapshot only after all steps succeed. Hold
+an exclusive `flock` on one persistent inode throughout; never unlink that lock.
+A changed source/exclusion set starts a new full chain. A filesystem snapshot is
+needed if the application requires a point-in-time image of concurrently changing data.
+
+The executable [manifest reference](../reference/backup_manifest.py) supplies
+`plan_retention` and `verified_restore_chain` for its documented v1 JSON manifest.
+It selects daily/weekly/monthly points and protects their entire ancestor closure,
+rejects malformed/cyclic/outside-root parents and verifies hashes and member paths
+for the complete chain before emitting any extraction path. A missing verifier is
+an error, never an unchecked restore. Adapt the format explicitly if the assignment
+contract chooses another storage interface; do not silently mix manifests.
+
+```bash
+# Set this to the repository reference, or vendor the module with your implementation.
+: "${M01_MANIFEST_HELPER:?Set the path to 04_PROJECTS/reference/backup_manifest.py}"
+plan_retention() { python3 "$M01_MANIFEST_HELPER" retention "$@"; }
+verified_restore_chain() { python3 "$M01_MANIFEST_HELPER" chain "$@"; }
+```
+
+See the executable [SEM06 Backup reference](../../SEM06/scripts/projects/backup/)
+and its mutation regressions for full chains, staged snapshot updates and
+complete-chain retention. Its CLI/layout is distinct from this assignment;
+it does not settle the pending assessment-interface decision.
+
 ### Detecting modified files (incremental)
 
 ```bash
@@ -356,7 +394,7 @@ set -euo pipefail
 find_modified_files() {
     local source_dir="$1"
     local reference_file="$2"  # Timestamp file from last backup
-    local exclude_file="$3"
+    local exclude_file="${3:-}"
     
     local find_args=(-type f)
     
@@ -373,7 +411,7 @@ find_modified_files() {
         find_args+=(-newer "$reference_file")
     fi
     
-    find "$source_dir" "${find_args[@]}" 2>/dev/null
+    (cd -- "$source_dir" && find . "${find_args[@]}" -print0)
 }
 
 # Alternative: using rsync dry-run
@@ -381,110 +419,77 @@ find_modified_rsync() {
     local source_dir="$1"
     local last_backup="$2"
     
-    rsync -avn --itemize-changes "$source_dir/" "$last_backup/" 2>/dev/null | \
-        grep "^>f" | awk '{print $2}'
+    # Human-readable comparison only; do not parse this as a filename list.
+    rsync -avn --itemize-changes -- "$source_dir/" "$last_backup/"
 }
 ```
 
 ### Creating archive with compression
 
 ```bash
-create_archive() {
-    local source_dir="$1"
-    local archive_path="$2"
-    local compression="${3:-gzip}"
-    local level="${4:-6}"
-    local file_list="$5"  # Optional: file list for incremental
-    
-    local tar_args=(--create --file=-)
-    local compress_cmd
+create_archive() (
+    set -euo pipefail
+    local source_dir="$1" archive_path="$2" compression="${3:-gzip}"
+    local level="${4:-6}" file_list="${5:-}"
+    local -a compressor
     local extension
-    
-    # Configure compression
+    [[ $level =~ ^[1-9]$ ]] || return 2
     case "$compression" in
-        gzip)  compress_cmd="gzip -${level}"; extension=".tar.gz" ;;
-        bzip2) compress_cmd="bzip2 -${level}"; extension=".tar.bz2" ;;
-        xz)    compress_cmd="xz -${level}"; extension=".tar.xz" ;;
-        none)  compress_cmd="cat"; extension=".tar" ;;
-        *)     echo "Unknown algorithm: $compression" >&2; return 1 ;;
+        gzip) compressor=(gzip "-$level"); extension=.tar.gz ;;
+        bzip2) compressor=(bzip2 "-$level"); extension=.tar.bz2 ;;
+        xz) compressor=(xz "-$level"); extension=.tar.xz ;;
+        none) compressor=(cat); extension=.tar ;;
+        *) echo "Unsupported compression" >&2; return 2 ;;
     esac
-    
-    # Add file list or directory
-    if [[ -n "$file_list" && -f "$file_list" ]]; then
-        tar_args+=(--files-from="$file_list")
+    source_dir=$(realpath -- "$source_dir") || return 1
+    local final="${archive_path}${extension}" stage
+    [[ ! -e "$final" && ! -e "$final.sha256" ]] || return 1
+    stage=$(mktemp "${final}.partial.XXXXXX") || return 1
+    trap 'rm -f -- "$stage" "$stage.sha256"' EXIT
+    local -a args=(-C "$source_dir" --create --file=-)
+    if [[ -n "$file_list" ]]; then
+        [[ -r "$file_list" ]] || return 1
+        args+=(--null --verbatim-files-from --files-from="$file_list")
     else
-        tar_args+=(-C "$(dirname "$source_dir")" "$(basename "$source_dir")")
+        args+=(.)
     fi
-    
-    # Create archive
-    tar "${tar_args[@]}" | $compress_cmd > "${archive_path}${extension}"
-    
-    # Generate checksum
-    sha256sum "${archive_path}${extension}" > "${archive_path}${extension}.sha256"
-    
-    echo "${archive_path}${extension}"
-}
+    tar "${args[@]}" | "${compressor[@]}" > "$stage" || return 1
+    tar -tf "$stage" >/dev/null || return 1
+    # Metadata publication is guarded; callers also hold a backup-set lock.
+    local digest
+    digest=$(sha256sum < "$stage") || return 1
+    digest=${digest%% *}
+    printf '%s  %s\n' "$digest" "${final##*/}" > "$stage.sha256"
+    mv -- "$stage.sha256" "$final.sha256" || return 1
+    mv -- "$stage" "$final" || { rm -f -- "$final.sha256"; return 1; }
+    printf '%s\n' "$final"
+)
 ```
 
 ### Rotation policy
 
 ```bash
 apply_retention_policy() {
-    local backup_dir="$1"
-    local keep_daily="${2:-7}"
-    local keep_weekly="${3:-4}"
-    local keep_monthly="${4:-3}"
-    
-    local -a to_keep=()
-    local -a all_backups=()
-    
-    # List all backups sorted descending
-    mapfile -t all_backups < <(
-        find "$backup_dir" -maxdepth 1 -type d -name "backup_*" | sort -r
-    )
-    
-    local daily_count=0 weekly_count=0 monthly_count=0
-    local last_week="" last_month=""
-    
-    for backup in "${all_backups[@]}"; do
-        # Extract date from name: backup_YYYYMMDD_HHMMSS
-        local date_part
-        date_part=$(basename "$backup" | grep -oP '\d{8}')
-        local week month
-        week=$(date -d "$date_part" +%Y-%W)
-        month=$(date -d "$date_part" +%Y-%m)
-        
-        local keep=false
-        
-        # Keep dailies
-        if ((daily_count < keep_daily)); then
-            keep=true
-            ((daily_count++))
-        fi
-        
-        # Keep weeklies (one per week)
-        if [[ "$week" != "$last_week" ]] && ((weekly_count < keep_weekly)); then
-            keep=true
-            ((weekly_count++))
-            last_week="$week"
-        fi
-        
-        # Keep monthlies (one per month)
-        if [[ "$month" != "$last_month" ]] && ((monthly_count < keep_monthly)); then
-            keep=true
-            ((monthly_count++))
-            last_month="$month"
-        fi
-        
-        if $keep; then
-            to_keep+=("$backup")
-        else
-            echo "Deleting old backup: $backup"
-            rm -rf "$backup"
-        fi
-    done
-    
-    echo "Kept ${#to_keep[@]} backups"
+    local backup_dir="$1" keep_daily="${2:-7}" keep_weekly="${3:-4}" keep_monthly="${4:-3}"
+    [[ $keep_daily =~ ^[0-9]+$ && $keep_weekly =~ ^[0-9]+$ && $keep_monthly =~ ^[0-9]+$ ]] || return 2
+    # The reference graph planner outputs a NUL-delimited deletion plan only
+    # after validating every manifest and retaining the transitive parent closure.
+    # The active incremental tip and every required ancestor are always protected.
+    local plan
+    plan=$(mktemp) || return 1
+    if ! plan_retention "$backup_dir" "$keep_daily" "$keep_weekly" "$keep_monthly" > "$plan"; then
+        rm -f -- "$plan"; return 1
+    fi
+    local candidate
+    while IFS= read -r -d '' candidate; do
+        [[ $candidate =~ ^backup_[0-9]{8}_[0-9]{6}(_[A-Za-z0-9]+)?$ ]] || { rm -f -- "$plan"; return 1; }
+        [[ -d "$backup_dir/$candidate" && ! -L "$backup_dir/$candidate" ]] || { rm -f -- "$plan"; return 1; }
+    done < "$plan"
+    # Apply the validated plan under the same exclusive backup-set lock.
+    while IFS= read -r -d '' candidate; do
+        rm -rf -- "$backup_dir/$candidate" || { rm -f -- "$plan"; return 1; }
+    done < "$plan"
+    rm -f -- "$plan"
 }
 ```
 
@@ -492,45 +497,36 @@ apply_retention_policy() {
 
 ```bash
 restore_backup() {
-    local backup_id="$1"
-    local output_dir="$2"
-    local specific_file="${3:-}"
-    
-    local backup_path="$BACKUP_DIR/$backup_id"
-    local archive
-    archive=$(find "$backup_path" -name "*.tar.*" | head -1)
-    
-    [[ -f "$archive" ]] || { echo "Archive not found"; return 1; }
-    
-    # Verify integrity
-    if [[ -f "${archive}.sha256" ]]; then
-        echo "Verifying checksum..."
-        sha256sum -c "${archive}.sha256" || {
-            echo "Checksum verification failed!"
-            return 1
-        }
+    local backup_id="$1" output_dir="$2" specific_file="${3:-}"
+    [[ $backup_id =~ ^backup_[0-9]{8}_[0-9]{6}(_[A-Za-z0-9]+)?$ ]] || return 2
+    [[ ! -e "$output_dir" ]] || { echo "Restore requires a fresh destination" >&2; return 1; }
+    # The reference manifest parser resolves and validates a cycle-free chain,
+    # oldest full base first, including every checksum, algorithm and root convention.
+    local chain
+    chain=$(mktemp) || return 1
+    if ! verified_restore_chain "$BACKUP_DIR" "$backup_id" > "$chain"; then
+        rm -f -- "$chain"; return 1
     fi
-    
-    # Determine decompression command
-    local decompress_cmd
-    case "$archive" in
-        *.tar.gz)  decompress_cmd="gzip -d" ;;
-        *.tar.bz2) decompress_cmd="bzip2 -d" ;;
-        *.tar.xz)  decompress_cmd="xz -d" ;;
-        *.tar)     decompress_cmd="cat" ;;
-    esac
-    
-    mkdir -p "$output_dir"
-    
+    local stage archive
+    stage=$(mktemp -d "${output_dir}.partial.XXXXXX") || { rm -f -- "$chain"; return 1; }
+    while IFS= read -r -d '' archive; do
+        # GNU listed-incremental metadata carries deletions as well as additions.
+        if ! tar --extract --listed-incremental=/dev/null --file="$archive" --directory="$stage"; then
+            rm -rf -- "$stage"; rm -f -- "$chain"; return 1
+        fi
+    done < "$chain"
+    rm -f -- "$chain"
     if [[ -n "$specific_file" ]]; then
-        # Selective restore
-        $decompress_cmd < "$archive" | tar -xf - -C "$output_dir" "$specific_file"
+        # First materialise historical state, then select; never extract one delta alone.
+        case "$specific_file" in /*|../*|*/../*|*/..) rm -rf -- "$stage"; return 2;; esac
+        [[ -e "$stage/$specific_file" ]] || { rm -rf -- "$stage"; return 1; }
+        mkdir -p -- "$output_dir/$(dirname -- "$specific_file")" || { rm -rf -- "$stage"; return 1; }
+        cp -a -- "$stage/$specific_file" "$output_dir/$specific_file" || { rm -rf -- "$stage"; return 1; }
+        rm -rf -- "$stage"
     else
-        # Complete restore
-        $decompress_cmd < "$archive" | tar -xf - -C "$output_dir"
+        mv -- "$stage" "$output_dir" || { rm -rf -- "$stage"; return 1; }
     fi
-    
-    echo "Restored to: $output_dir"
+    printf 'Restored to: %s\n' "$output_dir"
 }
 ```
 

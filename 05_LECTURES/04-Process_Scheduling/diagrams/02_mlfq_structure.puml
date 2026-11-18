@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml mlfq_structure
-!include ../../diagrams_common/skin.puml
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
 title Multi-Level Feedback Queue (MLFQ)
 
 skinparam rectangle {
@@ -51,24 +51,26 @@ rectangle "**MLFQ - Structure**" as mlfq #FAFAFA {
 rectangle "**MLFQ RULES**" as rules #E3F2FD {
     note as rules_note
     **R1**: Priority(A) > Priority(B) → A runs
-    **R2**: Priority(A) = Priority(B) → Round Robin
+    **R2**: Equal priority → RR in Q0-Q2; FCFS in Q3
     **R3**: New process → Queue 0
     **R4a**: Exhausts quantum → Demoted
-    **R4b**: Yields CPU (I/O) → Stays
-    **R5**: **Priority Boost** periodic
+    **R4b**: Higher-priority arrival preempts; preserve unused budget
+    Voluntary yield stays at the same level in this simplified model
+    **R5**: Periodic boost → Q0; reset CPU budgets
+    Cumulative anti-gaming accounting is not modelled here
     end note
 }
 
-q0 -[#E74C3C,bold]-> q1 : Exhausts\nquantum
-q1 -[#E74C3C,bold]-> q2 : Exhausts\nquantum
-q2 -[#E74C3C,bold]-> q3 : Exhausts\nquantum
+q0 -[#E74C3C,bold]down-> q1 : Exhausts\nquantum
+q1 -[#E74C3C,bold]down-> q2 : Exhausts\nquantum
+q2 -[#E74C3C,bold]down-> q3 : Exhausts\nquantum
 
-q3 -[#27AE60,dashed]-> q0 : **BOOST**\n(periodic)
-q2 -[#27AE60,dashed]-> q0 : **BOOST**
-q1 -[#27AE60,dashed]-> q0 : **BOOST**
+q3 -[#27AE60,dashed,norank]up-> q0 : **BOOST**\n(periodic)
+q2 -[#27AE60,dashed,norank]up-> q0 : **BOOST**
+q1 -[#27AE60,dashed,norank]up-> q0 : **BOOST**
 
 note bottom of mlfq
-**Advantage**: Automatically separates I/O-bound processes (high priority)
+**Advantage**: Tends to favour short-burst / I/O-bound processes (high priority)
 from CPU-bound ones (low priority) **without knowing the burst time**
 end note
 

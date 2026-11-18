@@ -37,7 +37,8 @@ At the end of this laboratory, the student will be able to:
 ### 2.1 export
 
 ```bash
-# Local variable (current shell only)
+# Unexported shell variable; clear any inherited export attribute first
+unset LOCAL_VAR
 LOCAL_VAR="local"
 
 # Environment variable (inherited by subprocesses)
@@ -72,7 +73,7 @@ echo $EDITOR        # default editor
 | Variable | Description |
 |----------|-------------|
 | `$?` | Exit code of last command |
-| `$$` | PID of current shell |
+| `$$` | Original shell PID; use `$BASHPID` for current Bash process, including a subshell |
 | `$!` | PID of last background process |
 | `$0` | Script name |
 | `$1-$9` | Positional parameters |
@@ -99,18 +100,18 @@ echo "All: $@"
 ### 4.1 Default Values
 
 ```bash
-# ${VAR:-default} - use default if VAR is not set
+# ${VAR:-default} - use default if VAR is unset OR empty
 echo ${UNDEFINED:-"default value"}
 
-# ${VAR:=default} - set AND use default
+# ${VAR:=default} - set AND use default if VAR is unset OR empty
 echo ${DIRECTORY:="/tmp"}
 echo $DIRECTORY           # /tmp
 
-# ${VAR:+something} - use something only if VAR is set
+# ${VAR:+something} - use something only if VAR is set AND nonempty
 FILE="test.txt"
 echo ${FILE:+"file exists"}
 
-# ${VAR:?message} - error if VAR is not set
+# ${VAR:?message} - error if VAR is unset OR empty (may exit a non-interactive shell)
 echo ${REQUIRED:?"Variable is missing!"}
 ```
 
@@ -148,7 +149,7 @@ TEXT="Hello World"
 
 echo ${TEXT^^}              # HELLO WORLD (uppercase)
 echo ${TEXT,,}              # hello world (lowercase)
-echo ${TEXT^}               # Hello world (first letter)
+echo ${TEXT^}               # Hello World (only first character considered; already uppercase)
 ```
 
 ---
@@ -303,9 +304,9 @@ $#    # no. of parameters
 $@    # all parameters
 
 # DEFAULT VALUES
-${VAR:-default}         # default if not exists
+${VAR:-default}         # default if unset or empty
 ${VAR:=default}         # set default
-${VAR:+alt}             # alt if exists
+${VAR:+alt}             # alt if set and nonempty
 
 # STRINGS
 ${#VAR}                 # length
@@ -342,14 +343,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment has been submitted
    - ❌ If the upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

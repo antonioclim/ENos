@@ -61,7 +61,7 @@ Continuous monitoring system for services (systemd units, processes, ports) with
 
 ## CLI Interface
 
-```bash
+```text
 ./watchdog.sh <command> [options]
 
 Commands:
@@ -154,7 +154,7 @@ Time:      2025-01-20 14:25:30 UTC
 
 Details:
 - Previous state: active
-- Exit code: 137 (OOM killed)
+- Exit code: 137 (SIGKILL convention; OOM cause needs independent kernel/cgroup evidence)
 - Memory at failure: 2048MB / 2048MB limit
 
 Action Taken:
@@ -266,7 +266,7 @@ check_systemd_service() {
     local service="$1"
     local status
     
-    status=$(systemctl is-active "$service" 2>/dev/null)
+    status=$(systemctl is-active "$service" 2>/dev/null) || :
     
     case "$status" in
         active)   return 0 ;;
@@ -292,7 +292,9 @@ check_port() {
     local timeout="${3:-5}"
     
     # Method 1: with timeout and bash
-    timeout "$timeout" bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null
+    [[ $host =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ && $port =~ ^[0-9]{1,5}$ && $timeout =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    (( 10#$port >= 1 && 10#$port <= 65535 )) || return 2
+    timeout "$timeout" bash -c 'exec 3<>"/dev/tcp/$1/$2"' _ "$host" "$port" 2>/dev/null
     
     # Method 2: with nc (more portable)
     # nc -z -w "$timeout" "$host" "$port" 2>/dev/null
@@ -305,7 +307,7 @@ check_http() {
     local timeout="${3:-5}"
     
     local status
-    status=$(curl -s -o /dev/null -w "%{http_code}" --max-time "$timeout" "$url")
+    status=$(curl -s -o /dev/null -w "%{http_code}" --max-time "$timeout" -- "$url") || return 1
     
     [[ "$status" == "$expect_status" ]]
 }
@@ -314,65 +316,85 @@ check_http() {
 ### Daemon with PID file
 
 ```bash
-readonly PID_FILE="/var/run/watchdog.pid"
+PID_FILE="${PID_FILE:-${XDG_RUNTIME_DIR:-$HOME/.cache}/enos-watchdog/watchdog.pid}"
+
+process_start_ticks() {
+    local line
+    line=$(cat "/proc/$1/stat") || return 1
+    local -a fields
+    IFS=' ' read -r -a fields <<< "${line##*) }"
+    [[ ${fields[19]:-} =~ ^[0-9]+$ ]] || return 1
+    printf '%s\n' "${fields[19]}"
+}
 
 start_daemon() {
-    if [[ -f "$PID_FILE" ]]; then
-        local pid
-        pid=$(<"$PID_FILE")
-        if kill -0 "$pid" 2>/dev/null; then
-            die "Daemon already running (PID: $pid)"
-        fi
-        rm -f "$PID_FILE"
-    fi
-    
-    # Fork to background
+    local runtime_dir=${PID_FILE%/*}
+    [[ ! -L "$runtime_dir" ]] || return 1
+    mkdir -p -- "$runtime_dir" || return 1
+    [[ $(stat -c %u "$runtime_dir") == "$UID" ]] || return 1
+    chmod 700 -- "$runtime_dir" || return 1
     (
-        echo $$ > "$PID_FILE"
-        trap 'rm -f "$PID_FILE"; exit 0' SIGTERM SIGINT
-        
+        umask 077
+        exec {lock_fd}>"$PID_FILE.lock" || exit 1
+        flock -n "$lock_fd" || exit 1
+        local child_pid=$BASHPID start stage
+        start=$(process_start_ticks "$child_pid") || exit 1
+        stage=$(mktemp "$PID_FILE.partial.XXXXXX") || exit 1
+        printf '%s %s\n' "$child_pid" "$start" > "$stage"
+        mv -- "$stage" "$PID_FILE" || exit 1
+        # Persistent lock inode; only our own PID record is removed on exit.
+        trap 'if [[ $(cat "$PID_FILE" 2>/dev/null) == "$child_pid $start" ]]; then rm -f -- "$PID_FILE"; fi' EXIT
+        trap 'exit 0' TERM
+        trap 'exit 130' INT
         while true; do
-            run_all_checks
-            sleep "$INTERVAL"
+            run_all_checks || log_error "One or more checks failed"
+            sleep "$INTERVAL" || exit 1
         done
     ) &
-    
-    echo "Daemon started (PID: $!)"
+    local child=$! attempt
+    for ((attempt=0; attempt<100; attempt++)); do
+        if [[ -r "$PID_FILE" && $(cut -d ' ' -f1 "$PID_FILE") == "$child" ]]; then
+            printf 'Daemon started (PID: %s)\n' "$child"; return 0
+        fi
+        kill -0 "$child" 2>/dev/null || { wait "$child" || :; return 1; }
+        sleep 0.05
+    done
+    echo "Daemon did not publish its identity; inspect child $child" >&2
+    return 1
 }
 
 stop_daemon() {
-    [[ -f "$PID_FILE" ]] || die "Daemon not running"
-    
-    local pid
-    pid=$(<"$PID_FILE")
-    kill "$pid" 2>/dev/null
-    rm -f "$PID_FILE"
-    echo "Daemon stopped"
+    local pid start current attempt
+    IFS=' ' read -r pid start < "$PID_FILE" || return 1
+    [[ $pid =~ ^[1-9][0-9]*$ && $start =~ ^[0-9]+$ ]] || return 1
+    current=$(process_start_ticks "$pid") || return 1
+    [[ $current == "$start" && $(stat -c %u "/proc/$pid") == "$UID" ]] || return 1
+    kill -TERM -- "$pid" || return 1
+    for ((attempt=0; attempt<100; attempt++)); do
+        if [[ ! -e "$PID_FILE" ]]; then echo "Daemon stopped"; return 0; fi
+        sleep 0.05
+    done
+    echo "Stop not confirmed; PID record retained" >&2
+    return 1
 }
 ```
 
-### Simple YAML parser (for Bash)
+### YAML parser boundary (data, not shell code)
 
 ```bash
-# For simple configurations, parsing with grep/sed
-# For complex YAML, use yq or Python helper
-
+# Requires Python 3 and PyYAML; emits JSON data, never shell assignments for eval.
 parse_yaml() {
-    local file="$1"
-    local prefix="${2:-}"
-    
-    local s='[[:space:]]*'
-    local w='[a-zA-Z0-9_]*'
-    
-    sed -ne "s|^\($s\):|\1|" \
-        -e "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$prefix\2=\"\3\"|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$prefix\2=\"\3\"|p" \
-        "$file"
+    python3 - "$1" <<'PYCONFIG'
+import json, sys, yaml
+with open(sys.argv[1]) as stream:
+    config = yaml.safe_load(stream)
+if not isinstance(config, dict):
+    raise SystemExit("Configuration must be a mapping")
+print(json.dumps(config))
+PYCONFIG
 }
-
-# Or use yq (recommended)
-# apt install yq
-# yq '.services[0].name' config.yaml
+# Validate the documented keys, value types and service lists before use.
+# Do not source/eval parser output; use a JSON-aware consumer or explicit arguments.
 ```
 
 ---

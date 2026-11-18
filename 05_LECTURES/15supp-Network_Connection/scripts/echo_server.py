@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 TCP Echo Server - BSD Socket Model Demonstration
 Operating Systems | ASE Bucharest - CSIE | 2025-2026

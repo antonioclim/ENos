@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 TCP Echo Client - BSD Socket Model Demonstration
 Operating Systems | ASE Bucharest - CSIE | 2025-2026
@@ -54,6 +54,7 @@ def run_client(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     # Set connection timeout
     client_socket.settimeout(CONNECT_TIMEOUT)
     
+    messages_sent = bytes_sent = bytes_received = 0
     try:
         # Initiate TCP connection (three-way handshake)
         client_socket.connect((host, port))
@@ -106,7 +107,15 @@ def run_client(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
                 log_message("SEND", f"Sent {len(data)} bytes")
                 
                 # Wait for response
-                response = client_socket.recv(BUFFER_SIZE)
+                parts = []
+                remaining = len(data)
+                while remaining:
+                    chunk = client_socket.recv(min(BUFFER_SIZE, remaining))
+                    if not chunk:
+                        raise ConnectionError("Server closed before echoing the complete request")
+                    parts.append(chunk)
+                    remaining -= len(chunk)
+                response = b''.join(parts)
                 
                 if not response:
                     log_message("WARN", "Server closed the connection")
@@ -118,7 +127,7 @@ def run_client(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
                 response_text = response.decode('utf-8', errors='replace')
                 log_message("RECV", f"Echo: \"{response_text}\" ({len(response)} bytes)")
                 
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 print()  # New line after ^C
                 log_message("INFO", "User interrupt")
                 break

@@ -39,9 +39,9 @@ Advanced tool for process hierarchy analysis: tree visualisation with parent-chi
 
 3. **Anomaly detection**
    - Zombie processes (defunct)
-   - Orphan processes (PPID=1)
+   - Direct children of namespace PID 1 (not proof of orphaning)
    - High CPU/memory consumers
-   - Processes with FD leak (too many file descriptors)
+   - High descriptor counts (a leak requires trend and workload evidence)
 
 4. **Grouping and aggregation**
    - Resources per user
@@ -65,7 +65,7 @@ Advanced tool for process hierarchy analysis: tree visualisation with parent-chi
 
 ## CLI Interface
 
-```bash
+```text
 ./proctree.sh <command> [options]
 
 Commands:
@@ -212,7 +212,7 @@ HIERARCHY
   9012     8901     defunct              1h 30m
   
   Parent: 8901 (python /opt/worker.py) - not reaping children!
-  Action: Kill parent or fix code to call wait()
+  Action: Investigate reaping and service context; repair wait() handling before considering a controlled restart
 
 ⚠️ HIGH CPU CONSUMERS (>50% sustained)
 ───────────────────────────────────────────────────────────────────────────────
@@ -226,20 +226,20 @@ HIERARCHY
   12456    mysql    2.8 GB   17.5%     mysqld
   3240     1000     1.2 GB   7.5%      python myapp.py
   
-⚠️ FILE DESCRIPTOR LEAKS (>1000 FDs)
+⚠️ HIGH FILE DESCRIPTOR COUNTS (>1000 FDs)
 ───────────────────────────────────────────────────────────────────────────────
   PID      User     FDs      Limit     Command
   4567     www      2456     4096      node server.js
   
   Warning: Approaching FD limit, may cause "too many open files"
 
-🟡 ORPHAN PROCESSES (PPID=1, not daemons)
+🟡 NON-ROOT DIRECT CHILDREN OF PID 1 (service/orphan status unknown)
 ───────────────────────────────────────────────────────────────────────────────
   PID      User     Started     Command
   7890     antonio  3d ago      /usr/bin/python old_script.py
   7891     antonio  3d ago      sleep 99999
   
-  These may be leftover processes from crashed parents
+  These may be services or reparented processes; PPID and UID alone do not establish the cause
 
 SUMMARY
 ───────────────────────────────────────────────────────────────────────────────
@@ -284,39 +284,32 @@ M10_Process_Tree_Analyzer/
 
 ```bash
 get_process_info() {
-    local pid="$1"
-    local proc_dir="/proc/$pid"
-    
-    [[ -d "$proc_dir" ]] || return 1
-    
-    # Status
-    local status
-    status=$(cat "$proc_dir/status" 2>/dev/null)
-    
-    local name ppid state uid
-    name=$(echo "$status" | awk '/^Name:/ {print $2}')
-    ppid=$(echo "$status" | awk '/^PPid:/ {print $2}')
-    state=$(echo "$status" | awk '/^State:/ {print $2}')
-    uid=$(echo "$status" | awk '/^Uid:/ {print $2}')
-    
-    # Memory
-    local rss
-    rss=$(echo "$status" | awk '/^VmRSS:/ {print $2}')
-    
-    # Command line
-    local cmdline
-    cmdline=$(tr '\0' ' ' < "$proc_dir/cmdline" 2>/dev/null)
-    
-    echo "$pid|$ppid|$name|$state|$uid|$rss|$cmdline"
+    python3 - "$1" <<'PYPROC'
+import json,re,sys
+from pathlib import Path
+pid=sys.argv[1]
+if not re.fullmatch(r'[1-9][0-9]*',pid): raise SystemExit(2)
+root=Path('/proc')/pid
+try:
+    rows={line.split(':',1)[0]:line.split(':',1)[1].strip() for line in (root/'status').read_text().splitlines() if ':' in line}
+    name=rows['Name']; ppid=rows['PPid']; state=rows['State'].split()[0]; uid=rows['Uid'].split()[0]
+    rss=rows.get('VmRSS','0').split()[0]
+    argv=(root/'cmdline').read_bytes().split(b'\0')
+    # Display encoding: JSON string content, with | escaped to preserve this record grammar.
+    escape=lambda value: json.dumps(value,ensure_ascii=True)[1:-1].replace('|',r'\u007c')
+    command=' '.join(x.decode('utf-8','backslashreplace') for x in argv if x)
+    print('|'.join([pid,ppid,escape(name),state,uid,rss,escape(command)]))
+except (OSError,KeyError,ValueError): raise SystemExit(1)  # Process may disappear during observation.
+PYPROC
 }
 
 get_all_processes() {
-    for pid_dir in /proc/[0-9]*; do
-        local pid="${pid_dir##*/}"
-        get_process_info "$pid" 2>/dev/null
-    done
+    local pid_dir
+    for pid_dir in /proc/[0-9]*; do get_process_info "${pid_dir##*/}" || continue; done
 }
 ```
+
+Process name/command fields use JSON-escaped display text (without outer quotes), including `\u007c` for a pipe. This keeps newline/pipe bytes out of record delimiters. A `/proc` read remains a changing observation, not an atomic process snapshot.
 
 ### Building the tree
 
@@ -325,8 +318,12 @@ declare -A CHILDREN
 declare -A PROC_INFO
 
 build_tree() {
+    CHILDREN=(); PROC_INFO=()
+    # Each refresh replaces the previous snapshot.
     # Read all processes
     while IFS='|' read -r pid ppid name state uid rss cmd; do
+        [[ $pid =~ ^[0-9]+$ && $ppid =~ ^[0-9]+$ ]] || continue
+        [[ -z ${PROC_INFO[$pid]:-} ]] || continue
         PROC_INFO[$pid]="$name|$state|$uid|$rss|$cmd"
         CHILDREN[$ppid]+="$pid "
     done < <(get_all_processes)
@@ -338,10 +335,10 @@ print_tree() {
     local is_last="${3:-true}"
     
     # Get process info
-    IFS='|' read -r name state uid rss cmd <<< "${PROC_INFO[$pid]}"
+    IFS='|' read -r name state uid rss cmd <<< "${PROC_INFO[$pid]:-}"
     
     # Display current node
-    local branch
+    local branch child_prefix name state uid rss cmd child
     if [[ "$is_last" == "true" ]]; then
         branch="└── "
         child_prefix="${prefix}    "
@@ -353,13 +350,14 @@ print_tree() {
     echo "${prefix}${branch}${name}($pid) [MEM: ${rss}KB]"
     
     # Display children
-    local children="${CHILDREN[$pid]}"
-    local child_array=($children)
+    local children="${CHILDREN[$pid]:-}"
+    local -a child_array=()
+    IFS=' ' read -r -a child_array <<< "$children"
     local count=${#child_array[@]}
     local i=0
     
-    for child in $children; do
-        ((i++))
+    for child in "${child_array[@]}"; do
+        i=$((i + 1))
         local last=$( ((i == count)) && echo "true" || echo "false" )
         print_tree "$child" "$child_prefix" "$last"
     done
@@ -379,13 +377,9 @@ find_zombies() {
 
 find_orphans() {
     while IFS='|' read -r pid ppid name state uid rss cmd; do
-        # PPID=1 but not a system daemon
+        # Snapshot predicate only: no conclusion about daemon/orphan provenance.
         if [[ "$ppid" == "1" && "$uid" != "0" ]]; then
-            # Check if recently started
-            local start_time
-            start_time=$(stat -c %Y "/proc/$pid" 2>/dev/null)
-            
-            echo "ORPHAN|$pid|$name|$uid"
+            echo "INIT_CHILD_NONROOT|$pid|$name|$uid"
         fi
     done < <(get_all_processes)
 }
@@ -404,7 +398,9 @@ export_dot() {
         [[ "$state" == "Z" ]] && color="red"
         [[ "$state" == "R" ]] && color="green"
         
-        echo "    \"$pid\" [label=\"$name\\n($pid)\" fillcolor=$color style=filled];"
+        local label
+        label=$(python3 -c 'import json,sys; print(json.dumps(json.loads(chr(34)+sys.argv[1]+chr(34))+"\n("+sys.argv[2]+")"))' "$name" "$pid") || return 1
+        printf '    "%s" [label=%s fillcolor=%s style=filled];\n' "$pid" "$label" "$color"
         [[ "$ppid" != "0" ]] && echo "    \"$ppid\" -> \"$pid\";"
     done < <(get_all_processes)
     

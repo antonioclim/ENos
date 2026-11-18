@@ -1,5 +1,7 @@
 # S03_TC05 - File Permissions and Ownership
 
+> **Evidence limit:** local recordings, logs and hashes can support review of a submitted session; they do not prove authorship, uninterrupted capture or the absence of edited/omitted activity. Privacy, retention and assessment consequences remain subject to the approved course policy.
+
 > **Operating Systems** | Bucharest UES - CSIE  
 > Laboratory material - Seminar 3 (Redistributed)
 
@@ -98,7 +100,7 @@ chmod go-rwx private.txt    # remove everything for group and others
 
 # Recursive
 chmod -R 755 directory/     # apply recursively
-chmod -R u+rwX,go+rX dir/   # X = execute only for directories
+chmod -R u+rwX,go+rX dir/   # X = directories OR regular files already executable by any class
 ```
 
 ### 3.3 Permissions for Directories
@@ -114,7 +116,7 @@ chmod 700 private/          # Only owner can access
 chmod 775 shared/           # Owner and group can modify
 
 # Read-only directory
-chmod 555 readonly/         # Nobody can modify
+chmod 555 readonly/         # No unprivileged entry creation/removal; writable contained files can still be edited
 ```
 
 ---
@@ -180,17 +182,20 @@ sudo usermod -aG developers john
 # Default directories: 777 (rwxrwxrwx)
 
 # Effective permissions calculation:
-# Files: 666 - umask
-# Directories: 777 - umask
+# Files: 0666 & ~umask
+# Directories: 0777 & ~umask
 
 # Example with umask 022:
-# Files: 666 - 022 = 644 (rw-r--r--)
-# Directories: 777 - 022 = 755 (rwxr-xr-x)
+# Files: 0666 & ~0022 = 644 (rw-r--r--)
+# Directories: 0777 & ~0022 = 755 (rwxr-xr-x)
 
 # Example with umask 077:
-# Files: 666 - 077 = 600 (rw-------)
-# Directories: 777 - 077 = 700 (rwx------)
+# Files: 0666 & ~0077 = 600 (rw-------)
+# Directories: 0777 & ~0077 = 700 (rwx------)
 ```
+
+These ordinary creation examples assume no inherited default ACL. Bitwise removal
+is not arithmetic subtraction: mask 0177 produces file 0600 **and directory 0600**.
 
 ### 5.2 Setting umask
 
@@ -213,6 +218,10 @@ echo "umask 022" >> ~/.bashrc
 ## 6. Special Permissions
 
 ### 6.1 SUID (Set User ID) - 4xxx
+
+On Linux, set-ID execution applies to supported executable binaries, subject to
+mount/kernel restrictions. Linux ignores SUID on interpreter scripts. No privileged
+execution is needed to observe the mode bits on owned nonexecuted fixtures.
 
 ```bash
 # File executes with owner's permissions
@@ -249,11 +258,11 @@ chmod 2775 /projects/team1
 ### 6.3 Sticky Bit - 1xxx
 
 ```bash
-# On directories: only owner can delete their own files
+# On directories: file owner, directory owner or privilege may remove entries
 # Displayed as 't' instead of 'x' for others
 
-chmod +t /tmp               # set sticky
-chmod 1777 /tmp             # octal
+chmod +t owned_shared/      # set sticky on an owned fixture
+chmod 1777 owned_shared/    # octal
 
 # Example: /tmp
 ls -ld /tmp
@@ -270,7 +279,7 @@ find / -perm -1000 2>/dev/null
 |-----|-------|---------|--------------|
 | SUID | 4000 | Execute as owner | - |
 | SGID | 2000 | Execute as group | Group inheritance |
-| Sticky | 1000 | - | Only owner deletes |
+| Sticky | 1000 | - | File owner, directory owner or appropriate privilege may remove entries |
 
 ```bash
 # Octal examples
@@ -342,10 +351,10 @@ umask $OLD_UMASK
    > New files automatically inherit the directory's group.
 
 4. **What is Sticky Bit used for on /tmp?**
-   > Prevents deletion of others' files, even though directory is world-writable.
+   > Adds an ownership restriction to directory write/search permission; the directory owner and privileged processes are exceptions.
 
 5. **What permissions will a new file have with umask 027?**
-   > 666 - 027 = 640 (rw-r-----)
+   > 0666 & ~0027 = 640 (rw-r-----)
 
 ---
 
@@ -400,14 +409,20 @@ After you have completed all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - send it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

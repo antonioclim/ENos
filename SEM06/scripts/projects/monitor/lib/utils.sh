@@ -8,7 +8,7 @@
 #
 # DEPENDENCIES:
 #   - Must be loaded after core.sh
-#   - Required commands: top, free, df, ps, awk
+#   - Required commands: grep, df, ps, awk; readable Linux /proc counters
 #
 # USAGE:
 #   source "${SCRIPT_DIR}/lib/utils.sh"
@@ -25,106 +25,54 @@ readonly UTILS_VERSION="1.0.0"
 
 # Get total CPU usage as percentage
 # Returns: integer 0-100
+cpu_totals() {
+    awk 'NR==1 { if ($1!="cpu" || NF<9) exit 1;
+        total=0; for(i=2;i<=9;i++){if($i !~ /^[0-9]+$/) exit 1; total+=$i}
+        printf "%.0f %.0f\n",total,$5+$6; ok=1 } END {if(!ok) exit 1}'
+}
 get_cpu_usage() {
-    local cpu_line
-    local idle_percent
-    local cpu_usage
-    
-    # Method 1: /proc/stat (more accurate, but requires two readings)
-    if [[ -f /proc/stat ]]; then
-        # First reading
-        local cpu1
-        cpu1=$(grep '^cpu ' /proc/stat)
-        local user1 nice1 system1 idle1 iowait1 irq1 softirq1
-        read -r _ user1 nice1 system1 idle1 iowait1 irq1 softirq1 _ <<< "$cpu1"
-        
-        sleep 0.5
-        
-        # Second reading
-        local cpu2
-        cpu2=$(grep '^cpu ' /proc/stat)
-        local user2 nice2 system2 idle2 iowait2 irq2 softirq2
-        read -r _ user2 nice2 system2 idle2 iowait2 irq2 softirq2 _ <<< "$cpu2"
-        
-        # Calculate differences
-        local total1=$((user1 + nice1 + system1 + idle1 + iowait1 + irq1 + softirq1))
-        local total2=$((user2 + nice2 + system2 + idle2 + iowait2 + irq2 + softirq2))
-        local idle_diff=$((idle2 - idle1))
-        local total_diff=$((total2 - total1))
-        
-        if [[ $total_diff -gt 0 ]]; then
-            cpu_usage=$((100 - (100 * idle_diff / total_diff)))
-        else
-            cpu_usage=0
-        fi
-    else
-        # Alternative method: top (less accurate)
-        cpu_line=$(top -bn1 | grep "Cpu(s)" 2>/dev/null || top -bn1 | grep "CPU:" 2>/dev/null)
-        
-        if [[ -n "$cpu_line" ]]; then
-            # Extract idle and calculate usage
-            idle_percent=$(echo "$cpu_line" | awk '{
-                for(i=1; i<=NF; i++) {
-                    if($i ~ /id/) { print $(i-1); exit }
-                }
-            }' | tr -d '%,')
-            
-            if [[ -n "$idle_percent" ]]; then
-                cpu_usage=$(echo "100 - $idle_percent" | bc 2>/dev/null || echo $((100 - ${idle_percent%.*})))
-                cpu_usage=${cpu_usage%.*}  # Convert to integer
-            else
-                cpu_usage=0
-            fi
-        else
-            log_warn "Cannot determine CPU usage"
-            cpu_usage=0
-        fi
-    fi
-    
-    # Ensure valid range 0-100
-    if [[ $cpu_usage -lt 0 ]]; then cpu_usage=0; fi
-    if [[ $cpu_usage -gt 100 ]]; then cpu_usage=100; fi
-    
-    echo "$cpu_usage"
+    local first second values1 values2 total1 idle1 total2 idle2 elapsed idle_elapsed
+    [[ -r /proc/stat ]] || { log_error "CPU counters are unavailable"; return 1; }
+    first=$(grep '^cpu ' /proc/stat) || return 1
+    sleep "${CPU_SAMPLE_INTERVAL:-0.5}" || return 1
+    second=$(grep '^cpu ' /proc/stat) || return 1
+    # Sum user..steal only; guest/guest_nice are already in user/nice.
+    # This model treats idle+iowait as non-busy time; invalid intervals are unavailable.
+    values1=$(cpu_totals <<< "$first") || return 1
+    values2=$(cpu_totals <<< "$second") || return 1
+    IFS=' ' read -r total1 idle1 <<< "$values1"
+    IFS=' ' read -r total2 idle2 <<< "$values2"
+    elapsed=$((total2-total1)); idle_elapsed=$((idle2-idle1))
+    (( elapsed > 0 && idle_elapsed >= 0 && idle_elapsed <= elapsed )) || {
+        log_error "CPU counters did not yield a valid interval"; return 1;
+    }
+    printf '%s\n' "$((100 * (elapsed-idle_elapsed) / elapsed))"
 }
 
 # Get number of CPU cores
 get_cpu_cores() {
     local cores
-    
-    if [[ -f /proc/cpuinfo ]]; then
-        cores=$(grep -c "^processor" /proc/cpuinfo)
-    else
-        cores=$(nproc 2>/dev/null || echo 1)
-    fi
-    
-    echo "$cores"
+    cores=$(grep -c '^processor[[:space:]]*:' /proc/cpuinfo) || return 1
+    [[ $cores =~ ^[1-9][0-9]*$ ]] || return 1
+    printf '%s\n' "$cores"
 }
 
 # Get load average (1, 5, 15 minutes)
 # Returns: "load1 load5 load15"
 get_load_average() {
-    if [[ -f /proc/loadavg ]]; then
-        awk '{print $1, $2, $3}' /proc/loadavg
-    else
-        uptime | awk -F'load average:' '{print $2}' | tr ',' ' ' | xargs
-    fi
+    awk 'NR==1 {for(i=1;i<=3;i++) if($i !~ /^[0-9]+([.][0-9]+)?$/) exit 1;
+        print $1,$2,$3;ok=1} END{if(!ok)exit 1}' /proc/loadavg
 }
 
 # Check if load average is critical
 # Usage: is_load_critical [threshold_multiplier]
 # threshold_multiplier: multiplication factor for number of cores (default: 2)
 is_load_critical() {
-    local multiplier="${1:-2}"
-    local cores
-    cores=$(get_cpu_cores)
-    local threshold=$((cores * multiplier))
-    
-    local load1
-    load1=$(get_load_average | awk '{print $1}')
-    load1=${load1%.*}  # Convert to integer
-    
-    [[ ${load1:-0} -gt $threshold ]]
+    local multiplier="${1:-2}" cores loads
+    [[ $multiplier =~ ^[0-9]+([.][0-9]+)?$ ]] || return 2
+    cores=$(get_cpu_cores) || return 2
+    loads=$(get_load_average) || return 2
+    awk -v m="$multiplier" -v cores="$cores" '{exit !($1 > cores*m)}' <<< "$loads"
 }
 
 #------------------------------------------------------------------------------
@@ -134,70 +82,29 @@ is_load_critical() {
 # Get memory usage as percentage
 # Returns: integer 0-100
 get_memory_usage() {
-    local mem_usage
-    
-    if command -v free &>/dev/null; then
-        # free with -m option for values in MB
-        mem_usage=$(free | awk '/^Mem:/ {
-            total = $2
-            used = $3
-            if (total > 0) {
-                printf "%.0f", (used / total) * 100
-            } else {
-                print 0
-            }
-        }')
-    elif [[ -f /proc/meminfo ]]; then
-        # Direct parsing of /proc/meminfo
-        local total available
-        total=$(grep "^MemTotal:" /proc/meminfo | awk '{print $2}')
-        available=$(grep "^MemAvailable:" /proc/meminfo | awk '{print $2}')
-        
-        if [[ -z "$available" ]]; then
-            # Fallback for older kernel
-            local free buffers cached
-            free=$(grep "^MemFree:" /proc/meminfo | awk '{print $2}')
-            buffers=$(grep "^Buffers:" /proc/meminfo | awk '{print $2}')
-            cached=$(grep "^Cached:" /proc/meminfo | awk '{print $2}')
-            available=$((free + buffers + cached))
-        fi
-        
-        local used=$((total - available))
-        mem_usage=$((used * 100 / total))
-    else
-        log_warn "Cannot determine memory usage"
-        mem_usage=0
-    fi
-    
-    echo "$mem_usage"
+    # /proc/meminfo labels kB, conventionally KiB. MemAvailable is required.
+    awk '/^(MemTotal|MemAvailable):/ {if($2 !~ /^[0-9]+$/ || $3!="kB") exit 1;v[$1]=$2}
+      END {t=v["MemTotal:"];a=v["MemAvailable:"];
+        if(!("MemTotal:" in v) || !("MemAvailable:" in v) || t<=0 || a<0 || a>t) exit 1;
+        printf "%.0f\n",100*(t-a)/t}' /proc/meminfo
 }
 
 # Get memory details: total, used, free, available
 # Returns: "total_mb used_mb free_mb available_mb"
 get_memory_details() {
-    if command -v free &>/dev/null; then
-        free -m | awk '/^Mem:/ {print $2, $3, $4, $7}'
-    else
-        log_warn "Command 'free' is not available"
-        echo "0 0 0 0"
-    fi
+    # Total, used=(total-available), free, available in MiB; unavailable is non-zero exit.
+    awk '/^(MemTotal|MemAvailable|MemFree):/ {if($2 !~ /^[0-9]+$/ || $3!="kB") exit 1;v[$1]=$2}
+      END {t=v["MemTotal:"];a=v["MemAvailable:"];f=v["MemFree:"];
+        if(!("MemTotal:" in v) || !("MemAvailable:" in v) || !("MemFree:" in v) || t<=0 || a>t || f>t) exit 1;
+        printf "%d %d %d %d\n",t/1024,(t-a)/1024,f/1024,a/1024}' /proc/meminfo
 }
 
 # Get swap usage as percentage
 get_swap_usage() {
-    local swap_usage
-    
-    swap_usage=$(free | awk '/^Swap:/ {
-        total = $2
-        used = $3
-        if (total > 0) {
-            printf "%.0f", (used / total) * 100
-        } else {
-            print 0
-        }
-    }')
-    
-    echo "${swap_usage:-0}"
+    awk '/^(SwapTotal|SwapFree):/ {if($2 !~ /^[0-9]+$/ || $3!="kB") exit 1;v[$1]=$2}
+      END {t=v["SwapTotal:"];f=v["SwapFree:"];
+        if(!("SwapTotal:" in v) || !("SwapFree:" in v) || f>t) exit 1;
+        if(t==0) print 0; else printf "%.0f\n",100*(t-f)/t}' /proc/meminfo
 }
 
 #------------------------------------------------------------------------------
@@ -208,47 +115,42 @@ get_swap_usage() {
 # Usage: get_disk_usage "/mount/point"
 # Returns: integer 0-100
 get_disk_usage() {
-    local mount_point="${1:-/}"
-    local usage
-    
-    usage=$(df -h "$mount_point" 2>/dev/null | awk 'NR==2 {
-        gsub(/%/, "", $5)
-        print $5
-    }')
-    
-    echo "${usage:-0}"
+    local table
+    table=$(LC_ALL=C df -P -- "${1:-/}") || return 1
+    awk 'NR==2 {gsub(/%/,"",$5);if($5 !~ /^[0-9]+$/ || ($5+0)>100) exit 1;print $5;ok=1}
+         END {if(!ok)exit 1}' <<< "$table"
 }
 
 # Get complete information about all partitions
 # Format: mount_point|total|used|available|percent
 # Excludes: tmpfs, devtmpfs, squashfs
 get_all_disk_info() {
-    df -h 2>/dev/null | tail -n +2 | grep -v -E "^(tmpfs|devtmpfs|squashfs|overlay)" | \
-    while read -r filesystem size used avail percent mount_point; do
-        # Clean percentage
-        percent=${percent%\%}
-        echo "${mount_point}|${size}|${used}|${avail}|${percent}"
-    done
+    local table
+    table=$(LC_ALL=C df -hP -x tmpfs -x devtmpfs -x squashfs) || return 1
+    # Human report fields use |; percent-escape delimiters in mount names.
+    awk 'NR>1 {p=$5;sub(/%$/,"",p);if(p !~ /^[0-9]+$/ || (p+0)>100)exit 1;
+      mount=$6;for(i=7;i<=NF;i++)mount=mount " " $i;gsub(/%/,"%25",mount);gsub(/[|]/,"%7C",mount);
+      print mount "|" $2 "|" $3 "|" $4 "|" p}' <<< "$table"
 }
 
 # Get list of mount points with usage over threshold
 # Usage: get_disks_over_threshold 85
 get_disks_over_threshold() {
-    local threshold="${1:-85}"
-    
-    get_all_disk_info | while IFS='|' read -r mount size used avail percent; do
-        if [[ ${percent:-0} -ge $threshold ]]; then
-            echo "${mount}:${percent}%"
-        fi
-    done
+    local threshold="${1:-85}" rows mount size used avail percent
+    [[ $threshold =~ ^[0-9]{1,3}$ ]] && ((10#$threshold<=100)) || return 2
+    rows=$(get_all_disk_info) || return 2
+    while IFS='|' read -r mount size used avail percent; do
+        [[ -n $mount ]] || continue
+        if ((percent >= 10#$threshold)); then printf '%s:%s%%\n' "$mount" "$percent"; fi
+    done <<< "$rows"
 }
 
 # Check available space in MB for a mount point
 # Usage: get_available_space_mb "/path"
 get_available_space_mb() {
-    local path="${1:-/}"
-    
-    df -m "$path" 2>/dev/null | awk 'NR==2 {print $4}'
+    local table
+    table=$(LC_ALL=C df -Pm -- "${1:-/}") || return 1
+    awk 'NR==2 {if($4 !~ /^[0-9]+$/)exit 1;print $4;ok=1} END{if(!ok)exit 1}' <<< "$table"
 }
 
 #------------------------------------------------------------------------------
@@ -257,27 +159,33 @@ get_available_space_mb() {
 
 # Get total process count
 get_process_count() {
-    ps aux 2>/dev/null | wc -l | awk '{print $1 - 1}'  # -1 for header
+    local rows
+    rows=$(ps -e -o pid=) || return 1
+    awk 'NF{count++} END{print count+0}' <<< "$rows"
 }
 
 # Get top N processes by CPU usage
 # Usage: get_top_cpu_processes [N]
 get_top_cpu_processes() {
-    local count="${1:-5}"
-    
-    ps aux --sort=-%cpu 2>/dev/null | head -n $((count + 1)) | tail -n "$count" | \
-    awk '{printf "%s|%s|%s|%s\n", $2, $11, $3, $4}'
-    # Format: PID|COMMAND|CPU%|MEM%
+    local count="${1:-5}" rows
+    [[ $count =~ ^[1-9][0-9]*$ && ${#count} -le 6 ]] || return 2
+    rows=$(LC_ALL=C ps -eo pid=,pcpu=,pmem=,comm= --sort=-pcpu) || return 1
+    # comm is the final field, so embedded spaces do not shift numeric columns.
+    # Encode % and | in names for this human-report delimiter contract.
+    awk -v n="$count" 'NR<=n {pid=$1;cpu=$2;mem=$3;$1=$2=$3="";sub(/^[[:space:]]+/,"");name=$0;
+      gsub(/%/,"%25",name);gsub(/[|]/,"%7C",name);printf "%s|%s|%s|%s\n",pid,name,cpu,mem}' <<< "$rows"
 }
 
 # Get top N processes by memory usage
 # Usage: get_top_mem_processes [N]
 get_top_mem_processes() {
-    local count="${1:-5}"
-    
-    ps aux --sort=-%mem 2>/dev/null | head -n $((count + 1)) | tail -n "$count" | \
-    awk '{printf "%s|%s|%s|%s\n", $2, $11, $4, $3}'
-    # Format: PID|COMMAND|MEM%|CPU%
+    local count="${1:-5}" rows
+    [[ $count =~ ^[1-9][0-9]*$ && ${#count} -le 6 ]] || return 2
+    rows=$(LC_ALL=C ps -eo pid=,pcpu=,pmem=,comm= --sort=-pmem) || return 1
+    # comm is the final field, so embedded spaces do not shift numeric columns.
+    # Encode % and | in names for this human-report delimiter contract.
+    awk -v n="$count" 'NR<=n {pid=$1;cpu=$2;mem=$3;$1=$2=$3="";sub(/^[[:space:]]+/,"");name=$0;
+      gsub(/%/,"%25",name);gsub(/[|]/,"%7C",name);printf "%s|%s|%s|%s\n",pid,name,mem,cpu}' <<< "$rows"
 }
 
 # Check if a process is running
@@ -289,8 +197,9 @@ is_process_running() {
 
 # Get PID of a process by name
 get_process_pid() {
-    local process_name="$1"
-    pgrep -x "$process_name" 2>/dev/null | head -n1
+    local rows
+    rows=$(pgrep -x -- "$1") || return $?
+    printf '%s\n' "${rows%%$'\n'*}"
 }
 
 #------------------------------------------------------------------------------
@@ -300,16 +209,12 @@ get_process_pid() {
 # Get network statistics for an interface
 # Usage: get_network_stats "eth0"
 get_network_stats() {
-    local interface="${1:-eth0}"
-    local rx_bytes tx_bytes
-    
-    if [[ -d "/sys/class/net/$interface" ]]; then
-        rx_bytes=$(cat "/sys/class/net/$interface/statistics/rx_bytes" 2>/dev/null || echo 0)
-        tx_bytes=$(cat "/sys/class/net/$interface/statistics/tx_bytes" 2>/dev/null || echo 0)
-        echo "$rx_bytes $tx_bytes"
-    else
-        echo "0 0"
-    fi
+    local interface="${1:-eth0}" rx_bytes tx_bytes
+    [[ $interface =~ ^[A-Za-z0-9_.:-]+$ && $interface != . && $interface != .. ]] || return 2
+    rx_bytes=$(cat -- "/sys/class/net/$interface/statistics/rx_bytes") || return 1
+    tx_bytes=$(cat -- "/sys/class/net/$interface/statistics/tx_bytes") || return 1
+    [[ $rx_bytes =~ ^[0-9]+$ && $tx_bytes =~ ^[0-9]+$ ]] || return 1
+    printf '%s %s\n' "$rx_bytes" "$tx_bytes"
 }
 
 # Get list of active network interfaces
@@ -323,25 +228,7 @@ get_active_interfaces() {
 
 # Get uptime in seconds
 get_uptime_seconds() {
-    if [[ -f /proc/uptime ]]; then
-        awk '{print int($1)}' /proc/uptime
-    else
-        # Fallback: parse uptime output
-        uptime | awk '{
-            split($3, a, ":")
-            if ($4 ~ /day/) {
-                days = $3
-                split($5, a, ":")
-                hours = a[1]
-                mins = a[2]
-            } else {
-                days = 0
-                hours = a[1]
-                mins = a[2]
-            }
-            print (days * 86400) + (hours * 3600) + (mins * 60)
-        }'
-    fi
+    awk 'NR==1 {if($1 !~ /^[0-9]+([.][0-9]+)?$/)exit 1;print int($1);ok=1} END{if(!ok)exit 1}' /proc/uptime
 }
 
 # Get kernel information
@@ -389,7 +276,7 @@ generate_system_report() {
     echo "----- MEMORY -----"
     local mem_details
     mem_details=$(get_memory_details)
-    echo "Total/Used/Free/Available (MB): $mem_details"
+    echo "Total/Used/Free/Available (MiB): $mem_details"
     echo "Usage: $(get_memory_usage)%"
     echo "Swap: $(get_swap_usage)%"
     echo ""

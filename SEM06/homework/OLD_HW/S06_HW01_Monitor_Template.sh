@@ -5,7 +5,7 @@
 # INSTRUCTIONS:
 # 1. Complete functions marked with TODO
 # 2. Do not modify function signatures
-# 3. Run tests with: ./test_hw01.sh
+# 3. Historical test_hw0N.sh files were not supplied. Use an owned fixture and document assertions.
 #
 # Author: [Your name]
 # Group: [Your group]
@@ -75,9 +75,9 @@ get_cpu_usage() {
     # Suggested steps:
     # 1. Read "cpu " line from /proc/stat
     # 2. Extract values: user, nice, system, idle, iowait, irq, softirq
-    # 3. Calculate: active = user + nice + system
-    # 4. Calculate: total = active + idle + iowait + irq + softirq
-    # 5. Return: active * 100 / total
+    # 3. Include counters user through steal, excluding duplicate guest totals
+    # 4. Take a second sample; validate positive total delta and bounded idle delta
+    # 5. Calculate interval busy percentage; unavailable is not zero
     
     echo "0"  # Placeholder - replace with your implementation
 }
@@ -158,6 +158,11 @@ output_json() {
 
 # === MAIN (do not modify structure) ===
 main() {
+    # TODO guard: remove only after implementing and testing this exercise.
+    if [[ ${1:-} != -h && ${1:-} != --help && ${1:-} != -v && ${1:-} != --version ]]; then
+        printf 'NOT_IMPLEMENTED: archived starter; no operation performed\n' >&2
+        return 3
+    fi
     local check_cpu=false
     local check_mem=false
     local check_disk=false
@@ -199,15 +204,15 @@ main() {
         log "INFO" "=== Monitor System ==="
         
         if [[ "$check_cpu" == true ]]; then
-            check_threshold "$cpu_val" "$THRESHOLD_CPU" "CPU" || ((alerts++))
+            check_threshold "$cpu_val" "$THRESHOLD_CPU" "CPU" || alerts=$((alerts+1))
         fi
         
         if [[ "$check_mem" == true ]]; then
-            check_threshold "$mem_val" "$THRESHOLD_MEM" "Memory" || ((alerts++))
+            check_threshold "$mem_val" "$THRESHOLD_MEM" "Memory" || alerts=$((alerts+1))
         fi
         
         if [[ "$check_disk" == true ]]; then
-            check_threshold "$disk_val" "$THRESHOLD_DISK" "Disk" || ((alerts++))
+            check_threshold "$disk_val" "$THRESHOLD_DISK" "Disk" || alerts=$((alerts+1))
         fi
         
         if ((alerts > 0)); then

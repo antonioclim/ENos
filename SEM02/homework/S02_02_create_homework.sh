@@ -5,7 +5,7 @@
 #
 # DESCRIPTION:
 #     Creates directory structure and template files for the
-#     Seminar 3-4 homework. Includes templates for all exercises and
+#     Seminar 2 homework. Includes templates for all exercises and
 #     a self-check script.
 #
 # USAGE:
@@ -40,7 +40,7 @@ fi
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SEMINAR_NUM="03-04"
+SEMINAR_NUM="02"
 TEMA_PREFIX="HW_SEM${SEMINAR_NUM}"
 
 # 
@@ -51,7 +51,7 @@ print_banner() {
     echo -e "${CYAN}"
     echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
     echo "║                                                                               ║"
-    echo "║   📝  HOMEWORK TEMPLATE GENERATOR - Seminar 3-4                               ║"
+    echo "║   📝  HOMEWORK TEMPLATE GENERATOR - Seminar 2                               ║"
     echo "║       Operators | Redirection | Filters | Loops                               ║"
     echo "║                                                                               ║"
     echo "║       ASE Bucharest - CSIE | Operating Systems                                ║"
@@ -508,282 +508,33 @@ print_success "Created: exercises/ex5_integrated.sh"
 # --- Check Script ---
 cat > "$TARGET_DIR/check_homework.sh" << 'SCRIPT'
 #!/bin/bash
-# 
-#  Homework Self-Check Script
-# 
-
-set -e
-
-# Colours
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-BOLD='\033[1m'
-
+# Structural preflight only: final functional assessment remains instructor-led.
+set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXERCISES_DIR="$SCRIPT_DIR/exercises"
-TOTAL_SCORE=0
-MAX_SCORE=0
-
-echo ""
-echo -e "${BLUE}═══════════════════════════════════════════════════════════════════════════════${NC}"
-echo -e "${BOLD}   🔍 HOMEWORK CHECK - Seminar 2${NC}"
-echo -e "${BLUE}═══════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
-
-check_file() {
-    local file="$1"
-    local points="$2"
-    local name=$(basename "$file")
-    
-    MAX_SCORE=$((MAX_SCORE + points))
-    
-    echo -e "${BOLD}📄 Checking: $name ($points points)${NC}"
-    
-    # Check existence
+failures=0
+for name in ex1_operators.sh ex2_redirection.sh ex3_filters.sh ex4_loops.sh ex5_integrated.sh; do
+    file="$SCRIPT_DIR/exercises/$name"
     if [[ ! -f "$file" ]]; then
-        echo -e "  ${RED}✗${NC} File does not exist!"
-        return
+        echo "FAIL: missing exercises/$name"
+        failures=$((failures + 1))
+        continue
     fi
-    
-    # Check shebang
-    if ! head -1 "$file" | grep -q '^#!/bin/bash'; then
-        echo -e "  ${YELLOW}⚠${NC} Missing shebang (#!/bin/bash)"
-    else
-        echo -e "  ${GREEN}✓${NC} Shebang present"
+    if ! bash -n "$file"; then
+        echo "FAIL: Bash syntax in $name"
+        failures=$((failures + 1))
     fi
-    
-    # Check permissions
+    if grep -Eq 'TODO:|TODO |YOUR CODE|IMPLEMENT HERE' "$file"; then
+        echo "INCOMPLETE: starter placeholders remain in $name"
+        failures=$((failures + 1))
+    fi
     if [[ ! -x "$file" ]]; then
-        echo -e "  ${YELLOW}⚠${NC} File is not executable"
-        chmod +x "$file"
-        echo -e "  ${BLUE}ℹ${NC} Added execute permission"
-    else
-        echo -e "  ${GREEN}✓${NC} Permissions correct"
+        echo "FAIL: $name is not executable; set its permission deliberately."
+        failures=$((failures + 1))
     fi
-    
-    # Check syntax
-    if ! bash -n "$file" 2>/dev/null; then
-        echo -e "  ${RED}✗${NC} Syntax errors!"
-        bash -n "$file" 2>&1 | head -5 | sed 's/^/    /'
-        return
-    else
-        echo -e "  ${GREEN}✓${NC} Syntax correct"
-    fi
-    
-    # Specific checks per exercise
-    case "$name" in
-        ex1_operators.sh)
-            check_operators "$file"
-            ;;
-        ex2_redirection.sh)
-            check_redirection "$file"
-            ;;
-        ex3_filters.sh)
-            check_filters "$file"
-            ;;
-        ex4_loops.sh)
-            check_loops "$file"
-            ;;
-        ex5_integrated.sh)
-            check_integrated "$file"
-            ;;
-    esac
-    
-    echo ""
-}
-
-check_operators() {
-    local file="$1"
-    local score=0
-    
-    # Check operator presence
-    grep -q '&&' "$file" && { echo -e "  ${GREEN}✓${NC} Uses &&"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing &&"
-    grep -q '||' "$file" && { echo -e "  ${GREEN}✓${NC} Uses ||"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing ||"
-    grep -q '|' "$file" && { echo -e "  ${GREEN}✓${NC} Uses | (pipe)"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing |"
-    grep -q '&$\|& ' "$file" && { echo -e "  ${GREEN}✓${NC} Uses & (background)"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing &"
-    
-    # Check execution
-    if timeout 5 bash "$file" &>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} Script runs without errors"
-        ((score+=2))
-    else
-        echo -e "  ${YELLOW}⚠${NC} Script has execution problems"
-    fi
-    
-    TOTAL_SCORE=$((TOTAL_SCORE + score))
-    echo -e "  ${BLUE}Partial score: $score/10${NC}"
-}
-
-check_redirection() {
-    local file="$1"
-    local score=0
-    
-    grep -q '>' "$file" && { echo -e "  ${GREEN}✓${NC} Uses > (overwrite)"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing >"
-    grep -q '>>' "$file" && { echo -e "  ${GREEN}✓${NC} Uses >> (append)"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing >>"
-    grep -q '2>' "$file" && { echo -e "  ${GREEN}✓${NC} Uses 2> (stderr)"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing 2>"
-    grep -qE '2>&1|&>' "$file" && { echo -e "  ${GREEN}✓${NC} Uses 2>&1 or &>"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing stream combination"
-    grep -q '<<' "$file" && { echo -e "  ${GREEN}✓${NC} Uses << (here doc)"; ((score+=4)); } || echo -e "  ${RED}✗${NC} Missing here document"
-    
-    TOTAL_SCORE=$((TOTAL_SCORE + score))
-    echo -e "  ${BLUE}Partial score: $score/12${NC}"
-}
-
-check_filters() {
-    local file="$1"
-    local score=0
-    
-    grep -q 'sort' "$file" && { echo -e "  ${GREEN}✓${NC} Uses sort"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing sort"
-    grep -q 'uniq' "$file" && { echo -e "  ${GREEN}✓${NC} Uses uniq"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing uniq"
-    grep -q 'cut' "$file" && { echo -e "  ${GREEN}✓${NC} Uses cut"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing cut"
-    grep -q 'tr' "$file" && { echo -e "  ${GREEN}✓${NC} Uses tr"; ((score+=2)); } || echo -e "  ${RED}✗${NC} Missing tr"
-    
-    # Check correct pattern sort | uniq
-    if grep -q 'sort.*|.*uniq' "$file"; then
-        echo -e "  ${GREEN}✓${NC} Correct pattern: sort | uniq"
-        ((score+=2))
-    else
-        echo -e "  ${YELLOW}⚠${NC} Check if you use sort BEFORE uniq!"
-    fi
-    
-    # Check complex pipeline (minimum 3 |)
-    if grep -qE '\|.*\|.*\|' "$file"; then
-        echo -e "  ${GREEN}✓${NC} Complex pipeline (3+ commands)"
-        ((score+=2))
-    else
-        echo -e "  ${YELLOW}⚠${NC} Add a pipeline with at least 3 commands"
-    fi
-    
-    TOTAL_SCORE=$((TOTAL_SCORE + score))
-    echo -e "  ${BLUE}Partial score: $score/12${NC}"
-}
-
-check_loops() {
-    local file="$1"
-    local score=0
-    
-    grep -q 'for' "$file" && { echo -e "  ${GREEN}✓${NC} Uses for"; ((score+=3)); } || echo -e "  ${RED}✗${NC} Missing for"
-    grep -q 'while' "$file" && { echo -e "  ${GREEN}✓${NC} Uses while"; ((score+=3)); } || echo -e "  ${RED}✗${NC} Missing while"
-    
-    # Check BUG {1..$N}
-    if grep -qE '\{1\.\.\$[A-Za-z_]' "$file"; then
-        echo -e "  ${RED}✗${NC} BUG DETECTED: {1..\$N} does not work with variables!"
-        echo -e "    ${YELLOW}→ Use \$(seq 1 \$N) or for ((i=1; i<=N; i++))${NC}"
-    else
-        echo -e "  ${GREEN}✓${NC} No brace expansion bug"
-        ((score+=2))
-    fi
-    
-    # Check BUG cat | while
-    if grep -qE 'cat.*\|.*while\s+read' "$file"; then
-        echo -e "  ${RED}✗${NC} BUG DETECTED: cat file | while read loses variables!"
-        echo -e "    ${YELLOW}→ Use: while read line; do ... done < file${NC}"
-    else
-        echo -e "  ${GREEN}✓${NC} No subshell bug"
-        ((score+=2))
-    fi
-    
-    # Check while read < file (correct pattern)
-    if grep -qE 'while.*read.*<|done\s*<' "$file"; then
-        echo -e "  ${GREEN}✓${NC} Correct pattern: while read ... < file"
-        ((score+=1))
-    fi
-    
-    TOTAL_SCORE=$((TOTAL_SCORE + score))
-    echo -e "  ${BLUE}Partial score: $score/11${NC}"
-}
-
-check_integrated() {
-    local file="$1"
-    local score=0
-    local lines=$(grep -v '^\s*#' "$file" | grep -v '^\s*$' | wc -l)
-    
-    echo -e "  ${BLUE}Lines of code: $lines${NC}"
-    
-    if [[ $lines -ge 30 ]]; then
-        echo -e "  ${GREEN}✓${NC} Minimum 30 lines ($lines)"
-        ((score+=3))
-    else
-        echo -e "  ${YELLOW}⚠${NC} Under 30 lines ($lines)"
-    fi
-    
-    # Check functions
-    local func_count=$(grep -cE '^\s*[a-zA-Z_][a-zA-Z_0-9]*\s*\(\)' "$file" || echo 0)
-    if [[ $func_count -ge 2 ]]; then
-        echo -e "  ${GREEN}✓${NC} Minimum 2 functions ($func_count)"
-        ((score+=3))
-    else
-        echo -e "  ${YELLOW}⚠${NC} Under 2 functions ($func_count)"
-    fi
-    
-    # Check error handling
-    grep -qE '\$#|if.*\[.*-[fdeznr]|\[\[.*\]\]' "$file" && { echo -e "  ${GREEN}✓${NC} Error handling/checks"; ((score+=2)); } || echo -e "  ${YELLOW}⚠${NC} Missing error handling"
-    
-    # Check help
-    grep -qE '\-h|--help|usage|Usage|USAGE' "$file" && { echo -e "  ${GREEN}✓${NC} Help message"; ((score+=2)); } || echo -e "  ${YELLOW}⚠${NC} Missing help"
-    
-    # Check loops
-    grep -qE 'for|while' "$file" && { echo -e "  ${GREEN}✓${NC} Uses loops"; ((score+=2)); } || echo -e "  ${YELLOW}⚠${NC} Missing loops"
-    
-    # Check filters
-    grep -qE 'sort|uniq|cut|tr|wc|head|tail' "$file" && { echo -e "  ${GREEN}✓${NC} Uses filters"; ((score+=2)); } || echo -e "  ${YELLOW}⚠${NC} Missing filters"
-    
-    # Check redirection
-    grep -qE '>|>>' "$file" && { echo -e "  ${GREEN}✓${NC} Uses redirection"; ((score+=1)); } || echo -e "  ${YELLOW}⚠${NC} Missing redirection"
-    
-    TOTAL_SCORE=$((TOTAL_SCORE + score))
-    echo -e "  ${BLUE}Partial score: $score/15${NC}"
-}
-
-# Run checks
-check_file "$EXERCISES_DIR/ex1_operators.sh" 10
-check_file "$EXERCISES_DIR/ex2_redirection.sh" 12
-check_file "$EXERCISES_DIR/ex3_filters.sh" 12
-check_file "$EXERCISES_DIR/ex4_loops.sh" 11
-check_file "$EXERCISES_DIR/ex5_integrated.sh" 15
-
-# Total score
-echo -e "${BLUE}═══════════════════════════════════════════════════════════════════════════════${NC}"
-echo ""
-PERCENTAGE=$((TOTAL_SCORE * 100 / 60))
-
-if [[ $PERCENTAGE -ge 90 ]]; then
-    GRADE="A"
-    COLOR=$GREEN
-elif [[ $PERCENTAGE -ge 80 ]]; then
-    GRADE="B"
-    COLOR=$GREEN
-elif [[ $PERCENTAGE -ge 70 ]]; then
-    GRADE="C"
-    COLOR=$YELLOW
-elif [[ $PERCENTAGE -ge 60 ]]; then
-    GRADE="D"
-    COLOR=$YELLOW
-elif [[ $PERCENTAGE -ge 50 ]]; then
-    GRADE="E"
-    COLOR=$YELLOW
-else
-    GRADE="F"
-    COLOR=$RED
-fi
-
-echo -e "${BOLD}📊 FINAL RESULT${NC}"
-echo -e "   Score: ${COLOR}${TOTAL_SCORE}/60${NC} (${PERCENTAGE}%)"
-echo -e "   Grade: ${COLOR}${BOLD}${GRADE}${NC}"
-echo ""
-
-if [[ $PERCENTAGE -lt 50 ]]; then
-    echo -e "${YELLOW}💡 You need to work more on your homework to pass!${NC}"
-elif [[ $PERCENTAGE -lt 80 ]]; then
-    echo -e "${BLUE}💡 Homework is acceptable, but you can improve!${NC}"
-else
-    echo -e "${GREEN}🎉 Excellent! Homework is very good!${NC}"
-fi
-
-echo ""
-echo -e "${BLUE}═══════════════════════════════════════════════════════════════════════════════${NC}"
+done
+echo "Preflight findings: $failures"
+echo "No marks or final grade are assigned by this check. Functional evidence and review are still required."
+[[ $failures -eq 0 ]]
 SCRIPT
 chmod +x "$TARGET_DIR/check_homework.sh"
 print_success "Created: check_homework.sh"

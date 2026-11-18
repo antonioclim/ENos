@@ -78,6 +78,8 @@ Examples:
 
 ## Output Example
 
+These are synthetic illustrations, not measured runs or acceptance evidence.
+
 ```
 ╔══════════════════════════════════════════════════════════════════╗
 ║              BULK FILE ORGANIZER - DRY RUN                       ║
@@ -156,8 +158,11 @@ get_category() {
 
 # Journal for undo
 log_operation() {
-    echo "$(date +%s)|$1|$2|$3" >> "$JOURNAL_FILE"
-    # Format: timestamp|operation|source|destination
+    # Call only after a successful operation under the journal lock.
+    # Four NUL-terminated fields preserve pipes, whitespace and newlines.
+    printf '%s\0%s\0%s\0%s\0' "$(date +%s)" "$1" "$2" "$3" >> "$JOURNAL_FILE"
+    # Decoder reads four fields with read -r -d ''; reject an incomplete record.
+    # Store destination identity/checksum too; undo must refuse changed destinations.
 }
 ```
 

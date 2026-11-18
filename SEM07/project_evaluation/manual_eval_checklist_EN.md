@@ -5,6 +5,17 @@
 
 ---
 
+## Decision boundary
+
+The criteria below are preserved for review. Their numbers are competing historical scales, not an approved additive formula: interface rows reach0.8 plus usability0.4 while UX is capped0.5; readability/best-practices/consistency similarly exceed their category cap. The form uses another subdivision. Record observations and raw ratings without a final manual score until the author chooses a mapping.
+
+| Concrete choice | Consequence |
+|---|---|
+| Treat all rows as evidence and score only the form's disjoint caps | Preserves the form; needs a criterion-to-form mapping and avoids double counting |
+| Normalise each category's row total by its declared row maximum, then multiply by its cap | Makes the maximum attainable; changes relative weights and requires an explicit rule for not-applicable criteria |
+
+Recommendation: adopt one disjoint criterion table derived from the approved project rubric, and generate this form from it. Neither alternative is enacted by the calculator. Extras/documentation must have one allocation and cap, not be added repeatedly. The15% manual split itself conflicts with other project guides and is awaiting author resolution. Missing evidence stays pending rather than zero.
+
 ## Overview
 
 Manual evaluation accounts for **15%** of the project score (1.5 points out of 10).
@@ -68,7 +79,7 @@ This checklist guides instructors through the subjective aspects of project eval
 |-----------|---|------|-----|
 | Quoting | Inconsistent | Mostly correct | Always correct |
 | Error handling | Missing | Basic | Comprehensive |
-| Strict mode | Not used | Partial | Full (set -euo pipefail) |
+| Error strategy | Unspecified | Partially tested | Explicit failure handling, including strict-mode exceptions where used |
 | Shellcheck | Many warnings | Few warnings | Clean |
 
 ### 2.3 Consistency
@@ -189,7 +200,7 @@ Award additional points for:
 ## Red Flags
 - [ ] None
 - [ ] Potential plagiarism indicators
-- [ ] Mismatched code style suggesting multiple authors
+- [ ] Observable code/source similarities requiring contextual review (style alone is not authorship proof)
 - [ ] Other: _______________
 ```
 
@@ -227,7 +238,7 @@ Before evaluating, review these reference implementations:
 Watch for:
 - Identical variable names between unrelated students
 - Same unusual approaches or bugs
-- Comments that don't match student's English level
+- Specific uncited passages or unusual shared defects, reviewed in context
 - Code style inconsistencies within one project
 
 ### 7.2 Actions
@@ -236,7 +247,7 @@ Watch for:
 |---------|--------|
 | Minor similarity | Note for oral defence |
 | Significant similarity | Compare with source, question both |
-| Clear plagiarism | Refer to academic integrity |
+| Evidence requiring a misconduct decision | Apply the institutionally approved review process; no automatic conclusion |
 
 ---
 

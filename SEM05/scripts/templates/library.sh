@@ -22,6 +22,8 @@ fi
 # ============================================================
 # COMMON CONSTANTS
 # ============================================================
+[[ ${_SEM05_LIBRARY_LOADED:-0} == 1 ]] && return 0
+_SEM05_LIBRARY_LOADED=1
 readonly LIB_VERSION="1.0.0"
 
 # ============================================================
@@ -70,7 +72,10 @@ lib_die() {
 
 # Display debug message (only if DEBUG=1)
 lib_debug() {
-    [[ "${DEBUG:-0}" == "1" ]] && echo -e "${_BLUE}[DEBUG]${_NC} $*" >&2
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo -e "${_BLUE}[DEBUG]${_NC} $*" >&2
+    fi
+    return 0
 }
 
 # Display bold message
@@ -168,6 +173,7 @@ lib_in_array() {
 lib_join() {
     local separator="$1"
     shift
+    [[ $# -gt 0 ]] || return 0
     local first="$1"
     shift
     printf '%s' "$first" "${@/#/$separator}"
@@ -181,7 +187,8 @@ lib_join() {
 lib_backup() {
     local file="$1"
     local backup="${file}.bak.$(date +%Y%m%d_%H%M%S)"
-    [[ -f "$file" ]] && cp "$file" "$backup"
+    [[ -f "$file" ]] || { lib_error "Missing source: $file"; return 1; }
+    cp -- "$file" "$backup" || return 1
     echo "$backup"
 }
 
@@ -277,17 +284,18 @@ lib_progress() {
     local current=$1
     local total=$2
     local msg="${3:-Progress}"
+    [[ $current =~ ^[0-9]+$ && $total =~ ^[0-9]+$ ]] || return 2
+    (( total > 0 && current <= total )) || return 2
     local width=40
     local percent=$((current * 100 / total))
     local filled=$((current * width / total))
-    local empty=$((width - filled))
-    
-    printf "\r%s: [%s%s] %d%%" "$msg" \
-           "$(printf '#%.0s' $(seq 1 $filled))" \
-           "$(printf '.%.0s' $(seq 1 $empty))" \
-           "$percent"
-    
-    [[ $current -eq $total ]] && echo
+    local bar="" i
+    for ((i=0; i<width; i++)); do
+        if ((i < filled)); then bar+="#"; else bar+="."; fi
+    done
+    printf '\r%s: [%s] %d%%' "$msg" "$bar" "$percent"
+    if [[ $current -eq $total ]]; then echo; fi
+    return 0
 }
 
 # ============================================================
@@ -296,7 +304,7 @@ lib_progress() {
 
 # Get directory of script that loaded the library
 lib_script_dir() {
-    cd "$(dirname "${BASH_SOURCE[1]}")" && pwd
+    (cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)
 }
 
 # Check Bash version

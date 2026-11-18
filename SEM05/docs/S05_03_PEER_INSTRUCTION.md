@@ -23,9 +23,9 @@ For each question in this document, follow this protocol:
 
 ### Optimal Conditions
 
-- **Target first-vote accuracy:** 40-60% (maximises learning from discussion)
+- **Planning target for first-vote accuracy:** 40-60%; this is an instructional target, not a measured or guaranteed learning effect.
 - **Discussion groups:** 2-3 students with different initial answers
-- **Re-vote improvement:** Expect 20-30% increase after discussion
+- **Re-vote observation:** Record both votes and calculate any change from the observed responses; no improvement is guaranteed.
 
 ### Question Notation
 
@@ -60,7 +60,7 @@ Peer Instruction is a pedagogical method developed by Eric Mazur (Harvard) that:
 
 ## Section 1: FUNCTIONS
 
-### Q1: Variables in Functions (Misconception 80%)
+### Q1: Variables in Functions
 
 ```bash
 #!/bin/bash
@@ -92,7 +92,7 @@ Explanation:
 Key aspects: in bash, variables in functions are global by default, `count` in the function modifies the global variable and this is the opposite of behaviour in python/java/c.
 
 
-Targeted misconception: 80% believe variables are local by default
+Targeted misconception: assuming variables are local by default
 
 Follow-up question: "How do we make the variable stay local?"
 → Answer: `local count=$((count + 1))`
@@ -101,7 +101,7 @@ Follow-up question: "How do we make the variable stay local?"
 
 ---
 
-### Q2: Return vs Echo (Misconception 75%)
+### Q2: Return vs Echo
 
 ```bash
 #!/bin/bash
@@ -146,13 +146,13 @@ get_value() {
 result=$(get_value)    # result="42"
 ```
 
-Targeted misconception: 75% believe return works as in other languages
+Targeted misconception: assuming return communicates arbitrary values as in other languages
 
 </details>
 
 ---
 
-### Q3: Function Arguments vs Script (Misconception 65%)
+### Q3: Function Arguments vs Script
 
 ```bash
 #!/bin/bash
@@ -195,7 +195,7 @@ show_arg "A" "B" "C"
 # All function args: A B C
 ```
 
-Targeted misconception: 65% confuse $1 in function with $1 in script
+Targeted misconception: confusing $1 in a function with $1 in the script
 
 </details>
 
@@ -203,7 +203,7 @@ Targeted misconception: 65% confuse $1 in function with $1 in script
 
 ## Section 2: ARRAYS
 
-### Q4: Array Indexing (Misconception 55%)
+### Q4: Array Indexing
 
 ```bash
 #!/bin/bash
@@ -231,13 +231,13 @@ Explanation:
 
 **Attention for students familiar with Lua, R or other 1-indexed languages!**
 
-Targeted misconception: 55% believe arrays start from 1
+Targeted misconception: assuming indexed arrays start from 1
 
 </details>
 
 ---
 
-### Q5: declare -A (Misconception 70%)
+### Q5: declare -A
 
 ```bash
 #!/bin/bash
@@ -273,20 +273,21 @@ config[port]="8080"         # config[0]="8080" (overwrites!)
 echo "${config[@]}"         # 8080
 echo "${!config[@]}"        # 0
 
-# With declare -A
+# With declare -A: discard the intentionally wrong indexed variable first
+unset config
 declare -A config
 config[host]="localhost"
 config[port]="8080"
 echo "${!config[@]}"        # host port (correct!)
 ```
 
-Targeted misconception: 70% believe declare -A is optional
+Targeted misconception: assuming declare -A is optional for an associative array
 
 </details>
 
 ---
 
-### Q6: Iteration with Quotes (Misconception 65%)
+### Q6: Iteration with Quotes
 
 ```bash
 #!/bin/bash
@@ -327,7 +328,7 @@ done
 
 Golden rule: ALWAYS use `"${arr[@]}"` with quotes!
 
-Targeted misconception: 65% forget quotes when iterating
+Targeted misconception: omitting quotes when iterating
 
 </details>
 
@@ -415,7 +416,7 @@ fi
 
 ---
 
-### Q9: set -e in if (Misconception 75%)
+### Q9: set -e in if
 
 ```bash
 #!/bin/bash
@@ -445,17 +446,17 @@ Explanation:
 - Script continues normally
 
 Other cases where set -e does NOT work:
-- Commands followed by `||` or `&&`
+- Non-final commands in an `||`/`&&` list (the final command can still trigger -e)
 - Commands negated with `!`
 - Functions called in test context
 
-Targeted misconception: 75% believe set -e stops on ANY error
+Targeted misconception: assuming set -e stops on ANY error
 
 </details>
 
 ---
 
-### Q10: set -e with || (Misconception 60%)
+### Q10: set -e with ||
 
 ```bash
 #!/bin/bash
@@ -520,7 +521,7 @@ Correct answer: B) `Exit: 1`
 
 Explanation:
 
-Concretely: With `pipefail`, pipeline returns exit code of first command that fails. `false` returns 1. And without pipefail, it would have returned 0 (from the last `true`).
+Concretely: With `pipefail`, pipeline returns the rightmost nonzero exit status (or zero if all commands succeed). `false` returns 1. And without pipefail, it would have returned 0 (from the last `true`).
 
 
 PIPESTATUS for debugging:
@@ -558,7 +559,7 @@ What happens?
 Explanation:
 - `set -e` + `pipefail` = errors from pipe stop the script
 - `cat /nonexistent` fails (exit code ≠ 0)
-- With pipefail, pipeline returns this exit code
+- Here grep also returns 1 for no match; pipefail selects that rightmost nonzero status
 - With set -e, script stops
 
 Without pipefail:
@@ -601,7 +602,7 @@ What does it display?
 Correct answer: A) `Start` then `Cleanup executed`
 
 Explanation:
-- `trap cleanup EXIT` executes always on exit
+- `trap cleanup EXIT` runs when this shell exits; SIGKILL and power loss cannot run it
 - `false` + `set -e` → script stops
 - But trap EXIT still executes!
 - `End` is not displayed because script stopped
@@ -645,7 +646,7 @@ How many "Cleanup" appear?
 Correct answer: B) 1
 
 Explanation:
-- Traps are NOT inherited in subshells
+- This EXIT handler is not automatically inherited by the parenthesised subshell; ERR inheritance has its separate -E setting
 - The subshell (in parentheses) does not have cleanup trap
 - When subshell does exit 1, cleanup does not execute
 - Cleanup executes only when main script terminates
@@ -686,7 +687,7 @@ What is the correct order of sections in a professional script?
 Correct answer: C)
 
 Recommended structure:
-```bash
+```text
 #!/bin/bash                    # 1. Shebang
 set -euo pipefail             # 2. Strict mode
 IFS=$'\n\t'                   # 3. Safe IFS
@@ -730,54 +731,38 @@ for f in ${files[@]}; do
 done
 ```
 
-How many bugs does this code have?
+Which correction preserves arbitrary filenames and detects an enumeration failure?
 
-- A) 1
-- B) 2
-- C) 3
-- D) 4 or more
+- A) Remove `declare -a` only
+- B) Change `find` to `ls`
+- C) Capture checked NUL-delimited `find` output, then iterate a quoted array
+- D) Use an unquoted scalar instead of the array
 
 <details>
 <summary>📋 Answer and Explanation</summary>
 
-Correct answer: C) 3 main bugs
+Correct answer: C. `declare -a` is valid; it is not a semantic bug.
+`files=$(find ...)` assigns a single string to element zero. Unquoted expansion
+then splits and expands patterns. Newline-delimited collection still cannot
+represent filenames containing newlines.
 
-Bug 1: `files=$(...)` - wrong assignment for array
 ```bash
-# Wrong:
-files=$(find . -name "*.txt")    # files becomes STRING
-
-# Correct:
-mapfile -t files < <(find . -name "*.txt")
-# or
-readarray -t files < <(find . -name "*.txt")
+workspace=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$workspace"' EXIT
+find . -name '*.txt' -print0 > "$workspace/files" || exit 1
+mapfile -d '' -t files < "$workspace/files"
+for f in "${files[@]}"; do process "$f" || exit 1; done
 ```
 
-Bug 2: `${files[@]}` without quotes
-```bash
-# Wrong:
-for f in ${files[@]}; do    # Word splitting!
-
-# Correct:
-for f in "${files[@]}"; do
-```
-
-Bug 3: Potential - `declare -a` is not necessary for indexed arrays
-```bash
-# OK but redundant:
-declare -a files
-
-# Sufficient:
-files=()
-```
-
+The `process` operation is application-supplied. This asks about two concrete
+behaviours, not a count that mixes optional style choices with defects.
 </details>
 
 ---
 
 ### Q17: Best Practice
 
-Which stahomeworknt is FALSE about best practices in Bash?
+Which statement is FALSE about best practices in Bash?
 
 > 💡 Many students initially underestimate the importance of permissions. Then they encounter their first 'Permission denied' and see the light.
 
@@ -803,7 +788,7 @@ set -e exceptions:
 2. Left side of || or &&
 3. Commands negated with !
 4. Functions in test context
-5. Subshells (without inherit_errexit)
+5. Command substitutions normally clear -e unless POSIX/inherit_errexit is enabled; ordinary (...) subshells inherit it
 
 </details>
 
@@ -817,12 +802,12 @@ DEBUG="${DEBUG:-false}"
 
 process() {
     local file="$1"
-    $DEBUG && echo "[DEBUG] Processing: $file" >&2
+    if [[ "$DEBUG" == true ]]; then echo "[DEBUG] Processing: $file" >&2; fi
     # ... processing
 }
 ```
 
-What does `$DEBUG && echo ...` do?
+What does the explicit `[[ "$DEBUG" == true ]]` test do?
 
 - A) Always displays the debug message
 - B) Displays message only if DEBUG="true"
@@ -835,10 +820,9 @@ What does `$DEBUG && echo ...` do?
 Correct answer: B) Displays message only if DEBUG="true"
 
 Explanation:
-- `$DEBUG` expands to the variable value
-- If DEBUG="true", command is `true && echo ...` → echo executes
-- If DEBUG="false", command is `false && echo ...` → echo does NOT execute
-- `&&` executes right side only if left succeeds
+- DEBUG is compared as data; no command is executed from its contents.
+- Only the literal value `true` selects the debug message.
+- The old `$DEBUG && ...` form executed arbitrary configured commands; `DEBUG=:` also succeeded.
 
 Alternative pattern:
 ```bash

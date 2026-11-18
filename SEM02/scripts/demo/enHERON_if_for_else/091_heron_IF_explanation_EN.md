@@ -1,5 +1,8 @@
 # Heron's Method (Babylonian) — The `IF` Variant
 
+> **Current executable contract:** use the numbered `_EN.sh` file in this directory. Historical line numbers and Romanian output labels below describe the original teaching version, not exact current byte positions. The current code checks `bc` before input, runs with `set -euo pipefail` and passes arithmetic through `calculate`, which rejects nonzero calculator status and output that is not one numeric scalar. Bare `echo ... | bc` snippets below explain the arithmetic mechanism; the executable uses the checked wrapper. No calculator installation is performed automatically.
+
+
 ## Line-by-Line Explanation of the Script `heron_IF.sh`
 
 > **Purpose of the script:** computes the square root of a positive integer
@@ -69,7 +72,7 @@ Opens a **conditional block**. The `-z` operator checks whether the string has
 |---|---|
 | `if` | Keyword that begins a decision structure. |
 | `[` … `]` | Shorthand for the `test` command. The square brackets *must* be separated from the content by spaces. |
-| `-z "$N"` | Returns *true* if the length of `$N` is zero. The double quotes are mandatory — without them, on an empty field, the `test` command receives the wrong number of arguments and raises a syntax error. |
+| `-z "$N"` | Returns *true* if the length of `$N` is zero. The double quotes are mandatory — without them, on an empty field, `[ -z ]` becomes a valid one-argument test of the nonempty string `-z`, which succeeds for a different reason. |
 | `; then` | Marks the beginning of the instruction block that executes when the test is true. The `;` character separates two statements on the same line. Alternatively, `then` can be placed on the following line, in which case the `;` is no longer needed. |
 
 ---
@@ -448,3 +451,9 @@ Final visual separator — marks the end of the script's output.
 `IF` selects **a single branch** from several possibilities and executes it.
 It does not repeat anything — for repetition, the `FOR` and `WHILE` loops
 are used, as presented in the subsequent variants of the same algorithm.
+
+## Numerical limits and verification scope
+
+`scale=8` (FOR/WHILE) or `scale=6` (IF) controls truncated decimal arithmetic, not a mathematical guarantee of that many correct digits. The update difference `|x_new - x|` is distinct from root error `|x - sqrt(N)|` and residual `|x² - N|`. In exact positive arithmetic, with `r = sqrt(N)`, `x_new - r = (x - r)²/(2x)`; the quadratic local convergence claim assumes `N > 0` and `x > 0`. Zero is handled separately before division. The IF labels classify the residual using the displayed illustrative thresholds; they are not an accuracy certificate for arbitrary N.
+
+The WHILE stopping-policy examples N=4 → 1 update and N=1,000,000 → 14 updates refer to the stated initial estimate, scale and threshold. They are bounded arithmetic reproductions, not a guarantee for a different precision or implementation. A missing/failing calculator must terminate with an error rather than produce a success message or an unbounded loop. The current calculator wrapper rejects multiline/wrapped or diagnostic output rather than accepting an invalid scalar; extremely large input can therefore be rejected.

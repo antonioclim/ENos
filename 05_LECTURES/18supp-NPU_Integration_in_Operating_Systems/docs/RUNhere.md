@@ -7,20 +7,20 @@
 
 ### Interactive HTML Simulators
 
-| Fișier | Description |
+| File | Description |
 |------|-------------|
 | `18ex1_-_Heterogeneous_Computing.html` | CPU+GPU+NPU task distribution |
 | `18ex2_-_CPU_GPU_NPU_Comparator.html` | Architecture and performance comparison |
 
 ### Formative Assessment (YAML)
 
-| Fișier | Description |
+| File | Description |
 |------|-------------|
 | `C18_05_FORMATIVE_ASSESSMENT.yaml` | Formative assessment quiz (Bloom-distributed) |
 
 ### Pedagogical Documentation
 
-| Fișier | Purpose |
+| File | Purpose |
 |------|---------|
 | `C18_01_LECTURE_PLAN.md` | Learning objectives and session timing |
 | `C18_02_CONCEPT_MAP.md` | Visual topic relationships |
@@ -43,18 +43,17 @@ xdg-open 18ex1_-_Heterogeneous_Computing.html
 ```
 
 **Features:**
-- Self-contained (no server required)
+- No server required; optional web fonts/chart assets may need internet, with a textual chart fallback offline
 - Interactive controls and visualizations  
 - Step-by-step execution modes
 - Reset buttons to restart simulations
 
 ### YAML Formative Quiz
 
-Run the quiz using the quiz runner from any SEM folder:
+Run the lecture self-assessment from this `docs/` directory (Python with PyYAML):
 
 ```bash
-cd ../../SEM01/formative/
-python3 quiz_runner.py --file ../../05_LECTURES/18supp-NPU_Integration_in_Operating_Systems/docs/C18_05_FORMATIVE_ASSESSMENT.yaml
+python3 ../../quiz_runner.py "C18_05_FORMATIVE_ASSESSMENT.yaml" --shuffle --seed 42
 ```
 
 **Or manually review:**
@@ -83,7 +82,7 @@ python3 quiz_runner.py --file ../../05_LECTURES/18supp-NPU_Integration_in_Operat
 
 - **Parent:** [`../README.md`](../README.md) — Lecture unit overview
 - **Scripts:** [`../scripts/`](../scripts/) — Demo scripts (if available)
-- **Diagrams:** [`../../00_SUPPLEMENTARY/diagrams_png/`](../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
+- **Diagrams:** [`../../../00_SUPPLEMENTARY/diagrams_png/`](../../../00_SUPPLEMENTARY/diagrams_png/) — Related concept diagrams
 
 ---
 

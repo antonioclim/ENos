@@ -1,292 +1,126 @@
-# External Plagiarism Detection Tools
+# External Similarity Tools and Evidence Limits
 
-> **For cohorts >50 students** | Supplements internal detector  
-> **Version:** 1.0 | **Date:** January 2025
+> Operating Systems | ASE Bucharest - CSIE  
+> Corrected operational guidance for Seminar 01
 
----
+## 1. Scope and current supported route
 
-## Overview
+This kit contains an internal normalised code/text comparison tool. Its results
+are descriptive observations for documented human review. Shared templates,
+short answers, common idioms and permitted collaboration can produce substantial
+overlap. A percentage is not proof of plagiarism, independent authorship or the
+origin of any particular line. Lexical style patterns do not establish AI use.
 
-The internal plagiarism detector (`S01_05_plagiarism_detector.py`) works well for quick checks and small cohorts. For larger groups or when you need structural comparison across semesters, use MOSS or JPlag.
-
-| Tool | Best For | Requires | Turnaround |
-|------|----------|----------|------------|
-| Internal detector | Quick checks, <50 students | Python | Immediate |
-| MOSS | Large cohorts, cross-semester | Internet, Perl | Minutes |
-| JPlag | Offline analysis, detailed reports | Java | Immediate |
-
----
-
-## 1. MOSS (Measure of Software Similarity)
-
-MOSS is a free service from Stanford that's been the standard for academic plagiarism detection since 1994.
-
-### 1.1 Registration (One-time)
-
-1. Send an email to `moss@moss.stanford.edu`
-2. **Subject line:** `registeruser`
-3. **Body:** Just the word `registeruser` (nothing else)
-4. Wait 24-48 hours
-5. You'll receive a Perl script with your personal user ID embedded
-
-Save the script as `moss.pl` in your working directory.
-
-### 1.2 Basic Usage
+From `SEM01`, the available local route is:
 
 ```bash
-# Submit all .sh files from student directories
-perl moss.pl -l bash -d submissions/*/*.sh
-
-# With base files (template code to ignore)
-perl moss.pl -l bash -b template.sh -d submissions/*/*.sh
-
-# Cross-semester comparison
-perl moss.pl -l bash -d semester1/*/*.sh semester2/*/*.sh
+python3 scripts/python/S01_05_plagiarism_detector.py ./submissions --threshold 0.85
 ```
 
-### 1.3 Useful Options
+The threshold is a configurable report filter, not an academic sanction. Inspect
+the matched passages and common base code. The assignment's unresolved grading,
+oral and evidential policies are described in
+[ASSESSMENT_STATUS.md](../homework/ASSESSMENT_STATUS.md).
 
-| Option | Purpose | Example |
-|--------|---------|---------|
-| `-l bash` | Language (bash, python, c, java, etc.) | Required |
-| `-d` | Compare by directory (group files by student) | Recommended |
-| `-b file` | Base file (ignore matches to this template) | For starters |
-| `-m N` | Max times a passage can appear before ignored | `-m 10` |
-| `-n N` | Number of matches to show | `-n 250` |
+## 2. MOSS
 
-### 1.4 Interpreting Results
+MOSS is Stanford's software-similarity service. The provider's supported-language
+list checked in the phase 3 evidence does **not** provide a Bash language adapter.
+The former `-l bash` examples are not supported commands for this kit and have
+been removed from the executable Makefile target. Plain text comparison, if a
+service supports it, must be labelled as text comparison with different limits;
+it must not be described as structural Bash analysis.
 
-MOSS returns a URL with results. The report shows:
+[Official MOSS documentation](https://theory.stanford.edu/~aiken/moss/) is the
+source for registration and service terms. Its registration request contains two
+body lines:
 
-| Similarity | Typical Meaning | Action |
-|------------|-----------------|--------|
-| <30% | Normal variation, common idioms | None |
-| 30-50% | Some shared code, possibly collaboration | Review manually |
-| 50-70% | Substantial overlap | Likely collaboration, interview both |
-| 70-90% | Very high similarity | Probable plagiarism, investigate |
-| >90% | Near-identical | Almost certainly copied |
-
-**Important:** MOSS results expire after 14 days. Download or screenshot immediately!
-
-### 1.5 Makefile Integration
-
-```bash
-# Already added to Makefile - usage:
-make moss-check MOSS_USERID=123456789 SUBMISSIONS=./submissions/
+```text
+registeruser
+mail your-address@example.org
 ```
 
----
+That is a template only: substitute the actual sender address if registration is
+separately authorised. This phase did not send a registration message, create an
+account or upload student work. Do not promise a response within a fixed number
+of hours. Results are normally retained for roughly 14 days and may disappear
+earlier; they are not a durable institutional archive.
 
-## 2. JPlag
+MOSS options such as base-file exclusion and grouping by submission are useful
+only with an actually supported input contract. The kit does not provide a
+validated Bash-to-MOSS conversion. Selecting an external service requires the
+author's decision on confidentiality, permission, student data and retention;
+repository maintenance does not approve that policy.
 
-JPlag is an open-source alternative that runs locally — useful when you can't send code to external servers.
+## 3. JPlag
 
-### 2.1 Installation
+JPlag can operate locally. The formerly pinned **v5.0.0** requires **JDK 21**,
+according to its [release documentation](https://github.com/jplag/JPlag/releases/tag/v5.0.0).
+Calling that fixed release “latest”, or declaring Java 17 sufficient for it, was
+incorrect. The [supported-language documentation](https://github.com/jplag/JPlag/wiki/2.-Supported-Languages)
+checked in phase 3 does not list a Bash parser. Primitive text support is not
+semantically equivalent to a Bash parser.
 
-```bash
-# Download latest release
-wget https://github.com/jplag/JPlag/releases/download/v5.0.0/jplag-5.0.0-jar-with-dependencies.jar -O jplag.jar
+Before an instructor adopts another release or text adapter, verify its exact
+runtime, language identifier, CLI options and report format against that release.
+The kit makes no claim that the former `-l bash`, `-m 50`, results-directory or
+`index.html` commands are a working JPlag v5 route. No JPlag comparison, report
+import or installation was executed in this phase. `make jplag-check` therefore
+reports this unsupported integration with a nonzero status instead of asserting
+that results were generated.
 
-# Verify installation
-java -jar jplag.jar --version
-```
+## 4. Review workflow
 
-Requires Java 17 or later.
+1. Validate the submission's declared structure and run authorised local checks
+   in an isolated exercise environment. A diagnostic score is not a final grade.
+2. Compare local submissions and record the tool/version, configuration, source
+   hashes, common templates and relevant matched passages. Execution time depends
+   on input size and environment; no measured cohort-size guarantee is supplied.
+3. Review explanations for the overlap, including assigned starter code, common
+   solutions, permitted assistance and collaboration. Similarity alone does not
+   justify selecting a penalty or accusing a student.
+4. Use specific oral questions and requested modifications to assess present
+   understanding. Oral answers do not retrospectively prove the origin of every
+   source line. Record the actual answers and uncertainty without inventing an
+   identity or provenance conclusion.
+5. Apply only an approved academic process and published assessment policy. An
+   unresolved observation stays unresolved; no automatic zero, sanction or final
+   grade is produced by this workflow.
 
-### 2.2 Basic Usage
+The applicable oral record is
+[S01_04_ORAL_VERIFICATION_LOG.md](../homework/S01_04_ORAL_VERIFICATION_LOG.md).
+Which students receive which oral checks remains part of the open author policy.
 
-```bash
-# Basic comparison
-java -jar jplag.jar -l bash submissions/
+## 5. Evidence to retain under the approved policy
 
-# With minimum similarity threshold
-java -jar jplag.jar -l bash -m 50 submissions/
+Retain the compared source hashes, configuration, selected report excerpts,
+common base-file exclusions and the documented review outcome. Preserve
+unfavourable and inconclusive results. Retention of previous semesters' work,
+external report URLs, screenshots, student identifiers and correspondence is a
+separate policy decision; it is not automatically authorised by this guide.
 
-# Specify output directory
-java -jar jplag.jar -l bash -r results/ submissions/
-```
+| Method | Observation | Evidential limit |
+|--------|-------------|------------------|
+| Internal comparison | Equal or similar normalised text | Templates and short answers can explain overlap |
+| Style patterns | Matched words and comment forms | No calibrated authorship or AI-use inference |
+| Supported external adapter | Tool-specific token or text overlap | Requires validation for the actual language and version |
+| Oral explanation | Responses to documented questions | Assesses current understanding, not complete historical provenance |
 
-### 2.3 Useful Options
+No comparative accuracy data are supplied for these methods. The source guide's
+former star rankings, fixed execution times and percentage-to-guilt bands were
+not validated measurements. Historical source content remains in the immutable
+baseline; it is not duplicated as an operational recipe.
 
-| Option | Purpose | Example |
-|--------|---------|---------|
-| `-l bash` | Language | Required for shell scripts |
-| `-m N` | Minimum similarity % to report | `-m 40` |
-| `-r dir` | Results directory | `-r jplag_results/` |
-| `-bc dir` | Base code directory (template to ignore) | `-bc template/` |
-| `-n N` | Max comparisons to store | `-n 500` |
+## 6. Troubleshooting without false success
 
-### 2.4 Viewing Results
+- A missing executable or incompatible Java runtime is an operational error,
+  not a completed comparison.
+- An unsupported language selection requires a supported adapter or a clearly
+  limited local text route; changing the label to Bash does not add a parser.
+- An empty report can mean absent inputs or unsupported format. Check the exact
+  input inventory and diagnostics before interpreting it as zero similarity.
+- Failure to open a version-specific report requires checking that release's
+  documented viewer and format. Do not assume every release emits index.html.
 
-JPlag generates an HTML report:
-
-```bash
-# Open results (Linux)
-xdg-open jplag_results/index.html
-
-# Open results (macOS)
-open jplag_results/index.html
-
-# Open results (WSL)
-explorer.exe jplag_results/index.html
-```
-
-The report includes:
-- Cluster visualisation showing groups of similar submissions
-- Pairwise comparison with side-by-side diff
-- Distribution histogram
-
-### 2.5 Makefile Integration
-
-```bash
-# Already added to Makefile - usage:
-make jplag-check SUBMISSIONS=./submissions/
-```
-
----
-
-## 3. Recommended Workflow
-
-Here's the complete anti-plagiarism pipeline for a typical seminar:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     SUBMISSIONS RECEIVED                         │
-│              (deadline passed, archive collected)                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  STAGE 1: Autograder                                            │
-│  ─────────────────────                                          │
-│  • Run: python3 S01_01_autograder.py submissions/StudentX/      │
-│  • Generates: score + oral questions                            │
-│  • Time: ~30 seconds per student                                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  STAGE 2: Internal Plagiarism Detector                          │
-│  ─────────────────────────────────────                          │
-│  • Run: make plagiarism-check SUBMISSIONS=./submissions/        │
-│  • Catches: exact copies, reordering, AI patterns               │
-│  • Time: ~2 minutes for 50 students                             │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                     Cohort size > 50?
-                      │           │
-                     YES          NO
-                      │           │
-                      ▼           │
-┌─────────────────────────────────┐          │
-│  STAGE 2b: MOSS or JPlag        │          │
-│  ───────────────────────        │          │
-│  • For structural similarity    │          │
-│  • Cross-semester comparison    │          │
-│  • Time: 5-10 minutes           │          │
-└─────────────────────────────────┘          │
-                      │                       │
-                      ▼                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  STAGE 3: Flag Review                                           │
-│  ────────────────────                                           │
-│  • Review all pairs >70% similarity                             │
-│  • Check for legitimate collaboration (pair programming)        │
-│  • Prepare specific questions for oral verification             │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  STAGE 4: Oral Verification                                     │
-│  ──────────────────────────                                     │
-│  • Use: S01_04_ORAL_VERIFICATION_LOG.md                         │
-│  • All students (random 2 questions)                            │
-│  • Flagged students (targeted questions about suspicious code)  │
-│  • Time: 3-5 minutes per student                                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  STAGE 5: Final Decision                                        │
-│  ───────────────────────                                        │
-│  • Clear: Grade normally                                        │
-│  • Suspicious: Request resubmission or zero                     │
-│  • Confirmed plagiarism: Academic integrity process             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 4. Tips for Effective Detection
-
-### Before the Assignment
-
-1. **Use the assignment generator** — randomised variants make direct copying harder
-2. **Announce detection** — deterrence works (students know you check)
-3. **Keep previous semesters' submissions** — for cross-semester comparison
-
-### During Grading
-
-1. **Run internal detector first** — it's fast and catches obvious cases
-2. **Use MOSS for structural similarity** — catches "paraphrased" code
-3. **Trust your instincts** — if code seems inconsistent with a student's level, investigate
-
-### Common False Positives
-
-These often trigger high similarity but aren't plagiarism:
-
-- **Template code** — use base file option to exclude
-- **Common idioms** — `set -euo pipefail`, standard loops
-- **Pair programming partners** — verify they're registered as a pair
-- **Online tutorials** — similar to MOSS's base corpus
-
-### Documentation
-
-Always keep:
-- [ ] Plagiarism detector reports (JSON export)
-- [ ] MOSS URLs (screenshot before they expire!)
-- [ ] JPlag HTML reports
-- [ ] Oral verification logs
-- [ ] Any email correspondence
-
----
-
-## 5. Comparison of Detection Methods
-
-| Method | Exact Copies | Reordering | Variable Renaming | Structural Changes | AI-Generated |
-|--------|--------------|------------|-------------------|-------------------|--------------|
-| Internal (hash) | ✓✓✓ | ✗ | ✗ | ✗ | ✗ |
-| Internal (sorted) | ✓✓✓ | ✓✓✓ | ✗ | ✗ | ✗ |
-| Internal (AI patterns) | ✗ | ✗ | ✗ | ✗ | ✓✓ |
-| MOSS | ✓✓✓ | ✓✓ | ✓✓ | ✓ | ✗ |
-| JPlag | ✓✓✓ | ✓✓ | ✓✓ | ✓✓ | ✗ |
-| Oral verification | ✓ | ✓ | ✓ | ✓ | ✓✓✓ |
-
-**Legend:** ✓✓✓ = Excellent, ✓✓ = Good, ✓ = Partial, ✗ = Not detected
-
----
-
-## 6. Troubleshooting
-
-### MOSS Issues
-
-| Problem | Solution |
-|---------|----------|
-| "Connection refused" | Stanford servers may be down — try later |
-| "Invalid user ID" | Re-register, IDs occasionally expire |
-| No results URL | Check that files were actually uploaded |
-| Results page empty | May have submitted incompatible file types |
-
-### JPlag Issues
-
-| Problem | Solution |
-|---------|----------|
-| "Unsupported class file" | Update Java to version 17+ |
-| "No submissions found" | Check directory structure — needs subdirectories |
-| OutOfMemoryError | Add `-Xmx4g` before `-jar` |
-| Report won't open | Try different browser, check JavaScript enabled |
-
----
-
-*External plagiarism tools guide | Version 1.0 | January 2025*  
-*Operating Systems | ASE Bucharest - CSIE*
+The official-source statements above are carried forward from the archived
+phase 3 verification of 17 November 2026. They are not a new online service test.

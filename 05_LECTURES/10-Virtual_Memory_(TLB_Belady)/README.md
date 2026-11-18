@@ -1,3 +1,26 @@
+# Lecture 10 — Virtual Memory (TLB Belady)
+
+## Learning and demonstration materials
+
+- [Course Plan](docs/C10_01_COURSE_PLAN.md)
+- [Concept Map](docs/C10_02_CONCEPT_MAP.md)
+- [Discussion Questions](docs/C10_03_DISCUSSION_QUESTIONS.md)
+- [Study Guide](docs/C10_04_STUDY_GUIDE.md)
+- [10ex1 - Page Replacement Algorithms EN](docs/10ex1_-_Page_Replacement_Algorithms_EN.html)
+- [10ex2 - Working Set Model EN](docs/10ex2_-_Working_Set_Model_EN.html)
+- [10ex3 - Thrashing Demo EN](docs/10ex3_-_Thrashing_Demo_EN.html)
+- [10ex4 - Demand Paging EN](docs/10ex4_-_Demand_Paging_EN.html)
+- [10ex5 - Memory Mapped Files EN](docs/10ex5_-_Memory_Mapped_Files_EN.html)
+- [Formative question bank](docs/C10_05_FORMATIVE_ASSESSMENT.yaml)
+
+- [All lecture resources and launch instructions](docs/RUNhere.md)
+- [Demonstration script guide](scripts/README.md)
+- [Lecture quiz format and runner](../FORMATIVE_QUIZ_FORMAT.md)
+
+## Demonstration script reference
+
+The retained script guide below assumes the **`scripts/` working directory**. From this lecture directory, run `cd scripts` first. Native experiments and interactive HTML models provide different kinds of evidence.
+
 <!-- RO: TRADUS ȘI VERIFICAT -->
 # Demonstration Scripts – Week 10
 

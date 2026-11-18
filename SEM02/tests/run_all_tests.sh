@@ -61,7 +61,7 @@ run_test() {
     
     if [[ ! -f "$test_file" ]]; then
         echo -e "${YELLOW}[SKIP]${NC} - File not found"
-        ((TESTS_SKIPPED++))
+        TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
         return
     fi
     
@@ -71,10 +71,10 @@ run_test() {
     
     if "$test_file" >/dev/null 2>&1; then
         echo -e "${GREEN}[PASS]${NC}"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
     else
         echo -e "${RED}[FAIL]${NC}"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 }
 

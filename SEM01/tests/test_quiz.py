@@ -5,6 +5,7 @@ Version: 2.0
 """
 
 import json
+import hashlib
 import subprocess
 from pathlib import Path
 
@@ -141,10 +142,15 @@ class TestQuizLmsJson:
         assert data is not None
     
     def test_lms_has_quiz_settings(self, lms_data):
-        """Verifies quiz settings."""
-        assert 'quiz' in lms_data
-        assert 'title' in lms_data['quiz']
-        assert 'time_limit_minutes' in lms_data['quiz']
+        """Verifies descriptive metadata without inventing assessment policy."""
+        meta = lms_data['quiz']
+        assert meta['title']
+        assert meta['estimated_time'] == '20 minutes'
+        assert meta['assessment_status'] == 'PENDING_POLICY'
+        assert meta['lms_import_validation'] == 'NOT_RUN'
+        # An estimate is not an enforced time limit or a validated LMS adapter.
+        assert 'time_limit_minutes' not in meta
+        assert 'passing_score' not in meta
     
     def test_lms_has_questions(self, lms_data):
         """Verifies presence of questions."""
@@ -152,18 +158,26 @@ class TestQuizLmsJson:
         assert len(lms_data['questions']) >= 10
     
     def test_lms_question_has_correct_answer(self, lms_data):
-        """Verifies that each question has exactly one correct answer."""
+        """MCQs have one key; open responses retain manual assessment."""
         for q in lms_data['questions']:
-            correct_answers = [a for a in q['answers'] if a.get('correct', False)]
-            assert len(correct_answers) == 1, \
-                f"Question {q['id']} must have exactly 1 correct answer, got {len(correct_answers)}"
+            if q['type'] == 'multiple_choice':
+                correct_answers = [a for a in q['answers'] if a.get('correct', False)]
+                assert len(correct_answers) == 1, q['id']
+            else:
+                assert q['type'] == 'open_response', q['id']
+                assert q['manual_review_required'] is True
+                assert q['rubric']
+                assert 'answers' not in q
+                assert 'score' not in q
     
     def test_lms_answers_have_feedback(self, lms_data):
         """Verifies that all answers have feedback."""
         for q in lms_data['questions']:
-            for i, a in enumerate(q['answers']):
-                assert 'feedback' in a, \
-                    f"Question {q['id']}, answer {i}: missing feedback"
+            if q['type'] == 'multiple_choice':
+                for i, a in enumerate(q['answers']):
+                    assert a.get('feedback'), f"Question {q['id']}, answer {i}: missing feedback"
+            else:
+                assert q['rubric'] and q.get('example_solution'), q['id']
 
 
 # =============================================================================
@@ -175,12 +189,31 @@ class TestQuizConsistency:
     
     def test_same_number_of_questions(self, quiz_data, lms_data):
         """Verifies that both files have the same number of questions."""
-        yaml_mcq_count = len([q for q in quiz_data.get('questions', []) if q['type'] == 'mcq'])
-        json_count = len(lms_data.get('questions', []))
-        
-        # LMS only contains MCQ questions, so compare MCQ count
-        assert yaml_mcq_count == json_count, \
-            f"Different number of MCQ questions: YAML={yaml_mcq_count}, JSON={json_count}"
+        source = quiz_data['questions']
+        derived = lms_data['questions']
+        assert [q['id'] for q in source] == [q['id'] for q in derived]
+        assert len(source) == lms_data['quiz']['total_questions']
+        assert sum(q['type'] == 'mcq' for q in source) == sum(q['type'] == 'multiple_choice' for q in derived)
+        assert sum(q['type'] != 'mcq' for q in source) == sum(q['type'] == 'open_response' for q in derived)
+
+    def test_derived_content_and_provenance(self, quiz_data, lms_data, quiz_path):
+        """Derivation preserves wording, keys, feedback, rubric and source identity."""
+        assert lms_data['source_sync']['sha256'] == hashlib.sha256(quiz_path.read_bytes()).hexdigest()
+        for source, derived in zip(quiz_data['questions'], lms_data['questions'], strict=True):
+            assert derived['text'] == source['text']
+            assert derived['bloom_level'] == source['bloom']
+            assert derived['learning_outcome'] == source['lo']
+            assert derived['targeted_misconception'] == source.get('targeted_misconception')
+            if source['type'] == 'mcq':
+                for index, (option, answer) in enumerate(zip(source['options'], derived['answers'], strict=True)):
+                    expected_text = option[3:] if len(option) > 2 and option[1:3] == ') ' else option
+                    assert answer['text'] == expected_text
+                    assert answer['correct'] == (chr(65 + index) == source['correct'])
+                    assert answer['feedback'] == source['explanation']
+            else:
+                assert derived['rubric'] == source['rubric']
+                assert derived['example_solution'] == source.get('example_solution')
+
 
 
 # =============================================================================

@@ -7,7 +7,12 @@
 
 ---
 
+> **Current use and evidence:** These are teaching materials, with intentional WRONG/TODO examples retained. The [teaching and assessment contract](TEACHING_CONTRACT.md) separates runnable references, proposed assessment rules and historical claims whose provenance remains unresolved. Percentages and first-person anecdotes below are retained author-supplied history, not independently verified empirical findings.
+
+
 ## 1. EVALUATION OF CURRENT MATERIALS
+
+> Inventory filenames and line counts below describe the historical design snapshot, not the current file map. Consult the repository tree and traceability matrix for current paths.
 
 ### 1.1 Existing Structure
 
@@ -86,52 +91,52 @@
 
 ### 2.1 Misconceptions about Functions
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M1.1 | "`return` returns strings" | 75% | `return "hello"` does not work; return is only 0-255 |
-| M1.2 | "Variables are local by default" | 80% | They are GLOBAL! Namespace pollution |
-| M1.3 | "`$1` in function is the script argument" | 65% | `$1` in function is the FUNCTION argument |
-| M1.4 | "`echo` in function is like `return`" | 50% | echo writes to stdout, return sets $? |
-| M1.5 | "Functions can be called before definition" | 60% | Error: function not found |
-| M1.6 | "Recursion is efficient in Bash" | 35% | It is very slow - subshell overhead |
-| M1.7 | "`local` can be used anywhere" | 45% | Only inside functions |
-| M1.8 | "Functions automatically return the last value" | 40% | They return the exit status of the last command |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M1.1 | "`return` returns strings" | `return "hello"` does not work; return is only 0-255 |
+| M1.2 | "Variables are local by default" | They are GLOBAL! Namespace pollution |
+| M1.3 | "`$1` in function is the script argument" | `$1` in function is the FUNCTION argument |
+| M1.4 | "`echo` in function is like `return`" | echo writes to stdout, return sets $? |
+| M1.5 | "Functions can be called before definition" | Error: function not found |
+| M1.6 | "Recursion is efficient in Bash" | It is very slow - subshell overhead |
+| M1.7 | "`local` can be used anywhere" | Only inside functions |
+| M1.8 | "Functions automatically return the last value" | They return the exit status of the last command |
 
 ### 2.2 Misconceptions about Arrays
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M2.1 | "Arrays start from 1" | 55% | They start from 0! `${arr[0]}` is the first |
-| M2.2 | "`declare -A` is optional for hash" | 70% | It is MANDATORY! Otherwise treated as indexed |
-| M2.3 | "`${arr[*]}` and `${arr[@]}` are identical" | 60% | They differ in quoting: `@` preserves elements |
-| M2.4 | "`unset arr` deletes an element" | 45% | It deletes the ENTIRE array! `unset arr[i]` for element |
-| M2.5 | "Arrays can contain other arrays" | 40% | Not in Bash! They are unidimensional |
-| M2.6 | "Elements are continuously re-indexed after unset" | 50% | No! The array becomes sparse |
-| M2.7 | "`arr=($(cmd))` is safe" | 55% | Word splitting! Use `mapfile` |
-| M2.8 | "`for i in ${arr[@]}` is correct" | 65% | Quotes are needed: `"${arr[@]}"` |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M2.1 | "Arrays start from 1" | They start from 0! `${arr[0]}` is the first |
+| M2.2 | "`declare -A` is optional for hash" | It is MANDATORY! Otherwise treated as indexed |
+| M2.3 | "`${arr[*]}` and `${arr[@]}` are identical" | They differ in quoting: `@` preserves elements |
+| M2.4 | "`unset arr` deletes an element" | It deletes the ENTIRE array! `unset arr[i]` for element |
+| M2.5 | "Arrays can contain other arrays" | Not in Bash! They are unidimensional |
+| M2.6 | "Elements are continuously re-indexed after unset" | No! The array becomes sparse |
+| M2.7 | "`arr=($(cmd))` is safe" | Word splitting! Use `mapfile` |
+| M2.8 | "`for i in ${arr[@]}` is correct" | Quotes are needed: `"${arr[@]}"` |
 
 ### 2.3 Misconceptions about Error Handling
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M3.1 | "`set -e` stops on ANY error" | 75% | Not in: subshells, if, `||`, `&&`, pipes |
-| M3.2 | "`pipefail` is activated by default" | 50% | Must be explicitly activated with `set -o pipefail` |
-| M3.3 | "trap is inherited in subshells" | 45% | It is NOT inherited! Resets in subshell |
-| M3.4 | "`$?` contains the last error from pipe" | 60% | Only from the last command (without pipefail) |
-| M3.5 | "`|| true` is equivalent to `set +e`" | 35% | Only for that specific command |
-| M3.6 | "`mktemp` never fails" | 40% | It can fail: full disk, permissions |
-| M3.7 | "trap EXIT executes only on success" | 55% | It executes ALWAYS on exit |
-| M3.8 | "The order of traps does not matter" | 30% | It matters! The last one set wins |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M3.1 | "`set -e` stops on ANY error" | Tested contexts are exempt; ordinary subshells inherit -e; command substitutions normally clear it |
+| M3.2 | "`pipefail` is activated by default" | Must be explicitly activated with `set -o pipefail` |
+| M3.3 | "trap is inherited in subshells" | Inheritance depends on the trap: ERR uses `set -E`; signal traps generally reset |
+| M3.4 | "`$?` contains the last error from pipe" | Only from the last command (without pipefail) |
+| M3.5 | "`|| true` is equivalent to `set +e`" | Only for that specific command |
+| M3.6 | "`mktemp` never fails" | It can fail: full disk, permissions |
+| M3.7 | "trap EXIT executes only on success" | Runs on shell exit; not SIGKILL or machine failure |
+| M3.8 | "The order of traps does not matter" | It matters! The last one set wins |
 
 ### 2.4 Misconceptions about Logging/Debug
 
-| ID | Misconception | Estimated Frequency | Practical Consequence |
-|----|---------------|---------------------|----------------------|
-| M4.1 | "`echo` is sufficient for logging" | 70% | Without timestamp, level, destination |
-| M4.2 | "`set -x` is only for development" | 45% | Can be useful in prod too (with condition) |
-| M4.3 | "`>&2` is only for errors" | 55% | For any diagnostic/logging |
-| M4.4 | "`tee` slows things down a lot" | 30% | Minimal overhead for logging |
-| M4.5 | "Debug info must be deleted before commit" | 50% | No! Keep with control variable |
+| ID | Misconception | Practical Consequence |
+|----|---------------|----------------------|
+| M4.1 | "`echo` is sufficient for logging" | Without timestamp, level, destination |
+| M4.2 | "`set -x` is only for development" | Can be useful in prod too (with condition) |
+| M4.3 | "`>&2` is only for errors" | For any diagnostic/logging |
+| M4.4 | "`tee` slows things down a lot" | Minimal overhead for logging |
+| M4.5 | "Debug info must be deleted before commit" | No! Keep with control variable |
 
 ---
 
@@ -147,11 +152,13 @@
 | O4 | Students implement trap cleanup | 80% correct in assignment | Yes | Important | SEM |
 | O5 | Students use the template | 100% for assignments | Yes | Critical | SEM |
 
-### 3.2 Detailed Timeline (100 minutes)
+### 3.2 Historical Detailed Timeline (120 elapsed minutes)
+
+This is a retained alternative plan. The current instructor guide describes 100 teaching minutes plus a 10-minute break (110 elapsed). The author must choose the actual slot and activity subset; this review does not invent a timetable.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                    TIMELINE SEMINAR 9-10 (100 min)                           │
+│                    HISTORICAL SEMINAR 5 TIMELINE (120 elapsed min)                           │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │ PART 1 (50 min): Functions + Arrays                                          │
@@ -223,7 +230,7 @@
 │  │  │  └─ set options protect against errors                   │   │      │
 │  │  │                                                          │   │      │
 │  │  │  ERROR HANDLING: Graceful failure                        │   │      │
-│  │  │  └─ trap ensures resource cleanup                        │   │      │
+│  │  │  └─ trap supports owned-resource cleanup on handled exits                        │   │      │
 │  │  │                                                          │   │      │
 │  │  │  LOGGING: Production debugging                           │   │      │
 │  │  │  └─ Journaling of critical operations                    │   │      │
@@ -266,14 +273,15 @@ errors=$(extract_errors /var/log/syslog "ERROR|WARN")
 #### Example 3: Error handling for file operations
 ```bash
 # Without error handling (dangerous)
-rm -rf /tmp/workdir/*
+printf 'Would remove entries in: %s\n' /tmp/workdir  # Wrong example: observe only
 
 # With complete error handling
 cleanup_workdir() {
     local dir="${1:?Error: directory required}"
     [[ -d "$dir" ]] || { log_error "Not a directory: $dir"; return 1; }
     [[ "$dir" == /tmp/* ]] || { log_error "Refusing to clean non-temp: $dir"; return 1; }
-    rm -rf "${dir:?}"/* || { log_error "Failed to clean: $dir"; return 1; }
+    [[ ${OWNED_WORKDIR:-} && $dir == "$OWNED_WORKDIR" && -d $dir && ! -L $dir ]] || return 2
+    rm -rf -- "$dir"/* || { log_error "Failed to clean: $dir"; return 1; }
     log_info "Cleaned: $dir"
 }
 ```
@@ -320,7 +328,7 @@ cleanup_workdir() {
 - [ ] Clear demonstrations of local vs global variables
 - [ ] trap cleanup demonstrated and explained
 - [ ] All scripts pass shellcheck without warnings
-- [ ] Works on Bash 4.0+
+- [ ] Works on Bash 4.4+
 - [ ] Diagrams for execution flow
 - [ ] Before/after comparisons for fragile vs solid script
 
@@ -361,7 +369,7 @@ cleanup_workdir() {
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| Students do not have Bash 4.0+ | Medium | High | Check at beginning, alternatives |
+| Students do not have Bash 4.4+ | Medium | High | Check at beginning, alternatives |
 | Insufficient time for template | High | High | Prioritise, eliminate exercises |
 | Confusion local vs global | High | Medium | VISUAL demo, dedicated PI |
 | declare -A forgotten | High | High | Repeat 3+ times, checklist |

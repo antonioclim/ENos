@@ -1,5 +1,7 @@
 # Evaluation Rubric - Seminar 1 Assignment
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > **Document for instructor** | Not to be distributed to students before evaluation
 
 ---

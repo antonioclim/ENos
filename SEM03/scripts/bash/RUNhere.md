@@ -1,160 +1,88 @@
-# 📁 Bash Utilities — SEM03
+# Bash tools — Seminar 3
 
-> **Location:** `SEM03/scripts/bash/`  
-> **Purpose:** Seminar setup, validation, and interactive tools
+Run from this directory with Bash. The usage below is the actual interface; generic --check, --fix and --batch flags are not provided.
 
-## Contents
-
-| Script | Purpose | Sudo Required? |
-|--------|---------|----------------|
-| `S03_01_setup_seminar.sh` | Install dependencies, create workspace | Yes (first run) |
-| `S03_02_interactive_quiz.sh` | CLI quiz with instant feedback | No |
-| `S03_03_validator.sh` | Validate homework submissions | No |
-
-## Quick Start
-
-```bash
-# Make all scripts executable (once)
-chmod +x *.sh
-
-# Setup seminar environment
-./S03_01_setup_seminar.sh
-
-# Take a practice quiz
-./S03_02_interactive_quiz.sh
-
-# Validate your homework
-./S03_03_validator.sh ~/my_homework/
-```
-
----
+Diagnostic points are not a final grade: see [assessment status](../../homework/ASSESSMENT_STATUS.md). A timeout is not an execution sandbox.
 
 ## S03_01_setup_seminar.sh
 
-**Purpose:** Prepares your system with all required tools and creates the seminar workspace.
+```text
+\033[1mUSAGE:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_01_setup_seminar.sh [-h] [-v] [-c] [-d DIR]
 
-### Usage
+\033[1mOPTIONS:\033[0m
+    -h          Display this help
+    -v          Verbose mode
+    -c          Clean previous setup before installation
+    -d DIR      Base directory (default: ~/sem5-6_lab)
 
-```bash
-./S03_01_setup_seminar.sh [options]
+\033[1mEXAMPLES:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_01_setup_seminar.sh                    # Standard setup
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_01_setup_seminar.sh -v                 # Setup with detailed output
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_01_setup_seminar.sh -c -d ~/mylab      # Clean and install in ~/mylab
 
-Options:
-  --minimal     Skip optional packages (faster)
-  --force       Reinstall even if packages exist
-  --workspace   Create workspace directory only
-  --check       Verify installation without installing
+\033[1mSTRUCTURE CREATED:\033[0m
+    ~/sem5-6_lab/
+    ├── find_exercises/      # find and xargs exercises
+    ├── script_exercises/    # Parameters and getopts exercises
+    ├── permission_lab/      # Permissions exercises (sandbox)
+    ├── cron_exercises/      # Cron exercises
+    └── integration/         # Integrated exercises
 ```
-
-### What It Installs
-
-- Required system packages
-- Python dependencies from `requirements.txt`
-- Workspace directories (`~/os_seminar_sem03/`)
-- Sample files for exercises
-
-### Example
-
-```bash
-# Full installation
-./S03_01_setup_seminar.sh
-
-# Quick check if everything is ready
-./S03_01_setup_seminar.sh --check
-```
-
----
 
 ## S03_02_interactive_quiz.sh
 
-**Purpose:** Terminal-based quiz for self-assessment with immediate feedback.
+```text
+\033[1mInteractive Quiz - Seminar 3 OS\033[0m
 
-### Usage
+\033[1mUSAGE:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_02_interactive_quiz.sh [-h] [-n NUM] [-c CATEGORY] [-r] [-p]
 
-```bash
-./S03_02_interactive_quiz.sh [options]
+\033[1mOPTIONS:\033[0m
+    -h              Display this help
+    -n NUM          Number of questions (default: 10, max: 25)
+    -c CATEGORY     Category:
+                      find   - Questions about find and xargs
+                      script - Questions about parameters and getopts
+                      perm   - Questions about permissions
+                      cron   - Questions about cron
+                      all    - All categories (default)
+    -r              Random order of questions
+    -p              Practice mode (displays explanations after each answer)
 
-Options:
-  --timed         30-second limit per question
-  --shuffle       Randomize question order
-  --hard-only     Show only difficult questions
-  --count N       Limit to N questions
+\033[1mEXAMPLES:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_02_interactive_quiz.sh                     # 10 questions from all categories
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_02_interactive_quiz.sh -n 5 -c find        # 5 questions only about find
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_02_interactive_quiz.sh -r -p               # Practice mode with random order
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_02_interactive_quiz.sh -c perm -n 8        # 8 questions about permissions
 ```
-
-### Features
-
-- Coloured output for correct/incorrect
-- Running score display
-- Detailed explanations after each answer
-- Summary statistics at end
-
-### Example
-
-```bash
-# Standard quiz
-./S03_02_interactive_quiz.sh
-
-# Timed challenge mode
-./S03_02_interactive_quiz.sh --timed --shuffle
-```
-
----
 
 ## S03_03_validator.sh
 
-**Purpose:** Checks homework submissions against requirements.
+```text
+\033[1mAssignment Validator - Seminar 3 OS\033[0m
 
-### Usage
+\033[1mUSAGE:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_03_validator.sh [-h] [-v] [-o REPORT] [-s] <assignment_directory>
 
-```bash
-./S03_03_validator.sh <submission_dir> [options]
+\033[1mOPTIONS:\033[0m
+    -h          Display this help
+    -v          Verbose mode (details for each test)
+    -o REPORT   Save report to file
+    -s          Strict mode (any warning becomes error)
 
-Options:
-  --strict      Fail on warnings (for final check)
-  --report      Generate detailed report file
-  --fix         Attempt to auto-fix common issues
-  --quiet       Minimal output
+\033[1mEXPECTED STRUCTURE:\033[0m
+    tema_sem5-6/
+    ├── find_commands.sh       # Find commands (Part 1)
+    ├── professional_script.sh # Script with getopts (Part 2)
+    ├── permission_manager.sh  # Permissions manager (Part 3)
+    ├── cron_jobs.txt          # Cron expressions (Part 4)
+    └── integration.sh         # Integrated script (Part 5)
+
+\033[1mEXAMPLES:\033[0m
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_03_validator.sh ./my_assignment         # Simple validation
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_03_validator.sh -v ./my_assignment      # With details
+    /workspace/scratch/cc249383a0ce/ENos_WORK/ENos-v6/SEM03/scripts/bash/S03_03_validator.sh -v -o report.txt ./tema # Save report
 ```
 
-### What It Validates
-
-| Check | Severity |
-|-------|----------|
-| Required files present | ERROR |
-| Script syntax (bash -n) | ERROR |
-| Shellcheck compliance | WARNING |
-| Proper shebang lines | WARNING |
-| No hardcoded paths | WARNING |
-| Executable permissions | WARNING |
-
-### Example
-
-```bash
-# Basic validation
-./S03_03_validator.sh ~/homework/
-
-# Strict mode before submission
-./S03_03_validator.sh ~/homework/ --strict --report
-```
-
----
-
-## Dependencies
-
-- `bash` ≥ 4.0
-- `shellcheck` (for validation)
-- Standard Unix tools (`grep`, `sed`, `awk`)
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| "Permission denied" | Run `chmod +x *.sh` |
-| "shellcheck not found" | Run setup script or `sudo apt install shellcheck` |
-| Quiz won't start | Check terminal supports ANSI colours |
-
----
-
-*See also: [`../demo/`](../demo/) for live coding demonstrations*  
-*See also: [`../python/`](../python/) for automated grading tools*
-
-*Last updated: January 2026*
+Setup accepts -d DIR and writes only the configured exercise tree. Generated cron examples resolve their paths relative to that tree; setup does not install a scheduler entry. The validator can execute submitted shell scripts: inspect them first and use the dedicated lab environment.

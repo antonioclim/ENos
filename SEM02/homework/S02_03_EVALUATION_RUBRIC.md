@@ -1,5 +1,7 @@
 # Evaluation Rubric - Seminar 2 Assignment
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > **Document for instructor** | Not to be distributed to students before evaluation
 
 ---
@@ -43,8 +45,15 @@
 
 **Reference solution:**
 ```bash
-[[ -z "$1" ]] && echo "Usage: $0 <file>" && exit 1
-[[ -f "$1" ]] && mkdir -p backup && cp "$1" "backup/${1%.*}_$(date +%Y%m%d_%H%M%S).${1##*.}" && echo "✓ Backup created" || echo "✗ File doesn't exist"
+[[ $# -eq 1 ]] || { echo "Usage: $0 <file>" >&2; exit 2; }
+[[ -f "$1" ]] || { echo "Source is not a regular file: $1" >&2; exit 1; }
+mkdir -p -- backup || { echo "Cannot create backup directory" >&2; exit 1; }
+destination=$(mktemp "backup/$(basename -- "$1").$(date +%Y%m%d_%H%M%S).XXXXXX") || exit 1
+cp -- "$1" "$destination" && printf 'Backup created: %s\n' "$destination" || {
+    rm -f -- "$destination"
+    echo "Copy failed; no completed backup was produced" >&2
+    exit 1
+}
 ```
 
 ### Ex 1.2: Multi-Command (7%)

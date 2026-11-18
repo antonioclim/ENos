@@ -1,14 +1,19 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 @startuml
-title cgroups Hierarchy
-rectangle "Root" {
-  rectangle "CPU"
-  rectangle "Memory"
-  rectangle "IO"
-  rectangle "PIDs"
-}
-rectangle "Container A"
-rectangle "Container B"
-Root --> "Container A"
-Root --> "Container B"
+title cgroup v2 — Unified Hierarchy and Controller Delegation
+rectangle "Root cgroup" as root
+rectangle "Course / workload subtree" as parent
+rectangle "Container A cgroup" as a
+rectangle "Container B cgroup" as b
+root --> parent : hierarchical limits
+parent --> a : child membership
+parent --> b : child membership
+note right of root
+Available controllers (examples): cpu, memory, io, pids.
+Enable applicable controllers in cgroup.subtree_control.
+Limits and delegation constraints apply down the hierarchy.
+end note
+note bottom of parent
+Controllers are capabilities of the hierarchy, not child cgroups.
+Namespace view, membership and resource limits are distinct concepts.
+end note
 @enduml

@@ -5,9 +5,9 @@ set -euo pipefail
 
 SCORE=0
 TOTAL=10
-DATA_DIR="../resources/sample_data"
-TEMP_DIR="/tmp/sed_test_$$"
-mkdir -p "$TEMP_DIR"
+DATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../resources/sample_data" && pwd)"
+TEMP_DIR="$(mktemp -d)"
+trap 'rm -rf -- "$TEMP_DIR"' EXIT
 
 echo "=== TEST 03: SED TRANSFORMATIONS ==="
 echo ""
@@ -15,7 +15,7 @@ echo ""
 # Ex 1: Delete comments (lines starting with #)
 echo -n "Ex 1 - Delete comments: "
 EXPECTED=31
-RESULT=$(sed '/^#/d' "$DATA_DIR/config.ini" | grep -c '.' 2>/dev/null || echo 0)
+RESULT=$(sed '/^#/d' "$DATA_DIR/config.ini" | grep -c '.' 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT lines remaining)"
     ((SCORE+=2))
@@ -26,7 +26,7 @@ fi
 # Ex 2: Replace 'true' with 'yes'
 echo -n "Ex 2 - true -> yes: "
 EXPECTED=2
-RESULT=$(sed 's/true/yes/g' "$DATA_DIR/config.ini" | grep -c 'yes' 2>/dev/null || echo 0)
+RESULT=$(sed 's/true/yes/g' "$DATA_DIR/config.ini" | grep -c 'yes' 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT replacements)"
     ((SCORE+=2))
@@ -49,7 +49,7 @@ fi
 # Ex 4: Add prefix "CONFIG_" to sections [xxx]
 echo -n "Ex 4 - Prefix for sections: "
 EXPECTED=6
-RESULT=$(sed 's/\[\([^]]*\)\]/[CONFIG_\1]/' "$DATA_DIR/config.ini" | grep -c 'CONFIG_' 2>/dev/null || echo 0)
+RESULT=$(sed 's/\[\([^]]*\)\]/[CONFIG_\1]/' "$DATA_DIR/config.ini" | grep -c 'CONFIG_' 2>/dev/null || true)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT sections modified)"
     ((SCORE+=2))
@@ -57,9 +57,9 @@ else
     echo "❌ Wrong (got: $RESULT, expected: $EXPECTED)"
 fi
 
-# Ex 5: Delete empty lines and comments
+# Ex 5: Delete empty lines and comments; section headers remain
 echo -n "Ex 5 - Clean config: "
-EXPECTED=25
+EXPECTED=31
 RESULT=$(sed '/^#/d; /^$/d; /^[[:space:]]*$/d' "$DATA_DIR/config.ini" | wc -l)
 if [[ "$RESULT" == "$EXPECTED" ]]; then
     echo "✅ CORRECT ($RESULT clean lines)"
@@ -72,3 +72,5 @@ rm -rf "$TEMP_DIR"
 
 echo ""
 echo "=== FINAL SCORE: $SCORE / $TOTAL ==="
+
+[[ $SCORE -eq $TOTAL ]]

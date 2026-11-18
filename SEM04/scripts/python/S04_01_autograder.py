@@ -14,6 +14,8 @@ Version: 1.1
 """
 
 import logging
+from collections import Counter
+import argparse
 import subprocess
 import sys
 import os
@@ -33,7 +35,7 @@ logger = setup_logging(__name__)
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-DATA_DIR = Path.home() / "demo_sem4" / "data"
+DATA_DIR = Path(os.environ.get("ENOS_SEM04_DATA_DIR", str(Path.home() / "demo_sem4" / "data")))
 
 
 @dataclass
@@ -160,8 +162,9 @@ def run_command(
     """
     try:
         result = subprocess.run(
-            cmd,
+            'set -o pipefail; ' + cmd,
             shell=True,
+            executable='/bin/bash',
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -220,18 +223,15 @@ def compare_outputs(
     if exp_norm == act_norm:
         return True, 1.0
     
-    # Calculate line-based similarity
-    exp_lines = set(exp_norm.split('\n'))
-    act_lines = set(act_norm.split('\n'))
-    
-    if not exp_lines:
-        return False, 0.0
-    
-    correct = len(exp_lines.intersection(act_lines))
-    total = len(exp_lines)
-    similarity = correct / total
-    
-    return similarity >= 0.9, similarity
+    # Multiset F1 penalises both missing and extra records, including duplicates.
+    # Full credit requires equality above, never a high fuzzy score.
+    exp_lines = Counter(exp_norm.splitlines())
+    act_lines = Counter(act_norm.splitlines())
+    denominator = sum(exp_lines.values()) + sum(act_lines.values())
+    common = sum((exp_lines & act_lines).values())
+    similarity = 2 * common / denominator if denominator else 0.0
+    return False, similarity
+
 
 
 def evaluate_exercise(
@@ -268,15 +268,31 @@ def evaluate_exercise(
         return {
             'score': 0,
             'max_points': exercise.points,
-            'feedback': "Data directory not found. Run setup_seminar.sh first.",
+            'feedback': "Reference data directory not found; assessment not performed.",
+            'assessment_error': True,
             'passed': False
         }
     
+    required_file = ('access.log' if exercise_id.startswith('G') and exercise_id != 'G4'
+                     else 'emails.txt' if exercise_id == 'G4'
+                     else 'config.txt' if exercise_id.startswith('S') else 'employees.csv')
+    if not (DATA_DIR / required_file).is_file():
+        return {'score': 0, 'max_points': exercise.points, 'passed': False,
+                'assessment_error': True,
+                'feedback': f"Reference fixture missing: {required_file}; assessment not performed."}
+
     # Run expected command
     expected_out, expected_err, expected_rc = run_command(
         exercise.expected_command, DATA_DIR
     )
     
+    # grep status 1 means a valid empty match; stderr or other statuses are errors.
+    acceptable_empty_grep = exercise_id.startswith('G') and expected_rc == 1 and not expected_err
+    if (expected_rc != 0 and not acceptable_empty_grep) or expected_err:
+        return {'score': 0, 'max_points': exercise.points, 'passed': False,
+                'assessment_error': True,
+                'feedback': f"Reference command failed ({expected_rc}): {expected_err}; assessment not performed."}
+
     # Run student command
     student_out, student_err, student_rc = run_command(
         student_command, DATA_DIR
@@ -381,22 +397,36 @@ def grade_submission(
             'max_score': 0
         }
     
+    if not isinstance(submission, dict):
+        return {'error': 'Submission must be a JSON object', 'total_score': 0,
+                'max_score': sum(ex.points for ex in EXERCISES.values()), 'assessment_complete': False}
     student_id = submission.get('student_id', 'UNKNOWN')
     solutions = submission.get('solutions', {})
     
     results: Dict[str, Any] = {
         'student_id': student_id,
+        'assessment_status': 'PENDING_POLICY',
+        'note': 'These command-test points are diagnostic; the assignment/rubric contract is unresolved.',
         'exercises': {},
         'total_score': 0,
         'max_score': 0
     }
     
-    for ex_id, student_cmd in solutions.items():
-        result = evaluate_exercise(ex_id, student_cmd, verbose)
+    if not isinstance(solutions, dict) or any(key not in EXERCISES for key in solutions):
+        return {'error': 'solutions must map known exercise IDs to command strings',
+                'total_score': 0, 'max_score': sum(ex.points for ex in EXERCISES.values())}
+    for ex_id, exercise in EXERCISES.items():
+        student_cmd = solutions.get(ex_id)
+        if not isinstance(student_cmd, str) or not student_cmd.strip():
+            result = {'score': 0, 'max_points': exercise.points, 'passed': False,
+                      'feedback': 'Required exercise not submitted'}
+        else:
+            result = evaluate_exercise(ex_id, student_cmd, verbose)
         results['exercises'][ex_id] = result
         results['total_score'] += result['score']
         results['max_score'] += result['max_points']
     
+    results['assessment_complete'] = not any(r.get('assessment_error') for r in results['exercises'].values())
     return results
 
 
@@ -478,30 +508,27 @@ def self_test() -> bool:
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def main() -> None:
-    """Main entry point for the autograder."""
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
-    
-    if sys.argv[1] == '--self-test':
-        logger.info("Running self-test...")
-        success = self_test()
-        sys.exit(0 if success else 1)
-    
-    submission_file = Path(sys.argv[1])
-    verbose = '--verbose' in sys.argv or '-v' in sys.argv
-    
-    if not submission_file.exists():
-        logger.error(f"File not found: {submission_file}")
-        print(f"Error: File not found: {submission_file}")
-        sys.exit(1)
-    
-    logger.info(f"Grading submission: {submission_file}")
-    results = grade_submission(submission_file, verbose)
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run diagnostic command checks; assessment policy remains pending.")
+    parser.add_argument('submission_file', nargs='?', type=Path, help='JSON object with student_id and solutions mapping')
+    parser.add_argument('--verbose', '-v', action='store_true')
+    parser.add_argument('--json', type=Path, dest='json_output', help='Write the machine-readable result')
+    parser.add_argument('--self-test', action='store_true')
+    args = parser.parse_args()
+    if args.self_test:
+        return 0 if self_test() else 1
+    if not args.submission_file:
+        parser.error('submission_file is required unless --self-test is used')
+    results = grade_submission(args.submission_file, args.verbose)
+    if args.json_output:
+        args.json_output.write_text(json.dumps(results, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    if 'error' in results:
+        print(results['error'], file=sys.stderr)
+        return 1
     print_results(results)
-    logger.info(f"Grading complete: {results['total_score']}/{results['max_score']} points")
+    print('PENDING_POLICY: diagnostic points only; no final grade is issued.')
+    return 0 if results['assessment_complete'] else 2
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

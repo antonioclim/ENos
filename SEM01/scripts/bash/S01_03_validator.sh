@@ -23,9 +23,9 @@ FAIL=0
 WARN=0
 
 # Functions
-log_pass() { echo -e "${GREEN}[PASS]${NC} $1"; ((PASS++)); }
-log_fail() { echo -e "${RED}[FAIL]${NC} $1"; ((FAIL++)); }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; ((WARN++)); }
+log_pass() { echo -e "${GREEN}[PASS]${NC} $1"; PASS=$((PASS + 1)); }
+log_fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 
 # Header
@@ -129,7 +129,7 @@ for script in "${SCRIPTS[@]}"; do
             log_pass "Syntax correct: $script"
         else
             log_fail "Syntax errors: $script"
-            bash -n "$HOMEWORK_DIR/$script" 2>&1 | head -3 | while read -r line; do
+            { bash -n "$HOMEWORK_DIR/$script" 2>&1 || true; } | head -3 | while read -r line; do
                 echo "        $line"
             done
         fi
@@ -251,7 +251,7 @@ fi
 echo ""
 
 #
-# TEST 7: Script Execution (optional, with sandboxing)
+# TEST 7: Script Execution (timeout only; this is not a security sandbox)
 #
 
 echo -e "${BOLD}=== TEST 7: Execution Testing ===${NC}"
@@ -259,15 +259,15 @@ echo -e "${BOLD}=== TEST 7: Execution Testing ===${NC}"
 for script in "project/src/variables.sh" "project/src/system_info.sh"; do
     if [ -f "$HOMEWORK_DIR/$script" ]; then
         # Run with timeout and capture output
-        output=$(timeout 5 bash "$HOMEWORK_DIR/$script" 2>&1) || true
-        exit_code=$?
+        exit_code=0
+        output=$(timeout 5 bash "$HOMEWORK_DIR/$script" 2>&1) || exit_code=$?
         
         if [ $exit_code -eq 0 ] && [ -n "$output" ]; then
             log_pass "Execution successful: $script"
         elif [ $exit_code -eq 124 ]; then
             log_fail "Execution timeout: $script"
         else
-            log_warn "Execution with issues: $script (exit code: $exit_code)"
+            log_fail "Execution with issues: $script (exit code: $exit_code)"
         fi
     fi
 done
@@ -312,3 +312,6 @@ echo -e "${BLUE}Note: This is a preliminary automated verification.${NC}"
 echo -e "${BLUE}Final evaluation will be done manually by the instructor.${NC}"
 echo -e "${BLUE}Oral verification is MANDATORY for final grade.${NC}"
 echo ""
+
+# Return the actual aggregate result to callers.
+[[ $FAIL -eq 0 ]]

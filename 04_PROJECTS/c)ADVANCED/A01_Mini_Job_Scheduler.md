@@ -107,6 +107,22 @@ A01_Mini_Job_Scheduler/
 
 ## C Component - Detailed Implementation
 
+This is a teaching scaffold, not a completed scheduler. Ellipsised queue functions
+and the persistent job ledger are student work. `queue_pop` currently removes an
+item from the pending heap: a completed implementation must record a durable
+RUNNING reservation before exposing it and reconcile interrupted workers. The CLI
+below defines NUL-framed pop output and a completion command against that ledger;
+it does not turn the omitted ledger into an implemented feature.
+
+`init` exclusively creates a per-user, per-instance queue; ordinary restarts attach.
+Set `JOBQUEUE_INSTANCE` to an agreed instance name for all participants. Shared
+memory can survive process restarts on the same boot, but it is not disk/reboot
+persistence. Recovery from a dead semaphore owner is an explicit administrative
+operation after all participants stop; the two-second acquisition timeout reports
+unavailability and never resets live state. `destroy` is separate from `make clean`.
+A durable journal, crash recovery, multi-user permissions and ABI migration remain
+student design requirements.
+
 ### Main Header (jobqueue.h)
 
 ```c
@@ -118,8 +134,8 @@ A01_Mini_Job_Scheduler/
 
 #define MAX_JOBS 1024
 #define MAX_CMD_LEN 256
-#define SHM_NAME "/jobscheduler_queue"
-#define SEM_NAME "/jobscheduler_sem"
+#define QUEUE_MAGIC UINT32_C(0x4a515631)
+#define QUEUE_VERSION 1
 
 /* Job states */
 typedef enum {
@@ -146,8 +162,10 @@ typedef struct {
     char command[MAX_CMD_LEN];
 } Job;
 
-/* Shared memory structure */
+/* Shared memory structure; same ABI/build required for all participants. */
 typedef struct {
+    uint32_t magic;
+    uint32_t version;
     int32_t size;
     int32_t next_job_id;
     int32_t total_submitted;
@@ -160,7 +178,7 @@ typedef struct {
 int queue_init(void);
 int queue_attach(void);
 void queue_detach(void);
-void queue_destroy(void);
+int queue_destroy(void);
 
 /* Queue operations */
 int queue_push(const Job *job);
@@ -193,9 +211,35 @@ void queue_stats(int *pending, int *running, int *completed, int *failed);
 #include <semaphore.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
+#include <limits.h>
 
 static JobQueue *queue = NULL;
 static sem_t *sem = NULL;
+static char shm_name[128], sem_name[128];
+
+static int queue_names(void) {
+    const char *instance = getenv("JOBQUEUE_INSTANCE");
+    if (!instance || !*instance) instance = "default";
+    if (strlen(instance) > 48) { errno = EINVAL; return -1; }
+    for (const unsigned char *p = (const unsigned char *)instance; *p; ++p)
+        if (!isalnum(*p) && *p != '_' && *p != '-') { errno = EINVAL; return -1; }
+    snprintf(shm_name, sizeof shm_name, "/jobqueue_%lu_%s", (unsigned long)getuid(), instance);
+    snprintf(sem_name, sizeof sem_name, "/jobsem_%lu_%s", (unsigned long)getuid(), instance);
+    return 0;
+}
+
+static int queue_lock(void) {
+    if (!queue || !sem) { errno = EINVAL; return -1; }
+    struct timespec deadline;
+    if (clock_gettime(CLOCK_REALTIME, &deadline) < 0) return -1;
+    deadline.tv_sec += 2;
+    int rc;
+    do { rc = sem_timedwait(sem, &deadline); } while (rc < 0 && errno == EINTR);
+    return rc; /* Timeout/error does not confer ownership of the semaphore. */
+}
+
+static int queue_unlock(void) { return sem_post(sem); }
 
 /* Heap helpers */
 static void heap_swap(Job *a, Job *b) {
@@ -241,96 +285,89 @@ static void heap_sift_down(int idx) {
     }
 }
 
-/* Initialise shared memory and semaphore (call once) */
+/* Explicit creation: never truncates or resets an existing queue. */
 int queue_init(void) {
-    /* Create shared memory */
-    int fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
-    if (fd == -1) {
-        perror("shm_open");
-        return -1;
-    }
-    
-    if (ftruncate(fd, sizeof(JobQueue)) == -1) {
-        perror("ftruncate");
-        close(fd);
-        return -1;
-    }
-    
-    queue = mmap(NULL, sizeof(JobQueue), PROT_READ | PROT_WRITE,
-                 MAP_SHARED, fd, 0);
+    if (queue || sem) { errno = EALREADY; return -1; }
+    if (queue_names() < 0) return -1;
+    int fd = shm_open(shm_name, O_CREAT | O_EXCL | O_RDWR, 0600);
+    if (fd < 0) return -1;
+    int made_sem = 0, saved;
+    if (ftruncate(fd, sizeof(JobQueue)) < 0) goto fail;
+    void *mapped = mmap(NULL, sizeof(JobQueue), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (mapped == MAP_FAILED) goto fail;
+    queue = mapped;
+    sem_t *opened = sem_open(sem_name, O_CREAT | O_EXCL, 0600, 0);
+    if (opened == SEM_FAILED) goto fail;
+    sem = opened; made_sem = 1;
+    memset(queue, 0, sizeof *queue);
+    queue->version = QUEUE_VERSION; queue->next_job_id = 1;
+    queue->magic = QUEUE_MAGIC;
+    if (queue_unlock() < 0) goto fail; /* Publish readiness only after initialisation. */
     close(fd);
-    
-    if (queue == MAP_FAILED) {
-        perror("mmap");
-        return -1;
-    }
-    
-    /* Create semaphore */
-    sem = sem_open(SEM_NAME, O_CREAT, 0666, 1);
-    if (sem == SEM_FAILED) {
-        perror("sem_open");
-        munmap(queue, sizeof(JobQueue));
-        return -1;
-    }
-    
-    /* Initialise queue */
-    sem_wait(sem);
-    memset(queue, 0, sizeof(JobQueue));
-    queue->next_job_id = 1;
-    sem_post(sem);
-    
     return 0;
+fail:
+    saved = errno;
+    queue_detach(); close(fd);
+    if (made_sem) sem_unlink(sem_name);
+    shm_unlink(shm_name); /* Only the object created with O_EXCL by this call. */
+    errno = saved;
+    return -1;
 }
 
-/* Attach to existing shared memory */
+/* Normal restart: attach; an absent/incomplete/incompatible queue is an error. */
 int queue_attach(void) {
-    int fd = shm_open(SHM_NAME, O_RDWR, 0666);
-    if (fd == -1) {
-        return -1;
+    if (queue || sem) { errno = EALREADY; return -1; }
+    if (queue_names() < 0) return -1;
+    int fd = shm_open(shm_name, O_RDWR, 0);
+    if (fd < 0) return -1;
+    struct stat st;
+    if (fstat(fd, &st) < 0 || st.st_uid != getuid() || (st.st_mode & 0777) != 0600 ||
+        st.st_size != (off_t)sizeof(JobQueue)) {
+        close(fd); errno = EINVAL; return -1;
     }
-    
-    queue = mmap(NULL, sizeof(JobQueue), PROT_READ | PROT_WRITE,
-                 MAP_SHARED, fd, 0);
+    void *mapped = mmap(NULL, sizeof(JobQueue), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     close(fd);
-    
-    if (queue == MAP_FAILED) {
-        return -1;
-    }
-    
-    sem = sem_open(SEM_NAME, 0);
-    if (sem == SEM_FAILED) {
-        munmap(queue, sizeof(JobQueue));
-        return -1;
-    }
-    
+    if (mapped == MAP_FAILED) return -1;
+    queue = mapped;
+    sem_t *opened = sem_open(sem_name, 0);
+    if (opened == SEM_FAILED) { queue_detach(); return -1; }
+    sem = opened;
+    if (queue_lock() < 0) { int saved = errno; queue_detach(); errno = saved; return -1; }
+    int valid = queue->magic == QUEUE_MAGIC && queue->version == QUEUE_VERSION &&
+                queue->size >= 0 && queue->size <= MAX_JOBS && queue->next_job_id > 0;
+    int unlock_rc = queue_unlock();
+    if (!valid || unlock_rc < 0) { queue_detach(); errno = EINVAL; return -1; }
     return 0;
 }
 
 void queue_detach(void) {
-    if (queue) {
-        munmap(queue, sizeof(JobQueue));
-        queue = NULL;
-    }
-    if (sem) {
-        sem_close(sem);
-        sem = NULL;
-    }
+    if (queue) { munmap(queue, sizeof *queue); queue = NULL; }
+    if (sem) { sem_close(sem); sem = NULL; }
 }
 
-void queue_destroy(void) {
+/* Explicit administrative operation; all workers must already be stopped. */
+int queue_destroy(void) {
+    if (queue_names() < 0) return -1;
+    int fd = shm_open(shm_name, O_RDWR, 0);
+    if (fd < 0) return -1;
+    struct stat st;
+    int owned = fstat(fd, &st) == 0 && st.st_uid == getuid() && (st.st_mode & 0777) == 0600;
+    close(fd);
+    if (!owned) { errno = EPERM; return -1; }
     queue_detach();
-    shm_unlink(SHM_NAME);
-    sem_unlink(SEM_NAME);
+    int rc = shm_unlink(shm_name);
+    if (sem_unlink(sem_name) < 0 && errno != ENOENT) rc = -1;
+    return rc;
 }
 
 /* Push job to queue */
 int queue_push(const Job *job) {
-    if (!queue || !sem) return -1;
+    if (!queue || !sem || !job) { errno = EINVAL; return -1; }
     
-    sem_wait(sem);
+    if (queue_lock() < 0) return -1;
     
-    if (queue->size >= MAX_JOBS) {
-        sem_post(sem);
+    if (queue->size >= MAX_JOBS || queue->next_job_id == INT32_MAX || queue->total_submitted == INT32_MAX) {
+        queue_unlock();
         return -1;
     }
     
@@ -347,18 +384,18 @@ int queue_push(const Job *job) {
     
     queue->total_submitted++;
     
-    sem_post(sem);
+    if (queue_unlock() < 0) return -1;
     return new_job.job_id;
 }
 
 /* Pop highest priority job */
 int queue_pop(Job *job) {
-    if (!queue || !sem) return -1;
+    if (!queue || !sem || !job) { errno = EINVAL; return -1; }
     
-    sem_wait(sem);
+    if (queue_lock() < 0) return -1;
     
     if (queue->size == 0) {
-        sem_post(sem);
+        queue_unlock();
         return -1;
     }
     
@@ -369,33 +406,30 @@ int queue_pop(Job *job) {
     queue->heap[0] = queue->heap[--queue->size];
     heap_sift_down(0);
     
-    sem_post(sem);
-    return 0;
+    return queue_unlock();
 }
 
 int queue_peek(Job *job) {
-    if (!queue || !sem) return -1;
+    if (!queue || !sem || !job) { errno = EINVAL; return -1; }
     
-    sem_wait(sem);
+    if (queue_lock() < 0) return -1;
     
     if (queue->size == 0) {
-        sem_post(sem);
+        queue_unlock();
         return -1;
     }
     
     *job = queue->heap[0];
     
-    sem_post(sem);
-    return 0;
+    return queue_unlock();
 }
 
 int queue_size(void) {
-    if (!queue) return -1;
+    if (!queue || !sem) return -1;
     
-    sem_wait(sem);
+    if (queue_lock() < 0) return -1;
     int size = queue->size;
-    sem_post(sem);
-    
+    if (queue_unlock() < 0) return -1;
     return size;
 }
 
@@ -410,18 +444,29 @@ int queue_size(void) {
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <errno.h>
+#include <limits.h>
 #include <unistd.h>
 
+static int parse_number(const char *text, int minimum, int maximum, int *result) {
+    char *end; errno = 0;
+    long value = strtol(text, &end, 10);
+    if (errno || end == text || *end || value < minimum || value > maximum) return -1;
+    *result = (int)value; return 0;
+}
+
 static void print_usage(const char *prog) {
-    printf("Usage: %s <command> [options]\n\n", prog);
+    printf("Usage: %s [options] <command> [arguments]\n\n", prog);
     printf("Commands:\n");
-    printf("  init              Initialise job queue\n");
+    printf("  init              Create a new queue (existing queue is an error)\n");
     printf("  destroy           Destroy job queue\n");
     printf("  submit <cmd>      Submit a job\n");
     printf("  list              List pending jobs\n");
     printf("  status <id>       Show job status\n");
     printf("  cancel <id>       Cancel a job\n");
     printf("  stats             Show queue statistics\n");
+    printf("  pop               Reserve a job; --format=nul is required\n");
+    printf("  complete ID CODE  Record completion in the student-supplied job ledger\n");
     printf("\nOptions:\n");
     printf("  -p, --priority N  Job priority (default: 10)\n");
     printf("  -m, --memory MB   Max memory in MB\n");
@@ -464,6 +509,7 @@ int main(int argc, char *argv[]) {
     int priority = 10;
     int max_memory = 0;
     int max_time = 0;
+    const char *format = NULL;
     
     /* Parse options */
     static struct option long_opts[] = {
@@ -471,15 +517,17 @@ int main(int argc, char *argv[]) {
         {"memory", required_argument, 0, 'm'},
         {"time", required_argument, 0, 't'},
         {"help", no_argument, 0, 'h'},
+        {"format", required_argument, 0, 'f'},
         {0, 0, 0, 0}
     };
     
     int opt;
-    while ((opt = getopt_long(argc, argv, "p:m:t:h", long_opts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "+p:m:t:hf:", long_opts, NULL)) != -1) {
         switch (opt) {
-            case 'p': priority = atoi(optarg); break;
-            case 'm': max_memory = atoi(optarg); break;
-            case 't': max_time = atoi(optarg); break;
+            case 'p': if (parse_number(optarg, 0, INT_MAX, &priority) < 0) return 2; break;
+            case 'm': if (parse_number(optarg, 0, INT_MAX/1024, &max_memory) < 0) return 2; break;
+            case 't': if (parse_number(optarg, 0, INT_MAX, &max_time) < 0) return 2; break;
+            case 'f': format = optarg; break;
             case 'h':
             default:
                 print_usage(argv[0]);
@@ -487,7 +535,9 @@ int main(int argc, char *argv[]) {
         }
     }
     
+    if (optind >= argc) { print_usage(argv[0]); return 2; }
     const char *cmd = argv[optind];
+    if (format && (strcmp(cmd, "pop") != 0 || strcmp(format, "nul") != 0)) return 2;
     
     /* Handle commands */
     if (strcmp(cmd, "init") == 0) {
@@ -502,7 +552,7 @@ int main(int argc, char *argv[]) {
     }
     
     if (strcmp(cmd, "destroy") == 0) {
-        queue_destroy();
+        if (queue_destroy() < 0) { perror("queue_destroy"); return 1; }
         printf("Queue destroyed\n");
         return 0;
     }
@@ -513,8 +563,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    atexit(queue_detach);
     if (strcmp(cmd, "submit") == 0) {
-        if (optind + 1 >= argc) {
+        if (optind + 2 != argc || strlen(argv[optind+1]) >= MAX_CMD_LEN) {
             fprintf(stderr, "Usage: submit <command>\n");
             return 1;
         }
@@ -551,7 +602,8 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         
-        int job_id = atoi(argv[optind + 1]);
+        int job_id;
+        if (parse_number(argv[optind + 1], 1, INT_MAX, &job_id) < 0) return 2;
         Job job;
         
         if (queue_get_by_id(job_id, &job) == 0) {
@@ -567,7 +619,8 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         
-        int job_id = atoi(argv[optind + 1]);
+        int job_id;
+        if (parse_number(argv[optind + 1], 1, INT_MAX, &job_id) < 0) return 2;
         
         if (queue_cancel(job_id) == 0) {
             printf("Job #%d cancelled\n", job_id);
@@ -575,6 +628,20 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Failed to cancel job #%d\n", job_id);
             return 1;
         }
+    }
+    else if (strcmp(cmd, "pop") == 0) {
+        if (!format || strcmp(format, "nul") != 0 || optind+1 != argc) return 2;
+        Job job;
+        if (queue_pop(&job) < 0) return 3; /* Empty/unavailable: no metadata emitted. */
+        printf("%d%c%s%c%d%c%d%c", job.job_id, 0, job.command, 0,
+               job.max_cpu_seconds, 0, job.max_memory_mb, 0);
+        if (ferror(stdout)) return 1;
+    }
+    else if (strcmp(cmd, "complete") == 0) {
+        int id, code;
+        if (optind+3 != argc || parse_number(argv[optind+1], 1, INT_MAX, &id) < 0 ||
+            parse_number(argv[optind+2], 0, 255, &code) < 0) return 2;
+        if (queue_update_state(id, code == 0 ? JOB_COMPLETED : JOB_FAILED, code) < 0) return 1;
     }
     else if (strcmp(cmd, "stats") == 0) {
         int pending, running, completed, failed;
@@ -599,11 +666,11 @@ int main(int argc, char *argv[]) {
 
 ---
 
-## Complete Makefile
+## Makefile for the completed student implementation
 
 ```makefile
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -fPIC
+CFLAGS = -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -O2 -fPIC
 LDFLAGS = -lpthread -lrt
 
 SRC_DIR = src/c
@@ -640,7 +707,6 @@ test: $(LIB_TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
-	rm -f /dev/shm/jobscheduler_*
 
 install: all
 	cp $(LIB_TARGET) /usr/local/lib/
@@ -655,65 +721,55 @@ install: all
 ### Calling from Bash
 
 ```bash
-#!/bin/bash
-# scheduler.sh - Uses C library
+#!/usr/bin/env bash
+# Integration scaffold: the student must supply a durable job ledger, reservation
+# recovery, queue_list/cancel/update/stats and the complete scheduler policies.
+set -euo pipefail
+PROJECT_ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+JOBCTL="$PROJECT_ROOT/bin/jobctl"
+# The CLI uses its ORIGIN rpath. No empty LD_LIBRARY_PATH component is added.
+MAX_WORKERS=${MAX_WORKERS:-4}
+[[ $MAX_WORKERS =~ ^[1-9][0-9]*$ ]] || exit 2
 
-LIB_PATH="$(dirname "$0")/../build"
-export LD_LIBRARY_PATH="$LIB_PATH:$LD_LIBRARY_PATH"
+submit_job() { "$JOBCTL" -p "${2:-10}" submit "$1"; }
 
-JOBCTL="$(dirname "$0")/../bin/jobctl"
+run_worker() (
+    local id="$1" command="$2" cpu="$3" memory="$4" status
+    # Zero means no additional limit. A requested limit that fails stops this job.
+    if ((cpu > 0)); then ulimit -t "$cpu" || return 1; fi
+    if ((memory > 0)); then ulimit -v "$((memory*1024))" || return 1; fi
+    # Submitted commands are explicitly authorised shell programs. Metadata is data.
+    if bash -c "$command"; then status=0; else status=$?; fi
+    "$JOBCTL" complete "$id" "$status" || return 1
+    return "$status"
+)
 
-# Initialisation at startup
-init_queue() {
-    "$JOBCTL" init || {
-        echo "Failed to initialise job queue" >&2
-        exit 1
-    }
-}
-
-# Submit job via C tool
-submit_job() {
-    local cmd="$1"
-    local priority="${2:-10}"
-    
-    "$JOBCTL" submit -p "$priority" "$cmd"
-}
-
-# Get next job
-get_next_job() {
-    # For operations requiring direct queue access,
-    # use a C wrapper that exports in easy-to-parse format
-    "$JOBCTL" pop --format=shell
-}
-
-# Main scheduler loop
-main() {
-    init_queue
-    
+main() (
+    local workspace record pid failed=0
+    workspace=$(mktemp -d) || return 1
+    trap 'rm -rf -- "$workspace"' EXIT
+    # Attach/inspect on startup; creation is a separate explicit jobctl init step.
+    "$JOBCTL" stats || return 1
+    local -a workers=() fields=()
     while true; do
-        local job_info
-        job_info=$(get_next_job)
-        
-        if [[ -n "$job_info" ]]; then
-            eval "$job_info"  # Sets $JOB_ID, $JOB_CMD, etc.
-            
-            log_info "Starting job #$JOB_ID: $JOB_CMD"
-            
-            # Run in background with resource limits
-            (
-                ulimit -t "$JOB_MAX_TIME" 2>/dev/null
-                ulimit -v "$((JOB_MAX_MEM * 1024))" 2>/dev/null
-                
-                eval "$JOB_CMD"
-                exit_code=$?
-                
-                "$JOBCTL" complete "$JOB_ID" "$exit_code"
-            ) &
+        if ((${#workers[@]} >= MAX_WORKERS)); then
+            if ! wait "${workers[0]}"; then failed=1; fi
+            workers=("${workers[@]:1}")
         fi
-        
-        sleep 1
+        record="$workspace/job.nul"
+        if "$JOBCTL" --format=nul pop > "$record"; then
+            mapfile -d '' -t fields < "$record"
+            [[ ${#fields[@]} -eq 4 && ${fields[0]} =~ ^[1-9][0-9]*$ && ${fields[2]} =~ ^[0-9]+$ && ${fields[3]} =~ ^[0-9]+$ ]] || return 1
+            run_worker "${fields[@]}" & workers+=("$!")
+        else
+            local status=$?
+            ((status == 3)) || return "$status"
+            sleep 1
+        fi
     done
-}
+)
+# Intentionally not invoked: this is a scaffold until reservation/recovery and
+# orderly shutdown are implemented and tested. Do not label it a complete daemon.
 ```
 
 ---
@@ -727,15 +783,15 @@ main() {
 ls -la /dev/shm/
 
 # Inspect with hexdump
-hexdump -C /dev/shm/jobscheduler_queue | head
+hexdump -C /dev/shm/jobqueue_"$(id -u)"_"${JOBQUEUE_INSTANCE:-default}" | head
 
 # Check semaphore
-ls -la /dev/shm/sem.jobscheduler_sem
+ls -la /dev/shm/sem.jobsem_"$(id -u)"_"${JOBQUEUE_INSTANCE:-default}"
 ```
 
 ### Debugging with GDB
 
-```bash
+```text
 # Compile with debug symbols
 gcc -g -Wall -o jobctl_debug jobctl.c -L. -ljobqueue -lpthread -lrt
 

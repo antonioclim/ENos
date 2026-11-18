@@ -1,5 +1,5 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
 #!/usr/bin/env python3
+# Historical translation annotation: RO: TRADUS ȘI VERIFICAT
 """
 Demo (Week 3): `fork()` / PID / PPID / `wait()`.
 
@@ -14,16 +14,19 @@ Recommendation:
 from __future__ import annotations
 
 import os
+import sys
 import time
 
 def main() -> int:
     print(f"[PARENT] PID={os.getpid()} PPID={os.getppid()}")
+    sys.stdout.flush()
     pid = os.fork()
 
     if pid == 0:
         # child
         print(f"[CHILD]  PID={os.getpid()} PPID={os.getppid()} (will sleep 1s and exit)")
         time.sleep(1.0)
+        sys.stdout.flush()
         os._exit(0)
 
     # parent continues

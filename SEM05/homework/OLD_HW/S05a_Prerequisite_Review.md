@@ -1,5 +1,8 @@
 # S05_TC00 - Bash Scripting Practice
 
+> Archived teaching material. The historical upload/signature statements below are not a current interoperability guarantee. Use the current [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md); recording format, metadata, authentication and submission acknowledgement are separate states. This archive does not authorise an external upload.
+
+
 > **Operating Systems** | ASE Bucharest - CSIE  
 > Laboratory material - Seminar 5 (REVIEW - Prerequisites)
 
@@ -301,20 +304,20 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-if [ ! -e "$1" ]; then
+if [ ! -e "$1" ] && [ ! -L "$1" ]; then
     echo "Does not exist: $1"
     exit 1
 fi
 
-if [ -f "$1" ]; then
+if [ -L "$1" ]; then
+    printf 'Symlink: %s -> %s\n' "$1" "$(readlink -- "$1")"
+elif [ -f "$1" ]; then
     echo "File: $1"
     echo "Size: $(stat -c %s "$1") bytes"
     echo "Lines: $(wc -l < "$1")"
 elif [ -d "$1" ]; then
     echo "Directory: $1"
     echo "Contains: $(ls -1 "$1" | wc -l) elements"
-elif [ -L "$1" ]; then
-    echo "Symlink: $1 -> $(readlink "$1")"
 fi
 ```
 
@@ -372,7 +375,8 @@ done
 
 echo "---"
 echo "Total: $count files, $total_lines lines"
-echo "Average: $((total_lines / count)) lines/file"
+if ((count > 0)); then echo "Average: $((total_lines / count)) lines/file"
+else echo "Average: unavailable (no matching regular .txt files)"; fi
 ```
 
 ### Exercise 4: Interactive Menu
@@ -410,7 +414,7 @@ done
 
 ## Cheat Sheet
 
-```bash
+```text
 # TESTS
 [ -f file ]     file exists
 [ -d dir ]      directory exists

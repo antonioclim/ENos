@@ -1,160 +1,110 @@
-# 📁 Bash Utilities — SEM04
+# Bash tools — Seminar 4
 
-> **Location:** `SEM04/scripts/bash/`  
-> **Purpose:** Seminar setup, validation, and interactive tools
+Run from this directory with Bash. The usage below is the actual interface; generic --check, --fix and --batch flags are not provided.
 
-## Contents
-
-| Script | Purpose | Sudo Required? |
-|--------|---------|----------------|
-| `S04_01_setup_seminar.sh` | Install dependencies, create workspace | Yes (first run) |
-| `S04_02_interactive_quiz.sh` | CLI quiz with instant feedback | No |
-| `S04_03_validator.sh` | Validate homework submissions | No |
-
-## Quick Start
-
-```bash
-# Make all scripts executable (once)
-chmod +x *.sh
-
-# Setup seminar environment
-./S04_01_setup_seminar.sh
-
-# Take a practice quiz
-./S04_02_interactive_quiz.sh
-
-# Validate your homework
-./S04_03_validator.sh ~/my_homework/
-```
-
----
-
-## S04_01_setup_seminar.sh
-
-**Purpose:** Prepares your system with all required tools and creates the seminar workspace.
-
-### Usage
-
-```bash
-./S04_01_setup_seminar.sh [options]
-
-Options:
-  --minimal     Skip optional packages (faster)
-  --force       Reinstall even if packages exist
-  --workspace   Create workspace directory only
-  --check       Verify installation without installing
-```
-
-### What It Installs
-
-- Required system packages
-- Python dependencies from `requirements.txt`
-- Workspace directories (`~/os_seminar_sem04/`)
-- Sample files for exercises
-
-### Example
-
-```bash
-# Full installation
-./S04_01_setup_seminar.sh
-
-# Quick check if everything is ready
-./S04_01_setup_seminar.sh --check
-```
-
----
+Diagnostic points are not a final grade: see [assessment status](../../homework/ASSESSMENT_STATUS.md). A timeout is not an execution sandbox.
 
 ## S04_02_interactive_quiz.sh
 
-**Purpose:** Terminal-based quiz for self-assessment with immediate feedback.
+```text
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    INTERACTIVE QUIZ - TEXT PROCESSING                    ║
+╚══════════════════════════════════════════════════════════════════════════╝
 
-### Usage
+USAGE:
+    ./S04_02_interactive_quiz.sh [OPTIONS]
 
-```bash
-./S04_02_interactive_quiz.sh [options]
+OPTIONS:
+    --category CATEGORY   Choose category: regex, grep, sed, awk or all
+    --count N             Number of questions (default: 10)
+    --help                Display this message
 
-Options:
-  --timed         30-second limit per question
-  --shuffle       Randomize question order
-  --hard-only     Show only difficult questions
-  --count N       Limit to N questions
+EXAMPLES:
+    ./S04_02_interactive_quiz.sh                    # Full quiz, 10 questions
+    ./S04_02_interactive_quiz.sh --category grep    # Only grep
+    ./S04_02_interactive_quiz.sh --count 5          # Only 5 questions
 ```
-
-### Features
-
-- Coloured output for correct/incorrect
-- Running score display
-- Detailed explanations after each answer
-- Summary statistics at end
-
-### Example
-
-```bash
-# Standard quiz
-./S04_02_interactive_quiz.sh
-
-# Timed challenge mode
-./S04_02_interactive_quiz.sh --timed --shuffle
-```
-
----
 
 ## S04_03_validator.sh
 
-**Purpose:** Checks homework submissions against requirements.
+```text
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    EXERCISE VALIDATOR - TEXT PROCESSING                  ║
+╚══════════════════════════════════════════════════════════════════════════╝
 
-### Usage
+USAGE:
+    ./S04_03_validator.sh <exercise_id> "<student_command>"
+    ./S04_03_validator.sh --list
 
-```bash
-./S04_03_validator.sh <submission_dir> [options]
+OPTIONS:
+    --list      Show all available exercises
+    --help      Display this message
 
-Options:
-  --strict      Fail on warnings (for final check)
-  --report      Generate detailed report file
-  --fix         Attempt to auto-fix common issues
-  --quiet       Minimal output
+EXAMPLES:
+    ./S04_03_validator.sh G1 "grep ' 404 ' access.log"
+    ./S04_03_validator.sh A3 "awk -F',' 'NR>1{s+=\$4}END{print s}' employees.csv"
+    ./S04_03_validator.sh --list
+
+AVAILABLE EXERCISES:
+    G1-G5: GREP Exercises
+    S1-S4: SED Exercises
+    A1-A4: AWK Exercises
 ```
 
-### What It Validates
+## S04_01_setup_seminar.sh
 
-| Check | Severity |
-|-------|----------|
-| Required files present | ERROR |
-| Script syntax (bash -n) | ERROR |
-| Shellcheck compliance | WARNING |
-| Proper shebang lines | WARNING |
-| No hardcoded paths | WARNING |
-| Executable permissions | WARNING |
+```text
+╔══════════════════════════════════════════════════════════════════════════╗
+║                  SETUP SEMINAR 4: TEXT PROCESSING                        ║
+╚══════════════════════════════════════════════════════════════════════════╝
 
-### Example
+USAGE:
+    ./S04_01_setup_seminar.sh [OPTIONS]
 
-```bash
-# Basic validation
-./S04_03_validator.sh ~/homework/
+OPTIONS:
+    --clean     Delete existing data before regeneration
+    --verbose   Display detailed progress
+    --help      Display this message
 
-# Strict mode before submission
-./S04_03_validator.sh ~/homework/ --strict --report
+GENERATED FILES:
+    • access.log     - Simulated web server log (~2000 lines)
+    • employees.csv  - Employee data for awk exercises
+    • config.txt     - Configuration file for sed exercises
+    • emails.txt     - Data for email validation exercises
+    • test.txt       - Generic file for regex tests
+
+LOCATIONS:
+    • ~/demo_sem4/data/    - Main directory for demonstrations
+    • ./resources/generated_data/ - Generated demo copy (not committed test fixtures)
+
+EXAMPLES:
+    ./S04_01_setup_seminar.sh              # Standard setup
+    ./S04_01_setup_seminar.sh --clean      # Complete regeneration
+    ./S04_01_setup_seminar.sh --verbose    # With detailed output
 ```
 
----
+Setup writes synthetic demonstration data under ENOS_SEM04_DATA_DIR (default ~/demo_sem4/data) and ENOS_SEM04_RESOURCE_DIR (default resources/generated_data). Existing unmarked directories are refused. --clean removes only the generator’s known files; committed resources/sample_data fixtures remain separate. Use the same ENOS_SEM04_DATA_DIR for the Bash/Python command validators.
 
-## Dependencies
 
-- `bash` ≥ 4.0
-- `shellcheck` (for validation)
-- Standard Unix tools (`grep`, `sed`, `awk`)
+## S04_config_to_env.sh
 
-## Troubleshooting
+```bash
+bash S04_config_to_env.sh --exports path/to/config.txt
+bash S04_config_to_env.sh --assignments path/to/config.txt
+```
 
-| Issue | Solution |
-|-------|----------|
-| "Permission denied" | Run `chmod +x *.sh` |
-| "shellcheck not found" | Run setup script or `sudo apt install shellcheck` |
-| Quiz won't start | Check terminal supports ANSI colours |
+A teaching serializer for flat, line-based `key=value` records. Split at the first
+`=`, trim key whitespace, convert key dots to underscores and key letters to
+uppercase. Values are literal (including quotes, `$`, backslashes and further
+`=`); an optional terminal CR is removed for CRLF input. Blank lines, comment
+lines beginning with optional whitespace plus `#`/`;` and simple section headings
+are skipped. Sections do not create namespaces. Invalid keys, normalisation
+collisions, duplicates and NUL bytes fail before stdout contains assignments.
+All other values are emitted using Bash `printf %q`, without evaluation.
 
----
-
-*See also: [`../demo/`](../demo/) for live coding demonstrations*  
-*See also: [`../python/`](../python/) for automated grading tools*
-
-*Last updated: January 2026*
+Output is Bash syntax, not a claim of compatibility with every `.env` or INI
+parser. A quoted value in the input retains its literal quote characters; there
+is no implicit INI unquoting or interpolation. Exit 0 means serialization
+completed, 2 means invalid CLI/input and 1 means an I/O failure detected while
+opening the file. Do not source unreviewed configuration as a substitute for
+validation; the serializer only emits data assignments and does not execute them.

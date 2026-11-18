@@ -1,4 +1,24 @@
 #!/usr/bin/env bash
+# Container identifiers use the same mapping for deploy and rollback.
+normalise_container_name() {
+    local ref=$1 last
+    ref=${ref%%@*}; last=${ref##*/}
+    [[ $last != *:* ]] || ref=${ref%:*}
+    ref=${ref//\//_}; ref=${ref//:/_}
+    [[ $ref =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || return 2
+    printf '%s\n' "$ref"
+}
+load_container_config() {
+    local file=$1 parsed key value
+    CONTAINER_PORTS= CONTAINER_VOLUMES= CONTAINER_RESTART=
+    parsed=$(mktemp) || return 1
+    if ! python3 "$(dirname -- "${BASH_SOURCE[0]}")/../../config_data.py" "$file" CONTAINER_PORTS CONTAINER_VOLUMES CONTAINER_RESTART > "$parsed"; then
+        rm -f -- "$parsed"; return 1
+    fi
+    while IFS= read -r -d '' key && IFS= read -r -d '' value; do printf -v "$key" '%s' "$value"; done < "$parsed"
+    rm -f -- "$parsed"
+}
+
 # ==============================================================================
 # DEPLOYER - Utils Library
 # ==============================================================================
@@ -343,9 +363,10 @@ health_check_tcp() {
     local port=$2
     local timeout=${3:-5}
     
+    [[ "$host" =~ ^[A-Za-z0-9._:-]+$ ]] && is_valid_port "$port" && is_positive_integer "$timeout" || return 1
     log_debug "TCP health check: $host:$port"
     
-    if timeout "$timeout" bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null; then
+    if timeout "$timeout" bash -c 'exec 3<>"/dev/tcp/$1/$2"' bash "$host" "$port" 2>/dev/null; then
         log_debug "Health check passed: $host:$port"
         return 0
     else
@@ -424,7 +445,7 @@ health_check_with_retry() {
             sleep "$interval"
         fi
         
-        ((attempt++))
+        attempt=$((attempt + 1))
     done
     
     log_error "Health check failed after $retries attempts"
@@ -442,6 +463,7 @@ deploy_file() {
     local dest=$2
     local backup_dir=${3:-""}
     
+    [[ "${DRY_RUN:-false}" != true ]] || { log_info "[DRY RUN] File: $source -> $dest"; return 0; }
     log_info "Deploying file: $source -> $dest"
     
     # Check source
@@ -479,39 +501,39 @@ deploy_file() {
 # Deploy directory with backup
 # Args: $1 = source dir, $2 = destination dir, $3 = backup dir (optional)
 deploy_directory() {
-    local source=$1
-    local dest=$2
-    local backup_dir=${3:-""}
-    
-    log_info "Deploying directory: $source -> $dest"
-    
-    # Check source
-    if [[ ! -d "$source" ]]; then
-        log_error "Source directory not found: $source"
+    local source="$1" dest="$2" backup_dir="${3:-}" parent stage previous="" backup
+    [[ -d "$source" && -n "$dest" && "$dest" != / && ! -L "$dest" ]] || return 1
+    source=$(realpath -e -- "$source") || return 1
+    dest=$(realpath -m -- "$dest") || return 1
+    [[ "$dest" != "$source" && "$dest" != "$source/"* && "$source" != "$dest/"* ]] || {
+        log_error "Source and destination must be disjoint directories"; return 1;
+    }
+    [[ "${DRY_RUN:-false}" != true ]] || { log_info "[DRY RUN] Directory: $source -> $dest"; return 0; }
+    parent=$(dirname "$dest")
+    mkdir -p -- "$parent" || return 1
+    stage=$(mktemp -d "$parent/.deploy-stage.XXXXXX") || return 1
+    if ! cp -a -- "$source/." "$stage/"; then rm -rf -- "$stage"; return 1; fi
+    if [[ -d "$dest" ]]; then
+        if [[ -n "$backup_dir" ]]; then
+            mkdir -p -- "$backup_dir" || { rm -rf -- "$stage"; return 1; }
+            backup="$backup_dir/$(basename "$dest")_$(date +%s%N)"
+            cp -a -- "$dest" "$backup" || { rm -rf -- "$stage"; return 1; }
+            register_rollback "files_$dest" "$backup"
+        fi
+        previous=$(mktemp -d "$parent/.deploy-previous.XXXXXX") || return 1
+        rmdir -- "$previous" || return 1
+        mv -T -- "$dest" "$previous" || { rm -rf -- "$stage"; return 1; }
+    elif [[ -e "$dest" ]]; then
+        rm -rf -- "$stage"; return 1
+    fi
+    if ! mv -T -- "$stage" "$dest"; then
+        [[ -z "$previous" ]] || mv -T -- "$previous" "$dest"
+        rm -rf -- "$stage"
         return 1
     fi
-    
-    # Create backup if destination exists
-    if [[ -d "$dest" && -n "$backup_dir" ]]; then
-        local backup_name="$(basename "$dest")_$(get_short_timestamp)"
-        mkdir -p "$backup_dir"
-        cp -rp "$dest" "$backup_dir/$backup_name"
-        log_debug "Backup created: $backup_dir/$backup_name"
-    fi
-    
-    # Create parent directory if it doesn't exist
-    local dest_parent
-    dest_parent=$(dirname "$dest")
-    mkdir -p "$dest_parent"
-    
-    # Copy directory
-    if cp -rp "$source" "$dest"; then
-        log_info "Directory deployed: $dest"
-        return 0
-    else
-        log_error "Failed to deploy directory: $dest"
-        return 1
-    fi
+    [[ -z "$previous" ]] || rm -rf -- "$previous"
+    log_info "Directory deployed: $dest"
+    return 0
 }
 
 # Sync directory using rsync
@@ -521,6 +543,7 @@ sync_directory() {
     local dest=$2
     local exclude_file=${3:-""}
     
+    [[ "${DRY_RUN:-false}" != true ]] || { log_info "[DRY RUN] Sync: $source -> $dest"; return 0; }
     log_info "Syncing: $source -> $dest"
     
     if ! command_exists rsync; then
@@ -628,7 +651,7 @@ get_current_version() {
 # ==============================================================================
 
 # Structure for rollback backup
-declare -A ROLLBACK_DATA
+declare -gA ROLLBACK_DATA=()
 
 # Register data for rollback
 # Args: $1 = key, $2 = value
@@ -672,27 +695,9 @@ restore_file() {
 # Restore directory from backup
 # Args: $1 = backup dir, $2 = destination
 restore_directory() {
-    local backup=$1
-    local dest=$2
-    
-    log_rollback "Restoring directory: $backup -> $dest"
-    
-    if [[ ! -d "$backup" ]]; then
-        log_error "Backup directory not found: $backup"
-        return 1
-    fi
-    
-    # Delete current destination
-    rm -rf "$dest"
-    
-    # Restore from backup
-    if cp -rp "$backup" "$dest"; then
-        log_info "Directory restored: $dest"
-        return 0
-    else
-        log_error "Failed to restore directory: $dest"
-        return 1
-    fi
+    local backup="$1" dest="$2"
+    [[ -d "$backup" ]] || { log_error "Backup directory not found: $backup"; return 1; }
+    deploy_directory "$backup" "$dest" ""
 }
 
 # ==============================================================================
@@ -703,30 +708,25 @@ restore_directory() {
 # Args: $1 = manifest file
 # Output: MANIFEST_* variables
 parse_manifest() {
-    local manifest=$1
-    
-    if [[ ! -f "$manifest" ]]; then
-        log_error "Manifest not found: $manifest"
-        return 1
-    fi
-    
-    log_debug "Parsing manifest: $manifest"
-    
-    while IFS=': ' read -r key value || [[ -n "$key" ]]; do
-        # Skip comments and empty lines
-        [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
-        
-        # Clean whitespace
-        key=$(echo "$key" | tr -d ' ')
-        value=$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        
-        # Export as variable
-        local var_name="MANIFEST_${key^^}"
-        var_name=${var_name//-/_}
-        declare -g "$var_name=$value"
-        log_debug "  $var_name=$value"
+    local manifest="$1" key value line
+    local -A seen=()
+    # Each manifest starts from empty state; do not inherit previous fields.
+    for key in "${!MANIFEST_@}"; do unset "$key"; done
+    [[ -r "$manifest" ]] || return 1
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
+        [[ "$line" =~ ^([a-z_][a-z_0-9-]*):[[:space:]]*(.*)$ ]] || {
+            log_error "Only flat key: scalar manifests are supported"; return 1;
+        }
+        key="${BASH_REMATCH[1]}"; [[ ! ${seen[$key]+yes} ]] || { log_error "Duplicate manifest key: $key"; return 1; }; seen[$key]=1; value="${BASH_REMATCH[2]}"
+        value="${value%"${value##*[![:space:]]}"}"
+        if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then value="${value:1:${#value}-2}"; fi
+        case "$key" in name|version|type|source|destination|image|service_file|service-file|description) ;;
+            *) log_error "Unsupported manifest field: $key"; return 1;;
+        esac
+        key="MANIFEST_${key^^}"; key="${key//-/_}"
+        printf -v "$key" '%s' "$value"
     done < "$manifest"
-    
     return 0
 }
 
@@ -746,6 +746,13 @@ validate_manifest() {
         fi
     done
     
+    case "$MANIFEST_TYPE" in
+        service) ;;
+        container) [[ -n "${MANIFEST_IMAGE:-}" ]] || return 1 ;;
+        files) [[ -n "${MANIFEST_SOURCE:-}" && -n "${MANIFEST_DESTINATION:-}" ]] || return 1 ;;
+        *) log_error "Unsupported manifest type: $MANIFEST_TYPE"; return 1 ;;
+    esac
+    [[ "$MANIFEST_NAME" =~ ^[A-Za-z0-9_.-]+$ ]] || return 1
     log_debug "Manifest valid: $manifest"
     return 0
 }
@@ -796,25 +803,24 @@ substitute_env_vars() {
         return 1
     fi
     
-    # Use envsubst if available
-    if command_exists envsubst; then
-        envsubst < "$template" > "$output"
-    else
-        # Manual fallback
-        local content
-        content=$(cat "$template")
-        
-        while [[ "$content" =~ \$\{([A-Za-z_][A-Za-z0-9_]*)\} ]]; do
-            local var="${BASH_REMATCH[1]}"
-            local value="${!var:-}"
-            content=${content//\$\{$var\}/$value}
-        done
-        
-        echo "$content" > "$output"
-    fi
-    
-    log_debug "Template processed: $output"
-    return 0
+    python3 - "$template" "$output" <<'PYENV'
+import os,pathlib,re,sys,tempfile
+source,target=map(pathlib.Path,sys.argv[1:])
+try:
+    if source.resolve()==target.resolve(): raise ValueError('Template and output must differ')
+    data=source.read_text()
+    pattern=re.compile(r'\$\$|\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)')
+    rendered=pattern.sub(lambda m: '$' if m[0]=='$$' else os.environ.get(m[1] or m[2],''),data)
+    fd,path=tempfile.mkstemp(prefix='.render.',dir=target.parent)
+    try:
+        with os.fdopen(fd,'w') as stream: stream.write(rendered)
+        os.replace(path,target)
+    finally:
+        if os.path.exists(path): os.unlink(path)
+except (OSError,UnicodeError,ValueError) as exc:
+    print(exc,file=sys.stderr);sys.exit(1)
+PYENV
+
 }
 
 # ==============================================================================
@@ -956,7 +962,7 @@ stop_daemon() {
     local elapsed=0
     while kill -0 "$pid" 2>/dev/null && [[ $elapsed -lt $timeout ]]; do
         sleep 1
-        ((elapsed++))
+        elapsed=$((elapsed + 1))
     done
     
     # SIGKILL if still running
@@ -1008,17 +1014,10 @@ generate_deployment_report() {
             ;;
             
         json)
-            cat <<EOF
-{
-  "deployment_id": "$DEPLOYMENT_ID",
-  "status": "$DEPLOYMENT_STATE",
-  "duration_seconds": $duration,
-  "services_total": $DEPLOY_SERVICES_TOTAL,
-  "services_success": $DEPLOY_SERVICES_SUCCESS,
-  "services_failed": $DEPLOY_SERVICES_FAILED,
-  "hooks_run": $DEPLOY_HOOKS_RUN
-}
-EOF
+            python3 - "$DEPLOYMENT_ID" "$DEPLOYMENT_STATE" "$duration" "$DEPLOY_SERVICES_TOTAL" "$DEPLOY_SERVICES_SUCCESS" "$DEPLOY_SERVICES_FAILED" "$DEPLOY_HOOKS_RUN" <<'PYREPORT'
+import json,sys
+print(json.dumps(dict(deployment_id=sys.argv[1],status=sys.argv[2],duration_seconds=int(sys.argv[3]),services_total=int(sys.argv[4]),services_success=int(sys.argv[5]),services_failed=int(sys.argv[6]),hooks_run=int(sys.argv[7]))))
+PYREPORT
             ;;
     esac
 }

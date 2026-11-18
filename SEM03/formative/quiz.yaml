@@ -15,7 +15,7 @@ metadata:
   language: "en"
   level: "beginner"
   estimated_duration_minutes: 25
-  total_score: 100
+  total_score: 171
   passing_threshold: 60
   bloom_distribution:
     remember: 3      # 20%
@@ -159,7 +159,7 @@ questions:
       - "find . -name '*.txt' | xargs rm"
       - "find . -name '*.txt' -print0 | xargs -0 rm"
       - "find . -name '*.txt' -exec rm {} +"
-      - "Both B and C are correct"
+      - "Removing cat alone fixes filename splitting in the displayed code"
     correct: 3
     explanation: |
       Both variants are correct for files with spaces:
@@ -353,17 +353,17 @@ questions:
     bloom: apply
     score: 8
     text: |
-      You want a script to run with the owner's permissions, not those of
+      You want an eligible compiled executable to run with the owner's permissions, not those of
       the person executing it. What do you do?
     options:
-      - "chmod u+s script.sh"
-      - "chmod g+s script.sh"
-      - "chmod +t script.sh"
-      - "chmod 777 script.sh"
+      - "chmod u+s program"
+      - "chmod g+s program"
+      - "chmod +t program"
+      - "chmod 777 program"
     correct: 0
     explanation: |
       SUID (Set User ID): `chmod u+s` or `chmod 4755`
-      The script runs with the owner's UID.
+      On a supporting filesystem without nosuid and with other execution constraints satisfied, the executable uses the owner's effective UID.
       CAUTION: SUID on scripts is ignored on most modern systems!
       It is used for binaries like /usr/bin/passwd.
     misconceptions:
@@ -443,7 +443,7 @@ questions:
     bloom: apply
     score: 8
     text: |
-      You want to run a script every 15 minutes. Which line is correct?
+      Which line uses step notation to run a script at minutes 0, 15, 30 and 45 each hour?
     options:
       - "*/15 * * * * /path/script.sh"
       - "15 * * * * /path/script.sh"
@@ -453,11 +453,11 @@ questions:
     explanation: |
       `*/15` = every 15 minutes (0, 15, 30, 45)
       `15 * * * *` = only at minute 15 of each hour
-      Variant D is equivalent to A, but A is more elegant.
+      Variant D is functionally equivalent, but uses an explicit list rather than the requested step notation.
     misconceptions:
       1: "Runs only once per hour, at minute 15"
       2: "0-15 = minutes 0-15, not interval of 15"
-      3: "Functionally correct, but inefficient"
+      3: "Functionally equivalent explicit list; the question requests step notation"
     reference: "docs/S03_05_LIVE_CODING_GUIDE.md#LC-05"
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -469,7 +469,8 @@ questions:
     bloom: analyse
     score: 9
     text: |
-      A cron job is not running. The script works manually.
+      The cron daemon is confirmed running, the crontab is installed and readable,
+      and the executable script works manually. Its directory is absent from cron PATH.
       Crontab line: `0 3 * * * backup.sh`
       
       What is the most likely cause?
@@ -485,7 +486,7 @@ questions:
       Other common causes: missing environment variables, unredirected output.
     misconceptions:
       1: "DST is a rare problem, not the first to check"
-      2: "If script runs manually, daemon is working"
+      2: "Manual script execution alone cannot prove the daemon is running; this is explicitly confirmed in the question"
       3: "Error would be different for permissions"
     reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#cron-debug"
 
@@ -498,8 +499,8 @@ questions:
     bloom: evaluate
     score: 10
     text: |
-      You need to process 10,000 .log files, deleting empty lines.
-      Which approach is the most efficient?
+      You need to process 10,000 regular .log files recursively, including names with spaces.
+      Which displayed approach both preserves filename boundaries and batches sed invocations?
     options:
       - "for f in *.log; do sed -i '/^$/d' \"$f\"; done"
       - "find . -name '*.log' -exec sed -i '/^$/d' {} \\;"
@@ -507,8 +508,8 @@ questions:
       - "find . -name '*.log' | xargs sed -i '/^$/d'"
     correct: 2
     explanation: |
-      Variant C with `+` groups files and calls sed once
-      (or a few times for large batches). It is much more efficient than:
+      Variant C with `+` groups filenames into bounded batches. It satisfies both stated
+      structural requirements; no elapsed-time benchmark is implied. In contrast:
       - A/B: starts a sed process for EACH file (10,000 processes)
       - D: problems with spaces in names (would need -print0 | xargs -0)
     misconceptions:
@@ -544,7 +545,8 @@ questions:
       - "Needs sudo to actually delete system files"
     correct: 1
     explanation: |
-      This command deletes /var/log/auth.log, /var/log/syslog and everything!
+      It attempts deletion of matching .log entries throughout /, subject to permissions.
+      A name such as /var/log/syslog does not match the .log suffix.
       The error suppression (2>/dev/null) hides permission denied but does not
       prevent deletion of user-owned logs.
       Answer A sounds like AI-generated feedback (focuses on style not consequences).
@@ -552,7 +554,7 @@ questions:
       LLMs often validate "correct syntax" without considering real-world impact.
     misconceptions:
       0: "AI-style answer - validates syntax but ignores danger"
-      2: "-delete works without -depth (though -depth is recommended)"
+      2: "GNU -delete automatically enables depth-first traversal"
       3: "Without sudo it still deletes user logs"
     reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#trap-t1"
 
@@ -575,7 +577,7 @@ questions:
       - "Should use printf instead of read"
       - "Useless use of cat - just use: process_data < $filename"
       - "Missing quotes: cat \"$filename\""
-      - "Both B and C are correct"
+      - "Removing cat alone fixes filename splitting in the displayed code"
     correct: 2
     explanation: |
       Missing quotes is a SECURITY vulnerability plus it breaks on spaces.
@@ -603,24 +605,23 @@ questions:
       
         30 2 * * * /home/user/backup.sh
       
-      What is the MOST LIKELY cause?
+      Which conclusion is justified by these facts alone?
     options:
-      - "backup.sh uses relative paths that do not exist in cron"
-      - "2:30 AM falls during DST transition in some months"
-      - "The script needs >> log 2>&1 to capture errors"
-      - "cron uses a different shell than your terminal"
-    correct: 0
+      - "The script certainly uses invalid relative paths"
+      - "A DST transition is certainly the cause"
+      - "Adding redirection is guaranteed to repair the underlying failure"
+      - "Insufficient evidence: inspect logs, environment, paths and the relevant schedule"
+    correct: 3
     explanation: |
-      Scripts that work interactively often use `cd`, `~` or commands without
-      full path. Cron has minimal PATH and no user environment.
-      All answers are partially true but A is MOST LIKELY (90%+ of cases).
-      B is rare (1 hour/year), C hides but does not cause failure and D is usually not fatal.
-    trap_note: |
-      This requires real-world experience to answer - not just pattern matching.
+      The prompt does not identify a cause. Cron normally sets HOME, but the job's
+      environment and working directory differ from an interactive session.
+      Logs, exit status and a controlled reproduction distinguish path, resource,
+      interpreter and scheduling hypotheses. No prevalence measurement is supplied.
+    trap_note: "Do not turn a plausible hypothesis into an established diagnosis."
     misconceptions:
-      1: "DST edge case - true but rare"
-      2: "Hides errors but does not cause them"
-      3: "Usually not the cause of failure"
+      0: "No relative path inside the script is shown"
+      1: "No transition date, timezone or implementation evidence is supplied"
+      2: "Capturing diagnostics does not by itself repair the cause"
     reference: "docs/S03_07_LLM_AWARE_EXERCISES.md#trap-t3"
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -632,12 +633,10 @@ questions:
     bloom: evaluate
     score: 10
     text: |
-      You wrote a backup script that works perfectly when you run it manually.
-      Scheduled via cron at 3 AM, it fails silently — no backup file appears.
-      
-      You checked: syntax is correct, script is executable, cron service is running.
-      
-      What do you check FIRST?
+      The executable backup script calls a tool by its bare name. The tool exists
+      only in /usr/local/bin. The job log reports "command not found" and the cron
+      job PATH is /usr/bin:/bin; manual execution has /usr/local/bin in PATH.
+      Which demonstrated difference explains this particular failure?
     options:
       - "The script's shebang line"
       - "Whether the disk is full"
@@ -645,25 +644,15 @@ questions:
       - "The cron log in /var/log/syslog"
     correct: 2
     explanation: |
-      Cron runs with a minimal environment. PATH is usually just /usr/bin:/bin.
-      HOME may be unset or wrong. Scripts that rely on ~/.bashrc, ~/bin in PATH,
-      or environment variables from your interactive shell will fail silently.
-      
-      This is the kind of thing you learn by debugging at 3 AM. Textbooks mention
-      it but don't emphasise how COMMON this problem is (easily 70% of cron issues).
-      
-      The other options are valid but less likely:
-      - Shebang issues would usually show an error
-      - Disk full would affect manual runs too
-      - Log checking is useful but environment is the first suspect
-    tacit_note: |
-      AI often suggests "check syntax" or "check logs" because those are the
-      textbook answers. Experienced sysadmins check environment FIRST because
-      they've been burned by it repeatedly.
+      The stated PATH omits the only directory containing the required tool.
+      Set the required PATH or call the tool by its verified absolute path.
+      This conclusion follows from the supplied log and location, not a claim
+      that environment errors account for a particular percentage of cron issues.
+    tacit_note: "Use observed diagnostics before ranking possible causes."
     misconceptions:
-      0: "Shebang issues usually produce visible errors"
-      1: "Would also affect manual execution"
-      3: "Good for post-mortem but not first diagnostic step"
+      0: "The script is confirmed executable and reached the tool invocation"
+      1: "The displayed failure is command discovery, not an output-space error"
+      3: "The relevant job log and PATH evidence are already provided"
     reference: "docs/S03_07_LLM_AWARE_EXERCISES.md"
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -676,14 +665,15 @@ questions:
     score: 10
     text: |
       A colleague asks: "My script runs fine as root but fails as normal user.
-      The script only reads files in /opt/app/data/ which has permissions 755."
+      The executable script only reads files in /opt/app/data/ (mode 755).
+      All target files are confirmed readable by that user; no ACL or security module denies access."
       
       What is the MOST LIKELY cause?
     options:
       - "The files inside /opt/app/data/ have restrictive permissions"
       - "The script itself is not executable for normal users"
       - "A parent directory (/opt or /opt/app) lacks execute permission"
-      - "The script uses absolute paths that only root can access"
+      - "Absolute paths are syntactically forbidden for normal users"
     correct: 2
     explanation: |
       The sneaky one: you need execute (x) permission on EVERY directory in the
@@ -698,22 +688,22 @@ questions:
       Classic "works for me" scenario. Root ignores most permission checks,
       so testing as root hides these issues until deployment.
     misconceptions:
-      0: "Possible but 755 on data/ suggests they checked that already"
-      1: "Would fail for root too"
-      3: "Would fail for root too"
+      0: "File readability is explicitly confirmed; directory mode alone would not prove it"
+      1: "Excluded by the explicit checks in the question"
+      3: "Excluded by the explicit checks in the question"
     reference: "docs/S03_02_MAIN_MATERIAL.md#permissions"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DISTRIBUTION SUMMARY
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Remember (3):    Q01, Q06, Q09, Q13              = 24 points
-# Understand (4):  Q02, Q04, Q07, Q10, Q14         = 35 points
+# Remember (4):    Q01, Q06, Q09, Q13              = 24 points
+# Understand (5):  Q02, Q04, Q07, Q10, Q14         = 35 points
 # Apply (5):       Q03, Q05, Q08, Q12, Q15         = 40 points
 # Analyse (4):     Q11, Q16, T2, T3                = 34 points
 # Evaluate (4):    Q17, T1, TACIT_01, TACIT_02     = 38 points
 # ───────────────────────────────────────────────────────────────────────────────
-# TOTAL:           22 questions                    = 171 points (scaled to 100)
+# TOTAL:           22 questions                    = 171 raw points; normalised percentage is descriptive
 # 
 # TRAP QUESTIONS: T1, T2, T3 (24 points, ~14%)
 # TACIT KNOWLEDGE: TACIT_01, TACIT_02 (20 points, ~12%)

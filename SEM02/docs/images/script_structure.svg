@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
-  <defs>
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700" role="img" xml:lang="en" aria-labelledby="sem02-script-structure-title sem02-script-structure-desc">
+  <title id="sem02-script-structure-title">Bash Script Structure</title><desc id="sem02-script-structure-desc">A script identifies its interpreter, sets up and validates input, parses arguments, defines functions, runs its main work and reports results. Optional style preferences are distinct from syntax requirements; error handling must be tested.</desc><defs>
     <style>
-      .box { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
-      .box-setup { fill: #2c5282; }
-      .box-parse { fill: #285e61; }
-      .box-func { fill: #553c9a; }
-      .box-main { fill: #9c4221; }
-      .box-output { fill: #276749; }
-      .text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 14px; text-anchor: middle; }
-      .text-title { font-size: 18px; font-weight: bold; }
-      .text-code { font-size: 11px; fill: #a0aec0; }
-      .arrow { stroke: #718096; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-      .label { fill: #e2e8f0; font-family: 'Segoe UI', sans-serif; font-size: 12px; }
+      .sem02-script-structure-box { fill: #2d3748; stroke: #4a5568; stroke-width: 2; rx: 8; }
+      .sem02-script-structure-box-setup { fill: #2c5282; }
+      .sem02-script-structure-box-parse { fill: #285e61; }
+      .sem02-script-structure-box-func { fill: #553c9a; }
+      .sem02-script-structure-box-main { fill: #9c4221; }
+      .sem02-script-structure-box-output { fill: #276749; }
+      .sem02-script-structure-text { fill: #e2e8f0; font-family: 'Consolas', monospace; font-size: 14px; text-anchor: middle; }
+      .sem02-script-structure-text-title { font-size: 18px; font-weight: bold; }
+      .sem02-script-structure-text-code { font-size: 11px; fill: #e2e8f0; }
+      .sem02-script-structure-arrow { stroke: #718096; stroke-width: 2; fill: none; marker-end: url(#sem02-script-structure-arrowhead); }
+      .sem02-script-structure-label { fill: #e2e8f0; font-family: 'Segoe UI', sans-serif; font-size: 12px; }
     </style>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+    <marker id="sem02-script-structure-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#718096"/>
     </marker>
   </defs>
   
@@ -23,59 +23,59 @@
   <rect width="600" height="700" fill="#1a202c"/>
   
   <!-- Title -->
-  <text x="300" y="35" class="text text-title">Structura Script Bash</text>
-  <text x="300" y="55" class="text text-code">(Subgoal Labels Pattern)</text>
+  <text x="300" y="35" class="sem02-script-structure-text sem02-script-structure-text-title" id="sem02-script-structure-text-1">Bash Script Structure</text>
+  <text x="300" y="55" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-2">(Subgoal Labels Pattern)</text>
   
-  <!-- SETUP_SI_VALIDARE -->
-  <rect x="150" y="80" width="300" height="80" class="box box-setup"/>
-  <text x="300" y="105" class="text">SETUP_SI_VALIDARE</text>
-  <text x="300" y="125" class="text text-code">#!/bin/bash</text>
-  <text x="300" y="142" class="text text-code">set -euo pipefail</text>
-  
-  <!-- Arrow -->
-  <path d="M300 160 L300 190" class="arrow"/>
-  
-  <!-- PARSEAZA_ARGUMENTE -->
-  <rect x="150" y="190" width="300" height="80" class="box box-parse"/>
-  <text x="300" y="215" class="text">PARSEAZA_ARGUMENTE</text>
-  <text x="300" y="235" class="text text-code">getopts, $1, $2, ...</text>
-  <text x="300" y="252" class="text text-code">validare input</text>
+  <!--SETUP AND VALIDATION-->
+  <rect x="150" y="80" width="300" height="80" class="sem02-script-structure-box sem02-script-structure-box-setup"/>
+  <text x="300" y="105" class="sem02-script-structure-text" id="sem02-script-structure-text-3">SETUP AND VALIDATION</text>
+  <text x="300" y="125" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-4">#!/bin/bash</text>
+  <text x="300" y="142" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-5">set -euo pipefail</text>
   
   <!-- Arrow -->
-  <path d="M300 270 L300 300" class="arrow"/>
+  <path d="M300 160 L300 190" class="sem02-script-structure-arrow"/>
   
-  <!-- DEFINIRE_FUNCTII -->
-  <rect x="150" y="300" width="300" height="80" class="box box-func"/>
-  <text x="300" y="325" class="text">DEFINIRE_FUNCTII</text>
-  <text x="300" y="345" class="text text-code">functie_ajutor() { ... }</text>
-  <text x="300" y="362" class="text text-code">procesare_date() { ... }</text>
-  
-  <!-- Arrow -->
-  <path d="M300 380 L300 410" class="arrow"/>
-  
-  <!-- PROCESARE_PRINCIPALA -->
-  <rect x="150" y="410" width="300" height="80" class="box box-main"/>
-  <text x="300" y="435" class="text">PROCESARE_PRINCIPALA</text>
-  <text x="300" y="455" class="text text-code">logica principală</text>
-  <text x="300" y="472" class="text text-code">apeluri funcții</text>
+  <!--PARSE ARGUMENTS-->
+  <rect x="150" y="190" width="300" height="80" class="sem02-script-structure-box sem02-script-structure-box-parse"/>
+  <text x="300" y="215" class="sem02-script-structure-text" id="sem02-script-structure-text-6">PARSE ARGUMENTS</text>
+  <text x="300" y="235" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-7">getopts, $1, $2, ...</text>
+  <text x="300" y="252" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-8">validate input</text>
   
   <!-- Arrow -->
-  <path d="M300 490 L300 520" class="arrow"/>
+  <path d="M300 270 L300 300" class="sem02-script-structure-arrow"/>
   
-  <!-- AFISARE_REZULTATE -->
-  <rect x="150" y="520" width="300" height="80" class="box box-output"/>
-  <text x="300" y="545" class="text">AFISARE_REZULTATE</text>
-  <text x="300" y="565" class="text text-code">echo, printf</text>
-  <text x="300" y="582" class="text text-code">exit code</text>
+  <!--DEFINE FUNCTIONS-->
+  <rect x="150" y="300" width="300" height="80" class="sem02-script-structure-box sem02-script-structure-box-func"/>
+  <text x="300" y="325" class="sem02-script-structure-text" id="sem02-script-structure-text-9">DEFINE FUNCTIONS</text>
+  <text x="300" y="345" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-10">helper_function() { ... }</text>
+  <text x="300" y="362" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-11">process_data() { ... }</text>
+  
+  <!-- Arrow -->
+  <path d="M300 380 L300 410" class="sem02-script-structure-arrow"/>
+  
+  <!--MAIN PROCESSING-->
+  <rect x="150" y="410" width="300" height="80" class="sem02-script-structure-box sem02-script-structure-box-main"/>
+  <text x="300" y="435" class="sem02-script-structure-text" id="sem02-script-structure-text-12">MAIN PROCESSING</text>
+  <text x="300" y="455" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-13">main logic</text>
+  <text x="300" y="472" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-14">function calls</text>
+  
+  <!-- Arrow -->
+  <path d="M300 490 L300 520" class="sem02-script-structure-arrow"/>
+  
+  <!--DISPLAY RESULTS-->
+  <rect x="150" y="520" width="300" height="80" class="sem02-script-structure-box sem02-script-structure-box-output"/>
+  <text x="300" y="545" class="sem02-script-structure-text" id="sem02-script-structure-text-15">DISPLAY RESULTS</text>
+  <text x="300" y="565" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-16">echo, printf</text>
+  <text x="300" y="582" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-17">exit code</text>
   
   <!-- Side annotations -->
-  <text x="80" y="120" class="label" text-anchor="end">Inițializare</text>
-  <text x="80" y="230" class="label" text-anchor="end">Input</text>
-  <text x="80" y="340" class="label" text-anchor="end">Definiții</text>
-  <text x="80" y="450" class="label" text-anchor="end">Execuție</text>
-  <text x="80" y="560" class="label" text-anchor="end">Output</text>
+  <text x="125" y="120" class="sem02-script-structure-label" text-anchor="end" id="sem02-script-structure-text-18">Initialisation</text>
+  <text x="125" y="230" class="sem02-script-structure-label" text-anchor="end" id="sem02-script-structure-text-19">Input</text>
+  <text x="125" y="340" class="sem02-script-structure-label" text-anchor="end" id="sem02-script-structure-text-20">Definitions</text>
+  <text x="125" y="450" class="sem02-script-structure-label" text-anchor="end" id="sem02-script-structure-text-21">Execution</text>
+  <text x="125" y="560" class="sem02-script-structure-label" text-anchor="end" id="sem02-script-structure-text-22">Output</text>
   
   <!-- Footer -->
-  <text x="300" y="640" class="text text-code">Seminarul 02 SO | ASE București - CSIE</text>
-  <text x="300" y="660" class="text text-code">Pattern: Subgoal Labels pentru claritate</text>
-</svg>
+  <text x="300" y="640" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-23">Seminar 02 OS | ASE București - CSIE</text>
+  <text x="300" y="660" class="sem02-script-structure-text sem02-script-structure-text-code" id="sem02-script-structure-text-24">Pattern: subgoal labels for clarity</text>
+<text x="300" y="680" font-family="Arial, sans-serif" font-size="10" fill="#cbd5e1" text-anchor="middle" id="sem02-script-structure-text-25">set -euo pipefail is optional; test expected failures and its exceptions.</text></svg>

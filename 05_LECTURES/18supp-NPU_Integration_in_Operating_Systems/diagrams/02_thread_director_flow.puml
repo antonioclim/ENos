@@ -2,7 +2,7 @@
 !theme plain
 skinparam backgroundColor #FEFEFE
 
-title Intel Thread Director: Scheduling Flow
+title Thread Director Feedback — Illustrative Scheduling Model
 
 participant "Thread" as T
 participant "Thread\nDirector\n(Hardware)" as TD
@@ -34,4 +34,5 @@ note over OS
   remains with OS
 end note
 
+caption Baseline numeric claims retained; measurement provenance or model adoption remains pending author decision.
 @enduml

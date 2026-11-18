@@ -1,3 +1,4 @@
+# Historical mixed-tool/pyproject-style reference. Use ci/ruff.toml with Ruff --config; do not pass this file directly.
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configurare Linting — Seminarul 04: Text Processing
 # ═══════════════════════════════════════════════════════════════════════════════

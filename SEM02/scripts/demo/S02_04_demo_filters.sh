@@ -579,9 +579,9 @@ demo_pipelines() {
     
     print_subheader "Example 2: Status codes from log"
     
-    print_code "awk '{print \$9}' access.log | sort | uniq -c | sort -rn"
+    print_code "awk '{print \$8}' access.log | sort | uniq -c | sort -rn"
     echo -e "${BLUE}Result (HTTP code frequency):${RESET}"
-    awk '{print $9}' access.log | sort | uniq -c | sort -rn | sed 's/^/  /'
+    awk '{print $8}' access.log | sort | uniq -c | sort -rn | sed 's/^/  /'
     
     wait_for_user
     

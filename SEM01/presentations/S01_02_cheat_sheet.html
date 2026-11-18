@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cheat Sheet - Bash Shell | OS ASE</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0f172a;
             --card: #1e293b;
-            --accent: #3b82f6;
+            --accent: #79b8ff;
             --accent2: #8b5cf6;
             --success: #22c55e;
             --warning: #f59e0b;
             --error: #ef4444;
             --text: #f1f5f9;
-            --muted: #64748b;
+            --muted: #b8c4d4;
             --border: #334155;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -219,6 +218,102 @@
             .cmd-item { grid-template-columns: 1fr; }
         }
     </style>
+
+<style id="seminar-accessible-print">
+button.quiz-option, button.tab { font: inherit; color: inherit; text-align: left; }
+button.quiz-option { width: 100%; }
+button.nav-dot { padding: 0; border: 1px solid currentColor; }
+button:focus-visible, input:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+@media print {
+  .presentation, .slide-container { display: block !important; height: auto !important; }
+  .slide { height: auto !important; min-height: 0 !important; overflow: visible !important; animation: none !important; }
+  .slide-content { overflow: visible !important; }
+  .nav, .nav-bar, .shortcuts, .keyboard-info, .search-container, .tabs, .filter-tabs, .stats, .print-btn { display: none !important; }
+  .slide *, .card *, .header *, .example *, .diagram * { color: #000 !important; -webkit-text-fill-color: #000 !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+  .card, .card.hidden, .card[style], .quiz-option { display: block !important; background: #fff !important; color: #000 !important; border: 1px solid #777 !important; }
+  .card-header, .example, .terminal, .terminal-header, .terminal-body, .diagram, .column, .quiz-question { background: #fff !important; color: #000 !important; }
+  .grid { display: block !important; }
+  .card { margin-bottom: 8mm; break-inside: avoid; }
+  pre, code, .example, .diagram { white-space: pre-wrap !important; overflow: visible !important; }
+  h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body>
     <div class="container">
@@ -228,21 +323,21 @@
         </header>
         
         <div class="search-container">
-            <input type="text" class="search-box" placeholder="🔍 Search command..." id="search" onkeyup="filterCards()">
+            <input type="text" class="search-box" placeholder="🔍 Search command..." id="search" aria-label="Search commands and explanations" oninput="filterCards()">
         </div>
         
         <div class="tabs">
-            <span class="tab active" onclick="filterCategory('all')">All</span>
-            <span class="tab" onclick="filterCategory('nav')">🧭 Navigation</span>
-            <span class="tab" onclick="filterCategory('files')">📁 Files</span>
-            <span class="tab" onclick="filterCategory('vars')">📦 Variables</span>
-            <span class="tab" onclick="filterCategory('config')">⚙️ Configuration</span>
-            <span class="tab" onclick="filterCategory('glob')">✨ Globbing</span>
+            <button type="button" class="tab active" data-category="all" aria-pressed="true" onclick="filterCategory('all')">All</button>
+            <button type="button" class="tab" data-category="nav" aria-pressed="false" onclick="filterCategory('nav')">🧭 Navigation</button>
+            <button type="button" class="tab" data-category="files" aria-pressed="false" onclick="filterCategory('files')">📁 Files</button>
+            <button type="button" class="tab" data-category="vars" aria-pressed="false" onclick="filterCategory('vars')">📦 Variables</button>
+            <button type="button" class="tab" data-category="config" aria-pressed="false" onclick="filterCategory('config')">⚙️ Configuration</button>
+            <button type="button" class="tab" data-category="glob" aria-pressed="false" onclick="filterCategory('glob')">✨ Globbing</button>
         </div>
         
         <div class="grid" id="cards-container">
             
-            <!-- Navigare -->
+            <!-- Navigation -->
             <div class="card" data-category="nav" data-keywords="navigation pwd cd ls directory">
                 <div class="card-header">
                     <span class="card-icon">🧭</span>
@@ -252,23 +347,23 @@
                     <ul class="cmd-list">
                         <li class="cmd-item">
                             <code>pwd</code>
-                            <span class="cmd-desc">Print Working Directory - displays current directoryy</span>
+                            <span class="cmd-desc">Print Working Directory - displays current directory</span>
                         </li>
                         <li class="cmd-item">
                             <code>cd DIR</code>
-                            <span class="cmd-desc">Change Directory - changes directoryy</span>
+                            <span class="cmd-desc">Change Directory - changes directory</span>
                         </li>
                         <li class="cmd-item">
                             <code>cd ~</code>
-                            <span class="cmd-desc">Go to HOME directoryy</span>
+                            <span class="cmd-desc">Go to HOME directory</span>
                         </li>
                         <li class="cmd-item">
                             <code>cd ..</code>
-                            <span class="cmd-desc">Go to parent directoryy</span>
+                            <span class="cmd-desc">Go to parent directory</span>
                         </li>
                         <li class="cmd-item">
                             <code>cd -</code>
-                            <span class="cmd-desc">Return to previous directoryy</span>
+                            <span class="cmd-desc">Return to previous directory</span>
                         </li>
                         <li class="cmd-item">
                             <code>ls -la</code>
@@ -284,7 +379,7 @@
             </div>
             
             <!-- Files and Directories -->
-            <div class="card" data-category="files" data-keywords="file directoryy mkdir touch cp mv rm cat">
+            <div class="card" data-category="files" data-keywords="file directory mkdir touch cp mv rm cat">
                 <div class="card-header">
                     <span class="card-icon">📁</span>
                     <span class="card-title">Files & Directories</span>
@@ -293,7 +388,7 @@
                     <ul class="cmd-list">
                         <li class="cmd-item">
                             <code>mkdir -p DIR</code>
-                            <span class="cmd-desc">Create directoryy(ies) recursively</span>
+                            <span class="cmd-desc">Create directory(ies) recursively</span>
                         </li>
                         <li class="cmd-item">
                             <code>touch FILE</code>
@@ -301,7 +396,7 @@
                         </li>
                         <li class="cmd-item">
                             <code>cp SRC DEST</code>
-                            <span class="cmd-desc">Copy files (-r for directoryies)</span>
+                            <span class="cmd-desc">Copy files (-r for directories)</span>
                         </li>
                         <li class="cmd-item">
                             <code>mv SRC DEST</code>
@@ -309,7 +404,7 @@
                         </li>
                         <li class="cmd-item">
                             <code>rm FILE</code>
-                            <span class="cmd-desc">Delete file (-rf for directoryies)</span>
+                            <span class="cmd-desc">Delete file (-rf for directories)</span>
                         </li>
                         <li class="cmd-item">
                             <code>cat FILE</code>
@@ -323,7 +418,7 @@
                 </div>
             </div>
             
-            <!-- Variabile -->
+            <!-- Variables -->
             <div class="card" data-category="vars" data-keywords="variables export echo env local">
                 <div class="card-header">
                     <span class="card-icon">📦</span>
@@ -333,7 +428,7 @@
                     <ul class="cmd-list">
                         <li class="cmd-item">
                             <code>VAR="val"</code>
-                            <span class="cmd-desc">Set local variable (no spaces!)</span>
+                            <span class="cmd-desc">Set shell variable (no spaces around =!)</span>
                         </li>
                         <li class="cmd-item">
                             <code>export VAR</code>
@@ -355,7 +450,7 @@
                     <div class="table-container">
                         <table>
                             <tr><th>Variable</th><th>Meaning</th></tr>
-                            <tr><td><code>$HOME</code></td><td>Home directoryy</td></tr>
+                            <tr><td><code>$HOME</code></td><td>Home directory</td></tr>
                             <tr><td><code>$USER</code></td><td>Current user</td></tr>
                             <tr><td><code>$PATH</code></td><td>Executable search paths</td></tr>
                             <tr><td><code>$?</code></td><td>Last command exit code</td></tr>
@@ -407,7 +502,7 @@
             <div class="card" data-category="config" data-keywords="bashrc alias source config">
                 <div class="card-header">
                     <span class="card-icon">⚙️</span>
-                    <span class="card-title">Configurare ~/.bashrc</span>
+                    <span class="card-title">Configuring ~/.bashrc</span>
                 </div>
                 <div class="card-body">
                     <ul class="cmd-list">
@@ -458,7 +553,7 @@
                             </tr>
                             <tr>
                                 <td><code>?</code></td>
-                                <td>Exact UN caracter</td>
+                                <td>Exactly one character</td>
                                 <td><code>file?.txt</code></td>
                             </tr>
                             <tr>
@@ -468,7 +563,7 @@
                             </tr>
                             <tr>
                                 <td><code>[a-z]</code></td>
-                                <td>Un caracter din range</td>
+                                <td>One character from the range</td>
                                 <td><code>file[a-c].txt</code></td>
                             </tr>
                             <tr>
@@ -489,7 +584,7 @@
             <div class="card" data-category="nav" data-keywords="fhs directory etc var tmp home">
                 <div class="card-header">
                     <span class="card-icon">🗂️</span>
-                    <span class="card-title">Structura FHS</span>
+                    <span class="card-title">FHS structure</span>
                 </div>
                 <div class="card-body">
                     <div class="table-container">
@@ -497,8 +592,8 @@
                             <tr><th>Directory</th><th>Content</th></tr>
                             <tr><td><code>/</code></td><td>System root</td></tr>
                             <tr><td><code>/etc</code></td><td>System configurations</td></tr>
-                            <tr><td><code>/home</code></td><td>User directoryies</td></tr>
-                            <tr><td><code>/tmp</code></td><td>Temporary files (deleted at reboot!)</td></tr>
+                            <tr><td><code>/home</code></td><td>User directories</td></tr>
+                            <tr><td><code>/tmp</code></td><td>Temporaryy files (cleanup follows system policy)</td></tr>
                             <tr><td><code>/var</code></td><td>Variable data, logs</td></tr>
                             <tr><td><code>/usr</code></td><td>User programs</td></tr>
                             <tr><td><code>/bin</code></td><td>Essential executables</td></tr>
@@ -515,7 +610,7 @@
             <div class="card" data-category="config" data-keywords="shortcut terminal ctrl tab">
                 <div class="card-header">
                     <span class="card-icon">⌨️</span>
-                    <span class="card-title">Shortcut-uri Terminal</span>
+                    <span class="card-title">Terminal shortcuts</span>
                 </div>
                 <div class="card-body">
                     <ul class="cmd-list">
@@ -562,32 +657,23 @@
     </div>
     
     <script>
+        let currentCategory = 'all';
         function filterCards() {
             const query = document.getElementById('search').value.toLowerCase();
-            const cards = document.querySelectorAll('.card');
-            
-            cards.forEach(card => {
-                const keywords = card.dataset.keywords.toLowerCase();
-                const content = card.textContent.toLowerCase();
-                const visible = keywords.includes(query) || content.includes(query);
+            document.querySelectorAll('.card').forEach(card => {
+                const text = ((card.dataset.keywords || '') + ' ' + card.textContent).toLowerCase();
+                const visible = (currentCategory === 'all' || card.dataset.category === currentCategory) && text.includes(query);
                 card.style.display = visible ? '' : 'none';
             });
         }
-        
         function filterCategory(category) {
-            // Update tabs
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Filter cards
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
+            currentCategory = category;
+            document.querySelectorAll('.tab').forEach(tab => {
+                const selected = tab.dataset.category === category;
+                tab.classList.toggle('active', selected);
+                tab.setAttribute('aria-pressed', String(selected));
             });
+            filterCards();
         }
     </script>
 </body>

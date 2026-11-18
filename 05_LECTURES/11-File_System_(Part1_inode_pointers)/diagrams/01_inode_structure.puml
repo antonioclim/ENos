@@ -1,7 +1,7 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml inode_structure
-!include ../../diagrams_common/skin.puml
-title Inode Structure (ext4)
+!include ../../../00_SUPPLEMENTARY/diagrams_common/skin.puml
+title Classical Unix Inode Block Pointers (legacy ext2/ext3-style mapping)
 
 skinparam rectangle {
     roundCorner 5
@@ -11,7 +11,7 @@ rectangle "**INODE #12345**" as inode #E3F2FD {
     
     rectangle "**METADATA**" as meta #FFF9C4 {
         note as meta_note
-        **Type & Mode:** -rw-r--r-- (0644)
+        **Type & Mode:** ~-rw~-r~-~-r~-~- (0644)
         **Owner UID/GID:** 1000/1000
         **Size:** 15,847 bytes
         **Link Count:** 2
@@ -25,13 +25,13 @@ rectangle "**INODE #12345**" as inode #E3F2FD {
     
     rectangle "**BLOCK POINTERS**" as blocks #C8E6C9 {
         
-        rectangle "**12 Direct Blocks**\n→ 48 KB direct" as direct #BBDEFB
+        rectangle "**12 Direct Blocks**\n→ 48 KiB direct" as direct #BBDEFB
         
-        rectangle "**Single Indirect**\n1024 ptr → 4 MB" as single #E1BEE7
+        rectangle "**Single Indirect**\n1024 ptr → 4 MiB" as single #E1BEE7
         
-        rectangle "**Double Indirect**\n1024² ptr → 4 GB" as double #FCE4EC
+        rectangle "**Double Indirect**\n1024² ptr → 4 GiB" as double #FCE4EC
         
-        rectangle "**Triple Indirect**\n1024³ ptr → 4 TB" as triple #FFCDD2
+        rectangle "**Triple Indirect**\n1024³ ptr → 4 TiB" as triple #FFCDD2
     }
 }
 
@@ -51,8 +51,13 @@ note bottom of inode
 **Important:** The inode does **NOT** contain the file name!
 The name is stored in the **directory** (name → inode# mapping)
 
-**Max file size (4KB blocks):**
-12×4KB + 1024×4KB + 1024²×4KB + 1024³×4KB ≈ **4 TB**
+**Theoretical pointer addressability (4 KiB blocks):**
+12×4 KiB + 1024×4 KiB + 1024²×4 KiB + 1024³×4 KiB ≈ **4 TiB**
 end note
 
+note right of inode
+Modern ext4 normally stores an extent tree in i_block.
+The shown indirect-pointer arithmetic is a classical model,
+not a universal ext4 maximum file size.
+end note
 @enduml

@@ -6,7 +6,7 @@
 #         USAGE:  ./record_homework.sh
 #
 #   DESCRIPTION:  Script for recording student homework using asciinema
-#                 Includes: input validation, session recording, cryptographic signature,
+#                 Includes: input validation, session recording, legacy metadata token,
 #                 automatic upload to server
 #
 #        AUTHOR:  Operating Systems 2023-2027 - Revolvix/github.com
@@ -27,7 +27,7 @@ IFS=$'\n\t'
 
 #===============================================================================
 # RSA PUBLIC KEY - DO NOT MODIFY!
-# Used for cryptographic signature of homework
+# Used for legacy metadata token of homework
 #===============================================================================
 readonly PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCieNySGxV0PZUBbAjbwksHyUUB
@@ -40,7 +40,7 @@ HAsViFvWuv8rlbxvHwIDAQAB
 # SERVER CONFIGURATION
 #===============================================================================
 readonly SCP_SERVER="sop.ase.ro"
-readonly SCP_PORT="1001"
+SCP_PORT="1001"
 readonly SCP_PASSWORD="stud"
 readonly SCP_BASE_PATH="/home/HOMEWORKS"
 readonly MAX_RETRIES=3
@@ -88,57 +88,38 @@ print_info() {
 }
 
 #===============================================================================
-# CHECK AND INSTALL PREREQUISITES
+# CHECK PREREQUISITES
 #===============================================================================
 
+require_asciinema_v2() {
+    local version
+    if ! version=$(asciinema --version 2>&1); then
+        print_error 'Cannot determine asciinema version; recording was not started.'
+        return 1
+    fi
+    if [[ ! "$version" =~ ^asciinema\ 2\.[0-9]+(\.[0-9]+)?([-+][0-9A-Za-z.-]+)?$ ]]; then
+        print_error "This recorder requires asciinema CLI 2.x (asciicast v2). Found: $version"
+        print_info 'CLI 3.x writes a different format. Use the supported 2.x lab package; no package was changed.'
+        return 1
+    fi
+}
+
 check_and_install_prerequisites() {
-    echo -e "${BOLD}📦 Checking and installing prerequisites...${NC}"
-    echo ""
-    
-    local -a packages_to_install=()
-    
-    # Check asciinema
-    if ! command -v asciinema &> /dev/null; then
-        print_warning "asciinema is not installed"
-        packages_to_install+=("asciinema")
-    else
-        print_success "asciinema is installed"
+    # Historical name retained for compatibility. This function only checks.
+    local -a required=(asciinema python3)
+    local -a missing=()
+    local cmd
+    if [[ "$OFFLINE" != true ]]; then required+=(openssl sshpass scp); fi
+    for cmd in "${required[@]}"; do
+        command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
+    done
+    if (( ${#missing[@]} )); then
+        print_error "Missing commands: ${missing[*]}"
+        print_info 'Install the required packages in your supported lab environment, then rerun.'
+        print_info 'Ubuntu: sudo apt install asciinema python3 openssl sshpass openssh-client'
+        return 1
     fi
-    
-    # Check openssl
-    if ! command -v openssl &> /dev/null; then
-        print_warning "openssl is not installed"
-        packages_to_install+=("openssl")
-    else
-        print_success "openssl is installed"
-    fi
-    
-    # Check sshpass
-    if ! command -v sshpass &> /dev/null; then
-        print_warning "sshpass is not installed"
-        packages_to_install+=("sshpass")
-    else
-        print_success "sshpass is installed"
-    fi
-    
-    # Install missing packages
-    if [[ ${#packages_to_install[@]} -gt 0 ]]; then
-        echo ""
-        print_info "Installing missing packages: ${packages_to_install[*]}"
-        echo ""
-        
-        # Update and install
-        sudo apt update -qq
-        if sudo apt install -y "${packages_to_install[@]}"; then
-            echo ""
-            print_success "All packages have been installed successfully!"
-        else
-            print_error "Error installing packages. Check your internet connection."
-            exit 1
-        fi
-    fi
-    
-    echo ""
+    require_asciinema_v2
 }
 
 #===============================================================================
@@ -331,6 +312,10 @@ generate_filename() {
 #===============================================================================
 
 start_recording() {
+    if [[ -e "$FILEPATH" ]]; then
+        print_error "A recording with this name already exists. Preserve/move it before reusing the name."
+        return 1
+    fi
     echo -e "${BOLD}🎬 Preparing recording...${NC}"
     echo ""
     
@@ -377,10 +362,16 @@ EOF
     sleep 2
     
     # Start asciinema recording
-    asciinema rec --overwrite "$FILEPATH" -c "bash --rcfile $TEMP_RC"
+    local record_command record_status=0
+    printf -v record_command 'bash --rcfile %q' "$TEMP_RC"
+    asciinema rec "$FILEPATH" -c "$record_command" || record_status=$?
     
     # Cleanup temporary file
     rm -f "$TEMP_RC"
+    if (( record_status != 0 )); then
+        print_error "Recording failed (status $record_status); any local file is retained."
+        return "$record_status"
+    fi
     
     echo ""
     print_success "Recording completed!"
@@ -388,11 +379,11 @@ EOF
 }
 
 #===============================================================================
-# GENERATE CRYPTOGRAPHIC SIGNATURE
+# GENERATE LEGACY METADATA TOKEN (NOT A SIGNATURE)
 #===============================================================================
 
 generate_signature() {
-    echo -e "${BOLD}🔐 Generating cryptographic signature...${NC}"
+    echo -e "${BOLD}🔐 Generating legacy metadata token (does not bind recording content)...${NC}"
     echo ""
     
     # Check if file exists
@@ -428,13 +419,17 @@ generate_signature() {
     
     # Encrypt with RSA and convert to Base64
     local ENCRYPTED_B64
-    ENCRYPTED_B64=$(echo -n "$DATA_TO_SIGN" | openssl pkeyutl -encrypt -pubin -inkey "$TEMP_PUBKEY" -pkeyopt rsa_padding_mode:pkcs1 2>/dev/null | base64 -w 0)
+    if ! ENCRYPTED_B64=$(echo -n "$DATA_TO_SIGN" | openssl pkeyutl -encrypt -pubin -inkey "$TEMP_PUBKEY" -pkeyopt rsa_padding_mode:pkcs1 2>/dev/null | base64 -w 0); then
+        rm -f "$TEMP_PUBKEY"
+        print_error "Legacy raw-RSA metadata limit exceeded or encryption failed. Recording retained locally; not uploaded."
+        return 1
+    fi
     
     # Cleanup temporary key
     rm -f "$TEMP_PUBKEY"
     
     if [[ -z "$ENCRYPTED_B64" ]]; then
-        print_error "Error generating cryptographic signature!"
+        print_error "Error generating legacy metadata token!"
         exit 1
     fi
     
@@ -442,7 +437,7 @@ generate_signature() {
     echo "" >> "$FILEPATH"
     echo "## ${ENCRYPTED_B64}" >> "$FILEPATH"
     
-    print_success "Cryptographic signature added!"
+    print_success "Legacy metadata token added; recording authenticity remains UNVERIFIED."
     echo ""
 }
 
@@ -451,6 +446,7 @@ generate_signature() {
 #===============================================================================
 
 upload_homework() {
+    [[ "${OFFLINE:-false}" == true ]] && { print_info "Offline mode: local recording only."; return 0; }
     echo -e "${BOLD}📤 Uploading homework to server...${NC}"
     echo ""
     
@@ -466,25 +462,20 @@ upload_homework() {
     local attempt=1
     local upload_success=false
     
-    # Temporarily disable errexit for upload attempts
-    set +e
     
     while [[ $attempt -le $MAX_RETRIES ]]; do
         echo -e "${YELLOW}   Attempt $attempt of $MAX_RETRIES...${NC}"
         
         # SCP with sshpass and options to bypass SSH prompt
-        sshpass -p "$SCP_PASSWORD" scp -P "$SCP_PORT" \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
+        if sshpass -p "$SCP_PASSWORD" scp -P "$SCP_PORT" \
+            -o StrictHostKeyChecking=yes \
             -o LogLevel=ERROR \
-            "$FILEPATH" "${SCP_USER}@${SCP_SERVER}:${SCP_DEST}/" 2>/dev/null
-        
-        if [[ $? -eq 0 ]]; then
+            "$FILEPATH" "${SCP_USER}@${SCP_SERVER}:${SCP_DEST}/"; then
             upload_success=true
             break
         else
             print_warning "Attempt $attempt failed."
-            ((attempt++)) || true
+            attempt=$((attempt + 1))
             if [[ $attempt -le $MAX_RETRIES ]]; then
                 echo "   Retrying in 3 seconds..."
                 sleep 3
@@ -492,8 +483,6 @@ upload_homework() {
         fi
     done
     
-    # Re-enable errexit
-    set -e
     
     echo ""
     
@@ -530,6 +519,7 @@ upload_homework() {
     fi
     
     echo ""
+    [[ "$upload_success" == true ]]
 }
 
 #===============================================================================
@@ -558,10 +548,14 @@ finalize() {
 #===============================================================================
 
 main() {
+    local option_status=0
+    parse_options "$@" || option_status=$?
+    if (( option_status == 10 )); then return 0; fi
+    if (( option_status != 0 )); then return "$option_status"; fi
     clear
     print_header
     
-    check_and_install_prerequisites
+    check_and_install_prerequisites || return $?
     
     collect_student_data
     
@@ -572,14 +566,71 @@ main() {
     read -r -p "   Press ENTER to continue or Ctrl+C to cancel..."
     echo ""
     
-    start_recording
-    
-    generate_signature
-    
-    upload_homework
-    
-    finalize
+    start_recording || return $?
+    add_recording_metadata || return $?
+    if [[ "$OFFLINE" == true ]]; then
+        print_info 'OFFLINE: local recording saved. No token, connection or upload attempted.'
+        finalize
+        return 0
+    fi
+    print_warning 'The legacy token is not a digital signature or proof of content integrity.'
+    generate_signature || return $?
+    if upload_homework; then
+        finalize
+    else
+        print_error 'Upload failed; local recording retained. This is not a successful submission.'
+        return 1
+    fi
 }
 
-# Run the script
-main
+
+parse_options() {
+    OFFLINE=false
+    while (( $# )); do
+        case "$1" in
+            --offline) OFFLINE=true ;;
+            --port)
+                [[ $# -ge 2 && "$2" =~ ^[0-9]+$ && ${#2} -le 5 ]] || { print_error 'Expected --port NUMBER'; return 2; }
+                (( 10#$2 >= 1 && 10#$2 <= 65535 )) || return 2
+                SCP_PORT="$2"; PORT_CONFIRMED=true; shift ;;
+            --help|-h)
+                printf 'Usage: bash %s [--offline | --port CONFIRMED_SSH_PORT]\n' "$0"
+                printf '%s\n' 'Use --offline for practice: no key token, connection or upload is attempted.' 
+                printf '%s\n' 'Online mode needs the instructor-confirmed port and a verified known_hosts entry.'
+                return 10 ;;
+            *) print_error "Unknown option: $1"; return 2 ;;
+        esac
+        shift
+    done
+    if [[ "$OFFLINE" != true && "${PORT_CONFIRMED:-false}" != true ]]; then
+        print_error 'Upload configuration is unresolved (historical copies use 1001 and 1002).'
+        print_info 'Use --offline, or supply --port only after confirming the service configuration.'
+        return 2
+    fi
+}
+
+add_recording_metadata() {
+    python3 - "$FILEPATH" "$SURNAME" "$FIRSTNAME" "$GROUP" "$HOMEWORK_NUM" <<'PY'
+import json, os, pathlib, sys, tempfile
+path = pathlib.Path(sys.argv[1])
+with path.open(encoding='utf-8') as stream:
+    first = stream.readline()
+    rest = stream.read()
+header = json.loads(first)
+if not isinstance(header, dict) or type(header.get('version')) is not int or header['version'] != 2:
+    raise SystemExit('Expected asciicast v2. Local recording retained; no upload attempted.')
+header.update(student_name=sys.argv[2] + ' ' + sys.argv[3], student_group=sys.argv[4], seminar=int(sys.argv[5][:2]), homework=sys.argv[5])
+# These are self-declared labels, not authenticated identity or a signature.
+fd, tmp = tempfile.mkstemp(prefix='.' + path.name + '.', dir=path.parent)
+try:
+    with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+        stream.write(json.dumps(header, ensure_ascii=False) + '\n' + rest)
+    os.chmod(tmp, path.stat().st_mode & 0o777)
+    os.replace(tmp, path)
+finally:
+    if os.path.exists(tmp): os.unlink(tmp)
+PY
+}
+
+# Run only when invoked, so offline tests can source the functions.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then main "$@"; fi

@@ -1,5 +1,7 @@
 # Oral Verification Log — Seminar 1
 
+> **Assessment contract pending.** Consult [the assessment status and author decision](ASSESSMENT_STATUS.md) before treating any weights, penalties or eligibility rules below as adopted. The tools provide diagnostics, not a final grade.
+
 > **Instructor use only** | Complete during or immediately after verification  
 > **Version:** 1.0 | **Form ID:** S01-ORAL-____
 

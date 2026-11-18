@@ -78,9 +78,9 @@ NOTIFY_EMAIL=${NOTIFY_EMAIL:-$DEFAULT_NOTIFY_EMAIL}
 SLACK_WEBHOOK=${SLACK_WEBHOOK:-$DEFAULT_SLACK_WEBHOOK}
 
 # Deployment targets (array)
-declare -a SERVICES=()
-declare -a CONTAINERS=()
-declare -a MANIFESTS=()
+declare -ga SERVICES=()
+declare -ga CONTAINERS=()
+declare -ga MANIFESTS=()
 
 # Flags
 DRY_RUN=false
@@ -158,13 +158,13 @@ load_config_file() {
             SERVICE_RESTART_DELAY|SERVICE_STOP_TIMEOUT|SERVICE_START_TIMEOUT|\
             DOCKER_REGISTRY|DOCKER_PULL_TIMEOUT|CONTAINER_STOP_TIMEOUT|\
             NOTIFY_ON_SUCCESS|NOTIFY_ON_FAILURE|NOTIFY_EMAIL|SLACK_WEBHOOK|\
-            LOG_LEVEL|LOG_FILE|HOOKS_DIR)
+            LOG_LEVEL|LOG_FILE|HOOKS_DIR|DRY_RUN|VERBOSE|PARALLEL)
                 declare -g "$key=$value"
-                log_debug "  $key=$value"
+                log_debug "  Loaded setting: $key"
                 ;;
-            SERVICES)
-                # Parse array
-                IFS=',' read -ra SERVICES <<< "$value"
+            SERVICES|MANIFESTS)
+                # The file contract uses comma-separated targets.
+                IFS=',' read -ra "$key" <<< "$value"
                 log_debug "  SERVICES=${SERVICES[*]}"
                 ;;
             CONTAINERS)
@@ -172,7 +172,8 @@ load_config_file() {
                 log_debug "  CONTAINERS=${CONTAINERS[*]}"
                 ;;
             *)
-                log_debug "  Unknown config key: $key"
+                log_error "Unknown configuration key: $key"
+                return 1
                 ;;
         esac
     done < "$config_file"
@@ -307,10 +308,6 @@ show_version() {
 # Parse CLI arguments
 # Args: $@ = command line arguments
 parse_args() {
-    # Reset arrays
-    SERVICES=()
-    CONTAINERS=()
-    MANIFESTS=()
     
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -344,7 +341,7 @@ parse_args() {
             --debug)
                 VERBOSE=true
                 CURRENT_LOG_LEVEL=$LOG_LEVEL_DEBUG
-                set -x
+                # Shell xtrace would expose webhook/credential arguments; log named operations only.
                 shift
                 ;;
                 
@@ -353,7 +350,7 @@ parse_args() {
                 if [[ -z "${2:-}" ]]; then
                     die "Option $1 requires a file argument"
                 fi
-                load_config_file "$2"
+                CONFIG_FILE="$2"
                 shift 2
                 ;;
             -e|--env|--environment)
@@ -542,7 +539,7 @@ validate_config() {
             ;;
         *)
             log_error "Invalid deployment strategy: $STRATEGY"
-            ((errors++))
+            errors=$((errors + 1))
             ;;
     esac
     
@@ -553,7 +550,7 @@ validate_config() {
             if [[ "$DRY_RUN" != "true" ]]; then
                 mkdir -p "$dir" 2>/dev/null || {
                     log_error "Cannot create directory: $dir"
-                    ((errors++))
+                    errors=$((errors + 1))
                 }
             else
                 log_debug "  Would create: $dir"
@@ -564,24 +561,24 @@ validate_config() {
     # Validate numeric values
     if ! is_positive_integer "$HEALTH_CHECK_RETRIES"; then
         log_error "Invalid health check retries: $HEALTH_CHECK_RETRIES"
-        ((errors++))
+        errors=$((errors + 1))
     fi
     
     if ! is_positive_integer "$HEALTH_CHECK_INTERVAL"; then
         log_error "Invalid health check interval: $HEALTH_CHECK_INTERVAL"
-        ((errors++))
+        errors=$((errors + 1))
     fi
     
     if ! is_positive_integer "$HEALTH_CHECK_TIMEOUT"; then
         log_error "Invalid health check timeout: $HEALTH_CHECK_TIMEOUT"
-        ((errors++))
+        errors=$((errors + 1))
     fi
     
     # Validate manifest files
     for manifest in "${MANIFESTS[@]}"; do
         if [[ ! -f "$manifest" ]]; then
             log_error "Manifest file not found: $manifest"
-            ((errors++))
+            errors=$((errors + 1))
         fi
     done
     
@@ -589,12 +586,12 @@ validate_config() {
     if [[ ${#CONTAINERS[@]} -gt 0 ]]; then
         if ! docker_available; then
             log_error "Docker is required but not available"
-            ((errors++))
+            errors=$((errors + 1))
         fi
     fi
     
     # Validate log file
-    if [[ "$LOG_TO_FILE" == "true" && -n "$LOG_FILE" ]]; then
+    if [[ "$DRY_RUN" != true && "$LOG_TO_FILE" == "true" && -n "$LOG_FILE" ]]; then
         local log_dir
         log_dir=$(dirname "$LOG_FILE")
         if [[ ! -d "$log_dir" ]]; then
@@ -608,7 +605,8 @@ validate_config() {
     # Check that we have something to deploy
     if [[ ${#SERVICES[@]} -eq 0 && ${#CONTAINERS[@]} -eq 0 && ${#MANIFESTS[@]} -eq 0 ]]; then
         if [[ "$ACTION" == "deploy" || "$ACTION" == "rollback" || "$ACTION" == "health" ]]; then
-            log_warn "No deployment targets specified"
+            log_error "No deployment targets specified"
+            errors=$((errors + 1))
         fi
     fi
     
@@ -685,8 +683,18 @@ EOF
 # Complete configuration initialisation
 # Args: $@ = CLI arguments
 init_config() {
-    # Load default configuration from file (if exists)
-    load_config_file || true
+    # File settings are loaded before every CLI override, independently of order.
+    local args=("$@") i
+    for i in "${args[@]}"; do
+        case "$i" in -h|--help) show_help; exit 0;; -V|--version) show_version; exit 0;; esac
+    done
+    for ((i=0; i<${#args[@]}; i++)); do
+        if [[ "${args[i]}" == -c || "${args[i]}" == --config ]]; then
+            (( i+1 < ${#args[@]} )) || return 1
+            CONFIG_FILE="${args[i+1]}"
+        fi
+    done
+    load_config_file "${CONFIG_FILE:-}" || return 1
     
     # Parse CLI arguments (override file)
     parse_args "$@"
@@ -699,6 +707,10 @@ init_config() {
         ERROR) CURRENT_LOG_LEVEL=$LOG_LEVEL_ERROR ;;
     esac
     
+    if [[ "$VERBOSE" == true ]]; then CURRENT_LOG_LEVEL=$LOG_LEVEL_DEBUG; fi
+    if [[ "$QUIET" == true ]]; then CURRENT_LOG_LEVEL=$LOG_LEVEL_ERROR; fi
+    if [[ "$DRY_RUN" == true ]]; then LOG_TO_FILE=false; fi
+
     # Set hooks dir
     if [[ -z "$HOOKS_DIR" ]]; then
         HOOKS_DIR="$(dirname "${BASH_SOURCE[0]}")/../hooks"

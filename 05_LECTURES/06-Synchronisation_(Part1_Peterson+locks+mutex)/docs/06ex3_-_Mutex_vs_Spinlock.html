@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>06ex3 - Mutex vs Spinlock | OS Interactive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../../assets/css/lecture_utilities.css">
+    <script src="../../../assets/vendor/chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="../../../assets/vendor/fontawesome-free/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
         
         * { font-family: 'Inter', sans-serif; }
         code, .mono { font-family: 'JetBrains Mono', monospace; }
@@ -137,7 +137,84 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    </style>
+    :focus-visible {outline:3px solid #f59e0b!important;outline-offset:3px}
+</style>
+<link rel="stylesheet" data-enos-local-fonts href="../../../assets/vendor/fonts.css">
+<style id="enos-print-styles">
+/* ENos print stylesheet — v6 candidate
+ * Operating Systems | ASE Bucharest — CSIE
+ * Author: ing. dr. Antonio Clim
+ * Inject with scripts/add_print_styles.sh for self-contained HTML copies.
+ * Source rules do not establish browser pagination or accessibility acceptance.
+ */
+@media print {
+    @page { size: A4 portrait; margin: 14mm 12mm 16mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+        background: #fff !important; color: #111 !important;
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; margin: 0 !important; padding: 0 !important;
+        overflow: visible !important; font-size: 10.5pt !important; line-height: 1.4 !important;
+    }
+    .presentation, .slides, .slide-container, .reveal, .reveal .slides,
+    main, .main-content, .container {
+        position: static !important; width: auto !important; height: auto !important;
+        min-height: 0 !important; max-height: none !important; max-width: none !important;
+        overflow: visible !important; transform: none !important; padding: 0 !important;
+    }
+    .slide, .slide:not(.active), .reveal .slides section {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        position: static !important; transform: none !important;
+        width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+        overflow: visible !important; padding: 0 !important; margin: 0 0 12pt !important;
+        background: #fff !important; color: #111 !important; box-shadow: none !important;
+        break-after: page !important; break-inside: auto !important;
+        counter-increment: none !important;
+    }
+    .reveal .slides > section.stack { break-after: auto !important; }
+    .collapsible-header, .accordion-header { display: block !important; color: #111 !important; background: #fff !important; }
+    .slide:last-child, .reveal .slides section:last-child { break-after: auto !important; }
+    .slide::after, .slide::before { content: none !important; }
+    section { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+    .tab-content, .tab-panel, [role="tabpanel"], .os-content, .accordion-content, .accordion-body, .collapsible-content {
+        display: block !important; visibility: visible !important; opacity: 1 !important;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    details > :not(summary) { display: block !important; }
+    .fragment { opacity: 1 !important; visibility: visible !important; }
+    h1, h2, h3, h4, h5, h6 {
+        color: #111 !important; background: none !important; text-shadow: none !important;
+        -webkit-text-fill-color: #111 !important; break-after: avoid !important;
+    }
+    h1 { font-size: 18pt !important; } h2 { font-size: 14pt !important; } h3 { font-size: 12pt !important; }
+    p, li, th, td, label { color: #111 !important; }
+    p, li { orphans: 3; widows: 3; }
+    pre, code, .code-block, .terminal, .terminal-output, .hljs {
+        color: #111 !important; background: #f3f4f6 !important;
+        font-family: "DejaVu Sans Mono", Consolas, monospace !important; font-size: 8.5pt !important;
+        white-space: pre-wrap !important; overflow-wrap: anywhere !important;
+        max-height: none !important; overflow: visible !important;
+    }
+    pre, .code-block, .terminal-output { padding: 7pt !important; border: 1px solid #aaa !important; break-inside: auto !important; }
+    code { border: none !important; }
+    table { width: 100% !important; border-collapse: collapse !important; break-inside: auto !important; }
+    thead { display: table-header-group !important; } tr { break-inside: avoid !important; }
+    th, td { border: 1px solid #777 !important; padding: 5pt !important; overflow-wrap: anywhere !important; }
+    th { background: #e8edf1 !important; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; break-inside: avoid !important; }
+    a { color: #111 !important; text-decoration: underline !important; }
+    a[href]::after { content: none !important; }
+    .nav-controls, .navigation, .nav-buttons, .tabs, .tab-buttons, .controls,
+    .progress, .progress-bar, .progress-container, .slide-number, .slide-counter,
+    .copy-btn, .copy-button, .keyboard-hint, .speaker-notes, aside.notes,
+    button:not(.quiz-option):not(.choice-btn):not(.collapsible-header):not(.accordion-header), video, audio, iframe { display: none !important; }
+    .quiz-option, .choice-btn { display: block !important; color: #111 !important; background: #fff !important; }
+    footer, .footer, .slide-footer {
+        position: static !important; inset: auto !important; height: auto !important;
+        margin-top: 10pt !important; transform: none !important;
+    }
+}
+</style>
 </head>
 <body class="text-slate-200 p-4 lg:p-6">
     <!-- Header -->
@@ -153,7 +230,7 @@
                             <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
                                 Mutex vs Spinlock
                             </h1>
-                            <p class="text-slate-400 text-sm">Course 06 • Synchronisation Part 1 • Comparison Mecanisme of Lock</p>
+                            <p class="text-slate-400 text-sm">Course 06 • Synchronisation Part 1 • Lock Mechanism Comparison</p>
                         </div>
                     </div>
                 </div>
@@ -167,7 +244,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header><section class="enos-model-notes" style="margin:1rem;padding:1rem;border:1px solid #64748b;border-radius:.5rem"><h2>Which lock and execution context?</h2><p>An uncontended futex-backed mutex often stays in userspace; a contended wait can block in the kernel. A user-space spinlock is distinct from an IRQ-safe kernel spinlock. Kernel interrupt contexts cannot use sleeping locks, and the correct IRQ/preemption variant depends on context. A single CPU does not by itself make all spinlocks deadlock: owner scheduling and interrupt/preemption constraints matter. The numeric comparison is a declared serial-critical-section toy workload, not measured lock performance.</p></section>
 
     <main class="max-w-7xl mx-auto">
         <!-- Dual Visualization -->
@@ -206,7 +283,7 @@
                             <span class="font-medium text-sm">Thread 1</span>
                             <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">In CS</span>
                         </div>
-                        <div class="mt-1 text-xs text-slate-400">Detine lock-ul</div>
+                        <div class="mt-1 text-xs text-slate-400">Holds the lock</div>
                     </div>
                     <div class="thread-indicator blocked p-3 rounded-lg border-2" id="mutexT2">
                         <div class="flex items-center justify-between">
@@ -215,7 +292,7 @@
                                 <i class="fas fa-bed mr-1"></i> Sleeping
                             </span>
                         </div>
-                        <div class="mt-1 text-xs text-slate-400">In wait queue, CPU liber</div>
+                        <div class="mt-1 text-xs text-slate-400">Queued; this thread does not occupy the CPU</div>
                     </div>
                 </div>
                 
@@ -223,7 +300,7 @@
                 <div class="space-y-3">
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-400">CPU Utilization</span>
+                            <span class="text-slate-400">CPU Utilisation</span>
                             <span id="mutexCpuUtil" class="text-emerald-400">50%</span>
                         </div>
                         <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -243,7 +320,7 @@
                 
                 <div class="mt-4 p-3 rounded-lg bg-blue-900/20 border border-blue-500/30 text-xs">
                     <i class="fas fa-info-circle text-blue-400 mr-1"></i>
-                    Thread-ul blocat <span class="text-blue-400">doarme</span> and elibereaza CPU-ul for other task-uri.
+                    The blocked thread <span class="text-blue-400">sleeps</span> and releases the CPU for other tasks.
                 </div>
             </section>
 
@@ -281,7 +358,7 @@
                             <span class="font-medium text-sm">Thread 1</span>
                             <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">In CS</span>
                         </div>
-                        <div class="mt-1 text-xs text-slate-400">Detine lock-ul</div>
+                        <div class="mt-1 text-xs text-slate-400">Holds the lock</div>
                     </div>
                     <div class="thread-indicator spinning p-3 rounded-lg border-2" id="spinT2">
                         <div class="flex items-center justify-between">
@@ -290,7 +367,7 @@
                                 <i class="fas fa-sync spinning mr-1"></i> Spinning
                             </span>
                         </div>
-                        <div class="mt-1 text-xs text-slate-400">Check lock in bucla, consuma CPU!</div>
+                        <div class="mt-1 text-xs text-slate-400">Repeatedly tests the lock and consumes CPU time.</div>
                     </div>
                 </div>
                 
@@ -298,7 +375,7 @@
                 <div class="space-y-3">
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-400">CPU Utilization</span>
+                            <span class="text-slate-400">CPU Utilisation</span>
                             <span id="spinCpuUtil" class="text-red-400">100%</span>
                         </div>
                         <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -318,7 +395,7 @@
                 
                 <div class="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-500/30 text-xs">
                     <i class="fas fa-exclamation-triangle text-red-400 mr-1"></i>
-                    Thread-ul blocat <span class="text-red-400">consuma activ CPU</span> verifiwhen lock-ul in bucla!
+                    The blocked thread <span class="text-red-400">actively consumes CPU time</span> while repeatedly testing the lock.
                 </div>
             </section>
         </div>
@@ -332,7 +409,7 @@
             <div class="grid md:grid-cols-3 gap-6">
                 <div class="slider-container" style="--slider-color: #3b82f6;">
                     <label class="block text-sm text-slate-400 mb-2">
-                        Durata CS (Critical Section)
+                        Critical-Section Duration
                     </label>
                     <input type="range" id="csDuration" min="10" max="1000" value="100">
                     <div class="flex justify-between text-xs text-slate-500 mt-1">
@@ -369,7 +446,7 @@
             
             <div class="mt-6 flex gap-3">
                 <button id="btnSimulate" class="btn-sim px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-medium text-sm flex items-center gap-2">
-                    <i class="fas fa-play"></i> Run Simulare
+                    <i class="fas fa-play"></i> Run Simulation
                 </button>
                 <button id="btnReset" class="btn-sim px-6 py-2.5 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium text-sm flex items-center gap-2">
                     <i class="fas fa-redo"></i> Reset
@@ -380,7 +457,7 @@
         <!-- Preset Scenarios -->
         <section class="glass-card rounded-2xl p-6 mb-6">
             <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <i class="fas fa-flask text-purple-400"></i> Scenarii Predefinite
+                <i class="fas fa-flask text-purple-400"></i> Predefined Scenarios
             </h3>
             
             <div class="grid md:grid-cols-3 gap-4">
@@ -392,7 +469,7 @@
                     <p class="text-xs text-slate-400 mb-2">CS: 10μs, CTX: 20μs</p>
                     <div class="text-xs">
                         <span class="text-emerald-400">✓ Spinlock wins</span>
-                        <p class="text-slate-500 mt-1">Context switch e more costisitor than spin time</p>
+                        <p class="text-slate-500 mt-1">Switching cost exceeds the waiting cost for these illustrative inputs</p>
                     </div>
                 </div>
                 
@@ -404,7 +481,7 @@
                     <p class="text-xs text-slate-400 mb-2">CS: 1000μs, CTX: 20μs</p>
                     <div class="text-xs">
                         <span class="text-blue-400">✓ Mutex wins</span>
-                        <p class="text-slate-500 mt-1">Nu merita to spin atat of mult timp</p>
+                        <p class="text-slate-500 mt-1">Long waits can make busy-waiting expensive</p>
                     </div>
                 </div>
                 
@@ -416,7 +493,7 @@
                     <p class="text-xs text-slate-400 mb-2">8 threads, CS: 100μs</p>
                     <div class="text-xs">
                         <span class="text-blue-400">✓ Mutex wins</span>
-                        <p class="text-slate-500 mt-1">Multe thread-uri ar spin simultan</p>
+                        <p class="text-slate-500 mt-1">Several waiting threads may spin simultaneously</p>
                     </div>
                 </div>
             </div>
@@ -464,19 +541,19 @@
                             <td class="py-3 px-4 text-center text-red-300">Spin (busy wait)</td>
                         </tr>
                         <tr class="comparison-item">
-                            <td class="py-3 px-4">CPU in timpul asteptarii</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">Liber (0%)</td>
-                            <td class="py-3 px-4 text-center text-red-400">100% ocupat</td>
+                            <td class="py-3 px-4">CPU Use While Waiting</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">No CPU while blocked</td>
+                            <td class="py-3 px-4 text-center text-red-400">Busy while spinning</td>
                         </tr>
                         <tr class="comparison-item">
-                            <td class="py-3 px-4">Overhead at acquire (necontestat)</td>
-                            <td class="py-3 px-4 text-center text-amber-400">Mediu (~syscall)</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">Mic (atomic op)</td>
+                            <td class="py-3 px-4">Uncontended Acquisition Cost</td>
+                            <td class="py-3 px-4 text-center text-amber-400">Often a user-space atomic fast path when uncontended</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">Atomic-operation cost</td>
                         </tr>
                         <tr class="comparison-item">
-                            <td class="py-3 px-4">Context switch necesar</td>
-                            <td class="py-3 px-4 text-center text-red-400">Yes (2x per blocare)</td>
-                            <td class="py-3 px-4 text-center text-emerald-400">Nu</td>
+                            <td class="py-3 px-4">Context Switch Required</td>
+                            <td class="py-3 px-4 text-center text-red-400">Possible on block/wakeup; implementation-dependent</td>
+                            <td class="py-3 px-4 text-center text-emerald-400">No</td>
                         </tr>
                         <tr class="comparison-item">
                             <td class="py-3 px-4">Ideal for CS...</td>
@@ -484,19 +561,19 @@
                             <td class="py-3 px-4 text-center text-red-300">Short (< ctx switch cost)</td>
                         </tr>
                         <tr class="comparison-item">
-                            <td class="py-3 px-4">may fi tinut in interrupt handler</td>
-                            <td class="py-3 px-4 text-center text-red-400">Nu (can dormi)</td>
+                            <td class="py-3 px-4">Usable in an Interrupt Handler</td>
+                            <td class="py-3 px-4 text-center text-red-400">Not a sleeping mutex</td>
                             <td class="py-3 px-4 text-center text-emerald-400">Yes</td>
                         </tr>
                         <tr class="comparison-item">
-                            <td class="py-3 px-4">Functioneaza pe single-core</td>
+                            <td class="py-3 px-4">Single-Core Use</td>
                             <td class="py-3 px-4 text-center text-emerald-400">Yes</td>
-                            <td class="py-3 px-4 text-center text-red-400">Ineficient (spin forever)</td>
+                            <td class="py-3 px-4 text-center text-red-400">May delay its owner; depends on scheduling constraints</td>
                         </tr>
                         <tr class="comparison-item">
                             <td class="py-3 px-4">Priority inversion</td>
-                            <td class="py-3 px-4 text-center text-amber-400">may fi rezolvata</td>
-                            <td class="py-3 px-4 text-center text-red-400">Problematica</td>
+                            <td class="py-3 px-4 text-center text-amber-400">Can be mitigated with an appropriate protocol</td>
+                            <td class="py-3 px-4 text-center text-red-400">Requires explicit analysis</td>
                         </tr>
                     </tbody>
                 </table>
@@ -512,48 +589,48 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="p-4 rounded-xl bg-blue-900/20 border border-blue-500/30">
                     <h4 class="font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                        <i class="fas fa-bed"></i> Foloseste Mutex when:
+                        <i class="fas fa-bed"></i> Consider a Mutex When:
                     </h4>
                     <ul class="space-y-2 text-sm">
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Sectiona critical is <strong>lunga</strong> (I/O, calcule complexe)</span>
+                            <span>The critical section is <strong>long</strong> (I/O or substantial work)</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Sistemul are <strong>putine core-uri</strong> or e single-core</span>
+                            <span>The system has <strong>few cores</strong> or a single core</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Multe thread-uri concureaza for acelaand lock (<strong>high contention</strong>)</span>
+                            <span>Many threads contend for the same lock (<strong>high contention</strong>)</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>you want to economisesti energie (mobile, embedded)</span>
+                            <span>Reducing wasted CPU/energy is important</span>
                         </li>
                     </ul>
                 </div>
                 
                 <div class="p-4 rounded-xl bg-red-900/20 border border-red-500/30">
                     <h4 class="font-semibold text-red-400 mb-3 flex items-center gap-2">
-                        <i class="fas fa-sync"></i> Foloseste Spinlock when:
+                        <i class="fas fa-sync"></i> Consider a Suitable Spinlock When:
                     </h4>
                     <ul class="space-y-2 text-sm">
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Sectiona critical is <strong>foarte scurta</strong> (cateva instructiuni)</span>
+                            <span>The critical section is <strong>very short</strong> (a few bounded operations)</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Sistemul are <strong>multe core-uri</strong></span>
+                            <span>The system has <strong>multiple cores</strong></span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Lock-ul e tinut in <strong>interrupt handler</strong></span>
+                            <span>The lock is used in an appropriate <strong>interrupt handler</strong></span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fas fa-check text-emerald-400 mt-1"></i>
-                            <span>Nu poti to dormi (real-time, kernel context)</span>
+                            <span>When sleeping is forbidden in the particular context, such as an atomic kernel section</span>
                         </li>
                     </ul>
                 </div>
@@ -569,6 +646,51 @@
     </footer>
 
     <script>
+if (typeof globalThis.Chart === 'undefined') {
+ globalThis.Chart=class {
+  constructor(target, config){this.data=config.data||{};this.options=config.options||{};this.config=config;const canvas=target.canvas||target;this.canvas=canvas;this.table=document.createElement('div');this.table.setAttribute('role','region');this.table.setAttribute('aria-label','Chart values');if(canvas.parentNode)canvas.parentNode.appendChild(this.table);this.update();}
+  update(){this.table.innerHTML='<p>Chart library unavailable; values are shown below.</p>'+((this.data.datasets||[]).map(d=>'<p><strong>'+enosEscape(d.label||'Series')+'</strong>: '+(d.data||[]).map((v,i)=>enosEscape((this.data.labels||[])[i]??i)+': '+enosEscape(typeof v==='object'?JSON.stringify(v):v)).join('; ')+'</p>').join(''));}
+  destroy(){this.table.remove();}resize(){}
+ };
+}
+
+
+// Timers belong to the current interactive run. Reset invalidates earlier work.
+const enosTimers = (() => {
+    const timeouts = new Set(), intervals = new Set(), frames = new Set();
+    const nativeTimeout = globalThis.setTimeout.bind(globalThis), nativeInterval = globalThis.setInterval.bind(globalThis);
+    const nativeClearTimeout = globalThis.clearTimeout.bind(globalThis), nativeClearInterval = globalThis.clearInterval.bind(globalThis);
+    const nativeFrame = typeof globalThis.requestAnimationFrame==='function' ? globalThis.requestAnimationFrame.bind(globalThis) : callback=>nativeTimeout(()=>callback(Date.now()),16);
+    const nativeCancelFrame = typeof globalThis.cancelAnimationFrame==='function' ? globalThis.cancelAnimationFrame.bind(globalThis) : nativeClearTimeout;
+    let generation = 0;
+    globalThis.requestAnimationFrame = callback => {
+        const owner=generation;const id=nativeFrame(stamp=>{frames.delete(id);if(owner===generation)callback(stamp);});frames.add(id);return id;
+    };
+    globalThis.cancelAnimationFrame=id=>{frames.delete(id);nativeCancelFrame(id);};
+    globalThis.setTimeout = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeTimeout(() => { timeouts.delete(id); if (owner === generation) callback(...args); }, delay);
+        timeouts.add(id); return id;
+    };
+    globalThis.setInterval = (callback, delay, ...args) => {
+        const owner = generation;
+        const id = nativeInterval(() => { if (owner === generation) callback(...args); }, delay);
+        intervals.add(id); return id;
+    };
+    globalThis.clearTimeout = id => { timeouts.delete(id); nativeClearTimeout(id); };
+    globalThis.clearInterval = id => { intervals.delete(id); nativeClearInterval(id); };
+    return { cancel() { generation++; timeouts.forEach(nativeClearTimeout); intervals.forEach(nativeClearInterval); frames.forEach(nativeCancelFrame); timeouts.clear(); intervals.clear(); frames.clear(); }, get generation() { return generation; } };
+})();
+function enosInteger(value, min, max, name) {
+    const n = typeof value === 'number' ? value : (String(value).trim() === '' ? NaN : Number(value));
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) {
+        alert(`${name} must be an integer from ${min} to ${max}.`); return null;
+    }
+    return n;
+}
+function enosEscape(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
         // State
         const state = {
             csDuration: 100,
@@ -654,33 +776,14 @@
         }
 
         function calculateMetrics() {
-            const cs = state.csDuration;
-            const ctx = state.ctxCost;
-            const threads = state.numThreads;
-            
-            // Simplified model:
-            // Mutex: each blocked thread pays 2x context switch cost
-            // Spinlock: each blocked thread spins for cs duration
-            
-            const blockedThreads = threads - 1;
-            
-            // Mutex metrics
-            const mutexTotalTime = cs + (blockedThreads * 2 * ctx);
-            const mutexThroughput = 1000000 / (mutexTotalTime / threads);
-            const mutexLatency = mutexTotalTime / threads;
-            const mutexCpuWaste = (ctx * 2 * blockedThreads) / mutexTotalTime * 100;
-            
-            // Spinlock metrics
-            const spinTotalTime = cs * threads; // All wait for full CS
-            const spinThroughput = 1000000 / (spinTotalTime / threads);
-            const spinLatency = spinTotalTime / threads;
-            const spinCpuWaste = ((threads - 1) * cs) / spinTotalTime * 100;
-            
-            return {
-                mutex: { throughput: mutexThroughput, latency: mutexLatency, cpuWaste: mutexCpuWaste },
-                spin: { throughput: spinThroughput, latency: spinLatency, cpuWaste: spinCpuWaste }
-            };
-        }
+ const cs=state.csDuration,ctx=state.ctxCost,n=state.numThreads;
+ // One operation per thread, all arrive at t=0; N CPUs; serial critical section.
+ const mutexTotal=n*cs+2*ctx*(n-1),spinTotal=n*cs;
+ const mutexCompletion=Array.from({length:n},(_,i)=>(i+1)*cs+2*ctx*i);
+ const spinCompletion=Array.from({length:n},(_,i)=>(i+1)*cs);
+ const mutexCpu=n*cs+2*ctx*(n-1),spinWaste=cs*n*(n-1)/2,spinCpu=n*cs+spinWaste;
+ return {mutex:{throughput:n*1e6/mutexTotal,latency:mutexCompletion.reduce((a,b)=>a+b,0)/n,cpuWaste:100*(mutexCpu-n*cs)/mutexCpu,cpuUtil:100*mutexCpu/(n*mutexTotal)},spin:{throughput:n*1e6/spinTotal,latency:spinCompletion.reduce((a,b)=>a+b,0)/n,cpuWaste:100*spinWaste/spinCpu,cpuUtil:100*spinCpu/(n*spinTotal)}};
+}
 
         function updateVisuals() {
             const metrics = calculateMetrics();
@@ -699,7 +802,7 @@
             latencyChart.update();
             
             // Update mutex metrics display
-            const mutexCpuUtil = 50; // Simplified
+            const mutexCpuUtil = Math.round(metrics.mutex.cpuUtil);
             const mutexWaste = Math.min(metrics.mutex.cpuWaste, 100);
             document.getElementById('mutexCpuUtil').textContent = `${mutexCpuUtil}%`;
             document.getElementById('mutexCpuBar').style.width = `${mutexCpuUtil}%`;
@@ -707,7 +810,7 @@
             document.getElementById('mutexWasteBar').style.width = `${mutexWaste}%`;
             
             // Update spinlock metrics display
-            const spinCpuUtil = 100;
+            const spinCpuUtil = Math.round(metrics.spin.cpuUtil);
             const spinWaste = Math.min(metrics.spin.cpuWaste, 100);
             document.getElementById('spinCpuUtil').textContent = `${spinCpuUtil}%`;
             document.getElementById('spinCpuBar').style.width = `${spinCpuUtil}%`;
@@ -756,6 +859,7 @@
         }
 
         function reset() {
+            enosTimers.cancel();
             state.csDuration = 100;
             state.ctxCost = 20;
             state.numThreads = 2;
@@ -800,6 +904,27 @@
         // Initialize
         updateSliderDisplays();
         updateVisuals();
-    </script>
+    
+function enosAccessibleControls() {
+ document.querySelectorAll('input,select,textarea').forEach((el,index)=>{
+  if(el.type==='hidden'||el.getAttribute('aria-label')||el.getAttribute('aria-labelledby'))return;
+  if(el.id && document.querySelector('label[for="'+el.id+'"]'))return;
+  const previous=el.previousElementSibling;
+  const name=previous && previous.textContent.trim() ? previous.textContent.trim() : (el.id||el.name||('Value '+(index+1))).replace(/[_-]/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const row=el.closest('tr');const rowName=row&&row.firstElementChild?row.firstElementChild.textContent.trim():'';
+  el.setAttribute('aria-label',(rowName?rowName+' — ':'')+name);
+ });
+ document.querySelectorAll('[onclick],.quiz-option,.scenario-card,.algorithm-btn,.strategy-card,.type-card,.permission-bit,.namespace-card,.toggle-switch,.process-card,.client-dot,.page-cell,.disk-block,.fs-tree-item,.file-item,.inode-field').forEach(el=>{
+  if(['BUTTON','INPUT','SELECT','A','TEXTAREA'].includes(el.tagName))return;
+  if(el.classList.contains('active')||el.classList.contains('selected'))el.setAttribute('aria-pressed','true');else el.setAttribute('aria-pressed','false');
+  if(el.getAttribute('data-enos-keyboard'))return;
+  el.setAttribute('data-enos-keyboard','true');el.setAttribute('tabindex','0');el.setAttribute('role','button');
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();el.click();}});
+ });
+ document.querySelectorAll('button').forEach(el=>{if(el.textContent.trim()||el.getAttribute('aria-label'))return;const icon=el.querySelector('i');const hint=(el.id||el.title||(icon?icon.className:'' )||'Activate control').replace(/fas? |fa-/g,' ').replace(/[_-]/g,' ');el.setAttribute('aria-label',hint.trim());});
+}
+enosAccessibleControls();
+if(typeof MutationObserver!=='undefined')new MutationObserver(enosAccessibleControls).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+</script>
 </body>
 </html>

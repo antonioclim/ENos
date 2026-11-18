@@ -34,6 +34,8 @@ By the end of this laboratory, the student will be able to:
 ---
 
 
+Input contract: delimiter-based CSV examples accept simple unquoted fields with no embedded delimiter, quote or newline and one record per line. For general CSV use a CSV parser. Expected lexical order uses `LC_ALL=C`; measurements of the current host are illustrative and change between samples.
+
 ## 2. sort - Sorting
 
 Sorts lines alphabetically or numerically.
@@ -157,7 +159,7 @@ Translates or deletes characters.
 tr 'a-z' 'A-Z' < file.txt           # lowercase → uppercase
 tr 'A-Z' 'a-z' < file.txt           # uppercase → lowercase
 tr ':' ',' < file.txt               # replace : with ,
-echo "hello" | tr 'aeiou' '12345'   # h1ll4
+echo "hello" | tr 'aeiou' '12345'   # h2ll4
 
 # Delete characters (-d)
 tr -d '0-9' < file.txt              # delete all digits
@@ -166,7 +168,8 @@ tr -d '[:space:]' < file.txt        # delete all whitespace
 
 # Squeeze repeated characters (-s)
 tr -s ' ' < file.txt                # multiple spaces → single
-tr -s '\n' < file.txt               # multiple empty lines → one
+tr -s '\n' < file.txt               # repeated newline bytes → one (removes empty lines)
+cat -s file.txt                       # instead, retain at most one empty separator line
 
 # Complement (-c)
 tr -cd '0-9\n' < file.txt           # keep ONLY digits and newline
@@ -196,14 +199,14 @@ wc -l file.txt                      # lines only
 wc -w file.txt                      # words only
 wc -c file.txt                      # bytes only
 wc -m file.txt                      # characters only
-wc -L file.txt                      # length of longest line
+wc -L file.txt                      # maximum display width, not a character count
 
 # Multiple files
 wc -l *.txt                         # each + total
 
 # In pipeline
 cat access.log | grep "404" | wc -l
-ps aux | wc -l                      # process count
+ps -e -o pid= | wc -l                      # process count
 ```
 
 ---
@@ -433,14 +436,20 @@ After completing all requirements:
    or press `Ctrl+D`
 
 2. **Wait** - the script will:
-   - Generate the cryptographic signature
+   - Finalise the legacy recorder metadata envelope (not a content signature)
    - Automatically upload the file to the server
 
 3. **Check the final message**:
    - ✅ `UPLOAD SUCCESSFUL!` - the assignment was submitted
    - ❌ If upload fails, the `.cast` file is saved locally - submit it manually later with the displayed command
 
-> ⚠️ **DO NOT modify the `.cast` file** after generation - the signature becomes invalid!
+> Keep the original `.cast` as evidence. The distributed recorder envelopes do not
+> bind event content and do not authenticate the student. Local preflight exit 0
+> establishes format only (`UNVERIFIED` authentication, `UNCONFIRMED` readiness).
+> The separate SEM07 `# SIGNATURE:` contract binds a content digest only when it
+> verifies with an explicitly supplied key; identity and institutional acceptance
+> still require an approved protocol. See the [current recording contract](../../../03_GUIDES/RECORDING_CONTRACT.md)
+> and [verification contract](../../../SEM07/homework_evaluation/VERIFICATION_AND_GRADING_CONTRACT.md).
 
 ---
 

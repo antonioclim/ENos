@@ -56,7 +56,7 @@ At the end of this seminar, the student will be able to:
 ```
 /                           ← ROOT - everything starts here
 ├── bin/                    ← Essential binaries (ls, cp, cat)
-├── etc/                    ← System configurations (etc = "editable text config")
+├── etc/                    ← System configurations ("editable text config" is a mnemonic)
 │   ├── passwd              ← User information
 │   ├── hosts               ← Hostname ↔ IP mappings
 │   └── bash.bashrc         ← Global Bash configuration
@@ -65,7 +65,7 @@ At the end of this seminar, the student will be able to:
 │       ├── Desktop/
 │       ├── Documents/
 │       └── .bashrc         ← YOUR personal configuration
-├── tmp/                    ← Temporary files (deleted at reboot! don't keep anything important here)
+├── tmp/                    ← Temporary storage (cleanup is system policy; do not rely on persistence)
 ├── var/                    ← Variable data
 │   └── log/                ← System logs
 └── usr/                    ← User programs
@@ -127,7 +127,7 @@ cd ~username    # another user's home
 
 ### COMMON ERROR: Confusion between "/" and "~"
 
-> In my experience at ASE, students frequently confuse `/` with `~`. Last year, a student ran `rm -rf /*` instead of `rm -rf ~/*` — fortunately it was on a virtual machine and they didn't have root permissions. But the sweat was real! Since then, I insist on checking with `pwd` before any destructive operation.
+> Distinguish `/` from `~`. Inspect the intended target and expansion before a destructive operation; checking `pwd` alone does not validate an absolute path or a wildcard.
 
 ```bash
 # WRONG (conceptually for beginners):
@@ -192,11 +192,13 @@ ls -la          # combination: long + hidden
 ls -lh          # human-readable sizes (KB, MB, GB)
 ls -lt          # sort by time (most recent first)
 
-> 💡 Over the years, I have found that practical examples beat theory every time.
 
 ls -lS          # sort by size (largest first)
 ls -lR          # recursive (includes subdirectories)
 ```
+
+> 💡 Over the years, I have found that practical examples beat theory every time.
+
 
 ---
 
@@ -210,7 +212,7 @@ ls -lR          # recursive (includes subdirectories)
 ### SUBGOAL: Create files and directories
 
 ```bash
-# Empty file
+# Create an empty file if absent; otherwise update timestamps without truncating it
 touch file.txt
 
 # Simple directory
@@ -267,15 +269,42 @@ rm -rf directory/
 
 ### ANTI-PATTERN: `rm -rf` without verification
 
-```bash
-# NEVER run directly:
-rm -rf $VARIABLE/    # If VARIABLE is empty, deletes /
+The following is an expansion demonstration, not a deletion command. Quotation
+prevents splitting but does not change an empty prefix: both forms denote `/temp`.
+GNU `rm -rf /` normally refuses `/` through its default root protection; this does
+not make other expanded targets safe.
 
-# ALWAYS verify first:
-echo "Will delete: $VARIABLE"
-read -p "Continue? (y/n) " confirm
-[[ $confirm == "y" ]] && rm -rf "$VARIABLE"
+```bash
+DIR=
+printf 'Unquoted conceptual target: %s\n' "$DIR/temp"
+printf 'Quoted target: %s\n' "$DIR/temp"
 ```
+
+For a runnable exercise, create and retain ownership of a private workspace. This
+helper accepts one filename, not an arbitrary path. It rejects empty names,
+`..`, separators and non-regular files before considering deletion. Do not replace
+the workspace with a directory supplied by another person.
+
+```bash
+readonly OWNED_BASE=$(mktemp -d "${TMPDIR:-/tmp}/enos-delete.XXXXXX") || exit 1
+trap 'rm -rf -- "$OWNED_BASE"' EXIT
+printf 'fixture\n' > "$OWNED_BASE/-example.tmp"
+remove_owned_file() {
+    local name=${1-}
+    [[ -n $name && $name != . && $name != .. && $name != */* ]] || return 2
+    local target="$OWNED_BASE/$name"
+    [[ -f $target && ! -L $target ]] || return 2
+    printf 'Selected owned file: %q\n' "$target"
+    rm -- "$target"
+}
+printf 'Preview: %q\n' "$OWNED_BASE/-example.tmp"
+read -r -p 'Delete this exercise file? (y/n) ' confirm
+if [[ $confirm == y ]]; then remove_owned_file '-example.tmp'; fi
+```
+
+The trap removes only the new workspace created by this invocation. This owned
+fixture is not a sandbox or a guarantee against concurrent replacement of paths.
+
 
 ---
 
@@ -340,25 +369,21 @@ Think of variables like labelled boxes in a storage room:
 
 ### SUBGOAL: Distinguish variable types
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    BASH VARIABLES                            │
+| Kind | Example | What a newly executed child receives |
+|------|---------|--------------------------------------|
+| Unexported shell variable | `VAR="val"` after `unset VAR` | Not included in its environment |
+| Exported shell variable | `export VAR="val"` | Included in the environment of subsequently executed commands |
+| Special parameter | `$?`, `$$`, `$!`, `$0`, `$1` | Meaning is defined by Bash; not an ordinary export category |
+
+A parenthesised group `( ... )` is a subshell that starts from a copy of shell state,
+including unexported variables. A new `bash -c` is a separate interpreter supplied
+with the exported environment. `local` has a different meaning inside a Bash function.
+
 
 > 💡 Over the years, I have found that practical examples beat theory every time.
 
-├───────────────┬───────────────────┬─────────────────────────┤
-│   LOCAL       │   ENVIRONMENT     │   SPECIAL               │
-│               │   (export)        │                         │
-├───────────────┼───────────────────┼─────────────────────────┤
-│ VAR="val"     │ export VAR="val"  │ $? $$ $! $0 $1-$9       │
-│               │                   │                         │
-│ Exists ONLY   │ Inherited by      │ Set automatically       │
-│ in the        │ all child         │ by the shell            │
-│ current shell │ processes         │                         │
-└───────────────┴───────────────────┴─────────────────────────┘
-```
 
-### SUBGOAL: Create local variables
+### SUBGOAL: Create shell variables
 
 ```bash
 # Syntax: NAME=value (NO spaces around =)
@@ -384,9 +409,11 @@ NAME="John"
 ### SUBGOAL: Export for subprocesses
 
 ```bash
-# Local variable - NOT visible in subprocesses
+# Unset first to remove a possible inherited export attribute.
+unset LOCAL
 LOCAL="local value"
-bash -c 'echo "Local: $LOCAL"'      # Output: Local: (empty!)
+( printf "Parenthesised group: %s\n" "$LOCAL" ) # local value
+bash -c 'printf "New interpreter: %s\n" "${LOCAL-}"' # empty
 
 # Environment variable - VISIBLE in subprocesses
 export GLOBAL="global value"
@@ -398,12 +425,12 @@ bash -c 'echo "Global: $GLOBAL"'    # Output: Global: global value
 | Variable | Meaning | Example |
 |----------|---------|---------|
 | `$?` | Exit code of last command | `0` = success |
-| `$$` | PID of current shell | `12345` |
-| `$USER` | Current user | `student` |
+| `$$` | PID of the invoking shell; retained in a parenthesised subshell (`BASHPID` differs) | `12345` |
+| `$USER` | Conventional environment value; `id -un` queries the effective user | `student` |
 | `$HOME` | Home directory | `/home/student` |
 | `$PATH` | Executable search paths | `/usr/bin:/bin` |
 | `$PWD` | Current directory | `/home/student` |
-| `$SHELL` | Current shell | `/bin/bash` |
+| `$SHELL` | Preferred/login shell value; not proof of the current interpreter | `/bin/bash` |
 
 ### SUBGOAL: Verify command results
 
@@ -442,11 +469,11 @@ echo 'Hello $NAME in year $DATE'
 
 # Double quotes - variables expand
 echo "Hello $NAME in year $DATE"
-# Output: Hello Student in year 2024
+# Output: Hello Student in year <the current year>
 
 # No quotes - variables expand + word splitting
 echo Hello    $NAME   in   year   $DATE
-# Output: Hello Student in year 2024 (multiple spaces compressed)
+# Output: Hello Student in year <the current year> (multiple spaces compressed)
 ```
 
 ### SUBGOAL: Protect special characters
@@ -479,25 +506,21 @@ cat "$FILE"             # Works!
 
 ### SUBGOAL: Understand the loading order
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              WHEN YOU OPEN A NEW TERMINAL:                   │
-│                                                             │
-│    NON-LOGIN SHELL (graphical terminal):                    │
-│    ~/.bashrc  ───►  is executed                             │
-│                                                             │
-│              WHEN YOU LOG IN (ssh, tty):                    │
-│                                                             │
-│    LOGIN SHELL:                                             │
-│    /etc/profile  ───►  ~/.bash_profile  ───►  ~/.bashrc     │
+For ordinary interactive Bash (without options that suppress startup files):
+
+- **Interactive non-login shell:** reads `~/.bashrc`.
+- **Login shell:** reads `/etc/profile`, then the **first readable** one of
+  `~/.bash_profile`, `~/.bash_login` and `~/.profile`. A personal profile may
+  explicitly source `~/.bashrc`; Bash does not automatically read all these files.
+- **Non-interactive `bash -c`:** normally uses the file named by `BASH_ENV`, if set,
+  rather than following the interactive `.bashrc` route. Remote invocation and
+  invocation as `sh` have additional documented rules.
+
+A terminal emulator's configuration determines whether its shell is a login shell.
+
 
 *Personal note: I prefer Bash scripts for simple automation and Python when the logic becomes complex. It's a matter of pragmatism.*
 
-│         │                    │                              │
-│         │                    └── usually "source ~/.bashrc" │
-│         └── global for everyone                             │
-└─────────────────────────────────────────────────────────────┘
-```
 
 ### SUBGOAL: Edit ~/.bashrc for personalisation
 
@@ -588,7 +611,7 @@ alias cdd='cd ~/Downloads'
 ### SUBGOAL: Use functions for complex logic
 
 ```bash
-# Functions can receive arguments (aliases cannot!)
+# Functions have positional parameters. Aliases perform textual substitution; trailing words remain command arguments.
 
 # mkdir + cd in a single command
 mkcd() {
@@ -596,7 +619,7 @@ mkcd() {
 }
 # Usage: mkcd new_project
 
-# Extract any archive
+# Extract the listed formats (only trusted archives, in a dedicated directory)
 extract() {
     case "$1" in
         *.tar.gz)  tar xzf "$1" ;;
@@ -714,9 +737,11 @@ echo {01..10}          # 01 02 03 04 05 06 07 08 09 10
 ### COMMON ERROR: `*` does not include hidden files
 
 ```bash
-ls *                   # does NOT show .bashrc, .profile, etc.
-ls .*                  # ONLY hidden files
-ls -a                  # All (safe way)
+# With dotglob disabled, * omits dot-prefixed names. ls may traverse a directory.
+ls -d -- *
+# List hidden entries themselves, including ..double, excluding . and ..:
+( shopt -s nullglob; hidden=(.[!.]* ..?*); ((${#hidden[@]} == 0)) || printf '%s\n' "${hidden[@]}" )
+ls -A                  # Visible and hidden names, excluding . and ..
 ```
 
 ---
@@ -769,8 +794,8 @@ man -k network          # equivalent
 4. Use `"$VAR"` with double quotes for files with spaces
 5. `'single'` = literal, `"double"` = expansion
 6. `source ~/.bashrc` after modifications
-7. `rm -i` for safety, never `rm -rf` directly
-8. **`*` does not include hidden files (those with `.`)
+7. `rm -i` can request confirmation; still validate the intended owned target
+8. `*` omits dot-prefixed names by default; shell options can change this.
 9. Test the prompt before saving it permanently
 10. **`export`** for variables accessible in subprocesses
 

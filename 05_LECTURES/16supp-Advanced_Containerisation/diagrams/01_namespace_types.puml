@@ -1,6 +1,6 @@
-<!-- RO: TRADUS ȘI VERIFICAT -->
+' Baseline translation marker retained in Git history; source reviewed in phase 5.
 @startuml
-title Linux Namespaces
+title Linux Namespace Types — Runtime Configuration Selects Membership
 rectangle "PID" as pid
 rectangle "NET" as net
 rectangle "MNT" as mnt
@@ -8,7 +8,8 @@ rectangle "UTS" as uts
 rectangle "IPC" as ipc
 rectangle "USER" as user
 rectangle "CGROUP" as cgrp
-rectangle "Container" as c
+rectangle "TIME" as timens
+rectangle "Process / container workload" as c
 c --> pid
 c --> net
 c --> mnt
@@ -16,4 +17,10 @@ c --> uts
 c --> ipc
 c --> user
 c --> cgrp
+c --> timens
+note bottom of c
+A namespace scopes selected resources; it is not a complete security boundary.
+Types available depend on kernel configuration.
+Source: Linux man-pages, namespaces(7).
+end note
 @enduml
